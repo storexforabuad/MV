@@ -8,7 +8,7 @@ import { Percent } from 'lucide-react';
 import { Product } from '../../types/product';
 import { formatPrice } from '../../utils/price';
 import EditProductPanel from './EditProductPanel';
-import ConfirmationDialog from '../common/ConfirmationDialog'; // Import the new dialog
+import ConfirmationDialog from '../common/ConfirmationDialog';
 
 // --- TYPES ---
 interface ManageProductsModalProps {
@@ -25,11 +25,37 @@ type FilterType = 'all' | 'popular' | 'limited' | 'soldout';
 
 // --- SUB-COMPONENTS ---
 
-const ProductRow = ({ product, categories, onEdit, onDeleteRequest }: { product: Product, categories: {id: string, name: string}[], onEdit: (product: Product) => void, onDeleteRequest: (product: Product) => void }) => {
+const ProductRow = ({ 
+    product, 
+    categories, 
+    onEdit, 
+    onDeleteRequest, 
+    isSelectMode, 
+    isSelected, 
+    onSelect 
+}: { 
+    product: Product, 
+    categories: {id: string, name: string}[], 
+    onEdit: (product: Product) => void, 
+    onDeleteRequest: (product: Product) => void, 
+    isSelectMode: boolean, 
+    isSelected: boolean, 
+    onSelect: (productId: string) => void 
+}) => {
     const categoryName = categories.find(c => c.id === product.categoryId)?.name || 'Uncategorized';
 
     return (
-    <div className={`flex items-start gap-4 p-3 rounded-lg transition-colors hover:bg-input-background`}>
+    <div className={`flex items-start gap-4 p-3 rounded-lg transition-colors ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-input-background'}`}>
+        {isSelectMode && (
+            <div className="flex items-center justify-center h-16">
+                <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => onSelect(product.id)}
+                    className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+            </div>
+        )}
         <Image src={product.images[0]} alt={product.name} width={64} height={64} className="w-16 h-16 object-cover rounded-lg flex-shrink-0 pointer-events-none" />
         <div className="flex-1 overflow-hidden">
             <p className="font-semibold text-text-primary truncate">{product.name}</p>
@@ -67,17 +93,19 @@ const ProductRow = ({ product, categories, onEdit, onDeleteRequest }: { product:
                 </div>
             </div>
         </div>
-        <Menu as="div" className="relative flex-shrink-0">
-            <Menu.Button className="p-2 rounded-full hover:bg-button-secondary-hover">
-                <EllipsisVerticalIcon className="w-5 h-5 text-text-secondary" />
-            </Menu.Button>
-            <Transition as={Fragment} enter="transition ease-out duration-100" enterFrom="transform opacity-0 scale-95" enterTo="transform opacity-100 scale-100" leave="transition ease-in duration-75" leaveFrom="transform opacity-100 scale-100" leaveTo="transform opacity-0 scale-95">
-                <Menu.Items className="absolute right-0 w-48 mt-2 origin-top-right bg-card-background divide-y divide-border-color rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20">
-                    <div className="px-1 py-1 "><Menu.Item>{({ active }) => (<button onClick={() => onEdit(product)} className={`${active ? 'bg-button-secondary-hover text-text-primary' : 'text-text-secondary'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Edit</button>)}</Menu.Item><Menu.Item>{({ active }) => (<button className={`${active ? 'bg-button-secondary-hover text-text-primary' : 'text-text-secondary'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Duplicate</button>)}</Menu.Item></div>
-                    <div className="px-1 py-1"><Menu.Item>{({ active }) => (<button onClick={() => onDeleteRequest(product)} className={`${active ? 'bg-red-500 text-white' : 'text-red-500'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Delete</button>)}</Menu.Item></div>
-                </Menu.Items>
-            </Transition>
-        </Menu>
+        {!isSelectMode && (
+          <Menu as="div" className="relative flex-shrink-0">
+              <Menu.Button className="p-2 rounded-full hover:bg-button-secondary-hover">
+                  <EllipsisVerticalIcon className="w-5 h-5 text-text-secondary" />
+              </Menu.Button>
+              <Transition as={Fragment} enter="transition ease-out duration-100" enterFrom="transform opacity-0 scale-95" enterTo="transform opacity-100 scale-100" leave="transition ease-in duration-75" leaveFrom="transform opacity-100 scale-100" leaveTo="transform opacity-0 scale-95">
+                  <Menu.Items className="absolute right-0 w-48 mt-2 origin-top-right bg-card-background divide-y divide-border-color rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20">
+                      <div className="px-1 py-1 "><Menu.Item>{({ active }) => (<button onClick={() => onEdit(product)} className={`${active ? 'bg-button-secondary-hover text-text-primary' : 'text-text-secondary'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Edit</button>)}</Menu.Item><Menu.Item>{({ active }) => (<button className={`${active ? 'bg-button-secondary-hover text-text-primary' : 'text-text-secondary'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Duplicate</button>)}</Menu.Item></div>
+                      <div className="px-1 py-1"><Menu.Item>{({ active }) => (<button onClick={() => onDeleteRequest(product)} className={`${active ? 'bg-red-500 text-white' : 'text-red-500'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Delete</button>)}</Menu.Item></div>
+                  </Menu.Items>
+              </Transition>
+          </Menu>
+        )}
     </div>
     )
 };
@@ -97,6 +125,9 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
+  const [isBulkDeleteConfirmOpen, setIsBulkDeleteConfirmOpen] = useState(false);
 
   const filteredProducts = useMemo(() => {
     return products
@@ -116,6 +147,8 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
         setActiveFilter('all');
         setEditingProduct(null);
         setProductToDelete(null);
+        setIsSelectMode(false);
+        setSelectedProducts([]);
     }, 300);
   }
 
@@ -133,6 +166,37 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
       setProducts(prevProducts => prevProducts.filter(p => p.id !== productToDelete.id));
       setProductToDelete(null); // Close the dialog
     }
+  };
+
+  const handleToggleSelection = (productId: string) => {
+    setSelectedProducts(prev =>
+      prev.includes(productId)
+        ? prev.filter(id => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.checked) {
+        setSelectedProducts(filteredProducts.map(p => p.id));
+    } else {
+        setSelectedProducts([]);
+    }
+  };
+
+  const handleBulkDeleteRequest = () => {
+    if (selectedProducts.length > 0) {
+        setIsBulkDeleteConfirmOpen(true);
+    }
+  };
+
+  const handleConfirmBulkDelete = () => {
+    selectedProducts.forEach(id => {
+        onDeleteProduct(id);
+    });
+    setProducts(prev => prev.filter(p => !selectedProducts.includes(p.id)));
+    setSelectedProducts([]);
+    setIsBulkDeleteConfirmOpen(false);
   };
 
 
@@ -156,9 +220,23 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
 
                   {/* Sticky Search & Filters */}
                   <div className="sticky top-0 z-10 bg-card-background/80 backdrop-blur-sm p-4 border-b border-border-color">
-                      <div className="relative">
-                         <MagnifyingGlassIcon className="pointer-events-none absolute top-3.5 left-4 h-5 w-5 text-text-secondary" />
-                         <input type="text" placeholder="Search products..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="block w-full rounded-lg border-2 border-input-border bg-input-background py-3 pl-11 pr-4 text-text-primary placeholder:text-text-secondary focus:border-blue-500 focus:ring-0 sm:text-sm" />
+                      <div className="flex gap-2">
+                         <div className="relative flex-1">
+                             <MagnifyingGlassIcon className="pointer-events-none absolute top-3.5 left-4 h-5 w-5 text-text-secondary" />
+                             <input type="text" placeholder="Search products..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="block w-full rounded-lg border-2 border-input-border bg-input-background py-3 pl-11 pr-4 text-text-primary placeholder:text-text-secondary focus:border-blue-500 focus:ring-0 sm:text-sm" />
+                         </div>
+                         <button 
+                            onClick={() => {
+                                setIsSelectMode(!isSelectMode);
+                                setSelectedProducts([]);
+                            }}
+                            className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${
+                                isSelectMode 
+                                    ? 'bg-blue-600 text-white' 
+                                    : 'bg-input-background text-text-primary hover:bg-button-secondary-hover'
+                            }`}>
+                             {isSelectMode ? 'Cancel' : 'Mark'}
+                          </button>
                       </div>
                       <div className="mt-4 flex space-x-2 overflow-x-auto pb-2">
                           <FilterChip label="All" value="all" activeFilter={activeFilter} onClick={setActiveFilter} />
@@ -170,9 +248,28 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
 
                   {/* Product List */}
                    <div className="flex-1 overflow-y-auto p-2 pb-24"> 
+                    {isSelectMode && (
+                        <div className="p-2 pb-0">
+                            <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-input-background">
+                                <input
+                                    type="checkbox"
+                                    onChange={handleSelectAll}
+                                    checked={filteredProducts.length > 0 && selectedProducts.length === filteredProducts.length}
+                                    ref={input => {
+                                        if (input) {
+                                            const indeterminate = selectedProducts.length > 0 && selectedProducts.length < filteredProducts.length;
+                                            input.indeterminate = indeterminate;
+                                        }
+                                    }}
+                                    className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                />
+                                <span className="text-sm font-medium text-text-primary">Select All</span>
+                            </label>
+                        </div>
+                    )}
                     <div className="grid grid-cols-1 gap-1">
                         {filteredProducts.length > 0 ? (
-                            filteredProducts.map(p => <ProductRow key={p.id} product={p} categories={categories} onEdit={setEditingProduct} onDeleteRequest={setProductToDelete} />)
+                            filteredProducts.map(p => <ProductRow key={p.id} product={p} categories={categories} onEdit={setEditingProduct} onDeleteRequest={setProductToDelete} isSelectMode={isSelectMode} isSelected={selectedProducts.includes(p.id)} onSelect={handleToggleSelection}/>)
                         ) : (
                             <div className="text-center py-16"><p className="font-semibold text-text-primary">No products found</p><p className="text-text-secondary mt-1">Try adjusting your search or filters.</p></div>
                         )}
@@ -182,9 +279,26 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
                   {/* Footer */}
                   <div className="absolute bottom-0 left-0 right-0 z-20">
                     <div className="bg-card-background p-4 border-t border-border-color">
-                      <button onClick={handleClose} className="w-full bg-gray-900 text-white font-semibold py-3 px-4 rounded-lg hover:bg-gray-800 transition">
-                        Done
-                      </button>
+                        {isSelectMode ? (
+                          <div className="flex justify-between items-center">
+                            <p className="text-sm font-medium text-text-secondary">
+                              {selectedProducts.length} selected
+                            </p>
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={handleBulkDeleteRequest}
+                                    disabled={selectedProducts.length === 0}
+                                    className="bg-red-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-red-700 transition disabled:opacity-50"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <button onClick={handleClose} className="w-full bg-gray-900 text-white font-semibold py-3 px-4 rounded-lg hover:bg-gray-800 transition">
+                            Done
+                          </button>
+                        )}
                     </div>
                   </div>
                 </div>
@@ -209,6 +323,14 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
         title="Delete Product"
     >
         Are you sure you want to delete this product? This action cannot be undone.
+    </ConfirmationDialog>
+    <ConfirmationDialog
+        isOpen={isBulkDeleteConfirmOpen}
+        onClose={() => setIsBulkDeleteConfirmOpen(false)}
+        onConfirm={handleConfirmBulkDelete}
+        title={`Delete ${selectedProducts.length} Products?`}
+    >
+        Are you sure you want to delete the selected products? This action cannot be undone.
     </ConfirmationDialog>
     </>
   );
