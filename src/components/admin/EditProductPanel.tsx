@@ -197,9 +197,9 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
 
                     {/* Footer with Actions */}
                     <div className="flex-shrink-0 border-t border-border-color px-4 py-3 bg-background sticky bottom-0">
-                      <div className="flex justify-end space-x-3">
-                        <button type="button" className="rounded-lg border border-border-color bg-button-secondary py-2 px-4 text-sm font-semibold text-text-primary shadow-sm hover:bg-button-secondary-hover focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" onClick={onClose}>Cancel</button>
-                        <button type="button" className="inline-flex justify-center rounded-lg border border-transparent bg-gray-900 py-2 px-4 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2" onClick={handleSave}>Save Changes</button>
+                      <div className="flex gap-3">
+                        <button type="button" className="flex-1 inline-flex justify-center rounded-lg border border-border-color bg-button-secondary py-2 px-4 text-sm font-semibold text-text-primary shadow-sm hover:bg-button-secondary-hover focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" onClick={onClose}>Cancel</button>
+                        <button type="button" className="flex-1 inline-flex justify-center rounded-lg border border-transparent bg-gray-900 py-2 px-4 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2" onClick={handleSave}>Save Changes</button>
                       </div>
                     </div>
                   </div>

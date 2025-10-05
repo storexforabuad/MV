@@ -35,7 +35,7 @@ const CategorySelectorModal: React.FC<CategorySelectorProps> = ({ isOpen, onClos
                         leaveFrom="translate-y-0"
                         leaveTo="translate-y-full"
                     >
-                        <Dialog.Panel className="bg-card-background rounded-t-2xl shadow-xl">
+                        <Dialog.Panel className="bg-card-background rounded-t-3xl shadow-xl">
                             <div className="p-4 border-b border-border-color">
                                 <Dialog.Title className="text-lg font-semibold text-center text-text-primary">
                                     Select a Category

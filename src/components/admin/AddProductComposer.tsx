@@ -395,7 +395,7 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
                     {/* Navigation */}
                     <div className="p-4 sm:p-6 flex justify-between sm:justify-end gap-4 border-t border-border-color">
                        {currentStep === 0 && ( // New Cancel Button for initial step
-                           <button onClick={handleClose} className="px-6 py-3 rounded-lg bg-button-secondary text-text-primary font-semibold hover:bg-button-secondary-hover transition">Cancel</button>
+                           <button onClick={handleClose} className="w-full rounded-lg border border-border-color bg-button-secondary py-2 px-4 text-sm font-semibold text-text-primary shadow-sm hover:bg-button-secondary-hover focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Cancel</button>
                        )}
                        {currentStep > 0 && currentStep < 4 && (
                            <button onClick={() => setCurrentStep(s => s - 1)} className="px-6 py-3 rounded-lg bg-button-secondary text-text-primary font-semibold hover:bg-button-secondary-hover transition">Back</button>
