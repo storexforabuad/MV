@@ -8,6 +8,7 @@ import { Percent } from 'lucide-react';
 import { Product } from '../../types/product';
 import { formatPrice } from '../../utils/price';
 import EditProductPanel from './EditProductPanel';
+import ConfirmationDialog from '../common/ConfirmationDialog'; // Import the new dialog
 
 // --- TYPES ---
 interface ManageProductsModalProps {
@@ -24,18 +25,8 @@ type FilterType = 'all' | 'popular' | 'limited' | 'soldout';
 
 // --- SUB-COMPONENTS ---
 
-const ProductRow = ({ product, categories, onEdit, onDelete }: { product: Product, categories: {id: string, name: string}[], onEdit: (product: Product) => void, onDelete: (productId: string) => void }) => {
+const ProductRow = ({ product, categories, onEdit, onDeleteRequest }: { product: Product, categories: {id: string, name: string}[], onEdit: (product: Product) => void, onDeleteRequest: (product: Product) => void }) => {
     const categoryName = categories.find(c => c.id === product.categoryId)?.name || 'Uncategorized';
-    const [deleteConfirm, setDeleteConfirm] = useState(false);
-
-    const handleDeleteClick = () => {
-        if (deleteConfirm) {
-            onDelete(product.id);
-        } else {
-            setDeleteConfirm(true);
-            setTimeout(() => setDeleteConfirm(false), 3000); // Reset after 3 seconds
-        }
-    }
 
     return (
     <div className={`flex items-start gap-4 p-3 rounded-lg transition-colors hover:bg-input-background`}>
@@ -83,7 +74,7 @@ const ProductRow = ({ product, categories, onEdit, onDelete }: { product: Produc
             <Transition as={Fragment} enter="transition ease-out duration-100" enterFrom="transform opacity-0 scale-95" enterTo="transform opacity-100 scale-100" leave="transition ease-in duration-75" leaveFrom="transform opacity-100 scale-100" leaveTo="transform opacity-0 scale-95">
                 <Menu.Items className="absolute right-0 w-48 mt-2 origin-top-right bg-card-background divide-y divide-border-color rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20">
                     <div className="px-1 py-1 "><Menu.Item>{({ active }) => (<button onClick={() => onEdit(product)} className={`${active ? 'bg-button-secondary-hover text-text-primary' : 'text-text-secondary'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Edit</button>)}</Menu.Item><Menu.Item>{({ active }) => (<button className={`${active ? 'bg-button-secondary-hover text-text-primary' : 'text-text-secondary'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Duplicate</button>)}</Menu.Item></div>
-                    <div className="px-1 py-1"><Menu.Item>{({ active }) => (<button onClick={handleDeleteClick} className={`${active || deleteConfirm ? 'bg-red-500 text-white' : 'text-red-500'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>{deleteConfirm ? 'Confirm?' : 'Delete'}</button>)}</Menu.Item></div>
+                    <div className="px-1 py-1"><Menu.Item>{({ active }) => (<button onClick={() => onDeleteRequest(product)} className={`${active ? 'bg-red-500 text-white' : 'text-red-500'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Delete</button>)}</Menu.Item></div>
                 </Menu.Items>
             </Transition>
         </Menu>
@@ -105,6 +96,7 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
 
   const filteredProducts = useMemo(() => {
     return products
@@ -123,6 +115,7 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
         setSearchQuery('');
         setActiveFilter('all');
         setEditingProduct(null);
+        setProductToDelete(null);
     }, 300);
   }
 
@@ -134,10 +127,13 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
       }
   }
   
-  const handleProductDelete = (productId: string) => {
-      onDeleteProduct(productId);
-      setProducts(prevProducts => prevProducts.filter(p => p.id !== productId));
-  }
+  const handleConfirmDelete = () => {
+    if (productToDelete) {
+      onDeleteProduct(productToDelete.id);
+      setProducts(prevProducts => prevProducts.filter(p => p.id !== productToDelete.id));
+      setProductToDelete(null); // Close the dialog
+    }
+  };
 
 
   return (
@@ -176,7 +172,7 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
                    <div className="flex-1 overflow-y-auto p-2 pb-24"> 
                     <div className="grid grid-cols-1 gap-1">
                         {filteredProducts.length > 0 ? (
-                            filteredProducts.map(p => <ProductRow key={p.id} product={p} categories={categories} onEdit={setEditingProduct} onDelete={handleProductDelete} />)
+                            filteredProducts.map(p => <ProductRow key={p.id} product={p} categories={categories} onEdit={setEditingProduct} onDeleteRequest={setProductToDelete} />)
                         ) : (
                             <div className="text-center py-16"><p className="font-semibold text-text-primary">No products found</p><p className="text-text-secondary mt-1">Try adjusting your search or filters.</p></div>
                         )}
@@ -203,9 +199,17 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
         isOpen={!!editingProduct}
         onClose={() => setEditingProduct(null)}
         onSave={handleProductSave}
-        onDelete={handleProductDelete}
+        onDelete={() => { /* No longer used here */ }}
         categories={categories}
     />
+    <ConfirmationDialog
+        isOpen={!!productToDelete}
+        onClose={() => setProductToDelete(null)}
+        onConfirm={handleConfirmDelete}
+        title="Delete Product"
+    >
+        Are you sure you want to delete this product? This action cannot be undone.
+    </ConfirmationDialog>
     </>
   );
 };
