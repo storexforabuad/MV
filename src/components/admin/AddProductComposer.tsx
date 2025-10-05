@@ -12,6 +12,7 @@ import { uploadImageToCloudinary } from '../../lib/cloudinaryClient';
 import { compressImage } from '../../utils/imageCompression';
 import { formatPrice } from '../../utils/price';
 import CategorySelectorModal from './modals/CategorySelectorModal';
+import ProductUploadTips from './ProductUploadTips';
 
 
 // --- TYPES ---
@@ -237,6 +238,7 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
                 <span className="font-semibold text-xl text-text-primary">Tap to upload pictures</span>
                 <span className="text-base text-text-secondary mt-1">Add one or more images to get started</span>
              </div>
+             <ProductUploadTips />
           </MotionDiv>
         );
 
