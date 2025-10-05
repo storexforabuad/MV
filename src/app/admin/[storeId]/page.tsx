@@ -215,6 +215,7 @@ export default function AdminStorePage() {
         isOpen={isManageModalOpen}
         onClose={() => setIsManageModalOpen(false)}
         products={products}
+        setProducts={setProducts}
         categories={categories}
         storeId={storeId}
       />
