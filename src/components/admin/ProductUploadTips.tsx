@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, Tag, TrendingUp } from 'lucide-react';
+import { Image, CircleDollarSign, TrendingUp } from 'lucide-react';
 
 const ProductUploadTips = () => {
   const tips = [
@@ -8,12 +8,12 @@ const ProductUploadTips = () => {
       text: "Use clear, high-quality photos for best results.",
     },
     {
-      icon: <Tag size={20} className="text-green-500" />,
+      icon: <CircleDollarSign size={20} className="text-green-500" />,
       text: "Competitive prices and promos attract more buyers.",
     },
     {
       icon: <TrendingUp size={20} className="text-purple-500" />,
-      text: "Higher affiliate commissions lead to more shares and sales.",
+      text: "Higher referral commissions lead to more shares and sales.",
     },
   ];
 
