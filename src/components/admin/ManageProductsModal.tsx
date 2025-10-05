@@ -1,9 +1,10 @@
 'use client';
 import React, { useState, useMemo, Fragment } from 'react';
 import { Dialog, Transition, Menu } from '@headlessui/react';
-import { XMarkIcon, MagnifyingGlassIcon, EllipsisVerticalIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
+import { XMarkIcon, MagnifyingGlassIcon, EllipsisVerticalIcon, CheckCircleIcon, EyeIcon } from '@heroicons/react/24/solid';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import { Percent } from 'lucide-react';
 import { Product } from '../../types/product';
 import { formatPrice } from '../../utils/price';
 import EditProductPanel from './EditProductPanel';
@@ -21,28 +22,60 @@ type FilterType = 'all' | 'popular' | 'limited' | 'soldout';
 
 // --- SUB-COMPONENTS ---
 
-const ProductRow = ({ product, isSelectMode, isSelected, onToggleSelect, onEdit }: { product: Product, isSelectMode: boolean, isSelected: boolean, onToggleSelect: (id: string) => void, onEdit: (product: Product) => void }) => (
-    <div className={`flex items-center gap-4 p-2 rounded-lg transition-colors ${isSelectMode ? 'cursor-pointer' : ''} ${isSelected ? 'bg-blue-100' : 'hover:bg-input-background'}`}>
+const ProductRow = ({ product, categories, isSelectMode, isSelected, onToggleSelect, onEdit }: { product: Product, categories: {id: string, name: string}[], isSelectMode: boolean, isSelected: boolean, onToggleSelect: (id: string) => void, onEdit: (product: Product) => void }) => {
+    const categoryName = categories.find(c => c.id === product.categoryId)?.name || 'Uncategorized';
+
+    return (
+    <div className={`flex items-start gap-4 p-3 rounded-lg transition-colors ${isSelectMode ? 'cursor-pointer' : ''} ${isSelected ? 'bg-blue-50' : 'hover:bg-input-background'}`}>
         {isSelectMode && (
-            <input
-                type="checkbox"
-                checked={isSelected}
-                onChange={() => onToggleSelect(product.id)}
-                className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
+            <div className="pt-1">
+                <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => onToggleSelect(product.id)}
+                    className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+            </div>
         )}
-        <Image src={product.images[0]} alt={product.name} width={64} height={64} className="w-16 h-16 object-cover rounded-md pointer-events-none" />
-        <div className="flex-1">
+        <Image src={product.images[0]} alt={product.name} width={64} height={64} className="w-16 h-16 object-cover rounded-lg flex-shrink-0 pointer-events-none" />
+        <div className="flex-1 overflow-hidden">
             <p className="font-semibold text-text-primary truncate">{product.name}</p>
-            <p className="text-sm text-text-secondary">{formatPrice(product.price)}</p>
-             <div className="flex items-center gap-2 mt-1">
-                {product.soldOut && <span className="px-2 py-0.5 text-xs font-medium text-red-700 bg-red-100 rounded-full">Sold Out</span>}
-                {product.limitedStock && !product.soldOut && <span className="px-2 py-0.5 text-xs font-medium text-yellow-800 bg-yellow-100 rounded-full">Limited</span>}
-                {!product.soldOut && !product.limitedStock && <span className="px-2 py-0.5 text-xs font-medium text-green-700 bg-green-100 rounded-full">In Stock</span>}
+            <p className="text-sm text-text-secondary -mt-1">{categoryName}</p>
+
+            <div className="mt-2 flex items-baseline gap-2">
+                {product.onPromo && product.originalPrice ? (
+                    <>
+                        <p className="text-lg font-bold text-blue-600">{formatPrice(product.price)}</p>
+                        <p className="text-sm text-text-secondary line-through">{formatPrice(product.originalPrice)}</p>
+                    </>
+                ) : (
+                    <p className="text-lg font-bold text-text-primary">{formatPrice(product.price)}</p>
+                )}
+            </div>
+            
+            <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-secondary">
+                <div>
+                  {product.soldOut ? 
+                    <span className="px-2 py-0.5 text-xs font-medium text-red-700 bg-red-100 rounded-full">Sold Out</span> :
+                   product.limitedStock ? 
+                    <span className="px-2 py-0.5 text-xs font-medium text-yellow-800 bg-yellow-100 rounded-full">Limited</span> :
+                    <span className="px-2 py-0.5 text-xs font-medium text-green-700 bg-green-100 rounded-full">In Stock</span>
+                  }
+                </div>
+                
+                <div className="flex items-center gap-1">
+                    <EyeIcon className="w-4 h-4" />
+                    <span>{product.views || 0}</span>
+                </div>
+
+                <div className="flex items-center gap-1">
+                    <Percent className="w-4 h-4" />
+                    <span>{product.commission || 0}%</span>
+                </div>
             </div>
         </div>
         {!isSelectMode && (
-            <Menu as="div" className="relative">
+            <Menu as="div" className="relative flex-shrink-0">
                 <Menu.Button className="p-2 rounded-full hover:bg-button-secondary-hover">
                     <EllipsisVerticalIcon className="w-5 h-5 text-text-secondary" />
                 </Menu.Button>
@@ -55,7 +88,8 @@ const ProductRow = ({ product, isSelectMode, isSelected, onToggleSelect, onEdit 
             </Menu>
         )}
     </div>
-);
+    )
+};
 
 const FilterChip = ({ label, value, activeFilter, onClick }: { label: string, value: FilterType, activeFilter: FilterType, onClick: (filter: FilterType) => void }) => (
     <button onClick={() => onClick(value)} className={`flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-full transition-colors whitespace-nowrap ${activeFilter === value ? 'bg-gray-900 text-white' : 'bg-input-background text-text-primary hover:bg-button-secondary-hover'}`}>
@@ -155,7 +189,7 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
                    <div className="flex-1 overflow-y-auto p-2 pb-24"> {/* Added pb-24 for footer clearance */}
                     <div className="grid grid-cols-1 gap-1">
                         {filteredProducts.length > 0 ? (
-                            filteredProducts.map(p => <ProductRow key={p.id} product={p} isSelectMode={isSelectMode} isSelected={selectedProductIds.includes(p.id)} onToggleSelect={handleToggleSelect} onEdit={setEditingProduct} />)
+                            filteredProducts.map(p => <ProductRow key={p.id} product={p} categories={categories} isSelectMode={isSelectMode} isSelected={selectedProductIds.includes(p.id)} onToggleSelect={handleToggleSelect} onEdit={setEditingProduct} />)
                         ) : (
                             <div className="text-center py-16"><p className="font-semibold text-text-primary">No products found</p><p className="text-text-secondary mt-1">Try adjusting your search or filters.</p></div>
                         )}
