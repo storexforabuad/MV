@@ -58,7 +58,7 @@ const ProductRow = ({ product, isSelectMode, isSelected, onToggleSelect, onEdit 
 );
 
 const FilterChip = ({ label, value, activeFilter, onClick }: { label: string, value: FilterType, activeFilter: FilterType, onClick: (filter: FilterType) => void }) => (
-    <button onClick={() => onClick(value)} className={`px-4 py-2 text-sm font-semibold rounded-full transition-colors whitespace-nowrap ${activeFilter === value ? 'bg-blue-600 text-white' : 'bg-input-background text-text-primary hover:bg-button-secondary-hover'}`}>
+    <button onClick={() => onClick(value)} className={`flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-full transition-colors whitespace-nowrap ${activeFilter === value ? 'bg-gray-900 text-white' : 'bg-input-background text-text-primary hover:bg-button-secondary-hover'}`}>
         {label}
     </button>
 )
@@ -143,7 +143,7 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
                             {isSelectMode ? 'Cancel' : 'Select'}
                         </button>
                       </div>
-                      <div className="mt-4 flex space-x-2 overflow-x-auto pb-2 -mx-4 px-4">
+                      <div className="mt-4 flex space-x-2 overflow-x-auto pb-2">
                           <FilterChip label="All" value="all" activeFilter={activeFilter} onClick={setActiveFilter} />
                           <FilterChip label="Popular" value="popular" activeFilter={activeFilter} onClick={setActiveFilter} />
                           <FilterChip label="Limited Stock" value="limited" activeFilter={activeFilter} onClick={setActiveFilter} />
