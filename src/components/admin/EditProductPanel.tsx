@@ -45,17 +45,27 @@ const StyledSwitch = ({ label, description, checked, onChange }) => (
 
 
 const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, onClose, onSave, categories }) => {
-  const [editedProduct, setEditedProduct] = useState<Product | null>(product);
+  const [editedProduct, setEditedProduct] = useState<Product | null>(null);
   const [isCategorySelectorOpen, setCategorySelectorOpen] = useState(false);
 
   useEffect(() => {
     if (isOpen && product) {
-      setEditedProduct({ ...product });
-    } else {
-        // Reset state when closing
+      let initialProductState = { ...product };
+
+      // Backward compatibility: If categoryId is missing, find it from the legacy category name.
+      if (!initialProductState.categoryId && (initialProductState.category as unknown as string) && categories.length > 0) {
+        const foundCategory = categories.find(c => c.name.toLowerCase() === (initialProductState.category as unknown as string).toLowerCase());
+        if (foundCategory) {
+          initialProductState.categoryId = foundCategory.id;
+        }
+      }
+      
+      setEditedProduct(initialProductState);
+    } else if (!isOpen) {
+        // Reset state when closing to avoid stale data flash
         setTimeout(() => setEditedProduct(null), 300);
     }
-  }, [isOpen, product]);
+  }, [isOpen, product, categories]);
 
   const handleInputChange = (field: keyof Product, value: any) => {
     if (editedProduct) {
@@ -65,7 +75,10 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
 
   const handleSave = () => {
     if (editedProduct) {
-      onSave(editedProduct);
+      // Before saving, ensure the legacy `category` field is also updated for consistency
+      const categoryName = categories.find(c => c.id === editedProduct.categoryId)?.name || editedProduct.category;
+      const productToSave = { ...editedProduct, category: categoryName };
+      onSave(productToSave);
       onClose();
     }
   };
@@ -77,7 +90,8 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
   }, [editedProduct]);
 
   const currentCategoryName = useMemo(() => {
-      return categories.find(c => c.id === editedProduct?.categoryId)?.name || 'Uncategorized';
+      if (!editedProduct?.categoryId) return 'Uncategorized';
+      return categories.find(c => c.id === editedProduct.categoryId)?.name || 'Uncategorized';
   }, [editedProduct, categories]);
 
 
