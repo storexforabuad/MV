@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import { useEffect, useState, Suspense, useCallback } from 'react';
-import { getProducts, getCategories, getContacts, WholesaleData, getStoreMeta } from '../../../lib/db';
+import { getProducts, getCategories, getContacts, WholesaleData, getStoreMeta, updateProduct, deleteProduct } from '../../../lib/db';
 import { Product } from '../../../types/product';
 import { StoreMeta } from '../../../types/store';
 import AdminHeader from '../../../components/admin/AdminHeader';
@@ -98,6 +98,26 @@ export default function AdminStorePage() {
     if (!storeId) return;
     fetchData();
   }, [storeId, fetchData]);
+
+  const handleUpdateProduct = async (productId: string, updatedData: Partial<Product>) => {
+      try {
+          await updateProduct(storeId, productId, updatedData);
+          // No need to call fetchData, local state is updated optimistically
+      } catch (error) {
+          console.error("Failed to update product:", error);
+          // Optional: add error handling UI
+      }
+  };
+
+  const handleDeleteProduct = async (productId: string) => {
+      try {
+          await deleteProduct(storeId, productId);
+          // No need to call fetchData, local state is updated optimistically
+      } catch (error) {
+          console.error("Failed to delete product:", error);
+      }
+  };
+
 
   useEffect(() => {
     if (activeSection === 'preview') {
@@ -218,6 +238,8 @@ export default function AdminStorePage() {
         setProducts={setProducts}
         categories={categories}
         storeId={storeId}
+        onUpdateProduct={handleUpdateProduct}
+        onDeleteProduct={handleDeleteProduct}
       />
 
       <div className={`transition-opacity duration-500 ${uiVisible ? 'opacity-100' : 'opacity-0'}`}>
