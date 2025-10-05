@@ -1,11 +1,12 @@
 'use client';
 import React, { useState, useEffect, Fragment, useMemo } from 'react';
-import { Dialog, Transition, Switch } from '@headlessui/react';
+import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import { Product } from '../../types/product';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatPrice } from '../../utils/price';
 import CategorySelectorModal from './modals/CategorySelectorModal';
+import ModernSwitch from '../common/ModernSwitch'; // Import the new switch
 
 interface EditProductPanelProps {
   product: Product | null;
@@ -29,20 +30,6 @@ const StyledInput = ({ id, label, value, onChange, type = 'text', placeholder = 
         />
     </div>
 );
-
-// A simple styled switch
-const StyledSwitch = ({ label, description, checked, onChange }) => (
-     <Switch.Group as="div" className="flex items-center justify-between py-2">
-        <Switch.Label as="span" className="flex-grow flex flex-col pr-4">
-            <span className="text-sm font-medium text-text-primary">{label}</span>
-            {description && <span className="text-xs text-text-secondary">{description}</span>}
-        </Switch.Label>
-        <Switch checked={checked} onChange={onChange} className={`${ checked ? 'bg-blue-600' : 'bg-gray-300'} relative inline-flex h-7 w-12 items-center rounded-full transition-colors`}>
-            <span className={`${ checked ? 'translate-x-6' : 'translate-x-1'} inline-block h-5 w-5 transform rounded-full bg-white transition-transform`} />
-        </Switch>
-    </Switch.Group>
-)
-
 
 const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, onClose, onSave, categories }) => {
   const [editedProduct, setEditedProduct] = useState<Product | null>(null);
@@ -141,14 +128,11 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
 
                         {/* Pricing Section */}
                         <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-sm font-medium text-text-secondary">Pricing</h3>
-                                <StyledSwitch 
-                                    label="Promo" 
-                                    checked={editedProduct.onPromo || false} 
-                                    onChange={(checked) => handleInputChange('onPromo', checked)} 
-                                />
-                            </div>
+                           <ModernSwitch 
+                                label="Promo" 
+                                checked={editedProduct.onPromo || false} 
+                                onChange={(checked) => handleInputChange('onPromo', checked)} 
+                            />
                             
                             <AnimatePresence mode="wait">
                                 <motion.div key={editedProduct.onPromo ? 'promo' : 'normal'} initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}>
@@ -195,13 +179,13 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                          {/* Inventory Section */}
                         <div className="space-y-1">
                             <h3 className="text-sm font-medium text-text-secondary mb-2">Inventory</h3>
-                            <StyledSwitch 
+                            <ModernSwitch 
                                 label="Limited Stock" 
                                 description="Mark item as having limited availability."
                                 checked={editedProduct.limitedStock || false} 
                                 onChange={(checked) => handleInputChange('limitedStock', checked)} 
                             />
-                             <StyledSwitch 
+                             <ModernSwitch 
                                 label="Sold Out" 
                                 description="Mark item as completely unavailable."
                                 checked={editedProduct.soldOut || false} 
