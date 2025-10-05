@@ -181,7 +181,7 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
 
                     {/* Done Button Footer */}
                     <div className="bg-card-background p-4 border-t border-border-color">
-                      <button onClick={handleClose} className="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-blue-700 transition">
+                      <button onClick={handleClose} className="w-full bg-gray-900 text-white font-semibold py-3 px-4 rounded-lg hover:bg-gray-800 transition">
                         Done
                       </button>
                     </div>

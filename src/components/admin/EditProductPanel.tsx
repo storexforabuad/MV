@@ -167,7 +167,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                         <div>
                             <label className="block text-sm font-medium text-text-secondary">Commission</label>
                             <div className="mt-2 bg-input-background p-4 rounded-lg">
-                                <input type="range" min="1" max="25" value={editedProduct.commission || 0} onChange={e => handleInputChange('commission', parseInt(e.target.value))} className="w-full h-2 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-lg appearance-none cursor-pointer slider-thumb"/>
+                                <input type="range" min="1" max="25" value={editedProduct.commission || 0} onChange={e => handleInputChange('commission', parseInt(e.target.value))} className="w-full h-2 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-lg appearance-none cursor-pointer glass-slider"/>
                                 <div className="flex justify-center items-center text-sm font-medium text-text-primary mt-2">
                                     <span>{editedProduct.commission || 0}%</span>
                                     <span className="text-text-secondary mx-2">-</span>
@@ -199,7 +199,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                     <div className="flex-shrink-0 border-t border-border-color px-4 py-3 bg-background sticky bottom-0">
                       <div className="flex justify-end space-x-3">
                         <button type="button" className="rounded-lg border border-border-color bg-button-secondary py-2 px-4 text-sm font-semibold text-text-primary shadow-sm hover:bg-button-secondary-hover focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" onClick={onClose}>Cancel</button>
-                        <button type="button" className="inline-flex justify-center rounded-lg border border-transparent bg-blue-600 py-2 px-4 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" onClick={handleSave}>Save Changes</button>
+                        <button type="button" className="inline-flex justify-center rounded-lg border border-transparent bg-gray-900 py-2 px-4 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2" onClick={handleSave}>Save Changes</button>
                       </div>
                     </div>
                   </div>

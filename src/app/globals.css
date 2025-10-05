@@ -665,3 +665,21 @@ h1, h2, h3 {
   background-clip: text;
   color: transparent;
 }
+
+.glass-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 24px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 9999px;
+  cursor: pointer;
+}
+
+[data-theme='dark'] .glass-slider::-webkit-slider-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
