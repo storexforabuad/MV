@@ -188,7 +188,7 @@ export default function AdminStorePage() {
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0 transition-colors">
-      <AdminHeader onLogout={async () => {}} isRefreshing={false} />
+      {!isModalOpen && <AdminHeader onLogout={async () => {}} isRefreshing={false} />}
       
       {activeSection !== 'preview' ? (
         <main className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">
