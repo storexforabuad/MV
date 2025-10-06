@@ -18,7 +18,8 @@ interface MobileNavProps {
   activeSection: string;
   setActiveSection: (section: string) => void;
   onAddProductClick: () => void;
-  onManageProductsClick: () => void; // New prop
+  onManageProductsClick: () => void;
+  onManageCategoriesClick: () => void;
   isModalOpen?: boolean;
 }
 
@@ -30,21 +31,19 @@ const navItems = [
   { id: 'categories', iconOutline: TagIconOutline, iconSolid: TagIconSolid, label: 'Categories' },
 ];
 
-const MobileNav = ({ activeSection, setActiveSection, onAddProductClick, onManageProductsClick, isModalOpen }: MobileNavProps) => {
+const MobileNav = ({ activeSection, setActiveSection, onAddProductClick, onManageProductsClick, onManageCategoriesClick, isModalOpen }: MobileNavProps) => {
   const { spotlightStep, setSpotlightStep } = useSpotlightContext();
-
-  const handleNavClick = (sectionId: string) => {
-    setActiveSection(sectionId);
-    setSpotlightStep('inactive');
-  };
 
   const handleClick = (item: typeof navItems[0]) => {
     if (item.id === 'add') {
       onAddProductClick();
     } else if (item.id === 'manage') {
-      onManageProductsClick(); // Use the new prop here
+      onManageProductsClick();
+    } else if (item.id === 'categories') {
+      onManageCategoriesClick();
     } else {
-      handleNavClick(item.id);
+      setActiveSection(item.id);
+      setSpotlightStep('inactive');
     }
   };
 
@@ -75,19 +74,20 @@ const MobileNav = ({ activeSection, setActiveSection, onAddProductClick, onManag
               );
             }
             
-            const isActive = activeSection === item.id;
-            const IconComponent = isActive ? item.iconOutline : item.iconSolid;
+            const isModalButton = item.id === 'manage' || item.id === 'categories';
+            const isActive = activeSection === item.id && !isModalButton;
+            const IconComponent = isActive ? item.iconSolid : item.iconOutline;
             return (
               <button
                 key={item.id}
                 onClick={() => handleClick(item)}
                 className={`flex flex-col items-center justify-center h-14 w-16 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-1 focus:ring-offset-0 focus:ring-blue-400/50 ${
-                  isActive ? 'text-neutral-800 dark:text-gray-500' : 'text-gray-600 dark:text-neutral-100'
+                  isActive ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-neutral-400'
                 }`}
                 style={{ WebkitTapHighlightColor: 'transparent' }}
               >
-                <IconComponent className="h-6 w-6" {...(isActive ? { strokeWidth: 2 } : {})} />
-                <span className="text-xs font-medium mt-1 tracking-tight">{item.label}</span>
+                <IconComponent className="h-6 w-6" strokeWidth={isActive ? 2 : 1.5} />
+                <span className={`text-xs font-medium mt-1 tracking-tight ${isActive ? 'font-semibold' : 'font-normal'}`}>{item.label}</span>
               </button>
             );
           })}
