@@ -1,8 +1,9 @@
+'use client';
+
 import { useState, useMemo, FC } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, GripVertical, MoreVertical, Plus, Search as SearchIcon, Check, Trash2, Edit } from 'lucide-react';
 import ConfirmationDialog from '@/components/common/ConfirmationDialog';
-import { SkeletonLoader } from '@/components/SkeletonLoader';
 
 // Dummy data for categories - replace with actual data fetching
 const dummyCategories = [
@@ -167,96 +168,80 @@ export const ManageCategoriesModal: FC<{ isOpen: boolean; onClose: () => void; }
         <AnimatePresence>
             {isOpen && (
                 <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4"
+                    initial={{ y: '100%' }}
+                    animate={{ y: 0 }}
+                    exit={{ y: '100%' }}
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                    className="fixed inset-0 bg-background-primary z-50 flex flex-col"
                 >
-                    <motion.div
-                        initial={{ scale: 0.95, y: 50 }}
-                        animate={{ scale: 1, y: 0 }}
-                        exit={{ scale: 0.95, y: 50 }}
-                        className="bg-background-primary rounded-2xl w-full h-full max-w-4xl flex flex-col overflow-hidden"
-                    >
-                        {/* Header */}
-                        <header className="flex items-center justify-between p-4 border-b border-border-color shrink-0">
-                            <h2 className="text-xl font-bold">Manage Categories</h2>
-                            <button onClick={onClose} className="p-2 rounded-full hover:bg-button-secondary-hover">
-                                <X size={24} />
-                            </button>
-                        </header>
+                    {/* Header */}
+                    <header className="flex items-center justify-between p-4 border-b border-border-color shrink-0">
+                        <h2 className="text-xl font-bold">Manage Categories</h2>
+                        <button onClick={onClose} className="p-2 rounded-full hover:bg-button-secondary-hover">
+                            <X size={24} />
+                        </button>
+                    </header>
 
-                        {/* Controls */}
-                        <div className="p-4 border-b border-border-color bg-background-secondary">
-                            <div className="flex flex-col md:flex-row gap-4">
-                                <button onClick={handleAddNew} className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors">
-                                    <Plus size={18} /> Add New Category
-                                </button>
-                                <div className="relative flex-grow">
-                                    <SearchIcon size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
-                                    <input
-                                        type="text"
-                                        placeholder="Search categories..."
-                                        value={searchQuery}
-                                        onChange={(e) => setSearchQuery(e.target.value)}
-                                        className="w-full pl-10 pr-4 py-2 rounded-lg bg-input-background border-transparent focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                                    />
-                                </div>
-                            </div>
-                            <div className="mt-4 flex space-x-2 overflow-x-auto pb-1">
-                                <SortOption label="Custom Order" value="custom" activeSort={sortKey} onClick={setSortKey} />
-                                <SortOption label="Name (A-Z)" value="name" activeSort={sortKey} onClick={setSortKey} />
-                                <SortOption label="Most Views" value="views" activeSort={sortKey} onClick={setSortKey} />
-                                <SortOption label="Most Products" value="products" activeSort={sortKey} onClick={setSortKey} />
+                    {/* Controls */}
+                    <div className="p-4 border-b border-border-color bg-background-secondary">
+                        <div className="flex flex-col md:flex-row gap-4">
+                            <button onClick={handleAddNew} className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors">
+                                <Plus size={18} /> Add New Category
+                            </button>
+                            <div className="relative flex-grow">
+                                <SearchIcon size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-secondary" />
+                                <input
+                                    type="text"
+                                    placeholder="Search categories..."
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full pl-10 pr-4 py-2 rounded-lg bg-input-background border-transparent focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                />
                             </div>
                         </div>
+                        <div className="mt-4 flex space-x-2 overflow-x-auto pb-1">
+                            <SortOption label="Custom Order" value="custom" activeSort={sortKey} onClick={setSortKey} />
+                            <SortOption label="Name (A-Z)" value="name" activeSort={sortKey} onClick={setSortKey} />
+                            <SortOption label="Most Views" value="views" activeSort={sortKey} onClick={setSortKey} />
+                            <SortOption label="Most Products" value="products" activeSort={sortKey} onClick={setSortKey} />
+                        </div>
+                    </div>
 
-                        {/* Category List */}
-                        <main className="flex-grow p-4 overflow-y-auto">
-                             { isLoading ? (
-                                Array.from({ length: 5 }).map((_, i) => (
-                                    <div key={i} className="bg-background-secondary p-4 rounded-lg mb-3">
-                                        <SkeletonLoader className="h-5 w-3/4" />
-                                        <div className="flex space-x-4 mt-2">
-                                            <SkeletonLoader className="h-4 w-1/4" />
-                                            <SkeletonLoader className="h-4 w-1/4" />
-                                        </div>
+                    {/* Category List */}
+                    <main className="flex-grow p-4 overflow-y-auto">
+                        {!isLoading && (
+                            <> 
+                                {isAdding && (
+                                    <CategoryListItem 
+                                        category={{id: 'new-category', name: '', productCount: 0, totalViews: 0}}
+                                        isEditing={true}
+                                        onSave={(newName) => handleSave('new-category', newName)}
+                                        onCancel={handleCancel}
+                                        onEdit={() => {}}
+                                        onDelete={() => {}}
+                                    />
+                                )}
+                                {sortedAndFilteredCategories.length > 0 ? (
+                                    sortedAndFilteredCategories.map(cat => <CategoryListItem 
+                                        key={cat.id} 
+                                        category={cat} 
+                                        isEditing={editingCategoryId === cat.id}
+                                        onEdit={() => setEditingCategoryId(cat.id)}
+                                        onCancel={handleCancel}
+                                        onSave={(newName) => handleSave(cat.id, newName)}
+                                        onDelete={() => handleDelete(cat)}
+                                    />)
+                                ) : !isAdding && (
+                                    <div className="text-center py-20">
+                                        <h3 className="text-lg font-semibold">No Categories Found</h3>
+                                        <p className="text-text-secondary mt-1">
+                                            {searchQuery ? `No results for "${searchQuery}"` : "Tap '+ Add New Category' to get started."}
+                                        </p>
                                     </div>
-                                ))
-                            ) : (
-                                <> 
-                                    {isAdding && (
-                                        <CategoryListItem 
-                                            category={{id: 'new-category', name: '', productCount: 0, totalViews: 0}}
-                                            isEditing={true}
-                                            onSave={(newName) => handleSave('new-category', newName)}
-                                            onCancel={handleCancel}
-                                            onEdit={() => {}}
-                                            onDelete={() => {}}
-                                        />
-                                    )}
-                                    {sortedAndFilteredCategories.length > 0 ? (
-                                        sortedAndFilteredCategories.map(cat => <CategoryListItem 
-                                            key={cat.id} 
-                                            category={cat} 
-                                            isEditing={editingCategoryId === cat.id}
-                                            onEdit={() => setEditingCategoryId(cat.id)}
-                                            onCancel={handleCancel}
-                                            onSave={(newName) => handleSave(cat.id, newName)}
-                                            onDelete={() => handleDelete(cat)}
-                                        />)
-                                    ) : !isAdding && (
-                                        <div className="text-center py-20">
-                                            <h3 className="text-lg font-semibold">No Categories Found</h3>
-                                            <p className="text-text-secondary mt-1">
-                                                {searchQuery ? `No results for "${searchQuery}"` : "Tap '+ Add New Category' to get started."}
-                                            </p>
-                                        </div>
-                                    )}
-                                </>
-                            )}
-                        </main>
-                    </motion.div>
+                                )}
+                            </>
+                        )}
+                    </main>
 
                     <ConfirmationDialog
                         isOpen={!!showDeleteConfirmation}

@@ -51,7 +51,6 @@ export default function AdminStorePage() {
   const [storeMeta, setStoreMeta] = useState<StoreMeta | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('home');
-  const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false);
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -158,13 +157,13 @@ export default function AdminStorePage() {
     return <OnboardingFlow onComplete={handleOnboardingComplete} storeName={storeMeta?.name || ''} />;
   }
 
-  const isModalOpen = isComposerOpen || isManageModalOpen || isManageCategoriesOpen;
+  const isModalOpen = isComposerOpen || isManageModalOpen;
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0 transition-colors">
       <AdminHeader onLogout={async () => {}} isRefreshing={false} />
       
-      {activeSection !== 'preview' ? (
+      {activeSection !== 'preview' && activeSection !== 'categories' ? (
         <main className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">
           <Suspense fallback={<AdminSkeleton isNavigation={true} />}>
             {activeSection === 'home' && (
@@ -195,13 +194,16 @@ export default function AdminStorePage() {
                   storeName={storeMeta?.name}
                   totalRevenue={totalRevenue}
                   onAnimationComplete={handleAnimationComplete}
-                  openManageCategories={() => setIsManageCategoriesOpen(true)}
+                  onAddProductClick={() => setIsComposerOpen(true)}
                   onManageProductsClick={() => setIsManageModalOpen(true)}
+                  openManageCategories={() => setActiveSection('categories')}
                 />
               </div>
             )}
           </Suspense>
         </main>
+      ) : activeSection === 'categories' ? (
+          <ManageCategoriesModal isOpen={true} onClose={() => setActiveSection('home')} />
       ) : (
         <div className="w-full h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)]">
           {isPreviewLoading && <PreviewSkeleton />}
@@ -233,11 +235,6 @@ export default function AdminStorePage() {
         onDeleteProduct={handleDeleteProduct}
       />
 
-      <ManageCategoriesModal
-        isOpen={isManageCategoriesOpen}
-        onClose={() => setIsManageCategoriesOpen(false)}
-      />
-
       <div className={`transition-opacity duration-500 ${uiVisible ? 'opacity-100' : 'opacity-0'}`}>
         {activeSection !== 'preview' && <FloatingActionButton isModalOpen={isModalOpen} />}
         { spotlightStep !== 'tips' && !isModalOpen && 
@@ -245,7 +242,7 @@ export default function AdminStorePage() {
             activeSection={activeSection} 
             setActiveSection={setActiveSection} 
             onAddProductClick={() => setIsComposerOpen(true)} 
-            onManageProductsClick={() => setIsManageModalOpen(true)} // This is the fix
+            onManageProductsClick={() => setIsManageModalOpen(true)}
           /> 
         }
       </div>
