@@ -2,8 +2,9 @@
 
 import { useParams } from 'next/navigation';
 import { useEffect, useState, Suspense, useCallback } from 'react';
-import { getProducts, getCategories, getContacts, WholesaleData, getStoreMeta, updateProduct, deleteProduct } from '../../../lib/db';
+import { getProducts, getCategories, getContacts, WholesaleData, getStoreMeta, updateProduct, deleteProduct, addCategory, updateCategory, deleteCategory } from '../../../lib/db';
 import { Product } from '../../../types/product';
+import { Category } from '../../../types/category';
 import { StoreMeta } from '../../../types/store';
 import AdminHeader from '../../../components/admin/AdminHeader';
 import AdminSkeleton from '../../../components/admin/AdminSkeleton';
@@ -12,7 +13,7 @@ import FloatingActionButton from '../../../components/admin/FloatingActionButton
 import AdminHomeCards from '../../../components/admin/AdminHomeCards';
 import AddProductComposer from '../../../components/admin/AddProductComposer';
 import ManageProductsModal from '../../../components/admin/ManageProductsModal';
-import { ManageCategoriesModal } from '../../../components/admin/modals/ManageCategoriesModal';
+import ManageCategoriesModal from '../../../components/admin/ManageCategoriesModal';
 import dynamic from 'next/dynamic';
 import PreviewSkeleton from '../../../components/admin/PreviewSkeleton';
 import { markOnboardingAsCompleted } from '../../../app/actions/onboardingActions';
@@ -45,7 +46,7 @@ export default function AdminStorePage() {
   const params = useParams();
   const storeId = typeof params?.storeId === 'string' ? params.storeId : Array.isArray(params?.storeId) ? params.storeId[0] : '';
   const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [contacts, setContacts] = useState<WholesaleData[]>([]);
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [storeMeta, setStoreMeta] = useState<StoreMeta | null>(null);
@@ -53,6 +54,7 @@ export default function AdminStorePage() {
   const [activeSection, setActiveSection] = useState('home');
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
+  const [isManageCategoriesModalOpen, setIsManageCategoriesModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isPreviewLoading, setIsPreviewLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState<boolean | null>(null);
@@ -101,22 +103,47 @@ export default function AdminStorePage() {
   const handleUpdateProduct = async (productId: string, updatedData: Partial<Product>) => {
       try {
           await updateProduct(storeId, productId, updatedData);
-          // No need to call fetchData, local state is updated optimistically
+          fetchData();
       } catch (error) {
           console.error("Failed to update product:", error);
-          // Optional: add error handling UI
       }
   };
 
   const handleDeleteProduct = async (productId: string) => {
       try {
           await deleteProduct(storeId, productId);
-          // No need to call fetchData, local state is updated optimistically
+          fetchData();
       } catch (error) {
           console.error("Failed to delete product:", error);
       }
   };
 
+  const handleAddCategory = async (name: string) => {
+    try {
+        await addCategory(storeId, name);
+        fetchData();
+    } catch (error) {
+        console.error("Failed to add category:", error);
+    }
+  };
+
+  const handleUpdateCategory = async (categoryId: string, name: string) => {
+      try {
+          await updateCategory(storeId, categoryId, name);
+          fetchData();
+      } catch (error) {
+          console.error("Failed to update category:", error);
+      }
+  };
+
+  const handleDeleteCategory = async (categoryId: string) => {
+      try {
+          await deleteCategory(storeId, categoryId);
+          fetchData();
+      } catch (error) {
+          console.error("Failed to delete category:", error);
+      }
+  };
 
   useEffect(() => {
     if (activeSection === 'preview') {
@@ -157,13 +184,13 @@ export default function AdminStorePage() {
     return <OnboardingFlow onComplete={handleOnboardingComplete} storeName={storeMeta?.name || ''} />;
   }
 
-  const isModalOpen = isComposerOpen || isManageModalOpen;
+  const isModalOpen = isComposerOpen || isManageModalOpen || isManageCategoriesModalOpen;
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0 transition-colors">
       <AdminHeader onLogout={async () => {}} isRefreshing={false} />
       
-      {activeSection !== 'preview' && activeSection !== 'categories' ? (
+      {activeSection !== 'preview' ? (
         <main className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">
           <Suspense fallback={<AdminSkeleton isNavigation={true} />}>
             {activeSection === 'home' && (
@@ -196,14 +223,12 @@ export default function AdminStorePage() {
                   onAnimationComplete={handleAnimationComplete}
                   onAddProductClick={() => setIsComposerOpen(true)}
                   onManageProductsClick={() => setIsManageModalOpen(true)}
-                  openManageCategories={() => setActiveSection('categories')}
+                  openManageCategories={() => setIsManageCategoriesModalOpen(true)}
                 />
               </div>
             )}
           </Suspense>
         </main>
-      ) : activeSection === 'categories' ? (
-          <ManageCategoriesModal isOpen={true} onClose={() => setActiveSection('home')} />
       ) : (
         <div className="w-full h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)]">
           {isPreviewLoading && <PreviewSkeleton />}
@@ -235,6 +260,17 @@ export default function AdminStorePage() {
         onDeleteProduct={handleDeleteProduct}
       />
 
+      <ManageCategoriesModal
+        isOpen={isManageCategoriesModalOpen}
+        onClose={() => setIsManageCategoriesModalOpen(false)}
+        products={products}
+        categories={categories}
+        storeId={storeId}
+        onAddCategory={handleAddCategory}
+        onUpdateCategory={handleUpdateCategory}
+        onDeleteCategory={handleDeleteCategory}
+      />
+
       <div className={`transition-opacity duration-500 ${uiVisible ? 'opacity-100' : 'opacity-0'}`}>
         {activeSection !== 'preview' && <FloatingActionButton isModalOpen={isModalOpen} />}
         { spotlightStep !== 'tips' && !isModalOpen && 
@@ -243,6 +279,7 @@ export default function AdminStorePage() {
             setActiveSection={setActiveSection} 
             onAddProductClick={() => setIsComposerOpen(true)} 
             onManageProductsClick={() => setIsManageModalOpen(true)}
+            onManageCategoriesClick={() => setIsManageCategoriesModalOpen(true)}
           /> 
         }
       </div>
