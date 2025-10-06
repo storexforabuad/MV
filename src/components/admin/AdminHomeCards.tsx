@@ -52,6 +52,7 @@ interface AdminHomeCardsProps {
   storeName?: string;
   totalRevenue: number;
   onAnimationComplete?: () => void;
+  openManageCategories: () => void;
 }
 
 const cardData = [
@@ -84,16 +85,16 @@ const cardData = [
       glowClass: 'shadow-[0_0_25px_-5px_rgba(59,130,246,0.5)]',
     },
     {
-      label: 'Categories',
+      label: 'Manage Categories',
       valueKey: 'totalCategories',
       icon: Tag,
       gradient: 'from-teal-400 via-cyan-500 to-sky-600',
       text: 'text-white',
-      component: CategoriesModal,
+      component: null, // This will be handled by a specific prop
       glowClass: 'shadow-[0_0_25px_-5px_rgba(20,184,166,0.5)]',
     },
     {
-      label: 'Products',
+      label: 'Manage Products',
       valueKey: 'totalProducts',
       icon: Archive,
       gradient: 'from-pink-400 via-pink-500 to-pink-600',
@@ -196,6 +197,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const handleOpenModal = (idx: number, cardLabel?: string) => {
     if (cardLabel === 'Tips') {
         setIsTipsModalOpen(true);
+    } else if (cardLabel === 'Manage Categories') {
+        props.openManageCategories();
     } else {
         setOpenModal(idx);
     }
@@ -350,7 +353,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                                     })()}
                         </div>
                         <div className="text-xs sm:text-sm font-medium opacity-90 text-center px-1 leading-tight">
-                          {card.label}
+                          {card.label === 'Manage Categories' ? 'Categories' : card.label === 'Manage Products' ? 'Products' : card.label}
                         </div>
                       </div>
                     </button>
@@ -376,6 +379,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             {(() => {
               const card = cardData[openModal];
               const ModalComponent = card.component;
+              if (!ModalComponent) return null;
               const modalProps = {
                 ...props,
                 handleClose: handleCloseModal,

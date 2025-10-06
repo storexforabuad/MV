@@ -16,11 +16,10 @@ import { ProductCache } from '../../lib/productCache';
 import AdminHomeCards from '../../components/admin/AdminHomeCards';
 import AddProductSection from '../../components/AddProductSection';
 import PopularProductsSection from '../../components/PopularProductsSection'; // Import the new component
+import { ManageCategoriesModal } from '@/components/admin/modals/ManageCategoriesModal';
 
 // Lazy load components
 const ManageProductsSection = dynamic(() => import('../../components/ManageProductsSection'));
-const CategoryManagementSection = dynamic(() => import('../../components/CategoryManagementSection'));
-
 
 // Define types for the mock data
 interface Contact {
@@ -43,7 +42,7 @@ const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState('home');
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isManageProductsOpen, setIsManageProductsOpen] = useState(false);
-  const [isCategoryManagementOpen, setIsCategoryManagementOpen] = useState(false);
+  const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false);
   const [isPopularProductsOpen, setIsPopularProductsOpen] = useState(false); // Add state for popular products section
   const [batchTemplate, setBatchTemplate] = useState<Partial<Product> | null>(null);
   const [isAddProductOpen, setIsAddProductOpen] = useState(true);
@@ -193,6 +192,7 @@ const AdminDashboard = () => {
                   isRefreshing={isRefreshing}
                   totalContacts={totalContacts}
                   storeId={storeId}
+                  openManageCategories={() => setIsManageCategoriesOpen(true)}
                 />
                 <PopularProductsSection 
                   isPopularProductsOpen={isPopularProductsOpen} 
@@ -220,16 +220,6 @@ const AdminDashboard = () => {
               </div>
             )}
 
-            {activeSection === 'categories' && storeId &&(
-              <div className="mb-8">
-                <CategoryManagementSection
-                  storeId={storeId}
-                  isCategoryManagementOpen={isCategoryManagementOpen}
-                  setIsCategoryManagementOpen={setIsCategoryManagementOpen}
-                />
-              </div>
-            )}
-
             {activeSection === 'add' && storeId &&(
               <div className="mb-8">
                 <AddProductSection
@@ -252,6 +242,10 @@ const AdminDashboard = () => {
           activeSection={activeSection} 
           setActiveSection={setActiveSection} 
           isModalOpen={isModalOpen} 
+        />
+        <ManageCategoriesModal 
+          isOpen={isManageCategoriesOpen}
+          onClose={() => setIsManageCategoriesOpen(false)}
         />
       </div>
     // </ProtectedRoute>

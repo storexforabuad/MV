@@ -12,12 +12,12 @@ import FloatingActionButton from '../../../components/admin/FloatingActionButton
 import AdminHomeCards from '../../../components/admin/AdminHomeCards';
 import AddProductComposer from '../../../components/admin/AddProductComposer';
 import ManageProductsModal from '../../../components/admin/ManageProductsModal';
+import { ManageCategoriesModal } from '../../../components/admin/modals/ManageCategoriesModal';
 import dynamic from 'next/dynamic';
 import PreviewSkeleton from '../../../components/admin/PreviewSkeleton';
 import { markOnboardingAsCompleted } from '../../../app/actions/onboardingActions';
 import { useSpotlightContext } from '@/context/SpotlightContext';
 
-const CategoryManagementSection = dynamic(() => import('../../../components/CategoryManagementSection'));
 const OnboardingFlow = dynamic(() => import('../../../components/admin/onboarding/OnboardingFlow'));
 
 interface Referral {
@@ -51,7 +51,7 @@ export default function AdminStorePage() {
   const [storeMeta, setStoreMeta] = useState<StoreMeta | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState('home');
-  const [isCategoryManagementOpen, setIsCategoryManagementOpen] = useState(false);
+  const [isManageCategoriesOpen, setIsManageCategoriesOpen] = useState(false);
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -158,7 +158,7 @@ export default function AdminStorePage() {
     return <OnboardingFlow onComplete={handleOnboardingComplete} storeName={storeMeta?.name || ''} />;
   }
 
-  const isModalOpen = isComposerOpen || isManageModalOpen;
+  const isModalOpen = isComposerOpen || isManageModalOpen || isManageCategoriesOpen;
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0 transition-colors">
@@ -195,17 +195,8 @@ export default function AdminStorePage() {
                   storeName={storeMeta?.name}
                   totalRevenue={totalRevenue}
                   onAnimationComplete={handleAnimationComplete}
-                  onAddProductClick={() => setIsComposerOpen(true)}
+                  openManageCategories={() => setIsManageCategoriesOpen(true)}
                   onManageProductsClick={() => setIsManageModalOpen(true)}
-                />
-              </div>
-            )}
-            {activeSection === 'categories' && (
-              <div className="mb-8">
-                <CategoryManagementSection
-                  isCategoryManagementOpen={isCategoryManagementOpen}
-                  setIsCategoryManagementOpen={setIsCategoryManagementOpen}
-                  storeId={storeId}
                 />
               </div>
             )}
@@ -240,6 +231,11 @@ export default function AdminStorePage() {
         storeId={storeId}
         onUpdateProduct={handleUpdateProduct}
         onDeleteProduct={handleDeleteProduct}
+      />
+
+      <ManageCategoriesModal
+        isOpen={isManageCategoriesOpen}
+        onClose={() => setIsManageCategoriesOpen(false)}
       />
 
       <div className={`transition-opacity duration-500 ${uiVisible ? 'opacity-100' : 'opacity-0'}`}>
