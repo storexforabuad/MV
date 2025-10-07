@@ -10,13 +10,13 @@ type Category = {
 };
 
 interface CategoryBarProps {
-  onCategorySelect: (category: string) => void;
-  activeCategory: string;
+  onCategorySelect: (categoryId: string) => void;
+  activeCategoryId: string;
   categories: Category[];
   onActiveCategoryClick?: () => void;
 }
 
-export default function CategoryBar({ onCategorySelect, activeCategory, categories, onActiveCategoryClick }: CategoryBarProps) {
+export default function CategoryBar({ onCategorySelect, activeCategoryId, categories, onActiveCategoryClick }: CategoryBarProps) {
   const [isSticky, setIsSticky] = useState(false);
 
   const handleScroll = useCallback(() => {
@@ -32,7 +32,7 @@ export default function CategoryBar({ onCategorySelect, activeCategory, categori
     return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
-  const handleCategoryClick = (category: string, event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleCategoryClick = (categoryId: string, event: React.MouseEvent<HTMLButtonElement>) => {
     const button = event.currentTarget;
     const container = button.parentElement?.parentElement;
     if (container) {
@@ -43,10 +43,10 @@ export default function CategoryBar({ onCategorySelect, activeCategory, categori
       container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
     }
 
-    if (activeCategory === category) {
+    if (activeCategoryId === categoryId) {
       if (onActiveCategoryClick) onActiveCategoryClick();
     } else {
-      onCategorySelect(category);
+      onCategorySelect(categoryId);
     }
   };
 
@@ -69,12 +69,12 @@ export default function CategoryBar({ onCategorySelect, activeCategory, categori
     return colorMap[categoryName] || null;
   };
 
-  const CategoryButton = ({ name, onClick, isActive }: { 
-    name: string; 
+  const CategoryButton = ({ category, onClick, isActive }: { 
+    category: Category; 
     onClick: (e: React.MouseEvent<HTMLButtonElement>) => void; 
     isActive: boolean;
   }) => {
-    const specialColorStyle = getCategoryColor(name);
+    const specialColorStyle = getCategoryColor(category.name);
 
     // If active, use the special color. If not, use the theme's secondary button style.
     // If inactive, also use the theme's secondary button style for a consistent, high-contrast look.
@@ -108,21 +108,21 @@ export default function CategoryBar({ onCategorySelect, activeCategory, categori
           transition={{ duration: 0.3, ease: "easeOut" }}
           style={{ willChange: 'transform', backfaceVisibility: 'hidden' }}
         >
-          <span className={`text-2xl sm:text-2xl ${iconTextStyle}`}>{getIconForCategory(name)}</span>
+          <span className={`text-2xl sm:text-2xl ${iconTextStyle}`}>{getIconForCategory(category.name)}</span>
         </motion.div>
         <motion.span 
           className={`text-xs font-medium truncate max-w-[80px] text-center ${labelTextStyle}`}
           animate={isActive ? { scale: [1, 1.05, 1] } : { scale: 1 }}
           transition={{ duration: 0.3, delay: 0.1 }}
         >
-          {name}
+          {category.name}
         </motion.span>
       </motion.button>
     );
   }
 
   // Define system categories that appear first
-  const systemCategories = [
+  const systemCategories: Category[] = [
     { id: 'promo', name: 'Promo' },
     { id: 'popular', name: 'Popular' },
     { id: 'new-arrivals', name: 'New Arrivals' },
@@ -139,9 +139,9 @@ export default function CategoryBar({ onCategorySelect, activeCategory, categori
           {systemCategories.map(category => (
             <CategoryButton 
               key={category.id}
-              name={category.name} 
-              onClick={(e) => handleCategoryClick(category.name, e)} 
-              isActive={activeCategory === category.name}
+              category={category}
+              onClick={(e) => handleCategoryClick(category.id, e)} 
+              isActive={activeCategoryId === category.id}
             />
           ))}
 
@@ -154,9 +154,9 @@ export default function CategoryBar({ onCategorySelect, activeCategory, categori
           {vendorCategories.map((category) => (
             <CategoryButton
               key={category.id}
-              name={category.name}
-              onClick={(e) => handleCategoryClick(category.name, e)}
-              isActive={activeCategory === category.name}
+              category={category}
+              onClick={(e) => handleCategoryClick(category.id, e)}
+              isActive={activeCategoryId === category.id}
             />
           ))}
         </div>

@@ -49,42 +49,42 @@ export default function StorefrontPage() {
   const [storeName, setStoreName] = useState('');
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState('Promo');
+  const [activeCategoryId, setActiveCategoryId] = useState('promo');
   const [lastVisible, setLastVisible] = useState<any>(null);
   const [hasMore, setHasMore] = useState(true);
   const { isConnectionError, setIsConnectionError } = useConnectionCheck();
   const observerRef = useRef<HTMLDivElement>(null);
   const productGridRef = useRef<HTMLDivElement>(null);
 
-  const fetchProducts = useCallback(async (category: string, pageNum = 1, lastDoc: any = null) => {
+  const fetchProducts = useCallback(async (categoryId: string, pageNum = 1, lastDoc: any = null) => {
     if (!storeId) return;
     setLoading(true);
     try {
-      const cacheKey = `store_${storeId}_products_${category || 'all'}_page${pageNum}`;
+      const cacheKey = `store_${storeId}_products_${categoryId || 'all'}_page${pageNum}`;
       let fetchedProducts;
       const cached = ProductListCache.get(cacheKey);
 
       if (cached && Array.isArray(cached) && pageNum === 1) {
         fetchedProducts = cached;
       } else {
-        switch (category) {
-          case 'Promo': {
+        switch (categoryId) {
+          case 'promo': {
             const promoProducts = await getProducts(storeId);
             fetchedProducts = promoProducts.filter(p => p.originalPrice && p.originalPrice > p.price);
             break;
           }
-          case 'Popular': {
+          case 'popular': {
             const { products: popularProducts, lastVisible: newLastVisible } = await getStorePopularProducts(storeId, lastDoc, PRODUCTS_PAGE_SIZE);
             fetchedProducts = popularProducts;
             setLastVisible(newLastVisible);
             break;
           }
-          case 'New Arrivals': {
+          case 'new-arrivals': {
             fetchedProducts = await getProducts(storeId); // Already sorted by createdAt desc by default
             break;
           }
           default: {
-            fetchedProducts = await getProductsByCategory(storeId, category);
+            fetchedProducts = await getProductsByCategory(storeId, categoryId);
             break;
           }
         }
@@ -99,7 +99,7 @@ export default function StorefrontPage() {
       }
 
     } catch (error) {
-      console.error(`Error fetching products for store ${storeId}, category ${category}:`, error);
+      console.error(`Error fetching products for store ${storeId}, category ${categoryId}:`, error);
       setIsConnectionError(true);
     } finally {
       setLoading(false);
@@ -107,12 +107,12 @@ export default function StorefrontPage() {
     }
   }, [storeId, setIsConnectionError]);
 
-  const handleCategorySelect = useCallback((category: string) => {
-    setActiveCategory(category);
+  const handleCategorySelect = useCallback((categoryId: string) => {
+    setActiveCategoryId(categoryId);
     setProducts([]);
     setLastVisible(null);
     setHasMore(true);
-    fetchProducts(category, 1, null);
+    fetchProducts(categoryId, 1, null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [fetchProducts]);
 
@@ -127,7 +127,7 @@ export default function StorefrontPage() {
         setCategories(cats);
 
         // Fetch initial products for the default category
-        fetchProducts(activeCategory, 1, null);
+        fetchProducts(activeCategoryId, 1, null);
 
       } catch (error) {
         console.error("Error fetching initial store data:", error);
@@ -137,13 +137,13 @@ export default function StorefrontPage() {
       }
     };
     fetchInitialData();
-  }, [storeId, activeCategory, fetchProducts, setIsConnectionError]);
+  }, [storeId, activeCategoryId, fetchProducts, setIsConnectionError]);
 
   const fetchMoreProducts = useCallback(() => {
     if (!loading && hasMore) {
-      fetchProducts(activeCategory, products.length / PRODUCTS_PAGE_SIZE + 1, lastVisible);
+      fetchProducts(activeCategoryId, products.length / PRODUCTS_PAGE_SIZE + 1, lastVisible);
     }
-  }, [loading, hasMore, activeCategory, products.length, lastVisible, fetchProducts]);
+  }, [loading, hasMore, activeCategoryId, products.length, lastVisible, fetchProducts]);
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
@@ -170,7 +170,7 @@ export default function StorefrontPage() {
       <div className="pt-16 pb-safe-area-inset-bottom">
         <CategoryBar 
           onCategorySelect={handleCategorySelect}
-          activeCategory={activeCategory}
+          activeCategoryId={activeCategoryId}
           categories={categories}
           onActiveCategoryClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         />
@@ -180,7 +180,7 @@ export default function StorefrontPage() {
           ) : (
             <>
               {isConnectionError && (
-                <ConnectionErrorToast onRetry={() => fetchProducts(activeCategory, 1, null)} />
+                <ConnectionErrorToast onRetry={() => fetchProducts(activeCategoryId, 1, null)} />
               )}
               <ProductGrid 
                 products={products}

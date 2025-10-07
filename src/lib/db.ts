@@ -282,12 +282,12 @@ export async function getProducts(storeId: string): Promise<Product[]> {
   }
 }
 
-export async function getProductsByCategory(storeId: string, category: string): Promise<Product[]> {
+export async function getProductsByCategory(storeId: string, categoryId: string): Promise<Product[]> {
   try {
     const productsRef = collection(db, 'stores', storeId, 'products');
     const q = query(
       productsRef, 
-      where('category', '==', category),
+      where('categoryId', '==', categoryId),
       orderBy('createdAt', 'desc')
     );
     const snapshot = await getDocs(q);

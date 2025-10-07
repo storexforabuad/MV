@@ -4,11 +4,12 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
-import { getProductById, incrementProductViews, getStoreMeta } from '../../../../lib/db';
+import { getProductById, incrementProductViews, getStoreMeta, getCategories } from '../../../../lib/db';
 import { CirclePlus, ShoppingCart, Clock, Check } from 'lucide-react';
 import { useCart } from '../../../../lib/cartContext';
 import { useOrders } from '../../../../hooks/useOrders';
 import { Product } from '../../../../types/product';
+import { Category } from '../../../../types/category';
 import { StoreMeta } from '../../../../types/store';
 import { calculateDiscount, formatPrice } from '../../../../utils/price';
 import { ViewHistoryCache } from '../../../../lib/viewHistoryCache';
@@ -29,6 +30,7 @@ const AnimatedViewCount = dynamic(() => import('../../../../components/AnimatedV
 export default function ProductDetail() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [product, setProduct] = useState<Product | null>(null);
+  const [category, setCategory] = useState<Category | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
   const [isInCart, setIsInCart] = useState(false);
@@ -46,7 +48,7 @@ export default function ProductDetail() {
 
   useEffect(() => {
     let isMounted = true;
-    async function fetchProduct() {
+    async function fetchProductAndCategory() {
       try {
         if (!storeId || !productId) {
           setProduct(null);
@@ -63,6 +65,14 @@ export default function ProductDetail() {
           setProduct(fetchedProduct);
           ViewHistoryCache.add(fetchedProduct);
           await incrementProductViews(storeId, productId);
+
+          if (fetchedProduct.categoryId) {
+            const categories = await getCategories(storeId);
+            const productCategory = categories.find(c => c.id === fetchedProduct.categoryId);
+            if (productCategory) {
+              setCategory(productCategory);
+            }
+          }
         }
       } catch (error) {
         console.error('[PROD] Error in product detail:', error);
@@ -70,7 +80,7 @@ export default function ProductDetail() {
         if (isMounted) setIsLoading(false);
       }
     }
-    fetchProduct();
+    fetchProductAndCategory();
     return () => { isMounted = false; };
   }, [storeId, productId]);
 
@@ -236,9 +246,11 @@ return (
                   Sold Out
                 </span>
               )}
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border border-gray-200 ${product && getCategoryColor(product.category).background} ${product && getCategoryColor(product.category).text}`}>
-                {product?.category}
-              </span>
+              {category && (
+                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border border-gray-200 ${getCategoryColor(category.name).background} ${getCategoryColor(category.name).text}`}>
+                  {category.name}
+                </span>
+              )}
             </div>
 
             {/* Right side - View Count */}
