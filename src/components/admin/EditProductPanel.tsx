@@ -48,7 +48,6 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
 
   useEffect(() => {
     if (isOpen && product) {
-        // On open, translate the DB schema (price, originalPrice) to the clear form state (basePrice, promoPrice)
         const isPromo = product.onPromo;
         const dbPrice = product.price;
         const dbOriginalPrice = product.originalPrice;
@@ -60,7 +59,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
             promoPrice = dbPrice;
         } else {
             basePrice = dbPrice;
-            promoPrice = 0; // Default to 0 if no promo is set
+            promoPrice = null; // Use null for empty promo price
         }
 
         setFormState({ 
@@ -76,12 +75,10 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
     }
   }, [isOpen, product]);
 
-  // Generic handler for most fields
   const handleInputChange = (field: keyof ProductFormState, value: any) => {
     setFormState(prev => ({ ...prev, [field]: value }));
   };
 
-  // Specific handler for prices to ensure they are always valid numbers
   const handlePriceChange = (field: 'basePrice' | 'promoPrice', value: string) => {
     const numericValue = parseFloat(value);
     handleInputChange(field, isNaN(numericValue) ? null : numericValue);
@@ -92,15 +89,12 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
 
     const { basePrice, promoPrice, onPromo, ...restOfState } = formState;
 
-    // --- FINAL VALIDATION --- 
-    // This is the crucial pre-save check. It makes it impossible to send invalid data.
     if (onPromo && (promoPrice === null || basePrice === null || promoPrice >= basePrice)) {
         alert('Error: When a promotion is active, the promo price must be less than the original price.');
         console.error('Save Blocked: Invalid promo price.', { basePrice, promoPrice });
-        return; // Block the save
+        return;
     }
 
-    // Construct the final payload that matches the database schema
     const payload: Partial<Product> = {
         ...restOfState,
         onPromo: onPromo,
@@ -114,8 +108,8 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
         payload.originalPrice = null;
     }
 
-    // Remove the legacy field just in case
-    delete payload.promoPrice;
+    delete (payload as any).promoPrice;
+    delete (payload as any).basePrice;
       
     onSave(payload);
     ProductDetailCache.clear(product.id);
@@ -176,7 +170,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                         <StyledInput
                             id="product-name"
                             label="Product Name"
-                            value={formState.name || ''}
+                            value={formState.name ?? ''}
                             onChange={(e) => handleInputChange('name', e.target.value)}
                         />
 
@@ -191,7 +185,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                         <StyledInput
                             id="price"
                             label="Price"
-                            value={formState.basePrice === null ? '' : formState.basePrice}
+                            value={formState.basePrice ?? ''}
                             onChange={(e) => handlePriceChange('basePrice', e.target.value)}
                             type="number"
                         />
@@ -209,7 +203,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                                         <StyledInput
                                             id="promo-price"
                                             label="Promo Price"
-                                            value={formState.promoPrice === null ? '' : formState.promoPrice}
+                                            value={formState.promoPrice ?? ''}
                                             onChange={(e) => handlePriceChange('promoPrice', e.target.value)}
                                             type="number"
                                         />
