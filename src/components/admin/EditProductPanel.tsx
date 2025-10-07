@@ -1,3 +1,4 @@
+
 'use client';
 import React, { useState, useEffect, Fragment, useMemo } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
@@ -8,7 +9,7 @@ import { formatPrice } from '../../utils/price';
 import CategorySelectorModal from './modals/CategorySelectorModal';
 import ModernSwitch from '../common/ModernSwitch';
 import { ProductDetailCache } from '../../lib/productDetailCache';
-import { ProductListCache } from '../../lib/productCache';
+import { ProductCache } from '../../lib/productCache';
 
 interface EditProductPanelProps {
   product: Product | null;
@@ -19,6 +20,13 @@ interface EditProductPanelProps {
   categories: { id: string; name: string }[];
 }
 
+// Defines the shape of the form's state, which is clearer than the DB schema
+interface ProductFormState extends Omit<Product, 'price' | 'originalPrice'> {
+    basePrice: number | null;
+    promoPrice: number | null;
+}
+
+// A simple styled input
 const StyledInput = ({ id, label, value, onChange, type = 'text', placeholder = '' }) => (
     <div>
         <label htmlFor={id} className="block text-sm font-medium text-text-secondary">{label}</label>
@@ -34,57 +42,84 @@ const StyledInput = ({ id, label, value, onChange, type = 'text', placeholder = 
 );
 
 const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, onClose, onSave, onDelete, categories }) => {
-  const [editedFields, setEditedFields] = useState<Partial<Product>>({});
+  const [formState, setFormState] = useState<Partial<ProductFormState>>({});
   const [isCategorySelectorOpen, setCategorySelectorOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
 
-  const fullProductState = useMemo(() => {
-    if (!product) return null;
-    const state = { ...product, ...editedFields };
-
-    if (state.onPromo && state.promoPrice) {
-      state.originalPrice = state.price;
-      state.price = state.promoPrice;
-    }
-    
-    return state;
-  }, [product, editedFields]);
-
   useEffect(() => {
     if (isOpen && product) {
-      const initialFields = { ...product };
-      if (product.onPromo && product.promoPrice) {
-        initialFields.originalPrice = product.price;
-        initialFields.price = product.promoPrice;
-      }
-      setEditedFields(initialFields);
+        // On open, translate the DB schema (price, originalPrice) to the clear form state (basePrice, promoPrice)
+        const isPromo = product.onPromo;
+        const dbPrice = product.price;
+        const dbOriginalPrice = product.originalPrice;
+
+        let basePrice, promoPrice;
+
+        if (isPromo) {
+            basePrice = dbOriginalPrice;
+            promoPrice = dbPrice;
+        } else {
+            basePrice = dbPrice;
+            promoPrice = 0; // Default to 0 if no promo is set
+        }
+
+        setFormState({ 
+            ...product,
+            basePrice: basePrice,
+            promoPrice: promoPrice,
+        });
     } else {
         setTimeout(() => {
-            setEditedFields({});
+            setFormState({});
             setDeleteConfirm(false);
         }, 300);
     }
   }, [isOpen, product]);
 
-  const handleInputChange = (field: keyof Product, value: any) => {
-    setEditedFields(prev => ({ ...prev, [field]: value }));
+  // Generic handler for most fields
+  const handleInputChange = (field: keyof ProductFormState, value: any) => {
+    setFormState(prev => ({ ...prev, [field]: value }));
+  };
+
+  // Specific handler for prices to ensure they are always valid numbers
+  const handlePriceChange = (field: 'basePrice' | 'promoPrice', value: string) => {
+    const numericValue = parseFloat(value);
+    handleInputChange(field, isNaN(numericValue) ? null : numericValue);
   };
 
   const handleSave = () => {
-    if (product && Object.keys(editedFields).length > 0) {
-        const finalPayload: Partial<Product> = { ...editedFields };
+    if (!product || !formState) return;
 
-        if (finalPayload.onPromo) {
-            finalPayload.originalPrice = product.price;
-        } else {
-            finalPayload.originalPrice = null;
-            finalPayload.promoPrice = null;
-        }
+    const { basePrice, promoPrice, onPromo, ...restOfState } = formState;
 
-        onSave(finalPayload);
-        ProductDetailCache.clear(product.id);
-        ProductListCache.clearAll();
+    // --- FINAL VALIDATION --- 
+    // This is the crucial pre-save check. It makes it impossible to send invalid data.
+    if (onPromo && (promoPrice === null || basePrice === null || promoPrice >= basePrice)) {
+        alert('Error: When a promotion is active, the promo price must be less than the original price.');
+        console.error('Save Blocked: Invalid promo price.', { basePrice, promoPrice });
+        return; // Block the save
     }
+
+    // Construct the final payload that matches the database schema
+    const payload: Partial<Product> = {
+        ...restOfState,
+        onPromo: onPromo,
+    };
+
+    if (onPromo) {
+        payload.price = promoPrice;
+        payload.originalPrice = basePrice;
+    } else {
+        payload.price = basePrice;
+        payload.originalPrice = null;
+    }
+
+    // Remove the legacy field just in case
+    delete payload.promoPrice;
+      
+    onSave(payload);
+    ProductDetailCache.clear(product.id);
+    ProductCache.clear();
     onClose();
   };
 
@@ -92,7 +127,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
       if(product && deleteConfirm) {
           onDelete(product.id);
           ProductDetailCache.clear(product.id);
-          ProductListCache.clearAll();
+          ProductCache.clear();
           onClose();
       } else {
           setDeleteConfirm(true);
@@ -101,19 +136,18 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
   }
 
   const commissionAmount = useMemo(() => {
-      if (!fullProductState) return 0;
-      const price = fullProductState.onPromo ? fullProductState.price : fullProductState.price;
-      return ((price || 0) * (fullProductState.commission || 0)) / 100;
-  }, [fullProductState]);
+    if (!formState) return 0;
+    const price = formState.onPromo ? formState.promoPrice : formState.basePrice;
+    return ((price || 0) * (formState.commission || 0)) / 100;
+  }, [formState]);
 
   const currentCategoryName = useMemo(() => {
-      const categoryId = fullProductState?.categoryId;
+      const categoryId = formState?.categoryId;
       if (!categoryId) return 'Uncategorized';
       return categories.find(c => c.id === categoryId)?.name || 'Uncategorized';
-  }, [fullProductState, categories]);
+  }, [formState, categories]);
 
-
-  if (!fullProductState) return null;
+  if (!formState || !product) return null;
 
   return (
     <>
@@ -130,7 +164,6 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                 <Dialog.Panel className="pointer-events-auto w-screen max-w-md">
                   <div className="flex h-full flex-col overflow-y-scroll bg-background shadow-xl">
 
-                    {/* Header */}
                     <div className="p-4 bg-background sticky top-0 z-10 border-b border-border-color">
                       <div className="flex items-center justify-between">
                         <Dialog.Title className="text-lg font-bold text-text-primary">Edit Product</Dialog.Title>
@@ -138,66 +171,59 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                       </div>
                     </div>
 
-                    {/* Form Content */}
                     <div className="relative flex-1 p-4 space-y-6">
 
                         <StyledInput
                             id="product-name"
                             label="Product Name"
-                            value={fullProductState.name}
+                            value={formState.name || ''}
                             onChange={(e) => handleInputChange('name', e.target.value)}
                         />
 
-                        <div>
+                         <div>
                             <h3 className="block text-sm font-medium text-text-secondary">Category</h3>
                             <button onClick={() => setCategorySelectorOpen(true)} className="mt-1 flex justify-between items-center w-full bg-input-background p-3 rounded-lg text-left">
                                 <span className="text-text-primary">{currentCategoryName}</span>
                                 <ChevronRightIcon className="h-5 w-5 text-text-secondary" />
                             </button>
                         </div>
+                        
+                        <StyledInput
+                            id="price"
+                            label="Price"
+                            value={formState.basePrice === null ? '' : formState.basePrice}
+                            onChange={(e) => handlePriceChange('basePrice', e.target.value)}
+                            type="number"
+                        />
 
                         <div className="space-y-3">
                            <ModernSwitch
                                 label="Promo"
-                                checked={fullProductState.onPromo || false}
+                                checked={formState.onPromo || false}
                                 onChange={(checked) => handleInputChange('onPromo', checked)}
                             />
 
-                            <AnimatePresence mode="wait">
-                                <motion.div key={fullProductState.onPromo ? 'promo' : 'normal'} initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}>
-                                    {fullProductState.onPromo ? (
-                                        <div className="grid grid-cols-2 gap-4">
-                                             <div className="relative">
-                                                <p className="mt-1 text-lg font-semibold text-text-secondary line-through p-3">{formatPrice(fullProductState.originalPrice || product.price)}</p>
-                                                <label className="absolute top-0 left-3 text-xs font-medium text-text-secondary">Original Price</label>
-                                             </div>
-                                            <StyledInput
-                                                id="promo-price"
-                                                label="Promo Price"
-                                                value={fullProductState.price || ''}
-                                                onChange={(e) => handleInputChange('price', parseFloat(e.target.value))}
-                                                type="number"
-                                            />
-                                        </div>
-                                    ) : (
+                            <AnimatePresence>
+                                {formState.onPromo && (
+                                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}>
                                         <StyledInput
-                                            id="price"
-                                            label="Price"
-                                            value={fullProductState.price}
-                                            onChange={(e) => handleInputChange('price', parseFloat(e.target.value))}
+                                            id="promo-price"
+                                            label="Promo Price"
+                                            value={formState.promoPrice === null ? '' : formState.promoPrice}
+                                            onChange={(e) => handlePriceChange('promoPrice', e.target.value)}
                                             type="number"
                                         />
-                                    )}
-                                </motion.div>
+                                    </motion.div>
+                                )}
                             </AnimatePresence>
                         </div>
 
                         <div>
                             <label className="block text-sm font-medium text-text-secondary">Commission</label>
                             <div className="mt-2 bg-input-background p-4 rounded-lg">
-                                <input type="range" min="1" max="10" value={fullProductState.commission || 0} onChange={e => handleInputChange('commission', parseInt(e.target.value))} className="w-full h-2 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-lg appearance-none cursor-pointer glass-slider"/>
+                                <input type="range" min="1" max="10" value={formState.commission || 0} onChange={e => handleInputChange('commission', parseInt(e.target.value))} className="w-full h-2 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-lg appearance-none cursor-pointer glass-slider"/>
                                 <div className="flex justify-center items-center text-sm font-medium text-text-primary mt-2">
-                                    <span>{fullProductState.commission || 0}%</span>
+                                    <span>{formState.commission || 0}%</span>
                                     <span className="text-text-secondary mx-2">-</span>
                                     <span className="font-bold">{formatPrice(commissionAmount)}</span>
                                  </div>
@@ -209,13 +235,13 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                             <ModernSwitch
                                 label="Limited Stock"
                                 description="Mark item as having limited availability."
-                                checked={fullProductState.limitedStock || false}
+                                checked={formState.limitedStock || false}
                                 onChange={(checked) => handleInputChange('limitedStock', checked)}
                             />
                              <ModernSwitch
                                 label="Sold Out"
                                 description="Mark item as completely unavailable."
-                                checked={fullProductState.soldOut || false}
+                                checked={formState.soldOut || false}
                                 onChange={(checked) => handleInputChange('soldOut', checked)}
                             />
                         </div>
@@ -241,7 +267,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
         isOpen={isCategorySelectorOpen}
         onClose={() => setCategorySelectorOpen(false)}
         categories={categories}
-        selectedCategoryId={fullProductState.categoryId}
+        selectedCategoryId={formState.categoryId}
         onSelect={(categoryId) => {
             handleInputChange('categoryId', categoryId);
             setCategorySelectorOpen(false);
