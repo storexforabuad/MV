@@ -62,10 +62,10 @@ const ProductRow = ({
             <p className="text-sm text-text-secondary -mt-1">{categoryName}</p>
 
             <div className="mt-2 flex items-baseline gap-2">
-                {product.onPromo && product.promoPrice ? (
+                {product.onPromo && product.originalPrice ? (
                     <>
-                        <p className="text-lg font-bold text-blue-600">{formatPrice(product.promoPrice)}</p>
-                        <p className="text-sm text-text-secondary line-through">{formatPrice(product.price)}</p>
+                        <p className="text-lg font-bold text-blue-600">{formatPrice(product.price)}</p>
+                        <p className="text-sm text-text-secondary line-through">{formatPrice(product.originalPrice)}</p>
                     </>
                 ) : (
                     <p className="text-lg font-bold text-text-primary">{formatPrice(product.price)}</p>
