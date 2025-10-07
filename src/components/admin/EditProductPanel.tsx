@@ -6,18 +6,19 @@ import { Product } from '../../types/product';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatPrice } from '../../utils/price';
 import CategorySelectorModal from './modals/CategorySelectorModal';
-import ModernSwitch from '../common/ModernSwitch'; // Import the new switch
+import ModernSwitch from '../common/ModernSwitch';
+import { ProductDetailCache } from '../../lib/productDetailCache';
+import { ProductListCache } from '../../lib/productCache';
 
 interface EditProductPanelProps {
   product: Product | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (updatedFields: Partial<Product>) => void; // Changed to Partial<Product>
-  onDelete: (productId: string) => void; // Added for deleting
+  onSave: (updatedFields: Partial<Product>) => void;
+  onDelete: (productId: string) => void;
   categories: { id: string; name: string }[];
 }
 
-// A simple styled input
 const StyledInput = ({ id, label, value, onChange, type = 'text', placeholder = '' }) => (
     <div>
         <label htmlFor={id} className="block text-sm font-medium text-text-secondary">{label}</label>
@@ -39,19 +40,31 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
 
   const fullProductState = useMemo(() => {
     if (!product) return null;
-    return { ...product, ...editedFields };
+    const state = { ...product, ...editedFields };
+
+    if (state.onPromo && state.promoPrice) {
+      state.originalPrice = state.price;
+      state.price = state.promoPrice;
+    }
+    
+    return state;
   }, [product, editedFields]);
 
-
   useEffect(() => {
-    if (!isOpen) {
-        // Reset state when closing to avoid stale data and confirmation prompts
+    if (isOpen && product) {
+      const initialFields = { ...product };
+      if (product.onPromo && product.promoPrice) {
+        initialFields.originalPrice = product.price;
+        initialFields.price = product.promoPrice;
+      }
+      setEditedFields(initialFields);
+    } else {
         setTimeout(() => {
             setEditedFields({});
             setDeleteConfirm(false);
         }, 300);
     }
-  }, [isOpen]);
+  }, [isOpen, product]);
 
   const handleInputChange = (field: keyof Product, value: any) => {
     setEditedFields(prev => ({ ...prev, [field]: value }));
@@ -59,7 +72,18 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
 
   const handleSave = () => {
     if (product && Object.keys(editedFields).length > 0) {
-      onSave(editedFields);
+        const finalPayload: Partial<Product> = { ...editedFields };
+
+        if (finalPayload.onPromo) {
+            finalPayload.originalPrice = product.price;
+        } else {
+            finalPayload.originalPrice = null;
+            finalPayload.promoPrice = null;
+        }
+
+        onSave(finalPayload);
+        ProductDetailCache.clear(product.id);
+        ProductListCache.clearAll();
     }
     onClose();
   };
@@ -67,17 +91,18 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
   const handleDelete = () => {
       if(product && deleteConfirm) {
           onDelete(product.id);
+          ProductDetailCache.clear(product.id);
+          ProductListCache.clearAll();
           onClose();
       } else {
           setDeleteConfirm(true);
-          // Reset confirmation after a few seconds
           setTimeout(() => setDeleteConfirm(false), 3000);
       }
   }
 
   const commissionAmount = useMemo(() => {
       if (!fullProductState) return 0;
-      const price = fullProductState.onPromo ? fullProductState.promoPrice : fullProductState.price;
+      const price = fullProductState.onPromo ? fullProductState.price : fullProductState.price;
       return ((price || 0) * (fullProductState.commission || 0)) / 100;
   }, [fullProductState]);
 
@@ -88,7 +113,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
   }, [fullProductState, categories]);
 
 
-  if (!fullProductState) return null; // Don't render anything if there's no product data
+  if (!fullProductState) return null;
 
   return (
     <>
@@ -123,8 +148,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                             onChange={(e) => handleInputChange('name', e.target.value)}
                         />
 
-                        {/* Category Section */}
-                         <div>
+                        <div>
                             <h3 className="block text-sm font-medium text-text-secondary">Category</h3>
                             <button onClick={() => setCategorySelectorOpen(true)} className="mt-1 flex justify-between items-center w-full bg-input-background p-3 rounded-lg text-left">
                                 <span className="text-text-primary">{currentCategoryName}</span>
@@ -132,7 +156,6 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                             </button>
                         </div>
 
-                        {/* Pricing Section */}
                         <div className="space-y-3">
                            <ModernSwitch
                                 label="Promo"
@@ -145,14 +168,14 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                                     {fullProductState.onPromo ? (
                                         <div className="grid grid-cols-2 gap-4">
                                              <div className="relative">
-                                                <p className="mt-1 text-lg font-semibold text-text-secondary line-through p-3">{formatPrice(fullProductState.price)}</p>
+                                                <p className="mt-1 text-lg font-semibold text-text-secondary line-through p-3">{formatPrice(fullProductState.originalPrice || product.price)}</p>
                                                 <label className="absolute top-0 left-3 text-xs font-medium text-text-secondary">Original Price</label>
                                              </div>
                                             <StyledInput
                                                 id="promo-price"
                                                 label="Promo Price"
-                                                value={fullProductState.promoPrice || ''}
-                                                onChange={(e) => handleInputChange('promoPrice', parseFloat(e.target.value))}
+                                                value={fullProductState.price || ''}
+                                                onChange={(e) => handleInputChange('price', parseFloat(e.target.value))}
                                                 type="number"
                                             />
                                         </div>
@@ -169,7 +192,6 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                             </AnimatePresence>
                         </div>
 
-                        {/* Commission Slider */}
                         <div>
                             <label className="block text-sm font-medium text-text-secondary">Commission</label>
                             <div className="mt-2 bg-input-background p-4 rounded-lg">
@@ -182,7 +204,6 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                             </div>
                         </div>
 
-                         {/* Inventory Section */}
                         <div className="space-y-1">
                             <h3 className="text-sm font-medium text-text-secondary mb-2">Inventory</h3>
                             <ModernSwitch
@@ -201,7 +222,6 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
 
                     </div>
 
-                    {/* Footer with Actions */}
                     <div className="flex-shrink-0 border-t border-border-color px-4 py-3 bg-background sticky bottom-0">
                       <div className="flex gap-3">
                         <button type="button" className={`flex-1 inline-flex justify-center rounded-lg border border-transparent py-2 px-4 text-sm font-semibold text-white shadow-sm transition-colors ${deleteConfirm ? 'bg-red-700 hover:bg-red-800' : 'bg-red-500 hover:bg-red-600'}`} onClick={handleDelete}>{deleteConfirm ? 'Confirm Delete?' : 'Delete'}</button>

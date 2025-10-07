@@ -56,6 +56,15 @@ export interface PaginatedProductsResult {
   lastVisible: DocumentSnapshot | null;
 }
 
+const transformProductData = (data: any): Product => {
+  const product = { ...data } as Product;
+  if (product.onPromo && product.promoPrice) {
+    product.originalPrice = product.price;
+    product.price = product.promoPrice;
+  }
+  return product;
+};
+
 
 function assertDb() {
   if (!db) throw new Error('Firestore db is not initialized. Check your Firebase config and imports.');
@@ -261,19 +270,10 @@ export async function getProducts(storeId: string): Promise<Product[]> {
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => {
       const data = doc.data();
+      const transformedData = transformProductData(data);
       return {
-        ...data,
+        ...transformedData,
         id: doc.id,
-        name: data.name || '',
-        description: data.description || '',
-        currentPrice: data.currentPrice || 0,
-        slashedPrice: data.slashedPrice || 0,
-        inStock: typeof data.inStock === 'number' ? data.inStock : 1,
-        soldOut: data.soldOut || false,
-        limitedStock: data.limitedStock || false,
-        category: data.category || '',
-        image: data.image || '',
-        views: data.views || 0,
       } as Product;
     });
   } catch (error) {
@@ -293,8 +293,9 @@ export async function getProductsByCategory(storeId: string, categoryId: string)
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => {
       const data = doc.data();
+      const transformedData = transformProductData(data);
       return {
-        ...data,
+        ...transformedData,
         id: doc.id, 
       } as Product;
     });
@@ -315,6 +316,7 @@ export async function getProductById(storeId: string | null, id: string): Promis
   }
 
   try {
+    let productData;
     // Case 1: Global search (for /bizcon)
     if (storeId === null) {
       const productsRef = collectionGroup(db, 'products');
@@ -326,24 +328,22 @@ export async function getProductById(storeId: string | null, id: string): Promis
       }
 
       const productDoc = snapshot.docs[0];
-      const product = { ...productDoc.data(), id: productDoc.id, storeId: productDoc.ref.parent.parent?.id } as Product;
+      productData = { ...productDoc.data(), id: productDoc.id, storeId: productDoc.ref.parent.parent?.id };
 
       // Increment views for global discovery
       await updateDoc(productDoc.ref, { views: increment(1) });
 
-      return product;
+    } else {
+      // Case 2: Store-specific search (original functionality)
+      const productRef = doc(db, 'stores', storeId, 'products', id);
+      const productSnap = await getDoc(productRef);
+      if (!productSnap.exists()) {
+        return null;
+      }
+      productData = { id: productSnap.id, ...productSnap.data() };
     }
-
-    // Case 2: Store-specific search (original functionality)
-    const productRef = doc(db, 'stores', storeId, 'products', id);
-    const productSnap = await getDoc(productRef);
-    if (!productSnap.exists()) {
-      return null;
-    }
-    return {
-      id: productSnap.id,
-      ...productSnap.data()
-    } as Product;
+    
+    return transformProductData(productData) as Product;
 
   } catch (error) {
     console.error('Error fetching product:', error);
