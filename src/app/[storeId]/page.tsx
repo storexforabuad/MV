@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useTransition } from 'react';
 import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
 import {
@@ -55,6 +55,7 @@ export default function StorefrontPage() {
   const { isConnectionError, setIsConnectionError } = useConnectionCheck();
   const observerRef = useRef<HTMLDivElement>(null);
   const productGridRef = useRef<HTMLDivElement>(null);
+  const [isPending, startTransition] = useTransition();
 
   const fetchProducts = useCallback(async (categoryId: string, pageNum = 1, lastDoc: any = null) => {
     if (!storeId) return;
@@ -108,11 +109,12 @@ export default function StorefrontPage() {
   }, [storeId, setIsConnectionError]);
 
   const handleCategorySelect = useCallback((categoryId: string) => {
-    setActiveCategoryId(categoryId);
-    setProducts([]);
-    setLastVisible(null);
-    setHasMore(true);
-    fetchProducts(categoryId, 1, null);
+    startTransition(() => {
+      setActiveCategoryId(categoryId);
+      setLastVisible(null);
+      setHasMore(true);
+      fetchProducts(categoryId, 1, null);
+    });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [fetchProducts]);
 
@@ -175,7 +177,7 @@ export default function StorefrontPage() {
           onActiveCategoryClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         />
         <div className="mt-3 sm:mt-4">
-          {initialLoading ? (
+          {initialLoading || isPending ? (
             <LoadingGrid />
           ) : (
             <>

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useTransition } from 'react';
 import dynamic from 'next/dynamic';
 import { DocumentSnapshot } from 'firebase/firestore';
 import {
@@ -51,6 +51,7 @@ export default function BizconPage() {
   const { isConnectionError, setIsConnectionError } = useConnectionCheck();
   const observerRef = useRef<HTMLDivElement>(null);
   const productGridRef = useRef<HTMLDivElement>(null);
+  const [isPending, startTransition] = useTransition();
 
   const fetchProducts = useCallback(async (category: string, lastDoc: DocumentSnapshot | null = null) => {
     if (loading) return;
@@ -94,12 +95,12 @@ export default function BizconPage() {
   }, [loading, setIsConnectionError]);
 
   const handleCategorySelect = useCallback((category: string) => {
-    setActiveCategory(category);
-    setInitialLoading(true);
-    setProducts([]);
-    setLastVisible(null);
-    setHasMore(true);
-    fetchProducts(category, null);
+    startTransition(() => {
+      setActiveCategory(category);
+      setLastVisible(null);
+      setHasMore(true);
+      fetchProducts(category, null);
+    });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [fetchProducts]);
 
@@ -156,7 +157,7 @@ export default function BizconPage() {
           onActiveCategoryClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         />
         <div className="mt-3 sm:mt-4">
-          {initialLoading ? (
+          {initialLoading || isPending ? (
             <LoadingGrid />
           ) : (
             <>
