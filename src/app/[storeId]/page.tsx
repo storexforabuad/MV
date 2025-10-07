@@ -81,7 +81,7 @@ export default function StorefrontPage() {
             break;
           }
           case 'new-arrivals': {
-            fetchedProducts = await getProducts(storeId); // Already sorted by createdAt desc by default
+            fetchedProducts = await getProducts(storeId);
             break;
           }
           default: {
@@ -109,6 +109,18 @@ export default function StorefrontPage() {
   }, [storeId, setIsConnectionError]);
 
   const handleCategorySelect = useCallback((categoryId: string) => {
+    const cacheKey = `store_${storeId}_products_${categoryId || 'all'}_page1`;
+    const cachedData = ProductListCache.get(cacheKey);
+
+    if (cachedData) {
+      setProducts(cachedData);
+      setActiveCategoryId(categoryId);
+      setHasMore(cachedData.length === PRODUCTS_PAGE_SIZE);
+      setLastVisible(null);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     startTransition(() => {
       setActiveCategoryId(categoryId);
       setLastVisible(null);
@@ -116,7 +128,7 @@ export default function StorefrontPage() {
       fetchProducts(categoryId, 1, null);
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [fetchProducts]);
+  }, [storeId, fetchProducts]);
 
   useEffect(() => {
     if (!storeId) return;
@@ -128,7 +140,6 @@ export default function StorefrontPage() {
         const cats = await getCategories(storeId);
         setCategories(cats);
 
-        // Fetch initial products for the default category
         fetchProducts(activeCategoryId, 1, null);
 
       } catch (error) {
@@ -187,7 +198,7 @@ export default function StorefrontPage() {
               <ProductGrid 
                 products={products}
                 containerRef={productGridRef}
-                storeId={storeId} // Pass storeId here
+                storeId={storeId}
               />
               {hasMore && (
                 <div ref={observerRef} className="h-8 flex items-center justify-center">

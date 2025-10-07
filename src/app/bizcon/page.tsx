@@ -17,6 +17,7 @@ import SkeletonLoader from '../../components/SkeletonLoader';
 import type { Product } from '../../types/product';
 import ConnectionErrorToast from '../../components/ConnectionErrorToast';
 import { CategoryCache } from '../../lib/categoryCache';
+import { ProductListCache } from '../../lib/productCache';
 
 const ProductGrid = dynamic(
   () => import('../../components/products/ProductGrid'),
@@ -61,6 +62,7 @@ export default function BizconPage() {
 
     try {
       let result: PaginatedProductsResult;
+      const cacheKey = `bizcon_products_${category}_page1`;
       
       switch (category) {
         case 'Promo':
@@ -78,6 +80,9 @@ export default function BizconPage() {
       }
       
       if (result && result.products) {
+        if (isInitialLoad) {
+          ProductListCache.set(cacheKey, { products: result.products, lastVisible: result.lastVisible, hasMore: result.lastVisible !== null });
+        }
         setProducts(prev => isInitialLoad ? result.products : [...prev, ...result.products]);
         setLastVisible(result.lastVisible);
         setHasMore(result.lastVisible !== null);
@@ -95,6 +100,18 @@ export default function BizconPage() {
   }, [loading, setIsConnectionError]);
 
   const handleCategorySelect = useCallback((category: string) => {
+    const cacheKey = `bizcon_products_${category}_page1`;
+    const cachedData = ProductListCache.get(cacheKey);
+
+    if (cachedData) {
+      setProducts(cachedData.products);
+      setLastVisible(cachedData.lastVisible);
+      setHasMore(cachedData.hasMore);
+      setActiveCategory(category);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
     startTransition(() => {
       setActiveCategory(category);
       setLastVisible(null);
@@ -108,7 +125,7 @@ export default function BizconPage() {
     const fetchInitialData = async () => {
       try {
         const cacheKey = 'bizcon_popular_categories';
-        const cached = CategoryCache.get(cacheKey);
+        const cached = CategoryCache.get(cacheKez);
         if (cached) {
           setCategories(cached);
         } else {
