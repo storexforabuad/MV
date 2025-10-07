@@ -446,7 +446,14 @@ export async function getPopularProducts(storeId: string, limitCount: number = 6
     const productsRef = collection(db, 'stores', storeId, 'products');
     const q = query(productsRef, orderBy('views', 'desc'), limit(limitCount));
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Product));
+    return querySnapshot.docs.map(doc => {
+        const data = doc.data();
+        const transformedData = transformProductData(data);
+        return {
+            ...transformedData,
+            id: doc.id,
+        } as Product;
+    });
   } catch (error) {
     console.error('Error fetching popular products:', error);
     return [];
@@ -532,7 +539,15 @@ export async function incrementProductViews(storeId: string, productId: string):
 
 async function executePaginatedQuery(q: any): Promise<PaginatedProductsResult> {
   const snapshot = await getDocs(q);
-  const products = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id, storeId: doc.ref.parent.parent?.id }) as Product);
+  const products = snapshot.docs.map(doc => {
+      const data = doc.data();
+      const transformedData = transformProductData(data);
+      return {
+          ...transformedData,
+          id: doc.id,
+          storeId: doc.ref.parent.parent?.id,
+      } as Product;
+  });
   const lastVisible = snapshot.docs.length > 0 ? snapshot.docs[snapshot.docs.length - 1] : null;
   return { products, lastVisible };
 }
@@ -644,7 +659,10 @@ export async function getPopularCategories(): Promise<{ id: string; name: string
   try {
     const productsRef = collectionGroup(db, 'products');
     const snapshot = await getDocs(productsRef);
-    const products = snapshot.docs.map(doc => doc.data() as Product);
+    const products = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return transformProductData(data) as Product;
+    });
 
     const categoryViews: { [key: string]: number } = {};
 
