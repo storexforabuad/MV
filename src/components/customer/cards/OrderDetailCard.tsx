@@ -14,14 +14,18 @@ interface OrderDetailCardProps {
 export function OrderDetailCard({ order }: OrderDetailCardProps) {
 
   const handleReorder = () => {
-    const whatsappNumber = order.storeMeta?.whatsapp;
-    if (!whatsappNumber) {
+    const rawWhatsappNumber = order.storeMeta?.whatsapp;
+    if (!rawWhatsappNumber) {
       toast.error("Seller's contact information is not available.");
       return;
     }
+    
+    const sanitizedWhatsappNumber = rawWhatsappNumber.replace(/\D/g, '');
     const productUrl = `${window.location.origin}/${order.product.storeId}/products/${order.product.id}`;
-    const message = `I would like to reorder this product: ${order.product.name}. You can view the product here: ${productUrl}`;
-    const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+    
+    const message = `*Reorder Request*\n\n---\n\n*Product:* ${order.product.name}\n*Price:* ${formatPrice(order.product.price, order.storeMeta.currency)}\n\nI would like to place another order for this item.\n\n*Product Link:* ${productUrl}`;
+    
+    const whatsappUrl = `https://wa.me/${sanitizedWhatsappNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
   };
 
