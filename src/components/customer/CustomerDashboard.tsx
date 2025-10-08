@@ -33,6 +33,9 @@ const colorGradients = {
 export function CustomerDashboard({
   orders,
   onSectionChange,
+  onOrdersModalOpen,
+  onReferralsModalOpen,
+  onWishlistModalOpen,
 }: CustomerDashboardProps) {
   
   const referralCount = 0; 
@@ -50,21 +53,21 @@ export function CustomerDashboard({
         value={orders.length}
         icon={<ShoppingBag className="w-6 h-6" />}
         gradient={colorGradients.purple}
-        onClick={() => onSectionChange('orders')}
+        onClick={onOrdersModalOpen} // Changed from onSectionChange('orders')
       />
       <CustomerStatCard
         label="My Referrals"
         value={referralCount}
         icon={<Gift className="w-6 h-6" />}
         gradient={colorGradients.green}
-        onClick={() => onSectionChange('referrals')}
+        onClick={onReferralsModalOpen} // Assuming this will be the next feature
       />
       <CustomerStatCard
         label="My Wishlist"
         value={wishlistCount}
         icon={<Heart className="w-6 h-6" />}
         gradient={colorGradients.red}
-        onClick={() => onSectionChange('wishlist')}
+        onClick={onWishlistModalOpen}
       />
     </motion.div>
   );

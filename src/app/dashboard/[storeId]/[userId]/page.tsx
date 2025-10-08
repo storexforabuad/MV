@@ -13,6 +13,7 @@ import { ReferralsSection } from '../../../../components/customer/sections/Refer
 import { WishlistSection } from '../../../../components/customer/sections/WishlistSection';
 import { ProfileSection } from '../../../../components/customer/sections/ProfileSection';
 import { WishlistModal } from '../../../../components/customer/modals/WishlistModal';
+import { OrdersModal } from '../../../../components/customer/modals/OrdersModal'; // Import the new modal
 
 const sectionConfig = {
   home: { title: 'Dashboard', subtitle: 'A summary of your recent orders and interactions.' },
@@ -84,7 +85,7 @@ export default function DashboardPage() {
             <CustomerDashboard 
               orders={orders}
               storeId={storeId}
-              onSectionChange={setActiveSection} // Pass the handler here
+              onSectionChange={setActiveSection}
               onOrdersModalOpen={() => setIsOrdersModalOpen(true)}
               onReferralsModalOpen={() => setIsReferralsModalOpen(true)}
               onWishlistModalOpen={() => setIsWishlistModalOpen(true)}
@@ -126,6 +127,12 @@ export default function DashboardPage() {
         isModalOpen={isAnyModalOpen} 
       />
       <WishlistModal isOpen={isWishlistModalOpen} onClose={() => setIsWishlistModalOpen(false)} />
+      <OrdersModal 
+        isOpen={isOrdersModalOpen} 
+        onClose={() => setIsOrdersModalOpen(false)} 
+        orders={orders}
+        storeId={storeId}
+      />
     </div>
   );
 }

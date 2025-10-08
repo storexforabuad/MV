@@ -1,100 +1,114 @@
 'use client';
 
-import { motion } from 'framer-motion';
-import { ShoppingBag, Repeat, MessageSquare } from 'lucide-react';
+import React, { Fragment } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
+import { XMarkIcon, ShoppingCartIcon } from '@heroicons/react/24/solid';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Order } from '../../../hooks/useOrders';
-import Image from 'next/image';
-import { formatPrice } from '../../../utils/price';
-import { CustomerModal } from './CustomerModal';
+import { OrderDetailCard } from '../cards/OrderDetailCard';
 
 interface OrdersModalProps {
   isOpen: boolean;
   onClose: () => void;
   orders: Order[];
+  storeId: string; // Keep for future context-aware actions if needed
 }
 
-export function OrdersModal({ isOpen, onClose, orders }: OrdersModalProps) {
+const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose, orders }) => {
 
-  const handleReorder = (order: Order) => {
-    const storePhoneNumber = order.storeMeta.whatsapp;
-    const productName = order.product.name;
-    const productPrice = formatPrice(order.product.price);
-    const productLink = `${window.location.origin}/${order.product.storeId}/products/${order.product.id}`;
-
-    const message = 
-      `Hello! 👋 I'd like to reorder this item:\n\n` +
-      `🛍️ *${productName}*\n` +
-      `*Price:* ${productPrice}\n\n` +
-      `Here is the link for confirmation:\n` +
-      `${productLink}\n\n` +
-      `Thank you! 🙏`;
-
-    const whatsappUrl = `https://wa.me/${storePhoneNumber}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
-  };
-
-  const handleDispute = (order: Order) => {
-    console.log('Dispute button clicked for order:', order.product.id);
-  };
+  const handleClose = () => {
+    // Allow for exit animation before truly closing
+    onClose();
+  }
 
   return (
-    <CustomerModal isOpen={isOpen} onClose={onClose} title="Your Orders">
-      {orders.length > 0 ? (
-        <ul className="divide-y divide-slate-200 dark:divide-slate-800">
-          {orders.map((order, index) => (
-            <motion.li
-              key={index}
-              className="p-4"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
+    <Transition.Root show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-40" onClose={handleClose}>
+        {/* --- Overlay --- */}
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black bg-opacity-75 backdrop-blur-sm transition-opacity" />
+        </Transition.Child>
+
+        {/* --- Modal Content --- */}
+        <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+          <div className="flex min-h-full items-stretch justify-center text-center md:items-center md:px-2 lg:px-4">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 translate-y-full md:translate-y-0 md:scale-95"
+              enterTo="opacity-100 translate-y-0 md:scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 translate-y-0 md:scale-100"
+              leaveTo="opacity-0 translate-y-full md:translate-y-0 md:scale-95"
             >
-              <div className="flex items-start gap-4">
-                <div className="relative w-24 h-24 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 flex-shrink-0">
-                  <Image 
-                    src={order.product.images[0]} 
-                    alt={order.product.name} 
-                    fill
-                    className="object-cover" 
-                  />
-                </div>
+              <Dialog.Panel className="relative flex w-full max-w-2xl transform text-left text-base transition md:my-8">
+                <div className="relative flex w-full flex-col overflow-hidden bg-slate-100 dark:bg-slate-900 shadow-2xl h-screen md:h-[90vh] md:rounded-2xl">
 
-                <div className="flex-grow">
-                  <p className="text-sm text-slate-500 dark:text-slate-400">{order.storeMeta.name}</p>
-                  <h3 className="font-semibold text-md text-slate-800 dark:text-slate-100 mb-1">{order.product.name}</h3>
-                  <p className="text-lg font-bold text-blue-500 dark:text-blue-400 mb-3">{formatPrice(order.product.price)}</p>
-                  
-                  <div className="flex items-center gap-2">
-                    <motion.button
-                      onClick={() => handleReorder(order)}
-                      className="flex-1 flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2.5 px-3 rounded-lg shadow-sm"
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <Repeat className="w-4 h-4" />
-                      <span className="text-sm">Reorder</span>
-                    </motion.button>
-
-                    <motion.button
-                      onClick={() => handleDispute(order)}
-                      className="flex-1 flex items-center justify-center gap-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-semibold py-2.5 px-3 rounded-lg"
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <MessageSquare className="w-4 h-4" />
-                      <span className="text-sm">Dispute</span>
-                    </motion.button>
+                  {/* Header */}
+                  <div className="p-4 flex justify-between items-center border-b border-slate-200 dark:border-slate-700 sticky top-0 bg-slate-100/80 dark:bg-slate-900/80 backdrop-blur-sm z-10">
+                    <Dialog.Title as="h3" className="text-xl font-bold text-slate-800 dark:text-slate-100">My Orders</Dialog.Title>
+                    <button onClick={handleClose} className="p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                      <XMarkIcon className="h-6 w-6 text-slate-600 dark:text-slate-300" />
+                    </button>
                   </div>
+
+                  {/* Order List */}
+                  <div className="flex-1 overflow-y-auto p-4">
+                    <AnimatePresence>
+                      {orders && orders.length > 0 ? (
+                        <motion.div 
+                          className="grid grid-cols-1 gap-4"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1, transition: { staggerChildren: 0.1 } }}
+                        >
+                          {orders.map(order => (
+                            <motion.div key={order.product.id + order.orderDate} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                              <OrderDetailCard order={order} />
+                            </motion.div>
+                          ))}
+                        </motion.div>
+                      ) : (
+                        <motion.div 
+                          key="empty-state"
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          className="flex flex-col items-center justify-center h-full text-center"
+                        >
+                          <ShoppingCartIcon className="w-24 h-24 text-slate-300 dark:text-slate-600 mb-4" />
+                          <h3 className="text-xl font-semibold text-slate-700 dark:text-slate-200">No Orders Yet</h3>
+                          <p className="text-slate-500 dark:text-slate-400 mt-2 max-w-xs">
+                            When you buy something, your orders will show up here.
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Footer */}
+                  <div className="absolute bottom-0 left-0 right-0 z-20">
+                    <div className="bg-slate-100/80 dark:bg-slate-900/80 backdrop-blur-sm p-4 border-t border-slate-200 dark:border-slate-700">
+                      <button onClick={handleClose} className="w-full bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-800 font-semibold py-3 px-4 rounded-lg hover:bg-slate-700 dark:hover:bg-slate-200 transition-colors duration-200">
+                        Done
+                      </button>
+                    </div>
+                  </div>
+
                 </div>
-              </div>
-            </motion.li>
-          ))}
-        </ul>
-      ) : (
-        <div className="text-center py-20 px-6">
-          <ShoppingBag className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-200">No Orders Yet</h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Start shopping to see your orders here.</p>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
         </div>
-      )}
-    </CustomerModal>
+      </Dialog>
+    </Transition.Root>
   );
-}
+};
+
+export { OrdersModal };
