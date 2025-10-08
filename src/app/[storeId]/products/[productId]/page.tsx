@@ -123,8 +123,16 @@ export default function ProductDetail() {
         toast.success('Order placed! Redirecting to WhatsApp...');
 
         // 2. Construct the WhatsApp URL
-        const message = encodeURIComponent(`Hi, I'd like to order the ${product.name} from ${storeMeta.name}.`);
-        const whatsappUrl = `https://wa.me/${storeMeta.whatsapp.replace(/\D/g, '')}?text=${message}`;
+        const message =
+          `🛍️ *New Order Request*\n\n` +
+          `Hello! I would like to order this item:\n\n` +
+          `*${product.name}*\n` +
+          `• Price: ${formatPrice(product.price)}\n` +
+          `• Product Link: ${window.location.href}\n\n` +
+          `Thank you! 🙏`;
+
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappUrl = `https://wa.me/${storeMeta.whatsapp.replace(/\D/g, '')}?text=${encodedMessage}`;
 
         // 3. Redirect to WhatsApp
         window.open(whatsappUrl, '_blank');
