@@ -38,7 +38,7 @@ export default function DashboardPage() {
   const params = useParams();
   const storeId = Array.isArray(params.storeId) ? params.storeId[0] : params.storeId;
   const userId = Array.isArray(params.userId) ? params.userId[0] : params.userId; // Get userId
-  const { orders, fetchOrders, loading } = useOrders(userId || null, storeId || null); // Pass userId to hook
+  const { orders, refetchOrders: fetchOrders, isLoading: loading } = useOrders(userId || null); // Pass userId to hook
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeSection, setActiveSection] = useState<CustomerSection>('home');
   const [initialLoading, setInitialLoading] = useState(true);
