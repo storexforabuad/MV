@@ -23,7 +23,7 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose, orders }) =>
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-40" onClose={handleClose}>
+      <Dialog as="div" className="relative z-50" onClose={handleClose}>
         {/* --- Overlay --- */}
         <Transition.Child
           as={Fragment}
