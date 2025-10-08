@@ -62,11 +62,53 @@ export default function DashboardPage() {
   const currentSection = sectionConfig[activeSection];
   const isAnyModalOpen = isOrdersModalOpen || isReferralsModalOpen || isWishlistModalOpen;
 
+  const renderMainContent = () => {
+    if (initialLoading && activeSection === 'home') {
+      return <DashboardSkeleton />;
+    }
+
+    switch(activeSection) {
+      case 'home':
+        return (
+          <>
+            <motion.button
+              onClick={handleRefresh}
+              className="w-full flex items-center justify-center gap-3 bg-gradient-to-br from-purple-500 to-indigo-600 text-white font-bold py-3 px-4 rounded-2xl shadow-lg transition-all duration-300 ease-in-out mb-6"
+              whileHover={{ scale: 1.02, y: -2 }}
+              whileTap={{ scale: 0.98 }}
+              disabled={isRefreshing || loading}
+            >
+              <RefreshCw className={`w-5 h-5 ${(isRefreshing || loading) ? 'animate-spin' : ''}`} />
+              <span>{(isRefreshing || loading) ? 'Refreshing...' : 'Refresh'}</span>
+            </motion.button>
+            <CustomerDashboard 
+              orders={orders}
+              storeId={storeId}
+              onSectionChange={setActiveSection} // Pass the handler here
+              onOrdersModalOpen={() => setIsOrdersModalOpen(true)}
+              onReferralsModalOpen={() => setIsReferralsModalOpen(true)}
+              onWishlistModalOpen={() => setIsWishlistModalOpen(true)}
+            />
+          </>
+        );
+      case 'orders':
+        return <OrdersSection storeId={storeId} />;
+      case 'referrals':
+        return <ReferralsSection storeId={storeId} />;
+      case 'wishlist':
+        return <WishlistSection storeId={storeId} />;
+      case 'profile':
+        return <ProfileSection storeId={storeId} />;
+      default:
+        return null;
+    }
+  }
+
   return (
     <div className="bg-slate-50 dark:bg-black min-h-screen">
       <Navbar storeName={currentSection.title} />
       <main className="p-4 pt-20 pb-28 max-w-2xl mx-auto">
-        {activeSection !== 'home' && (
+         {activeSection !== 'home' && (
           <>
             <h1 className="text-3xl font-extrabold text-slate-800 dark:text-slate-100 mb-2">{currentSection.title}</h1>
             <p className="text-slate-500 dark:text-slate-400 mb-6">
@@ -74,43 +116,8 @@ export default function DashboardPage() {
             </p>
           </>
         )}
-
         <div className={activeSection === 'home' ? '' : 'mt-8'}>
-          {activeSection === 'home' && (
-            initialLoading ? (
-              <DashboardSkeleton />
-            ) : (
-              <>
-                <motion.button
-                  onClick={handleRefresh}
-                  className="w-full flex items-center justify-center gap-3 bg-gradient-to-br from-purple-500 to-indigo-600 text-white font-bold py-3 px-4 rounded-2xl shadow-lg transition-all duration-300 ease-in-out mb-6"
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  disabled={isRefreshing || loading}
-                >
-                  <RefreshCw className={`w-5 h-5 ${(isRefreshing || loading) ? 'animate-spin' : ''}`} />
-                  <span>{(isRefreshing || loading) ? 'Refreshing...' : 'Refresh'}</span>
-                </motion.button>
-                <CustomerDashboard 
-                  orders={orders}
-                  storeId={storeId}
-                  isOrdersModalOpen={isOrdersModalOpen}
-                  onOrdersModalOpen={() => setIsOrdersModalOpen(true)}
-                  onOrdersModalClose={() => setIsOrdersModalOpen(false)}
-                  isReferralsModalOpen={isReferralsModalOpen}
-                  onReferralsModalOpen={() => setIsReferralsModalOpen(true)}
-                  onReferralsModalClose={() => setIsReferralsModalOpen(false)}
-                  isWishlistModalOpen={isWishlistModalOpen}
-                  onWishlistModalOpen={() => setIsWishlistModalOpen(true)}
-                  onWishlistModalClose={() => setIsWishlistModalOpen(false)}
-                />
-              </>
-            )
-          )}
-          {activeSection === 'orders' && <OrdersSection storeId={storeId} />}
-          {activeSection === 'referrals' && <ReferralsSection storeId={storeId} />}
-          {activeSection === 'wishlist' && <WishlistSection storeId={storeId} />}
-          {activeSection === 'profile' && <ProfileSection storeId={storeId} />}
+          {renderMainContent()}
         </div>
       </main>
       <CustomerMobileNav 
