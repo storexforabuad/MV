@@ -12,6 +12,7 @@ interface FirestoreOrderData {
   storeMeta: StoreMeta;
   orderDate: Timestamp;
   customerId: string;
+  quantity: number;
 }
 
 /**
@@ -20,7 +21,8 @@ interface FirestoreOrderData {
 export const addOrderToFirestore = async (
   customerId: string,
   product: Product,
-  storeMeta: StoreMeta
+  storeMeta: StoreMeta,
+  quantity: number
 ): Promise<Order> => {
   try {
     const ordersRef = collection(db, 'customers', customerId, 'orders');
@@ -29,6 +31,7 @@ export const addOrderToFirestore = async (
       storeMeta,
       orderDate: Timestamp.now(), // Use Firestore Timestamp
       customerId: customerId, // For collection group queries
+      quantity,
     };
 
     const docRef = await addDoc(ordersRef, newOrderData);
@@ -61,6 +64,7 @@ export const fetchOrdersFromFirestore = async (customerId: string): Promise<Orde
         product: data.product,
         storeMeta: data.storeMeta,
         orderDate: data.orderDate.toDate().toISOString(), // Convert Timestamp to ISO string
+        quantity: data.quantity || 1, // Default to 1 if quantity is not set
       };
     });
 

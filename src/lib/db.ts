@@ -57,12 +57,20 @@ export interface PaginatedProductsResult {
 }
 
 const transformProductData = (data: any): Product => {
-  const product = { ...data } as Product;
+  const product: { [key: string]: any } = { ...data };
+
+  // Convert Timestamps to ISO strings
+  for (const key in product) {
+    if (product[key] instanceof Timestamp) {
+      product[key] = product[key].toDate().toISOString();
+    }
+  }
+
   if (product.onPromo && product.promoPrice) {
     product.originalPrice = product.price;
     product.price = product.promoPrice;
   }
-  return product;
+  return product as Product;
 };
 
 

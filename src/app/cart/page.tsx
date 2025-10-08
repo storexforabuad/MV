@@ -7,8 +7,11 @@ import { getStoreMeta } from '../../lib/db';
 import { useState, useEffect } from 'react';
 import { StoreMeta } from '../../types/store';
 import { Product } from '../../types/product';
-import { incrementOrderCount } from '../../app/actions/orderActions';
 import Navbar from '../../components/layout/navbar';
+import { useCustomer } from '@/context/CustomerContext';
+import { useOrders } from '@/hooks/useOrders';
+import CustomerLookupModal from '@/components/customer/CustomerLookupModal';
+import toast from 'react-hot-toast';
 
 const CartItem = dynamic(
   () => import('../../components/cart/CartItem'),
@@ -26,6 +29,10 @@ export default function CartPage() {
   const { state, dispatch } = useCart();
   const [storeMetas, setStoreMetas] = useState<{[storeId: string]: StoreMeta}>({});
   const [groupedCart, setGroupedCart] = useState<GroupedCart>({});
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+  const { customer } = useCustomer();
+  const { addOrder } = useOrders(customer?.id || null);
 
   useEffect(() => {
     const newGroupedCart: GroupedCart = state.items.reduce((acc, item) => {
@@ -72,40 +79,41 @@ export default function CartPage() {
     dispatch({ type: 'REMOVE_ITEM', payload: id });
   };
   
-  const createWhatsAppMessage = async (storeId: string, items: Product[]) => {
+  const handleCheckout = async (storeId: string, items: Product[]) => {
+    if (!customer) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+
     const storeMeta = storeMetas[storeId];
-    if (!storeMeta || !storeMeta.whatsapp) return;
+    if (!storeMeta) {
+      toast.error('Store information is missing.');
+      return;
+    }
 
-    await incrementOrderCount(storeId, items.length);
+    const orderPromises = items.map(item => 
+      addOrder(item, storeMeta, item.quantity)
+    );
 
-    const itemsList = items
-      .map((item, index) => 
-        `${index + 1}. *${item.name}*\n` +
-        `• Quantity: ${item.quantity}\n` +
-        `• Price: ${formatPrice(item.price * item.quantity)}\n` +
-        `• Product Link: ${window.location.origin}/${storeId}/products/${item.id}`
-      )
-      .join('\n\n');
+    try {
+      await toast.promise(
+        Promise.all(orderPromises),
+        {
+          loading: 'Placing your order...',
+          success: 'Order placed successfully!',
+          error: 'There was an error placing your order.'
+        }
+      );
+      
+      // Remove only ordered items from cart
+      items.forEach(item => {
+          dispatch({ type: 'REMOVE_ITEM', payload: item.id });
+      });
 
-    const totalAmount = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
-  
-    const message = 
-      `🛍️ *New Order Request*\n\n` +
-      `Hello! I would like to place an order for the following items:\n\n` +
-      `${itemsList}\n\n` +
-      `Total Items: ${totalItems}\n` +
-      `Total Amount: ${formatPrice(totalAmount)}\n\n` +
-      `Thank you! 🙏`;
-  
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappLink = `https://wa.me/${storeMeta.whatsapp.replace(/\D/g, '')}?text=${encodedMessage}`;
-    window.open(whatsappLink, '_blank');
-    
-    // Remove only ordered items from cart
-    items.forEach(item => {
-        dispatch({ type: 'REMOVE_ITEM', payload: item.id });
-    });
+    } catch (error) {
+        // The toast will already show the error message
+        console.error("Failed to place one or more orders:", error);
+    }
   };
 
   if (state.items.length === 0) {
@@ -125,6 +133,14 @@ export default function CartPage() {
   return (
     <>
         <Navbar storeName="Cart" />
+        <CustomerLookupModal 
+          isOpen={isLoginModalOpen}
+          onClose={() => setIsLoginModalOpen(false)}
+          onSuccess={() => {
+            setIsLoginModalOpen(false);
+            toast.success("You're logged in! You can now place your order.");
+          }}
+        />
         <div className="min-h-screen mx-auto max-w-2xl px-3 sm:px-4 pb-8 pt-[calc(var(--navbar-height)+1.5rem)] sm:pt-[calc(var(--navbar-height)+2rem)]">
           {Object.entries(groupedCart).map(([storeId, items]) => {
             const storeMeta = storeMetas[storeId];
@@ -149,8 +165,8 @@ export default function CartPage() {
                     <span>{formatPrice(totalAmount)}</span>
                   </div>
                   <button
-                    onClick={() => createWhatsAppMessage(storeId, items)}
-                    disabled={!storeMeta || !storeMeta.whatsapp}
+                    onClick={() => handleCheckout(storeId, items)}
+                    disabled={!storeMeta}
                     className="mt-6 group relative w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[var(--button-success)] text-white font-medium shadow-sm hover:shadow-md transition-all duration-300 hover:bg-[var(--button-success-hover)] transform-gpu active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <ShoppingCart className="w-5 h-5" />

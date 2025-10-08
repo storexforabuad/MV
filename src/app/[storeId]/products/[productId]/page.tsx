@@ -15,7 +15,9 @@ import { calculateDiscount, formatPrice } from '../../../../utils/price';
 import { ViewHistoryCache } from '../../../../lib/viewHistoryCache';
 import { ProductDetailCache } from '../../../../lib/productDetailCache';
 import Navbar from '../../../../components/layout/navbar';
-import { incrementOrderCount } from '../../../../app/actions/orderActions';
+import { useCustomer } from '../../../../context/CustomerContext';
+import CustomerLookupModal from '../../../../components/customer/CustomerLookupModal';
+import toast from 'react-hot-toast';
 
 // Dynamic imports
 const ProductDetailSkeleton = dynamic(() => import('../../../../components/ProductDetailSkeleton'), {
@@ -35,8 +37,11 @@ export default function ProductDetail() {
   const [isAdding, setIsAdding] = useState(false);
   const [isInCart, setIsInCart] = useState(false);
   const { state, dispatch } = useCart();
-  const { addOrder } = useOrders(null); // Pass null for storeId in global context
   const [storeMeta, setStoreMeta] = useState<StoreMeta | null>(null);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+
+  const { customer } = useCustomer();
+  const { addOrder } = useOrders(customer?.id || null);
 
   const [imageLoading, setImageLoading] = useState(true);
 
@@ -111,20 +116,27 @@ export default function ProductDetail() {
   const handleOrderNow = async () => {
     if (!product || !storeId || !storeMeta || !storeMeta.whatsapp) return;
 
-    addOrder(product, storeMeta);
-    
-    await incrementOrderCount(storeId, 1);
-    const message = 
-      `🛍️ *New Order Request*\n\n` +
-      `Hello! I would like to order this item:\n\n` +
-      `*${product.name}*\n` +
-      `• Price: ${formatPrice(product.price)}\n` +
-      `• Product Link: ${window.location.href}\n\n` +
-      `Thank you! 🙏`;
-    
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappLink = `https://wa.me/${storeMeta.whatsapp.replace(/\D/g, '')}?text=${encodedMessage}`;
-    window.open(whatsappLink, '_blank');
+    if (customer) {
+      try {
+        // 1. Save the order to the database
+        await addOrder(product, storeMeta, 1);
+        toast.success('Order placed! Redirecting to WhatsApp...');
+
+        // 2. Construct the WhatsApp URL
+        const message = encodeURIComponent(`Hi, I'd like to order the ${product.name} from ${storeMeta.name}.`);
+        const whatsappUrl = `https://wa.me/${storeMeta.whatsapp.replace(/\D/g, '')}?text=${message}`;
+
+        // 3. Redirect to WhatsApp
+        window.open(whatsappUrl, '_blank');
+        
+      } catch (error) {
+        console.error("Error placing order or redirecting to WhatsApp:", error);
+        toast.error('Failed to place order. Please try again.');
+      }
+    } else {
+      // If the user is not logged in, open the login modal first.
+      setIsLoginModalOpen(true);
+    }
   };
 
   const handleAddToCart = () => {
@@ -161,11 +173,19 @@ export default function ProductDetail() {
     };
   };
 
-  const canOrder = product && !product.soldOut && storeMeta && storeMeta.whatsapp;
+  const canOrder = product && !product.soldOut;
 
 return (
   <>
     <Navbar storeName={storeMeta?.name || storeId || 'Alaniq INT.'} />
+    <CustomerLookupModal 
+      isOpen={isLoginModalOpen}
+      onClose={() => setIsLoginModalOpen(false)}
+      onSuccess={() => {
+        setIsLoginModalOpen(false);
+        toast.success("You're logged in! You can now place your order.");
+      }}
+    />
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8 pt-[calc(var(--navbar-height)+1rem)] lg:pt-[calc(var(--navbar-height)+2rem)]">
       <div className="flex flex-col lg:flex lg:flex-row gap-6 lg:gap-x-8">
         {/* Image Section */}

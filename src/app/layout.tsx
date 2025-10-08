@@ -5,6 +5,7 @@ import { CartProvider } from '../lib/cartContext'
 import { ThemeProvider } from '../lib/themeContext'
 import Navbar from '../components/layout/navbar'
 import ClientProviders from '../components/ClientProviders'
+import { CustomerProvider } from '@/context/CustomerContext'
 
 const poppins = Poppins({ 
   subsets: ['latin'],
@@ -42,12 +43,14 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={poppins.className}>
         <ThemeProvider>
-          <CartProvider>
-            <ClientProviders>
-              <Navbar />
-              {children}
-            </ClientProviders>
-          </CartProvider>
+          <CustomerProvider>
+            <CartProvider>
+              <ClientProviders>
+                <Navbar />
+                {children}
+              </ClientProviders>
+            </CartProvider>
+          </CustomerProvider>
         </ThemeProvider>
       </body>
     </html>

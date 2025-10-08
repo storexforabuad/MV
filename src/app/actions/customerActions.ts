@@ -1,14 +1,27 @@
 'use server';
 
-import { collection, query, where, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp } from "firebase/firestore";
 import { db } from "@/lib/db";
-import { Customer } from "@/types/customer";
+import { Customer, DeliveryAddress } from "@/types/customer";
 import { nanoid } from 'nanoid';
 
+// Helper to serialize Firestore Timestamps
+const serializeTimestamp = (timestamp: any): string => {
+    if (timestamp instanceof Timestamp) {
+        return timestamp.toDate().toISOString();
+    } 
+    // If it's already a Date object for some reason
+    if (timestamp instanceof Date) {
+        return timestamp.toISOString();
+    }
+    // Fallback for unexpected formats, though this should be avoided
+    return new Date().toISOString(); 
+};
+
 /**
- * Finds a customer by their phone number.
+ * Finds a customer by their phone number and serializes the result.
  * @param phoneNumber The customer's phone number.
- * @returns The customer object if found, otherwise null.
+ * @returns The customer object if found (with serialized timestamp), otherwise null.
  */
 export const findCustomerByPhone = async (phoneNumber: string): Promise<Customer | null> => {
   try {
@@ -18,7 +31,12 @@ export const findCustomerByPhone = async (phoneNumber: string): Promise<Customer
 
     if (!querySnapshot.empty) {
       const doc = querySnapshot.docs[0];
-      return { id: doc.id, ...doc.data() } as Customer;
+      const data = doc.data();
+      return {
+          id: doc.id,
+          ...data,
+          createdAt: serializeTimestamp(data.createdAt),
+      } as Customer;
     }
     return null;
   } catch (error) {
@@ -28,15 +46,14 @@ export const findCustomerByPhone = async (phoneNumber: string): Promise<Customer
 };
 
 /**
- * Finds an existing customer or creates a new one.
- * This is intended for the final step of signup.
+ * Finds an existing customer or creates a new one, ensuring the result is serialized.
  * @param phoneNumber The customer's phone number.
- * @param details The customer's details (name, address) required for creation.
- * @returns An object containing the customer data and a flag indicating if they were newly created.
+ * @param details The customer's details required for creation.
+ * @returns An object containing the serialized customer data and a flag indicating if they were newly created.
  */
 export const findOrCreateCustomer = async (
   phoneNumber: string,
-  details: { name: string; deliveryAddress: string }
+  details: { name: string; deliveryAddress: DeliveryAddress }
 ): Promise<{ isNew: boolean; customer: Customer }> => {
   try {
     const existingCustomer = await findCustomerByPhone(phoneNumber);
@@ -44,12 +61,10 @@ export const findOrCreateCustomer = async (
     if (existingCustomer) {
       return {
         isNew: false,
-        customer: existingCustomer,
+        customer: existingCustomer, // Already serialized by findCustomerByPhone
       };
     }
 
-    // If no customer is found, proceed to create one.
-    // The details are now guaranteed to be present.
     const referralCode = nanoid(8);
     const newCustomerData = {
       ...details,
@@ -65,9 +80,11 @@ export const findOrCreateCustomer = async (
       isNew: true,
       customer: {
         id: docRef.id,
-        ...newCustomerData,
-        createdAt: new Date() // Approximate timestamp for immediate use
-      } as unknown as Customer,
+        ...details,
+        phoneNumber,
+        referralCode,
+        createdAt: new Date().toISOString() // Immediate, serialized timestamp
+      },
     };
   } catch (error) {
     console.error("Error in findOrCreateCustomer:", error);

@@ -9,15 +9,16 @@ import { Customer, DeliveryAddress } from "@/types/customer";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import toast from "react-hot-toast";
 import Confetti from 'react-confetti';
+import { useCustomer } from "@/context/CustomerContext";
 
 interface CustomerLookupModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: (customerId: string) => void;
+  onSuccess: (customer: Customer) => void;
 }
 
 // A simple component for the new user form
-const CreateAccountForm = ({ phoneNumber, onAccountCreated }: { phoneNumber: string, onAccountCreated: (customerId: string) => void }) => {
+const CreateAccountForm = ({ phoneNumber, onAccountCreated }: { phoneNumber: string, onAccountCreated: (customer: Customer) => void }) => {
     const [name, setName] = useState("");
     const [address, setAddress] = useState<DeliveryAddress>({
         country: "Nigeria",
@@ -69,7 +70,7 @@ const CreateAccountForm = ({ phoneNumber, onAccountCreated }: { phoneNumber: str
         try {
             const result = await findOrCreateCustomer(phoneNumber, { name, deliveryAddress: address });
             toast.success("Account created successfully!");
-            onAccountCreated(result.customer.id);
+            onAccountCreated(result.customer);
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred.";
             toast.error(errorMessage);
@@ -135,6 +136,7 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
   const [phoneNumber, setPhoneNumber] = useState("");
   const [foundCustomer, setFoundCustomer] = useState<Customer | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const { setCustomer } = useCustomer();
   
   const handlePhoneNumberSubmit = async () => {
     if (phoneNumber.length < 10) {
@@ -165,19 +167,21 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
     }
   };
 
-  const handleAccountCreated = (customerId: string) => {
-      setFoundCustomer({ ...foundCustomer, id: customerId } as Customer);
+  const handleAccountCreated = (newCustomer: Customer) => {
+      setFoundCustomer(newCustomer);
+      setCustomer(newCustomer);
       setStep("AllDone");
       setTimeout(() => {
-          onSuccess(customerId);
+          onSuccess(newCustomer);
       }, 2500);
   };
 
   const handleWelcomeBackContinue = () => {
       if(foundCustomer) {
+          setCustomer(foundCustomer);
           setStep("AllDone");
           setTimeout(() => {
-              onSuccess(foundCustomer.id);
+              onSuccess(foundCustomer);
           }, 2500);
       }
   }

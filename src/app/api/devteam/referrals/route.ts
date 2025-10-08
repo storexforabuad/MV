@@ -1,14 +1,14 @@
 'use server';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
-import { collectionGroup, getDocs } from 'firebase/firestore';
+import { collectionGroup, getDocs, Timestamp } from 'firebase/firestore';
 
 interface Referral {
   id: string;
   businessName: string;
   businessNumber: string;
   storeId: string;
-  createdAt: any;
+  createdAt: string; // Changed to string for serialization
 }
 
 // GET all referrals for the dev team, grouped by store
@@ -28,10 +28,14 @@ export async function GET(req: NextRequest) {
           referralsByStore[storeId] = [];
         }
 
-        // Safely handle the timestamp
-        const createdAt = (referralData.createdAt && referralData.createdAt.seconds !== undefined)
-          ? { seconds: referralData.createdAt.seconds, nanoseconds: referralData.createdAt.nanoseconds }
-          : { seconds: 0, nanoseconds: 0 };
+        let createdAt: string;
+        // Safely convert the timestamp to an ISO string
+        if (referralData.createdAt instanceof Timestamp) {
+          createdAt = referralData.createdAt.toDate().toISOString();
+        } else {
+          // Provide a fallback for unexpected formats
+          createdAt = new Date().toISOString();
+        }
 
         const referral: Referral = {
           id: doc.id,

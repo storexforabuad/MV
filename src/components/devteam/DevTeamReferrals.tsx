@@ -7,7 +7,7 @@ interface Referral {
   businessName: string;
   businessNumber: string;
   storeId: string;
-  createdAt: { seconds: number; nanoseconds: number; };
+  createdAt: string; // Changed to string to match API response
 }
 
 interface ReferralsByStore {
@@ -73,7 +73,7 @@ const DevTeamReferrals: React.FC = () => {
                       <p className="text-sm text-slate-600 dark:text-slate-300">{ref.businessNumber}</p>
                     </div>
                     <p className="text-xs text-slate-400 dark:text-slate-500">
-                      {new Date(ref.createdAt.seconds * 1000).toLocaleDateString()}
+                      {new Date(ref.createdAt).toLocaleDateString()}
                     </p>
                   </div>
                 ))}
