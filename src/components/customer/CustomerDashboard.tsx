@@ -1,12 +1,20 @@
-'use client';
 
-import { ShoppingBag, Gift, Heart } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { Order } from '../../hooks/useOrders';
+"use client";
+
+import { useEffect, useState } from "react";
+import { useCustomer } from "@/context/CustomerContext";
+import { ShoppingBag, Gift, Heart, User } from "lucide-react";
+import { motion } from "framer-motion";
 import { OrdersModal } from './modals/OrdersModal';
 import { ReferralsModal } from './modals/ReferralsModal';
 import { WishlistModal } from './modals/WishlistModal';
 import { CustomerStatCard } from './CustomerStatCard';
+import { DashboardActionCard } from './DashboardActionCard';
+import { CustomerMobileNav } from './CustomerMobileNav';
+import { ProfileSection } from './sections/ProfileSection';
+import { OrdersSection } from './sections/OrdersSection';
+import { ReferralsSection } from './sections/ReferralsSection';
+import { WishlistSection } from './sections/WishlistSection';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -16,78 +24,83 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
-  hidden: { y: 20, opacity: 0 },
-  visible: { y: 0, opacity: 1, transition: { duration: 0.5, ease: 'easeOut' } },
-};
+export function CustomerDashboard() {
+  const { customer, isLoading, promptLogin } = useCustomer();
+  const [activeSection, setActiveSection] = useState('profile');
 
-interface CustomerDashboardProps {
-  orders: Order[];
-  storeId?: string;
-  isOrdersModalOpen: boolean;
-  onOrdersModalOpen: () => void;
-  onOrdersModalClose: () => void;
-  isReferralsModalOpen: boolean;
-  onReferralsModalOpen: () => void;
-  onReferralsModalClose: () => void;
-  isWishlistModalOpen: boolean;
-  onWishlistModalOpen: () => void;
-  onWishlistModalClose: () => void;
-}
+  // If not logged in, prompt for login
+  useEffect(() => {
+    if (!isLoading && !customer) {
+      promptLogin();
+    }
+  }, [isLoading, customer, promptLogin]);
 
-export function CustomerDashboard({ 
-  orders, 
-  storeId, 
-  isOrdersModalOpen,
-  onOrdersModalOpen,
-  onOrdersModalClose,
-  isReferralsModalOpen,
-  onReferralsModalOpen,
-  onReferralsModalClose,
-  isWishlistModalOpen,
-  onWishlistModalOpen,
-  onWishlistModalClose,
-}: CustomerDashboardProps) {
+  const renderSection = () => {
+    if (isLoading || !customer) {
+      return (
+          <div className="text-center py-10">
+              <p className="text-gray-500">Loading your dashboard...</p>
+          </div>
+      );
+    }
+
+    switch (activeSection) {
+      case 'profile':
+        return <ProfileSection customer={customer} />;
+      case 'orders':
+        return <OrdersSection customerId={customer.id} />;
+      case 'referrals':
+        return <ReferralsSection customer={customer} />;
+      case 'wishlist':
+          return <WishlistSection customerId={customer.id} />;
+      default:
+        return <ProfileSection customer={customer} />;
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        {/* You can use a spinner or skeleton loader here */}
+        <p>Loading customer profile...</p>
+      </div>
+    );
+  }
+
+  if (!customer) {
+    // The useEffect above will trigger the login prompt.
+    // This is a fallback UI.
+    return (
+      <div className="text-center py-10">
+        <p className="mb-4">Please log in to see your dashboard.</p>
+        <button
+          onClick={() => promptLogin()}
+          className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors"
+        >
+          Login / Sign Up
+        </button>
+      </div>
+    );
+  }
+  
   return (
-    <>
-      <motion.div 
-        className="grid grid-cols-2 gap-4"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <motion.div variants={itemVariants}>
-          <CustomerStatCard
-            icon={<ShoppingBag className="w-7 h-7 opacity-80" />}
-            value={orders.length}
-            label="My Orders"
-            gradient="bg-gradient-to-br from-blue-500 to-purple-600 dark:from-blue-600 dark:to-purple-700"
-            onClick={onOrdersModalOpen}
-          />
-        </motion.div>
-        <motion.div variants={itemVariants}>
-          <CustomerStatCard
-            icon={<Gift className="w-7 h-7 opacity-80" />}
-            value={0}
-            label="My Referrals"
-            gradient="bg-gradient-to-br from-green-500 to-teal-600 dark:from-green-600 dark:to-teal-700"
-            onClick={onReferralsModalOpen}
-          />
-        </motion.div>
-        <motion.div variants={itemVariants}>
-          <CustomerStatCard
-            icon={<Heart className="w-7 h-7 opacity-80" />}
-            value={0}
-            label="My Wishlist"
-            gradient="bg-gradient-to-br from-pink-500 to-red-600 dark:from-pink-600 dark:to-red-700"
-            onClick={onWishlistModalOpen}
-          />
-        </motion.div>
-      </motion.div>
+      <div className="container mx-auto px-4 py-8">
+          <div className="md:flex">
+              <aside className="w-full md:w-64 md:mr-8 mb-8 md:mb-0">
+                  <h2 className="text-2xl font-bold mb-6">My Account</h2>
+                  <nav className="hidden md:block">
+                      <ul>
+                          {/* Navigation items for desktop - can be implemented similarly to mobile */}
+                      </ul>
+                  </nav>
+              </aside>
+              <main className="flex-1">
+                  {renderSection()}
+              </main>
+          </div>
 
-      <OrdersModal isOpen={isOrdersModalOpen} onClose={onOrdersModalClose} orders={orders} />
-      <ReferralsModal isOpen={isReferralsModalOpen} onClose={onReferralsModalClose} storeId={storeId} />
-      <WishlistModal isOpen={isWishlistModalOpen} onClose={onWishlistModalClose} />
-    </>
+          {/* Mobile Navigation */}
+          <CustomerMobileNav activeSection={activeSection} onSectionChange={setActiveSection} />
+      </div>
   );
 }

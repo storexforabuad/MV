@@ -1,3 +1,4 @@
+
 import { memo, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
@@ -7,7 +8,7 @@ import { motion, LayoutGroup, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { getStoreMeta } from '../../lib/db';
 import { StoreMeta } from '../../types/store';
-import { useUser } from '../../hooks/useUser';
+import { useCustomer } from '@/context/CustomerContext';
 
 const ProductCard = dynamic(() => import('./ProductCard'), {
   loading: () => (
@@ -234,7 +235,7 @@ interface ProductGridProps {
 
 const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId }: ProductGridProps) {
   const router = useRouter();
-  const { userId } = useUser();
+  const { customer, promptLogin } = useCustomer(); // Using the customer context
   const [isSingleColumn, setIsSingleColumn] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [storeMeta, setStoreMeta] = useState<StoreMeta | null>(null);
@@ -249,8 +250,13 @@ const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId 
   }, [storeId]);
   
   const handleDashboardClick = () => {
-    const dashboardStoreId = storeId || 'bizcon';
-    router.push(`/dashboard/${dashboardStoreId}/${userId}`);
+    if (customer) {
+      router.push(`/dashboard/${storeId}/${customer.id}`);
+    } else {
+      promptLogin((customerId) => {
+        router.push(`/dashboard/${storeId}/${customerId}`);
+      });
+    }
   };
 
   const validProducts = products.filter(p => p && p.id && Array.isArray(p.images));

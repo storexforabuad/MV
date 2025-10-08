@@ -1,6 +1,8 @@
+
 'use client';
 
 import { SpotlightProvider, useSpotlightContext } from '@/context/SpotlightContext';
+import { CustomerProvider } from '@/context/CustomerContext';
 import { AnimatePresence, motion } from 'framer-motion';
 
 function SpotlightOverlay() {
@@ -28,9 +30,11 @@ function SpotlightOverlay() {
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <SpotlightProvider>
-      {children}
-      <SpotlightOverlay />
-    </SpotlightProvider>
+    <CustomerProvider>
+        <SpotlightProvider>
+        {children}
+        <SpotlightOverlay />
+        </SpotlightProvider>
+    </CustomerProvider>
   );
 }
