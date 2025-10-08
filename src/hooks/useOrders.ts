@@ -1,65 +1,68 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { toast } from 'react-hot-toast';
 import { Product } from '../types/product';
 import { StoreMeta } from '../types/store';
+import { fetchOrdersFromFirestore, addOrderToFirestore } from '../app/actions/orderActions';
 
+// The client-side Order type uses a string for the date
 export interface Order {
+  id: string;
   product: Product;
   storeMeta: StoreMeta;
   orderDate: string;
 }
 
-export function useOrders(storeId: string | null) {
+export function useOrders(userId: string | null, storeId: string | null) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchOrders = useCallback(() => {
+  const fetchOrders = useCallback(async () => {
+    if (!userId) {
+      setOrders([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     try {
-      const storedOrders = localStorage.getItem('customer_orders');
-      if (storedOrders) {
-        const allOrders: Order[] = JSON.parse(storedOrders);
-        
-        // If the storeId is 'bizcon', we want to show all orders (global view).
-        // Otherwise, we filter by the specific storeId.
-        if (storeId && storeId !== 'bizcon') {
-          const filteredOrders = allOrders.filter(order => order.storeMeta.id === storeId);
-          setOrders(filteredOrders);
-        } else {
-          // This branch now correctly handles both the global case (storeId === 'bizcon')
-          // and the case where no storeId is provided at all.
-          setOrders(allOrders);
-        }
+      const fetchedOrders = await fetchOrdersFromFirestore(userId);
+      
+      // Filter orders by storeId if a specific store context is provided
+      if (storeId && storeId.toLowerCase() !== 'bizcon') { // bizcon is global
+        const filteredOrders = fetchedOrders.filter(order => order.storeMeta.id === storeId);
+        setOrders(filteredOrders);
+      } else {
+        setOrders(fetchedOrders);
       }
+
     } catch (error) {
-      console.error("Failed to fetch orders from localStorage", error);
+      console.error("Failed to fetch orders from Firestore", error);
+      toast.error("Could not load your orders.");
       setOrders([]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
-  }, [storeId]);
+  }, [userId, storeId]);
 
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
 
-  const addOrder = (product: Product, storeMeta: StoreMeta) => {
+  const addOrder = async (product: Product, storeMeta: StoreMeta) => {
+    if (!userId) {
+        toast.error("You must be logged in to place an order.");
+        return;
+    }
     try {
-      const newOrder: Order = { 
-        product, 
-        storeMeta, 
-        orderDate: new Date().toISOString() 
-      };
-      const storedOrders = localStorage.getItem('customer_orders');
-      const allOrders = storedOrders ? JSON.parse(storedOrders) : [];
-      const updatedOrders = [newOrder, ...allOrders];
-      localStorage.setItem('customer_orders', JSON.stringify(updatedOrders));
-      
-      // After adding, we need to refetch to apply the correct filter context
-      fetchOrders();
-
+      const newOrder = await addOrderToFirestore(userId, product, storeMeta);
+      // Optimistically update the UI and then refetch for consistency
+      setOrders(prevOrders => [newOrder, ...prevOrders]);
+      toast.success("Order placed successfully!");
+      fetchOrders(); // Refetch to ensure data is in sync
     } catch (error) {
-      console.error("Failed to save order to localStorage", error);
+      console.error("Failed to save order to Firestore", error);
+      toast.error("There was a problem placing your order.");
     }
   };
 

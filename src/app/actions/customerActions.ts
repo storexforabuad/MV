@@ -1,8 +1,7 @@
-
-"use server";
+'use server';
 
 import { collection, query, where, getDocs, addDoc, serverTimestamp } from "firebase/firestore";
-import { db } from "@/lib/firebase";
+import { db } from "@/lib/db";
 import { Customer } from "@/types/customer";
 import { nanoid } from 'nanoid';
 
