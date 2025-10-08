@@ -118,8 +118,14 @@ export default function ProductDetail() {
 
     if (customer) {
       try {
+        // Create a new storeMeta object that includes the storeId
+        const storeMetaWithId = {
+          ...storeMeta,
+          id: storeId,
+        };
+
         // 1. Save the order to the database
-        await addOrder(product, storeMeta, 1);
+        await addOrder(product, storeMetaWithId, 1, customer);
         toast.success('Order placed! Redirecting to WhatsApp...');
 
         // 2. Construct the WhatsApp URL

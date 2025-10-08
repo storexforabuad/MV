@@ -24,6 +24,15 @@ import {
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Product } from '../types/product';
 
+// Re-export order actions from the new location
+export {
+  addOrderToFirestore,
+  fetchOrdersFromFirestore,
+  fetchStoreOrders,
+} from '../app/actions/orderActions';
+export type { StoreOrder } from '../app/actions/orderActions';
+
+
 export { db };
 
 // Store metadata type

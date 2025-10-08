@@ -2,7 +2,20 @@
 
 import { useParams } from 'next/navigation';
 import { useEffect, useState, Suspense, useCallback } from 'react';
-import { getProducts, getCategories, getContacts, WholesaleData, getStoreMeta, updateProduct, deleteProduct, addCategory, updateCategory, deleteCategory } from '../../../lib/db';
+import { 
+  getProducts, 
+  getCategories, 
+  getContacts, 
+  WholesaleData, 
+  getStoreMeta, 
+  updateProduct, 
+  deleteProduct, 
+  addCategory, 
+  updateCategory, 
+  deleteCategory, 
+  fetchStoreOrders, 
+  StoreOrder 
+} from '../../../lib/db';
 import { Product } from '../../../types/product';
 import { Category } from '../../../types/category';
 import { StoreMeta } from '../../../types/store';
@@ -14,6 +27,7 @@ import AdminHomeCards from '../../../components/admin/AdminHomeCards';
 import AddProductComposer from '../../../components/admin/AddProductComposer';
 import ManageProductsModal from '../../../components/admin/ManageProductsModal';
 import ManageCategoriesModal from '../../../components/admin/ManageCategoriesModal';
+import { AdminOrdersModal } from '../../../components/admin/modals/AdminOrdersModal';
 import dynamic from 'next/dynamic';
 import PreviewSkeleton from '../../../components/admin/PreviewSkeleton';
 import { markOnboardingAsCompleted } from '../../../app/actions/onboardingActions';
@@ -26,6 +40,31 @@ interface Referral {
   businessName: string;
   businessNumber: string;
 }
+
+// A new hook to fetch store orders
+const useStoreOrders = (storeId: string) => {
+  const [orders, setOrders] = useState<StoreOrder[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchOrders = useCallback(async () => {
+    if (!storeId) return;
+    setLoading(true);
+    try {
+      const fetchedOrders = await fetchStoreOrders(storeId);
+      setOrders(fetchedOrders);
+    } catch (error) {
+      console.error("Failed to fetch store orders:", error);
+    } finally {
+      setLoading(false);
+    }
+  }, [storeId]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
+
+  return { orders, loading, refreshOrders: fetchOrders };
+};
 
 async function getReferrals(storeId: string): Promise<Referral[]> {
     if (!storeId) return [];
@@ -55,6 +94,7 @@ export default function AdminStorePage() {
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [isManageCategoriesModalOpen, setIsManageCategoriesModalOpen] = useState(false);
+  const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isPreviewLoading, setIsPreviewLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState<boolean | null>(null);
@@ -62,6 +102,8 @@ export default function AdminStorePage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const { spotlightStep, setSpotlightStep } = useSpotlightContext();
   const [shouldShowSpotlight, setShouldShowSpotlight] = useState(false);
+
+  const { orders, refreshOrders } = useStoreOrders(storeId);
 
   const fetchData = useCallback(async (showRefresh = false) => {
     if (showRefresh) setIsRefreshing(true);
@@ -78,6 +120,7 @@ export default function AdminStorePage() {
       setContacts(fetchedContacts);
       setStoreMeta(fetchedStoreMeta as StoreMeta);
       setReferrals(fetchedReferrals);
+      refreshOrders(); // Refresh orders as well
 
       if (fetchedStoreMeta?.hasCompletedOnboarding) {
         setShowOnboarding(false);
@@ -93,7 +136,7 @@ export default function AdminStorePage() {
       if (showRefresh) setIsRefreshing(false);
       setLoading(false);
     }
-  }, [storeId]);
+  }, [storeId, refreshOrders]);
 
   useEffect(() => {
     if (!storeId) return;
@@ -184,7 +227,7 @@ export default function AdminStorePage() {
     return <OnboardingFlow onComplete={handleOnboardingComplete} storeName={storeMeta?.name || ''} />;
   }
 
-  const isModalOpen = isComposerOpen || isManageModalOpen || isManageCategoriesModalOpen;
+  const isModalOpen = isComposerOpen || isManageModalOpen || isManageCategoriesModalOpen || isOrdersModalOpen;
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0 transition-colors">
@@ -215,14 +258,13 @@ export default function AdminStorePage() {
                   soldOut={products.filter(p => (typeof p.inStock === 'number' && p.inStock === 0) || p.soldOut === true).length}
                   totalContacts={contacts.reduce((sum, region) => sum + (region.contacts?.length || 0), 0)}
                   storeId={storeId}
-                  totalOrders={storeMeta?.totalOrders || 0}
+                  totalOrders={orders.length} // Use live order count
                   promoCaption={storeMeta?.promoCaption}
                   uiVisible={uiVisible}
                   storeName={storeMeta?.name}
                   totalRevenue={totalRevenue}
                   onAnimationComplete={handleAnimationComplete}
-                  onAddProductClick={() => setIsComposerOpen(true)}
-                  onManageProductsClick={() => setIsManageModalOpen(true)}
+                  onOrdersCardClick={() => setIsOrdersModalOpen(true)} // Wire up the click handler
                   openManageCategories={() => setIsManageCategoriesModalOpen(true)}
                 />
               </div>
@@ -269,6 +311,12 @@ export default function AdminStorePage() {
         onAddCategory={handleAddCategory}
         onUpdateCategory={handleUpdateCategory}
         onDeleteCategory={handleDeleteCategory}
+      />
+
+      <AdminOrdersModal
+        isOpen={isOrdersModalOpen}
+        onClose={() => setIsOrdersModalOpen(false)}
+        orders={orders}
       />
 
       <div className={`transition-opacity duration-500 ${uiVisible ? 'opacity-100' : 'opacity-0'}`}>

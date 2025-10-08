@@ -16,7 +16,6 @@ import SubscriptionModal from './modals/SubscriptionModal';
 import ReferralsModal from './modals/ReferralsModal';
 import SoldOutModal from './modals/SoldOutModal';
 
-import OrdersModal from './modals/OrdersModal';
 import RevenueModal from './modals/RevenueModal';
 import TipsModal from './modals/TipsModal';
 import { Product } from '../../types/product';
@@ -53,6 +52,7 @@ interface AdminHomeCardsProps {
   totalRevenue: number;
   onAnimationComplete?: () => void;
   openManageCategories: () => void;
+  onOrdersCardClick: () => void; // New callback for orders card
 }
 
 const cardData = [
@@ -135,7 +135,7 @@ const cardData = [
       icon: ShoppingCart,
       gradient: 'from-blue-400 via-blue-500 to-blue-600',
       text: 'text-white',
-      component: OrdersModal,
+      component: null, // Set to null, will be handled by onOrdersCardClick
       glowClass: 'shadow-[0_0_25px_-5px_rgba(59,130,246,0.5)]',
     },
     {
@@ -173,7 +173,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [openModal, setOpenModal] = useState<number | null>(null);
   const [isTipsModalOpen, setIsTipsModalOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const { setIsModalOpen, onRefresh, uiVisible, onAnimationComplete } = props;
+  const { setIsModalOpen, onRefresh, uiVisible, onAnimationComplete, onOrdersCardClick } = props;
 
   useEffect(() => {
     const modalIsOpen = openModal !== null || isTipsModalOpen;
@@ -196,13 +196,15 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
   const handleOpenModal = (idx: number, cardLabel?: string) => {
     if (cardLabel === 'Tips') {
-        setIsTipsModalOpen(true);
+      setIsTipsModalOpen(true);
     } else if (cardLabel === 'Manage Categories') {
-        props.openManageCategories();
+      props.openManageCategories();
+    } else if (cardLabel === 'Orders') {
+      onOrdersCardClick(); // Use the new callback
     } else {
-        setOpenModal(idx);
+      setOpenModal(idx);
     }
-    if (props.setIsModalOpen) props.setIsModalOpen(true);
+    if (props.setIsModalOpen && cardLabel !== 'Orders') props.setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
