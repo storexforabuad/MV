@@ -14,4 +14,6 @@ export interface Customer {
   referralCode: string;
   deliveryAddress: DeliveryAddress;
   createdAt: Timestamp;
+  totalReferralCommission: number;
+  successfulReferralCount: number;
 }
