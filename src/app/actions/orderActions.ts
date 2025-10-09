@@ -58,7 +58,8 @@ export const addOrderToFirestore = async (
   product: Product,
   storeMeta: StoreMeta,
   quantity: number,
-  referralCode: string | null
+  customer: Customer,
+  referralCode: string | null,
 ): Promise<Order> => {
   try {
     const storeId = storeMeta.id;
@@ -104,7 +105,7 @@ export const addOrderToFirestore = async (
 
           batch.set(newReferralRef, {
             refereeId: customerId,
-            refereeName: customerData.name,
+            refereeName: customer.name,
             orderId: newOrderId,
             productId: product.id,
             productName: product.name,
@@ -199,7 +200,7 @@ export const fetchStoreOrders = async (storeId: string): Promise<StoreOrder[]> =
     const q = query(ordersRef, orderBy('orderDate', 'desc'));
     const querySnapshot = await getDocs(q);
 
-    const orders: StoreOrder[] = querySnapshot.docs.map(doc => {
+    const orders: StoreOrder[] = query.docs.map(doc => {
       const data = doc.data() as StoreOrderData;
       return {
         id: doc.id,

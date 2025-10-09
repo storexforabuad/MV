@@ -71,6 +71,8 @@ export const findOrCreateCustomer = async (
       phoneNumber,
       referralCode,
       createdAt: serverTimestamp(),
+      totalReferralCommission: 0,
+      successfulReferralCount: 0,
     };
 
     const customersRef = collection(db, "customers");
@@ -83,7 +85,9 @@ export const findOrCreateCustomer = async (
         ...details,
         phoneNumber,
         referralCode,
-        createdAt: new Date().toISOString() // Immediate, serialized timestamp
+        createdAt: new Date().toISOString(), // Immediate, serialized timestamp
+        totalReferralCommission: 0,
+        successfulReferralCount: 0,
       },
     };
   } catch (error) {
