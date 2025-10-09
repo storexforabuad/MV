@@ -94,7 +94,8 @@ export const addOrderToFirestore = async (
         const customerOrdersSnap = await getDocs(customerOrdersQuery);
 
         if (referrerId !== customerId && customerOrdersSnap.empty && product.commission && product.commission > 0) {
-          const commissionEarned = product.commission * 0.5;
+          const commissionValue = (product.price * product.commission) / 100;
+          const commissionEarned = commissionValue * 0.5;
           const referrerRef = doc(db, 'customers', referrerId);
           const newReferralRef = doc(collection(db, 'customers', referrerId, 'referrals'));
 
