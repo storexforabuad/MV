@@ -5,6 +5,7 @@ import toast from 'react-hot-toast';
 import { addOrderToFirestore, fetchOrdersFromFirestore } from '@/app/actions/orderActions';
 import { Product } from '@/types/product';
 import { StoreMeta } from '@/types/store';
+import { Customer } from '@/types/customer';
 
 export interface Order {
   id: string;
@@ -41,13 +42,13 @@ export const useOrders = (customerId: string | null) => {
     fetchOrders();
   }, [fetchOrders]);
 
-  const addOrder = async (product: Product, storeMeta: StoreMeta, quantity: number, referralCode: string | null) => {
-    if (!customerId) {
+  const addOrder = async (product: Product, storeMeta: StoreMeta, quantity: number, customerInfo: Customer, referralCode: string | null) => {
+    if (!customerId || !customerInfo) {
       throw new Error("User is not logged in.");
     }
 
     try {
-      const newOrder = await addOrderToFirestore(customerId, product, storeMeta, quantity, referralCode);
+      const newOrder = await addOrderToFirestore(customerId, product, storeMeta, quantity, customerInfo, referralCode);
       setOrders(prevOrders => [newOrder, ...prevOrders]);
     } catch (error) {
       console.error("Error in addOrder:", error);

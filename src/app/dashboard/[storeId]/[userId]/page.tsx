@@ -9,7 +9,6 @@ import { useOrders } from '../../../../hooks/useOrders';
 import { CustomerDashboard } from '../../../../components/customer/CustomerDashboard';
 import { CustomerMobileNav, CustomerSection } from '../../../../components/customer/CustomerMobileNav';
 import { OrdersSection } from '../../../../components/customer/sections/OrdersSection';
-import { ReferralsSection } from '../../../../components/customer/sections/ReferralsSection';
 import { WishlistSection } from '../../../../components/customer/sections/WishlistSection';
 import { ProfileSection } from '../../../../components/customer/sections/ProfileSection';
 import { WishlistModal } from '../../../../components/customer/modals/WishlistModal';
@@ -65,6 +64,12 @@ export default function DashboardPage() {
   const currentSection = sectionConfig[activeSection];
   const isAnyModalOpen = isOrdersModalOpen || isReferralsModalOpen || isWishlistModalOpen;
 
+  useEffect(() => {
+    if (activeSection === 'referrals') {
+      setIsReferralsModalOpen(true);
+    }
+  }, [activeSection]);
+
   const renderMainContent = () => {
     if (initialLoading && activeSection === 'home') {
       return <DashboardSkeleton />;
@@ -96,8 +101,6 @@ export default function DashboardPage() {
         );
       case 'orders':
         return <OrdersSection storeId={storeId} />;
-      case 'referrals':
-        return <ReferralsSection storeId={storeId} />;
       case 'wishlist':
         return <WishlistSection storeId={storeId} />;
       case 'profile':
@@ -137,7 +140,10 @@ export default function DashboardPage() {
       />
       <ReferralsModal 
         isOpen={isReferralsModalOpen} 
-        onClose={() => setIsReferralsModalOpen(false)} 
+        onClose={() => {
+          setIsReferralsModalOpen(false);
+          setActiveSection('home');
+        }} 
         storeId={storeId}
       />
     </div>
