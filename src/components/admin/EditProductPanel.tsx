@@ -215,12 +215,13 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                         <div>
                             <label className="block text-sm font-medium text-text-secondary">Commission</label>
                             <div className="mt-2 bg-input-background p-4 rounded-lg">
-                                <input type="range" min="1" max="10" value={formState.commission || 0} onChange={e => handleInputChange('commission', parseInt(e.target.value))} className="w-full h-2 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-lg appearance-none cursor-pointer glass-slider"/>
-                                <div className="flex justify-center items-center text-sm font-medium text-text-primary mt-2">
+                            <div className="flex justify-center items-center text-sm font-medium text-text-primary mb-2">
                                     <span>{formState.commission || 0}%</span>
                                     <span className="text-text-secondary mx-2">-</span>
                                     <span className="font-bold">{formatPrice(commissionAmount)}</span>
                                  </div>
+                                <input type="range" min="2" max="12" value={formState.commission || 0} onChange={e => handleInputChange('commission', parseInt(e.target.value))} className="w-full h-2.5 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-lg appearance-none cursor-pointer glass-slider"/>
+                                
                             </div>
                         </div>
 

@@ -292,13 +292,16 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
                             )}
                         </AnimatePresence>
                         <div>
-                           <label className="block text-sm font-medium text-text-secondary mb-2">Commission</label>
-                           <input type="range" min="1" max="10" value={activeProduct.commission} onChange={e => handleProductChange(activeProductIndex, 'commission', parseInt(e.target.value))} className="w-full h-2 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-lg appearance-none cursor-pointer slider-thumb"/>
-                           <div className="flex justify-center items-center text-sm font-medium text-text-primary mt-2">
-                               <span>{activeProduct.commission}%</span>
-                               <span className="text-text-secondary mx-2">-</span>
-                               <span className="font-bold">{formatPrice(commissionAmount)}</span>
-                           </div>
+                            <label className="block text-sm font-medium text-text-secondary">Commission</label>
+                            <div className="mt-2 bg-input-background p-4 rounded-lg">
+                            <div className="flex justify-center items-center text-sm font-medium text-text-primary mb-2">
+                                    <span>{activeProduct.commission}%</span>
+                                    <span className="text-text-secondary mx-2">-</span>
+                                    <span className="font-bold">{formatPrice(commissionAmount)}</span>
+                                 </div>
+                                <input type="range" min="2" max="12" value={activeProduct.commission} onChange={e => handleProductChange(activeProductIndex, 'commission', parseInt(e.target.value))} className="w-full h-2.5 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-lg appearance-none cursor-pointer glass-slider"/>
+                                
+                            </div>
                         </div>
                     </motion.div>
                 )}
@@ -366,7 +369,7 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
           <div className="flex min-h-full items-stretch justify-center text-center md:items-center md:px-2 lg:px-4">
             <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-full md:translate-y-0 md:scale-95" enterTo="opacity-100 translate-y-0 md:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 md:scale-100" leaveTo="opacity-0 translate-y-full md:translate-y-0 md:scale-95">
               <Dialog.Panel className="relative flex w-full max-w-lg transform text-left text-base transition md:my-8">
-                <div className="relative flex w-full flex-col overflow-hidden rounded-t-2xl md:rounded-2xl bg-card-background shadow-2xl">
+                <div className="relative flex w-full flex-col overflow-hidden  md:rounded-2xl bg-card-background shadow-2xl">
                     <div className="p-4 sm:p-6 flex justify-between items-center border-b border-border-color">
                         <Dialog.Title as="h3" className="text-xl font-bold text-text-primary">
                             {currentStep === 4 ? 'Uploading...' : currentStep === 5 ? 'Summary' : 'Add New Product'}
