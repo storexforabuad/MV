@@ -10,7 +10,10 @@ import {
   Timestamp,
   doc,
   getDoc,
-  writeBatch
+  writeBatch,
+  where,
+  limit,
+  increment
 } from 'firebase/firestore';
 import { Product } from '@/types/product';
 import { StoreMeta } from '@/types/store';
@@ -54,7 +57,8 @@ export const addOrderToFirestore = async (
   customerId: string,
   product: Product,
   storeMeta: StoreMeta,
-  quantity: number
+  quantity: number,
+  referralCode: string | null
 ): Promise<Order> => {
   try {
     const storeId = storeMeta.id;
@@ -73,6 +77,44 @@ export const addOrderToFirestore = async (
     // 2. Prepare the data for the atomic batch write.
     const orderDate = Timestamp.now();
     const newOrderId = doc(collection(db, 'dummy')).id; // Generate a unique ID for the order
+
+    const batch = writeBatch(db);
+
+    // Referral Logic
+    if (referralCode) {
+      const referrersQuery = query(collection(db, 'customers'), where("referralCode", "==", referralCode), limit(1));
+      const referrerSnap = await getDocs(referrersQuery);
+      
+      if (!referrerSnap.empty) {
+        const referrerDoc = referrerSnap.docs[0];
+        const referrerId = referrerDoc.id;
+
+        const customerOrdersQuery = query(collection(db, 'customers', customerId, 'orders'), limit(1));
+        const customerOrdersSnap = await getDocs(customerOrdersQuery);
+
+        if (referrerId !== customerId && customerOrdersSnap.empty && product.commission && product.commission > 0) {
+          const commissionEarned = product.commission * 0.5;
+          const referrerRef = doc(db, 'customers', referrerId);
+          const newReferralRef = doc(collection(db, 'customers', referrerId, 'referrals'));
+
+          batch.update(referrerRef, {
+            totalReferralCommission: increment(commissionEarned),
+            successfulReferralCount: increment(1)
+          });
+
+          batch.set(newReferralRef, {
+            refereeId: customerId,
+            refereeName: customerData.name,
+            orderId: newOrderId,
+            productId: product.id,
+            productName: product.name,
+            commissionEarned: commissionEarned,
+            orderDate: orderDate,
+            storeId: storeId
+          });
+        }
+      }
+    }
 
     // a. Data for the customer's personal order history
     const customerOrderPayload: CustomerOrderData = {
@@ -95,8 +137,6 @@ export const addOrderToFirestore = async (
     };
 
     // 3. Execute the atomic batch write.
-    const batch = writeBatch(db);
-
     const customerOrderRef = doc(db, 'customers', customerId, 'orders', newOrderId);
     batch.set(customerOrderRef, customerOrderPayload);
 

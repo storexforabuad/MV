@@ -124,8 +124,10 @@ export default function ProductDetail() {
           id: storeId,
         };
 
+        const referrerId = localStorage.getItem('referrerId');
+
         // 1. Save the order to the database
-        await addOrder(product, storeMetaWithId, 1, customer);
+        await addOrder(product, storeMetaWithId, 1, referrerId);
         toast.success('Order placed! Redirecting to WhatsApp...');
 
         // 2. Construct the WhatsApp URL
