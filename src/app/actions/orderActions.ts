@@ -200,7 +200,7 @@ export const fetchStoreOrders = async (storeId: string): Promise<StoreOrder[]> =
     const q = query(ordersRef, orderBy('orderDate', 'desc'));
     const querySnapshot = await getDocs(q);
 
-    const orders: StoreOrder[] = query.docs.map(doc => {
+    const orders: StoreOrder[] = querySnapshot.docs.map(doc => {
       const data = doc.data() as StoreOrderData;
       return {
         id: doc.id,
