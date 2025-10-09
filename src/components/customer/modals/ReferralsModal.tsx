@@ -1,70 +1,86 @@
 'use client';
 
-import { Info, Link, Copy, Users, Share2 } from 'lucide-react';
-import { CustomerModal } from './CustomerModal';
+import React, { Fragment } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
+import { XMarkIcon, UserGroupIcon } from '@heroicons/react/24/solid';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ReferralsSection } from '../sections/ReferralsSection';
 
 interface ReferralsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  storeId?: string;
+  storeId: string;
 }
 
-export function ReferralsModal({ isOpen, onClose, storeId }: ReferralsModalProps) {
-  const isStoreContext = storeId && storeId !== 'bizcon';
+const ReferralsModal: React.FC<ReferralsModalProps> = ({ isOpen, onClose, storeId }) => {
+
+  const handleClose = () => {
+    onClose();
+  }
 
   return (
-    <CustomerModal isOpen={isOpen} onClose={onClose} title="My Referrals">
-      <div className="p-4 sm:p-6 flex flex-col gap-6 text-sm sm:text-base">
-        {/* Section 1: How It Works */}
-        <div className="pb-6 border-b border-slate-200/80 dark:border-slate-800/80">
-          <div className="flex items-center gap-3 mb-3">
-            <Info className="w-5 h-5 text-slate-400" />
-            <h3 className="font-semibold text-slate-800 dark:text-slate-100">How It Works</h3>
-          </div>
-          <p className="text-slate-600 dark:text-slate-400">
-            {isStoreContext
-              ? "Give your friends 15% off their first order at this store, and you'll get a ₦1,000 credit when they make a purchase."
-              : "Give your friends 10% off their first order on Bizcon, and you'll get a ₦500 credit you can use anywhere."
-            }
-          </p>
-        </div>
+    <Transition.Root show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={handleClose}>
+        <Transition.Child
+          as={Fragment}
+          enter="ease-out duration-300"
+          enterFrom="opacity-0"
+          enterTo="opacity-100"
+          leave="ease-in duration-200"
+          leaveFrom="opacity-100"
+          leaveTo="opacity-0"
+        >
+          <div className="fixed inset-0 bg-black bg-opacity-75 backdrop-blur-sm transition-opacity" />
+        </Transition.Child>
 
-        {/* Section 2: Share Your Link */}
-        <div className="pb-6 border-b border-slate-200/80 dark:border-slate-800/80">
-          <div className="flex items-center gap-3 mb-4">
-            <Link className="w-5 h-5 text-slate-400" />
-            <h3 className="font-semibold text-slate-800 dark:text-slate-100">Share Your Link</h3>
-          </div>
-          <div className="flex items-center gap-2 p-3 bg-slate-100 dark:bg-slate-800/50 rounded-lg mb-4">
-            <p className="text-slate-500 dark:text-slate-400 overflow-x-auto whitespace-nowrap scrollbar-hide flex-1">
-              https://bizcon.app/ref/johndoe123
-            </p>
-            <button className="p-2 rounded-md hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
-              <Copy className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-            </button>
-          </div>
-          <button 
-            disabled 
-            className="w-full flex items-center justify-center gap-2 bg-blue-500 text-white font-semibold py-3 px-4 rounded-xl shadow-sm transition-all duration-200 ease-in-out opacity-50 cursor-not-allowed"
-          >
-            <Share2 className="w-4 h-4" />
-            Share
-          </button>
-        </div>
+        <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+          <div className="flex min-h-full items-stretch justify-center text-center md:items-center md:px-2 lg:px-4">
+            <Transition.Child
+              as={Fragment}
+              enter="ease-out duration-300"
+              enterFrom="opacity-0 translate-y-full md:translate-y-0 md:scale-95"
+              enterTo="opacity-100 translate-y-0 md:scale-100"
+              leave="ease-in duration-200"
+              leaveFrom="opacity-100 translate-y-0 md:scale-100"
+              leaveTo="opacity-0 translate-y-full md:translate-y-0 md:scale-95"
+            >
+              <Dialog.Panel className="relative flex w-full max-w-2xl transform text-left text-base transition md:my-8">
+                <div className="relative flex w-full flex-col overflow-hidden bg-slate-100 dark:bg-slate-900 shadow-2xl h-screen md:h-[90vh] md:rounded-2xl">
 
-        {/* Section 3: Referral Status */}
-        <div>
-          <div className="flex items-center gap-3 mb-4">
-            <Users className="w-5 h-5 text-slate-400" />
-            <h3 className="font-semibold text-slate-800 dark:text-slate-100">Your Referrals</h3>
-          </div>
-          <div className="text-center py-10 px-6 bg-slate-50 dark:bg-slate-800/30 rounded-lg">
-            <Users className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
-            <h4 className="font-semibold text-slate-700 dark:text-slate-200">Nothing to see here yet</h4>
-            <p className="text-slate-500 dark:text-slate-400">Your referred friends will appear here once they sign up.</p>
+                  <div className="p-4 flex justify-between items-center border-b border-slate-200 dark:border-slate-700 sticky top-0 bg-slate-100/80 dark:bg-slate-900/80 backdrop-blur-sm z-10">
+                    <Dialog.Title as="h3" className="text-xl font-bold text-slate-800 dark:text-slate-100">My Referrals</Dialog.Title>
+                    <button onClick={handleClose} className="p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                      <XMarkIcon className="h-6 w-6 text-slate-600 dark:text-slate-300" />
+                    </button>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto p-4">
+                    <AnimatePresence>
+                        <motion.div 
+                          key="referrals-content"
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}>
+                          <ReferralsSection storeId={storeId} />
+                        </motion.div>
+                    </AnimatePresence>
+                  </div>
+
+                  <div className="absolute bottom-0 left-0 right-0 z-20">
+                    <div className="bg-slate-100/80 dark:bg-slate-900/80 backdrop-blur-sm p-4 border-t border-slate-200 dark:border-slate-700">
+                      <button onClick={handleClose} className="w-full bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-800 font-semibold py-3 px-4 rounded-lg hover:bg-slate-700 dark:hover:bg-slate-200 transition-colors duration-200">
+                        Done
+                      </button>
+                    </div>
+                  </div>
+
+                </div>
+              </Dialog.Panel>
+            </Transition.Child>
           </div>
         </div>
-      </div>
-    </CustomerModal>
+      </Dialog>
+    </Transition.Root>
   );
-}
+};
+
+export { ReferralsModal };
