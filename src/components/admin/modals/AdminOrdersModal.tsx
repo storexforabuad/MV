@@ -87,8 +87,7 @@ export const AdminOrdersModal = ({ isOpen, onClose, orders }: AdminOrdersModalPr
             initial="hidden"
             animate="visible"
             exit="exit"
-            className="fixed bottom-0 left-0 right-0 top-0 sm:top-auto sm:bottom-auto h-full w-full bg-slate-100 dark:bg-slate-900 shadow-2xl flex flex-col z-50"
-            style={{ maxHeight: '100vh', maxWidth: '100vw' }}
+            className="fixed bottom-0 left-0 right-0 top-0 sm:top-auto sm:bottom-auto h-full w-full bg-slate-100 dark:bg-slate-900 shadow-2xl flex flex-col z-50 sm:max-h-[90vh] sm:max-w-md sm:rounded-2xl"
           >
             {/* Header */}
             <header className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex-shrink-0">
@@ -121,6 +120,15 @@ export const AdminOrdersModal = ({ isOpen, onClose, orders }: AdminOrdersModalPr
                 </div>
               )}
             </main>
+            {/* Footer for mobile close button */}
+            <footer className="p-4 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 sm:hidden">
+                <button 
+                    onClick={onClose} 
+                    className="w-full px-6 py-3 bg-indigo-600 text-white font-bold rounded-lg hover:bg-indigo-700 transition-colors"
+                >
+                    Close
+                </button>
+            </footer>
           </motion.div>
         </motion.div>
       )}
