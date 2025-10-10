@@ -67,12 +67,6 @@ export default function DashboardPage() {
   const currentSection = sectionConfig[activeSection];
   const isAnyModalOpen = isOrdersModalOpen || isReferralsModalOpen || isWishlistModalOpen;
 
-  useEffect(() => {
-    if (activeSection === 'referrals') {
-      setIsReferralsModalOpen(true);
-    }
-  }, [activeSection]);
-
   const renderMainContent = () => {
     if (initialLoading && activeSection === 'home') {
       return <DashboardSkeleton />;
@@ -133,6 +127,8 @@ export default function DashboardPage() {
       <CustomerMobileNav 
         activeSection={activeSection} 
         setActiveSection={setActiveSection} 
+        onOrdersClick={() => setIsOrdersModalOpen(true)}
+        onReferralsClick={() => setIsReferralsModalOpen(true)}
         isModalOpen={isAnyModalOpen} 
       />
       <WishlistModal isOpen={isWishlistModalOpen} onClose={() => setIsWishlistModalOpen(false)} />

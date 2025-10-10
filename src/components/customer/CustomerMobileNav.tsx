@@ -8,6 +8,8 @@ export type CustomerSection = 'home' | 'orders' | 'referrals' | 'wishlist' | 'pr
 interface CustomerMobileNavProps {
   activeSection: CustomerSection;
   setActiveSection: (section: CustomerSection) => void;
+  onOrdersClick: () => void;
+  onReferralsClick: () => void;
   isModalOpen: boolean;
 }
 
@@ -19,7 +21,16 @@ const navItems = [
   { id: 'profile', icon: User, label: 'Profile' },
 ] as const;
 
-export function CustomerMobileNav({ activeSection, setActiveSection, isModalOpen }: CustomerMobileNavProps) {
+export function CustomerMobileNav({ activeSection, setActiveSection, onOrdersClick, onReferralsClick, isModalOpen }: CustomerMobileNavProps) {
+  const handleNavClick = (sectionId: CustomerSection) => {
+    if (sectionId === 'orders') {
+      onOrdersClick();
+    } else if (sectionId === 'referrals') {
+      onReferralsClick();
+    } else {
+      setActiveSection(sectionId);
+    }
+  };
   return (
     <nav className={`fixed bottom-0 left-0 right-0 h-[calc(4.5rem+env(safe-area-inset-bottom))] bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-t border-slate-200/80 dark:border-slate-800/80 z-50 transition-transform duration-300 ease-in-out ${isModalOpen ? 'translate-y-full pointer-events-none' : 'translate-y-0'}`}>
       <div className="flex justify-around items-start h-full max-w-md mx-auto">
@@ -29,7 +40,7 @@ export function CustomerMobileNav({ activeSection, setActiveSection, isModalOpen
           return (
             <button
               key={item.id}
-              onClick={() => setActiveSection(item.id)}
+              onClick={() => handleNavClick(item.id)}
               className="flex flex-col items-center justify-center pt-3 gap-1 w-full h-full text-slate-500 dark:text-slate-400 relative transition-colors duration-200"
             >
               <Icon 
