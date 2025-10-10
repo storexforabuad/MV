@@ -7,6 +7,7 @@ import { RefreshCw } from 'lucide-react';
 import Navbar from '../../../../components/layout/navbar';
 import { useOrders } from '../../../../hooks/useOrders';
 import { useReferrals } from '../../../../hooks/useReferrals';
+import { useCustomer } from '@/context/CustomerContext'; // Corrected import path
 import { CustomerDashboard } from '../../../../components/customer/CustomerDashboard';
 import { CustomerMobileNav, CustomerSection } from '../../../../components/customer/CustomerMobileNav';
 import { OrdersSection } from '../../../../components/customer/sections/OrdersSection';
@@ -14,7 +15,7 @@ import { WishlistSection } from '../../../../components/customer/sections/Wishli
 import { ProfileSection } from '../../../../components/customer/sections/ProfileSection';
 import { WishlistModal } from '../../../../components/customer/modals/WishlistModal';
 import { OrdersModal } from '../../../../components/customer/modals/OrdersModal';
-import { ReferralsModal } from '../../../../components/customer/modals/ReferralsModal'; // Import the new modal
+import { ReferralsModal } from '../../../../components/customer/modals/ReferralsModal';
 
 const sectionConfig = {
   home: { title: 'Dashboard', subtitle: 'A summary of your recent orders and interactions.' },
@@ -38,8 +39,8 @@ const DashboardSkeleton = () => (
 export default function DashboardPage() {
   const params = useParams();
   const storeId = Array.isArray(params.storeId) ? params.storeId[0] : params.storeId;
-  const userId = Array.isArray(params.userId) ? params.userId[0] : params.userId; // Get userId
-  const { orders, refetchOrders: fetchOrders, isLoading: loading } = useOrders(userId || null); // Pass userId to hook
+  const { customer } = useCustomer(); // Get customer from context
+  const { orders, refetchOrders: fetchOrders, isLoading: loading } = useOrders(customer?.id || null); // Use authenticated customer ID
   const { referrals, refetchReferrals: fetchReferrals } = useReferrals();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeSection, setActiveSection] = useState<CustomerSection>('home');
@@ -51,10 +52,11 @@ export default function DashboardPage() {
   const [isWishlistModalOpen, setIsWishlistModalOpen] = useState(false);
 
   useEffect(() => {
-    if (!loading) {
+    // Combine loading states for a single skeleton view
+    if (!loading && !customer) {
       setInitialLoading(false);
     }
-  }, [loading]);
+  }, [loading, customer]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -68,7 +70,8 @@ export default function DashboardPage() {
   const isAnyModalOpen = isOrdersModalOpen || isReferralsModalOpen || isWishlistModalOpen;
 
   const renderMainContent = () => {
-    if (initialLoading && activeSection === 'home') {
+    // Show skeleton if customer is loading OR orders are loading
+    if ((!customer || loading) && activeSection === 'home') {
       return <DashboardSkeleton />;
     }
 
@@ -125,11 +128,11 @@ export default function DashboardPage() {
         </div>
       </main>
       <CustomerMobileNav 
-        activeSection={activeSection} 
-        setActiveSection={setActiveSection} 
+        activeSection={activeSection}
+        setActiveSection={setActiveSection}
         onOrdersClick={() => setIsOrdersModalOpen(true)}
         onReferralsClick={() => setIsReferralsModalOpen(true)}
-        isModalOpen={isAnyModalOpen} 
+        isModalOpen={isAnyModalOpen}
       />
       <WishlistModal isOpen={isWishlistModalOpen} onClose={() => setIsWishlistModalOpen(false)} />
       <OrdersModal 

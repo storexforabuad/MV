@@ -40,7 +40,7 @@ export const useOrders = (customerId: string | null) => {
 
   useEffect(() => {
     fetchOrders();
-  }, [fetchOrders]);
+  }, [customerId, fetchOrders]);
 
   const addOrder = async (product: Product, storeMeta: StoreMeta, quantity: number, customerInfo: Customer, referralCode: string | null) => {
     if (!customerId || !customerInfo) {
