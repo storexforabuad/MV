@@ -1,26 +1,28 @@
 'use client';
-import { Tag, Star, AlertTriangle, Eye, Layers, CheckCircle, Gift, XCircle, RefreshCw, Archive, Handshake, ShoppingCart, Share2, BadgeDollarSign, Lightbulb } from 'lucide-react';
+import { Tag, Star, AlertTriangle, Eye, Users, CheckCircle, Gift, XCircle, RefreshCw, Archive, Handshake, ShoppingCart, Share2, BadgeDollarSign, Lightbulb } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useSpotlightContext } from '@/context/SpotlightContext';
 
-// Import the new modal components
+// Import modal components
 import TotalProductsModal from './modals/TotalProductsModal';
 import CategoriesModal from './modals/CategoriesModal';
 import PopularProductsModal from './modals/PopularProductsModal';
 import LimitedStockModal from './modals/LimitedStockModal';
 import TotalViewsModal from './modals/TotalViewsModal';
-
 import StoreLinkModal from './modals/StoreLinkModal';
 import SubscriptionModal from './modals/SubscriptionModal';
 import ReferralsModal from './modals/ReferralsModal';
 import SoldOutModal from './modals/SoldOutModal';
-
 import RevenueModal from './modals/RevenueModal';
 import TipsModal from './modals/TipsModal';
 import { Product } from '../../types/product';
 import { WholesaleData } from '../../lib/db';
 import SpotlightTooltip from '../shared/SpotlightTooltip';
+
+// Import the customer components
+import { AdminCustomersCard } from './AdminCustomersCard';
+import { CustomersListModal } from './CustomersListModal';
 
 interface AdminHomeCardsProps {
   totalProducts: number;
@@ -44,7 +46,7 @@ interface AdminHomeCardsProps {
   onRefresh: (showRefresh: boolean) => void;
   isRefreshing: boolean;
   totalContacts: number;
-  storeId: string; // Added storeId
+  storeId: string;
   totalOrders: number;
   promoCaption?: string;
   uiVisible: boolean;
@@ -52,10 +54,10 @@ interface AdminHomeCardsProps {
   totalRevenue: number;
   onAnimationComplete?: () => void;
   openManageCategories: () => void;
-  onOrdersCardClick: () => void; // New callback for orders card
+  onOrdersCardClick: () => void;
 }
 
-const cardData = [
+const cardData: any[] = [
     {
         label: 'Tips',
         subtitle: 'Quick Guide',
@@ -172,16 +174,28 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const { spotlightStep, setSpotlightStep } = useSpotlightContext();
   const [openModal, setOpenModal] = useState<number | null>(null);
   const [isTipsModalOpen, setIsTipsModalOpen] = useState(false);
+  const [isCustomersModalOpen, setIsCustomersModalOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const { setIsModalOpen, onRefresh, uiVisible, onAnimationComplete, onOrdersCardClick } = props;
 
+  // --- Start of Change: Dynamically insert Customers card --- 
+  const viewsIndex = cardData.findIndex(card => card.label === 'Views');
+  const cardsToRender = [...cardData];
+  const customersCard = { label: 'Customers', component: AdminCustomersCard };
+
+  if (viewsIndex !== -1) {
+    cardsToRender.splice(viewsIndex + 1, 0, customersCard);
+  }
+  // --- End of Change ---
+
   useEffect(() => {
-    const modalIsOpen = openModal !== null || isTipsModalOpen;
+    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen;
     if (modalIsOpen) {
       window.history.pushState({ modalOpen: true }, '');
       const handlePopState = () => {
         setOpenModal(null);
         setIsTipsModalOpen(false);
+        setIsCustomersModalOpen(false);
         if (setIsModalOpen) setIsModalOpen(false);
       };
       window.addEventListener('popstate', handlePopState);
@@ -192,7 +206,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         }
       };
     }
-  }, [openModal, isTipsModalOpen, setIsModalOpen]);
+  }, [openModal, isTipsModalOpen, isCustomersModalOpen, setIsModalOpen]);
 
   const handleOpenModal = (idx: number, cardLabel?: string) => {
     if (cardLabel === 'Tips') {
@@ -200,7 +214,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     } else if (cardLabel === 'Manage Categories') {
       props.openManageCategories();
     } else if (cardLabel === 'Orders') {
-      onOrdersCardClick(); // Use the new callback
+      onOrdersCardClick();
     } else {
       setOpenModal(idx);
     }
@@ -287,14 +301,24 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                 overflow: hidden;
               }
             `}</style>
-            {cardData.map((card, idx) => {
+
+            {cardsToRender.map((card, idx) => {
+              // --- Start of Change: Render Customers card --- 
+              if (card.label === 'Customers') {
+                return (
+                  <motion.div key="customers-card" variants={itemVariants}>
+                    <AdminCustomersCard storeId={props.storeId} onClick={() => setIsCustomersModalOpen(true)} />
+                  </motion.div>
+                );
+              }
+              // --- End of Change ---
+
               const Icon = card.icon;
               const isHorizontal = card.label === 'Share' || card.label === 'Tips';
               const isTipsCard = card.label === 'Tips';
               const spotlightClasses = spotlightStep === 'tips' && isTipsCard ? 'relative z-50 pointer-events-auto' : '';
 
               if (isHorizontal) {
-                // Horizontal Layout for Share, Subscription, and Tips
                 return (
                   <motion.div key={card.label} variants={itemVariants} className={`relative ${spotlightClasses}`}>
                     <button
@@ -327,7 +351,6 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                   </motion.div>
                 );
               } else {
-                // Original Vertical Layout for all other cards
                 return (
                   <motion.div key={card.label} variants={itemVariants}>
                     <button
@@ -364,6 +387,13 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
               }
             })}
         </motion.div>
+
+      {/* Render the new Customers Modal */}
+      <CustomersListModal 
+        storeId={props.storeId} 
+        isOpen={isCustomersModalOpen} 
+        onClose={() => setIsCustomersModalOpen(false)} 
+      />
 
       {isTipsModalOpen && (
         <TipsModal {...props} handleClose={handleCloseTipsModal} />

@@ -1,20 +1,19 @@
 'use server';
 
-import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp } from "firebase/firestore";
+import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, orderBy } from "firebase/firestore";
 import { db } from "@/lib/db";
 import { Customer, DeliveryAddress } from "@/types/customer";
 import { nanoid } from 'nanoid';
+import { StoreOrder } from "./orderActions";
 
 // Helper to serialize Firestore Timestamps
 const serializeTimestamp = (timestamp: any): string => {
     if (timestamp instanceof Timestamp) {
         return timestamp.toDate().toISOString();
     } 
-    // If it's already a Date object for some reason
     if (timestamp instanceof Date) {
         return timestamp.toISOString();
     }
-    // Fallback for unexpected formats, though this should be avoided
     return new Date().toISOString(); 
 };
 
@@ -61,7 +60,7 @@ export const findOrCreateCustomer = async (
     if (existingCustomer) {
       return {
         isNew: false,
-        customer: existingCustomer, // Already serialized by findCustomerByPhone
+        customer: existingCustomer,
       };
     }
 
@@ -85,7 +84,7 @@ export const findOrCreateCustomer = async (
         ...details,
         phoneNumber,
         referralCode,
-        createdAt: new Date().toISOString(), // Immediate, serialized timestamp
+        createdAt: new Date().toISOString(),
         totalReferralCommission: 0,
         successfulReferralCount: 0,
       },
@@ -97,4 +96,109 @@ export const findOrCreateCustomer = async (
     }
     throw new Error("An unknown error occurred while processing your request.");
   }
+};
+
+export interface StoreCustomer {
+  id: string;
+  name: string;
+  phoneNumber: string;
+  deliveryAddress: DeliveryAddress;
+  mostRecentOrderDate: string;
+  totalOrdersInStore: number;
+  totalSpentInStore: number;
+  successfulReferralCount: number;
+  totalReferralCommission: number;
+}
+
+/**
+ * Fetches the count of unique customers for a given store.
+ * Lightweight action for dashboard cards.
+ */
+export const getStoreCustomerCount = async (storeId: string): Promise<number> => {
+    try {
+        const ordersRef = collection(db, 'stores', storeId, 'orders');
+        const q = query(ordersRef);
+        const querySnapshot = await getDocs(q);
+
+        const customerIds = new Set<string>();
+        querySnapshot.forEach(doc => {
+            const data = doc.data() as StoreOrder;
+            if (data.customerInfo && data.customerInfo.id) {
+                customerIds.add(data.customerInfo.id);
+            }
+        });
+
+        return customerIds.size;
+    } catch (error) {
+        console.error("Error in getStoreCustomerCount:", error);
+        throw new Error("Failed to get customer count.");
+    }
+};
+
+/**
+ * Fetches a detailed list of customers for a specific store, sorted by most recent order.
+ * Gathers and aggregates data from store orders and global customer documents.
+ */
+export const fetchStoreCustomers = async (storeId: string): Promise<StoreCustomer[]> => {
+    try {
+        const ordersRef = collection(db, 'stores', storeId, 'orders');
+        const ordersQuery = query(ordersRef, orderBy('orderDate', 'desc'));
+        const ordersSnapshot = await getDocs(ordersQuery);
+        const orders = ordersSnapshot.docs.map(doc => doc.data() as StoreOrder);
+
+        if (orders.length === 0) {
+            return [];
+        }
+
+        const customerDataMap = new Map<string, StoreCustomer>();
+        const orderedUniqueCustomerIds: string[] = [];
+
+        for (const order of orders) {
+            if (!order.customerInfo || !order.customerInfo.id) continue;
+
+            const customerId = order.customerInfo.id;
+            
+            if (!customerDataMap.has(customerId)) {
+                orderedUniqueCustomerIds.push(customerId);
+                customerDataMap.set(customerId, {
+                    id: customerId,
+                    name: order.customerInfo.name,
+                    phoneNumber: order.customerInfo.phoneNumber,
+                    deliveryAddress: order.customerInfo.deliveryAddress,
+                    mostRecentOrderDate: serializeTimestamp(order.orderDate),
+                    totalOrdersInStore: 0,
+                    totalSpentInStore: 0,
+                    successfulReferralCount: 0,
+                    totalReferralCommission: 0,
+                });
+            }
+
+            const customerRecord = customerDataMap.get(customerId)!;
+            customerRecord.totalOrdersInStore += 1;
+            customerRecord.totalSpentInStore += order.product.price * order.quantity;
+        }
+
+        if (orderedUniqueCustomerIds.length > 0) {
+            const globalCustomersQuery = query(collection(db, 'customers'), where('__name__', 'in', orderedUniqueCustomerIds));
+            const globalCustomersSnapshot = await getDocs(globalCustomersQuery);
+            const globalCustomersMap = new Map<string, Customer>();
+            globalCustomersSnapshot.forEach(doc => {
+                globalCustomersMap.set(doc.id, doc.data() as Customer);
+            });
+
+            customerDataMap.forEach((customerRecord, customerId) => {
+                const globalData = globalCustomersMap.get(customerId);
+                if (globalData) {
+                    customerRecord.successfulReferralCount = globalData.successfulReferralCount || 0;
+                    customerRecord.totalReferralCommission = globalData.totalReferralCommission || 0;
+                }
+            });
+        }
+
+        return orderedUniqueCustomerIds.map(id => customerDataMap.get(id)!);
+
+    } catch (error) {
+        console.error("Error in fetchStoreCustomers:", error);
+        throw new Error("Failed to fetch store customers.");
+    }
 };
