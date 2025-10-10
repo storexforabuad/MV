@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { RefreshCw } from 'lucide-react';
 import Navbar from '../../../../components/layout/navbar';
 import { useOrders } from '../../../../hooks/useOrders';
+import { useReferrals } from '../../../../hooks/useReferrals';
 import { CustomerDashboard } from '../../../../components/customer/CustomerDashboard';
 import { CustomerMobileNav, CustomerSection } from '../../../../components/customer/CustomerMobileNav';
 import { OrdersSection } from '../../../../components/customer/sections/OrdersSection';
@@ -39,6 +40,7 @@ export default function DashboardPage() {
   const storeId = Array.isArray(params.storeId) ? params.storeId[0] : params.storeId;
   const userId = Array.isArray(params.userId) ? params.userId[0] : params.userId; // Get userId
   const { orders, refetchOrders: fetchOrders, isLoading: loading } = useOrders(userId || null); // Pass userId to hook
+  const { referrals, refetchReferrals: fetchReferrals } = useReferrals();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeSection, setActiveSection] = useState<CustomerSection>('home');
   const [initialLoading, setInitialLoading] = useState(true);
@@ -58,6 +60,7 @@ export default function DashboardPage() {
     setIsRefreshing(true);
     await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
     fetchOrders();
+    fetchReferrals();
     setIsRefreshing(false);
   };
 
@@ -91,6 +94,7 @@ export default function DashboardPage() {
             </motion.button>
             <CustomerDashboard 
               orders={orders}
+              referralCount={referrals.length}
               storeId={storeId}
               onSectionChange={setActiveSection}
               onOrdersModalOpen={() => setIsOrdersModalOpen(true)}

@@ -17,6 +17,7 @@ const containerVariants = {
 
 interface CustomerDashboardProps {
   orders: Order[];
+  referralCount: number;
   storeId: string;
   onSectionChange: (section: CustomerSection) => void;
   onOrdersModalOpen: () => void;
@@ -32,13 +33,13 @@ const colorGradients = {
 
 export function CustomerDashboard({
   orders,
+  referralCount,
   onSectionChange,
   onOrdersModalOpen,
   onReferralsModalOpen,
   onWishlistModalOpen,
 }: CustomerDashboardProps) {
   
-  const referralCount = 0; 
   const wishlistCount = 0;
 
   return (
