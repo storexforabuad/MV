@@ -409,7 +409,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             onClick={e => e.stopPropagation()}
           >
             {(() => {
-              const card = cardData[openModal];
+              const card = cardsToRender[openModal];
               const ModalComponent = card.component;
               if (!ModalComponent) return null;
               const modalProps = {
