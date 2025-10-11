@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useCustomer } from '@/context/CustomerContext';
 import { formatPrice } from '@/utils/price';
 import ShareReferralModal from '@/components/customer/modals/ShareReferralModal';
+import { Gift } from 'lucide-react';
 
 interface ReferralBannerProps {
   storeId: string;
@@ -18,26 +19,42 @@ const ReferralBanner = ({ storeId, storeName, onLoginClick }: ReferralBannerProp
 
   const referralLink = customer ? `${window.location.origin}/${storeId}?ref=${customer.referralCode}` : '';
 
+  // This is a common pattern for creating a subtle shimmer effect on a card.
+  // It creates a pseudo-element with a gradient that moves on a slow animation.
+  const shimmerEffectClasses = `
+    relative overflow-hidden 
+    before:absolute before:inset-0 before:-translate-x-full 
+    before:animate-[shimmer_3s_infinite] 
+    before:bg-gradient-to-r before:from-transparent 
+    dark:before:via-slate-800/50 before:via-slate-200/50 before:to-transparent
+  `;
+
   const LoggedInView = () => (
     <div className="flex justify-between items-center w-full">
-      <p className="text-sm font-semibold">
-        <span className="font-bold text-green-500">{formatPrice(customer?.totalReferralCommission || 0)}</span> bonus earned!
-      </p>
+      <div className="flex items-center gap-3">
+        <Gift className="text-indigo-500" size={24} />
+        <p className="text-sm text-slate-700 dark:text-slate-300">
+          <span className="font-bold text-indigo-600 dark:text-indigo-400">{formatPrice(customer?.totalReferralCommission || 0)}</span> bonus earned!
+        </p>
+      </div>
       <button
         onClick={() => setIsShareModalOpen(true)}
-        className="bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-bold py-2 px-4 rounded-full text-sm shadow-md hover:scale-105 transition-transform"
+        className="bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 font-bold py-2 px-5 rounded-full text-sm shadow-lg hover:opacity-90 active:scale-95 transition-all"
       >
-        Share Link
+        Share 
       </button>
     </div>
   );
 
   const LoggedOutView = () => (
     <div className="flex justify-between items-center w-full">
-      <p className="text-sm font-semibold">Get referral bonuses & gifts!</p>
+      <div className="flex items-center gap-3">
+        <Gift className="text-indigo-500" size={24} />
+        <p className="text-sm text-slate-700 dark:text-slate-300 font-semibold">Get referral bonuses & gifts!</p>
+      </div>
       <button
         onClick={onLoginClick}
-        className="bg-white dark:bg-slate-800 text-slate-800 dark:text-white font-bold py-2 px-4 rounded-full text-sm shadow-md hover:scale-105 transition-transform"
+        className="bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 font-bold py-2 px-5 rounded-full text-sm shadow-lg hover:opacity-90 active:scale-95 transition-all"
       >
         Log In
       </button>
@@ -47,9 +64,9 @@ const ReferralBanner = ({ storeId, storeName, onLoginClick }: ReferralBannerProp
   return (
     <>
       <div className="px-4 sm:px-6 mt-3 mb-2">
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-700 dark:to-purple-800 text-white p-4 rounded-2xl shadow-lg flex items-center">
-            {customer ? <LoggedInView /> : <LoggedOutView />}
-          </div>
+        <div className={`bg-slate-100 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/50 p-4 rounded-2xl shadow-sm flex items-center ${shimmerEffectClasses}`}>
+          {customer ? <LoggedInView /> : <LoggedOutView />}
+        </div>
       </div>
 
       {customer && (
