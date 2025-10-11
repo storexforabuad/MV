@@ -26,4 +26,5 @@
 
 ## 🌐 Domain-Specific & Architecture
 
-12. **Next.js Rendering Strategy:** For every new page or component, you must explicitly state the **optimal rendering strategy** (SSR, SSG, ISR, or Client-Side) and justify it based on data-freshness requirements, authentication needs, and performance goals. Avoid unnecessary use of `getServerSideProps` for static content.
+12. **Cross-Industry UI/UX Standards:** All suggested design and user experience (UX) solutions must prioritize **usability, accessibility, and clarity** by adhering to common design principles seen in high-standard platforms (e.g., Apple Human Interface Guidelines, Google Material Design, and Netflix-style discoverability/personalization). Specifically, favor **predictable interfaces, clear information hierarchy, and responsive design**.
+13. **Next.js Rendering Strategy:** For every new page or component, you must explicitly state the **optimal rendering strategy** (SSR, SSG, ISR, or Client-Side) and justify it based on data-freshness requirements, authentication needs, and performance goals. Avoid unnecessary use of `getServerSideProps` for static content.
