@@ -18,6 +18,8 @@ import type { Product } from '../../types/product';
 import ConnectionErrorToast from '../../components/ConnectionErrorToast';
 import { CategoryCache } from '../../lib/categoryCache';
 import { ProductListCache } from '../../lib/productCache';
+import ReferralBanner from '@/components/customer/ReferralBanner';
+import CustomerLookupModal from '@/components/customer/CustomerLookupModal';
 
 const ProductGrid = dynamic(
   () => import('../../components/products/ProductGrid'),
@@ -56,6 +58,7 @@ export default function StorefrontPage() {
   const observerRef = useRef<HTMLDivElement>(null);
   const productGridRef = useRef<HTMLDivElement>(null);
   const [isPending, startTransition] = useTransition();
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
   const fetchProducts = useCallback(async (categoryId: string, pageNum = 1, lastDoc: any = null) => {
     if (!storeId) return;
@@ -180,7 +183,17 @@ export default function StorefrontPage() {
   return (
     <div className="min-h-screen bg-background overscroll-none">
       <Navbar storeName={storeName} />
+      <CustomerLookupModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onSuccess={() => setIsLoginModalOpen(false)}
+      />
       <div className="pt-16 pb-safe-area-inset-bottom">
+        <ReferralBanner 
+          storeId={storeId}
+          storeName={storeName}
+          onLoginClick={() => setIsLoginModalOpen(true)}
+        />
         <CategoryBar 
           onCategorySelect={handleCategorySelect}
           activeCategoryId={activeCategoryId}
