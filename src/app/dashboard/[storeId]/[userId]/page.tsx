@@ -40,7 +40,7 @@ export default function DashboardPage() {
   const params = useParams();
   const storeId = Array.isArray(params.storeId) ? params.storeId[0] : params.storeId;
   const { customer } = useCustomer(); // Get customer from context
-  const { orders, refetchOrders: fetchOrders, isLoading: loading } = useOrders(customer?.id || null); // Use authenticated customer ID
+  const { orders, refetchOrders: fetchOrders, isLoading: loading } = useOrders(customer?.id || null, storeId);
   const { referrals, refetchReferrals: fetchReferrals } = useReferrals(customer?.id, storeId);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeSection, setActiveSection] = useState<CustomerSection>('home');
@@ -106,8 +106,7 @@ export default function DashboardPage() {
         return <WishlistSection storeId={storeId} />;
       case 'profile':
         return <ProfileSection storeId={storeId} />;
-      default:
-        return null;
+      default:        return null;
     }
   }
 

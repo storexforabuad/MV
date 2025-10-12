@@ -13,7 +13,8 @@ import {
   writeBatch,
   where,
   limit,
-  increment
+  increment,
+  Query
 } from 'firebase/firestore';
 import { Product } from '@/types/product';
 import { StoreMeta } from '@/types/store';
@@ -157,15 +158,17 @@ export const addOrderToFirestore = async (
 };
 
 /**
- * Fetches all orders for a specific customer from Firestore.
+ * Fetches orders for a specific customer from Firestore.
+ * If a storeId is provided, it filters orders for that specific store.
+ * Otherwise, it fetches all orders for the customer.
  */
-export const fetchOrdersFromFirestore = async (customerId: string): Promise<Order[]> => {
+export const fetchOrdersFromFirestore = async (customerId: string, storeId?: string): Promise<Order[]> => {
   try {
     const ordersRef = collection(db, 'customers', customerId, 'orders');
     const q = query(ordersRef, orderBy('orderDate', 'desc'));
     const querySnapshot = await getDocs(q);
 
-    const orders: Order[] = querySnapshot.docs.map(doc => {
+    let orders: Order[] = querySnapshot.docs.map(doc => {
       const data = doc.data() as CustomerOrderData;
       return {
         id: doc.id,
@@ -175,6 +178,10 @@ export const fetchOrdersFromFirestore = async (customerId: string): Promise<Orde
         quantity: data.quantity || 1,
       };
     });
+
+    if (storeId) {
+      orders = orders.filter(order => order.storeMeta.id === storeId);
+    }
 
     return orders;
   } catch (error) {

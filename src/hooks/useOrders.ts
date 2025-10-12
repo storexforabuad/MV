@@ -15,7 +15,7 @@ export interface Order {
   quantity: number;
 }
 
-export const useOrders = (customerId: string | null) => {
+export const useOrders = (customerId: string | null, storeId?: string) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -28,7 +28,7 @@ export const useOrders = (customerId: string | null) => {
 
     try {
       setIsLoading(true);
-      const fetchedOrders = await fetchOrdersFromFirestore(customerId);
+      const fetchedOrders = await fetchOrdersFromFirestore(customerId, storeId);
       setOrders(fetchedOrders);
     } catch (error) {
       toast.error('Failed to fetch orders.');
@@ -36,7 +36,7 @@ export const useOrders = (customerId: string | null) => {
     } finally {
       setIsLoading(false);
     }
-  }, [customerId]);
+  }, [customerId, storeId]);
 
   useEffect(() => {
     fetchOrders();
