@@ -7,7 +7,6 @@ import { CustomerStatCard } from './CustomerStatCard';
 import { Order } from "@/types/order";
 import { Customer } from "@/types/customer";
 import { CustomerSection } from "./CustomerMobileNav";
-import { formatPrice } from "@/utils/price";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -44,8 +43,7 @@ export function CustomerDashboard({
 }: CustomerDashboardProps) {
   
   const referralData = customer?.referralDataByStore?.[storeId];
-  const referralCount = referralData?.referredCustomers?.length || 0;
-  const commissionEarned = referralData?.commissionEarned || 0;
+  const referralCount = referralData?.referralCount || 0;
 
   const wishlistCount = 0;
 
@@ -66,7 +64,6 @@ export function CustomerDashboard({
       <CustomerStatCard
         label="My Referrals"
         value={referralCount}
-        subValue={formatPrice(commissionEarned)}
         icon={<Gift className="w-6 h-6" />}
         gradient={colorGradients.green}
         onClick={onReferralsModalOpen}

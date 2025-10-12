@@ -23,7 +23,7 @@ const ReferralsModal: React.FC<ReferralsModalProps> = ({ isOpen, onClose, storeI
   
   const referralData = customer?.referralDataByStore?.[storeId];
   const commissionEarned = referralData?.commissionEarned || 0;
-  const referralCount = referralData?.referredCustomers?.length || 0;
+  const referralCount = referralData?.referralCount || 0;
 
   const handleCopyLink = () => {
     if (referralLink) {

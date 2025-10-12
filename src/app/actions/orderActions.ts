@@ -102,14 +102,15 @@ export const addOrderToFirestore = async (
             [`referralDataByStore.${storeId}.referralCount`]: increment(1)
           });
 
-          // 2. Create a detailed record in the new subcollection
-          const newReferralHistoryRef = doc(db, 'customers', referrerId, 'referralsByStore', storeId, 'successfulOrders', newOrderId);
+          // 2. Create a detailed record in the general referrals subcollection for the list view
+          const newReferralHistoryRef = doc(db, 'customers', referrerId, 'referrals', newOrderId);
           batch.set(newReferralHistoryRef, {
             refereeId: customerId,
             refereeName: customer.name,
             productName: product.name,
             commissionEarned: commissionEarned,
             orderDate: orderDate,
+            storeId: storeId, // Include the storeId for filtering on the frontend
           });
         }
       }
