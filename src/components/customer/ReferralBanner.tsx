@@ -19,8 +19,6 @@ const ReferralBanner = ({ storeId, storeName, onLoginClick }: ReferralBannerProp
 
   const referralLink = customer ? `${window.location.origin}/${storeId}?ref=${customer.referralCode}` : '';
 
-  // This is a common pattern for creating a subtle shimmer effect on a card.
-  // It creates a pseudo-element with a gradient that moves on a slow animation.
   const shimmerEffectClasses = `
     relative overflow-hidden 
     before:absolute before:inset-0 before:-translate-x-full 
@@ -32,14 +30,14 @@ const ReferralBanner = ({ storeId, storeName, onLoginClick }: ReferralBannerProp
   const LoggedInView = () => (
     <div className="flex justify-between items-center w-full">
       <div className="flex items-center gap-3">
-        <Gift className="text-indigo-500" size={24} />
+        <Gift className="text-purple-500" size={24} />
         <p className="text-sm text-slate-700 dark:text-slate-300">
           <span className="font-bold text-indigo-600 dark:text-indigo-400">{formatPrice(customer?.totalReferralCommission || 0)}</span> bonus earned!
         </p>
       </div>
       <button
         onClick={() => setIsShareModalOpen(true)}
-        className="bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 font-bold py-2 px-5 rounded-full text-sm shadow-lg hover:opacity-90 active:scale-95 transition-all"
+        className="bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 font-bold py-2 px-5 rounded-full text-sm shadow-lg hover:opacity-90 active:scale-95 transition-all whitespace-nowrap flex items-center justify-center"
       >
         Share 
       </button>
@@ -49,13 +47,12 @@ const ReferralBanner = ({ storeId, storeName, onLoginClick }: ReferralBannerProp
   const LoggedOutView = () => (
     <div className="flex justify-between items-center w-full">
       <div className="flex items-center gap-3">
-      <Gift className="text-purple-500" size={24} />
-
+        <Gift className="text-purple-500" size={24} />
         <p className="text-sm text-slate-700 dark:text-slate-300 font-semibold">Get referral bonuses & gifts!</p>
       </div>
       <button
         onClick={onLoginClick}
-        className="bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 font-bold py-2 px-5 rounded-full text-sm shadow-lg hover:opacity-90 active:scale-95 transition-all"
+        className="bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 font-bold py-2 px-5 rounded-full text-sm shadow-lg hover:opacity-90 active:scale-95 transition-all whitespace-nowrap flex items-center justify-center"
       >
         Log In
       </button>

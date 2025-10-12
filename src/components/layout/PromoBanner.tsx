@@ -27,7 +27,7 @@ const PromoBanner = () => {
             <p className="text-sm text-slate-700 dark:text-slate-300 font-semibold">Need an online store like this?</p>
           </div>
           <button 
-            className="bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 font-bold py-2 px-5 rounded-full text-sm shadow-lg hover:opacity-90 active:scale-95 transition-all"
+            className="bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 font-bold py-2 px-5 rounded-full text-sm shadow-lg hover:opacity-90 active:scale-95 transition-all whitespace-nowrap flex items-center justify-center"
           >
             Get Yours
           </button>
