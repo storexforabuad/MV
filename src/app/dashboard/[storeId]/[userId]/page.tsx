@@ -41,7 +41,7 @@ export default function DashboardPage() {
   const storeId = Array.isArray(params.storeId) ? params.storeId[0] : params.storeId;
   const { customer } = useCustomer(); // Get customer from context
   const { orders, refetchOrders: fetchOrders, isLoading: loading } = useOrders(customer?.id || null); // Use authenticated customer ID
-  const { referrals, refetchReferrals: fetchReferrals } = useReferrals();
+  const { referrals, refetchReferrals: fetchReferrals } = useReferrals(customer?.id, storeId);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeSection, setActiveSection] = useState<CustomerSection>('home');
   const [initialLoading, setInitialLoading] = useState(true);
@@ -91,7 +91,7 @@ export default function DashboardPage() {
             </motion.button>
             <CustomerDashboard 
               orders={orders}
-              referralCount={referrals.length}
+              customer={customer}
               storeId={storeId}
               onSectionChange={setActiveSection}
               onOrdersModalOpen={() => setIsOrdersModalOpen(true)}

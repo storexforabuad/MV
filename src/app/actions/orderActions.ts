@@ -67,7 +67,6 @@ export const addOrderToFirestore = async (
       throw new Error("Store ID is missing from store metadata.");
     }
 
-    // 1. Fetch the full customer object to get their details.
     const customerRef = doc(db, 'customers', customerId);
     const customerSnap = await getDoc(customerRef);
     if (!customerSnap.exists()) {
@@ -75,13 +74,12 @@ export const addOrderToFirestore = async (
     }
     const customerData = customerSnap.data() as Customer;
 
-    // 2. Prepare the data for the atomic batch write.
     const orderDate = Timestamp.now();
-    const newOrderId = doc(collection(db, 'dummy')).id; // Generate a unique ID for the order
+    const newOrderId = doc(collection(db, 'dummy')).id;
 
     const batch = writeBatch(db);
 
-    // Referral Logic
+    // --- New Referral Logic ---
     if (referralCode) {
       const referrersQuery = query(collection(db, 'customers'), where("referralCode", "==", referralCode), limit(1));
       const referrerSnap = await getDocs(referrersQuery);
@@ -97,28 +95,26 @@ export const addOrderToFirestore = async (
           const commissionValue = (product.price * product.commission) / 100;
           const commissionEarned = commissionValue * 0.5;
           const referrerRef = doc(db, 'customers', referrerId);
-          const newReferralRef = doc(collection(db, 'customers', referrerId, 'referrals'));
 
+          // 1. Update the summary map on the customer document
           batch.update(referrerRef, {
-            totalReferralCommission: increment(commissionEarned),
-            successfulReferralCount: increment(1)
+            [`referralDataByStore.${storeId}.commissionEarned`]: increment(commissionEarned),
+            [`referralDataByStore.${storeId}.referralCount`]: increment(1)
           });
 
-          batch.set(newReferralRef, {
+          // 2. Create a detailed record in the new subcollection
+          const newReferralHistoryRef = doc(db, 'customers', referrerId, 'referralsByStore', storeId, 'successfulOrders', newOrderId);
+          batch.set(newReferralHistoryRef, {
             refereeId: customerId,
             refereeName: customer.name,
-            orderId: newOrderId,
-            productId: product.id,
             productName: product.name,
             commissionEarned: commissionEarned,
             orderDate: orderDate,
-            storeId: storeId
           });
         }
       }
     }
 
-    // a. Data for the customer's personal order history
     const customerOrderPayload: CustomerOrderData = {
       product,
       storeMeta,
@@ -127,7 +123,6 @@ export const addOrderToFirestore = async (
       quantity,
     };
 
-    // b. Enriched data for the store's central order collection
     const storeOrderPayload: StoreOrderData = {
       ...customerOrderPayload,
       customerInfo: {
@@ -138,7 +133,6 @@ export const addOrderToFirestore = async (
       },
     };
 
-    // 3. Execute the atomic batch write.
     const customerOrderRef = doc(db, 'customers', customerId, 'orders', newOrderId);
     batch.set(customerOrderRef, customerOrderPayload);
 
@@ -147,7 +141,6 @@ export const addOrderToFirestore = async (
 
     await batch.commit();
 
-    // 4. Return the same basic Order object to the client to avoid breaking existing functionality.
     return {
       id: newOrderId,
       product,
@@ -164,7 +157,6 @@ export const addOrderToFirestore = async (
 
 /**
  * Fetches all orders for a specific customer from Firestore.
- * (This function remains unchanged and continues to power the customer dashboard.)
  */
 export const fetchOrdersFromFirestore = async (customerId: string): Promise<Order[]> => {
   try {
@@ -193,7 +185,6 @@ export const fetchOrdersFromFirestore = async (customerId: string): Promise<Orde
 
 /**
  * Fetches all orders for a specific store from the central collection in Firestore.
- * (This is the new function to power the admin dashboard.)
  */
 export const fetchStoreOrders = async (storeId: string): Promise<StoreOrder[]> => {
   try {

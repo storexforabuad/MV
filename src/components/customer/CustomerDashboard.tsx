@@ -5,7 +5,9 @@ import { ShoppingBag, Gift, Heart } from "lucide-react";
 import { motion } from "framer-motion";
 import { CustomerStatCard } from './CustomerStatCard';
 import { Order } from "@/types/order";
+import { Customer } from "@/types/customer";
 import { CustomerSection } from "./CustomerMobileNav";
+import { formatPrice } from "@/utils/price";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -17,7 +19,7 @@ const containerVariants = {
 
 interface CustomerDashboardProps {
   orders: Order[];
-  referralCount: number;
+  customer: Customer | null;
   storeId: string;
   onSectionChange: (section: CustomerSection) => void;
   onOrdersModalOpen: () => void;
@@ -33,13 +35,18 @@ const colorGradients = {
 
 export function CustomerDashboard({
   orders,
-  referralCount,
+  customer,
+  storeId,
   onSectionChange,
   onOrdersModalOpen,
   onReferralsModalOpen,
   onWishlistModalOpen,
 }: CustomerDashboardProps) {
   
+  const referralData = customer?.referralDataByStore?.[storeId];
+  const referralCount = referralData?.referredCustomers?.length || 0;
+  const commissionEarned = referralData?.commissionEarned || 0;
+
   const wishlistCount = 0;
 
   return (
@@ -54,14 +61,15 @@ export function CustomerDashboard({
         value={orders.length}
         icon={<ShoppingBag className="w-6 h-6" />}
         gradient={colorGradients.purple}
-        onClick={onOrdersModalOpen} // Changed from onSectionChange('orders')
+        onClick={onOrdersModalOpen}
       />
       <CustomerStatCard
         label="My Referrals"
         value={referralCount}
+        subValue={formatPrice(commissionEarned)}
         icon={<Gift className="w-6 h-6" />}
         gradient={colorGradients.green}
-        onClick={onReferralsModalOpen} // Assuming this will be the next feature
+        onClick={onReferralsModalOpen}
       />
       <CustomerStatCard
         label="My Wishlist"

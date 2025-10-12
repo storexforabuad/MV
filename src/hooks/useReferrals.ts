@@ -1,10 +1,9 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
-import { useCustomer } from '@/context/CustomerContext';
+import { useEffect, useState, useCallback } from 'react';
 import { db } from '@/lib/db';
-import { collection, query, getDocs, orderBy } from 'firebase/firestore';
+import { collection, query, getDocs, orderBy, where } from 'firebase/firestore';
 import toast from 'react-hot-toast';
 
 interface Referral {
@@ -15,21 +14,24 @@ interface Referral {
   orderDate: { toDate: () => Date };
 }
 
-export const useReferrals = () => {
-  const { customer } = useCustomer();
+export const useReferrals = (customerId: string | null, storeId: string) => {
   const [referrals, setReferrals] = useState<Referral[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchReferrals = async () => {
-    if (!customer) {
+  const fetchReferrals = useCallback(async () => {
+    if (!customerId || !storeId) {
         setIsLoading(false);
         return;
-    };
+    }
 
     setIsLoading(true);
     try {
-      const referralsRef = collection(db, 'customers', customer.id, 'referrals');
-      const q = query(referralsRef, orderBy('orderDate', 'desc'));
+      const referralsRef = collection(db, 'customers', customerId, 'referrals');
+      const q = query(
+        referralsRef, 
+        where('storeId', '==', storeId), 
+        orderBy('orderDate', 'desc')
+      );
       const querySnapshot = await getDocs(q);
       const fetchedReferrals = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Referral));
       setReferrals(fetchedReferrals);
@@ -39,11 +41,11 @@ export const useReferrals = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [customerId, storeId]);
 
   useEffect(() => {
     fetchReferrals();
-  }, [customer]);
+  }, [fetchReferrals]);
 
   return { referrals, isLoading, refetchReferrals: fetchReferrals };
 };

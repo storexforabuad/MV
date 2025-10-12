@@ -1,12 +1,11 @@
 'use client';
 
-import React, { Fragment, useEffect, useState } from 'react';
+import React, { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCustomer } from '@/context/CustomerContext';
-import { db } from '@/lib/db';
-import { collection, query, getDocs, orderBy } from 'firebase/firestore';
+import { useReferrals } from '@/hooks/useReferrals';
 import { formatPrice } from '@/utils/price';
 import toast from 'react-hot-toast';
 
@@ -16,42 +15,15 @@ interface ReferralsModalProps {
   storeId: string;
 }
 
-interface Referral {
-  id: string;
-  refereeName: string;
-  productName: string;
-  commissionEarned: number;
-  orderDate: { toDate: () => Date };
-}
-
 const ReferralsModal: React.FC<ReferralsModalProps> = ({ isOpen, onClose, storeId }) => {
   const { customer } = useCustomer();
-  const [referrals, setReferrals] = useState<Referral[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (!isOpen || !customer) return;
-
-    const fetchReferrals = async () => {
-      setIsLoading(true);
-      try {
-        const referralsRef = collection(db, 'customers', customer.id, 'referrals');
-        const q = query(referralsRef, orderBy('orderDate', 'desc'));
-        const querySnapshot = await getDocs(q);
-        const fetchedReferrals = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Referral));
-        setReferrals(fetchedReferrals);
-      } catch (error) {
-        console.error("Error fetching referrals:", error);
-        toast.error("Couldn't load referral details.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchReferrals();
-  }, [customer, isOpen]);
+  const { referrals, isLoading } = useReferrals(customer?.id || null, storeId);
 
   const referralLink = customer ? `${window.location.origin}/${storeId}?ref=${customer.referralCode}` : '';
+  
+  const referralData = customer?.referralDataByStore?.[storeId];
+  const commissionEarned = referralData?.commissionEarned || 0;
+  const referralCount = referralData?.referredCustomers?.length || 0;
 
   const handleCopyLink = () => {
     if (referralLink) {
@@ -95,11 +67,11 @@ const ReferralsModal: React.FC<ReferralsModalProps> = ({ isOpen, onClose, storeI
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-slate-200/50 dark:bg-slate-800/50 p-4 rounded-lg">
             <h4 className="text-sm font-medium text-slate-500">Total Commission Earned</h4>
-            <p className="text-2xl font-semibold mt-1">{formatPrice(customer.totalReferralCommission || 0)}</p>
+            <p className="text-2xl font-semibold mt-1">{formatPrice(commissionEarned)}</p>
           </div>
           <div className="bg-slate-200/50 dark:bg-slate-800/50 p-4 rounded-lg">
             <h4 className="text-sm font-medium text-slate-500">Successful Referrals</h4>
-            <p className="text-2xl font-semibold mt-1">{customer.successfulReferralCount || 0}</p>
+            <p className="text-2xl font-semibold mt-1">{referralCount}</p>
           </div>
         </div>
 
@@ -127,7 +99,7 @@ const ReferralsModal: React.FC<ReferralsModalProps> = ({ isOpen, onClose, storeI
               ))}
             </div>
           ) : (
-            <p className="mt-4 text-sm text-slate-500">You have no successful referrals yet.</p>
+            <p className="mt-4 text-sm text-slate-500">You have no successful referrals for this store yet.</p>
           )}
         </div>
       </div>

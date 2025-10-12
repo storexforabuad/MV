@@ -19,6 +19,9 @@ const ReferralBanner = ({ storeId, storeName, onLoginClick }: ReferralBannerProp
 
   const referralLink = customer ? `${window.location.origin}/${storeId}?ref=${customer.referralCode}` : '';
 
+  // Get the store-specific commission, defaulting to 0 if not present
+  const commissionEarned = customer?.referralDataByStore?.[storeId]?.commissionEarned || 0;
+
   const shimmerEffectClasses = `
     relative overflow-hidden 
     before:absolute before:inset-0 before:-translate-x-full 
@@ -32,7 +35,7 @@ const ReferralBanner = ({ storeId, storeName, onLoginClick }: ReferralBannerProp
       <div className="flex items-center gap-3">
         <Gift className="text-purple-500" size={24} />
         <p className="text-sm text-slate-700 dark:text-slate-300">
-          <span className="font-bold text-indigo-600 dark:text-indigo-400">{formatPrice(customer?.totalReferralCommission || 0)}</span> bonus earned!
+          <span className="font-bold text-indigo-600 dark:text-indigo-400">{formatPrice(commissionEarned)}</span> bonus earned!
         </p>
       </div>
       <button
