@@ -49,7 +49,8 @@ const ReferralBanner = ({ storeId, storeName, onLoginClick }: ReferralBannerProp
   const LoggedOutView = () => (
     <div className="flex justify-between items-center w-full">
       <div className="flex items-center gap-3">
-        <Gift className="text-indigo-500" size={24} />
+      <Gift className="text-purple-500" size={24} />
+
         <p className="text-sm text-slate-700 dark:text-slate-300 font-semibold">Get referral bonuses & gifts!</p>
       </div>
       <button

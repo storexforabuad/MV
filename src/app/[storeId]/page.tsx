@@ -191,16 +191,17 @@ export default function StorefrontPage() {
       />
       <div className="pt-16 pb-safe-area-inset-bottom">
         <PromoBanner />
-        <ReferralBanner 
-          storeId={storeId}
-          storeName={storeName}
-          onLoginClick={() => setIsLoginModalOpen(true)}
-        />
+        
         <CategoryBar 
           onCategorySelect={handleCategorySelect}
           activeCategoryId={activeCategoryId}
           categories={categories}
           onActiveCategoryClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        />
+        <ReferralBanner 
+          storeId={storeId}
+          storeName={storeName}
+          onLoginClick={() => setIsLoginModalOpen(true)}
         />
         <div className="mt-3 sm:mt-4">
           {initialLoading || isPending ? (
