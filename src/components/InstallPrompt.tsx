@@ -89,7 +89,7 @@ export default function InstallPrompt() {
             </p>
             <button
               onClick={handleInstall}
-              className="mt-4 w-full bg-[var(--button-primary)] text-white px-4 py-3 rounded-lg hover:bg-[var(--button-primary-hover)] transition-colors font-medium text-base flex items-center justify-center gap-2"
+              className="mt-4 w-full bg-slate-800 text-white px-4 py-3 rounded-2xl hover:bg-slate-900 transition-colors font-medium text-base flex items-center justify-center gap-2"
             >
               <span>Install (5mb) </span>
               <ArrowDownTrayIcon className="w-5 h-5" />
