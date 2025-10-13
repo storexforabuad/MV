@@ -12,6 +12,7 @@ import { useCustomer } from '@/context/CustomerContext';
 import { useOrders } from '@/hooks/useOrders';
 import CustomerLookupModal from '@/components/customer/CustomerLookupModal';
 import toast from 'react-hot-toast';
+import { formatPrice } from '../../utils/price';
 
 const CartItem = dynamic(
   () => import('../../components/cart/CartItem'),
@@ -64,13 +65,6 @@ export default function CartPage() {
     }
   }, [state.items]);
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-NG', {
-      style: 'currency',
-      currency: 'NGN'
-    }).format(price);
-  };
-
   const handleUpdateQuantity = (id: string, quantity: number) => {
     dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity } });
   };
@@ -86,13 +80,16 @@ export default function CartPage() {
     }
 
     const storeMeta = storeMetas[storeId];
-    if (!storeMeta) {
-      toast.error('Store information is missing.');
+    if (!storeMeta || !storeMeta.whatsapp) {
+      toast.error('Store information or WhatsApp number is missing.');
       return;
     }
+    
+    const referrerId = localStorage.getItem('referrerId');
+    const storeMetaWithId = { ...storeMeta, id: storeId };
 
     const orderPromises = items.map(item => 
-      addOrder(item, storeMeta, item.quantity)
+      addOrder(item, storeMetaWithId, item.quantity, customer, referrerId)
     );
 
     try {
@@ -100,10 +97,28 @@ export default function CartPage() {
         Promise.all(orderPromises),
         {
           loading: 'Placing your order...',
-          success: 'Order placed successfully!',
+          success: 'Order placed! Redirecting to WhatsApp...',
           error: 'There was an error placing your order.'
         }
       );
+      
+      const totalAmount = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+      const itemsMessage = items.map(item => 
+        `*${item.name}* (x${item.quantity})\n` +
+        `• Price: ${formatPrice(item.price * item.quantity)}`
+      ).join('\n\n');
+
+      const message =
+          `🛍️ *New Order Request*\n\n` +
+          `Hello! I would like to order the following items:\n\n` +
+          `${itemsMessage}\n\n` +
+          `*Subtotal: ${formatPrice(totalAmount)}*\n\n` +
+          `Thank you! 🙏`;
+
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappUrl = `https://wa.me/${storeMeta.whatsapp.replace(/\D/g, '')}?text=${encodedMessage}`;
+      
+      window.open(whatsappUrl, '_blank');
       
       // Remove only ordered items from cart
       items.forEach(item => {
@@ -111,7 +126,6 @@ export default function CartPage() {
       });
 
     } catch (error) {
-        // The toast will already show the error message
         console.error("Failed to place one or more orders:", error);
     }
   };
