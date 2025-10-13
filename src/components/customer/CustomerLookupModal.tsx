@@ -3,13 +3,13 @@
 
 import React, { useState, useCallback, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { X, Loader, CheckCircle, MapPin } from "lucide-react";
+import { X, Loader, CheckCircle, MapPin, Search } from "lucide-react";
 import { findCustomerByPhone, findOrCreateCustomer } from "@/app/actions/customerActions";
 import { Customer, DeliveryAddress } from "@/types/customer";
-import { useGeolocation } from "@/hooks/useGeolocation";
 import toast from "react-hot-toast";
 import Confetti from 'react-confetti';
 import { useCustomer } from "@/context/CustomerContext";
+import { geography } from "@/config/geography";
 
 interface CustomerLookupModalProps {
   isOpen: boolean;
@@ -17,58 +17,26 @@ interface CustomerLookupModalProps {
   onSuccess: (customer: Customer) => void;
 }
 
-// A simple component for the new user form
 const CreateAccountForm = ({ phoneNumber, onAccountCreated }: { phoneNumber: string, onAccountCreated: (customer: Customer) => void }) => {
-    const [name, setName] = useState("");
     const [address, setAddress] = useState<DeliveryAddress>({
         country: "Nigeria",
         state: "Bauchi",
         street: "",
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { loading: geoLoading, error: geoError, data: geoData, getGeolocation } = useGeolocation();
-
-    // Mock reverse geocoding - in a real app, use a service like Google Maps Geocoding API
-    const reverseGeocode = async (coords: GeolocationCoordinates) => {
-        // Simulate network request
-        await new Promise(resolve => setTimeout(resolve, 500)); 
-        // In a real implementation, you would make an API call here.
-        // For example:
-        // const response = await fetch(`https://api.your-geocoder.com/reverse?lat=${coords.latitude}&lon=${coords.longitude}&apiKey=...`);
-        // const data = await response.json();
-        // return data.address.street;
-        return `Street near ${coords.latitude.toFixed(4)}, ${coords.longitude.toFixed(4)}`;
-    }
-
-    useEffect(() => {
-        if (geoData) {
-            toast.promise(
-                reverseGeocode(geoData).then(street => {
-                    setAddress(prev => ({ ...prev, street }));
-                }),
-                {
-                    loading: 'Getting street address...',
-                    success: <b>Address found!</b>,
-                    error: <b>Could not find address.</b>,
-                }
-            );
-        }
-        if (geoError) {
-            toast.error(geoError.message || "Could not get location.");
-        }
-    }, [geoData, geoError]);
-
+    const nigerianStates = geography.find(c => c.name === 'Nigeria')?.states.map(s => s.name) || [];
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!name || !address.street) {
+        if (!address.state || !address.street) {
             toast.error("Please fill in all fields.");
             return;
         }
 
         setIsSubmitting(true);
         try {
-            const result = await findOrCreateCustomer(phoneNumber, { name, deliveryAddress: address });
+            const tempName = `User ${phoneNumber.slice(-4)}`;
+            const result = await findOrCreateCustomer(phoneNumber, { name: tempName, deliveryAddress: address });
             toast.success("Account created successfully!");
             onAccountCreated(result.customer);
         } catch (err) {
@@ -80,53 +48,37 @@ const CreateAccountForm = ({ phoneNumber, onAccountCreated }: { phoneNumber: str
     }
 
     return (
-        <form onSubmit={handleSubmit}>
-            <h2 className="text-2xl font-bold text-center mb-4">Create Your Account</h2>
-            <div className="space-y-4">
-                <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Full Name"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    required
-                />
-                {/* For a real app, this would be a dropdown */}
-                <input
-                    type="text"
-                    value={address.country}
-                    onChange={(e) => setAddress(prev => ({ ...prev, country: e.target.value }))}
-                    placeholder="Country"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                    required
-                />
-                 {/* For a real app, this would be a dropdown of states */}
-                <input
-                    type="text"
+        <form onSubmit={handleSubmit} className="space-y-6">
+            <h2 className="text-3xl font-extrabold text-center text-slate-800 dark:text-white">Create Your Account</h2>
+            
+            <div className="relative">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                <select
                     value={address.state}
                     onChange={(e) => setAddress(prev => ({ ...prev, state: e.target.value }))}
-                    placeholder="State"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-100 dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl font-semibold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                >
+                    {nigerianStates.map(state => (
+                        <option key={state} value={state}>{state}</option>
+                    ))}
+                </select>
+            </div>
+
+            <div className="relative">
+                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
+                <input
+                    type="text"
+                    value={address.street}
+                    onChange={(e) => setAddress(prev => ({ ...prev, street: e.target.value }))}
+                    placeholder="Street name (e.g G.R.A)"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-100 dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl font-semibold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
                     required
                 />
-                <div className="relative">
-                     <input
-                        type="text"
-                        value={address.street}
-                        onChange={(e) => setAddress(prev => ({ ...prev, street: e.target.value }))}
-                        placeholder="Street Address"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg"
-                        required
-                    />
-                    <button type="button" onClick={() => getGeolocation()} disabled={geoLoading} className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-blue-500 disabled:opacity-50">
-                        {geoLoading ? <Loader className="animate-spin" size={20} /> : <MapPin size={20} />}
-                    </button>
-                </div>
-
-                <button type="submit" disabled={isSubmitting} className="w-full bg-blue-500 text-white py-3 rounded-lg mt-4 hover:bg-blue-600 transition-colors disabled:bg-blue-300">
-                    {isSubmitting ? "Creating Account..." : "Create Account"}
-                </button>
             </div>
+
+            <button type="submit" disabled={isSubmitting} className="w-full bg-slate-800 text-white font-bold py-3 rounded-2xl mt-4 hover:bg-slate-900 transition-colors disabled:bg-slate-600 shadow-lg">
+                {isSubmitting ? "Creating Account..." : "Create Account"}
+            </button>
         </form>
     )
 }
@@ -139,8 +91,14 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
   const { setCustomer } = useCustomer();
   
   const handlePhoneNumberSubmit = async () => {
-    if (phoneNumber.length < 10) {
-        toast.error("Please enter a valid phone number.");
+    let processedNumber = phoneNumber.replace(/\D/g, '');
+
+    if (processedNumber.length === 11 && processedNumber.startsWith('0')) {
+        processedNumber = processedNumber.substring(1);
+    }
+
+    if (processedNumber.length !== 10) {
+        toast.error("Please enter a valid 10-digit phone number.");
         return;
     }
     
@@ -148,20 +106,20 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
     setStep("AccountLookup");
 
     try {
-        const formattedPhoneNumber = `+234${phoneNumber.slice(-10)}`;
+        const formattedPhoneNumber = `+234${processedNumber}`;
         const customer = await findCustomerByPhone(formattedPhoneNumber);
         
         if (customer) {
             setFoundCustomer(customer);
             setStep("WelcomeBack");
         } else {
-            setPhoneNumber(formattedPhoneNumber); // Store formatted number for the next step
+            setPhoneNumber(formattedPhoneNumber);
             setStep("CreateAccount");
         }
     } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred.";
         toast.error(errorMessage);
-        setStep("PhoneNumberInput"); // Go back to the input on error
+        setStep("PhoneNumberInput");
     } finally {
         setIsLoading(false);
     }
@@ -203,20 +161,20 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
       case "PhoneNumberInput":
         return (
             <div>
-                <h2 className="text-2xl font-bold text-center mb-4">Welcome!</h2>
-                <p className="text-center text-gray-600 mb-6">Enter your phone number to continue.</p>
-                <div className="flex items-center border-2 border-gray-200 rounded-lg px-3 py-2 focus-within:border-blue-500 transition-colors">
-                    <span className="text-gray-500 mr-2 font-medium">+234</span>
+                <h2 className="text-3xl font-extrabold text-center text-slate-800 dark:text-white mb-4">Welcome!</h2>
+                <p className="text-center text-slate-500 dark:text-slate-400 mb-8">Enter your phone number to find or create your account.</p>
+                <div className="flex items-center bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 focus-within:ring-2 focus-within:ring-purple-500 transition-all">
+                    <span className="text-slate-400 dark:text-slate-500 mr-2 font-medium">🇳🇬 +234</span>
                     <input 
                         type="tel" 
                         value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))} // only allow digits
-                        className="w-full outline-none border-none bg-transparent" 
+                        onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
+                        className="w-full outline-none border-none bg-transparent text-slate-800 dark:text-white font-semibold" 
                         placeholder="801 234 5678"
                         onKeyDown={(e) => e.key === 'Enter' && handlePhoneNumberSubmit()}
                     />
                 </div>
-                <button onClick={handlePhoneNumberSubmit} disabled={isLoading} className="w-full bg-blue-500 text-white py-3 rounded-lg mt-4 hover:bg-blue-600 transition-colors disabled:bg-blue-300">
+                <button onClick={handlePhoneNumberSubmit} disabled={isLoading} className="w-full bg-slate-800 text-white font-bold py-3 rounded-2xl mt-6 hover:bg-slate-900 transition-colors disabled:bg-slate-600 shadow-lg">
                     {isLoading ? "Please wait..." : "Continue"}
                 </button>
             </div>
@@ -224,26 +182,26 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
       case "AccountLookup":
         return (
             <div className="flex flex-col items-center justify-center h-48">
-                <Loader className="animate-spin text-blue-500" size={48} />
-                <p className="mt-4 text-gray-600">Finding your account...</p>
+                <Loader className="animate-spin text-purple-500" size={48} />
+                <p className="mt-4 text-slate-500 dark:text-slate-400">Finding your account...</p>
             </div>
         );
       case "WelcomeBack":
           if (!foundCustomer) return <div>Loading...</div>
           return (
-              <div>
-                <h2 className="text-2xl font-bold text-center mb-2">Welcome back, {foundCustomer.name}!</h2>
-                <div className="text-center bg-gray-100 p-4 rounded-lg my-4">
-                    <p className="font-semibold">Your delivery address:</p>
-                    <p className="text-gray-700">{foundCustomer.deliveryAddress.street}</p>
-                    <p className="text-gray-600">{foundCustomer.deliveryAddress.state}, {foundCustomer.deliveryAddress.country}</p>
+              <div className="text-center">
+                <h2 className="text-3xl font-extrabold text-slate-800 dark:text-white mb-2">Welcome back, {foundCustomer.name}!</h2>
+                <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl my-6">
+                    <p className="font-semibold text-slate-700 dark:text-slate-300">Your delivery address:</p>
+                    <p className="text-slate-600 dark:text-slate-400">{foundCustomer.deliveryAddress.street}</p>
+                    <p className="text-sm text-slate-500 dark:text-slate-500">{foundCustomer.deliveryAddress.state}, {foundCustomer.deliveryAddress.country}</p>
                 </div>
-                <div className="flex space-x-2">
-                    <button onClick={() => { /* Logic to change address, maybe go to CreateAccount step with prefilled data */ toast('This feature is coming soon!'); }} className="w-full bg-gray-200 text-gray-800 py-3 rounded-lg hover:bg-gray-300 transition-colors">
-                        Change Address
-                    </button>
-                    <button onClick={handleWelcomeBackContinue} className="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition-colors">
+                <div className="flex flex-col gap-3">
+                    <button onClick={handleWelcomeBackContinue} className="w-full bg-slate-800 text-white font-bold py-3 rounded-2xl hover:bg-slate-900 transition-colors shadow-lg">
                         Continue
+                    </button>
+                    <button onClick={() => { setStep("CreateAccount") }} className="w-full bg-transparent text-slate-600 dark:text-slate-300 font-semibold py-3 rounded-2xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                        Change Address
                     </button>
                 </div>
               </div>
@@ -256,10 +214,10 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
                   <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: 'spring' }}>
                       <CheckCircle className="text-green-500" size={64} />
                   </motion.div>
-                  <h2 className="text-2xl font-bold mt-4">You're all set!</h2>
+                  <h2 className="text-3xl font-bold mt-4 text-slate-800 dark:text-white">You're all set!</h2>
                   <Confetti
-                    width={400} // rough estimate of modal width
-                    height={300} // rough estimate of modal height
+                    width={400}
+                    height={300}
                     recycle={false}
                     numberOfPieces={200}
                     gravity={0.1}
@@ -274,24 +232,24 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
       <motion.div
-        initial={{ y: "100vh", opacity: 0 }}
+        initial={{ y: "10vh", opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        exit={{ y: "100vh", opacity: 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 30 }}
-        className="bg-white rounded-2xl shadow-xl w-full max-w-md mx-auto relative overflow-hidden"
+        exit={{ y: "10vh", opacity: 0 }}
+        transition={{ type: "spring", stiffness: 200, damping: 25 }}
+        className="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl w-full max-w-md mx-auto relative overflow-hidden"
       >
-        <button onClick={handleClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-800 z-10">
-          <X size={24} />
+        <button onClick={handleClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+          <X size={20} />
         </button>
         <div className="p-8">
           <AnimatePresence mode="wait">
             <motion.div
               key={step}
-              initial={{ opacity: 0, x: 50 }}
+              initial={{ opacity: 0, x: 30 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
+              exit={{ opacity: 0, x: -30 }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
             >
               {renderStep()}
