@@ -190,7 +190,7 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
           if (!foundCustomer) return <div>Loading...</div>
           return (
               <div className="text-center">
-                <h2 className="text-3xl font-extrabold text-slate-800 dark:text-white mb-2">Welcome back, {foundCustomer.name}!</h2>
+                <h2 className="text-3xl font-extrabold text-slate-800 dark:text-white mb-2">Welcome back!</h2>
                 <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl my-6">
                     <p className="font-semibold text-slate-700 dark:text-slate-300">Your delivery address:</p>
                     <p className="text-slate-600 dark:text-slate-400">{foundCustomer.deliveryAddress.street}</p>
