@@ -1,72 +1,54 @@
-'use client';
 
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+"use client";
+
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Customer } from '@/types/customer';
-import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, Timestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
 import CustomerLookupModal from '@/components/customer/CustomerLookupModal';
 
 interface CustomerContextType {
   customer: Customer | null;
   setCustomer: (customer: Customer | null) => void;
   loading: boolean;
-  promptLogin: (onSuccess: (customer: Customer) => void) => void;
+  promptLogin: () => void;
 }
 
 const CustomerContext = createContext<CustomerContextType | undefined>(undefined);
 
 export const CustomerProvider = ({ children }: { children: ReactNode }) => {
-  const [customer, setCustomer] = useState<Customer | null>(null);
+  const [customer, setCustomerState] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [onLoginSuccess, setOnLoginSuccess] = useState<((customer: Customer) => void) | null>(null);
-  const auth = getAuth();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        try {
-          const customerDoc = await getDoc(doc(db, 'customers', user.uid));
-          if (customerDoc.exists()) {
-            const customerData = customerDoc.data();
-            let serializableData: Customer = {
-              id: customerDoc.id,
-              ...customerData,
-              createdAt: '',
-            } as Customer;
-
-            if (customerData.createdAt instanceof Timestamp) {
-                serializableData.createdAt = customerData.createdAt.toDate().toISOString();
-            } else if (customerData.createdAt) {
-                serializableData.createdAt = new Date(customerData.createdAt).toISOString();
-            }
-            
-            setCustomer(serializableData);
-          }
-        } catch (error) {
-            console.error("Failed to fetch customer data:", error);
-        }
-      } else {
-        setCustomer(null);
+    try {
+      const savedCustomer = localStorage.getItem('customer');
+      if (savedCustomer) {
+        setCustomerState(JSON.parse(savedCustomer));
       }
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, [auth]);
-
-  const promptLogin = useCallback((onSuccess: (customer: Customer) => void) => {
-      setOnLoginSuccess(() => onSuccess);
-      setIsLoginModalOpen(true);
+    } catch (error) {
+      console.error("Failed to parse customer from localStorage", error);
+      // If parsing fails, it's best to clear the corrupted data
+      localStorage.removeItem('customer');
+    }
+    setLoading(false);
   }, []);
 
-  const handleLoginSuccess = (loggedInCustomer: Customer) => {
-    setIsLoginModalOpen(false);
-    if (onLoginSuccess) {
-        onLoginSuccess(loggedInCustomer);
-        setOnLoginSuccess(null);
+  const setCustomer = (customer: Customer | null) => {
+    setCustomerState(customer);
+    if (customer) {
+      localStorage.setItem('customer', JSON.stringify(customer));
+    } else {
+      localStorage.removeItem('customer');
     }
+  };
+
+  const promptLogin = () => {
+    setIsLoginModalOpen(true);
+  };
+
+  const handleLoginSuccess = (loggedInCustomer: Customer) => {
+    setCustomer(loggedInCustomer);
+    setIsLoginModalOpen(false);
   };
 
   return (
