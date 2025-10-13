@@ -103,10 +103,14 @@ export default function CartPage() {
       );
       
       const totalAmount = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-      const itemsMessage = items.map(item => 
-        `*${item.name}* (x${item.quantity})\n` +
-        `• Price: ${formatPrice(item.price * item.quantity)}`
-      ).join('\n\n');
+      const itemsMessage = items.map(item => {
+        const productUrl = `${window.location.origin}/store/${storeId}/${item.id}`;
+        return (
+          `*${item.name}* (x${item.quantity})\n` +
+          `• Price: ${formatPrice(item.price * item.quantity)}\n` +
+          `• Product Link: ${productUrl}`
+        )
+      }).join('\n\n');
 
       const message =
           `🛍️ *New Order Request*\n\n` +
