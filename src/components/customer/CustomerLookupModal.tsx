@@ -88,6 +88,7 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
   const [phoneNumber, setPhoneNumber] = useState("");
   const [foundCustomer, setFoundCustomer] = useState<Customer | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isNewUser, setIsNewUser] = useState(false);
   const { setCustomer } = useCustomer();
   
   const handlePhoneNumberSubmit = async () => {
@@ -111,9 +112,11 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
         
         if (customer) {
             setFoundCustomer(customer);
+            setIsNewUser(false);
             setStep("WelcomeBack");
         } else {
             setPhoneNumber(formattedPhoneNumber);
+            setIsNewUser(true);
             setStep("CreateAccount");
         }
     } catch (err) {
@@ -131,7 +134,7 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
       setStep("AllDone");
       setTimeout(() => {
           onSuccess(newCustomer);
-      }, 2500);
+      }, 5000);
   };
 
   const handleWelcomeBackContinue = () => {
@@ -149,6 +152,7 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
       setFoundCustomer(null);
       setStep("PhoneNumberInput");
       setIsLoading(false);
+      setIsNewUser(false);
   }
 
   const handleClose = () => {
@@ -210,20 +214,27 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
           return <CreateAccountForm phoneNumber={phoneNumber} onAccountCreated={handleAccountCreated} />
       case "AllDone":
           return (
-              <div className="flex flex-col items-center justify-center h-48">
-                  <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: 'spring' }}>
-                      <CheckCircle className="text-green-500" size={64} />
-                  </motion.div>
-                  <h2 className="text-3xl font-bold mt-4 text-slate-800 dark:text-white">You're all set!</h2>
-                  <Confetti
+            <div className="flex flex-col items-center justify-center text-center h-60">
+                <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.2, type: 'spring' }}>
+                    <CheckCircle className="text-green-500" size={64} />
+                </motion.div>
+                {isNewUser ? (
+                    <>
+                        <h2 className="text-3xl font-bold mt-4 text-slate-800 dark:text-white">Your account has been created!</h2>
+                        <p className="text-slate-600 dark:text-slate-300 mt-2">Your referral link is now active. Congrats!</p>
+                    </>
+                ) : (
+                    <h2 className="text-3xl font-bold mt-4 text-slate-800 dark:text-white">You're all set!</h2>
+                )}
+                <Confetti
                     width={400}
                     height={300}
                     recycle={false}
                     numberOfPieces={200}
                     gravity={0.1}
-                  />
-              </div>
-          )
+                />
+            </div>
+        )
       default:
         return <div>Something went wrong. Please try again.</div>;
     }

@@ -35,7 +35,7 @@ const ReferralBanner = ({ storeId, storeName, onLoginClick }: ReferralBannerProp
       <div className="flex items-center gap-3">
         <Gift className="text-purple-500" size={24} />
         <p className="text-sm text-slate-700 dark:text-slate-300">
-          <span className="font-bold text-indigo-600 dark:text-indigo-400">{formatPrice(commissionEarned)}</span> bonus earned!
+          <span className="font-bold text-indigo-600 dark:text-indigo-400">{formatPrice(commissionEarned)}</span> Referral bonus earned!
         </p>
       </div>
       <button
