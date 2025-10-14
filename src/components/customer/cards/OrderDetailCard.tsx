@@ -23,7 +23,7 @@ export function OrderDetailCard({ order }: OrderDetailCardProps) {
     const sanitizedWhatsappNumber = rawWhatsappNumber.replace(/\D/g, '');
     const productUrl = `${window.location.origin}/${order.product.storeId}/products/${order.product.id}`;
     
-    const message = `*Reorder Request*\n\n---\n\n*Product:* ${order.product.name}\n*Price:* ${formatPrice(order.product.price, order.storeMeta.currency)}\n\nI would like to place another order for this item.\n\n*Product Link:* ${productUrl}`;
+    const message = `*Reorder Request*\n\n---\n\n*Product:* ${order.product.name}\n*Price:* ${formatPrice(order.product.price)}\n\nI would like to place another order for this item.\n\n*Product Link:* ${productUrl}`;
     
     const whatsappUrl = `https://wa.me/${sanitizedWhatsappNumber}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
@@ -54,7 +54,7 @@ export function OrderDetailCard({ order }: OrderDetailCardProps) {
         <div className="flex-1">
           <p className="font-bold text-lg text-slate-800 dark:text-slate-100 truncate">{order.product.name}</p>
           <p className="text-sm text-slate-500 dark:text-slate-400">Order placed on {orderDate}</p>
-          <p className="text-lg font-semibold text-purple-600 dark:text-purple-400 mt-1">{formatPrice(order.product.price, order.storeMeta.currency)}</p>
+          <p className="text-lg font-semibold text-purple-600 dark:text-purple-400 mt-1">{formatPrice(order.product.price)}</p>
           <div className="flex items-center gap-2 mt-2 text-sm font-medium text-green-600 dark:text-green-400">
             <CheckCircle className="w-4 h-4" />
             <span>Delivered</span>

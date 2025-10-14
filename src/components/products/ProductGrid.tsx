@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Info, Phone, MessageCircle, Star, Clock, X, MapPin, User } from 'lucide-react';
 import { Product } from '../../types/product';
-import { motion, LayoutGroup, AnimatePresence } from 'framer-motion';
+import { motion, LayoutGroup, AnimatePresence, Transition } from 'framer-motion';
 import Image from 'next/image';
 import { getStoreMeta } from '../../lib/db';
 import { StoreMeta } from '../../types/store';
@@ -239,10 +239,11 @@ interface ProductGridProps {
 
 const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId }: ProductGridProps) {
   const router = useRouter();
-  const { customer, promptLogin } = useCustomer(); // Using the customer context
+  const { customer, promptLogin } = useCustomer();
   const [isSingleColumn, setIsSingleColumn] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [storeMeta, setStoreMeta] = useState<StoreMeta | null>(null);
+  const [isLoginRedirectPending, setIsLoginRedirectPending] = useState(false);
 
   useEffect(() => {
     async function fetchStoreMeta() {
@@ -252,14 +253,20 @@ const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId 
     }
     fetchStoreMeta();
   }, [storeId]);
+
+  useEffect(() => {
+    if (customer && isLoginRedirectPending && storeId) {
+      router.push(`/dashboard/${storeId}/${customer.id}`);
+      setIsLoginRedirectPending(false);
+    }
+  }, [customer, isLoginRedirectPending, storeId, router]);
   
   const handleDashboardClick = () => {
     if (storeId && customer) {
       router.push(`/dashboard/${storeId}/${customer.id}`);
     } else if (storeId) {
-      promptLogin((customerId) => {
-        router.push(`/dashboard/${storeId}/${customerId}`);
-      });
+      setIsLoginRedirectPending(true);
+      promptLogin();
     }
   };
 
@@ -271,12 +278,11 @@ const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId 
     return timestampB - timestampA;
   });
 
-  const transition = {
+  const transition: Transition = {
     type: "spring",
     stiffness: 280,
     damping: 25,
     mass: 0.5,
-    duration: 0.3
   };
 
   return (

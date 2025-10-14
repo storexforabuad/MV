@@ -25,6 +25,7 @@ import {
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Product } from '../types/product';
+import { StoreMeta } from '../types/store';
 
 // Re-export order actions from the new location
 export {
@@ -36,16 +37,6 @@ export type { StoreOrder } from '../app/actions/orderActions';
 
 
 export { db };
-
-// Store metadata type
-export interface StoreMeta {
-  id: string;
-  name: string;
-  createdAt?: Timestamp;
-  whatsapp?: string;
-  hasCompletedOnboarding?: boolean;
-  // Add more fields as needed (e.g., description, contact, etc.)
-}
 
 // Define types for the contact data
 export interface Contact {
@@ -82,7 +73,7 @@ const transformProductData = (data: DocumentData): Product => {
     product.originalPrice = product.price;
     product.price = product.promoPrice;
   }
-  return product as Product;
+  return product as unknown as Product;
 };
 
 

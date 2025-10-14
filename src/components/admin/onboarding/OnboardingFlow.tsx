@@ -2,8 +2,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
-import WelcomeScreen from './screens/WelcomeScreen';
-import FeatureScreen from './screens/FeatureScreen';
+import WelcomeScreen, { WelcomeScreenProps } from './screens/WelcomeScreen';
+import FeatureScreen, { FeatureScreenProps } from './screens/FeatureScreen';
 import { Lightbulb } from 'lucide-react';
 import AnimatedDashboardIcons from './AnimatedDashboardIcons';
 
@@ -12,19 +12,20 @@ interface OnboardingFlowProps {
   onComplete: () => void;
 }
 
-export default function OnboardingFlow({ storeName, onComplete }: OnboardingFlowProps) {
-  const [step, setStep] = useState(0);
+type Step = 
+  | { component: 'welcome'; props: Omit<WelcomeScreenProps, 'onNext'> }
+  | { component: 'feature'; props: Omit<FeatureScreenProps, 'onNext'> };
 
-  const steps = [
+const steps = (storeName: string): Step[] => [
     {
-      component: WelcomeScreen,
+      component: 'welcome',
       props: { 
         storeName: storeName,
         showConfetti: true,
       },
     },
     {
-      component: FeatureScreen,
+      component: 'feature',
       props: {
         icon: <AnimatedDashboardIcons />,
         title: 'Your Toolkit for Success',
@@ -32,20 +33,37 @@ export default function OnboardingFlow({ storeName, onComplete }: OnboardingFlow
       },
     },
     {
-      component: FeatureScreen,
-      props: {
-        icon: <Lightbulb className="w-24 h-24 sm:w-32 sm:h-32 text-yellow-400 drop-shadow-lg" />,
-        title: 'Ready for Liftoff!',
-        description: "You're all set. Your first mission: visit the <strong>'Tips'</strong> card on your dashboard. It's your personal guide to delighting customers and growing your empire.",
-        buttonText: 'Enter Command Center',
+        component: 'feature',
+        props: {
+          icon: <Lightbulb className="w-24 h-24 sm:w-32 sm:h-32 text-yellow-400 drop-shadow-lg" />,
+          title: 'Ready for Liftoff!',
+          description: "You're all set. Your first mission: visit the <strong>'Tips'</strong> card on your dashboard. It's your personal guide to delighting customers and growing your empire.",
+          buttonText: 'Enter Command Center',
+        },
       },
-    },
   ];
+  
 
-  const CurrentStep = steps[step].component;
+  const StepContent = ({ step, onNext, storeName }: { step: number; onNext: () => void; storeName: string; }) => {
+    const stepConfig = steps(storeName)[step];
+  
+    if (stepConfig.component === 'welcome') {
+      return <WelcomeScreen {...stepConfig.props} onNext={onNext} />;
+    }
+  
+    if (stepConfig.component === 'feature') {
+      return <FeatureScreen {...stepConfig.props} onNext={onNext} />;
+    }
+  
+    return null;
+  };
+
+export default function OnboardingFlow({ storeName, onComplete }: OnboardingFlowProps) {
+  const [step, setStep] = useState(0);
+  const totalSteps = steps(storeName).length;
 
   const handleNext = () => {
-    if (step < steps.length - 1) {
+    if (step < totalSteps - 1) {
       setStep(step + 1);
     } else {
       onComplete();
@@ -90,13 +108,13 @@ export default function OnboardingFlow({ storeName, onComplete }: OnboardingFlow
               transition={{ duration: 0.4, ease: "easeInOut" }}
               className="w-full h-full"
             >
-              <CurrentStep {...steps[step].props} onNext={handleNext} />
+              <StepContent step={step} onNext={handleNext} storeName={storeName} />
             </motion.div>
           </AnimatePresence>
         </div>
 
         <div className="p-4 flex justify-center space-x-2">
-          {steps.map((_, i) => (
+          {steps(storeName).map((_, i) => (
             <button
               key={i}
               onClick={() => setStep(i)}

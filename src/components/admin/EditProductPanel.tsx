@@ -75,7 +75,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
     }
   }, [isOpen, product]);
 
-  const handleInputChange = (field: keyof ProductFormState, value: string | number | boolean) => {
+  const handleInputChange = (field: keyof ProductFormState, value: string | number | boolean | null) => {
     setFormState(prev => ({ ...prev, [field]: value }));
   };
 
@@ -89,30 +89,34 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
 
     const { basePrice, promoPrice, onPromo, ...restOfState } = formState;
 
-    if (onPromo && (promoPrice === null || basePrice === null || promoPrice >= basePrice)) {
-        alert('Error: When a promotion is active, the promo price must be less than the original price.');
-        console.error('Save Blocked: Invalid promo price.', { basePrice, promoPrice });
-        return;
-    }
-
+    // The final payload to be sent for saving.
     const payload: Partial<Product> = {
-        ...restOfState,
-        onPromo: onPromo,
+      ...restOfState,
+      onPromo: onPromo,
     };
 
     if (onPromo) {
-        payload.price = promoPrice;
-        payload.originalPrice = basePrice;
+      // For a promotion, both prices must be valid numbers, and the promo price must be lower.
+      if (typeof promoPrice !== 'number' || typeof basePrice !== 'number' || promoPrice >= basePrice) {
+        alert('Error: When a promotion is active, the promo price must be a valid number and less than the original price.');
+        console.error('Save Blocked: Invalid promotional pricing.', { basePrice, promoPrice });
+        return;
+      }
+      payload.price = promoPrice;
+      payload.originalPrice = basePrice;
     } else {
-        payload.price = basePrice;
-        payload.originalPrice = null;
+      // If not on promo, only base price is needed and it must be a valid number.
+      if (typeof basePrice !== 'number') {
+        alert('Error: The product must have a valid price.');
+        console.error('Save Blocked: Missing or invalid base price.', { basePrice });
+        return;
+      }
+      payload.price = basePrice;
+      payload.originalPrice = undefined; // Explicitly remove originalPrice if not on promo.
     }
-
-    delete (payload as Partial<ProductFormState>).promoPrice;
-    delete (payload as Partial<ProductFormState>).basePrice;
-      
+    
     onSave(payload);
-    ProductDetailCache.clear(product.id);
+    ProductDetailCache.clear();
     ProductCache.clear();
     onClose();
   };
@@ -120,7 +124,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
   const handleDelete = () => {
       if(product && deleteConfirm) {
           onDelete(product.id);
-          ProductDetailCache.clear(product.id);
+          ProductDetailCache.clear();
           ProductCache.clear();
           onClose();
       } else {

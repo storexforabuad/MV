@@ -3,7 +3,7 @@ import { ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import React from 'react';
 
-interface FeatureScreenProps {
+export interface FeatureScreenProps {
   onNext: () => void;
   icon?: React.ReactNode;
   title: string;
@@ -42,7 +42,7 @@ export default function FeatureScreen({ onNext, icon, title, description, button
         onClick={onNext}
         className="mt-8 sm:mt-10 flex items-center justify-center px-6 py-3 bg-indigo-600 text-white font-semibold rounded-full shadow-lg hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
       >
-        {buttonText}
+        <span>{buttonText}</span>
         <ArrowRight className="ml-2 h-5 w-5" />
       </motion.button>
     </div>

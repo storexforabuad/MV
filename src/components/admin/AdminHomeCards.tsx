@@ -1,7 +1,7 @@
 'use client';
-import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, BadgeDollarSign, Lightbulb } from 'lucide-react';
+import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, BadgeDollarSign, Lightbulb, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { useSpotlightContext } from '@/context/SpotlightContext';
 
 // Import modal components
@@ -179,7 +179,14 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   // --- Start of Change: Dynamically insert Customers card --- 
   const viewsIndex = cardData.findIndex(card => card.label === 'Views');
   const cardsToRender = [...cardData];
-  const customersCard = { label: 'Customers', component: AdminCustomersCard };
+  const customersCard = {
+    label: 'Customers',
+    icon: Users,
+    gradient: 'from-green-400 to-blue-500',
+    text: 'text-white',
+    component: AdminCustomersCard,
+    glowClass: 'shadow-[0_0_25px_-5px_rgba(74,222,128,0.5)]'
+  };
 
   if (viewsIndex !== -1) {
     cardsToRender.splice(viewsIndex + 1, 0, customersCard);
@@ -231,7 +238,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     }
   };
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -241,7 +248,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     },
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: { 
       opacity: 1, 

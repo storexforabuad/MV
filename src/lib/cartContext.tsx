@@ -4,8 +4,10 @@ import { createContext, useContext, useReducer, useEffect, ReactNode } from 'rea
 import { Product } from '../types/product';
 import { CartCache } from './cartCache';
 
-export interface CartItem extends Omit<Product, 'size'> {
+// The core of the fix: Omit 'storeId' from Product and add it back as an optional property.
+export interface CartItem extends Omit<Product, 'size' | 'storeId'> {
   quantity: number;
+  storeId?: string;
 }
 
 interface CartState {
@@ -14,8 +16,9 @@ interface CartState {
   totalAmount: number;
 }
 
+// The payload for 'ADD_ITEM' must also have an optional 'storeId'.
 type CartAction =
-  | { type: 'ADD_ITEM'; payload: Product & { quantity: number } }
+  | { type: 'ADD_ITEM'; payload: Omit<Product, 'storeId'> & { quantity: number; storeId?: string | null } }
   | { type: 'REMOVE_ITEM'; payload: string }
   | { type: 'UPDATE_QUANTITY'; payload: { id: string; quantity: number } }
   | { type: 'CLEAR_CART' };
@@ -51,9 +54,11 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         };
       }
 
+      const { storeId, ...restOfPayload } = action.payload;
       const newItem: CartItem = {
-        ...action.payload,
+        ...restOfPayload,
         quantity: 1,
+        storeId: storeId ?? undefined, // Convert null to undefined to match optional property
       };
 
       return {
@@ -109,7 +114,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const cachedCart = CartCache.get();
       if (cachedCart && cachedCart.length > 0) {
         return {
-          items: cachedCart,
+          items: cachedCart as CartItem[],
           totalItems: cachedCart.reduce((sum, item) => sum + item.quantity, 0),
           totalAmount: cachedCart.reduce((sum, item) => sum + (item.price * item.quantity), 0)
         } as CartState;
@@ -120,7 +125,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     return initial;
   });
 
-  // Save cart to cache whenever it changes
   useEffect(() => {
     CartCache.save(state.items);
   }, [state.items]);

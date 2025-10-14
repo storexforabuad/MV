@@ -10,6 +10,8 @@ interface CustomerMobileNavProps {
   setActiveSection: (section: CustomerSection) => void;
   onOrdersClick: () => void;
   onReferralsClick: () => void;
+  onWishlistClick: () => void;
+  onProfileClick: () => void;
   isModalOpen: boolean;
 }
 
@@ -21,12 +23,16 @@ const navItems = [
   { id: 'profile', icon: User, label: 'Profile' },
 ] as const;
 
-export function CustomerMobileNav({ activeSection, setActiveSection, onOrdersClick, onReferralsClick, isModalOpen }: CustomerMobileNavProps) {
+export function CustomerMobileNav({ activeSection, setActiveSection, onOrdersClick, onReferralsClick, onWishlistClick, onProfileClick, isModalOpen }: CustomerMobileNavProps) {
   const handleNavClick = (sectionId: CustomerSection) => {
     if (sectionId === 'orders') {
       onOrdersClick();
     } else if (sectionId === 'referrals') {
       onReferralsClick();
+    } else if (sectionId === 'wishlist') {
+      onWishlistClick();
+    } else if (sectionId === 'profile') {
+      onProfileClick();
     } else {
       setActiveSection(sectionId);
     }

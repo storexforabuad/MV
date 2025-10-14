@@ -147,9 +147,9 @@ export default function CreateStoreModal({
 
         const storeRef = doc(db, "stores", storeId);
 
-        const finalFormData: StoreMeta = {
+        const finalFormData = {
             ...formData,
-            storeId,
+            id: storeId,
             ceoImage: ceoImageUrl,
             name: formData.name ?? "Default Store Name",
             whatsapp: formData.whatsapp ?? "",

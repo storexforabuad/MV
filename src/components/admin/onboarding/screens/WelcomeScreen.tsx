@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
 
-interface WelcomeScreenProps {
+export interface WelcomeScreenProps {
   onNext: () => void;
   storeName: string;
   showConfetti?: boolean;
@@ -37,7 +37,7 @@ export default function WelcomeScreen({ onNext, storeName, showConfetti = false 
         onClick={onNext}
         className="mt-8 sm:mt-10 flex items-center justify-center px-6 py-3 bg-indigo-600 text-white font-semibold rounded-full shadow-lg hover:bg-indigo-700 transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
       >
-        Begin Your Journey
+        <span>Begin Your Journey</span>
         <ArrowRight className="ml-2 h-5 w-5" />
       </motion.button>
     </div>

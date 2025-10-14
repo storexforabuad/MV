@@ -238,8 +238,9 @@ export const ManageCategoriesModal: FC<{ isOpen: boolean; onClose: () => void; c
                         onClose={() => setShowDeleteConfirmation(null)}
                         onConfirm={confirmDelete}
                         title="Delete Category"
-                        description={`Are you sure you want to delete "${showDeleteConfirmation?.name}"? This action cannot be undone.`}
-                    />
+                    >
+                        {`Are you sure you want to delete "${showDeleteConfirmation?.name}"? This action cannot be undone.`}
+                    </ConfirmationDialog>
                 </motion.div>
             )}
         </AnimatePresence>

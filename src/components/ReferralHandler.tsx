@@ -7,9 +7,11 @@ const ReferralHandler = () => {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const referralCode = searchParams.get('ref');
-    if (referralCode) {
-      localStorage.setItem('referrerId', referralCode);
+    if (searchParams) {
+      const referralCode = searchParams.get('ref');
+      if (referralCode) {
+        localStorage.setItem('referrerId', referralCode);
+      }
     }
   }, [searchParams]);
 

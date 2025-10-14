@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { getStores, StoreMeta, getProducts, getPopularProducts } from '../../lib/db';
+import { getStores, getProducts, getPopularProducts } from '../../lib/db';
+import { StoreMeta } from '../../types/store';
 import { getStoreCaption, updateStoreCaption } from '../actions/devActions';
 import { resetAllOnboardingStatuses } from '../actions/onboardingActions'; // Import the new server action
 import CategoryManagement from '../../components/CategoryManagement';

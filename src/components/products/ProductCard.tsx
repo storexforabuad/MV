@@ -28,7 +28,7 @@ export default function ProductCard({ product, storeId }: ProductCardProps) {
     if (entries[0].isIntersecting) setIsVisible(true);
   }, { threshold: 0.2 });
 
-  useProductDetailPrefetch(storeId, product.id, (isVisible || isHovered) && !!storeId);
+  useProductDetailPrefetch(storeId, product.id, (isVisible || isHovered));
 
   if (!product.id) {
     console.error('Missing product id in ProductCard', { product });

@@ -16,4 +16,10 @@ export interface Customer {
   createdAt: Timestamp;
   totalReferralCommission: number;
   successfulReferralCount: number;
+  referralDataByStore?: {
+    [storeId: string]: {
+      commissionEarned?: number;
+      referralCount?: number;
+    };
+  };
 }

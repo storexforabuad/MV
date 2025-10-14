@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { X, ShoppingBag, User, MapPin, Phone } from 'lucide-react';
 import Image from 'next/image';
 import { StoreOrder } from '@/app/actions/orderActions';
@@ -12,13 +12,13 @@ interface AdminOrdersModalProps {
   orders: StoreOrder[];
 }
 
-const modalVariants = {
+const modalVariants: Variants = {
   hidden: { y: '100%', opacity: 0 },
   visible: { y: '0%', opacity: 1, transition: { type: 'spring', damping: 25, stiffness: 150 } },
   exit: { y: '100%', opacity: 0, transition: { duration: 0.2 } },
 };
 
-const backdropVariants = {
+const backdropVariants: Variants = {
     hidden: { opacity: 0 },
     visible: { opacity: 1 },
     exit: { opacity: 0 },
@@ -63,7 +63,7 @@ const AdminOrderDetailCard = ({ order }: { order: StoreOrder }) => {
             </div>
             <div className="flex items-start gap-3">
                 <MapPin className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
-                <span className="text-slate-600 dark:text-slate-300">{order.customerInfo.deliveryAddress.street}, {order.customerInfo.deliveryAddress.city}, {order.customerInfo.deliveryAddress.state} - {order.customerInfo.deliveryAddress.zip}</span>
+                <span className="text-slate-600 dark:text-slate-300">{order.customerInfo.deliveryAddress.street}, {order.customerInfo.deliveryAddress.state}</span>
             </div>
         </div>
       </div>

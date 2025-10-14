@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import { useCart } from '../../lib/cartContext';
+import { useCart, CartItem as CartItemType } from '../../lib/cartContext';
 import { ShoppingCart } from 'lucide-react';
 import { getStoreMeta } from '../../lib/db';
 import { useState, useEffect } from 'react';
@@ -14,7 +14,7 @@ import CustomerLookupModal from '@/components/customer/CustomerLookupModal';
 import toast from 'react-hot-toast';
 import { formatPrice } from '../../utils/price';
 
-const CartItem = dynamic(
+const CartItemComponent = dynamic(
   () => import('../../components/cart/CartItem'),
   { 
     loading: () => <div className="animate-pulse h-24 bg-gray-200 rounded-lg"></div>,
@@ -23,8 +23,10 @@ const CartItem = dynamic(
 );
 
 interface GroupedCart {
-  [storeId: string]: Product[];
+  [storeId: string]: CartItemType[];
 }
+
+const MARKETPLACE_KEY = 'Marketplace';
 
 export default function CartPage() {
   const { state, dispatch } = useCart();
@@ -37,7 +39,7 @@ export default function CartPage() {
 
   useEffect(() => {
     const newGroupedCart: GroupedCart = state.items.reduce((acc, item) => {
-      const storeId = item.storeId || 'unknown';
+      const storeId = item.storeId || MARKETPLACE_KEY;
       if (!acc[storeId]) {
         acc[storeId] = [];
       }
@@ -50,10 +52,14 @@ export default function CartPage() {
       const storeIds = Object.keys(newGroupedCart);
       const metas: {[storeId: string]: StoreMeta} = {};
       for (const id of storeIds) {
-        if (id !== 'unknown') {
-            const meta = await getStoreMeta(id);
-            if (meta) {
-                metas[id] = meta as StoreMeta;
+        if (id !== MARKETPLACE_KEY) {
+            try {
+                const meta = await getStoreMeta(id);
+                if (meta) {
+                    metas[id] = meta as StoreMeta;
+                }
+            } catch (error) {
+                console.error(`Failed to fetch store meta for ID: ${id}`, error)
             }
         }
       }
@@ -73,7 +79,7 @@ export default function CartPage() {
     dispatch({ type: 'REMOVE_ITEM', payload: id });
   };
   
-  const handleCheckout = async (storeId: string, items: Product[]) => {
+  const handleCheckout = async (storeId: string, items: CartItemType[]) => {
     if (!customer) {
       setIsLoginModalOpen(true);
       return;
@@ -88,9 +94,11 @@ export default function CartPage() {
     const referrerId = localStorage.getItem('referrerId');
     const storeMetaWithId = { ...storeMeta, id: storeId };
 
-    const orderPromises = items.map(item => 
-      addOrder(item, storeMetaWithId, item.quantity, customer, referrerId)
-    );
+    const orderPromises = items.map(item => {
+        const { quantity, ...productData } = item;
+        const productForOrder = { ...productData, storeId: storeId };
+        return addOrder(productForOrder as Product, storeMetaWithId, quantity, customer, referrerId)
+    });
 
     try {
       await toast.promise(
@@ -124,7 +132,6 @@ export default function CartPage() {
       
       window.open(whatsappUrl, '_blank');
       
-      // Remove only ordered items from cart
       items.forEach(item => {
           dispatch({ type: 'REMOVE_ITEM', payload: item.id });
       });
@@ -163,13 +170,14 @@ export default function CartPage() {
           {Object.entries(groupedCart).map(([storeId, items]) => {
             const storeMeta = storeMetas[storeId];
             const totalAmount = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+            const isMarketplace = storeId === MARKETPLACE_KEY;
 
             return (
               <div key={storeId} className="mb-8 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 sm:p-6 bg-white dark:bg-gray-800/20 shadow-sm">
-                <h2 className="text-lg font-bold card-text-gradient mb-4">{storeMeta?.name || 'Unknown Store'}</h2>
+                <h2 className="text-lg font-bold card-text-gradient mb-4">{isMarketplace ? 'Marketplace' : storeMeta?.name || 'Unknown Store'}</h2>
                 <div className="space-y-4">
                   {items.map(item => (
-                    <CartItem 
+                    <CartItemComponent 
                       key={item.id} 
                       item={item}
                       onUpdateQuantity={handleUpdateQuantity}
@@ -184,11 +192,11 @@ export default function CartPage() {
                   </div>
                   <button
                     onClick={() => handleCheckout(storeId, items)}
-                    disabled={!storeMeta}
+                    disabled={isMarketplace || !storeMeta}
                     className="mt-6 group relative w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-[var(--button-success)] text-white font-medium shadow-sm hover:shadow-md transition-all duration-300 hover:bg-[var(--button-success-hover)] transform-gpu active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <ShoppingCart className="w-5 h-5" />
-                    <span className="relative tracking-[-0.01em]">Order from {storeMeta?.name || '...'}</span>
+                    <span className="relative tracking-[-0.01em]">Order from {isMarketplace ? 'Marketplace' : storeMeta?.name || 'Store'}</span>
                   </button>
                 </div>
               </div>

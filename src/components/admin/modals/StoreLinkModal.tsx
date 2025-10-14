@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import Modal from '../../Modal';
 import { Send, Copy, Share2, X, Check } from 'lucide-react';
 
@@ -57,7 +57,7 @@ const StoreLinkModal: React.FC<StoreLinkModalProps> = ({ storeLink, handleClose,
     { name: 'Twitter', icon: TwitterIcon, url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}`, color: 'bg-[#1DA1F2] hover:bg-[#1A91DA]' },
   ];
 
-  const paneVariants = {
+  const paneVariants: Variants = {
     hidden: { opacity: 0, y: 15 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: 'easeOut' } },
   };

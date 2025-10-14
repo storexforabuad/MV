@@ -4,7 +4,7 @@
 import { ShoppingBag, Gift, Heart } from "lucide-react";
 import { motion } from "framer-motion";
 import { CustomerStatCard } from './CustomerStatCard';
-import { Order } from "@/types/order";
+import { Order } from "@/hooks/useOrders";
 import { Customer } from "@/types/customer";
 
 const containerVariants = {

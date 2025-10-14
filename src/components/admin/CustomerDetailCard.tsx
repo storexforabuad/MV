@@ -19,7 +19,6 @@ export const CustomerDetailCard: React.FC<CustomerDetailCardProps> = ({ customer
 
     const formattedAddress = [
         customer.deliveryAddress.street,
-        customer.deliveryAddress.city,
         customer.deliveryAddress.state,
     ].filter(Boolean).join(', ');
 

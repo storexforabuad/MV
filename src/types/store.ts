@@ -20,6 +20,9 @@ export interface StoreMeta {
   businessInstagram?: string;
   ceoName?: string;
   ceoImage?: string;
+  ceoEmail?: string;
+  ceoPhone?: string;
+  ceoInstagram?: string;
   
   // Physical address details
   hasPhysicalShop?: boolean;
@@ -28,4 +31,9 @@ export interface StoreMeta {
   streetAddress?: string;
   state?: string;
   country?: string;
+}
+
+export interface ProductCategory {
+  id: string;
+  name: string;
 }

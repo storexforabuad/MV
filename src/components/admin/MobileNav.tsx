@@ -26,7 +26,7 @@ interface MobileNavProps {
 const navItems = [
   { id: 'home', iconOutline: HomeIconOutline, iconSolid: HomeIconSolid, label: 'Home' },
   { id: 'preview', iconOutline: EyeIconOutline, iconSolid: EyeIconSolid, label: 'Store' },
-  { id: 'add', iconOutline: PlusIcon, label: 'Upload' },
+  { id: 'add', iconOutline: PlusIcon, iconSolid: PlusIcon, label: 'Upload' },
   { id: 'manage', iconOutline: CubeIconOutline, iconSolid: CubeIconSolid, label: 'Products' },
   { id: 'categories', iconOutline: TagIconOutline, iconSolid: TagIconSolid, label: 'Categories' },
 ];

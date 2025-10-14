@@ -6,7 +6,7 @@ import { ThemeProvider } from '../lib/themeContext'
 import Navbar from '../components/layout/navbar'
 import ClientProviders from '../components/ClientProviders'
 import { CustomerProvider } from '@/context/CustomerContext'
-import ReferralHandler from '@/components/ReferralHandler'
+import ReferralHandlerWrapper from '@/components/ReferralHandlerWrapper'
 
 const poppins = Poppins({ 
   subsets: ['latin'],
@@ -47,7 +47,7 @@ export default function RootLayout({
           <CustomerProvider>
             <CartProvider>
               <ClientProviders>
-                <ReferralHandler />
+                <ReferralHandlerWrapper />
                 <Navbar />
                 {children}
               </ClientProviders>
