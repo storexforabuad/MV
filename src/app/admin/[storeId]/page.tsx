@@ -122,7 +122,8 @@ export default function AdminStorePage() {
       setReferrals(fetchedReferrals);
       refreshOrders(); // Refresh orders as well
 
-      if (fetchedStoreMeta?.hasCompletedOnboarding) {
+      const hasCompletedOnboarding = localStorage.getItem('hasCompletedOnboarding') === 'true';
+      if (fetchedStoreMeta?.hasCompletedOnboarding || hasCompletedOnboarding) {
         setShowOnboarding(false);
         setUiVisible(true);
       } else {
@@ -199,6 +200,7 @@ export default function AdminStorePage() {
     setIsTransitioning(true);
     setShouldShowSpotlight(true);
     markOnboardingAsCompleted(storeId);
+    localStorage.setItem('hasCompletedOnboarding', 'true');
 
     setTimeout(() => {
       setIsTransitioning(false);

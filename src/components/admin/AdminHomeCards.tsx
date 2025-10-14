@@ -169,7 +169,7 @@ const formatCurrencyForCard = (amount: number) => {
   };
 
 export default function AdminHomeCards(props: AdminHomeCardsProps) {
-  const { spotlightStep, setSpotlightStep } = useSpotlightContext();
+  const { spotlightStep, completeSpotlight } = useSpotlightContext();
   const [openModal, setOpenModal] = useState<number | null>(null);
   const [isTipsModalOpen, setIsTipsModalOpen] = useState(false);
   const [isCustomersModalOpen, setIsCustomersModalOpen] = useState(false);
@@ -234,7 +234,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const handleCloseTipsModal = () => {
     setIsTipsModalOpen(false);
     if (spotlightStep === 'tips') {
-      setSpotlightStep('nav');
+      completeSpotlight();
     }
   };
 

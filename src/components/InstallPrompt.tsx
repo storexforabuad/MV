@@ -72,9 +72,9 @@ export default function InstallPrompt() {
             <p className="mt-2 text-sm text-text-secondary space-y-2 leading-relaxed">
               {isAdmin ? (
                 <>
-                  <span className="flex items-center gap-2"><span>🛒</span> See what’s selling at a glance</span>
+                  <span className="flex items-center gap-2"><span>🛒</span> See all your orders at a glance</span>
                   <span className="flex items-center gap-2"><span>👀</span> Track store views and top products</span>
-                  <span className="flex items-center gap-2"><span>💰</span> Know who owes you (debtors)</span>
+                  
                   <span className="flex items-center gap-2"><span>📈</span> Watch your store grow in real time</span>
                   <span className="flex items-center gap-2"><span>🗂️</span> Manage everything—all in one place</span>
                 </>

@@ -62,11 +62,16 @@ export default function OnboardingFlow({ storeName, onComplete }: OnboardingFlow
   const [step, setStep] = useState(0);
   const totalSteps = steps(storeName).length;
 
+  const handleComplete = () => {
+    localStorage.setItem('hasCompletedOnboarding', 'true');
+    onComplete();
+  };
+
   const handleNext = () => {
     if (step < totalSteps - 1) {
       setStep(step + 1);
     } else {
-      onComplete();
+      handleComplete();
     }
   };
 
@@ -92,7 +97,7 @@ export default function OnboardingFlow({ storeName, onComplete }: OnboardingFlow
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md">
       <div className="relative w-full h-full sm:max-w-md sm:max-h-[90vh] sm:rounded-2xl bg-slate-50 dark:bg-slate-900 shadow-2xl flex flex-col overflow-hidden">
         <div className="absolute top-3 right-3 z-10">
-          <button onClick={onComplete} className="p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+          <button onClick={handleComplete} className="p-2 rounded-full text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
             <X size={20} />
           </button>
         </div>
