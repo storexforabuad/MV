@@ -19,7 +19,9 @@ import {
   Timestamp,
   collectionGroup,
   startAfter,
-  DocumentSnapshot
+  DocumentSnapshot,
+  DocumentData,
+  Query
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Product } from '../types/product';
@@ -41,6 +43,7 @@ export interface StoreMeta {
   name: string;
   createdAt?: Timestamp;
   whatsapp?: string;
+  hasCompletedOnboarding?: boolean;
   // Add more fields as needed (e.g., description, contact, etc.)
 }
 
@@ -65,13 +68,13 @@ export interface PaginatedProductsResult {
   lastVisible: DocumentSnapshot | null;
 }
 
-const transformProductData = (data: any): Product => {
-  const product: { [key: string]: any } = { ...data };
+const transformProductData = (data: DocumentData): Product => {
+  const product: Record<string, unknown> = { ...data };
 
   // Convert Timestamps to ISO strings
   for (const key in product) {
     if (product[key] instanceof Timestamp) {
-      product[key] = product[key].toDate().toISOString();
+      product[key] = (product[key] as Timestamp).toDate().toISOString();
     }
   }
 
@@ -554,7 +557,7 @@ export async function incrementProductViews(storeId: string, productId: string):
 
 // --- New & Updated Global Marketplace Functions ---
 
-async function executePaginatedQuery(q: any): Promise<PaginatedProductsResult> {
+async function executePaginatedQuery(q: Query): Promise<PaginatedProductsResult> {
   const snapshot = await getDocs(q);
   const products = snapshot.docs.map(doc => {
       const data = doc.data();

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, FormEvent } from 'react';
+import { useState, useEffect, FormEvent, useCallback } from 'react';
 import { Gift, X, Loader2, ServerCrash } from 'lucide-react';
 
 interface ReferralsModalProps {
@@ -12,7 +12,7 @@ interface Referral {
   id: string;
   businessName: string;
   businessNumber: string;
-  createdAt: any;
+  createdAt: { seconds: number; nanoseconds: number; };
 }
 
 const ReferralsModal: React.FC<ReferralsModalProps> = ({ storeId, handleClose, onReferralAdded }) => {
@@ -23,7 +23,7 @@ const ReferralsModal: React.FC<ReferralsModalProps> = ({ storeId, handleClose, o
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchReferrals = async () => {
+  const fetchReferrals = useCallback(async () => {
     setIsLoading(true);
     try {
       const response = await fetch(`/api/stores/${storeId}/referrals`);
@@ -36,11 +36,11 @@ const ReferralsModal: React.FC<ReferralsModalProps> = ({ storeId, handleClose, o
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [storeId]);
 
   useEffect(() => {
     fetchReferrals();
-  }, [storeId]);
+  }, [fetchReferrals]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

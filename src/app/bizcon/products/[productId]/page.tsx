@@ -8,6 +8,7 @@ import { getProductById, getStoreMeta } from '../../../../lib/db';
 import { CirclePlus, ShoppingCart, Clock, Check } from 'lucide-react';
 import { useCart } from '../../../../lib/cartContext';
 import { useOrders } from '../../../../hooks/useOrders';
+import { useCustomer } from '../../../../context/CustomerContext';
 import { Product } from '../../../../types/product';
 import { StoreMeta } from '../../../../types/store';
 import { calculateDiscount, formatPrice } from '../../../../utils/price';
@@ -34,9 +35,10 @@ export default function ProductDetail() {
   const [isInCart, setIsInCart] = useState(false);
   const { state, dispatch } = useCart();
   const searchParams = useSearchParams();
+  const { customer } = useCustomer();
 
-  const storeId = useMemo(() => searchParams.get('storeId'), [searchParams]);
-  const { addOrder } = useOrders(storeId); // Pass storeId in global context
+  const storeId = useMemo(() => searchParams ? searchParams.get('storeId') : null, [searchParams]);
+  const { addOrder } = useOrders(customer?.id || null, storeId || undefined); // Pass storeId in global context
   const [storeMeta, setStoreMeta] = useState<StoreMeta | null>(null);
 
   const [imageLoading, setImageLoading] = useState(true);
@@ -101,9 +103,9 @@ export default function ProductDetail() {
   }
 
   const handleOrderNow = async () => {
-    if (!product?.storeId || !storeMeta || !storeMeta.whatsapp) return;
+    if (!product?.storeId || !storeMeta || !storeMeta.whatsapp || !customer) return;
 
-    addOrder(product, storeMeta);
+    addOrder(product, storeMeta, 1, customer, null);
     await incrementOrderCount(product.storeId, 1);
 
     const message = 

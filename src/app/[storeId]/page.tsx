@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback, useRef, useTransition } from 'react';
 import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
+import { DocumentSnapshot } from 'firebase/firestore';
 import {
   getProducts,
   getProductsByCategory,
@@ -16,7 +17,6 @@ import CategoryBar from '../../components/layout/CategoryBar';
 import SkeletonLoader from '../../components/SkeletonLoader';
 import type { Product } from '../../types/product';
 import ConnectionErrorToast from '../../components/ConnectionErrorToast';
-import { CategoryCache } from '../../lib/categoryCache';
 import { ProductListCache } from '../../lib/productCache';
 import ReferralBanner from '@/components/customer/ReferralBanner';
 import PromoBanner from '@/components/layout/PromoBanner';
@@ -53,7 +53,7 @@ export default function StorefrontPage() {
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [activeCategoryId, setActiveCategoryId] = useState('promo');
-  const [lastVisible, setLastVisible] = useState<any>(null);
+  const [lastVisible, setLastVisible] = useState<DocumentSnapshot | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const { isConnectionError, setIsConnectionError } = useConnectionCheck();
   const observerRef = useRef<HTMLDivElement>(null);
@@ -61,7 +61,7 @@ export default function StorefrontPage() {
   const [isPending, startTransition] = useTransition();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-  const fetchProducts = useCallback(async (categoryId: string, pageNum = 1, lastDoc: any = null) => {
+  const fetchProducts = useCallback(async (categoryId: string, pageNum = 1, lastDoc: DocumentSnapshot | null = null) => {
     if (!storeId) return;
     setLoading(true);
     try {

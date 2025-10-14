@@ -2,11 +2,10 @@
 
 import { User } from 'lucide-react';
 
-interface ProfileSectionProps {
-  storeId?: string;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface ProfileSectionProps {}
 
-export function ProfileSection({ storeId }: ProfileSectionProps) {
+export function ProfileSection({}: ProfileSectionProps) {
   return (
     <div className="text-center py-20 px-6">
       <User className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />

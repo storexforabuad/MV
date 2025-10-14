@@ -2,7 +2,7 @@
 import { memo, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Grid2X2, LayoutList, Info, Phone, MessageCircle, Star, Clock, X, MapPin, User } from 'lucide-react';
+import { Info, Phone, MessageCircle, Star, Clock, X, MapPin, User } from 'lucide-react';
 import { Product } from '../../types/product';
 import { motion, LayoutGroup, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
@@ -23,30 +23,6 @@ const ProductCard = dynamic(() => import('./ProductCard'), {
   ssr: false
 });
 
-const DUMMY_BUSINESS = {
-  ceo: {
-  name: 'Haj. Fatimah I. Goni',
-  image: '/images/ceo-profile-northern-nigeria.jpg',
-},
-  businessName: 'Alaniq INT.',
-  phone: '+2349021067212',
-  whatsapp: '+2349021067212',
-  address: 'No. 2, Garki Plaza, Ahmadu Bello Way, Abuja',
-  hasPhysicalStore: true,
-  rating: 4.8,
-  reviews: 476,
-  certified: true,
-  years: 4,
-  delivery: 'Nationwide Delivery',
-  country: 'Nigeria',
-  countryFlag: '🇳🇬',
-  businessHours: 'Open 24/7',
-  responseTime: 'Usually responds within 1 hour',
-  instagram: '@al_aniq_int',
-  facebook: 'Alaniq INT. ',
-  specialization: 'Premium Turanrenwuta, Khumras, Oil Perfumes & RTW'
-};
-
 function GlassButton({ onClick, children, 'aria-label': ariaLabel, text }: { onClick: () => void; children?: ReactNode; 'aria-label': string; text?: string }) {
   const paddingClass = text ? 'px-4 py-3' : 'p-3';
   return (
@@ -64,7 +40,6 @@ function GlassButton({ onClick, children, 'aria-label': ariaLabel, text }: { onC
 }
 
 function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean; onClose: () => void; storeMeta?: StoreMeta }) {
-  const b = { ...DUMMY_BUSINESS, ...storeMeta };
   
   useEffect(() => {
     if (!open) return;
@@ -84,7 +59,36 @@ function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean; onClos
     };
   }, [open, onClose]);
   
-  const fullAddress = [b.shopNumber, b.plazaBuildingName, b.streetAddress, b.state, b.country].filter(Boolean).join(', ');
+  if (!storeMeta) {
+    return (
+        <AnimatePresence>
+            {open && (
+                <motion.div
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-2"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    onClick={onClose}
+                >
+                    <motion.div
+                        className="relative w-full max-w-sm mx-auto rounded-2xl overflow-hidden shadow-2xl bg-white dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 flex flex-col items-center justify-center h-64"
+                        initial={{ y: 50, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: 50, opacity: 0 }}
+                        transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                        onClick={e => e.stopPropagation()}
+                    >
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-white"></div>
+                        <p className="mt-4 text-slate-500 dark:text-slate-400">Loading Business Info...</p>
+                    </motion.div>
+                </motion.div>
+            )}
+        </AnimatePresence>
+    );
+  }
+
+  const fullAddress = [storeMeta.shopNumber, storeMeta.plazaBuildingName, storeMeta.streetAddress, storeMeta.state, storeMeta.country].filter(Boolean).join(', ');
 
   return (
     <AnimatePresence>
@@ -119,24 +123,24 @@ function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean; onClos
             <div className="flex-grow overflow-y-auto">
               <div className="p-6 pt-8 text-center">
                 
-                {b.ceoImage && (
+                {storeMeta.ceoImage && (
                   <Image
-                    src={b.ceoImage}
-                    alt={b.ceoName || 'CEO'}
+                    src={storeMeta.ceoImage}
+                    alt={storeMeta.ceoName || 'CEO'}
                     width={96}
                     height={96}
                     className="w-24 h-24 rounded-full object-cover shadow-lg border-4 border-white dark:border-slate-700 mx-auto mb-4"
                   />
                 )}
 
-                {b.businessDescription && (
-                  <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">{b.businessDescription}</p>
+                {storeMeta.businessDescription && (
+                  <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">{storeMeta.businessDescription}</p>
                 )}
 
-                {b.ceoName && (
-                  <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">{b.ceoName}</h2>
+                {storeMeta.ceoName && (
+                  <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">{storeMeta.ceoName}</h2>
                 )}
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">CEO, {b.name}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">CEO, {storeMeta.name}</p>
 
                 <div className="flex items-center justify-center gap-2">
                   <div className="flex items-center gap-1">
@@ -149,7 +153,7 @@ function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean; onClos
               </div>
 
               <div className="px-4 pb-6 space-y-3">
-                {b.hasPhysicalShop && fullAddress && (
+                {storeMeta.hasPhysicalShop && fullAddress && (
                   <div className="flex items-start gap-3 p-3 bg-slate-50/80 dark:bg-slate-700/50 rounded-lg">
                     <MapPin className="w-5 h-5 text-slate-600 dark:text-slate-300 flex-shrink-0 mt-0.5" />
                     <span className="text-sm text-slate-700 dark:text-slate-200">{fullAddress}</span>
@@ -161,12 +165,12 @@ function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean; onClos
                   <span className="text-sm text-slate-700 dark:text-slate-200 font-medium">Open 24/7</span>
                 </div>
 
-                {b.businessInstagram && (
+                {storeMeta.businessInstagram && (
                   <div className="flex items-center gap-3 p-3 bg-slate-50/80 dark:bg-slate-700/50 rounded-lg">
                      <div className="w-5 h-5 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-md flex items-center justify-center">
                         <span className="text-white text-[10px] font-bold">IG</span>
                       </div>
-                    <span className="text-sm text-slate-700 dark:text-slate-200">{b.businessInstagram}</span>
+                    <span className="text-sm text-slate-700 dark:text-slate-200">{storeMeta.businessInstagram}</span>
                   </div>
                 )}
               </div>
@@ -175,7 +179,7 @@ function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean; onClos
             <div className="p-4 bg-white dark:bg-slate-800 border-t border-slate-200/50 dark:border-slate-700/50">
               <div className="grid grid-cols-2 gap-3">
                 <motion.a
-                  href={`tel:${b.whatsapp?.replace(/\s/g, '')}`}
+                  href={`tel:${storeMeta.whatsapp?.replace(/\s/g, '')}`}
                   className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-semibold py-3 rounded-xl shadow-lg"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -185,7 +189,7 @@ function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean; onClos
                 </motion.a>
 
                 <motion.a
-                  href={`https://wa.me/${b.whatsapp?.replace(/\D/g, '')}`}
+                  href={`https://wa.me/${storeMeta.whatsapp?.replace(/\D/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white font-semibold py-3 rounded-xl shadow-lg"
@@ -230,7 +234,7 @@ const EmptyCategory = () => (
 interface ProductGridProps {
   products: Product[];
   containerRef?: React.Ref<HTMLDivElement>;
-  storeId: string;
+  storeId?: string;
 }
 
 const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId }: ProductGridProps) {
@@ -250,9 +254,9 @@ const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId 
   }, [storeId]);
   
   const handleDashboardClick = () => {
-    if (customer) {
+    if (storeId && customer) {
       router.push(`/dashboard/${storeId}/${customer.id}`);
-    } else {
+    } else if (storeId) {
       promptLogin((customerId) => {
         router.push(`/dashboard/${storeId}/${customerId}`);
       });
@@ -277,29 +281,31 @@ const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId 
 
   return (
     <LayoutGroup>
-      <div className="sm:hidden fixed bottom-16 left-0 right-0 z-40 flex justify-center pointer-events-none">
-        <div className="flex items-center gap-2 pointer-events-auto">
-          <GlassButton
-            onClick={() => setIsSingleColumn(!isSingleColumn)}
-            aria-label="Toggle grid layout"
-            text={isSingleColumn ? 'Double' : 'Single'}
-          />
-          <GlassButton
-            onClick={handleDashboardClick}
-            aria-label="Customer activity"
-          >
-            <User className="w-5 h-5 text-[var(--text-primary)]" />
-          </GlassButton>
-          <GlassButton
-            onClick={() => setAboutOpen(true)}
-            aria-label="About this business"
-          >
-            <Info className="w-5 h-5 text-[var(--text-primary)]" />
-          </GlassButton>
+      {storeId && (
+        <div className="sm:hidden fixed bottom-16 left-0 right-0 z-40 flex justify-center pointer-events-none">
+          <div className="flex items-center gap-2 pointer-events-auto">
+            <GlassButton
+              onClick={() => setIsSingleColumn(!isSingleColumn)}
+              aria-label="Toggle grid layout"
+              text={isSingleColumn ? 'Double' : 'Single'}
+            />
+            <GlassButton
+              onClick={handleDashboardClick}
+              aria-label="Customer activity"
+            >
+              <User className="w-5 h-5 text-[var(--text-primary)]" />
+            </GlassButton>
+            <GlassButton
+              onClick={() => setAboutOpen(true)}
+              aria-label="About this business"
+            >
+              <Info className="w-5 h-5 text-[var(--text-primary)]" />
+            </GlassButton>
+          </div>
         </div>
-      </div>
+      )}
       
-      <BusinessCardModal open={aboutOpen} onClose={() => setAboutOpen(false)} storeMeta={storeMeta || undefined} />
+      {storeId && <BusinessCardModal open={aboutOpen} onClose={() => setAboutOpen(false)} storeMeta={storeMeta || undefined} />}
       
       <motion.div
         ref={containerRef}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useEffect, useState, Suspense, useCallback } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
 import { 
   getProducts, 
   getCategories, 
@@ -297,7 +297,6 @@ export default function AdminStorePage() {
         products={products}
         setProducts={setProducts}
         categories={categories}
-        storeId={storeId}
         onUpdateProduct={handleUpdateProduct}
         onDeleteProduct={handleDeleteProduct}
       />

@@ -1,11 +1,13 @@
-'use server';
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, getDocs, Timestamp } from 'firebase/firestore';
 
 // POST new referral for a store
-export async function POST(req: NextRequest, { params }: { params: { storeId: string } }) {
-  const { storeId } = params;
+export async function POST(
+  req: NextRequest, 
+  context: { params: Promise<{ storeId: string }> }
+) {
+  const { storeId } = await context.params;
   if (!storeId) {
     return NextResponse.json({ error: 'Store ID is required' }, { status: 400 });
   }
@@ -34,8 +36,11 @@ export async function POST(req: NextRequest, { params }: { params: { storeId: st
 }
 
 // GET all referrals for a store
-export async function GET(req: NextRequest, { params }: { params: { storeId: string } }) {
-  const { storeId } = params;
+export async function GET(
+  req: NextRequest, 
+  context: { params: Promise<{ storeId: string }> }
+) {
+  const { storeId } = await context.params;
   if (!storeId) {
     return NextResponse.json({ error: 'Store ID is required' }, { status: 400 });
   }
@@ -46,7 +51,6 @@ export async function GET(req: NextRequest, { params }: { params: { storeId: str
 
     const referrals = querySnapshot.docs.map(doc => {
       const data = doc.data();
-      // Safely handle the timestamp, providing a default if it's missing
       const createdAt = (data.createdAt && data.createdAt.seconds !== undefined)
         ? { seconds: data.createdAt.seconds, nanoseconds: data.createdAt.nanoseconds }
         : { seconds: 0, nanoseconds: 0 };

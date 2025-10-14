@@ -26,7 +26,7 @@ export default function WelcomeScreen({ onNext, storeName, showConfetti = false 
           Welcome, CEO {storeName}!
         </h1>
         <p className="mt-4 text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-md mx-auto">
-          We're thrilled you're here. You've just unlocked your personal command center on the Business Science™ platform. This is where your vision takes flight.
+          We&apos;re thrilled you&apos;re here. You&apos;ve just unlocked your personal command center on the Business Science™ platform. This is where your vision takes flight.
         </p>
       </motion.div>
 

@@ -3,7 +3,6 @@
 
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { motion } from 'framer-motion';
 import { X, Copy, Share2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 

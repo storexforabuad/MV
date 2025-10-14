@@ -2,7 +2,6 @@
 import React, { useState, useMemo, Fragment } from 'react';
 import { Dialog, Transition, Menu } from '@headlessui/react';
 import { XMarkIcon, MagnifyingGlassIcon, EllipsisVerticalIcon, EyeIcon } from '@heroicons/react/24/solid';
-import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { Percent } from 'lucide-react';
 import { Product } from '../../types/product';
@@ -17,7 +16,6 @@ interface ManageProductsModalProps {
   products: Product[];
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   categories: { id: string; name: string }[];
-  storeId: string;
   onUpdateProduct: (productId: string, data: Partial<Product>) => void;
   onDeleteProduct: (productId: string) => void;
 }
@@ -120,7 +118,7 @@ const FilterChip = ({ label, value, activeFilter, onClick }: { label: string, va
 
 // --- MAIN COMPONENT ---
 
-const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClose, products, setProducts, categories, storeId, onUpdateProduct, onDeleteProduct }) => {
+const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClose, products, setProducts, categories, onUpdateProduct, onDeleteProduct }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);

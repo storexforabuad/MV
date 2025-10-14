@@ -2,11 +2,10 @@
 
 import { Package } from 'lucide-react';
 
-interface OrdersSectionProps {
-  storeId?: string;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface OrdersSectionProps {}
 
-export function OrdersSection({ storeId }: OrdersSectionProps) {
+export function OrdersSection({}: OrdersSectionProps) {
   return (
     <div className="text-center py-20 px-6">
       <Package className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />

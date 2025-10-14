@@ -2,11 +2,10 @@
 
 import { Heart } from 'lucide-react';
 
-interface WishlistSectionProps {
-  storeId?: string;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+interface WishlistSectionProps {}
 
-export function WishlistSection({ storeId }: WishlistSectionProps) {
+export function WishlistSection({}: WishlistSectionProps) {
   return (
     <div className="text-center py-20 px-6">
       <Heart className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />

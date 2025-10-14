@@ -3,7 +3,6 @@
 import { db } from '@/lib/db';
 import {
   collection,
-  addDoc,
   getDocs,
   query,
   orderBy,
@@ -14,7 +13,6 @@ import {
   where,
   limit,
   increment,
-  Query
 } from 'firebase/firestore';
 import { Product } from '@/types/product';
 import { StoreMeta } from '@/types/store';
@@ -216,5 +214,25 @@ export const fetchStoreOrders = async (storeId: string): Promise<StoreOrder[]> =
   } catch (error) {
     console.error("Error fetching store orders from Firestore:", error);
     throw new Error("Failed to fetch store orders.");
+  }
+};
+
+/**
+ * Increments the total order count for a given store.
+ * This is a simple atomic update.
+ */
+export const incrementOrderCount = async (storeId: string, incrementValue: number) => {
+  if (!storeId || typeof incrementValue !== 'number') {
+    console.error('Invalid arguments for incrementOrderCount');
+    return;
+  }
+  try {
+    const storeRef = doc(db, 'stores', storeId);
+    const batch = writeBatch(db);
+    batch.update(storeRef, { totalOrders: increment(incrementValue) });
+    await batch.commit();
+  } catch (error) {
+    console.error('Error incrementing order count:', error);
+    // Decide on error handling strategy, e.g., silent fail or re-throw
   }
 };

@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X, Loader, CheckCircle, MapPin, Search } from "lucide-react";
 import { findCustomerByPhone, findOrCreateCustomer } from "@/app/actions/customerActions";
@@ -224,7 +224,7 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
                         <p className="text-slate-600 dark:text-slate-300 mt-2">Your referral link is now active. Congrats!</p>
                     </>
                 ) : (
-                    <h2 className="text-3xl font-bold mt-4 text-slate-800 dark:text-white">You're all set!</h2>
+                    <h2 className="text-3xl font-bold mt-4 text-slate-800 dark:text-white">You&apos;re all set!</h2>
                 )}
                 <Confetti
                     width={400}

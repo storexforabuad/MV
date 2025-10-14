@@ -4,15 +4,15 @@ import { Image, CircleDollarSign, TrendingUp } from 'lucide-react';
 const ProductUploadTips = () => {
   const tips = [
     {
-      icon: <Image size={20} className="text-blue-500" />,
+      icon: <Image size={20} className="text-blue-500" alt="Image tip" />,
       text: "Use clear, high-quality photos for best results.",
     },
     {
-      icon: <CircleDollarSign size={20} className="text-green-500" />,
+      icon: <CircleDollarSign size={20} className="text-green-500" alt="Pricing tip" />,
       text: "Competitive prices and promos attract more buyers.",
     },
     {
-      icon: <TrendingUp size={20} className="text-purple-500" />,
+      icon: <TrendingUp size={20} className="text-purple-500" alt="Commission tip" />,
       text: "Higher referral commissions lead to more shares and sales.",
     },
   ];

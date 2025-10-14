@@ -42,7 +42,7 @@ const ReferralsModal: React.FC<ReferralsModalProps> = ({ isOpen, onClose, storeI
         <div>
           <h3 className="text-lg font-medium">How It Works</h3>
           <p className="text-sm text-slate-500 mt-2">
-            Share your unique referral link with friends. When a new customer uses your link to make their first purchase on a product with commission, you'll earn a 50% cut!
+            Share your unique referral link with friends. When a new customer uses your link to make their first purchase on a product with commission, you&apos;ll earn a 50% cut!
           </p>
         </div>
 

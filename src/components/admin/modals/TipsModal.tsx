@@ -41,7 +41,7 @@ export default function TipsModal({ handleClose }: TipsModalProps) {
               Quick Stats
             </h3>
             <p className="text-sm sm:text-base">
-              Tap on cards like 'Views', 'Products', or 'Revenue' to see more detailed information and analytics.
+              Tap on cards like &apos;Views&apos;, &apos;Products&apos;, or &apos;Revenue&apos; to see more detailed information and analytics.
             </p>
           </div>
 
@@ -51,7 +51,7 @@ export default function TipsModal({ handleClose }: TipsModalProps) {
               Product Management
             </h3>
             <p className="text-sm sm:text-base">
-              Tapping the 'Popular', 'Limited', or 'Sold Out' cards will take you directly to a filtered list of those products.
+              Tapping the &apos;Popular&apos;, &apos;Limited&apos;, or &apos;Sold Out&apos; cards will take you directly to a filtered list of those products.
             </p>
           </div>
         </div>

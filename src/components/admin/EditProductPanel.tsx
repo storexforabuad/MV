@@ -1,6 +1,6 @@
 
 'use client';
-import React, { useState, useEffect, Fragment, useMemo } from 'react';
+import React, { useState, useEffect, Fragment, useMemo, ChangeEvent } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
 import { Product } from '../../types/product';
@@ -27,7 +27,7 @@ interface ProductFormState extends Omit<Product, 'price' | 'originalPrice'> {
 }
 
 // A simple styled input
-const StyledInput = ({ id, label, value, onChange, type = 'text', placeholder = '' }) => (
+const StyledInput: React.FC<{ id: string, label: string, value: string | number, onChange: (e: ChangeEvent<HTMLInputElement>) => void, type?: string, placeholder?: string }> = ({ id, label, value, onChange, type = 'text', placeholder = '' }) => (
     <div>
         <label htmlFor={id} className="block text-sm font-medium text-text-secondary">{label}</label>
         <input
@@ -75,7 +75,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
     }
   }, [isOpen, product]);
 
-  const handleInputChange = (field: keyof ProductFormState, value: any) => {
+  const handleInputChange = (field: keyof ProductFormState, value: string | number | boolean) => {
     setFormState(prev => ({ ...prev, [field]: value }));
   };
 
@@ -108,8 +108,8 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
         payload.originalPrice = null;
     }
 
-    delete (payload as any).promoPrice;
-    delete (payload as any).basePrice;
+    delete (payload as Partial<ProductFormState>).promoPrice;
+    delete (payload as Partial<ProductFormState>).basePrice;
       
     onSave(payload);
     ProductDetailCache.clear(product.id);
@@ -171,7 +171,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                             id="product-name"
                             label="Product Name"
                             value={formState.name ?? ''}
-                            onChange={(e) => handleInputChange('name', e.target.value)}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => handleInputChange('name', e.target.value)}
                         />
 
                          <div>
@@ -186,7 +186,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                             id="price"
                             label="Price"
                             value={formState.basePrice ?? ''}
-                            onChange={(e) => handlePriceChange('basePrice', e.target.value)}
+                            onChange={(e: ChangeEvent<HTMLInputElement>) => handlePriceChange('basePrice', e.target.value)}
                             type="number"
                         />
 
@@ -263,7 +263,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
         onClose={() => setCategorySelectorOpen(false)}
         categories={categories}
         selectedCategoryId={formState.categoryId}
-        onSelect={(categoryId) => {
+        onSelect={(categoryId: string) => {
             handleInputChange('categoryId', categoryId);
             setCategorySelectorOpen(false);
         }}

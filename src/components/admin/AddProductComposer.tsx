@@ -1,8 +1,8 @@
 'use client';
-import React, { useState, useEffect, useRef, Fragment } from 'react';
+import React, { useState, useRef, Fragment, ChangeEvent } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon, PhotoIcon, ChevronLeftIcon, ChevronRightIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
-import { ArrowPathIcon, CheckIcon } from '@heroicons/react/24/outline';
+import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
@@ -59,7 +59,7 @@ const ModernToggle: React.FC<{ checked: boolean; onChange: (checked: boolean) =>
     </label>
 );
 
-const FloatingLabelInput = ({ label, value, onChange, type = 'text', placeholder = ' ' }: any) => (
+const FloatingLabelInput: React.FC<{ label: string, value: string | number, onChange: (e: ChangeEvent<HTMLInputElement>) => void, type?: string, placeholder?: string }> = ({ label, value, onChange, type = 'text', placeholder = ' ' }) => (
   <div className="relative">
     <input
       type={type}
@@ -128,7 +128,7 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
     }
   };
   
-  const handleProductChange = (index: number, field: string, value: any) => {
+  const handleProductChange = (index: number, field: string, value: string | number | boolean) => {
     let newBatchProducts = batchProducts.map((p, i) => i === index ? { ...p, [field]: value } : p);
 
     const changedProduct = newBatchProducts[index];
@@ -274,7 +274,7 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
             <div className="p-4 sm:p-6 space-y-6">
                 {currentStep === 1 && (
                     <motion.div key="details" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-                        <FloatingLabelInput label="Product Name" value={activeProduct.name} onChange={(e: any) => handleProductChange(activeProductIndex, 'name', e.target.value)} />
+                        <FloatingLabelInput label="Product Name" value={activeProduct.name} onChange={(e: ChangeEvent<HTMLInputElement>) => handleProductChange(activeProductIndex, 'name', e.target.value)} />
                         <button onClick={() => setCategorySelectorOpen(true)} className="w-full text-left p-4 bg-input-background rounded-lg border-2 border-input-border">
                             <span className={activeProduct.categoryId ? 'text-text-primary' : 'text-text-secondary'}>{categoryName}</span>
                         </button>
@@ -282,12 +282,12 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
                 )}
                 {currentStep === 2 && (
                     <motion.div key="pricing" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-                        <FloatingLabelInput label="Price" type="number" value={activeProduct.price} onChange={(e: any) => handleProductChange(activeProductIndex, 'price', parseFloat(e.target.value) || 0)} />
+                        <FloatingLabelInput label="Price" type="number" value={activeProduct.price} onChange={(e: ChangeEvent<HTMLInputElement>) => handleProductChange(activeProductIndex, 'price', parseFloat(e.target.value) || 0)} />
                         <ModernToggle label="Add Promo Price" checked={activeProduct.isPromo} onChange={checked => handleProductChange(activeProductIndex, 'isPromo', checked)} />
                         <AnimatePresence>
                             {activeProduct.isPromo && (
                                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
-                                    <FloatingLabelInput label="Promo Price" type="number" value={activeProduct.promoPrice || ''} onChange={(e: any) => handleProductChange(activeProductIndex, 'promoPrice', parseFloat(e.target.value) || 0)} />
+                                    <FloatingLabelInput label="Promo Price" type="number" value={activeProduct.promoPrice || ''} onChange={(e: ChangeEvent<HTMLInputElement>) => handleProductChange(activeProductIndex, 'promoPrice', parseFloat(e.target.value) || 0)} />
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -430,7 +430,7 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
             onClose={() => setCategorySelectorOpen(false)}
             categories={categories}
             selectedCategoryId={batchProducts[activeProductIndex]?.categoryId}
-            onSelect={(categoryId) => {
+            onSelect={(categoryId: string) => {
                 handleProductChange(activeProductIndex, 'categoryId', categoryId);
                 setCategorySelectorOpen(false);
             }}

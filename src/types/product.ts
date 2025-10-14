@@ -5,6 +5,7 @@ export interface Product {
   price: number;
   originalPrice?: number;
   category: string;
+  categoryId?: string;
   images: string[];
   inStock: boolean;
   features?: string[];

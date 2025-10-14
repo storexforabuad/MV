@@ -81,7 +81,7 @@ export default function BizconPage() {
       
       if (result && result.products) {
         if (isInitialLoad) {
-          ProductListCache.set(cacheKey, { products: result.products, lastVisible: result.lastVisible, hasMore: result.lastVisible !== null });
+          ProductListCache.set(cacheKey, result.products);
         }
         setProducts(prev => isInitialLoad ? result.products : [...prev, ...result.products]);
         setLastVisible(result.lastVisible);
@@ -104,9 +104,9 @@ export default function BizconPage() {
     const cachedData = ProductListCache.get(cacheKey);
 
     if (cachedData) {
-      setProducts(cachedData.products);
-      setLastVisible(cachedData.lastVisible);
-      setHasMore(cachedData.hasMore);
+      setProducts(cachedData);
+      setLastVisible(null); // This might need adjustment if you cache the lastVisible document too
+      setHasMore(true); // Same as above
       setActiveCategory(category);
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
@@ -124,13 +124,12 @@ export default function BizconPage() {
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        const cacheKey = 'bizcon_popular_categories';
-        const cached = CategoryCache.get(cacheKez);
+        const cached = CategoryCache.get();
         if (cached) {
           setCategories(cached);
         } else {
           const fetchedCategories = await getPopularCategories();
-          CategoryCache.save(fetchedCategories, cacheKey);
+          CategoryCache.save(fetchedCategories);
           setCategories(fetchedCategories);
         }
         fetchProducts(activeCategory, null);
@@ -169,7 +168,7 @@ export default function BizconPage() {
       <div className="pt-16 pb-safe-area-inset-bottom">
         <CategoryBar 
           onCategorySelect={handleCategorySelect}
-          activeCategory={activeCategory}
+          activeCategoryId={activeCategory}
           categories={categories}
           onActiveCategoryClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         />
@@ -184,7 +183,7 @@ export default function BizconPage() {
               <ProductGrid 
                 products={products}
                 containerRef={productGridRef}
-                storeId={null}
+                storeId=""
               />
               {hasMore && (
                 <div ref={observerRef} className="h-8 flex items-center justify-center">

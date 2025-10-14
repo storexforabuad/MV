@@ -1,20 +1,17 @@
 'use client';
 
-import { useState, useMemo, FC } from 'react';
+import { useState, useMemo, FC, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, GripVertical, MoreVertical, Plus, Search as SearchIcon, Check, Trash2, Edit } from 'lucide-react';
 import ConfirmationDialog from '@/components/common/ConfirmationDialog';
 
-// Dummy data for categories - replace with actual data fetching
-const dummyCategories = [
-    { id: '1', name: 'Premium Perfumes', productCount: 12, totalViews: 12500 },
-    { id: '2', name: 'Khumras', productCount: 8, totalViews: 8300 },
-    { id: '3', name: 'Incense (Turanrenwuta)', productCount: 25, totalViews: 22000 },
-    { id: '4', name: 'Ready-to-Wear', productCount: 5, totalViews: 4500 },
-    { id: '5', name: 'Oils', productCount: 15, totalViews: 9800 },
-];
+interface Category {
+    id: string;
+    name: string;
+    productCount: number;
+    totalViews: number;
+}
 
-type Category = typeof dummyCategories[0];
 type SortKey = 'custom' | 'name' | 'views' | 'products';
 
 const SortOption: FC<{ label: string; value: SortKey; activeSort: SortKey; onClick: (value: SortKey) => void }> = ({ label, value, activeSort, onClick }) => (
@@ -78,7 +75,7 @@ const CategoryListItem: FC<{
     );
 };
 
-const Dropdown: FC<{ menuItems: any[] }> = ({ menuItems }) => {
+const Dropdown: FC<{ menuItems: {label: string, icon: React.ElementType, onClick: () => void, isDestructive?: boolean}[] }> = ({ menuItems }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
         <div>
@@ -106,25 +103,20 @@ const Dropdown: FC<{ menuItems: any[] }> = ({ menuItems }) => {
     )
 }
 
-export const ManageCategoriesModal: FC<{ isOpen: boolean; onClose: () => void; }> = ({ isOpen, onClose }) => {
-    const [categories, setCategories] = useState<Category[]>([]);
+export const ManageCategoriesModal: FC<{ isOpen: boolean; onClose: () => void; categories: Category[] }> = ({ isOpen, onClose, categories: initialCategories }) => {
+    const [categories, setCategories] = useState<Category[]>(initialCategories);
     const [searchQuery, setSearchQuery] = useState('');
     const [sortKey, setSortKey] = useState<SortKey>('custom');
-    const [isLoading, setIsLoading] = useState(true);
     const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
     const [isAdding, setIsAdding] = useState(false);
     const [showDeleteConfirmation, setShowDeleteConfirmation] = useState<Category | null>(null);
 
-    // Simulate loading
-    useState(() => {
-        setTimeout(() => {
-            setCategories(dummyCategories);
-            setIsLoading(false);
-        }, 1000);
-    });
+    useEffect(() => {
+        setCategories(initialCategories);
+    }, [initialCategories]);
 
     const sortedAndFilteredCategories = useMemo(() => {
-        let sorted = [...categories];
+        const sorted = [...categories];
         if (sortKey === 'name') sorted.sort((a, b) => a.name.localeCompare(b.name));
         else if (sortKey === 'views') sorted.sort((a, b) => b.totalViews - a.totalViews);
         else if (sortKey === 'products') sorted.sort((a, b) => b.productCount - a.productCount);
@@ -209,38 +201,36 @@ export const ManageCategoriesModal: FC<{ isOpen: boolean; onClose: () => void; }
 
                     {/* Category List */}
                     <main className="flex-grow p-4 overflow-y-auto">
-                        {!isLoading && (
-                            <> 
-                                {isAdding && (
-                                    <CategoryListItem 
-                                        category={{id: 'new-category', name: '', productCount: 0, totalViews: 0}}
-                                        isEditing={true}
-                                        onSave={(newName) => handleSave('new-category', newName)}
-                                        onCancel={handleCancel}
-                                        onEdit={() => {}}
-                                        onDelete={() => {}}
-                                    />
-                                )}
-                                {sortedAndFilteredCategories.length > 0 ? (
-                                    sortedAndFilteredCategories.map(cat => <CategoryListItem 
-                                        key={cat.id} 
-                                        category={cat} 
-                                        isEditing={editingCategoryId === cat.id}
-                                        onEdit={() => setEditingCategoryId(cat.id)}
-                                        onCancel={handleCancel}
-                                        onSave={(newName) => handleSave(cat.id, newName)}
-                                        onDelete={() => handleDelete(cat)}
-                                    />)
-                                ) : !isAdding && (
-                                    <div className="text-center py-20">
-                                        <h3 className="text-lg font-semibold">No Categories Found</h3>
-                                        <p className="text-text-secondary mt-1">
-                                            {searchQuery ? `No results for "${searchQuery}"` : "Tap '+ Add New Category' to get started."}
-                                        </p>
-                                    </div>
-                                )}
-                            </>
-                        )}
+                        <> 
+                            {isAdding && (
+                                <CategoryListItem 
+                                    category={{id: 'new-category', name: '', productCount: 0, totalViews: 0}}
+                                    isEditing={true}
+                                    onSave={(newName) => handleSave('new-category', newName)}
+                                    onCancel={handleCancel}
+                                    onEdit={() => {}}
+                                    onDelete={() => {}}
+                                />
+                            )}
+                            {sortedAndFilteredCategories.length > 0 ? (
+                                sortedAndFilteredCategories.map(cat => <CategoryListItem 
+                                    key={cat.id} 
+                                    category={cat} 
+                                    isEditing={editingCategoryId === cat.id}
+                                    onEdit={() => setEditingCategoryId(cat.id)}
+                                    onCancel={handleCancel}
+                                    onSave={(newName) => handleSave(cat.id, newName)}
+                                    onDelete={() => handleDelete(cat)}
+                                />)
+                            ) : !isAdding && (
+                                <div className="text-center py-20">
+                                    <h3 className="text-lg font-semibold">No Categories Found</h3>
+                                    <p className="text-text-secondary mt-1">
+                                        {searchQuery ? `No results for "${searchQuery}"` : "Tap '+ Add New Category' to get started."}
+                                    </p>
+                                </div>
+                            )}
+                        </>
                     </main>
 
                     <ConfirmationDialog

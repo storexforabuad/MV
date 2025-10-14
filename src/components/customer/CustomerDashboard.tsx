@@ -6,7 +6,6 @@ import { motion } from "framer-motion";
 import { CustomerStatCard } from './CustomerStatCard';
 import { Order } from "@/types/order";
 import { Customer } from "@/types/customer";
-import { CustomerSection } from "./CustomerMobileNav";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -20,7 +19,6 @@ interface CustomerDashboardProps {
   orders: Order[];
   customer: Customer | null;
   storeId: string;
-  onSectionChange: (section: CustomerSection) => void;
   onOrdersModalOpen: () => void;
   onReferralsModalOpen: () => void;
   onWishlistModalOpen: () => void;
@@ -36,7 +34,6 @@ export function CustomerDashboard({
   orders,
   customer,
   storeId,
-  onSectionChange,
   onOrdersModalOpen,
   onReferralsModalOpen,
   onWishlistModalOpen,
@@ -46,6 +43,7 @@ export function CustomerDashboard({
   const referralCount = referralData?.referralCount || 0;
 
   const wishlistCount = 0;
+  const ordersCount = orders ? orders.length : 0;
 
   return (
     <motion.div
@@ -56,7 +54,7 @@ export function CustomerDashboard({
     >
       <CustomerStatCard
         label="My Orders"
-        value={orders.length}
+        value={ordersCount}
         icon={<ShoppingBag className="w-6 h-6" />}
         gradient={colorGradients.purple}
         onClick={onOrdersModalOpen}

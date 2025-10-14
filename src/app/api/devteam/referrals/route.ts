@@ -1,5 +1,5 @@
 'use server';
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
 import { collectionGroup, getDocs, Timestamp } from 'firebase/firestore';
 
@@ -12,7 +12,7 @@ interface Referral {
 }
 
 // GET all referrals for the dev team, grouped by store
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const referralsQuery = collectionGroup(db, 'referrals');
     const querySnapshot = await getDocs(referralsQuery);

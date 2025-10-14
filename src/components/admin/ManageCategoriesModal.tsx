@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useMemo, Fragment, useEffect } from 'react';
+import React, { useState, useMemo, Fragment } from 'react';
 import { Dialog, Transition, Menu } from '@headlessui/react';
 import { XMarkIcon, MagnifyingGlassIcon, EllipsisVerticalIcon, EyeIcon, PlusIcon, CubeIcon } from '@heroicons/react/24/solid';
 import { Product } from '../../types/product';
@@ -12,7 +12,7 @@ interface ManageCategoriesModalProps {
   onClose: () => void;
   products: Product[];
   categories: Category[];
-  storeId: string;
+  storeId: string; // Add this line
   onAddCategory: (name: string) => Promise<void>;
   onUpdateCategory: (id: string, name: string) => Promise<void>;
   onDeleteCategory: (id: string) => Promise<void>;
@@ -92,7 +92,7 @@ const SortButton = ({ label, value, activeSort, onClick }: { label: string, valu
 
 // --- MAIN COMPONENT ---
 
-const ManageCategoriesModal: React.FC<ManageCategoriesModalProps> = ({ isOpen, onClose, products, categories, storeId, onAddCategory, onUpdateCategory, onDeleteCategory }) => {
+const ManageCategoriesModal: React.FC<ManageCategoriesModalProps> = ({ isOpen, onClose, products, categories, onAddCategory, onUpdateCategory, onDeleteCategory }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeSort, setActiveSort] = useState<SortType>('name');
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);

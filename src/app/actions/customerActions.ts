@@ -7,7 +7,7 @@ import { nanoid } from 'nanoid';
 import { StoreOrder } from "./orderActions";
 
 // Helper to serialize Firestore Timestamps
-const serializeTimestamp = (timestamp: any): string => {
+const serializeTimestamp = (timestamp: unknown): string => {
     if (timestamp instanceof Timestamp) {
         return timestamp.toDate().toISOString();
     } 
@@ -35,7 +35,7 @@ export const findCustomerByPhone = async (phoneNumber: string): Promise<Customer
           id: doc.id,
           ...data,
           createdAt: serializeTimestamp(data.createdAt),
-      } as Customer;
+      } as unknown as Customer;
     }
     return null;
   } catch (error) {
@@ -84,7 +84,7 @@ export const findOrCreateCustomer = async (
         ...details,
         phoneNumber,
         referralCode,
-        createdAt: new Date().toISOString(),
+        createdAt: Timestamp.now(),
         totalReferralCommission: 0,
         successfulReferralCount: 0,
       },

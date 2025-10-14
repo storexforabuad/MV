@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { RefreshCw } from 'lucide-react';
 import Navbar from '../../../../components/layout/navbar';
 import { useOrders } from '../../../../hooks/useOrders';
-import { useReferrals } from '../../../../hooks/useReferrals';
+// import { useReferrals } from '../../../../hooks/useReferrals';
 import { useCustomer } from '@/context/CustomerContext'; // Corrected import path
 import { CustomerDashboard } from '../../../../components/customer/CustomerDashboard';
 import { CustomerMobileNav, CustomerSection } from '../../../../components/customer/CustomerMobileNav';
@@ -41,28 +41,21 @@ export default function DashboardPage() {
   const storeId = Array.isArray(params.storeId) ? params.storeId[0] : params.storeId;
   const { customer } = useCustomer(); // Get customer from context
   const { orders, refetchOrders: fetchOrders, isLoading: loading } = useOrders(customer?.id || null, storeId);
-  const { referrals, refetchReferrals: fetchReferrals } = useReferrals(customer?.id, storeId);
+  // const { referrals, refetchReferrals: fetchReferrals } = useReferrals(customer?.id, storeId);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [activeSection, setActiveSection] = useState<CustomerSection>('home');
-  const [initialLoading, setInitialLoading] = useState(true);
+  // const [initialLoading, setInitialLoading] = useState(true);
   
   // State for modals
   const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
   const [isReferralsModalOpen, setIsReferralsModalOpen] = useState(false);
   const [isWishlistModalOpen, setIsWishlistModalOpen] = useState(false);
 
-  useEffect(() => {
-    // Combine loading states for a single skeleton view
-    if (!loading && !customer) {
-      setInitialLoading(false);
-    }
-  }, [loading, customer]);
-
   const handleRefresh = async () => {
     setIsRefreshing(true);
     await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network delay
     fetchOrders();
-    fetchReferrals();
+    // fetchReferrals();
     setIsRefreshing(false);
   };
 

@@ -156,7 +156,7 @@ export default function ProductDetail() {
   };
 
   const handleAddToCart = () => {
-    if (!product) return;
+    if (!product || !storeId) return;
     
     setIsAdding(true);
     dispatch({ 

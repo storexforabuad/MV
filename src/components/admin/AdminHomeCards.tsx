@@ -1,17 +1,15 @@
 'use client';
-import { Tag, Star, AlertTriangle, Eye, Users, CheckCircle, Gift, XCircle, RefreshCw, Archive, Handshake, ShoppingCart, Share2, BadgeDollarSign, Lightbulb } from 'lucide-react';
+import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, BadgeDollarSign, Lightbulb } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { useSpotlightContext } from '@/context/SpotlightContext';
 
 // Import modal components
 import TotalProductsModal from './modals/TotalProductsModal';
-import CategoriesModal from './modals/CategoriesModal';
 import PopularProductsModal from './modals/PopularProductsModal';
 import LimitedStockModal from './modals/LimitedStockModal';
 import TotalViewsModal from './modals/TotalViewsModal';
 import StoreLinkModal from './modals/StoreLinkModal';
-import SubscriptionModal from './modals/SubscriptionModal';
 import ReferralsModal from './modals/ReferralsModal';
 import SoldOutModal from './modals/SoldOutModal';
 import RevenueModal from './modals/RevenueModal';
@@ -41,7 +39,6 @@ interface AdminHomeCardsProps {
   onReferralAdded?: () => void;
   setIsModalOpen?: (open: boolean) => void;
   soldOut: number;
-  setManageTab: (tab: 'all' | 'popular' | 'limited' | 'soldout') => void;
   setIsManageProductsOpen?: (open: boolean) => void;
   onRefresh: (showRefresh: boolean) => void;
   isRefreshing: boolean;
@@ -57,7 +54,8 @@ interface AdminHomeCardsProps {
   onOrdersCardClick: () => void;
 }
 
-const cardData: any[] = [
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.FC<any> | null, glowClass: string}[] = [
     {
         label: 'Tips',
         subtitle: 'Quick Guide',
@@ -372,7 +370,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                                 : card.label === 'Sold Out'
                                   ? props.soldOut
                                   : (() => {
-                                      const value = props[card.valueKey as keyof AdminHomeCardsProps];
+                                      const value = card.valueKey ? props[card.valueKey as keyof AdminHomeCardsProps] : '';
                                       if (typeof value === 'number' || typeof value === 'string') return value;
                                       return '';
                                     })()}

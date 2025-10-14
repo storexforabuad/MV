@@ -1,7 +1,6 @@
 import { Banknote } from 'lucide-react';
 
 interface RevenueModalProps {
-  handleClose: () => void;
   totalRevenue: number;
 }
 
@@ -13,7 +12,7 @@ const formatCurrency = (amount: number) => {
   }).format(amount);
 };
 
-export default function RevenueModal({ handleClose, totalRevenue }: RevenueModalProps) {
+export default function RevenueModal({ totalRevenue }: RevenueModalProps) {
   return (
     <div className="w-full max-w-md p-6 bg-white dark:bg-slate-800 rounded-2xl text-center">
       <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-green-100 dark:bg-green-900/50 rounded-full border-4 border-green-200 dark:border-green-800">
