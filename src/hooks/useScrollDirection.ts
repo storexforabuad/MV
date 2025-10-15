@@ -1,8 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
 
-export function useScrollDirection() {
-  const [scrollDirection, setScrollDirection] = useState('up');
+export function useScrollDirection(): 'up' | 'down' {
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down'>('up');
   const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {

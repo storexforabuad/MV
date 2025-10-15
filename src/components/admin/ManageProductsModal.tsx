@@ -98,7 +98,11 @@ const ProductRow = ({
           <Menu as="div" className="relative flex-shrink-0">
               <Menu.Button 
                 ref={menuButtonRef}
-                onClick={() => calculateMenuPosition(menuButtonRef.current)}
+                onClick={() => {
+                    if (menuButtonRef.current) {
+                        calculateMenuPosition(menuButtonRef.current);
+                    }
+                }}
                 className="p-2 rounded-full hover:bg-button-secondary-hover">
                   <EllipsisVerticalIcon className="w-5 h-5 text-text-secondary" />
               </Menu.Button>
@@ -318,7 +322,6 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
         isOpen={!!editingProduct}
         onClose={() => setEditingProduct(null)}
         onSave={handleProductSave}
-        onDelete={() => { /* No longer used here */ }}
         categories={categories}
     />
     <ConfirmationDialog

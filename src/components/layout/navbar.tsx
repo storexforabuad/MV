@@ -20,7 +20,7 @@ export default function Navbar({ storeName, scrollDirection = 'up' }: NavbarProp
   const pathname = usePathname();
   const router = useRouter();
   const isAdminRoute = pathname?.startsWith('/admin');
-  const isStorefront = !isAdminRoute && pathname.split('/').length > 1 && pathname.split('/')[1].length > 0;
+  const isStorefront = !isAdminRoute && !!pathname && pathname.split('/').length > 1 && pathname.split('/')[1].length > 0;
   
   const pathSegments = pathname?.split('/').filter(Boolean) || [];
   const isStoreProductPage = pathSegments.length === 3 && pathSegments[1] === 'products';
