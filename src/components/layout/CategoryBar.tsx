@@ -14,23 +14,10 @@ interface CategoryBarProps {
   activeCategoryId: string;
   categories: Category[];
   onActiveCategoryClick?: () => void;
+  scrollDirection?: 'up' | 'down';
 }
 
-export default function CategoryBar({ onCategorySelect, activeCategoryId, categories, onActiveCategoryClick }: CategoryBarProps) {
-  const [isSticky, setIsSticky] = useState(false);
-
-  const handleScroll = useCallback(() => {
-    const navbar = document.querySelector('nav');
-    const navHeight = navbar?.getBoundingClientRect().height || 64;
-    const offset = window.pageYOffset || document.documentElement.scrollTop;
-    setIsSticky(offset > navHeight / 2);
-  }, []);
-
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
+export default function CategoryBar({ onCategorySelect, activeCategoryId, categories, onActiveCategoryClick, scrollDirection = 'up' }: CategoryBarProps) {
 
   const handleCategoryClick = (categoryId: string, event: React.MouseEvent<HTMLButtonElement>) => {
     const button = event.currentTarget;
@@ -59,7 +46,6 @@ export default function CategoryBar({ onCategorySelect, activeCategoryId, catego
     return iconMap[categoryName] || '🛍️';
   };
 
-  // This function now only returns styles for *special* system categories.
   const getCategoryColor = (categoryName: string): string | null => {
     const colorMap: { [key: string]: string } = {
       'Promo': 'bg-[var(--badge-red-bg)] text-[var(--badge-red-text)]',
@@ -76,17 +62,12 @@ export default function CategoryBar({ onCategorySelect, activeCategoryId, catego
   }) => {
     const specialColorStyle = getCategoryColor(category.name);
 
-    // If active, use the special color. If not, use the theme's secondary button style.
-    // If inactive, also use the theme's secondary button style for a consistent, high-contrast look.
     const iconContainerStyle = isActive && specialColorStyle
       ? specialColorStyle
       : 'bg-[var(--button-secondary)]';
       
-    // The text on the icon needs to be readable. Special styles have their own text color.
-    // For our default style, we need to ensure the text is bright.
     const iconTextStyle = isActive && specialColorStyle ? '' : 'text-text-primary';
 
-    // The label below the icon is bright when active, and dimmer when inactive.
     const labelTextStyle = isActive ? 'text-text-primary' : 'text-text-secondary';
 
     return (
@@ -121,21 +102,21 @@ export default function CategoryBar({ onCategorySelect, activeCategoryId, catego
     );
   }
 
-  // Define system categories that appear first
   const systemCategories: Category[] = [
     { id: 'promo', name: 'Promo' },
     { id: 'popular', name: 'Popular' },
     { id: 'new-arrivals', name: 'New Arrivals' },
   ];
 
-  // Filter out any vendor-created categories that have the same name as system ones
   const vendorCategories = categories.filter(c => !systemCategories.some(sc => sc.name === c.name));
 
   return (
-    <div className={`category-bar-container card-glass ${isSticky ? 'is-sticky' : ''} relative`}>
+    <div 
+      className="category-bar-container glassmorphic is-sticky"
+      style={{ top: scrollDirection === 'up' ? 'var(--navbar-height)' : '0' }}
+    >
       <div className="overflow-x-auto scrollbar-hide px-4">
         <div className="flex gap-3 py-3 min-w-min justify-center items-center">
-          {/* System Categories */}
           {systemCategories.map(category => (
             <CategoryButton 
               key={category.id}
@@ -145,12 +126,10 @@ export default function CategoryBar({ onCategorySelect, activeCategoryId, catego
             />
           ))}
 
-          {/* Separator */}
           {vendorCategories.length > 0 && (
             <div className="w-px h-10 bg-[var(--border-color)] opacity-60 mx-2" />
           )}
 
-          {/* Vendor-generated categories */}
           {vendorCategories.map((category) => (
             <CategoryButton
               key={category.id}

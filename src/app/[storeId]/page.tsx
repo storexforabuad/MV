@@ -10,14 +10,15 @@ import {
   getStoreMeta,
   getStorePopularProducts, 
 }
-from '../../lib/db';
-import { useConnectionCheck } from '../../hooks/useConnectionCheck';
-import Navbar from '../../components/layout/navbar';
-import CategoryBar from '../../components/layout/CategoryBar';
-import SkeletonLoader from '../../components/SkeletonLoader';
-import type { Product } from '../../types/product';
-import ConnectionErrorToast from '../../components/ConnectionErrorToast';
-import { ProductListCache } from '../../lib/productCache';
+from '@/lib/db';
+import { useConnectionCheck } from '@/hooks/useConnectionCheck';
+import { useScrollDirection } from '@/hooks/useScrollDirection';
+import Navbar from '@/components/layout/navbar';
+import CategoryBar from '@/components/layout/CategoryBar';
+import SkeletonLoader from '@/components/SkeletonLoader';
+import type { Product } from '@/types/product';
+import ConnectionErrorToast from '@/components/ConnectionErrorToast';
+import { ProductListCache } from '@/lib/productCache';
 import ReferralBanner from '@/components/customer/ReferralBanner';
 import PromoBanner from '@/components/layout/PromoBanner';
 import CustomerLookupModal from '@/components/customer/CustomerLookupModal';
@@ -46,7 +47,8 @@ const PRODUCTS_PAGE_SIZE = 24;
 export default function StorefrontPage() {
   const params = useParams();
   const storeId = typeof params?.storeId === 'string' ? params.storeId : Array.isArray(params?.storeId) ? params.storeId[0] : '';
-  
+  const scrollDirection = useScrollDirection();
+
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [storeName, setStoreName] = useState('');
@@ -183,27 +185,30 @@ export default function StorefrontPage() {
 
   return (
     <div className="min-h-screen bg-background overscroll-none">
-      <Navbar storeName={storeName} />
+      <Navbar 
+        storeName={storeName} 
+        scrollDirection={scrollDirection} 
+      />
+      <CategoryBar 
+        onCategorySelect={handleCategorySelect}
+        activeCategoryId={activeCategoryId}
+        categories={categories}
+        onActiveCategoryClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        scrollDirection={scrollDirection}
+      />
       <CustomerLookupModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
         onSuccess={() => setIsLoginModalOpen(false)}
       />
-      <div className="pt-16 pb-safe-area-inset-bottom">
+      <div className="pt-40 pb-safe-area-inset-bottom">
         <PromoBanner />
-        
-        <CategoryBar 
-          onCategorySelect={handleCategorySelect}
-          activeCategoryId={activeCategoryId}
-          categories={categories}
-          onActiveCategoryClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-        />
         <ReferralBanner 
           storeId={storeId}
           storeName={storeName}
           onLoginClick={() => setIsLoginModalOpen(true)}
         />
-        <div className="mt-3 sm:mt-4">
+        <div className="mt-3 sm:mt-4 px-2 sm:px-4 md:px-6 lg:px-8">
           {initialLoading || isPending ? (
             <LoadingGrid />
           ) : (

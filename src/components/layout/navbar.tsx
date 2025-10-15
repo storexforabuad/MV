@@ -3,15 +3,16 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { ShoppingCart, Moon, Sun, ShoppingBag, ArrowLeft } from 'lucide-react';
-import { useCart } from '../../lib/cartContext';
-import { useTheme } from '../../lib/themeContext';
+import { useCart } from '@/lib/cartContext';
+import { useTheme } from '@/lib/themeContext';
 import { usePathname, useRouter } from 'next/navigation';
 
 interface NavbarProps {
   storeName?: string;
+  scrollDirection?: 'up' | 'down';
 }
 
-export default function Navbar({ storeName }: NavbarProps) {
+export default function Navbar({ storeName, scrollDirection = 'up' }: NavbarProps) {
   const { state } = useCart();
   const { theme, toggleTheme } = useTheme();
   const [isBouncing, setIsBouncing] = useState(false);
@@ -19,6 +20,7 @@ export default function Navbar({ storeName }: NavbarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const isAdminRoute = pathname?.startsWith('/admin');
+  const isStorefront = !isAdminRoute && pathname.split('/').length > 1 && pathname.split('/')[1].length > 0;
   
   const pathSegments = pathname?.split('/').filter(Boolean) || [];
   const isStoreProductPage = pathSegments.length === 3 && pathSegments[1] === 'products';
@@ -41,10 +43,10 @@ export default function Navbar({ storeName }: NavbarProps) {
     }
   };
 
-  if (isAdminRoute) return null;
+  if (isAdminRoute || (isStorefront && !storeName)) return null;
 
   return (
-    <nav className="fixed top-0 z-50 w-full transition-colors duration-200">
+    <nav className={`fixed top-0 z-50 w-full transition-transform duration-300 ${scrollDirection === 'down' ? '-translate-y-full' : 'translate-y-0'} glassmorphic`}>
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
         <div className="flex h-16 justify-between">
           <div className="flex items-center gap-2">
