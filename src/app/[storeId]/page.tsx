@@ -200,7 +200,7 @@ export default function StorefrontPage() {
         onClose={() => setIsLoginModalOpen(false)}
         onSuccess={() => setIsLoginModalOpen(false)}
       />
-      <div className="pt-40 pb-safe-area-inset-bottom">
+      <div className="pt-44 pb-safe-area-inset-bottom">
         <ReferralBanner 
           storeId={storeId}
           storeName={storeName}
