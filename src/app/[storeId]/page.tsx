@@ -20,7 +20,6 @@ import type { Product } from '@/types/product';
 import ConnectionErrorToast from '@/components/ConnectionErrorToast';
 import { ProductListCache } from '@/lib/productCache';
 import ReferralBanner from '@/components/customer/ReferralBanner';
-import PromoBanner from '@/components/layout/PromoBanner';
 import CustomerLookupModal from '@/components/customer/CustomerLookupModal';
 
 const ProductGrid = dynamic(
@@ -202,7 +201,6 @@ export default function StorefrontPage() {
         onSuccess={() => setIsLoginModalOpen(false)}
       />
       <div className="pt-40 pb-safe-area-inset-bottom">
-        <PromoBanner />
         <ReferralBanner 
           storeId={storeId}
           storeName={storeName}
