@@ -19,11 +19,19 @@ const TwitterIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" hei
 
 const formatCategories = (categories: { name: string }[] | undefined) => {
   if (!categories || categories.length === 0) return 'products';
+  
   const categoryNames = categories.map(c => c.name);
-  if (categoryNames.length === 1) return categoryNames[0];
-  if (categoryNames.length === 2) return categoryNames.join(' and ');
-  const last = categoryNames.pop();
-  return `${categoryNames.join(', ')}, and ${last}`;
+  const count = categoryNames.length;
+
+  if (count <= 5) {
+    if (count === 1) return categoryNames[0];
+    if (count === 2) return categoryNames.join(' and ');
+    const last = categoryNames.pop();
+    return `${categoryNames.join(', ')}, and ${last}`;
+  } else {
+    const firstFive = categoryNames.slice(0, 5);
+    return `${firstFive.join(', ')}, and more`;
+  }
 };
 
 const StoreLinkModal: React.FC<StoreLinkModalProps> = ({ storeLink, handleClose, promoCaption, storeName, categories }) => {

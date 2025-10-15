@@ -16,7 +16,6 @@ interface EditProductPanelProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (updatedFields: Partial<Product>) => void;
-  onDelete: (productId: string) => void;
   categories: { id: string; name: string }[];
 }
 
@@ -41,10 +40,9 @@ const StyledInput: React.FC<{ id: string, label: string, value: string | number,
     </div>
 );
 
-const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, onClose, onSave, onDelete, categories }) => {
+const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, onClose, onSave, categories }) => {
   const [formState, setFormState] = useState<Partial<ProductFormState>>({});
   const [isCategorySelectorOpen, setCategorySelectorOpen] = useState(false);
-  const [deleteConfirm, setDeleteConfirm] = useState(false);
 
   useEffect(() => {
     if (isOpen && product) {
@@ -70,7 +68,6 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
     } else {
         setTimeout(() => {
             setFormState({});
-            setDeleteConfirm(false);
         }, 300);
     }
   }, [isOpen, product]);
@@ -120,18 +117,6 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
     ProductCache.clear();
     onClose();
   };
-
-  const handleDelete = () => {
-      if(product && deleteConfirm) {
-          onDelete(product.id);
-          ProductDetailCache.clear();
-          ProductCache.clear();
-          onClose();
-      } else {
-          setDeleteConfirm(true);
-          setTimeout(() => setDeleteConfirm(false), 3000);
-      }
-  }
 
   const commissionAmount = useMemo(() => {
     if (!formState) return 0;
@@ -249,8 +234,20 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
 
                     <div className="flex-shrink-0 border-t border-border-color px-4 py-3 bg-background sticky bottom-0">
                       <div className="flex gap-3">
-                        <button type="button" className={`flex-1 inline-flex justify-center rounded-lg border border-transparent py-2 px-4 text-sm font-semibold text-white shadow-sm transition-colors ${deleteConfirm ? 'bg-red-700 hover:bg-red-800' : 'bg-red-500 hover:bg-red-600'}`} onClick={handleDelete}>{deleteConfirm ? 'Confirm Delete?' : 'Delete'}</button>
-                        <button type="button" className="flex-1 inline-flex justify-center rounded-lg border border-transparent bg-gray-900 py-2 px-4 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2" onClick={handleSave}>Save Changes</button>
+                        <button
+                            type="button"
+                            className="flex-1 inline-flex justify-center rounded-lg bg-input-background py-2 px-4 text-sm font-semibold text-text-primary shadow-sm hover:bg-button-secondary-hover"
+                            onClick={onClose}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="button"
+                            className="flex-1 inline-flex justify-center rounded-lg border border-transparent bg-gray-900 py-2 px-4 text-sm font-semibold text-white shadow-sm hover:bg-gray-800"
+                            onClick={handleSave}
+                        >
+                            Save Changes
+                        </button>
                       </div>
                     </div>
                   </div>
