@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useMemo, Fragment } from 'react';
+import React, { useState, useMemo, Fragment, useRef } from 'react';
 import { Dialog, Transition, Menu } from '@headlessui/react';
 import { XMarkIcon, MagnifyingGlassIcon, EllipsisVerticalIcon, EyeIcon } from '@heroicons/react/24/solid';
 import Image from 'next/image';
@@ -8,6 +8,7 @@ import { Product } from '../../types/product';
 import { formatPrice } from '../../utils/price';
 import EditProductPanel from './EditProductPanel';
 import ConfirmationDialog from '../common/ConfirmationDialog';
+import { useDynamicMenuPosition } from '@/hooks/useDynamicMenuPosition';
 
 // --- TYPES ---
 interface ManageProductsModalProps {
@@ -41,6 +42,8 @@ const ProductRow = ({
     onSelect: (productId: string) => void 
 }) => {
     const categoryName = categories.find(c => c.id === product.categoryId)?.name || 'Uncategorized';
+    const { menuPosition, calculateMenuPosition } = useDynamicMenuPosition();
+    const menuButtonRef = useRef<HTMLButtonElement>(null);
 
     return (
     <div className={`flex items-start gap-4 p-3 rounded-lg transition-colors ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-input-background'}`}>
@@ -93,11 +96,15 @@ const ProductRow = ({
         </div>
         {!isSelectMode && (
           <Menu as="div" className="relative flex-shrink-0">
-              <Menu.Button className="p-2 rounded-full hover:bg-button-secondary-hover">
+              <Menu.Button 
+                ref={menuButtonRef}
+                onClick={() => calculateMenuPosition(menuButtonRef.current)}
+                className="p-2 rounded-full hover:bg-button-secondary-hover">
                   <EllipsisVerticalIcon className="w-5 h-5 text-text-secondary" />
               </Menu.Button>
               <Transition as={Fragment} enter="transition ease-out duration-100" enterFrom="transform opacity-0 scale-95" enterTo="transform opacity-100 scale-100" leave="transition ease-in duration-75" leaveFrom="transform opacity-100 scale-100" leaveTo="transform opacity-0 scale-95">
-                  <Menu.Items className="absolute right-0 w-48 mt-2 origin-top-right bg-card-background divide-y divide-border-color rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20">
+                  <Menu.Items 
+                    className={`absolute right-0 w-48 divide-y divide-border-color rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20 bg-card-background ${menuPosition === 'top' ? 'bottom-full origin-bottom mb-1' : 'origin-top mt-2'}`}>
                       <div className="px-1 py-1 "><Menu.Item>{({ active }) => (<button onClick={() => onEdit(product)} className={`${active ? 'bg-button-secondary-hover text-text-primary' : 'text-text-secondary'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Edit</button>)}</Menu.Item><Menu.Item>{({ active }) => (<button className={`${active ? 'bg-button-secondary-hover text-text-primary' : 'text-text-secondary'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Duplicate</button>)}</Menu.Item></div>
                       <div className="px-1 py-1"><Menu.Item>{({ active }) => (<button onClick={() => onDeleteRequest(product)} className={`${active ? 'bg-red-500 text-white' : 'text-red-500'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Delete</button>)}</Menu.Item></div>
                   </Menu.Items>
@@ -245,7 +252,7 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
                   </div>
 
                   {/* Product List */}
-                   <div className="flex-1 overflow-y-auto p-2 pb-24"> 
+                   <div className="flex-1 overflow-y-auto p-2 pb-40"> 
                     {isSelectMode && (
                         <div className="p-2 pb-0">
                             <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-input-background">
