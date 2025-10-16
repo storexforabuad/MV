@@ -14,11 +14,11 @@ interface ProfileModalProps {
 export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
   const params = useParams();
-  const storeId = params.storeId;
+  const storeId = typeof params?.storeId === 'string' ? params.storeId : Array.isArray(params?.storeId) ? params.storeId[0] : undefined;
 
   const handleLogout = () => {
     localStorage.clear();
-    window.location.href = `/${storeId}`;
+    window.location.href = storeId ? `/${storeId}` : '/';
   };
 
   return (

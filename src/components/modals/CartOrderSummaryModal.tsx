@@ -49,7 +49,12 @@ export default function CartOrderSummaryModal({ isOpen, onClose, cartItems, stor
     if (!storeMeta || !storeMeta.whatsapp || !customer) return;
 
     try {
-      const storeMetaWithId = { ...storeMeta, id: cartItems[0].storeId };
+      const storeId = cartItems[0]?.storeId;
+      if (!storeId) {
+        toast.error('Could not determine the store for this order.');
+        return;
+      }
+      const storeMetaWithId = { ...storeMeta, id: storeId };
       const referrerId = localStorage.getItem('referrerId');
       
       for (const item of cartItems) {

@@ -7,7 +7,6 @@ import { useParams } from 'next/navigation';
 import { getProductById, incrementProductViews, getStoreMeta, getCategories } from '../../../../lib/db';
 import { CirclePlus, ShoppingCart, Clock, Check } from 'lucide-react';
 import { useCart } from '../../../../lib/cartContext';
-import { useOrders } from '../../../../hooks/useOrders';
 import { Product } from '../../../../types/product';
 import { Category } from '../../../../types/category';
 import { StoreMeta } from '../../../../types/store';
@@ -43,7 +42,6 @@ export default function ProductDetail() {
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
 
   const { customer } = useCustomer();
-  const { addOrder } = useOrders(customer?.id || null);
 
   const [imageLoading, setImageLoading] = useState(true);
 

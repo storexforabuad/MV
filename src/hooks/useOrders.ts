@@ -26,7 +26,6 @@ export const useOrders = (customerId: string | null, storeId?: string) => {
       setIsLoading(false);
       return;
     }
-
     try {
       setIsLoading(true);
       const fetchedOrders = await fetchOrdersFromFirestore(customerId, storeId);
@@ -49,7 +48,8 @@ export const useOrders = (customerId: string | null, storeId?: string) => {
     }
 
     try {
-      const newOrder = await addOrderToFirestore(customerId, product, storeMeta, quantity, customerInfo, referralCode, bonusApplied);
+      const productToSend = { ...product, storeId: storeMeta.id } as Product;
+      const newOrder = await addOrderToFirestore(customerId, productToSend, storeMeta, quantity, customerInfo, referralCode, bonusApplied);
       setOrders(prevOrders => [newOrder, ...prevOrders]);
     } catch (error) {
       console.error("Error in addOrder:", error);
