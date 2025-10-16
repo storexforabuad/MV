@@ -1,6 +1,6 @@
 'use server';
 
-import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, orderBy } from "firebase/firestore";
+import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, orderBy, doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/db";
 import { Customer, DeliveryAddress } from "@/types/customer";
 import { nanoid } from 'nanoid';
@@ -16,6 +16,23 @@ const serializeTimestamp = (timestamp: unknown): string => {
     }
     return new Date().toISOString(); 
 };
+
+export const getReferralBonus = async (customerId: string): Promise<number> => {
+  try {
+    const customerRef = doc(db, "customers", customerId);
+    const customerSnap = await getDoc(customerRef);
+
+    if (customerSnap.exists()) {
+      return customerSnap.data().totalReferralCommission || 0;
+    } else {
+      console.log("No such customer!");
+      return 0;
+    }
+  } catch (error) {
+    console.error("Error getting referral bonus: ", error);
+    return 0;
+  }
+}
 
 /**
  * Finds a customer by their phone number and serializes the result.

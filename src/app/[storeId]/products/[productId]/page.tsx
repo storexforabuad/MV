@@ -17,6 +17,7 @@ import { ProductDetailCache } from '../../../../lib/productDetailCache';
 import Navbar from '../../../../components/layout/navbar';
 import { useCustomer } from '../../../../context/CustomerContext';
 import CustomerLookupModal from '../../../../components/customer/CustomerLookupModal';
+import OrderSummaryModal from '../../../../components/modals/OrderSummaryModal';
 import toast from 'react-hot-toast';
 
 // Dynamic imports
@@ -39,6 +40,7 @@ export default function ProductDetail() {
   const { state, dispatch } = useCart();
   const [storeMeta, setStoreMeta] = useState<StoreMeta | null>(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
 
   const { customer } = useCustomer();
   const { addOrder } = useOrders(customer?.id || null);
@@ -113,44 +115,10 @@ export default function ProductDetail() {
     return <div className="p-4">Product not found</div>;
   }
 
-  const handleOrderNow = async () => {
-    if (!product || !storeId || !storeMeta || !storeMeta.whatsapp) return;
-
+  const handlePlaceOrderClick = () => {
     if (customer) {
-      try {
-        // Create a new storeMeta object that includes the storeId
-        const storeMetaWithId = {
-          ...storeMeta,
-          id: storeId,
-        };
-
-        const referrerId = localStorage.getItem('referrerId');
-
-        // 1. Save the order to the database
-        await addOrder(product, storeMetaWithId, 1, customer, referrerId);
-        toast.success('Order placed! Redirecting to WhatsApp...');
-
-        // 2. Construct the WhatsApp URL
-        const message =
-          `🛍️ *New Order Request*\n\n` +
-          `Hello! I would like to order this item:\n\n` +
-          `*${product.name}*\n` +
-          `• Price: ${formatPrice(product.price)}\n` +
-          `• Product Link: ${window.location.href}\n\n` +
-          `Thank you! 🙏`;
-
-        const encodedMessage = encodeURIComponent(message);
-        const whatsappUrl = `https://wa.me/${storeMeta.whatsapp.replace(/\D/g, '')}?text=${encodedMessage}`;
-
-        // 3. Redirect to WhatsApp
-        window.open(whatsappUrl, '_blank');
-        
-      } catch (error) {
-        console.error("Error placing order or redirecting to WhatsApp:", error);
-        toast.error('Failed to place order. Please try again.');
-      }
+      setIsOrderModalOpen(true);
     } else {
-      // If the user is not logged in, open the login modal first.
       setIsLoginModalOpen(true);
     }
   };
@@ -201,6 +169,13 @@ return (
         setIsLoginModalOpen(false);
         toast.success("You're logged in! You can now place your order.");
       }}
+    />
+    <OrderSummaryModal 
+        isOpen={isOrderModalOpen} 
+        onClose={() => setIsOrderModalOpen(false)} 
+        product={product} 
+        storeMeta={storeMeta} 
+        customer={customer}
     />
     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8 pt-[calc(var(--navbar-height)+1rem)] lg:pt-[calc(var(--navbar-height)+2rem)]">
       <div className="flex flex-col lg:flex lg:flex-row gap-6 lg:gap-x-8">
@@ -360,15 +335,15 @@ return (
               {/* Action Buttons */}
               <div className="flex flex-col gap-3">
                 <button
-                  onClick={handleOrderNow}
+                  onClick={handlePlaceOrderClick}
                   disabled={!canOrder}
                   className="group relative w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-[980px] bg-[var(--button-success)] text-white font-medium shadow-sm hover:shadow-md transition-all duration-300 hover:bg-[var(--button-success-hover)] transform-gpu active:scale-[0.98] cursor-default disabled:opacity-75 disabled:cursor-not-allowed product-detail-button-success min-h-[48px] text-base"
                   style={{ minHeight: '48px', fontSize: '1rem' }}
                   tabIndex={0}
-                  aria-label="Order Now"
+                  aria-label="Place Order"
                 >
                   <ShoppingCart className="w-5 h-5 transition-transform group-hover:-translate-y-0.5" />
-                  <span className="relative tracking-[-0.01em]">Order Now</span>
+                  <span className="relative tracking-[-0.01em]">Place Order</span>
                 </button>
                 <button 
                   onClick={handleAddToCart}
