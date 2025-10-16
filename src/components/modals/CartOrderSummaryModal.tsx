@@ -10,7 +10,7 @@ import { Customer } from '@/types/customer';
 import { formatPrice } from '@/utils/price';
 import { useOrders } from '@/hooks/useOrders';
 import toast from 'react-hot-toast';
-import { getReferralBonus, getCustomerDetails } from '@/app/actions/customerActions';
+import { getCustomerDetails } from '@/app/actions/customerActions';
 
 interface CartOrderSummaryModalProps {
   isOpen: boolean;
@@ -22,20 +22,20 @@ interface CartOrderSummaryModalProps {
 
 export default function CartOrderSummaryModal({ isOpen, onClose, cartItems, storeMeta, customer: initialCustomer }: CartOrderSummaryModalProps) {
   const [deliveryMethod, setDeliveryMethod] = useState('home');
-  const [referralBonus, setReferralBonus] = useState(0);
   const [customer, setCustomer] = useState<Customer | null>(initialCustomer);
   const [bonusApplied, setBonusApplied] = useState(false);
   const { addOrder } = useOrders(customer?.id || null);
+  const storeId = cartItems[0]?.storeId;
+  const referralBonus = customer?.referralDataByStore?.[storeId]?.commissionEarned || 0;
 
   useEffect(() => {
     if (isOpen && initialCustomer) {
-        setBonusApplied(false);
+      setBonusApplied(false);
       getCustomerDetails(initialCustomer.id).then(details => {
         if (details) {
           setCustomer(details);
         }
       });
-      getReferralBonus(initialCustomer.id).then(setReferralBonus);
     }
   }, [isOpen, initialCustomer]);
 
@@ -49,7 +49,6 @@ export default function CartOrderSummaryModal({ isOpen, onClose, cartItems, stor
     if (!storeMeta || !storeMeta.whatsapp || !customer) return;
 
     try {
-      const storeId = cartItems[0]?.storeId;
       if (!storeId) {
         toast.error('Could not determine the store for this order.');
         return;

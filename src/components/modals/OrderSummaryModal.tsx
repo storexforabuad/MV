@@ -12,7 +12,7 @@ import { Minus, Plus } from 'lucide-react';
 import { useOrders } from '@/hooks/useOrders';
 import toast from 'react-hot-toast';
 import { useParams } from 'next/navigation';
-import { getReferralBonus, getCustomerDetails } from '@/app/actions/customerActions';
+import { getCustomerDetails } from '@/app/actions/customerActions';
 
 interface OrderSummaryModalProps {
   isOpen: boolean;
@@ -25,13 +25,13 @@ interface OrderSummaryModalProps {
 export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta, customer: initialCustomer }: OrderSummaryModalProps) {
   const [quantity, setQuantity] = useState(1);
   const [deliveryMethod, setDeliveryMethod] = useState('home');
-  const [referralBonus, setReferralBonus] = useState(0);
   const [customer, setCustomer] = useState<Customer | null>(initialCustomer);
   const [bonusApplied, setBonusApplied] = useState(false);
 
   const { addOrder } = useOrders(customer?.id || null);
   const routeParams = useParams();
   const storeId = typeof routeParams?.storeId === 'string' ? routeParams.storeId : Array.isArray(routeParams?.storeId) ? routeParams.storeId[0] : undefined;
+  const referralBonus = storeId ? customer?.referralDataByStore?.[storeId]?.commissionEarned || 0 : 0;
 
   useEffect(() => {
     if (isOpen) {
@@ -42,9 +42,6 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
           if (details) {
             setCustomer(details);
           }
-        });
-        getReferralBonus(initialCustomer.id).then(bonus => {
-          setReferralBonus(bonus);
         });
       }
     }
