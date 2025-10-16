@@ -59,6 +59,7 @@ export const addOrderToFirestore = async (
   quantity: number,
   customer: Customer,
   referralCode: string | null,
+  bonusApplied: boolean = false,
 ): Promise<Order> => {
   try {
     const storeId = storeMeta.id;
@@ -113,6 +114,10 @@ export const addOrderToFirestore = async (
           });
         }
       }
+    }
+
+    if (bonusApplied) {
+        batch.update(customerRef, { totalReferralCommission: 0 });
     }
 
     const customerOrderPayload: CustomerOrderData = {

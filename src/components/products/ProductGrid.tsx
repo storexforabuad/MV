@@ -148,7 +148,7 @@ function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean; onClos
                       <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
                     ))}
                   </div>
-                  <span className="text-xs text-slate-500 dark:text-slate-400">(4.8 stars from 476 reviews)</span>
+                  {/* <span className="text-xs text-slate-500 dark:text-slate-400">(4.8 stars from 476 reviews)</span> */}
                 </div>
               </div>
 

@@ -10,7 +10,7 @@ import { Customer } from '@/types/customer';
 import { formatPrice } from '@/utils/price';
 import { useOrders } from '@/hooks/useOrders';
 import toast from 'react-hot-toast';
-import { getReferralBonus } from '@/app/actions/customerActions';
+import { getReferralBonus, getCustomerDetails } from '@/app/actions/customerActions';
 
 interface CartOrderSummaryModalProps {
   isOpen: boolean;
@@ -20,22 +20,30 @@ interface CartOrderSummaryModalProps {
   customer: Customer | null;
 }
 
-export default function CartOrderSummaryModal({ isOpen, onClose, cartItems, storeMeta, customer }: CartOrderSummaryModalProps) {
+export default function CartOrderSummaryModal({ isOpen, onClose, cartItems, storeMeta, customer: initialCustomer }: CartOrderSummaryModalProps) {
   const [deliveryMethod, setDeliveryMethod] = useState('home');
   const [referralBonus, setReferralBonus] = useState(0);
+  const [customer, setCustomer] = useState<Customer | null>(initialCustomer);
+  const [bonusApplied, setBonusApplied] = useState(false);
   const { addOrder } = useOrders(customer?.id || null);
 
   useEffect(() => {
-    if (isOpen && customer) {
-      getReferralBonus(customer.id).then(setReferralBonus);
+    if (isOpen && initialCustomer) {
+        setBonusApplied(false);
+      getCustomerDetails(initialCustomer.id).then(details => {
+        if (details) {
+          setCustomer(details);
+        }
+      });
+      getReferralBonus(initialCustomer.id).then(setReferralBonus);
     }
-  }, [isOpen, customer]);
+  }, [isOpen, initialCustomer]);
 
   if (cartItems.length === 0) return null;
 
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const deliveryFee = deliveryMethod === 'home' && customer?.city?.toLowerCase() === 'bauchi' ? 500 : 0;
-  const total = subtotal + deliveryFee - referralBonus;
+  const deliveryFee = deliveryMethod === 'home' ? 500 : 0;
+  const total = subtotal + deliveryFee - (bonusApplied ? referralBonus : 0);
 
   const handlePlaceOrder = async () => {
     if (!storeMeta || !storeMeta.whatsapp || !customer) return;
@@ -44,9 +52,8 @@ export default function CartOrderSummaryModal({ isOpen, onClose, cartItems, stor
       const storeMetaWithId = { ...storeMeta, id: cartItems[0].storeId };
       const referrerId = localStorage.getItem('referrerId');
       
-      // This assumes addOrder can handle an array of products, or we can loop
       for (const item of cartItems) {
-        await addOrder(item, storeMetaWithId, item.quantity, customer, referrerId);
+        await addOrder(item, storeMetaWithId, item.quantity, customer, referrerId, bonusApplied);
       }
       
       toast.success('Order placed! Redirecting to WhatsApp...');
@@ -56,10 +63,10 @@ export default function CartOrderSummaryModal({ isOpen, onClose, cartItems, stor
                       `Hello! I would like to order the following items:\n\n` +
                       `${itemsSummary}\n\n`+
                       `• Delivery Method: ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n`+
-                      `${deliveryMethod === 'home' ? `• Address: ${customer.streetAddress}\n` : ''}`+
+                      `${deliveryMethod === 'home' && customer.deliveryAddress ? `• Address: ${customer.deliveryAddress.street}\n` : ''}`+
                       `• Subtotal: ${formatPrice(subtotal)}\n`+
                       `• Delivery Fee: ${formatPrice(deliveryFee)}\n`+
-                      `• Referral Bonus: -${formatPrice(referralBonus)}\n`+
+                      `${bonusApplied ? `• Referral Bonus: -${formatPrice(referralBonus)}\n` : ''}` +
                       `*• Total: ${formatPrice(total)}*\n\n` +
                       `Thank you! 🙏`;
 
@@ -115,23 +122,31 @@ export default function CartOrderSummaryModal({ isOpen, onClose, cartItems, stor
                         <BriefcaseIcon className="h-5 w-5 text-gray-500" /><span className="ml-3 text-sm font-medium">Pick Up</span>
                       </div>
                     </div>
-                    {deliveryMethod === 'home' && customer && <p className="mt-2 text-sm text-gray-500">To: {customer.streetAddress}</p>}
+                    {deliveryMethod === 'home' && customer && customer.deliveryAddress && <p className="mt-2 text-sm text-gray-500">To: {customer.name} - {customer.deliveryAddress.street}</p>}
                   </div>
                   
                   <div className="mt-6 border-t border-gray-200 pt-4">
                     <dl className="space-y-1 text-sm text-gray-500">
                       <div className="flex justify-between"><dt>Subtotal</dt><dd className="font-medium text-gray-900">{formatPrice(subtotal)}</dd></div>
                       <div className="flex justify-between"><dt>Home delivery</dt><dd className="font-medium text-gray-900">{formatPrice(deliveryFee)}</dd></div>
-                      <div className="flex justify-between"><dt>Referral bonus</dt><dd className="font-medium text-green-600">-{formatPrice(referralBonus)}</dd></div>
+                      <div className="flex justify-between"><dt>Referral bonus</dt><dd className="font-medium text-green-600">-{formatPrice(bonusApplied ? referralBonus : 0)}</dd></div>
                       <div className="flex justify-between text-base font-medium text-gray-900"><dt>Total</dt><dd>{formatPrice(total)}</dd></div>
                     </dl>
+                     {referralBonus >= 100 && !bonusApplied && (
+                        <button 
+                            onClick={() => setBonusApplied(true)}
+                            className="mt-2 text-sm text-indigo-600 hover:text-indigo-500 font-medium"
+                        >
+                            Use ₦{referralBonus} bonus
+                        </button>
+                    )}
                     <p className="mt-1 text-sm text-gray-500">Payment mode: Transfer</p>
                   </div>
                 </div>
 
                 <div className="mt-5 sm:mt-6 grid grid-cols-2 gap-3">
-                  <button type="button" className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50" onClick={onClose}>Cancel</button>
-                  <button type="button" className="w-full rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700" onClick={handlePlaceOrder}>Place Order</button>
+                  <button type="button" className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" onClick={onClose}>Cancel</button>
+                  <button type="button" className="w-full rounded-md border border-transparent bg-green-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2" onClick={handlePlaceOrder}>Place Order</button>
                 </div>
               </Dialog.Panel>
             </Transition.Child>

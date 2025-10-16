@@ -6,6 +6,7 @@ import { addOrderToFirestore, fetchOrdersFromFirestore } from '@/app/actions/ord
 import { Product } from '@/types/product';
 import { StoreMeta } from '@/types/store';
 import { Customer } from '@/types/customer';
+import { CartItem } from '@/lib/cartContext';
 
 export interface Order {
   id: string;
@@ -42,13 +43,13 @@ export const useOrders = (customerId: string | null, storeId?: string) => {
     fetchOrders();
   }, [customerId, fetchOrders]);
 
-  const addOrder = async (product: Product, storeMeta: StoreMeta, quantity: number, customerInfo: Customer, referralCode: string | null) => {
+  const addOrder = async (product: Product | CartItem, storeMeta: StoreMeta, quantity: number, customerInfo: Customer, referralCode: string | null, bonusApplied: boolean = false) => {
     if (!customerId || !customerInfo) {
       throw new Error("User is not logged in.");
     }
 
     try {
-      const newOrder = await addOrderToFirestore(customerId, product, storeMeta, quantity, customerInfo, referralCode);
+      const newOrder = await addOrderToFirestore(customerId, product, storeMeta, quantity, customerInfo, referralCode, bonusApplied);
       setOrders(prevOrders => [newOrder, ...prevOrders]);
     } catch (error) {
       console.error("Error in addOrder:", error);

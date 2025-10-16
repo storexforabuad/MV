@@ -17,6 +17,28 @@ const serializeTimestamp = (timestamp: unknown): string => {
     return new Date().toISOString(); 
 };
 
+export const getCustomerDetails = async (customerId: string): Promise<Customer | null> => {
+  try {
+    const customerRef = doc(db, "customers", customerId);
+    const customerSnap = await getDoc(customerRef);
+
+    if (customerSnap.exists()) {
+      const data = customerSnap.data();
+      return {
+          id: customerSnap.id,
+          ...data,
+          createdAt: serializeTimestamp(data.createdAt),
+      } as unknown as Customer;
+    } else {
+      console.log("No such customer!");
+      return null;
+    }
+  } catch (error) {
+    console.error("Error getting customer details: ", error);
+    throw new Error("Failed to get customer details.");
+  }
+}
+
 export const getReferralBonus = async (customerId: string): Promise<number> => {
   try {
     const customerRef = doc(db, "customers", customerId);

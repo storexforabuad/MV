@@ -12,7 +12,7 @@ import { Minus, Plus } from 'lucide-react';
 import { useOrders } from '@/hooks/useOrders';
 import toast from 'react-hot-toast';
 import { useParams } from 'next/navigation';
-import { getReferralBonus } from '@/app/actions/customerActions';
+import { getReferralBonus, getCustomerDetails } from '@/app/actions/customerActions';
 
 interface OrderSummaryModalProps {
   isOpen: boolean;
@@ -22,11 +22,13 @@ interface OrderSummaryModalProps {
   customer: Customer | null;
 }
 
-export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta, customer }: OrderSummaryModalProps) {
+export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta, customer: initialCustomer }: OrderSummaryModalProps) {
   const [quantity, setQuantity] = useState(1);
   const [deliveryMethod, setDeliveryMethod] = useState('home');
   const [referralBonus, setReferralBonus] = useState(0);
-  
+  const [customer, setCustomer] = useState<Customer | null>(initialCustomer);
+  const [bonusApplied, setBonusApplied] = useState(false);
+
   const { addOrder } = useOrders(customer?.id || null);
   const routeParams = useParams();
   const storeId = typeof routeParams?.storeId === 'string' ? routeParams.storeId : Array.isArray(routeParams?.storeId) ? routeParams.storeId[0] : undefined;
@@ -34,18 +36,24 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   useEffect(() => {
     if (isOpen) {
       setQuantity(1); // Reset quantity when modal opens
-      if (customer) {
-        getReferralBonus(customer.id).then(bonus => {
+      setBonusApplied(false);
+      if (initialCustomer) {
+        getCustomerDetails(initialCustomer.id).then(details => {
+          if (details) {
+            setCustomer(details);
+          }
+        });
+        getReferralBonus(initialCustomer.id).then(bonus => {
           setReferralBonus(bonus);
         });
       }
     }
-  }, [isOpen, customer]);
+  }, [isOpen, initialCustomer]);
 
   if (!product) return null;
 
-  const deliveryFee = deliveryMethod === 'home' && customer?.city?.toLowerCase() === 'bauchi' ? 500 : 0;
-  const total = product.price * quantity + deliveryFee - referralBonus;
+  const deliveryFee = deliveryMethod === 'home' ? 500 : 0;
+  const total = product.price * quantity + deliveryFee - (bonusApplied ? referralBonus : 0);
 
   const handlePlaceOrder = async () => {
     if (!product || !storeId || !storeMeta || !storeMeta.whatsapp || !customer) return;
@@ -53,7 +61,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
     try {
       const storeMetaWithId = { ...storeMeta, id: storeId };
       const referrerId = localStorage.getItem('referrerId');
-      await addOrder(product, storeMetaWithId, quantity, customer, referrerId);
+      await addOrder(product, storeMetaWithId, quantity, customer, referrerId, bonusApplied);
       toast.success('Order placed! Redirecting to WhatsApp...');
 
       const message = `🛍️ *New Order Request*\n\n` +
@@ -62,7 +70,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                       `• Quantity: ${quantity}\n` +
                       `• Price: ${formatPrice(product.price)}\n` +
                       `• Delivery Method: ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n`+
-                      `${deliveryMethod === 'home' ? `• Address: ${customer.streetAddress}\n` : ''}`+
+                      `${deliveryMethod === 'home' && customer.deliveryAddress ? `• To: ${customer.deliveryAddress.street}\n` : ''}`+
+                      `${bonusApplied ? `• Referral Bonus: -${formatPrice(referralBonus)}\n` : ''}` +
                       `• Total: ${formatPrice(total)}\n\n` +
                       `Thank you! 🙏`;
 
@@ -123,8 +132,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                         <span className="ml-3 text-sm font-medium">Pick Up</span>
                       </div>
                     </div>
-                    {deliveryMethod === 'home' && customer && (
-                      <p className="mt-2 text-sm text-gray-500">To: {customer.streetAddress}</p>
+                    {deliveryMethod === 'home' && customer && customer.deliveryAddress && (
+                      <p className="mt-2 text-sm text-gray-500">To: {customer.deliveryAddress.street}</p>
                     )}
                   </div>
 
@@ -142,13 +151,21 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                       </div>
                       <div className="flex justify-between">
                         <dt>Referral bonus</dt>
-                        <dd className="font-medium text-green-600">-{formatPrice(referralBonus)}</dd>
+                        <dd className="font-medium text-green-600">-{formatPrice(bonusApplied ? referralBonus : 0)}</dd>
                       </div>
                       <div className="flex justify-between text-base font-medium text-gray-900">
                         <dt>Total</dt>
                         <dd>{formatPrice(total)}</dd>
                       </div>
                     </dl>
+                    {referralBonus >= 100 && !bonusApplied && (
+                        <button 
+                            onClick={() => setBonusApplied(true)}
+                            className="mt-2 text-sm text-indigo-600 hover:text-indigo-500 font-medium"
+                        >
+                            Use ₦{referralBonus} bonus
+                        </button>
+                    )}
                     <p className="mt-1 text-sm text-gray-500">Payment mode: Transfer</p>
                   </div>
                 </div>
@@ -156,7 +173,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                 {/* Action Buttons */}
                 <div className="mt-5 sm:mt-6 grid grid-cols-2 gap-3">
                   <button type="button" className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm" onClick={onClose}>Cancel</button>
-                  <button type="button" className="inline-flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm" onClick={handlePlaceOrder}>Place Order</button>
+                  <button type="button" className="inline-flex w-full justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 sm:text-sm" onClick={handlePlaceOrder}>Place Order</button>
                 </div>
               </Dialog.Panel>
             </Transition.Child>
