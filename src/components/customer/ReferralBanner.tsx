@@ -17,7 +17,7 @@ const ReferralBanner = ({ storeId, storeName, onLoginClick }: ReferralBannerProp
   const { customer } = useCustomer();
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
-  const referralLink = customer ? `${window.location.origin}/${storeId}?ref=${customer.referralCode}` : '';
+  const referralLink = customer ? `https://tinyurl.com/bizcononline/${storeId}?ref=${customer.referralCode}` : '';
 
   // Get the store-specific commission, defaulting to 0 if not present
   const commissionEarned = customer?.referralDataByStore?.[storeId]?.commissionEarned || 0;

@@ -40,8 +40,13 @@ const StoreLinkModal: React.FC<StoreLinkModalProps> = ({ storeLink, handleClose,
 
   useEffect(() => {
     if (storeLink) {
-      const newFullUrl = storeLink.startsWith('http') ? storeLink : `${window.location.origin}${storeLink}`;
-      setFullUrl(newFullUrl);
+      if (storeLink.startsWith('http')) {
+        setFullUrl(storeLink);
+      } else {
+        const storeId = storeLink.startsWith('/') ? storeLink.substring(1) : storeLink;
+        const newFullUrl = `https://tinyurl.com/bizcononline/${storeId}`;
+        setFullUrl(newFullUrl);
+      }
     }
   }, [storeLink]);
 
