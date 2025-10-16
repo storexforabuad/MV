@@ -26,7 +26,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, cartItems, stor
   const [bonusApplied, setBonusApplied] = useState(false);
   const { addOrder } = useOrders(customer?.id || null);
   const storeId = cartItems[0]?.storeId;
-  const referralBonus = customer?.referralDataByStore?.[storeId]?.commissionEarned || 0;
+  const referralBonus = storeId && typeof storeId === 'string' ? customer?.referralDataByStore?.[storeId]?.commissionEarned || 0 : 0;
 
   useEffect(() => {
     if (isOpen && initialCustomer) {
