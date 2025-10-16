@@ -1,7 +1,10 @@
 'use client';
 
-import { X } from 'lucide-react';
+import { useState } from 'react';
+import { X, LogOut } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useParams } from 'next/navigation';
+import ConfirmationDialog from '@/components/common/ConfirmationDialog';
 
 interface ProfileModalProps {
   isOpen: boolean;
@@ -9,6 +12,15 @@ interface ProfileModalProps {
 }
 
 export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
+  const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
+  const params = useParams();
+  const storeId = params.storeId;
+
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.href = `/${storeId}`;
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -36,9 +48,26 @@ export function ProfileModal({ isOpen, onClose }: ProfileModalProps) {
             <div className="p-6 text-center">
               <p className="text-slate-500 dark:text-slate-400">Your profile information will be displayed here.</p>
             </div>
+            <div className="absolute bottom-0 left-0 right-0 p-6 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
+              <button 
+                onClick={() => setShowLogoutConfirmation(true)} 
+                className="w-full flex items-center justify-center gap-2 bg-red-500 text-white font-semibold py-3 px-4 rounded-lg hover:bg-red-600 transition-colors duration-300">
+                <LogOut className="w-5 h-5" />
+                Logout
+              </button>
+            </div>
           </motion.div>
         </motion.div>
       )}
+      <ConfirmationDialog
+        isOpen={showLogoutConfirmation}
+        onClose={() => setShowLogoutConfirmation(false)}
+        onConfirm={handleLogout}
+        title="Confirm Logout"
+        confirmButtonText="Logout"
+      >
+        Are you sure you want to log out?
+      </ConfirmationDialog>
     </AnimatePresence>
   );
 }

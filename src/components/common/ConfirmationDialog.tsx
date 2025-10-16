@@ -9,9 +9,10 @@ interface ConfirmationDialogProps {
   onConfirm: () => void;
   title: string;
   children: React.ReactNode;
+  confirmButtonText?: string;
 }
 
-export default function ConfirmationDialog({ isOpen, onClose, onConfirm, title, children }: ConfirmationDialogProps) {
+export default function ConfirmationDialog({ isOpen, onClose, onConfirm, title, children, confirmButtonText }: ConfirmationDialogProps) {
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
@@ -68,7 +69,7 @@ export default function ConfirmationDialog({ isOpen, onClose, onConfirm, title, 
                     className="w-full inline-flex justify-center rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:w-auto"
                     onClick={onConfirm}
                   >
-                    Delete
+                    {confirmButtonText || 'Delete'}
                   </button>
                 </div>
               </Dialog.Panel>
