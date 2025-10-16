@@ -1,7 +1,7 @@
 
 "use client";
 
-import { ShoppingBag, Gift, Heart } from "lucide-react";
+import { ShoppingBag, Gift } from "lucide-react";
 import { motion } from "framer-motion";
 import { CustomerStatCard } from './CustomerStatCard';
 import { Order } from "@/hooks/useOrders";
@@ -21,13 +21,11 @@ interface CustomerDashboardProps {
   storeId: string;
   onOrdersModalOpen: () => void;
   onReferralsModalOpen: () => void;
-  onWishlistModalOpen: () => void;
 }
 
 const colorGradients = {
   purple: "bg-gradient-to-br from-purple-500 to-indigo-600",
   green: "bg-gradient-to-br from-green-500 to-emerald-600",
-  red: "bg-gradient-to-br from-red-500 to-rose-600",
 };
 
 export function CustomerDashboard({
@@ -36,13 +34,11 @@ export function CustomerDashboard({
   storeId,
   onOrdersModalOpen,
   onReferralsModalOpen,
-  onWishlistModalOpen,
 }: CustomerDashboardProps) {
   
   const referralData = customer?.referralDataByStore?.[storeId];
   const referralCount = referralData?.referralCount || 0;
 
-  const wishlistCount = 0;
   const ordersCount = orders ? orders.length : 0;
 
   return (
@@ -65,13 +61,6 @@ export function CustomerDashboard({
         icon={<Gift className="w-6 h-6" />}
         gradient={colorGradients.green}
         onClick={onReferralsModalOpen}
-      />
-      <CustomerStatCard
-        label="My Wishlist"
-        value={wishlistCount}
-        icon={<Heart className="w-6 h-6" />}
-        gradient={colorGradients.red}
-        onClick={onWishlistModalOpen}
       />
     </motion.div>
   );
