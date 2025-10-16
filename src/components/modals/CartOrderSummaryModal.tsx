@@ -91,10 +91,10 @@ export default function CartOrderSummaryModal({ isOpen, onClose, cartItems, stor
         <div className="fixed inset-0 z-10 overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
             <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" enterTo="opacity-100 translate-y-0 sm:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 sm:scale-100" leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
+              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
                 <div>
                   <div className="flex items-start justify-between">
-                    <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900">Order Summary</Dialog.Title>
+                    <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 dark:text-white">Order Summary</Dialog.Title>
                     <button type="button" className="-m-2 p-2 text-gray-400 hover:text-gray-500" onClick={onClose}><XMarkIcon className="h-6 w-6" aria-hidden="true" /></button>
                   </div>
 
@@ -103,49 +103,49 @@ export default function CartOrderSummaryModal({ isOpen, onClose, cartItems, stor
                       <div key={item.id} className="flex items-center space-x-4 py-2">
                         <Image src={item.images[0]} alt={item.name} width={48} height={48} className="h-12 w-12 rounded-md object-cover" />
                         <div className="flex-1">
-                          <h4 className="text-sm font-medium text-gray-900">{item.name}</h4>
-                          <p className="text-sm text-gray-500">{formatPrice(item.price)} x {item.quantity}</p>
+                          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200">{item.name}</h4>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">{formatPrice(item.price)} x {item.quantity}</p>
                         </div>
-                        <p className="text-sm font-medium text-gray-900">{formatPrice(item.price * item.quantity)}</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-200">{formatPrice(item.price * item.quantity)}</p>
                       </div>
                     ))}
                   </div>
 
                   {/* Delivery Method & Payment Details */}
-                  <div className="mt-6 border-t border-gray-200 pt-4">
-                     <h4 className="text-sm font-medium text-gray-900">Delivery Method</h4>
+                  <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
+                     <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200">Delivery Method</h4>
                     <div className="mt-2 grid grid-cols-2 gap-4">
-                      <div onClick={() => setDeliveryMethod('home')} className={`flex cursor-pointer items-center rounded-lg border p-4 ${deliveryMethod === 'home' ? 'border-indigo-500 ring-1 ring-indigo-500' : 'border-gray-300'}`}>
-                        <HomeIcon className="h-5 w-5 text-gray-500" /><span className="ml-3 text-sm font-medium">Home Delivery</span>
+                      <div onClick={() => setDeliveryMethod('home')} className={`flex cursor-pointer items-center rounded-lg border p-4 ${deliveryMethod === 'home' ? 'border-indigo-500 ring-1 ring-indigo-500' : 'border-gray-300 dark:border-gray-600'}`}>
+                        <HomeIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" /><span className="ml-3 text-sm font-medium dark:text-gray-300">Home Delivery</span>
                       </div>
-                      <div onClick={() => setDeliveryMethod('pickup')} className={`flex cursor-pointer items-center rounded-lg border p-4 ${deliveryMethod === 'pickup' ? 'border-indigo-500 ring-1 ring-indigo-500' : 'border-gray-300'}`}>
-                        <BriefcaseIcon className="h-5 w-5 text-gray-500" /><span className="ml-3 text-sm font-medium">Pick Up</span>
+                      <div onClick={() => setDeliveryMethod('pickup')} className={`flex cursor-pointer items-center rounded-lg border p-4 ${deliveryMethod === 'pickup' ? 'border-indigo-500 ring-1 ring-indigo-500' : 'border-gray-300 dark:border-gray-600'}`}>
+                        <BriefcaseIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" /><span className="ml-3 text-sm font-medium dark:text-gray-300">Pick Up</span>
                       </div>
                     </div>
-                    {deliveryMethod === 'home' && customer && customer.deliveryAddress && <p className="mt-2 text-sm text-gray-500">To: {customer.name} - {customer.deliveryAddress.street}</p>}
+                    {deliveryMethod === 'home' && customer && customer.deliveryAddress && <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">To: {customer.name} - {customer.deliveryAddress.street}</p>}
                   </div>
                   
-                  <div className="mt-6 border-t border-gray-200 pt-4">
-                    <dl className="space-y-1 text-sm text-gray-500">
-                      <div className="flex justify-between"><dt>Subtotal</dt><dd className="font-medium text-gray-900">{formatPrice(subtotal)}</dd></div>
-                      <div className="flex justify-between"><dt>Home delivery</dt><dd className="font-medium text-gray-900">{formatPrice(deliveryFee)}</dd></div>
-                      <div className="flex justify-between"><dt>Referral bonus</dt><dd className="font-medium text-green-600">-{formatPrice(bonusApplied ? referralBonus : 0)}</dd></div>
-                      <div className="flex justify-between text-base font-medium text-gray-900"><dt>Total</dt><dd>{formatPrice(total)}</dd></div>
+                  <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <dl className="space-y-1 text-sm text-gray-500 dark:text-gray-400">
+                      <div className="flex justify-between"><dt>Subtotal</dt><dd className="font-medium text-gray-900 dark:text-gray-200">{formatPrice(subtotal)}</dd></div>
+                      <div className="flex justify-between"><dt>Home delivery</dt><dd className="font-medium text-gray-900 dark:text-gray-200">{formatPrice(deliveryFee)}</dd></div>
+                      <div className="flex justify-between"><dt>Referral bonus</dt><dd className="font-medium text-green-600 dark:text-green-400">-{formatPrice(bonusApplied ? referralBonus : 0)}</dd></div>
+                      <div className="flex justify-between text-base font-medium text-gray-900 dark:text-white"><dt>Total</dt><dd>{formatPrice(total)}</dd></div>
                     </dl>
-                     {referralBonus >= 100 && !bonusApplied && (
-                        <button 
-                            onClick={() => setBonusApplied(true)}
-                            className="mt-2 text-sm text-indigo-600 hover:text-indigo-500 font-medium"
-                        >
-                            Use ₦{referralBonus} bonus
-                        </button>
-                    )}
-                    <p className="mt-1 text-sm text-gray-500">Payment mode: Transfer</p>
+                    <button 
+                        onClick={() => setBonusApplied(true)}
+                        disabled={referralBonus < 100}
+                        className="mt-2 text-sm text-indigo-600 hover:text-indigo-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Use ₦{referralBonus} bonus
+                    </button>
+                     {referralBonus < 100 && <p className="text-xs text-gray-500 dark:text-gray-400">Earn ₦{100-referralBonus} more to use your bonus</p>}
+                    
                   </div>
                 </div>
 
                 <div className="mt-5 sm:mt-6 grid grid-cols-2 gap-3">
-                  <button type="button" className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" onClick={onClose}>Cancel</button>
+                  <button type="button" className="w-full rounded-md border border-gray-300 bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600 px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" onClick={onClose}>Cancel</button>
                   <button type="button" className="w-full rounded-md border border-transparent bg-green-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2" onClick={handlePlaceOrder}>Place Order</button>
                 </div>
               </Dialog.Panel>
