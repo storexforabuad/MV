@@ -174,7 +174,7 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
                         value={phoneNumber}
                         onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
                         className="w-full outline-none border-none bg-transparent text-slate-800 dark:text-white font-semibold" 
-                        placeholder="801 234 5678"
+                        placeholder="0801 234 5678"
                         onKeyDown={(e) => e.key === 'Enter' && handlePhoneNumberSubmit()}
                     />
                 </div>
