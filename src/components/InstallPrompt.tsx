@@ -22,7 +22,7 @@ export default function InstallPrompt() {
     async function fetchStoreName() {
       if (!storeId) return;
       const meta = await getStoreMeta(storeId);
-      setStoreName(meta?.name || storeId || 'Alaniq INT.');
+      setStoreName(meta?.name || storeId || 'The Store App');
     }
     fetchStoreName();
   }, [storeId]);
@@ -49,7 +49,7 @@ export default function InstallPrompt() {
     setShowPrompt(false);
   };
 
-  if (!showPrompt) return null;
+  if (!showPrompt || storeId) return null;
 
   return (
     <>
