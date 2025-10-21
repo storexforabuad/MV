@@ -16,32 +16,35 @@ const poppins = Poppins({
 })
 
 export async function generateMetadata({ params }: { params: { storeId: string } }): Promise<Metadata> {
-  const store = await getStoreMeta(params.storeId);
+  if (params.storeId) {
+    const store = await getStoreMeta(params.storeId);
 
-  if (!store) {
-    return {
-      title: "Alaniq INT.",
-      description: "Discover Beautiful RTW, Perfumes, Incense & More",
-      manifest: "/manifest.json",
-      appleWebApp: {
-        capable: true,
-        statusBarStyle: "default",
-        title: "Alaniq INT.",
-      },
-      formatDetection: {
-        telephone: false,
-      },
-    };
+    if (store) {
+      return {
+        title: store.name,
+        description: store.description || "Discover Amazing Products",
+        manifest: `/api/manifest?storeId=${params.storeId}`,
+        appleWebApp: {
+          capable: true,
+          statusBarStyle: "default",
+          title: store.name,
+        },
+        formatDetection: {
+          telephone: false,
+        },
+      };
+    }
   }
 
+  // Default metadata if no storeId or store not found
   return {
-    title: store.name,
-    description: store.description || "Discover Amazing Products",
-    manifest: `/api/manifest?storeId=${params.storeId}`,
+    title: "Alaniq INT.",
+    description: "Discover Beautiful RTW, Perfumes, Incense & More",
+    manifest: "/manifest.json",
     appleWebApp: {
       capable: true,
       statusBarStyle: "default",
-      title: store.name,
+      title: "Alaniq INT.",
     },
     formatDetection: {
       telephone: false,
