@@ -36,6 +36,7 @@ interface StoreOrderData extends CustomerOrderData {
     phoneNumber: string;
     deliveryAddress: DeliveryAddress;
   };
+  referralApplied?: boolean; // <-- ADD THIS
 }
 
 // Type for the detailed order object returned to the ADMIN client
@@ -46,6 +47,7 @@ export interface StoreOrder extends Order {
         phoneNumber: string;
         deliveryAddress: DeliveryAddress;
     }
+    referralApplied?: boolean; // <-- AND ADD THIS
 }
 
 /**
@@ -78,6 +80,7 @@ export const addOrderToFirestore = async (
     const newOrderId = doc(collection(db, 'dummy')).id;
 
     const batch = writeBatch(db);
+    let referralWasApplied = false; // <-- Track if referral was applied
 
     // --- New Referral Logic ---
     if (referralCode) {
@@ -92,6 +95,7 @@ export const addOrderToFirestore = async (
         const customerOrdersSnap = await getDocs(customerOrdersQuery);
 
         if (referrerId !== customerId && customerOrdersSnap.empty && product.commission && product.commission > 0) {
+          referralWasApplied = true; // <-- Mark referral as applied
           const commissionValue = (product.price * product.commission) / 100;
           const commissionEarned = commissionValue * 0.5;
           const referrerRef = doc(db, 'customers', referrerId);
@@ -136,6 +140,7 @@ export const addOrderToFirestore = async (
         phoneNumber: customerData.phoneNumber,
         deliveryAddress: customerData.deliveryAddress,
       },
+      ...(referralWasApplied && { referralApplied: true }), // <-- Conditionally add the flag
     };
 
     const customerOrderRef = doc(db, 'customers', customerId, 'orders', newOrderId);
@@ -212,6 +217,7 @@ export const fetchStoreOrders = async (storeId: string): Promise<StoreOrder[]> =
         orderDate: data.orderDate.toDate().toISOString(),
         quantity: data.quantity || 1,
         customerInfo: data.customerInfo,
+        referralApplied: data.referralApplied, // <-- Pass the flag
       };
     });
 
@@ -240,4 +246,34 @@ export const incrementOrderCount = async (storeId: string, incrementValue: numbe
     console.error('Error incrementing order count:', error);
     // Decide on error handling strategy, e.g., silent fail or re-throw
   }
+};
+
+/**
+ * Calculates the total commission earned and referral bonuses for a given store.
+ */
+export const calculateStoreCommissions = async (storeId: string): Promise<{ totalCommissionEarned: number, totalReferralBonus: number }> => {
+    try {
+        const orders = await fetchStoreOrders(storeId);
+        let totalCommissionEarned = 0;
+        let totalReferralBonus = 0;
+
+        for (const order of orders) {
+            if (order.product && order.product.commission && typeof order.product.price === 'number') {
+                const commission = (order.product.price * order.product.commission) / 100;
+                totalCommissionEarned += commission;
+
+                // A referral bonus is 50% of the product commission
+                if (order.referralApplied) {
+                    totalReferralBonus += commission * 0.5;
+                }
+            }
+        }
+
+        return { totalCommissionEarned, totalReferralBonus };
+
+    } catch (error) {
+        console.error("Error calculating store commissions:", error);
+        // In case of an error, return zero values to prevent the app from crashing.
+        return { totalCommissionEarned: 0, totalReferralBonus: 0 };
+    }
 };

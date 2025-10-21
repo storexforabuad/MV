@@ -2,19 +2,19 @@
 
 import { useParams } from 'next/navigation';
 import { useEffect, useState, useCallback, Suspense } from 'react';
-import { 
-  getProducts, 
-  getCategories, 
-  getContacts, 
-  WholesaleData, 
-  getStoreMeta, 
-  updateProduct, 
-  deleteProduct, 
-  addCategory, 
-  updateCategory, 
-  deleteCategory, 
-  fetchStoreOrders, 
-  StoreOrder 
+import {
+  getProducts,
+  getCategories,
+  getContacts,
+  WholesaleData,
+  getStoreMeta,
+  updateProduct,
+  deleteProduct,
+  addCategory,
+  updateCategory,
+  deleteCategory,
+  fetchStoreOrders,
+  StoreOrder
 } from '../../../lib/db';
 import { Product } from '../../../types/product';
 import { Category } from '../../../types/category';
@@ -32,6 +32,7 @@ import dynamic from 'next/dynamic';
 import PreviewSkeleton from '../../../components/admin/PreviewSkeleton';
 import { markOnboardingAsCompleted } from '../../../app/actions/onboardingActions';
 import { useSpotlightContext } from '@/context/SpotlightContext';
+import { calculateStoreCommissions } from '../../../app/actions/orderActions';
 
 const OnboardingFlow = dynamic(() => import('../../../components/admin/onboarding/OnboardingFlow'));
 
@@ -102,24 +103,27 @@ export default function AdminStorePage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const { spotlightStep, setSpotlightStep } = useSpotlightContext();
   const [shouldShowSpotlight, setShouldShowSpotlight] = useState(false);
+  const [commissionData, setCommissionData] = useState({ totalCommissionEarned: 0, totalReferralBonus: 0 });
 
   const { orders, refreshOrders } = useStoreOrders(storeId);
 
   const fetchData = useCallback(async (showRefresh = false) => {
     if (showRefresh) setIsRefreshing(true);
     try {
-      const [fetchedProducts, fetchedCategories, fetchedContacts, fetchedStoreMeta, fetchedReferrals] = await Promise.all([
+      const [fetchedProducts, fetchedCategories, fetchedContacts, fetchedStoreMeta, fetchedReferrals, fetchedCommissionData] = await Promise.all([
         getProducts(storeId),
         getCategories(storeId),
         getContacts(storeId),
         getStoreMeta(storeId),
-        getReferrals(storeId)
+        getReferrals(storeId),
+        calculateStoreCommissions(storeId)
       ]);
       setProducts(fetchedProducts);
       setCategories(fetchedCategories);
       setContacts(fetchedContacts);
       setStoreMeta(fetchedStoreMeta as StoreMeta);
       setReferrals(fetchedReferrals);
+      setCommissionData(fetchedCommissionData);
       refreshOrders(); // Refresh orders as well
 
       const hasCompletedOnboarding = localStorage.getItem('hasCompletedOnboarding') === 'true';
@@ -268,6 +272,8 @@ export default function AdminStorePage() {
                   onAnimationComplete={handleAnimationComplete}
                   onOrdersCardClick={() => setIsOrdersModalOpen(true)} // Wire up the click handler
                   openManageCategories={() => setIsManageCategoriesModalOpen(true)}
+                  totalCommissionEarned={commissionData.totalCommissionEarned}
+                  totalReferralBonus={commissionData.totalReferralBonus}
                 />
               </div>
             )}

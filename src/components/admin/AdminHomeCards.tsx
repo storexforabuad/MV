@@ -52,7 +52,32 @@ interface AdminHomeCardsProps {
   onAnimationComplete?: () => void;
   openManageCategories: () => void;
   onOrdersCardClick: () => void;
+  totalCommissionEarned: number;
+  totalReferralBonus: number;
 }
+
+// New Modal for Commission Earned
+const CommissionEarnedModal = ({ totalCommissionEarned, handleClose }: { totalCommissionEarned: number, handleClose: () => void }) => (
+  <div className="p-6 text-center">
+    <BadgeDollarSign className="w-12 h-12 mx-auto text-green-500 mb-4" />
+    <h3 className="text-2xl font-bold mb-2">Total Commission Earned</h3>
+    <p className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">${totalCommissionEarned.toFixed(2)}</p>
+    <p className="text-sm text-text-secondary mt-2">This is the total commission generated from all product sales.</p>
+    <button onClick={handleClose} className="mt-6 bg-blue-500 text-white font-bold py-2 px-4 rounded-lg">Close</button>
+  </div>
+);
+
+// New Modal for Referral Bonus
+const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferralBonus: number, handleClose: () => void }) => (
+  <div className="p-6 text-center">
+    <Gift className="w-12 h-12 mx-auto text-pink-500 mb-4" />
+    <h3 className="text-2xl font-bold mb-2">Total Referral Bonus</h3>
+    <p className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500">${totalReferralBonus.toFixed(2)}</p>
+    <p className="text-sm text-text-secondary mt-2">This is the portion of commission paid out as bonuses to referrers.</p>
+    <button onClick={handleClose} className="mt-6 bg-blue-500 text-white font-bold py-2 px-4 rounded-lg">Close</button>
+  </div>
+);
+
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.FC<any> | null, glowClass: string}[] = [
@@ -156,16 +181,35 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       component: ReferralsModal,
       glowClass: 'shadow-[0_0_25px_-5px_rgba(244,63,94,0.5)]',
     },
+    {
+      label: 'Commission Earned',
+      valueKey: 'totalCommissionEarned',
+      icon: BadgeDollarSign,
+      gradient: 'from-green-500 to-emerald-600',
+      text: 'text-white',
+      component: CommissionEarnedModal, // <-- Assign new modal
+      glowClass: 'shadow-[0_0_25px_-5px_rgba(22,163,74,0.5)]',
+    },
+    {
+      label: 'Referral Bonus',
+      valueKey: 'totalReferralBonus',
+      icon: Gift, 
+      gradient: 'from-orange-400 via-red-400 to-pink-500', 
+      text: 'text-white',
+      component: ReferralBonusModal, // <-- Assign new modal
+      glowClass: 'shadow-[0_0_25px_-5px_rgba(244,63,94,0.5)]', 
+    },
   ];
 
 const formatCurrencyForCard = (amount: number) => {
+    if (typeof amount !== 'number') return '0';
     if (amount >= 1000000) {
       return `${(amount / 1000000).toFixed(1)}M`;
     }
     if (amount >= 1000) {
       return `${(amount / 1000).toFixed(0)}K`;
     }
-    return amount.toString();
+    return amount.toFixed(0);
   };
 
 export default function AdminHomeCards(props: AdminHomeCardsProps) {
@@ -176,7 +220,6 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [refreshing, setRefreshing] = useState(false);
   const { setIsModalOpen, onRefresh, uiVisible, onAnimationComplete, onOrdersCardClick } = props;
 
-  // --- Start of Change: Dynamically insert Customers card --- 
   const viewsIndex = cardData.findIndex(card => card.label === 'Views');
   const cardsToRender = [...cardData];
   const customersCard = {
@@ -191,7 +234,6 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   if (viewsIndex !== -1) {
     cardsToRender.splice(viewsIndex + 1, 0, customersCard);
   }
-  // --- End of Change ---
 
   useEffect(() => {
     const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen;
@@ -308,7 +350,6 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             `}</style>
 
             {cardsToRender.map((card, idx) => {
-              // --- Start of Change: Render Customers card --- 
               if (card.label === 'Customers') {
                 return (
                   <motion.div key="customers-card" variants={itemVariants}>
@@ -316,7 +357,6 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                   </motion.div>
                 );
               }
-              // --- End of Change ---
 
               const Icon = card.icon;
               const isHorizontal = card.label === 'Share' || card.label === 'Tips';
@@ -370,17 +410,14 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                       </div>
                       <div className="flex flex-col items-center min-w-0 z-10 w-full">
                         <div className="text-lg sm:text-xl md:text-2xl font-bold drop-shadow">
-                          {card.label === 'Revenue'
-                              ? formatCurrencyForCard(props.totalRevenue)
-                              : card.label === 'Contacts'
-                                ? props.totalContacts
-                                : card.label === 'Sold Out'
-                                  ? props.soldOut
-                                  : (() => {
-                                      const value = card.valueKey ? props[card.valueKey as keyof AdminHomeCardsProps] : '';
-                                      if (typeof value === 'number' || typeof value === 'string') return value;
-                                      return '';
-                                    })()}
+                          {(() => {
+                            if (card.label === 'Revenue') return formatCurrencyForCard(props.totalRevenue);
+                            if (card.label === 'Commission Earned') return formatCurrencyForCard(props.totalCommissionEarned);
+                            if (card.label === 'Referral Bonus') return formatCurrencyForCard(props.totalReferralBonus);
+                            const value = card.valueKey ? props[card.valueKey as keyof AdminHomeCardsProps] : '';
+                            if (typeof value === 'number' || typeof value === 'string') return value;
+                            return '';
+                          })()}
                         </div>
                         <div className="text-xs sm:text-sm font-medium opacity-90 text-center px-1 leading-tight">
                           {card.label === 'Manage Categories' ? 'Categories' : card.label === 'Manage Products' ? 'Products' : card.label}
