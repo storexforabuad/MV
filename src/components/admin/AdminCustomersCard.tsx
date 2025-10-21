@@ -7,9 +7,11 @@ import { Users } from 'lucide-react';
 interface AdminCustomersCardProps {
   storeId: string;
   onClick: () => void;
+  gradient?: string;
+  glowClass?: string;
 }
 
-export const AdminCustomersCard: React.FC<AdminCustomersCardProps> = ({ storeId, onClick }) => {
+export const AdminCustomersCard: React.FC<AdminCustomersCardProps> = ({ storeId, onClick, gradient, glowClass }) => {
   const [customerCount, setCustomerCount] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -30,9 +32,12 @@ export const AdminCustomersCard: React.FC<AdminCustomersCardProps> = ({ storeId,
     fetchCount();
   }, [storeId]);
 
+  const cardGradient = gradient || 'bg-gradient-to-br from-slate-500 to-slate-600';
+  const cardGlow = glowClass || 'shadow-[0_0_25px_-5px_rgba(100,116,139,0.5)]';
+
   return (
     <button
-        className="dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden bg-gradient-to-br from-slate-500 to-slate-600 text-white shadow-[0_0_25px_-5px_rgba(100,116,139,0.5)] w-full h-full min-h-[7rem]"
+        className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden text-white w-full h-full min-h-[7rem] ${cardGradient} ${cardGlow}`}
         onClick={onClick}
     >
         <span className="card-blob" />
@@ -42,7 +47,7 @@ export const AdminCustomersCard: React.FC<AdminCustomersCardProps> = ({ storeId,
         <div className="flex flex-col items-center min-w-0 z-10 w-full">
             <div className="text-lg sm:text-xl md:text-2xl font-bold drop-shadow">
                 {isLoading ? (
-                    <div className="h-7 w-10 bg-gray-400 animate-pulse rounded-md" />
+                    <div className="h-7 w-10 bg-gray-400/50 animate-pulse rounded-md" />
                 ) : (
                     customerCount
                 )}

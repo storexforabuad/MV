@@ -85,7 +85,7 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
         label: 'Tips',
         subtitle: 'Quick Guide',
         icon: Lightbulb,
-        gradient: 'from-amber-400 to-yellow-500',
+        gradient: 'bg-gradient-to-br from-amber-400 to-yellow-500',
         text: 'text-white',
         component: TipsModal,
         glowClass: 'shadow-[0_0_25px_-5px_rgba(245,158,11,0.5)]',
@@ -95,97 +95,16 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       subtitle: 'Caption',
       valueKey: 'storeLink',
       icon: Share2,
-      gradient: 'from-purple-500 to-indigo-600',
+      gradient: 'bg-gradient-to-br from-teal-400 to-cyan-500',
       text: 'text-white',
       component: StoreLinkModal,
       glowClass: 'shadow-[0_0_25px_-5px_rgba(168,85,247,0.5)]',
     },
     {
-      label: 'Views',
-      valueKey: 'totalViews',
-      icon: Eye,
-      gradient: 'from-blue-400 via-blue-500 to-blue-600',
-      text: 'text-white',
-      component: TotalViewsModal,
-      glowClass: 'shadow-[0_0_25px_-5px_rgba(59,130,246,0.5)]',
-    },
-    {
-      label: 'Manage Categories',
-      valueKey: 'totalCategories',
-      icon: Tag,
-      gradient: 'from-teal-400 via-cyan-500 to-sky-600',
-      text: 'text-white',
-      component: null, // This will be handled by a specific prop
-      glowClass: 'shadow-[0_0_25px_-5px_rgba(20,184,166,0.5)]',
-    },
-    {
-      label: 'Manage Products',
-      valueKey: 'totalProducts',
-      icon: Archive,
-      gradient: 'from-pink-400 via-pink-500 to-pink-600',
-      text: 'text-white',
-      component: TotalProductsModal,
-      glowClass: 'shadow-[0_0_25px_-5px_rgba(236,72,153,0.5)]',
-    },
-    {
-      label: 'Popular',
-      valueKey: 'popularProducts',
-      icon: Star,
-      gradient: 'from-yellow-400 via-yellow-500 to-yellow-600',
-      text: 'text-white',
-      component: PopularProductsModal,
-      glowClass: 'shadow-[0_0_25px_-5px_rgba(234,179,8,0.5)]',
-    },
-    {
-      label: 'Limited',
-      valueKey: 'limitedStock',
-      icon: AlertTriangle,
-      gradient: 'from-orange-400 via-orange-500 to-orange-600',
-      text: 'text-white',
-      component: LimitedStockModal,
-      glowClass: 'shadow-[0_0_25px_-5px_rgba(249,115,22,0.5)]',
-    },
-    {
-      label: 'Sold Out',
-      valueKey: 'soldOut',
-      icon: XCircle,
-      gradient: 'from-red-400 via-red-500 to-red-600',
-      text: 'text-white',
-      component: SoldOutModal,
-      glowClass: 'shadow-[0_0_25px_-5px_rgba(239,68,68,0.5)]',
-    },
-    {
-      label: 'Orders',
-      valueKey: 'totalOrders',
-      icon: ShoppingCart,
-      gradient: 'from-blue-400 via-blue-500 to-blue-600',
-      text: 'text-white',
-      component: null, // Set to null, will be handled by onOrdersCardClick
-      glowClass: 'shadow-[0_0_25px_-5px_rgba(59,130,246,0.5)]',
-    },
-    {
-      label: 'Revenue',
-      valueKey: 'totalRevenue',
-      icon: BadgeDollarSign,
-      gradient: 'from-green-500 to-emerald-600',
-      text: 'text-white',
-      component: RevenueModal,
-      glowClass: 'shadow-[0_0_25px_-5px_rgba(22,163,74,0.5)]',
-    },
-    {
-      label: 'Referrals',
-      valueKey: 'referrals',
-      icon: Gift,
-      gradient: 'from-orange-400 via-red-400 to-pink-500',
-      text: 'text-white',
-      component: ReferralsModal,
-      glowClass: 'shadow-[0_0_25px_-5px_rgba(244,63,94,0.5)]',
-    },
-    {
       label: 'Commission Earned',
       valueKey: 'totalCommissionEarned',
       icon: BadgeDollarSign,
-      gradient: 'from-green-500 to-emerald-600',
+      gradient: 'bg-gradient-to-br from-green-500 to-emerald-600',
       text: 'text-white',
       component: CommissionEarnedModal, // <-- Assign new modal
       glowClass: 'shadow-[0_0_25px_-5px_rgba(22,163,74,0.5)]',
@@ -194,10 +113,82 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       label: 'Referral Bonus',
       valueKey: 'totalReferralBonus',
       icon: Gift, 
-      gradient: 'from-orange-400 via-red-400 to-pink-500', 
+      gradient: 'bg-gradient-to-br from-orange-400 via-red-400 to-pink-500', 
       text: 'text-white',
       component: ReferralBonusModal, // <-- Assign new modal
       glowClass: 'shadow-[0_0_25px_-5px_rgba(244,63,94,0.5)]', 
+    },
+    {
+      label: 'Views',
+      valueKey: 'totalViews',
+      icon: Eye,
+      gradient: 'bg-gradient-to-br from-purple-400 to-purple-500',
+      text: 'text-white',
+      component: TotalViewsModal,
+      glowClass: 'shadow-[0_0_25px_-5px_rgba(59,130,246,0.5)]',
+    },
+    {
+      label: 'Orders',
+      valueKey: 'totalOrders',
+      icon: ShoppingCart,
+      gradient: 'bg-gradient-to-br from-sky-500 to-indigo-500',
+      text: 'text-white',
+      component: null, // Set to null, will be handled by onOrdersCardClick
+      glowClass: 'shadow-[0_0_25px_-5px_rgba(59,130,246,0.5)]',
+    },
+    {
+      label: 'Manage Categories',
+      valueKey: 'totalCategories',
+      icon: Tag,
+      gradient: 'bg-gradient-to-br from-green-400 to-emerald-400',
+      text: 'text-white',
+      component: null, // This will be handled by a specific prop
+      glowClass: 'shadow-[0_0_25px_-5px_rgba(20,184,166,0.5)]',
+    },
+    {
+      label: 'Manage Products',
+      valueKey: 'totalProducts',
+      icon: Archive,
+      gradient: 'bg-gradient-to-br from-blue-800 to-indigo-900',
+      text: 'text-white',
+      component: TotalProductsModal,
+      glowClass: 'shadow-[0_0_25px_-5px_rgba(236,72,153,0.5)]',
+    },
+    {
+      label: 'Popular',
+      valueKey: 'popularProducts',
+      icon: Star,
+      gradient: 'bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600',
+      text: 'text-white',
+      component: PopularProductsModal,
+      glowClass: 'shadow-[0_0_25px_-5px_rgba(234,179,8,0.5)]',
+    },
+    {
+      label: 'Limited',
+      valueKey: 'limitedStock',
+      icon: AlertTriangle,
+      gradient: 'bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600',
+      text: 'text-white',
+      component: LimitedStockModal,
+      glowClass: 'shadow-[0_0_25px_-5px_rgba(249,115,22,0.5)]',
+    },
+    {
+      label: 'Sold Out',
+      valueKey: 'soldOut',
+      icon: XCircle,
+      gradient: 'bg-gradient-to-br from-red-400 via-red-500 to-red-600',
+      text: 'text-white',
+      component: SoldOutModal,
+      glowClass: 'shadow-[0_0_25px_-5px_rgba(239,68,68,0.5)]',
+    },
+    {
+      label: 'Referrals',
+      valueKey: 'referrals',
+      icon: Gift,
+      gradient: 'bg-gradient-to-br from-orange-500 to-amber-500',
+      text: 'text-white',
+      component: ReferralsModal,
+      glowClass: 'shadow-[0_0_25px_-5px_rgba(244,63,94,0.5)]',
     },
   ];
 
@@ -220,19 +211,19 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [refreshing, setRefreshing] = useState(false);
   const { setIsModalOpen, onRefresh, uiVisible, onAnimationComplete, onOrdersCardClick } = props;
 
-  const viewsIndex = cardData.findIndex(card => card.label === 'Views');
+  const ordersIndex = cardData.findIndex(card => card.label === 'Orders');
   const cardsToRender = [...cardData];
   const customersCard = {
     label: 'Customers',
     icon: Users,
-    gradient: 'from-green-400 to-blue-500',
+    gradient: 'bg-gradient-to-br from-indigo-400 to-violet-500',
     text: 'text-white',
     component: AdminCustomersCard,
     glowClass: 'shadow-[0_0_25px_-5px_rgba(74,222,128,0.5)]'
   };
 
-  if (viewsIndex !== -1) {
-    cardsToRender.splice(viewsIndex + 1, 0, customersCard);
+  if (ordersIndex !== -1) {
+    cardsToRender.splice(ordersIndex + 1, 0, customersCard);
   }
 
   useEffect(() => {
@@ -312,7 +303,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                   setRefreshing(false);
                 }}
                 disabled={refreshing}
-                className="col-span-2 sm:col-span-3 md:col-span-4 w-full bg-gradient-to-br from-purple-500 to-indigo-600 text-white font-bold py-3 px-4 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center dark:hover:shadow-lg dark:hover:shadow-purple-500/30"
+                className="col-span-2 sm:col-span-3 md:col-span-4 w-full bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold py-3 px-4 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center dark:hover:shadow-lg dark:hover:shadow-purple-500/30"
             >
                 <RefreshCw className={`mr-2 h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
                 {refreshing ? 'Refreshing...' : 'Refresh'}
@@ -353,7 +344,12 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
               if (card.label === 'Customers') {
                 return (
                   <motion.div key="customers-card" variants={itemVariants}>
-                    <AdminCustomersCard storeId={props.storeId} onClick={() => setIsCustomersModalOpen(true)} />
+                    <AdminCustomersCard 
+                      storeId={props.storeId} 
+                      onClick={() => setIsCustomersModalOpen(true)} 
+                      gradient={customersCard.gradient}
+                      glowClass={customersCard.glowClass}
+                    />
                   </motion.div>
                 );
               }
@@ -367,7 +363,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                 return (
                   <motion.div key={card.label} variants={itemVariants} className={`relative ${spotlightClasses}`}>
                     <button
-                      className={`dashboard-card relative flex flex-row items-center justify-center rounded-2xl p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden bg-gradient-to-br ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`}
+                      className={`dashboard-card relative flex flex-row items-center justify-center rounded-2xl p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`}
                       tabIndex={0}
                       type="button"
                       onClick={() => handleOpenModal(idx, card.label)}
@@ -399,7 +395,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                 return (
                   <motion.div key={card.label} variants={itemVariants}>
                     <button
-                      className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden bg-gradient-to-br ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`}
+                      className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`}
                       tabIndex={0}
                       type="button"
                       onClick={() => handleOpenModal(idx, card.label)}
