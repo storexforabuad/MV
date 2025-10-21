@@ -15,12 +15,13 @@ import { getCustomerDetails } from '@/app/actions/customerActions';
 interface CartOrderSummaryModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onOrderSuccess: () => void;
   cartItems: CartItem[];
   storeMeta: StoreMeta | null;
   customer: Customer | null;
 }
 
-export default function CartOrderSummaryModal({ isOpen, onClose, cartItems, storeMeta, customer: initialCustomer }: CartOrderSummaryModalProps) {
+export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess, cartItems, storeMeta, customer: initialCustomer }: CartOrderSummaryModalProps) {
   const [deliveryMethod, setDeliveryMethod] = useState('home');
   const [customer, setCustomer] = useState<Customer | null>(initialCustomer);
   const [bonusApplied, setBonusApplied] = useState(false);
@@ -84,7 +85,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, cartItems, stor
 
       window.open(whatsappUrl, '_blank');
       dispatch({ type: 'CLEAR_CART' });
-      onClose();
+      onOrderSuccess();
     } catch (error) {
       console.error("Error placing order or redirecting to WhatsApp:", error);
       toast.error('Failed to place order. Please try again.');

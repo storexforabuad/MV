@@ -88,15 +88,21 @@ export default function CartPage() {
     setIsOrderModalOpen(true);
   };
 
-  const handleModalClose = () => {
-    setIsOrderModalOpen(false);
-    if (currentStoreId) {
-      groupedCart[currentStoreId].forEach(item => {
+  const handleOrderSuccess = (storeId: string) => {
+    if (storeId) {
+      groupedCart[storeId].forEach(item => {
         dispatch({ type: 'REMOVE_ITEM', payload: item.id });
       });
     }
+    setIsOrderModalOpen(false);
     setCurrentStoreId(null);
-  }
+    toast.success('Order placed successfully!');
+  };
+
+  const handleModalClose = () => {
+    setIsOrderModalOpen(false);
+    setCurrentStoreId(null);
+  };
 
   if (state.items.length === 0) {
     return (
@@ -127,6 +133,7 @@ export default function CartPage() {
              <CartOrderSummaryModal
                 isOpen={isOrderModalOpen}
                 onClose={handleModalClose}
+                onOrderSuccess={() => handleOrderSuccess(currentStoreId)}
                 cartItems={groupedCart[currentStoreId] || []}
                 storeMeta={storeMetas[currentStoreId] || null}
                 customer={customer}
