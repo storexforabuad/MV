@@ -49,7 +49,9 @@ const CommissionEarnedModal = ({ totalCommissionEarned, handleClose }: { totalCo
   <div className="p-6 text-center">
     <Percent className="w-12 h-12 mx-auto text-green-500 mb-4" />
     <h3 className="text-2xl font-bold mb-2">Total Commission Earned</h3>
-    <p className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">${totalCommissionEarned.toFixed(2)}</p>
+    <p className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">
+      ₦{totalCommissionEarned.toFixed(2)}
+    </p>
     <p className="text-sm text-text-secondary mt-2">This is the total commission generated from all product sales.</p>
     <button onClick={handleClose} className="mt-6 bg-blue-500 text-white font-bold py-2 px-4 rounded-lg">Close</button>
   </div>
@@ -59,7 +61,9 @@ const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferral
   <div className="p-6 text-center">
     <Gift className="w-12 h-12 mx-auto text-pink-500 mb-4" />
     <h3 className="text-2xl font-bold mb-2">Total Referral Bonus</h3>
-    <p className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500">${totalReferralBonus.toFixed(2)}</p>
+    <p className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500">
+      ₦{totalReferralBonus.toFixed(2)}
+    </p>
     <p className="text-sm text-text-secondary mt-2">This is the portion of commission paid out as bonuses to referrers.</p>
     <button onClick={handleClose} className="mt-6 bg-blue-500 text-white font-bold py-2 px-4 rounded-lg">Close</button>
   </div>
@@ -179,14 +183,14 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
   ];
 
 const formatCurrencyForCard = (amount: number) => {
-    if (typeof amount !== 'number') return '0';
+    if (typeof amount !== 'number') return '₦0';
     if (amount >= 1000000) {
-      return `${(amount / 1000000).toFixed(1)}M`;
+      return `₦${(amount / 1000000).toFixed(1)}M`;
     }
     if (amount >= 1000) {
-      return `${(amount / 1000).toFixed(0)}K`;
+      return `₦${(amount / 1000).toFixed(0)}K`;
     }
-    return amount.toFixed(0);
+    return `₦${amount.toFixed(0)}`;
   };
 
 export default function AdminHomeCards(props: AdminHomeCardsProps) {
@@ -410,9 +414,9 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         </motion.div>
 
       <CustomersListModal 
-        storeId={props.storeId} 
-        isOpen={isCustomersModalOpen} 
-        onClose={() => setIsCustomersModalOpen(false)} 
+        storeId={props.storeId}
+        isOpen={isCustomersModalOpen}
+        onClose={() => setIsCustomersModalOpen(false)}
       />
 
       {isTipsModalOpen && (
