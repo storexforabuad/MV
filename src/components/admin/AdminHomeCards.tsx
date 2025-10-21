@@ -1,5 +1,5 @@
 'use client';
-import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, BadgeDollarSign, Lightbulb, Users } from 'lucide-react';
+import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, BadgeDollarSign, Lightbulb, Users, Percent } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { useSpotlightContext } from '@/context/SpotlightContext';
@@ -12,7 +12,6 @@ import TotalViewsModal from './modals/TotalViewsModal';
 import StoreLinkModal from './modals/StoreLinkModal';
 import ReferralsModal from './modals/ReferralsModal';
 import SoldOutModal from './modals/SoldOutModal';
-import RevenueModal from './modals/RevenueModal';
 import TipsModal from './modals/TipsModal';
 import { Product } from '../../types/product';
 import { WholesaleData } from '../../lib/db';
@@ -28,38 +27,27 @@ interface AdminHomeCardsProps {
   popularProducts: number;
   limitedStock: number;
   totalViews: number;
-  debtors: number;
-  subscriptionStatus: string;
-  products: Product[];
-  categories: { id: string; name: string }[];
-  contacts: WholesaleData[];
-  setActiveSection: (section: string) => void;
   storeLink: string;
   referrals: number;
-  onReferralAdded?: () => void;
-  setIsModalOpen?: (open: boolean) => void;
   soldOut: number;
-  setIsManageProductsOpen?: (open: boolean) => void;
-  onRefresh: (showRefresh: boolean) => void;
-  isRefreshing: boolean;
-  totalContacts: number;
   storeId: string;
   totalOrders: number;
-  promoCaption?: string;
   uiVisible: boolean;
-  storeName?: string;
   totalRevenue: number;
-  onAnimationComplete?: () => void;
-  openManageCategories: () => void;
-  onOrdersCardClick: () => void;
   totalCommissionEarned: number;
   totalReferralBonus: number;
+  onRefresh: (showRefresh: boolean) => void;
+  openManageCategories: () => void;
+  onOrdersCardClick: () => void;
+  isRefreshing: boolean;
+  onAnimationComplete?: () => void;
+  setIsModalOpen?: (open: boolean) => void;
 }
 
-// New Modal for Commission Earned
+// Modal Components (assuming they are defined elsewhere and imported)
 const CommissionEarnedModal = ({ totalCommissionEarned, handleClose }: { totalCommissionEarned: number, handleClose: () => void }) => (
   <div className="p-6 text-center">
-    <BadgeDollarSign className="w-12 h-12 mx-auto text-green-500 mb-4" />
+    <Percent className="w-12 h-12 mx-auto text-green-500 mb-4" />
     <h3 className="text-2xl font-bold mb-2">Total Commission Earned</h3>
     <p className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">${totalCommissionEarned.toFixed(2)}</p>
     <p className="text-sm text-text-secondary mt-2">This is the total commission generated from all product sales.</p>
@@ -67,7 +55,6 @@ const CommissionEarnedModal = ({ totalCommissionEarned, handleClose }: { totalCo
   </div>
 );
 
-// New Modal for Referral Bonus
 const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferralBonus: number, handleClose: () => void }) => (
   <div className="p-6 text-center">
     <Gift className="w-12 h-12 mx-auto text-pink-500 mb-4" />
@@ -78,7 +65,6 @@ const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferral
   </div>
 );
 
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.FC<any> | null, glowClass: string}[] = [
     {
@@ -88,26 +74,26 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
         gradient: 'bg-gradient-to-br from-amber-400 to-yellow-500',
         text: 'text-white',
         component: TipsModal,
-        glowClass: 'shadow-[0_0_25px_-5px_rgba(245,158,11,0.5)]',
+        glowClass: 'dark:shadow-yellow-500/30 shadow-yellow-500/50',
     },
     {
       label: 'Share',
       subtitle: 'Caption',
       valueKey: 'storeLink',
       icon: Share2,
-      gradient: 'bg-gradient-to-br from-teal-400 to-cyan-500',
+      gradient: 'bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-600',
       text: 'text-white',
       component: StoreLinkModal,
-      glowClass: 'shadow-[0_0_25px_-5px_rgba(168,85,247,0.5)]',
+      glowClass: 'dark:shadow-cyan-400/30 shadow-cyan-400/50',
     },
     {
       label: 'Commission Earned',
       valueKey: 'totalCommissionEarned',
-      icon: BadgeDollarSign,
-      gradient: 'bg-gradient-to-br from-green-500 to-emerald-600',
+      icon: Percent,
+      gradient: 'bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700',
       text: 'text-white',
-      component: CommissionEarnedModal, // <-- Assign new modal
-      glowClass: 'shadow-[0_0_25px_-5px_rgba(22,163,74,0.5)]',
+      component: CommissionEarnedModal,
+      glowClass: 'dark:shadow-emerald-500/30 shadow-emerald-500/50',
     },
     {
       label: 'Referral Bonus',
@@ -115,44 +101,44 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       icon: Gift, 
       gradient: 'bg-gradient-to-br from-orange-400 via-red-400 to-pink-500', 
       text: 'text-white',
-      component: ReferralBonusModal, // <-- Assign new modal
-      glowClass: 'shadow-[0_0_25px_-5px_rgba(244,63,94,0.5)]', 
+      component: ReferralBonusModal, 
+      glowClass: 'dark:shadow-red-400/30 shadow-red-400/50', 
     },
     {
       label: 'Views',
       valueKey: 'totalViews',
       icon: Eye,
-      gradient: 'bg-gradient-to-br from-purple-400 to-purple-500',
+      gradient: 'bg-gradient-to-br from-purple-500 via-fuchsia-600 to-pink-700',
       text: 'text-white',
       component: TotalViewsModal,
-      glowClass: 'shadow-[0_0_25px_-5px_rgba(59,130,246,0.5)]',
+      glowClass: 'dark:shadow-fuchsia-500/30 shadow-fuchsia-500/50',
     },
     {
       label: 'Orders',
       valueKey: 'totalOrders',
       icon: ShoppingCart,
-      gradient: 'bg-gradient-to-br from-sky-500 to-indigo-500',
+      gradient: 'bg-gradient-to-br from-sky-600 via-blue-700 to-indigo-800',
       text: 'text-white',
-      component: null, // Set to null, will be handled by onOrdersCardClick
-      glowClass: 'shadow-[0_0_25px_-5px_rgba(59,130,246,0.5)]',
+      component: null,
+      glowClass: 'dark:shadow-blue-600/30 shadow-blue-600/50',
     },
     {
       label: 'Manage Categories',
       valueKey: 'totalCategories',
       icon: Tag,
-      gradient: 'bg-gradient-to-br from-green-400 to-emerald-400',
+      gradient: 'bg-gradient-to-br from-lime-500 via-green-600 to-emerald-700',
       text: 'text-white',
-      component: null, // This will be handled by a specific prop
-      glowClass: 'shadow-[0_0_25px_-5px_rgba(20,184,166,0.5)]',
+      component: null, 
+      glowClass: 'dark:shadow-green-500/30 shadow-green-500/50',
     },
     {
       label: 'Manage Products',
       valueKey: 'totalProducts',
       icon: Archive,
-      gradient: 'bg-gradient-to-br from-blue-800 to-indigo-900',
+      gradient: 'bg-gradient-to-br from-slate-700 via-gray-800 to-zinc-900',
       text: 'text-white',
       component: TotalProductsModal,
-      glowClass: 'shadow-[0_0_25px_-5px_rgba(236,72,153,0.5)]',
+      glowClass: 'dark:shadow-slate-600/30 shadow-slate-600/50',
     },
     {
       label: 'Popular',
@@ -161,7 +147,7 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       gradient: 'bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600',
       text: 'text-white',
       component: PopularProductsModal,
-      glowClass: 'shadow-[0_0_25px_-5px_rgba(234,179,8,0.5)]',
+      glowClass: 'dark:shadow-yellow-500/30 shadow-yellow-500/50',
     },
     {
       label: 'Limited',
@@ -170,7 +156,7 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       gradient: 'bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600',
       text: 'text-white',
       component: LimitedStockModal,
-      glowClass: 'shadow-[0_0_25px_-5px_rgba(249,115,22,0.5)]',
+      glowClass: 'dark:shadow-orange-500/30 shadow-orange-500/50',
     },
     {
       label: 'Sold Out',
@@ -179,16 +165,16 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       gradient: 'bg-gradient-to-br from-red-400 via-red-500 to-red-600',
       text: 'text-white',
       component: SoldOutModal,
-      glowClass: 'shadow-[0_0_25px_-5px_rgba(239,68,68,0.5)]',
+      glowClass: 'dark:shadow-red-500/30 shadow-red-500/50',
     },
     {
       label: 'Referrals',
       valueKey: 'referrals',
       icon: Gift,
-      gradient: 'bg-gradient-to-br from-orange-500 to-amber-500',
+      gradient: 'bg-gradient-to-br from-pink-500 via-rose-500 to-fuchsia-600',
       text: 'text-white',
       component: ReferralsModal,
-      glowClass: 'shadow-[0_0_25px_-5px_rgba(244,63,94,0.5)]',
+      glowClass: 'dark:shadow-rose-500/30 shadow-rose-500/50',
     },
   ];
 
@@ -216,10 +202,10 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const customersCard = {
     label: 'Customers',
     icon: Users,
-    gradient: 'bg-gradient-to-br from-indigo-400 to-violet-500',
+    gradient: 'bg-gradient-to-br from-indigo-500 via-purple-600 to-violet-700',
     text: 'text-white',
     component: AdminCustomersCard,
-    glowClass: 'shadow-[0_0_25px_-5px_rgba(74,222,128,0.5)]'
+    glowClass: 'dark:shadow-violet-500/30 shadow-violet-500/50'
   };
 
   if (ordersIndex !== -1) {
@@ -303,7 +289,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                   setRefreshing(false);
                 }}
                 disabled={refreshing}
-                className="col-span-2 sm:col-span-3 md:col-span-4 w-full bg-gradient-to-br from-blue-500 to-blue-600 text-white font-bold py-3 px-4 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center dark:hover:shadow-lg dark:hover:shadow-purple-500/30"
+                className="col-span-2 sm:col-span-3 md:col-span-4 w-full bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white font-bold py-3 px-4 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center dark:hover:shadow-lg dark:hover:shadow-blue-700/30"
             >
                 <RefreshCw className={`mr-2 h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
                 {refreshing ? 'Refreshing...' : 'Refresh'}
@@ -374,9 +360,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                       </div>
                       <div className="flex flex-col items-center ml-3 min-w-0 z-10">
                         <div className="text-lg sm:text-xl font-bold drop-shadow">
-                          {card.label === 'Subscription'
-                            ? props.subscriptionStatus
-                            : card.label}
+                          {card.label}
                         </div>
                         <div className="text-xs sm:text-sm font-medium opacity-90 text-center leading-tight">
                           {card.subtitle}
@@ -407,10 +391,9 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                       <div className="flex flex-col items-center min-w-0 z-10 w-full">
                         <div className="text-lg sm:text-xl md:text-2xl font-bold drop-shadow">
                           {(() => {
-                            if (card.label === 'Revenue') return formatCurrencyForCard(props.totalRevenue);
+                            const value = card.valueKey ? (props as any)[card.valueKey] : '';
                             if (card.label === 'Commission Earned') return formatCurrencyForCard(props.totalCommissionEarned);
                             if (card.label === 'Referral Bonus') return formatCurrencyForCard(props.totalReferralBonus);
-                            const value = card.valueKey ? props[card.valueKey as keyof AdminHomeCardsProps] : '';
                             if (typeof value === 'number' || typeof value === 'string') return value;
                             return '';
                           })()}
@@ -426,7 +409,6 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             })}
         </motion.div>
 
-      {/* Render the new Customers Modal */}
       <CustomersListModal 
         storeId={props.storeId} 
         isOpen={isCustomersModalOpen} 
@@ -434,7 +416,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
       />
 
       {isTipsModalOpen && (
-        <TipsModal {...props} handleClose={handleCloseTipsModal} />
+        <TipsModal {...props as any} handleClose={handleCloseTipsModal} />
       )}
 
       {openModal !== null && (
@@ -448,18 +430,13 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           >
             {(() => {
               const card = cardsToRender[openModal];
+              if (!card || !card.component) return null;
               const ModalComponent = card.component;
-              if (!ModalComponent) return null;
               const modalProps = {
                 ...props,
                 handleClose: handleCloseModal,
-                setIsManageProductsOpen: props.setIsManageProductsOpen || (() => {}),
-                onContactAdded: () => props.onRefresh(true),
-                storeName: props.storeName,
-                categories: props.categories,
               };
               return <ModalComponent {...modalProps} />;
-              
             })()}
           </div>
         </div>
