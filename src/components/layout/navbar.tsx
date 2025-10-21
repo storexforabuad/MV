@@ -10,9 +10,10 @@ import { usePathname, useRouter } from 'next/navigation';
 interface NavbarProps {
   storeName?: string;
   scrollDirection?: 'up' | 'down';
+  backButtonHref?: string;
 }
 
-export default function Navbar({ storeName, scrollDirection = 'up' }: NavbarProps) {
+export default function Navbar({ storeName, scrollDirection = 'up', backButtonHref }: NavbarProps) {
   const { state } = useCart();
   const { theme, toggleTheme } = useTheme();
   const [isBouncing, setIsBouncing] = useState(false);
@@ -52,13 +53,23 @@ export default function Navbar({ storeName, scrollDirection = 'up' }: NavbarProp
           <div className="flex items-center gap-2">
             {showBackButton ? (
               <>
-                <button
-                  onClick={handleBack}
-                  className="p-2 rounded-lg hover:bg-card-hover transition-colors"
-                  aria-label="Go back"
-                >
-                  <ArrowLeft className="h-6 w-6 text-text-primary" />
-                </button>
+                {backButtonHref ? (
+                  <Link
+                    href={backButtonHref}
+                    className="p-2 rounded-lg hover:bg-card-hover transition-colors"
+                    aria-label="Go back"
+                  >
+                    <ArrowLeft className="h-6 w-6 text-text-primary" />
+                  </Link>
+                ) : (
+                  <button
+                    onClick={handleBack}
+                    className="p-2 rounded-lg hover:bg-card-hover transition-colors"
+                    aria-label="Go back"
+                  >
+                    <ArrowLeft className="h-6 w-6 text-text-primary" />
+                  </button>
+                )}
                 <span className="text-xl font-semibold card-text-gradient flex items-center gap-2">
                   {storeName || 'Store'}
                 </span>

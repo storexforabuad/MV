@@ -4,7 +4,7 @@ import { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon, HomeIcon, BriefcaseIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
-import { CartItem } from '@/lib/cartContext';
+import { CartItem, useCart } from '@/lib/cartContext';
 import { StoreMeta } from '@/types/store';
 import { Customer } from '@/types/customer';
 import { formatPrice } from '@/utils/price';
@@ -25,6 +25,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, cartItems, stor
   const [customer, setCustomer] = useState<Customer | null>(initialCustomer);
   const [bonusApplied, setBonusApplied] = useState(false);
   const { addOrder } = useOrders(customer?.id || null);
+  const { dispatch } = useCart();
   const storeId = cartItems[0]?.storeId;
   const referralBonus = storeId && typeof storeId === 'string' ? customer?.referralDataByStore?.[storeId]?.commissionEarned || 0 : 0;
 
@@ -62,22 +63,27 @@ export default function CartOrderSummaryModal({ isOpen, onClose, cartItems, stor
       
       toast.success('Order placed! Redirecting to WhatsApp...');
 
-      const itemsSummary = cartItems.map(item => `*${item.name}* (x${item.quantity}) - ${formatPrice(item.price * item.quantity)}`).join('\n');
+      const itemsSummary = cartItems.map(item => {
+        const productUrl = `https://tinyurl.com/bizcononline/${storeId}/products/${item.id}`;
+        return `*${item.name}* (x${item.quantity}) - ${formatPrice(item.price * item.quantity)}\n🔗 ${productUrl}`;
+      }).join('\n\n');
+
       const message = `🛍️ *New Order Request*\n\n` +
                       `Hello! I would like to order the following items:\n\n` +
                       `${itemsSummary}\n\n`+
-                      `• Delivery Method: ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n`+
-                      `${deliveryMethod === 'home' && customer.deliveryAddress ? `• Address: ${customer.deliveryAddress.street}\n` : ''}`+
-                      `• Subtotal: ${formatPrice(subtotal)}\n`+
-                      `• Delivery Fee: ${formatPrice(deliveryFee)}\n`+
-                      `${bonusApplied ? `• Referral Bonus: -${formatPrice(referralBonus)}\n` : ''}` +
-                      `*• Total: ${formatPrice(total)}*\n\n` +
+                      `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n`+
+                      `${deliveryMethod === 'home' && customer.deliveryAddress ? `📍 *Address:* ${customer.deliveryAddress.street}\n` : ''}`+
+                      `*Subtotal:* ${formatPrice(subtotal)}\n`+
+                      `*Delivery Fee:* ${formatPrice(deliveryFee)}\n`+
+                      `${bonusApplied ? `🎉 *Referral Bonus:* -${formatPrice(referralBonus)}\n` : ''}` +
+                      `*Total:* ${formatPrice(total)}\n\n` +
                       `Thank you! 🙏`;
 
       const encodedMessage = encodeURIComponent(message);
       const whatsappUrl = `https://wa.me/${storeMeta.whatsapp.replace(/\D/g, '')}?text=${encodedMessage}`;
 
       window.open(whatsappUrl, '_blank');
+      dispatch({ type: 'CLEAR_CART' });
       onClose();
     } catch (error) {
       console.error("Error placing order or redirecting to WhatsApp:", error);

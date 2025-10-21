@@ -61,15 +61,17 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
       await addOrder(product, storeMetaWithId, quantity, customer, referrerId, bonusApplied);
       toast.success('Order placed! Redirecting to WhatsApp...');
 
+      const productUrl = `https://tinyurl.com/bizcononline/${storeId}/products/${product.id}`;
       const message = `🛍️ *New Order Request*\n\n` +
                       `Hello! I would like to order this item:\n\n` +
                       `*${product.name}*\n` +
-                      `• Quantity: ${quantity}\n` +
-                      `• Price: ${formatPrice(product.price)}\n` +
-                      `• Delivery Method: ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n`+
-                      `${deliveryMethod === 'home' && customer.deliveryAddress ? `• To: ${customer.deliveryAddress.street}\n` : ''}`+
-                      `${bonusApplied ? `• Referral Bonus: -${formatPrice(referralBonus)}\n` : ''}` +
-                      `• Total: ${formatPrice(total)}\n\n` +
+                      `🔗 *Product Link:* ${productUrl}\n` +
+                      `🔢 *Quantity:* ${quantity}\n` +
+                      `💰 *Price:* ${formatPrice(product.price)}\n` +
+                      `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n`+
+                      `${deliveryMethod === 'home' && customer.deliveryAddress ? `📍 *To:* ${customer.deliveryAddress.street}\n` : ''}`+
+                      `${bonusApplied ? `🎉 *Referral Bonus:* -${formatPrice(referralBonus)}\n` : ''}` +
+                      `*Total:* ${formatPrice(total)}\n\n` +
                       `Thank you! 🙏`;
 
       const encodedMessage = encodeURIComponent(message);
