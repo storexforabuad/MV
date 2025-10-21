@@ -13,6 +13,7 @@ export interface StoreMeta {
   totalOrders?: number;
   promoCaption?: string;
   hasCompletedOnboarding?: boolean;
+  description?: string;
 
   // Business contact and details
   whatsapp: string;

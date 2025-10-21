@@ -82,13 +82,14 @@ function assertDb() {
 }
 
 // Create a new store (vendor) and seed default categories/products
-export async function createStore(store: { id: string; name: string; whatsapp?: string }): Promise<void> {
+export async function createStore(store: { id: string; name: string; whatsapp?: string; description?: string }): Promise<void> {
   try {
     const storeRef = doc(db, 'stores', store.id);
     await setDoc(storeRef, {
       name: store.name,
       createdAt: serverTimestamp(),
       whatsapp: store.whatsapp || '',
+      description: store.description || '',
     });
     // Seed default categories if not present
     const categoriesRef = collection(db, 'stores', store.id, 'categories');
@@ -125,7 +126,7 @@ export async function ensureDefaultStore(): Promise<void> {
   const storeRef = doc(db, 'stores', defaultStoreId);
   const storeSnap = await getDoc(storeRef);
   if (!storeSnap.exists()) {
-    await createStore({ id: defaultStoreId, name: defaultStoreName });
+    await createStore({ id: defaultStoreId, name: defaultStoreName, description: 'Your favorite online store' });
   }
 }
 

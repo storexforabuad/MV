@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { getProductById, incrementProductViews, getStoreMeta, getCategories } from '../../../../lib/db';
 import { CirclePlus, ShoppingCart, Clock, Check } from 'lucide-react';
 import { useCart } from '../../../../lib/cartContext';
@@ -47,6 +47,7 @@ export default function ProductDetail() {
 
   const discount = product ? calculateDiscount(product.price, product.originalPrice) : null;
 
+  const router = useRouter();
   const routeParams = useParams();
   const storeId = typeof routeParams?.storeId === 'string' ? routeParams.storeId : Array.isArray(routeParams?.storeId) ? routeParams.storeId[0] : undefined;
   const productId = typeof routeParams?.productId === 'string' ? routeParams.productId : Array.isArray(routeParams?.productId) ? routeParams.productId[0] : undefined;
@@ -104,6 +105,21 @@ export default function ProductDetail() {
       setIsInCart(!!productInCart);
     }
   }, [product, state.items]);
+
+  useEffect(() => {
+    if (storeId) {
+      const handlePopState = () => {
+        router.push(`/${storeId}`);
+      };
+
+      window.history.pushState(null, '', window.location.href);
+      window.addEventListener('popstate', handlePopState);
+
+      return () => {
+        window.removeEventListener('popstate', handlePopState);
+      };
+    }
+  }, [storeId, router]);
 
  if (isLoading) {
   return <ProductDetailSkeleton />;
