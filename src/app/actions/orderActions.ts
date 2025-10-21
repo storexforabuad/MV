@@ -97,7 +97,7 @@ export const addOrderToFirestore = async (
         if (referrerId !== customerId && customerOrdersSnap.empty && product.commission && product.commission > 0) {
           referralWasApplied = true; // <-- Mark referral as applied
           const commissionValue = (product.price * product.commission) / 100;
-          const commissionEarned = commissionValue * 0.5;
+          const commissionEarned = commissionValue;
           const referrerRef = doc(db, 'customers', referrerId);
 
           // 1. Update the summary map on the customer document
@@ -262,9 +262,9 @@ export const calculateStoreCommissions = async (storeId: string): Promise<{ tota
                 const commission = (order.product.price * order.product.commission) / 100;
                 totalCommissionEarned += commission;
 
-                // A referral bonus is 50% of the product commission
+                // A referral bonus is 100% of the product commission
                 if (order.referralApplied) {
-                    totalReferralBonus += commission * 0.5;
+                    totalReferralBonus += commission;
                 }
             }
         }
