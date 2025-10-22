@@ -5,7 +5,7 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { useParams, useRouter } from 'next/navigation';
 import { getProductById, incrementProductViews, getStoreMeta, getCategories } from '../../../../lib/db';
-import { Heart, ShoppingCart, Clock, Check, Share2 } from 'lucide-react';
+import { Heart, ShoppingCart, Clock, Share2 } from 'lucide-react';
 import { useCart } from '../../../../lib/cartContext';
 import { Product } from '../../../../types/product';
 import { Category } from '../../../../types/category';
@@ -76,7 +76,7 @@ export default function ProductDetail() {
       navigator.clipboard.writeText(canonicalShareUrl).then(
         () => toast.success('Link copied to clipboard!'),
         () => toast.error('Could not copy link.')
-      );
+      ); 
     }
   };
 
@@ -181,7 +181,7 @@ export default function ProductDetail() {
     setIsTogglingCart(true);
 
     if (isInCart) {
-      dispatch({ type: 'REMOVE_ITEM', payload: { id: product.id } });
+      dispatch({ type: 'REMOVE_ITEM', payload: product.id });
     } else {
       dispatch({ 
         type: 'ADD_ITEM', 
@@ -193,25 +193,17 @@ export default function ProductDetail() {
       });
     }
 
-    setTimeout(() => setIsTogglingCart(false), 500); // Animation duration
+    // Prevent button spamming
+    setTimeout(() => setIsTogglingCart(false), 400);
   };
 
   const getCategoryColor = (categoryName: string): { background: string; text: string } => {
     const colorMap: { [key: string]: { background: string; text: string } } = {
-      'Bespoke': {
-        background: 'bg-[var(--badge-purple-bg)]',
-        text: 'text-[var(--badge-purple-text)]'
-      },
-      'Ready To Wear': {
-        background: 'bg-[var(--badge-pink-bg)]',
-        text: 'text-[var(--badge-pink-text)]'
-      }
+      'Bespoke': { background: 'bg-purple-100', text: 'text-purple-800' },
+      'Ready To Wear': { background: 'bg-pink-100', text: 'text-pink-800' },
+      'Default': { background: 'bg-blue-100', text: 'text-blue-800' },
     };
-    
-    return colorMap[categoryName] || {
-      background: 'bg-[var(--badge-blue-bg)]',
-      text: 'text-[var(--badge-blue-text)]'
-    };
+    return colorMap[categoryName] || colorMap['Default'];
   };
 
   const canOrder = product && !product.soldOut;
@@ -248,27 +240,18 @@ return (
         {/* Image Section */}
         <div className="flex-1 flex flex-col">
           <div className="relative overflow-hidden rounded-2xl bg-gray-50 shadow-lg">
-          {imageLoading && (
-            <div className="absolute inset-0 bg-[var(--skeleton-background)] animate-pulse">
-              <div className="aspect-square" />
-            </div>
-          )}
-            {product.images[selectedImage] ? (
-              <Image
-                src={product.images[selectedImage]}
-                alt={product.name}
-                width={600}
-                height={600}
-                className={`w-full h-auto object-contain transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
-                priority={true}
-                loading="eager"
-                onLoadingComplete={() => setImageLoading(false)}
-              />
-            ) : (
-              <div className="h-full w-full bg-gray-100 flex items-center justify-center">
-                <span className="text-gray-400">No Image Available</span>
-              </div>
+            {imageLoading && (
+              <div className="absolute inset-0 bg-gray-200 animate-pulse" />
             )}
+            <Image
+              src={product.images[selectedImage]}
+              alt={product.name}
+              width={600}
+              height={600}
+              className={`w-full h-auto object-contain transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+              priority
+              onLoadingComplete={() => setImageLoading(false)}
+            />
           </div>
           {product.images.length > 1 && (
             <div className="mt-2 grid grid-cols-4 gap-2">
@@ -279,49 +262,44 @@ return (
                     setImageLoading(true);
                     setSelectedImage(index);
                   }}
-                  className={`relative overflow-hidden rounded-lg min-w-[56px] min-h-[56px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--button-primary)] transition-shadow duration-150 ${selectedImage === index ? 'ring-2 ring-offset-2 ring-[var(--button-primary)]' : 'hover:opacity-75'}`}
+                  className={`relative overflow-hidden rounded-lg min-w-[56px] min-h-[56px] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 transition-shadow duration-150 ${selectedImage === index ? 'ring-2 ring-offset-2 ring-indigo-500' : 'hover:opacity-75'}`}
                 >
-                  <Image
-                    src={image}
-                    alt={`${product.name} ${index + 1}`}
-                    fill
-                    sizes="(max-width: 640px) 25vw, 100px"
-                    className="object-cover"
-                  />
+                  <Image src={image} alt={`${product.name} ${index + 1}`} fill sizes="(max-width: 640px) 25vw, 100px" className="object-cover" />
                 </button>
               ))}
             </div>
           )}
         </div>
+
         {/* Product Info */}
         <div className="mt-4 lg:mt-0 flex flex-col">
           <div className="flex items-center justify-between mb-2">
             <div className="flex flex-wrap gap-1.5">
               {product.limitedStock && <span className="badge-yellow">Limited Stock</span>}
               {product.soldOut && <span className="badge-red">Sold Out</span>}
-              {category && <span className={`badge-${getCategoryColor(category.name).background}`}>{category.name}</span>}
+              {category && <span className={`badge-blue`}>{category.name}</span>}
             </div>
-            <div className="px-4 py-1 rounded-full border border-gray-300 dark:border-slate-700/40 bg-white/60 dark:bg-slate-900/40 shadow-sm flex items-center min-w-[64px] justify-center transition-colors duration-300" aria-label="Views" role="status">
-              <AnimatedViewCount value={product?.views || 0} duration={2.5} className="text-base font-semibold text-slate-700 dark:text-slate-200" />
+            <div className="px-4 py-1 rounded-full border border-gray-300 shadow-sm flex items-center">
+              <AnimatedViewCount value={product?.views || 0} />
             </div>
           </div>
 
           {product.soldOut ? (
             <div className="sold-out-card">
-              <div className="mb-4 inline-flex items-center justify-center w-12 h-12 rounded-full bg-[var(--badge-blue-bg)]">
-                <Clock className="w-6 h-6 text-[var(--badge-blue-text)]" />
+              <div className="mb-4 inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100">
+                <Clock className="w-6 h-6 text-blue-600" />
               </div>
-              <h3 className="text-lg font-medium text-[var(--text-primary)] mb-2">Currently Unavailable</h3>
-              <p className="text-[var(--text-secondary)] text-sm">This item is out of stock. Please check back later.</p>
+              <h3 className="text-lg font-medium mb-2">Currently Unavailable</h3>
+              <p className="text-sm text-gray-600">This item is out of stock. Please check back later.</p>
             </div>
           ) : (
             <>
-              <h1 className="text-2xl sm:text-3xl font-bold card-text-gradient mb-4">{product.name}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">{product.name}</h1>
               <div className="flex items-center gap-3 mb-6">
-                <p className="text-2xl font-semibold card-text-gradient">{formatPrice(product.price)}</p>
+                <p className="text-2xl font-semibold text-gray-900">{formatPrice(product.price)}</p>
                 {discount && (
                   <>
-                    <p className="text-lg text-text-secondary line-through">{formatPrice(product.originalPrice)}</p>
+                    <p className="text-lg text-gray-500 line-through">{formatPrice(product.originalPrice)}</p>
                     <span className="badge-green">{discount}% OFF</span>
                   </>
                 )}
@@ -331,9 +309,7 @@ return (
                 <div className="mb-8">
                   <ul className="space-y-2">
                     {product.features.map((feature, index) => (
-                      <li key={index} className="flex items-center text-[var(--text-secondary)]">
-                        <span className="mr-2">•</span>{feature}
-                      </li>
+                      <li key={index} className="flex items-center text-gray-600"><span className="mr-2">•</span>{feature}</li>
                     ))}
                   </ul>
                 </div>
@@ -344,27 +320,26 @@ return (
                   <button
                     onClick={handlePlaceOrderClick}
                     disabled={!canOrder}
-                    className="group relative flex-grow inline-flex items-center justify-center gap-2 px-6 py-4 rounded-[980px] bg-[var(--button-success)] text-white font-medium shadow-sm hover:shadow-md transition-all duration-300 hover:bg-[var(--button-success-hover)] transform-gpu active:scale-[0.98] disabled:opacity-75 disabled:cursor-not-allowed min-h-[56px] text-base"
+                    className="group relative flex-grow inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full bg-green-600 text-white font-medium shadow-sm hover:bg-green-700 transition-colors active:scale-[0.98] disabled:opacity-75 disabled:cursor-not-allowed min-h-[56px] text-base"
                   >
                     <ShoppingCart className="w-5 h-5" />
-                    <span className="relative tracking-[-0.01em]">Place Order</span>
+                    <span>Place Order</span>
                   </button>
                   <button
                     onClick={handleToggleCart}
                     disabled={isTogglingCart}
-                    className={`group relative flex-shrink-0 inline-flex items-center justify-center w-14 h-14 rounded-full font-medium transition-all duration-300 transform-gpu active:scale-[0.9] disabled:opacity-75 ${isInCart ? 'bg-red-500 text-white' : 'bg-[var(--button-secondary)] text-[var(--text-primary)] hover:bg-[var(--button-secondary-hover)]'}`}
+                    className={`group relative flex-shrink-0 inline-flex items-center justify-center w-14 h-14 rounded-full font-medium transition-all duration-300 transform-gpu active:scale-[0.9] disabled:opacity-75 ${isInCart ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
                     style={{ minWidth: '56px', minHeight: '56px' }}
-                    aria-label={isInCart ? 'Remove from cart' : 'Add to cart'}
+                    aria-label={isInCart ? 'Remove from wishlist' : 'Add to wishlist'}
                   >
                     <Heart
-                      className={`w-6 h-6 transition-transform duration-200 ease-in-out ${isInCart ? 'fill-current' : ''}`}
-                      style={{ transform: isTogglingCart && !isInCart ? 'scale(1.3)' : 'scale(1)' }}
+                      className={`w-6 h-6 transition-transform duration-200 ease-in-out ${isInCart ? 'fill-current' : ''} ${isTogglingCart && !isInCart ? 'scale(1.3)' : 'scale(1)'}`}
                     />
                   </button>
                 </div>
                 <button
                   onClick={handleShareClick}
-                  className="group relative w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-[980px] font-medium tracking-[-0.01em] transition-all duration-300 shadow-sm hover:shadow-md transform-gpu min-h-[48px] text-base bg-[var(--button-secondary)] text-[var(--text-primary)] hover:bg-[var(--button-secondary-hover)] active:bg-[var(--button-secondary-active)]"
+                  className="group relative w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full font-medium transition-colors shadow-sm min-h-[48px] text-base bg-gray-200 text-gray-700 hover:bg-gray-300"
                 >
                   <Share2 className="w-5 h-5 mr-2" />
                   <span>Share & Earn</span>
