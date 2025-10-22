@@ -111,16 +111,17 @@ export default function Navbar({ storeName, scrollDirection = 'up', backButtonHr
               >
                 <div className="relative">
                   <Heart 
-                    className={`h-6 w-6 text-text-primary transition-colors ${state.totalItems > 0 ? 'fill-current text-red-500' : ''}`}
+                    className={`h-7 w-7 text-text-primary transition-colors ${state.totalItems > 0 ? 'fill-current text-red-500' : ''}`}
                   />
                   <span 
                     className={`absolute -top-1 -right-1 
-                      bg-red-500 text-white
                       text-xs rounded-full h-5 w-5 flex items-center justify-center
                       transition-all duration-300
                       ${isBouncing ? 'animate-badge-bounce' : ''}
-                      ${state.totalItems > 0 ? 'opacity-100' : 'opacity-0'}`
-                    }
+                      ${state.totalItems > 0 
+                        ? 'bg-red-500/80 text-white' 
+                        : 'bg-gray-500/80 text-white'
+                      }`}
                     style={{
                       transform: 'translateZ(0)',
                       backfaceVisibility: 'hidden'
