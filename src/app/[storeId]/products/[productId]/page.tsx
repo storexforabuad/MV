@@ -76,7 +76,7 @@ export default function ProductDetail() {
       navigator.clipboard.writeText(canonicalShareUrl).then(
         () => toast.success('Link copied to clipboard!'),
         () => toast.error('Could not copy link.')
-      ); 
+      );
     }
   };
 
@@ -193,17 +193,25 @@ export default function ProductDetail() {
       });
     }
 
-    // Prevent button spamming
     setTimeout(() => setIsTogglingCart(false), 400);
   };
 
   const getCategoryColor = (categoryName: string): { background: string; text: string } => {
     const colorMap: { [key: string]: { background: string; text: string } } = {
-      'Bespoke': { background: 'bg-purple-100', text: 'text-purple-800' },
-      'Ready To Wear': { background: 'bg-pink-100', text: 'text-pink-800' },
-      'Default': { background: 'bg-blue-100', text: 'text-blue-800' },
+      'Bespoke': {
+        background: 'bg-[var(--badge-purple-bg)]',
+        text: 'text-[var(--badge-purple-text)]'
+      },
+      'Ready To Wear': {
+        background: 'bg-[var(--badge-pink-bg)]',
+        text: 'text-[var(--badge-pink-text)]'
+      }
     };
-    return colorMap[categoryName] || colorMap['Default'];
+    
+    return colorMap[categoryName] || {
+      background: 'bg-[var(--badge-blue-bg)]',
+      text: 'text-[var(--badge-blue-text)]'
+    };
   };
 
   const canOrder = product && !product.soldOut;
@@ -275,9 +283,21 @@ return (
         <div className="mt-4 lg:mt-0 flex flex-col">
           <div className="flex items-center justify-between mb-2">
             <div className="flex flex-wrap gap-1.5">
-              {product.limitedStock && <span className="badge-yellow">Limited Stock</span>}
-              {product.soldOut && <span className="badge-red">Sold Out</span>}
-              {category && <span className={`badge-blue`}>{category.name}</span>}
+                {product.limitedStock && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border border-gray-200 bg-[var(--badge-yellow-bg)] text-[var(--badge-yellow-text)]">
+                    Limited Stock
+                  </span>
+                )}
+                {product.soldOut && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border border-gray-200 bg-[var(--badge-red-bg)] text-[var(--badge-red-text)]">
+                    Sold Out
+                  </span>
+                )}
+                {category && (
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border border-gray-200 ${getCategoryColor(category.name).background} ${getCategoryColor(category.name).text}`}>
+                    {category.name}
+                  </span>
+                )}
             </div>
             <div className="px-4 py-1 rounded-full border border-gray-300 shadow-sm flex items-center">
               <AnimatedViewCount value={product?.views || 0} />
@@ -300,7 +320,9 @@ return (
                 {discount && (
                   <>
                     <p className="text-lg text-gray-500 line-through">{formatPrice(product.originalPrice)}</p>
-                    <span className="badge-green">{discount}% OFF</span>
+                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border border-gray-200 bg-[var(--badge-green-bg)] text-[var(--badge-green-text)]">
+                      {discount}% OFF
+                    </span>
                   </>
                 )}
               </div>
