@@ -314,9 +314,9 @@ return (
             </div>
           ) : (
             <>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">{product.name}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold card-text-gradient mb-4">{product.name}</h1>
               <div className="flex items-center gap-3 mb-6">
-                <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{formatPrice(product.price)}</p>
+                <p className="text-2xl font-semibold card-text-gradient">{formatPrice(product.price)}</p>
                 {discount && (
                   <>
                     <p className="text-lg text-gray-500 dark:text-gray-400 line-through">{formatPrice(product.originalPrice)}</p>
