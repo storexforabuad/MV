@@ -107,7 +107,7 @@ export default function CartPage() {
   if (state.items.length === 0) {
     return (
         <>
-            <Navbar storeName="Cart" />
+            <Navbar storeName="Wishlist" />
             <div className="min-h-[calc(100vh-var(--navbar-height))] pt-[calc(var(--navbar-height))] flex flex-col items-center justify-center px-4">
                 <h2 className="text-xl sm:text-2xl font-bold card-text-gradient">Your list is empty</h2>
                 <p className="mt-2 text-sm sm:text-base text-text-secondary">
@@ -120,7 +120,7 @@ export default function CartPage() {
 
   return (
     <>
-        <Navbar storeName="Cart" />
+        <Navbar storeName="Wishlist" />
         <CustomerLookupModal 
           isOpen={isLoginModalOpen}
           onClose={() => setIsLoginModalOpen(false)}

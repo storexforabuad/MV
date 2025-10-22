@@ -299,7 +299,7 @@ return (
                   </span>
                 )}
             </div>
-            <div className="px-4 py-1 rounded-full border border-gray-300 shadow-sm flex items-center">
+            <div className="px-4 py-1 rounded-full border border-gray-300 dark:border-gray-700 shadow-sm flex items-center">
               <AnimatedViewCount value={product?.views || 0} />
             </div>
           </div>
@@ -314,12 +314,12 @@ return (
             </div>
           ) : (
             <>
-              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4">{product.name}</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 mb-4">{product.name}</h1>
               <div className="flex items-center gap-3 mb-6">
-                <p className="text-2xl font-semibold text-gray-900">{formatPrice(product.price)}</p>
+                <p className="text-2xl font-semibold text-gray-900 dark:text-gray-100">{formatPrice(product.price)}</p>
                 {discount && (
                   <>
-                    <p className="text-lg text-gray-500 line-through">{formatPrice(product.originalPrice)}</p>
+                    <p className="text-lg text-gray-500 dark:text-gray-400 line-through">{formatPrice(product.originalPrice)}</p>
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border border-gray-200 bg-[var(--badge-green-bg)] text-[var(--badge-green-text)]">
                       {discount}% OFF
                     </span>
@@ -331,7 +331,7 @@ return (
                 <div className="mb-8">
                   <ul className="space-y-2">
                     {product.features.map((feature, index) => (
-                      <li key={index} className="flex items-center text-gray-600"><span className="mr-2">•</span>{feature}</li>
+                      <li key={index} className="flex items-center text-gray-600 dark:text-gray-300"><span className="mr-2">•</span>{feature}</li>
                     ))}
                   </ul>
                 </div>
@@ -350,7 +350,7 @@ return (
                   <button
                     onClick={handleToggleCart}
                     disabled={isTogglingCart}
-                    className={`group relative flex-shrink-0 inline-flex items-center justify-center w-14 h-14 rounded-full font-medium transition-all duration-300 transform-gpu active:scale-[0.9] disabled:opacity-75 ${isInCart ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                    className={`group relative flex-shrink-0 inline-flex items-center justify-center w-14 h-14 rounded-full font-medium transition-all duration-300 transform-gpu active:scale-[0.9] disabled:opacity-75 ${isInCart ? 'bg-red-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'}`}
                     style={{ minWidth: '56px', minHeight: '56px' }}
                     aria-label={isInCart ? 'Remove from wishlist' : 'Add to wishlist'}
                   >
@@ -361,7 +361,7 @@ return (
                 </div>
                 <button
                   onClick={handleShareClick}
-                  className="group relative w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full font-medium transition-colors shadow-sm min-h-[48px] text-base bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  className="group relative w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full font-medium transition-colors shadow-sm min-h-[48px] text-base bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                 >
                   <Share2 className="w-5 h-5 mr-2" />
                   <span>Share & Earn</span>
