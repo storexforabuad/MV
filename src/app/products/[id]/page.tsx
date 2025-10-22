@@ -12,6 +12,7 @@ import { calculateDiscount, formatPrice } from '../../../utils/price';
 import { ViewHistoryCache } from '@/lib/viewHistoryCache';
 import { ProductDetailCache } from '../../../lib/productDetailCache';
 import Navbar from '../../../components/layout/navbar';
+import ShareButton from '../../../components/products/ShareButton';
 
 // Dynamic imports
 const ProductDetailSkeleton = dynamic(() => import('../../../components/ProductDetailSkeleton'), {
@@ -323,6 +324,9 @@ return (
                     {isInCart ? 'Added To Cart' : 'Add To List'}
                   </span>
                 </button>
+              </div>
+              <div className="mt-3">
+                <ShareButton product={product} />
               </div>
             </>
           )}

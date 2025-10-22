@@ -5,7 +5,7 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { useParams, useRouter } from 'next/navigation';
 import { getProductById, incrementProductViews, getStoreMeta, getCategories } from '../../../../lib/db';
-import { CirclePlus, ShoppingCart, Clock, Check } from 'lucide-react';
+import { Heart, ShoppingCart, Clock, Check, Share2 } from 'lucide-react';
 import { useCart } from '../../../../lib/cartContext';
 import { Product } from '../../../../types/product';
 import { Category } from '../../../../types/category';
@@ -40,6 +40,7 @@ export default function ProductDetail() {
   const [storeMeta, setStoreMeta] = useState<StoreMeta | null>(null);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [shareIntent, setShareIntent] = useState(false);
 
   const { customer } = useCustomer();
 
@@ -51,6 +52,43 @@ export default function ProductDetail() {
   const routeParams = useParams();
   const storeId = typeof routeParams?.storeId === 'string' ? routeParams.storeId : Array.isArray(routeParams?.storeId) ? routeParams.storeId[0] : undefined;
   const productId = typeof routeParams?.productId === 'string' ? routeParams.productId : Array.isArray(routeParams?.productId) ? routeParams.productId[0] : undefined;
+
+  const handleShare = (withReferral: boolean) => {
+    if (!product || !storeId) return;
+
+    const productUrl = `${window.location.origin}/${storeId}/products/${product.id}`;
+    const canonicalShareUrl = withReferral && customer ? `${productUrl}?ref=${customer.referralCode}` : productUrl;
+    const tinyUrlStoreLink = `https://tinyurl.com/bizcononline/${storeId}`;
+
+    const shareText = `Check out "${product.name}" on the ${storeMeta?.name || storeId} store!\n\nShop the collection here: ${tinyUrlStoreLink}`;
+
+    const shareData = {
+      title: product.name,
+      text: shareText,
+      url: canonicalShareUrl,
+    };
+
+    if (navigator.share) {
+      navigator.share(shareData)
+        .then(() => console.log('Successful share'))
+        .catch((error) => console.log('Error sharing', error));
+    } else {
+      navigator.clipboard.writeText(canonicalShareUrl).then(
+        () => toast.success('Link copied to clipboard!'),
+        () => toast.error('Could not copy link.')
+      );
+    }
+  };
+
+  const handleShareClick = () => {
+    if (customer) {
+      handleShare(true);
+    } else {
+      setShareIntent(true);
+      setIsLoginModalOpen(true);
+    }
+  };
+
 
   useEffect(() => {
     let isMounted = true;
@@ -178,10 +216,19 @@ return (
     <Navbar storeName={storeMeta?.name || storeId || 'Alaniq INT.'} backButtonHref={`/${storeId}`} />
     <CustomerLookupModal 
       isOpen={isLoginModalOpen}
-      onClose={() => setIsLoginModalOpen(false)}
+      onClose={() => {
+        setIsLoginModalOpen(false);
+        setShareIntent(false); // Reset intent if modal is closed
+      }}
       onSuccess={() => {
         setIsLoginModalOpen(false);
-        toast.success("You're logged in! You can now place your order.");
+        if (shareIntent) {
+          toast.success("You're logged in! Sharing with your referral link.");
+          handleShare(true);
+          setShareIntent(false); // Reset intent after sharing
+        } else {
+          toast.success("You're logged in! You can now place your order.");
+        }
       }}
     />
     <OrderSummaryModal 
@@ -348,38 +395,47 @@ return (
 
               {/* Action Buttons */}
               <div className="flex flex-col gap-3">
-                <button
-                  onClick={handlePlaceOrderClick}
-                  disabled={!canOrder}
-                  className="group relative w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-[980px] bg-[var(--button-success)] text-white font-medium shadow-sm hover:shadow-md transition-all duration-300 hover:bg-[var(--button-success-hover)] transform-gpu active:scale-[0.98] cursor-default disabled:opacity-75 disabled:cursor-not-allowed product-detail-button-success min-h-[48px] text-base"
-                  style={{ minHeight: '48px', fontSize: '1rem' }}
-                  tabIndex={0}
-                  aria-label="Place Order"
-                >
-                  <ShoppingCart className="w-5 h-5 transition-transform group-hover:-translate-y-0.5" />
-                  <span className="relative tracking-[-0.01em]">Place Order</span>
-                </button>
-                <button 
-                  onClick={handleAddToCart}
-                  disabled={isAdding || isInCart}
-                  className={`group relative w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-[980px] font-medium tracking-[-0.01em] transition-all duration-300 shadow-sm hover:shadow-md transform-gpu min-h-[48px] text-base
-                    ${isAdding || isInCart
-                      ? 'bg-[var(--button-secondary-disabled)] text-[var(--text-secondary-disabled)] cursor-default'
-                      : 'bg-[var(--button-secondary)] text-[var(--text-primary)] hover:bg-[var(--button-secondary-hover)] active:bg-[var(--button-secondary-active)] product-detail-button-secondary'
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    onClick={handlePlaceOrderClick}
+                    disabled={!canOrder}
+                    className="group relative w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-[980px] bg-[var(--button-success)] text-white font-medium shadow-sm hover:shadow-md transition-all duration-300 hover:bg-[var(--button-success-hover)] transform-gpu active:scale-[0.98] cursor-default disabled:opacity-75 disabled:cursor-not-allowed product-detail-button-success min-h-[48px] text-base"
+                    style={{ minHeight: '48px', fontSize: '1rem' }}
+                    tabIndex={0}
+                    aria-label="Place Order"
+                  >
+                    <ShoppingCart className="w-5 h-5 transition-transform group-hover:-translate-y-0.5" />
+                    <span className="relative tracking-[-0.01em]">Order</span>
+                  </button>
+                  <button 
+                    onClick={handleAddToCart}
+                    disabled={isAdding || isInCart}
+                    className={`group relative w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-[980px] font-medium tracking-[-0.01em] transition-all duration-300 shadow-sm hover:shadow-md transform-gpu min-h-[48px] text-base
+                      ${isAdding || isInCart
+                        ? 'bg-[var(--button-secondary-disabled)] text-[var(--text-secondary-disabled)] cursor-default'
+                        : 'bg-[var(--button-secondary)] text-[var(--text-primary)] hover:bg-[var(--button-secondary-hover)] active:bg-[var(--button-secondary-active)] product-detail-button-secondary'
+                      }
+                      disabled:opacity-100`}
+                    style={{ minHeight: '48px', fontSize: '1rem' }}
+                    aria-disabled={isAdding || isInCart}
+                    tabIndex={0}
+                    aria-label={isInCart ? 'Added' : 'Add To Cart'}
+                  >
+                    {isInCart
+                      ? <Check className="w-5 h-5 transition-transform opacity-80" />
+                      : <Heart className={`w-5 h-5 transition-transform ${isAdding ? 'opacity-60' : 'group-hover:-translate-y-0.5'}`} />
                     }
-                    disabled:opacity-100`}
-                  style={{ minHeight: '48px', fontSize: '1rem' }}
-                  aria-disabled={isAdding || isInCart}
-                  tabIndex={0}
-                  aria-label={isAdding || isInCart ? 'Added To Cart' : 'Add To Cart'}
+                    <span>
+                      {isInCart ? 'Added' : ''}
+                    </span>
+                  </button>
+                </div>
+                <button
+                  onClick={handleShareClick}
+                  className="group relative w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-[980px] font-medium tracking-[-0.01em] transition-all duration-300 shadow-sm hover:shadow-md transform-gpu min-h-[48px] text-base bg-[var(--button-secondary)] text-[var(--text-primary)] hover:bg-[var(--button-secondary-hover)] active:bg-[var(--button-secondary-active)] product-detail-button-secondary"
                 >
-                  {isInCart
-                    ? <Check className="w-5 h-5 transition-transform opacity-80" />
-                    : <CirclePlus className={`w-5 h-5 transition-transform ${isAdding ? 'opacity-60' : 'group-hover:-translate-y-0.5'}`} />
-                  }
-                  <span>
-                    {isInCart ? 'Added To Cart' : 'Add To Cart'}
-                  </span>
+                  <Share2 className="w-5 h-5 mr-2" />
+                  Share & Earn
                 </button>
               </div>
             </>
