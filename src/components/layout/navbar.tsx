@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { ShoppingCart, Moon, Sun, ShoppingBag, ArrowLeft } from 'lucide-react';
+import { Heart, Moon, Sun, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { useCart } from '@/lib/cartContext';
 import { useTheme } from '@/lib/themeContext';
 import { usePathname, useRouter } from 'next/navigation';
@@ -110,16 +110,17 @@ export default function Navbar({ storeName, scrollDirection = 'up', backButtonHr
                 className="relative group p-2"
               >
                 <div className="relative">
-                  <ShoppingCart 
-                    className="h-6 w-6 text-text-primary transition-colors"
+                  <Heart 
+                    className={`h-6 w-6 text-text-primary transition-colors ${state.totalItems > 0 ? 'fill-current text-red-500' : ''}`}
                   />
                   <span 
                     className={`absolute -top-1 -right-1 
-                      ${state.totalItems > 0 ? 'bg-red-500' : 'bg-[var(--badge-gray-bg)]'} 
-                      ${state.totalItems > 0 ? 'text-white' : 'text-[var(--badge-gray-text)]'}
+                      bg-red-500 text-white
                       text-xs rounded-full h-5 w-5 flex items-center justify-center
                       transition-all duration-300
-                      ${isBouncing ? 'animate-badge-bounce' : ''}`}
+                      ${isBouncing ? 'animate-badge-bounce' : ''}
+                      ${state.totalItems > 0 ? 'opacity-100' : 'opacity-0'}`
+                    }
                     style={{
                       transform: 'translateZ(0)',
                       backfaceVisibility: 'hidden'

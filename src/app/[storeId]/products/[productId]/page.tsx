@@ -34,7 +34,7 @@ export default function ProductDetail() {
   const [product, setProduct] = useState<Product | null>(null);
   const [category, setCategory] = useState<Category | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isAdding, setIsAdding] = useState(false);
+  const [isTogglingCart, setIsTogglingCart] = useState(false);
   const [isInCart, setIsInCart] = useState(false);
   const { state, dispatch } = useCart();
   const [storeMeta, setStoreMeta] = useState<StoreMeta | null>(null);
@@ -175,20 +175,25 @@ export default function ProductDetail() {
     }
   };
 
-  const handleAddToCart = () => {
+  const handleToggleCart = () => {
     if (!product || !storeId) return;
-    
-    setIsAdding(true);
-    dispatch({ 
-      type: 'ADD_ITEM', 
-      payload: {
-        ...product,
-        quantity: 1,
-        storeId: storeId, // Ensure storeId is added to the cart item
-      }
-    });
-    setIsAdding(false);
-    setIsInCart(true);
+
+    setIsTogglingCart(true);
+
+    if (isInCart) {
+      dispatch({ type: 'REMOVE_ITEM', payload: { id: product.id } });
+    } else {
+      dispatch({ 
+        type: 'ADD_ITEM', 
+        payload: {
+          ...product,
+          quantity: 1,
+          storeId: storeId,
+        }
+      });
+    }
+
+    setTimeout(() => setIsTogglingCart(false), 500); // Animation duration
   };
 
   const getCategoryColor = (categoryName: string): { background: string; text: string } => {
@@ -218,14 +223,14 @@ return (
       isOpen={isLoginModalOpen}
       onClose={() => {
         setIsLoginModalOpen(false);
-        setShareIntent(false); // Reset intent if modal is closed
+        setShareIntent(false);
       }}
       onSuccess={() => {
         setIsLoginModalOpen(false);
         if (shareIntent) {
           toast.success("You're logged in! Sharing with your referral link.");
           handleShare(true);
-          setShareIntent(false); // Reset intent after sharing
+          setShareIntent(false);
         } else {
           toast.success("You're logged in! You can now place your order.");
         }
@@ -244,24 +249,20 @@ return (
         <div className="flex-1 flex flex-col">
           <div className="relative overflow-hidden rounded-2xl bg-gray-50 shadow-lg">
           {imageLoading && (
-    <div className="absolute inset-0 bg-[var(--skeleton-background)] animate-pulse">
-      <div className="aspect-square" />
-    </div>
-  )}
+            <div className="absolute inset-0 bg-[var(--skeleton-background)] animate-pulse">
+              <div className="aspect-square" />
+            </div>
+          )}
             {product.images[selectedImage] ? (
               <Image
                 src={product.images[selectedImage]}
                 alt={product.name}
                 width={600}
                 height={600}
-                className={`w-full h-auto object-contain transition-opacity duration-300
-                  ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                className={`w-full h-auto object-contain transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
                 priority={true}
                 loading="eager"
-                placeholder="blur"
-                blurDataURL={product.images[selectedImage]}
                 onLoadingComplete={() => setImageLoading(false)}
-                onLoad={() => setImageLoading(false)}
               />
             ) : (
               <div className="h-full w-full bg-gray-100 flex items-center justify-center">
@@ -269,173 +270,104 @@ return (
               </div>
             )}
           </div>
-          {/* Reduce spacing below image for mobile */}
-          <div className="mt-0.5 mb-0.5">
-            {/* Thumbnail Images */}
-            {product.images.length > 1 && (
-              <div className="mt-1 grid grid-cols-4 gap-2">
-                {product.images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      setImageLoading(true);
-                      setSelectedImage(index);
-                    }}
-                    className={`relative overflow-hidden rounded-lg min-w-[48px] min-h-[48px] sm:min-w-[56px] sm:min-h-[56px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--button-primary)] transition-shadow duration-150
-                      ${selectedImage === index 
-                        ? 'ring-2 ring-offset-2 ring-[var(--button-primary)]' 
-                        : 'hover:opacity-75'
-                      }`}
-                    aria-label={`View image ${index + 1} of ${product.name}`}
-                    tabIndex={0}
-                  >
-                    <Image
-                      src={image}
-                      alt={`${product.name} ${index + 1}`}
-                      width={150}
-                      height={150}
-                      className="w-full h-auto object-contain pointer-events-none"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+          {product.images.length > 1 && (
+            <div className="mt-2 grid grid-cols-4 gap-2">
+              {product.images.map((image, index) => (
+                <button
+                  key={index}
+                  onClick={() => {
+                    setImageLoading(true);
+                    setSelectedImage(index);
+                  }}
+                  className={`relative overflow-hidden rounded-lg min-w-[56px] min-h-[56px] focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--button-primary)] transition-shadow duration-150 ${selectedImage === index ? 'ring-2 ring-offset-2 ring-[var(--button-primary)]' : 'hover:opacity-75'}`}
+                >
+                  <Image
+                    src={image}
+                    alt={`${product.name} ${index + 1}`}
+                    fill
+                    sizes="(max-width: 640px) 25vw, 100px"
+                    className="object-cover"
+                  />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         {/* Product Info */}
-        <div className="mt-1 lg:mt-0 flex flex-col">
-          {/* Badges and View Count Row - moved up for mobile */}
-          <div className="flex items-center justify-between mb-1">
-            {/* Left side - Badges */}
+        <div className="mt-4 lg:mt-0 flex flex-col">
+          <div className="flex items-center justify-between mb-2">
             <div className="flex flex-wrap gap-1.5">
-              {product.limitedStock && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border border-gray-200 bg-[var(--badge-yellow-bg)] text-[var(--badge-yellow-text)]">
-                  Limited Stock
-                </span>
-              )}
-              {product?.soldOut && (
-                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border border-gray-200 bg-[var(--badge-red-bg)] text-[var(--badge-red-text)]">
-                  Sold Out
-                </span>
-              )}
-              {category && (
-                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border border-gray-200 ${getCategoryColor(category.name).background} ${getCategoryColor(category.name).text}`}>
-                  {category.name}
-                </span>
-              )}
+              {product.limitedStock && <span className="badge-yellow">Limited Stock</span>}
+              {product.soldOut && <span className="badge-red">Sold Out</span>}
+              {category && <span className={`badge-${getCategoryColor(category.name).background}`}>{category.name}</span>}
             </div>
-
-            {/* Right side - View Count */}
             <div className="px-4 py-1 rounded-full border border-gray-300 dark:border-slate-700/40 bg-white/60 dark:bg-slate-900/40 shadow-sm flex items-center min-w-[64px] justify-center transition-colors duration-300" aria-label="Views" role="status">
               <AnimatedViewCount value={product?.views || 0} duration={2.5} className="text-base font-semibold text-slate-700 dark:text-slate-200" />
             </div>
           </div>
 
-          {/* Conditional Content based on soldOut status */}
-          {product?.soldOut ? (
-            // Only show the "Check Back Later" message for sold out products
-            <div className="mt-2 bg-[var(--card-background)] border border-[var(--border-color)] 
-              rounded-2xl p-6 text-center">
-              {/* Icon Container */}
-              <div className="mb-4 inline-flex items-center justify-center w-12 h-12 
-                rounded-full bg-[var(--badge-blue-bg)]">
+          {product.soldOut ? (
+            <div className="sold-out-card">
+              <div className="mb-4 inline-flex items-center justify-center w-12 h-12 rounded-full bg-[var(--badge-blue-bg)]">
                 <Clock className="w-6 h-6 text-[var(--badge-blue-text)]" />
               </div>
-              
-              {/* Message */}
-              <h3 className="text-lg font-medium text-[var(--text-primary)] mb-2">
-                Currently Unavailable
-              </h3>
-              <p className="text-[var(--text-secondary)] text-sm">
-                This item is temporarily out of stock. Please check back later or explore our other collections.
-              </p>
+              <h3 className="text-lg font-medium text-[var(--text-primary)] mb-2">Currently Unavailable</h3>
+              <p className="text-[var(--text-secondary)] text-sm">This item is out of stock. Please check back later.</p>
             </div>
           ) : (
             <>
-              {/* Product Title */}
-              <h1 className="text-2xl sm:text-3xl font-bold card-text-gradient mb-4">
-                {product?.name}
-              </h1>
-
-              {/* Price Section */}
+              <h1 className="text-2xl sm:text-3xl font-bold card-text-gradient mb-4">{product.name}</h1>
               <div className="flex items-center gap-3 mb-6">
-                <p className="text-2xl font-semibold card-text-gradient">
-                  {product && formatPrice(product.price)}
-                </p>
-                {product?.originalPrice && product.originalPrice > product.price && (
+                <p className="text-2xl font-semibold card-text-gradient">{formatPrice(product.price)}</p>
+                {discount && (
                   <>
-                    <p className="text-lg text-text-secondary line-through">
-                      {formatPrice(product.originalPrice)}
-                    </p>
-                    {discount && (
-                      <span className="px-2 py-1 rounded-full text-sm font-medium 
-                        bg-[var(--badge-green-bg)] text-[var(--badge-green-text)]">
-                        {discount}% OFF
-                      </span>
-                    )}
+                    <p className="text-lg text-text-secondary line-through">{formatPrice(product.originalPrice)}</p>
+                    <span className="badge-green">{discount}% OFF</span>
                   </>
                 )}
               </div>
 
-              {/* Features Section */}
-              {product?.features && (
+              {product.features && (
                 <div className="mb-8">
-                  {/* <h2 className="text-sm font-medium text-[var(--text-primary)] mb-4">Features</h2> */}
                   <ul className="space-y-2">
-
                     {product.features.map((feature, index) => (
                       <li key={index} className="flex items-center text-[var(--text-secondary)]">
-                        <span className="mr-2">•</span>
-                        {feature}
+                        <span className="mr-2">•</span>{feature}
                       </li>
                     ))}
                   </ul>
                 </div>
               )}
 
-              {/* Action Buttons */}
               <div className="flex flex-col gap-3">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="flex items-stretch gap-3">
                   <button
                     onClick={handlePlaceOrderClick}
                     disabled={!canOrder}
-                    className="group relative w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-[980px] bg-[var(--button-success)] text-white font-medium shadow-sm hover:shadow-md transition-all duration-300 hover:bg-[var(--button-success-hover)] transform-gpu active:scale-[0.98] cursor-default disabled:opacity-75 disabled:cursor-not-allowed product-detail-button-success min-h-[48px] text-base"
-                    style={{ minHeight: '48px', fontSize: '1rem' }}
-                    tabIndex={0}
-                    aria-label="Place Order"
+                    className="group relative flex-grow inline-flex items-center justify-center gap-2 px-6 py-4 rounded-[980px] bg-[var(--button-success)] text-white font-medium shadow-sm hover:shadow-md transition-all duration-300 hover:bg-[var(--button-success-hover)] transform-gpu active:scale-[0.98] disabled:opacity-75 disabled:cursor-not-allowed min-h-[56px] text-base"
                   >
-                    <ShoppingCart className="w-5 h-5 transition-transform group-hover:-translate-y-0.5" />
-                    <span className="relative tracking-[-0.01em]">Order</span>
+                    <ShoppingCart className="w-5 h-5" />
+                    <span className="relative tracking-[-0.01em]">Place Order</span>
                   </button>
-                  <button 
-                    onClick={handleAddToCart}
-                    disabled={isAdding || isInCart}
-                    className={`group relative w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-[980px] font-medium tracking-[-0.01em] transition-all duration-300 shadow-sm hover:shadow-md transform-gpu min-h-[48px] text-base
-                      ${isAdding || isInCart
-                        ? 'bg-[var(--button-secondary-disabled)] text-[var(--text-secondary-disabled)] cursor-default'
-                        : 'bg-[var(--button-secondary)] text-[var(--text-primary)] hover:bg-[var(--button-secondary-hover)] active:bg-[var(--button-secondary-active)] product-detail-button-secondary'
-                      }
-                      disabled:opacity-100`}
-                    style={{ minHeight: '48px', fontSize: '1rem' }}
-                    aria-disabled={isAdding || isInCart}
-                    tabIndex={0}
-                    aria-label={isInCart ? 'Added' : 'Add To Cart'}
+                  <button
+                    onClick={handleToggleCart}
+                    disabled={isTogglingCart}
+                    className={`group relative flex-shrink-0 inline-flex items-center justify-center w-14 h-14 rounded-full font-medium transition-all duration-300 transform-gpu active:scale-[0.9] disabled:opacity-75 ${isInCart ? 'bg-red-500 text-white' : 'bg-[var(--button-secondary)] text-[var(--text-primary)] hover:bg-[var(--button-secondary-hover)]'}`}
+                    style={{ minWidth: '56px', minHeight: '56px' }}
+                    aria-label={isInCart ? 'Remove from cart' : 'Add to cart'}
                   >
-                    {isInCart
-                      ? <Check className="w-5 h-5 transition-transform opacity-80" />
-                      : <Heart className={`w-5 h-5 transition-transform ${isAdding ? 'opacity-60' : 'group-hover:-translate-y-0.5'}`} />
-                    }
-                    <span>
-                      {isInCart ? 'Added' : ''}
-                    </span>
+                    <Heart
+                      className={`w-6 h-6 transition-transform duration-200 ease-in-out ${isInCart ? 'fill-current' : ''}`}
+                      style={{ transform: isTogglingCart && !isInCart ? 'scale(1.3)' : 'scale(1)' }}
+                    />
                   </button>
                 </div>
                 <button
                   onClick={handleShareClick}
-                  className="group relative w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-[980px] font-medium tracking-[-0.01em] transition-all duration-300 shadow-sm hover:shadow-md transform-gpu min-h-[48px] text-base bg-[var(--button-secondary)] text-[var(--text-primary)] hover:bg-[var(--button-secondary-hover)] active:bg-[var(--button-secondary-active)] product-detail-button-secondary"
+                  className="group relative w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-[980px] font-medium tracking-[-0.01em] transition-all duration-300 shadow-sm hover:shadow-md transform-gpu min-h-[48px] text-base bg-[var(--button-secondary)] text-[var(--text-primary)] hover:bg-[var(--button-secondary-hover)] active:bg-[var(--button-secondary-active)]"
                 >
                   <Share2 className="w-5 h-5 mr-2" />
-                  Share & Earn
+                  <span>Share & Earn</span>
                 </button>
               </div>
             </>
