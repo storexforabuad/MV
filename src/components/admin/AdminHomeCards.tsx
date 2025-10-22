@@ -1,6 +1,6 @@
 'use client';
-import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, BadgeDollarSign, Lightbulb, Users, Percent } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent } from 'lucide-react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { useSpotlightContext } from '@/context/SpotlightContext';
 
@@ -13,15 +13,19 @@ import StoreLinkModal from './modals/StoreLinkModal';
 import ReferralsModal from './modals/ReferralsModal';
 import SoldOutModal from './modals/SoldOutModal';
 import TipsModal from './modals/TipsModal';
-import { Product } from '../../types/product';
-import { WholesaleData } from '../../lib/db';
 import SpotlightTooltip from '../shared/SpotlightTooltip';
 
 // Import the customer components
 import { AdminCustomersCard } from './AdminCustomersCard';
 import { CustomersListModal } from './CustomersListModal';
+import { Product } from '../../types/product';
+import { Category } from '../../types/category';
+import { WholesaleData } from '../../lib/db';
 
 interface AdminHomeCardsProps {
+  products: Product[];
+  categories: Category[];
+  contacts: WholesaleData[];
   totalProducts: number;
   totalCategories: number;
   popularProducts: number;
@@ -42,6 +46,13 @@ interface AdminHomeCardsProps {
   isRefreshing: boolean;
   onAnimationComplete?: () => void;
   setIsModalOpen?: (open: boolean) => void;
+  setActiveSection: Dispatch<SetStateAction<string>>;
+  debtors: number;
+  subscriptionStatus: string;
+  onReferralAdded: () => void;
+  totalContacts: number;
+  promoCaption?: string;
+  storeName?: string;
 }
 
 // Modal Components (assuming they are defined elsewhere and imported)
@@ -69,8 +80,7 @@ const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferral
   </div>
 );
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.FC<any> | null, glowClass: string}[] = [
+const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.FC<AdminHomeCardsProps & { handleClose: () => void; }> | null, glowClass: string}[] = [
     {
         label: 'Tips',
         subtitle: 'Quick Guide',
@@ -395,7 +405,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                       <div className="flex flex-col items-center min-w-0 z-10 w-full">
                         <div className="text-lg sm:text-xl md:text-2xl font-bold drop-shadow">
                           {(() => {
-                            const value = card.valueKey ? (props as any)[card.valueKey] : '';
+                            const value = card.valueKey ? (props as unknown as Record<string, unknown>)[card.valueKey] : '';
                             if (card.label === 'Commission Earned') return formatCurrencyForCard(props.totalCommissionEarned);
                             if (card.label === 'Referral Bonus') return formatCurrencyForCard(props.totalReferralBonus);
                             if (typeof value === 'number' || typeof value === 'string') return value;
@@ -420,7 +430,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
       />
 
       {isTipsModalOpen && (
-        <TipsModal {...props as any} handleClose={handleCloseTipsModal} />
+        <TipsModal {...props as AdminHomeCardsProps & { handleClose: () => void; }} handleClose={handleCloseTipsModal} />
       )}
 
       {openModal !== null && (

@@ -8,8 +8,8 @@ interface LimitedStockModalProps {
   limitedStock: number;
   products: Product[];
   setActiveSection: (section: string) => void;
-  setManageTab: (tab: 'all' | 'popular' | 'limited' | 'soldout') => void;
-  setIsManageProductsOpen: (open: boolean) => void;
+  setManageTab?: (tab: 'all' | 'popular' | 'limited' | 'soldout') => void;
+  setIsManageProductsOpen?: (open: boolean) => void;
   handleClose: () => void;
 }
 
@@ -32,8 +32,8 @@ const LimitedStockModal: React.FC<LimitedStockModalProps> = ({
       setActiveSection('add');
     } else {
       setActiveSection('manage');
-      setManageTab('limited');
-      setIsManageProductsOpen(true);
+      if (setManageTab) setManageTab('limited');
+      if (setIsManageProductsOpen) setIsManageProductsOpen(true);
     }
     handleClose();
   };

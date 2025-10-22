@@ -8,8 +8,8 @@ interface TotalProductsModalProps {
   totalProducts: number;
   products: Product[];
   setActiveSection: (section: string) => void;
-  setManageTab: (tab: 'all' | 'popular' | 'limited' | 'soldout') => void;
-  setIsManageProductsOpen: (open: boolean) => void;
+  setManageTab?: (tab: 'all' | 'popular' | 'limited' | 'soldout') => void;
+  setIsManageProductsOpen?: (open: boolean) => void;
   handleClose: () => void;
 }
 
@@ -37,8 +37,8 @@ const TotalProductsModal: React.FC<TotalProductsModalProps> = ({
       setActiveSection('add');
     } else {
       setActiveSection('manage');
-      setManageTab('all');
-      setIsManageProductsOpen(true);
+      if (setManageTab) setManageTab('all');
+      if (setIsManageProductsOpen) setIsManageProductsOpen(true);
     }
     handleClose();
   };

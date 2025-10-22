@@ -8,8 +8,8 @@ interface SoldOutModalProps {
   soldOut: number;
   products: Product[];
   setActiveSection: (section: string) => void;
-  setManageTab: (tab: 'all' | 'popular' | 'limited' | 'soldout') => void;
-  setIsManageProductsOpen: (open: boolean) => void;
+  setManageTab?: (tab: 'all' | 'popular' | 'limited' | 'soldout') => void;
+  setIsManageProductsOpen?: (open: boolean) => void;
   handleClose: () => void;
 }
 
@@ -32,8 +32,8 @@ const SoldOutModal: React.FC<SoldOutModalProps> = ({
       setActiveSection('add');
     } else {
       setActiveSection('manage');
-      setManageTab('soldout');
-      setIsManageProductsOpen(true);
+      if (setManageTab) setManageTab('soldout');
+      if (setIsManageProductsOpen) setIsManageProductsOpen(true);
     }
     handleClose();
   };

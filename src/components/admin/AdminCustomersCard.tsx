@@ -6,7 +6,7 @@ import { Users } from 'lucide-react';
 
 interface AdminCustomersCardProps {
   storeId: string;
-  onClick: () => void;
+  onClick?: () => void;
   gradient?: string;
   glowClass?: string;
 }

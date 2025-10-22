@@ -8,8 +8,8 @@ interface PopularProductsModalProps {
   popularProducts: number;
   products: Product[];
   setActiveSection: (section: string) => void;
-  setManageTab: (tab: 'all' | 'popular' | 'limited' | 'soldout') => void;
-  setIsManageProductsOpen: (open: boolean) => void;
+  setManageTab?: (tab: 'all' | 'popular' | 'limited' | 'soldout') => void;
+  setIsManageProductsOpen?: (open: boolean) => void;
   handleClose: () => void;
 }
 
@@ -47,8 +47,8 @@ const PopularProductsModal: React.FC<PopularProductsModalProps> = ({
       setActiveSection('add');
     } else {
       setActiveSection('manage');
-      setManageTab('popular');
-      setIsManageProductsOpen(true);
+      if (setManageTab) setManageTab('popular');
+      if (setIsManageProductsOpen) setIsManageProductsOpen(true);
     }
     handleClose();
   };
