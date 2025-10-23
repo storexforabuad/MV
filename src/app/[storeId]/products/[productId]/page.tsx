@@ -56,10 +56,10 @@ export default function ProductDetail() {
   const handleShare = (withReferral: boolean) => {
     if (!product || !storeId) return;
 
-    const productUrl = `${window.location.origin}/${storeId}/products/${product.id}`;
+    const productUrl = `https://tinyurl.com/bizcononline/${storeId}/products/${product.id}`;
     const canonicalShareUrl = withReferral && customer ? `${productUrl}?ref=${customer.referralCode}` : productUrl;
 
-    const shareText = `Check out "${product.name}"! I think you'll love it. Use my link to shop: ${canonicalShareUrl}`;
+    const shareText = `Check out "${product.name}"! I think you'll love it. Use my link to shop:`;
 
     const shareData = {
       title: product.name,
@@ -72,7 +72,7 @@ export default function ProductDetail() {
         .then(() => console.log('Successful share'))
         .catch((error) => console.log('Error sharing', error));
     } else {
-      navigator.clipboard.writeText(canonicalShareUrl).then(
+      navigator.clipboard.writeText(`${shareText} ${canonicalShareUrl}`).then(
         () => toast.success('Link copied to clipboard!'),
         () => toast.error('Could not copy link.')
       );
