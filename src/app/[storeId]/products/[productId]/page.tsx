@@ -58,9 +58,8 @@ export default function ProductDetail() {
 
     const productUrl = `${window.location.origin}/${storeId}/products/${product.id}`;
     const canonicalShareUrl = withReferral && customer ? `${productUrl}?ref=${customer.referralCode}` : productUrl;
-    const tinyUrlStoreLink = `https://tinyurl.com/bizcononline/${storeId}`;
 
-    const shareText = `Check out "${product.name}" on the ${storeMeta?.name || storeId} store!\n\nShop the collection here: ${tinyUrlStoreLink}`;
+    const shareText = `Check out "${product.name}"! I think you'll love it. Use my link to shop: ${canonicalShareUrl}`;
 
     const shareData = {
       title: product.name,
