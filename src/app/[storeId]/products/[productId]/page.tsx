@@ -317,7 +317,7 @@ return (
               <h1 className="text-2xl sm:text-3xl font-bold card-text-gradient mb-4">{product.name}</h1>
               <div className="flex items-center gap-3 mb-6">
                 <p className="text-2xl font-semibold card-text-gradient">{formatPrice(product.price)}</p>
-                {discount && (
+                {discount && typeof product.originalPrice === 'number' && (
                   <>
                     <p className="text-lg text-gray-500 dark:text-gray-400 line-through">{formatPrice(product.originalPrice)}</p>
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border border-gray-200 bg-[var(--badge-green-bg)] text-[var(--badge-green-text)]">
