@@ -274,6 +274,16 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
       completeSpotlight();
     }
   };
+  
+  const handleGetMoreViewsClick = () => {
+    setIsViewsModalOpen(false);
+    const shareCardIndex = cardData.findIndex(card => card.label === 'Share');
+    if (shareCardIndex !== -1) {
+      setTimeout(() => {
+        setOpenModal(shareCardIndex);
+      }, 50);
+    }
+  };
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -442,6 +452,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             {...props} 
             isOpen={isViewsModalOpen} 
             onClose={() => setIsViewsModalOpen(false)} 
+            onGetMoreViewsClick={handleGetMoreViewsClick}
         />
       )}
 

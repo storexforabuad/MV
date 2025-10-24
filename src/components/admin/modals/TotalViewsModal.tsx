@@ -2,7 +2,7 @@
 
 import { Fragment, useMemo } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { EyeIcon, TagIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import { EyeIcon, TagIcon, XMarkIcon, ShareIcon } from '@heroicons/react/24/solid';
 import Image from 'next/image';
 import { Product } from '../../../types/product';
 import { motion } from 'framer-motion';
@@ -19,6 +19,7 @@ interface TotalViewsModalProps {
   setIsManageProductsOpen?: (open: boolean) => void;
   onProductClick?: (product: Product) => void;
   onCategoryClick?: (categoryId: string) => void;
+  onGetMoreViewsClick?: () => void;
 }
 
 // --- MAIN COMPONENT ---
@@ -33,6 +34,7 @@ const TotalViewsModal: React.FC<TotalViewsModalProps> = ({
   setIsManageProductsOpen,
   onProductClick,
   onCategoryClick,
+  onGetMoreViewsClick,
 }) => {
   const productsArr = Array.isArray(products) ? products : [];
   const isEmpty = productsArr.length === 0;
@@ -70,14 +72,19 @@ const TotalViewsModal: React.FC<TotalViewsModalProps> = ({
 
 
   const handlePrimaryAction = () => {
-    if (isEmpty) {
-      setActiveSection('add');
+    if (onGetMoreViewsClick) {
+      onGetMoreViewsClick();
     } else {
-      setActiveSection('manage');
-      if (setManageTab) setManageTab('all');
-      if (setIsManageProductsOpen) setIsManageProductsOpen(true);
+      // Fallback for older implementations
+      if (isEmpty) {
+        setActiveSection('add');
+      } else {
+        setActiveSection('manage');
+        if (setManageTab) setManageTab('all');
+        if (setIsManageProductsOpen) setIsManageProductsOpen(true);
+      }
+      onClose();
     }
-    onClose();
   };
   
   const handleProductClick = (product: Product) => {
@@ -92,11 +99,6 @@ const TotalViewsModal: React.FC<TotalViewsModalProps> = ({
       onCategoryClick(categoryId);
       onClose();
     }
-  };
-
-  const getButtonText = () => {
-    if (isEmpty) return 'Add First Product';
-    return 'View All Products';
   };
 
   return (
@@ -192,8 +194,12 @@ const TotalViewsModal: React.FC<TotalViewsModalProps> = ({
                   </div>
                   
                   <div className="p-4 border-t border-border-color">
-                    <button className="w-full px-4 py-3 rounded-lg bg-gray-900 text-white font-semibold hover:bg-gray-800 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" onClick={handlePrimaryAction}>
-                      {getButtonText()}
+                    <button 
+                      className="w-full flex items-center justify-center px-4 py-3 rounded-lg bg-blue-500 text-white font-semibold hover:bg-blue-600 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                      onClick={handlePrimaryAction}
+                    >
+                      <ShareIcon className="w-5 h-5 mr-2" />
+                      Get more views
                     </button>
                   </div>
                 </div>
