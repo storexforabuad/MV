@@ -1,50 +1,73 @@
-import { Eye, Tag, X } from 'lucide-react';
-import Image from 'next/image';
-import { useEffect } from 'react';
-import { Product } from '../../../types/product';
-import Modal from '../../Modal';
+'use client';
 
+import { Fragment, useMemo } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
+import { EyeIcon, TagIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import Image from 'next/image';
+import { Product } from '../../../types/product';
+import { motion } from 'framer-motion';
+
+// --- TYPES ---
 interface TotalViewsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
   totalViews: number;
   products: Product[];
+  categories: { id: string; name: string }[];
   setActiveSection: (section: string) => void;
   setManageTab?: (tab: 'all' | 'popular' | 'limited' | 'soldout') => void;
   setIsManageProductsOpen?: (open: boolean) => void;
-  handleClose: () => void;
+  onProductClick?: (product: Product) => void;
+  onCategoryClick?: (categoryId: string) => void;
 }
 
+// --- MAIN COMPONENT ---
 const TotalViewsModal: React.FC<TotalViewsModalProps> = ({
+  isOpen,
+  onClose,
   totalViews,
   products,
+  categories,
   setActiveSection,
   setManageTab,
   setIsManageProductsOpen,
-  handleClose,
+  onProductClick,
+  onCategoryClick,
 }) => {
   const productsArr = Array.isArray(products) ? products : [];
   const isEmpty = productsArr.length === 0;
 
-  const { topCategory, topViewedProduct } = (() => {
-    if (isEmpty) return { topCategory: null, topViewedProduct: null };
+  const { topCategory, topProducts } = useMemo(() => {
+    if (isEmpty) return { topCategory: null, topProducts: [] };
 
-    const categoryViews: Record<string, number> = {};
+    const categoryViews: { [key: string]: { id: string; name: string; views: number } } = {};
     productsArr.forEach(p => {
-      const cat = p.category || 'Uncategorized';
-      categoryViews[cat] = (categoryViews[cat] || 0) + (p.views || 0);
+      const categoryId = p.categoryId || 'uncategorized';
+      const categoryInfo = categories.find(c => c.id === categoryId);
+      const categoryName = categoryInfo ? categoryInfo.name : 'Uncategorized';
+      
+      if (!categoryViews[categoryId]) {
+        categoryViews[categoryId] = { id: categoryId, name: categoryName, views: 0 };
+      }
+      categoryViews[categoryId].views += p.views || 0;
     });
 
-    const sortedCats = Object.entries(categoryViews).sort((a, b) => b[1] - a[1]);
-    const topCategory = sortedCats.length > 0 && sortedCats[0][1] > 0
-      ? { name: sortedCats[0][0], views: sortedCats[0][1] }
-      : null;
+    const sortedCats = Object.values(categoryViews).sort((a, b) => b.views - a.views);
+    const topCategory = sortedCats.length > 0 && sortedCats[0].views > 0 ? sortedCats[0] : null;
 
-    const sortedByViews = [...productsArr].sort((a, b) => (b.views || 0) - (a.views || 0));
-    const topViewedProduct = sortedByViews.length > 0 && (sortedByViews[0].views || 0) > 0 
-      ? sortedByViews[0] 
-      : null;
+    const sortedByViews = [...productsArr]
+      .sort((a, b) => (b.views || 0) - (a.views || 0))
+      .slice(0, 3);
 
-    return { topCategory, topViewedProduct };
-  })();
+    return { topCategory, topProducts: sortedByViews };
+  }, [productsArr, categories, isEmpty]);
+  
+  const maxViews = useMemo(() => {
+    const topProductView = topProducts.length > 0 ? topProducts[0].views || 0 : 0;
+    const topCategoryView = topCategory ? topCategory.views : 0;
+    return Math.max(topProductView, topCategoryView, 1); // Avoid division by zero
+  }, [topProducts, topCategory]);
+
 
   const handlePrimaryAction = () => {
     if (isEmpty) {
@@ -54,7 +77,21 @@ const TotalViewsModal: React.FC<TotalViewsModalProps> = ({
       if (setManageTab) setManageTab('all');
       if (setIsManageProductsOpen) setIsManageProductsOpen(true);
     }
-    handleClose();
+    onClose();
+  };
+  
+  const handleProductClick = (product: Product) => {
+    if (onProductClick) {
+      onProductClick(product);
+      onClose();
+    }
+  };
+
+  const handleCategoryClick = (categoryId: string) => {
+    if (onCategoryClick) {
+      onCategoryClick(categoryId);
+      onClose();
+    }
   };
 
   const getButtonText = () => {
@@ -62,94 +99,110 @@ const TotalViewsModal: React.FC<TotalViewsModalProps> = ({
     return 'View All Products';
   };
 
-  useEffect(() => {
-    window.history.pushState({ modalOpen: true }, '');
-    const handlePopState = () => {
-      handleClose();
-    };
-    window.addEventListener('popstate', handlePopState);
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-    };
-  }, [handleClose]);
-
   return (
-    <Modal open={true} onClose={handleClose}>
-      <button
-        onClick={handleClose}
-        className="absolute top-3 right-3 z-10 text-text-secondary hover:text-text-primary bg-white/80 dark:bg-slate-700/80 rounded-full p-1.5 shadow"
-        aria-label="Close"
-      >
-        <X className="w-5 h-5" />
-      </button>
-      <div className="w-full flex flex-col items-center">
-        {/* Header */}
-        <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-success/10 mb-4 border border-success/20">
-          <Eye className="w-7 h-7 text-success" />
-        </div>
-        <h2 className="text-xl font-bold text-text-primary">Total Views</h2>
-        <p className="text-4xl font-bold text-success my-1">
-          {totalViews}
-        </p>
-        <p className="text-sm text-text-secondary mb-6 text-center">Total product views across your store.</p>
-        {/* Content */}
-        <div className="w-full">
-          {!topCategory && !topViewedProduct ? (
-            <div className="w-full mt-2 flex flex-col items-center text-center">
-              <p className="text-sm text-text-secondary mb-4">
-                {isEmpty ? 'Your store is empty.' : 'No product views yet. Share your store link to get started!'}
-              </p>
-            </div>
-          ) : (
-            <div className="w-full space-y-4 max-h-48 overflow-y-auto pr-2 custom-scrollbar">
-              {topCategory && (
-                <div>
-                  <p className="text-xs font-semibold text-text-secondary mb-2 pl-1">Top Category</p>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-background-alt">
-                    <Tag className="w-4 h-4 text-text-secondary flex-shrink-0" />
-                    <div className="flex flex-col min-w-0">
-                      <span className="font-medium text-text-primary truncate">{topCategory.name}</span>
-                      <span className="text-xs text-text-secondary">{topCategory.views} Views</span>
+    <Transition.Root show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={onClose}>
+        <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
+          <div className="fixed inset-0 bg-black bg-opacity-75 backdrop-blur-sm transition-opacity" />
+        </Transition.Child>
+
+        <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
+          <div className="flex min-h-full items-stretch justify-center text-center md:items-center md:px-2 lg:px-4">
+            <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-full md:translate-y-0 md:scale-95" enterTo="opacity-100 translate-y-0 md:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 md:scale-100" leaveTo="opacity-0 translate-y-full md:translate-y-0 md:scale-95">
+              <Dialog.Panel className="relative flex w-full max-w-md transform text-left text-base transition md:my-8">
+                <div className="relative flex w-full flex-col overflow-hidden bg-card-background shadow-2xl h-screen md:h-auto md:rounded-2xl">
+                  
+                  <div className="p-4 flex justify-between items-center border-b border-border-color">
+                    <Dialog.Title as="h3" className="text-xl font-bold text-text-primary flex items-center gap-2">
+                      <EyeIcon className="w-6 h-6 text-text-secondary"/>
+                      Store Views
+                    </Dialog.Title>
+                    <button onClick={onClose} className="p-1 rounded-full hover:bg-button-secondary-hover transition">
+                      <XMarkIcon className="h-6 w-6 text-text-secondary" />
+                    </button>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto p-6">
+                    <div className="w-full flex flex-col items-center">
+                      <p className="text-sm text-text-secondary mb-1 text-center">Total product views</p>
+                      <p className="text-5xl font-bold text-text-primary my-1">{totalViews}</p>
+                      
+                      <div className="w-full mt-6">
+                        {topProducts.length === 0 && !topCategory ? (
+                          <div className="w-full mt-2 py-8 flex flex-col items-center text-center bg-input-background rounded-lg">
+                            <p className="font-semibold text-text-primary">{isEmpty ? 'Your store has no products' : 'No product views yet'}</p>
+                            <p className="text-sm text-text-secondary mt-1">{isEmpty ? 'Add a product to get started.' : 'Share your store to get views!'}</p>
+                          </div>
+                        ) : (
+                          <div className="w-full space-y-4">
+                            {topCategory && (
+                              <div>
+                                <p className="text-sm font-semibold text-text-secondary mb-2">Top Category</p>
+                                <button onClick={() => handleCategoryClick(topCategory.id)} className="w-full p-3 rounded-lg bg-input-background hover:bg-input-border transition-colors group">
+                                   <div className="flex items-center gap-3">
+                                      <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-background"><TagIcon className="w-5 h-5 text-text-secondary" /></div>
+                                      <div className="flex-1 min-w-0 text-left"><span className="font-semibold text-text-primary truncate">{topCategory.name}</span></div>
+                                      <span className="text-sm font-bold text-text-primary">{topCategory.views}</span>
+                                   </div>
+                                   <div className="w-full bg-background rounded-full h-1.5 mt-2">
+                                      <motion.div 
+                                        className="bg-blue-500 h-1.5 rounded-full"
+                                        initial={{ width: 0 }}
+                                        animate={{ width: `${(topCategory.views / maxViews) * 100}%` }}
+                                        transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
+                                       />
+                                   </div>
+                                </button>
+                              </div>
+                            )}
+                            {topProducts.length > 0 && (
+                              <div>
+                                <p className="text-sm font-semibold text-text-secondary mb-2">Top Products</p>
+                                <div className="space-y-2">
+                                  {topProducts.map((product) => (
+                                    <button key={product.id} onClick={() => handleProductClick(product)} className="w-full p-3 rounded-lg bg-input-background hover:bg-input-border transition-colors group">
+                                      <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-lg bg-background overflow-hidden flex items-center justify-center flex-shrink-0">
+                                          {product.images?.[0] ? (
+                                            <Image src={product.images[0]} alt={product.name} width={40} height={40} className="w-full h-full object-cover" />
+                                          ) : (
+                                            <span className="text-xs text-text-tertiary">No Img</span>
+                                          )}
+                                        </div>
+                                        <div className="flex-1 min-w-0 text-left"><span className="font-semibold text-text-primary truncate">{product.name}</span></div>
+                                        <span className="text-sm font-bold text-text-primary">{product.views || 0}</span>
+                                      </div>
+                                      <div className="w-full bg-background rounded-full h-1.5 mt-2">
+                                        <motion.div 
+                                          className="bg-blue-500 h-1.5 rounded-full"
+                                          initial={{ width: 0 }}
+                                          animate={{ width: `${((product.views || 0) / maxViews) * 100}%` }}
+                                          transition={{ duration: 0.8, ease: [0.25, 1, 0.5, 1] }}
+                                        />
+                                      </div>
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
-              {topViewedProduct && (
-                 <div>
-                  <p className="text-xs font-semibold text-text-secondary mb-2 pl-1">Top Product</p>
-                  <div className="flex items-center gap-3 p-3 rounded-lg bg-background-alt">
-                    <div className="w-10 h-10 rounded-lg bg-background overflow-hidden flex items-center justify-center flex-shrink-0">
-                      {topViewedProduct.images?.[0] ? (
-                        <Image 
-                          src={topViewedProduct.images[0]} 
-                          alt={topViewedProduct.name} 
-                          width={40} 
-                          height={40} 
-                          className="w-full h-full object-cover" 
-                        />
-                      ) : (
-                        <span className="text-xs text-text-tertiary">No Img</span>
-                      )}
-                    </div>
-                    <div className="flex flex-col min-w-0">
-                      <span className="font-medium text-text-primary truncate">{topViewedProduct.name}</span>
-                      <span className="text-xs text-text-secondary">{topViewedProduct.views || 0} Views</span>
-                    </div>
+                  
+                  <div className="p-4 border-t border-border-color">
+                    <button className="w-full px-4 py-3 rounded-lg bg-gray-900 text-white font-semibold hover:bg-gray-800 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500" onClick={handlePrimaryAction}>
+                      {getButtonText()}
+                    </button>
                   </div>
                 </div>
-              )}
-            </div>
-          )}
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
         </div>
-        {/* Footer Button */}
-        <button
-          className="mt-6 w-full px-4 py-2.5 rounded-lg bg-success text-success-foreground font-semibold hover:bg-success/90 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-success focus-visible:ring-offset-2 focus-visible:ring-offset-background"
-          onClick={handlePrimaryAction}
-        >
-          {getButtonText()}
-        </button>
-      </div>
-    </Modal>
+      </Dialog>
+    </Transition.Root>
   );
 };
 

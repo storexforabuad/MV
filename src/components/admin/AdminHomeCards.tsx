@@ -80,7 +80,7 @@ const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferral
   </div>
 );
 
-const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.FC<AdminHomeCardsProps & { handleClose: () => void; }> | null, glowClass: string}[] = [
+const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: any | null, glowClass: string}[] = [
     {
         label: 'Tips',
         subtitle: 'Quick Guide',
@@ -124,7 +124,7 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       icon: Eye,
       gradient: 'bg-gradient-to-br from-purple-500 via-fuchsia-600 to-pink-700',
       text: 'text-white',
-      component: TotalViewsModal,
+      component: TotalViewsModal, 
       glowClass: 'dark:shadow-fuchsia-500/30 shadow-fuchsia-500/50',
     },
     {
@@ -207,6 +207,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const { spotlightStep, completeSpotlight } = useSpotlightContext();
   const [openModal, setOpenModal] = useState<number | null>(null);
   const [isTipsModalOpen, setIsTipsModalOpen] = useState(false);
+  const [isViewsModalOpen, setIsViewsModalOpen] = useState(false);
   const [isCustomersModalOpen, setIsCustomersModalOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const { setIsModalOpen, onRefresh, uiVisible, onAnimationComplete, onOrdersCardClick } = props;
@@ -227,13 +228,14 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   }
 
   useEffect(() => {
-    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen;
+    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen;
     if (modalIsOpen) {
       window.history.pushState({ modalOpen: true }, '');
       const handlePopState = () => {
         setOpenModal(null);
         setIsTipsModalOpen(false);
         setIsCustomersModalOpen(false);
+        setIsViewsModalOpen(false);
         if (setIsModalOpen) setIsModalOpen(false);
       };
       window.addEventListener('popstate', handlePopState);
@@ -244,11 +246,13 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         }
       };
     }
-  }, [openModal, isTipsModalOpen, isCustomersModalOpen, setIsModalOpen]);
+  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, setIsModalOpen]);
 
   const handleOpenModal = (idx: number, cardLabel?: string) => {
     if (cardLabel === 'Tips') {
       setIsTipsModalOpen(true);
+    } else if (cardLabel === 'Views') {
+      setIsViewsModalOpen(true);
     } else if (cardLabel === 'Manage Categories') {
       props.openManageCategories();
     } else if (cardLabel === 'Orders') {
@@ -433,6 +437,14 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         <TipsModal {...props as AdminHomeCardsProps & { handleClose: () => void; }} handleClose={handleCloseTipsModal} />
       )}
 
+      {isViewsModalOpen && (
+        <TotalViewsModal 
+            {...props} 
+            isOpen={isViewsModalOpen} 
+            onClose={() => setIsViewsModalOpen(false)} 
+        />
+      )}
+
       {openModal !== null && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md"
@@ -444,7 +456,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           >
             {(() => {
               const card = cardsToRender[openModal];
-              if (!card || !card.component) return null;
+              if (!card || !card.component || card.label === 'Views') return null;
               const ModalComponent = card.component;
               const modalProps = {
                 ...props,
