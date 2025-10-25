@@ -151,13 +151,21 @@ export async function updateProduct(storeId: string, productId: string, data: Pa
     
     if (productSnap.exists()) {
       const currentData = productSnap.data();
+
+      // Sanitize the data to remove undefined fields
+      const sanitizedData = { ...data };
+      Object.keys(sanitizedData).forEach(key => {
+          if (sanitizedData[key] === undefined) {
+              delete sanitizedData[key];
+          }
+      });
       
-      if (currentData.soldOut === true && data.soldOut === false) {
-        data.backInStock = true; 
+      if (currentData.soldOut === true && sanitizedData.soldOut === false) {
+        sanitizedData.backInStock = true; 
         await handleBackInStock(storeId, productId); 
       }
       
-      await updateDoc(productRef, data);
+      await updateDoc(productRef, sanitizedData);
     }
   } catch (error) {
     console.error('Error updating product:', error);
