@@ -1,127 +1,172 @@
-import { useState, useEffect } from 'react';
-import { motion, Variants } from 'framer-motion';
-import Modal from '../../Modal';
-import { Send, Copy, Share2, X, Check } from 'lucide-react';
+"use client";
 
+import { Fragment, useState, useEffect } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
+import { Copy, Check, Lightbulb, Share2, X } from 'lucide-react';
+import toast from 'react-hot-toast';
+import { Category } from '../../../types/category';
+
+// --- PROPS INTERFACE ---
 interface StoreLinkModalProps {
-  storeLink: string;
+  isOpen: boolean;
   handleClose: () => void;
+  storeLink: string;
   promoCaption?: string;
   storeName?: string;
-  categories?: { id: string, name: string }[];
+  categories?: Category[];
 }
 
-// Social Icons
-const WhatsAppIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" className="text-white"><path d="M12 2.04C6.5 2.04 2 6.53 2 12.06c0 3.37 1.76 6.35 4.47 8.13-.09-.59-.2-1.28-.29-1.92h-.03c-.09-.61-.17-1.23-.24-1.87-.08-.6-.14-1.18-.18-1.72-.03-.43-.05-.82-.05-1.18 0-4.03 3.28-7.3 7.3-7.3s7.3 3.27 7.3 7.3c0 .35-.02.72-.05 1.07-.03.35-.08.73-.14 1.15s-.14.88-.22 1.37c-.08.49-.17.99-.26 1.5h-.03c-.09.51-.18 1.03-.26 1.56-.23 1.49-.57 2.92-.99 4.28.16-.01.32-.02.48-.02 5.5 0 9.96-4.49 9.96-10.02S17.5 2.04 12 2.04zM8.53 11.23c-.33 0-.6.27-.6.6s.27.6.6.6h7.93c.33 0 .6-.27.6-.6s-.27-.6-.6-.6H8.53zm0 2.59c-.33 0-.6.27-.6.6s.27.6.6.6h4.96c.33 0 .6-.27.6-.6s-.27-.6-.6-.6H8.53z"/></svg>;
-const FacebookIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M13.397 20.997v-8.196h2.765l.411-3.209h-3.176V7.548c0-.926.258-1.56 1.587-1.56h1.684V3.127A22.336 22.336 0 0 0 14.201 3c-2.444 0-4.122 1.492-4.122 4.231v2.355H7.332v3.209h2.753v8.196h3.312z"/></svg>;
-const InstagramIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.85s-.012 3.584-.07 4.85c-.148 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07s-3.584-.012-4.85-.07c-3.252-.148-4.771-1.691-4.919-4.919-.058-1.265-.07-1.645-.07-4.85s.012-3.584.07-4.85c.148-3.225 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.85-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.947s-.014-3.667-.072-4.947c-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>;
-const TwitterIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616v.064c0 2.298 1.634 4.212 3.793 4.649-.562.152-1.158.22-1.778.085.617 1.954 2.408 3.377 4.533 3.419-1.625 1.278-3.673 2.03-5.894 2.03-.382 0-.76-.022-1.13-.066 2.099 1.354 4.602 2.149 7.29 2.149 8.749 0 13.529-7.252 13.529-13.529 0-.206-.005-.412-.013-.617.928-.67 1.734-1.503 2.37-2.45z"/></svg>;
+// --- SOCIAL ICONS ---
+const WhatsAppIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.371-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01s-.521.074-.792.372c-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>;
+const FacebookIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/></svg>;
+const InstagramIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.85s-.011 3.584-.069 4.85c-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07s-3.584-.012-4.85-.07c-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.85s.012-3.584.07-4.85c.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.85-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948s.014 3.667.072 4.947c.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072s3.667-.014 4.947-.072c4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.947s-.014-3.667-.072-4.947c-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.948-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.162 6.162 6.162 6.162-2.759 6.162-6.162-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4s1.791-4 4-4 4 1.79 4 4-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.441 1.441 1.441 1.441-.645 1.441-1.441-.645-1.44-1.441-1.44z"/></svg>;
+const SnapchatIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8" viewBox="0 0 24 24" fill="currentColor"><path d="M22.972 13.447c-.436.033-.88.04-1.32.04-3.957 0-7.233-2.673-8.63-6.233-1.135-2.89.103-6.16.89-8.254.08-.204.01-.447-.16-.583-.18-.133-.42-.14-.59-.02C10.834.024 8.71 1.543 8.35 4.3c-1.004 7.64 4.933 14.867 12.65 15.67.28.03.55-.13.66-.4.12-.27.01-.58-.22-.72-1.92-1.18-3.05-3.2-3.4-5.4.49.03.98.05 1.47.05.51 0 1.02-.01 1.53-.04 1.1-.06 2.05-.18 2.05-.18s.22-.05.39-.21c.16-.17.18-.41.05-.61l-.01.01z"/></svg>;
 
-const formatCategories = (categories: { name: string }[] | undefined) => {
-  if (!categories || categories.length === 0) return 'products';
-  
-  const categoryNames = categories.map(c => c.name);
-  const count = categoryNames.length;
-
-  if (count <= 5) {
-    if (count === 1) return categoryNames[0];
-    if (count === 2) return categoryNames.join(' and ');
-    const last = categoryNames.pop();
-    return `${categoryNames.join(', ')}, and ${last}`;
-  } else {
+// --- HELPER FUNCTIONS ---
+const formatCategories = (categories: Category[] | undefined) => {
+    if (!categories || categories.length === 0) return 'products';
+    const categoryNames = categories.map(c => c.name);
+    const count = categoryNames.length;
+    if (count <= 5) {
+        if (count === 1) return categoryNames[0];
+        if (count === 2) return categoryNames.join(' and ');
+        const last = categoryNames.pop();
+        return `${categoryNames.join(', ')}, and ${last}`;
+    }
     const firstFive = categoryNames.slice(0, 5);
-    return `${firstFive.join(', ')}, and more`;
-  }
+    return `${firstFive.join(', ')}, and more products`;
 };
 
-const StoreLinkModal: React.FC<StoreLinkModalProps> = ({ storeLink, handleClose, promoCaption, storeName, categories }) => {
-  const [fullUrl, setFullUrl] = useState('');
-  const [copyState, setCopyState] = useState(false);
+// --- MAIN COMPONENT ---
+const StoreLinkModal: React.FC<StoreLinkModalProps> = ({ isOpen, handleClose, storeLink, promoCaption, storeName, categories }) => {
+    const [fullUrl, setFullUrl] = useState('');
+    const [copyMessageState, setCopyMessageState] = useState(false);
+    const [copyLinkState, setCopyLinkState] = useState(false);
 
-  useEffect(() => {
-    if (storeLink) {
-      if (storeLink.startsWith('http')) {
-        setFullUrl(storeLink);
-      } else {
-        const storeId = storeLink.startsWith('/') ? storeLink.substring(1) : storeLink;
-        const newFullUrl = `https://tinyurl.com/bizcononline/${storeId}`;
-        setFullUrl(newFullUrl);
-      }
-    }
-  }, [storeLink]);
+    useEffect(() => {
+        if (storeLink) {
+            if (storeLink.startsWith('http')) {
+                setFullUrl(storeLink);
+            } else {
+                const storeId = storeLink.startsWith('/') ? storeLink.substring(1) : storeLink;
+                setFullUrl(`https://tinyurl.com/bizcononline/${storeId}`);
+            }
+        }
+    }, [storeLink]);
 
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      setCopyState(true);
-      setTimeout(() => {
-        setCopyState(false);
-      }, 2000);
-    });
-  };
+    const handleCopy = (text: string, type: 'message' | 'link') => {
+        navigator.clipboard.writeText(text).then(() => {
+            if (type === 'message') {
+                setCopyMessageState(true);
+                toast.success('Share message copied!');
+                setTimeout(() => setCopyMessageState(false), 2000);
+            } else {
+                setCopyLinkState(true);
+                toast.success('Store link copied!');
+                setTimeout(() => setCopyLinkState(false), 2000);
+            }
+        });
+    };
 
-  const formattedCategories = formatCategories(categories);
-  const defaultCaption = `🌟 Discover authentic ${formattedCategories} at affordable prices in the new ${storeName || 'Online Store'} Online store! 🛒 Nationwide delivery 🚚 🇳🇬. Tap the link below:`;
-  const shareMessage = `${promoCaption ? promoCaption.replace(/\n/g, '\n') : defaultCaption}\n${fullUrl}`;
+    const formattedCategories = formatCategories(categories);
+    const defaultCaption = `🌟 Discover authentic ${formattedCategories} at affordable prices in the new ${storeName || 'Online Store'}! 🛒 Nationwide delivery 🚚 🇳🇬. Tap the link below:`;
+    const shareMessage = `${promoCaption || defaultCaption}\n${fullUrl}`;
 
-  const socialPlatforms = [
-    { name: 'WhatsApp', icon: WhatsAppIcon, url: `https://wa.me/?text=${encodeURIComponent(shareMessage)}`, color: 'bg-[#25D366] hover:bg-[#1DA851]' },
-    { name: 'Facebook', icon: FacebookIcon, url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fullUrl)}&quote=${encodeURIComponent(promoCaption || defaultCaption)}`, color: 'bg-[#1877F2] hover:bg-[#166eD9]' },
-    { name: 'Instagram', icon: InstagramIcon, url: `https://www.instagram.com`, color: 'bg-gradient-to-r from-purple-500 via-pink-500 to-red-500' },
-    { name: 'Twitter', icon: TwitterIcon, url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareMessage)}`, color: 'bg-[#1DA1F2] hover:bg-[#1A91DA]' },
-  ];
+    const socialPlatforms = [
+        { name: 'WhatsApp', icon: WhatsAppIcon, url: `https://wa.me/?text=${encodeURIComponent(shareMessage)}`, color: 'bg-[#25D366]' },
+        { name: 'Facebook', icon: FacebookIcon, url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(fullUrl)}&quote=${encodeURIComponent(promoCaption || defaultCaption)}`, color: 'bg-[#1877F2]' },
+        { name: 'Instagram', icon: InstagramIcon, action: () => {
+            navigator.clipboard.writeText(fullUrl);
+            toast.success('Link copied! Paste it in your Instagram story or bio.');
+        }, color: 'bg-gradient-to-br from-purple-500 via-pink-500 to-red-500' },
+        { name: 'Snapchat', icon: SnapchatIcon, action: () => {
+            navigator.clipboard.writeText(fullUrl);
+            toast.success('Link copied! Paste it in your Snapchat story.');
+        }, color: 'bg-yellow-300' },
+    ];
 
-  const paneVariants: Variants = {
-    hidden: { opacity: 0, y: 15 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.25, ease: 'easeOut' } },
-  };
+    return (
+        <Transition.Root show={isOpen} as={Fragment}>
+            <Dialog as="div" className="relative z-50" onClose={handleClose}>
+                <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" />
+                </Transition.Child>
 
-  return (
-    <Modal open={true} onClose={handleClose}>
-      <button onClick={handleClose} className="absolute top-3 right-3 z-20 text-text-secondary hover:text-text-primary bg-white/80 dark:bg-slate-700/80 rounded-full p-1.5 shadow-lg" aria-label="Close">
-        <X className="w-5 h-5" />
-      </button>
-      <div className="w-full flex flex-col items-center pt-2 px-2">
-        <div className="flex items-center justify-center w-14 h-14 rounded-2xl bg-primary/10 mb-4 border border-primary/20">
-          <Send className="w-7 h-7 text-primary" />
-        </div>
-        <h2 className="text-xl font-bold text-text-primary">Share Your Store</h2>
-        <p className="text-sm text-text-secondary mb-6 text-center px-4">Copy your personalized message to share.</p>
+                <div className="fixed inset-0 z-10 w-screen">
+                    <div className="flex min-h-full items-end justify-center md:items-center">
+                        <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="translate-y-full md:translate-y-0 md:scale-95" enterTo="translate-y-0 md:scale-100" leave="ease-in duration-200" leaveFrom="translate-y-0 md:scale-100" leaveTo="translate-y-full md:translate-y-0 md:scale-95">
+                            <Dialog.Panel className="relative flex w-full flex-col bg-slate-100 dark:bg-slate-900 text-slate-800 dark:text-slate-100 md:max-w-md md:rounded-2xl h-full md:h-auto md:max-h-[90vh]">
 
-        <motion.div
-          key="message"
-          variants={paneVariants}
-          initial="hidden"
-          animate="visible"
-          className="w-full space-y-4 flex flex-col items-center"
-        >
-          <blockquote className="w-full px-3 py-2.5 rounded-lg bg-background-alt border border-border-color">
-            <p className="text-sm text-text-primary whitespace-pre-wrap break-words select-text">{shareMessage}</p>
-          </blockquote>
-          <button className="w-full flex items-center justify-center gap-2 h-11 px-3 py-2 rounded-lg bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-all shadow active:scale-95" onClick={() => handleCopy(shareMessage)}>
-            {copyState ? <Check className="w-5 h-5 text-green-400" /> : <Copy className="w-4 h-4" />}
-            {copyState ? 'Copied!' : 'Copy Message'}
-          </button>
-        </motion.div>
+                                <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800">
+                                    <Dialog.Title as="h3" className="text-lg font-bold leading-6 flex items-center gap-2"><Share2 size={20} />Share Your Store</Dialog.Title>
+                                    <button onClick={handleClose} className="p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
+                                        <X size={24} className="text-slate-600 dark:text-slate-300" />
+                                    </button>
+                                </div>
 
-        <div className="w-full border-t border-border-color my-6"></div>
+                                <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6">
+                                    <div className="flex items-start gap-3 rounded-lg bg-sky-50 dark:bg-sky-900/50 border border-sky-200 dark:border-sky-800 p-3">
+                                        <Lightbulb className="h-5 w-5 flex-shrink-0 text-sky-600 dark:text-sky-400 mt-0.5" />
+                                        <p className="text-sm text-sky-800 dark:text-sky-200">Sharing your link is the best way to get more views and sales. Copy your message and share it everywhere!</p>
+                                    </div>
 
-        <div className="flex flex-col items-center gap-4 w-full">
-          <h3 className="text-sm font-semibold text-text-primary flex items-center gap-2">
-              <Share2 className="w-4 h-4" />
-              Quick Share
-          </h3>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-sm">
-            {socialPlatforms.map((platform) => (
-              <a href={platform.url} target="_blank" rel="noopener noreferrer" key={platform.name} className={`flex items-center justify-center gap-2.5 h-11 px-3 py-2 rounded-lg text-white font-semibold shadow-md transition-all active:scale-95 transform hover:scale-105 ${platform.color} ${!fullUrl ? 'pointer-events-none opacity-50' : ''}`} title={`Share on ${platform.name}`}>
-                <platform.icon />
-                {platform.name}
-              </a>
-            ))}
-          </div>
-        </div>
-      </div>
-    </Modal>
-  );
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Your Share Message</label>
+                                        <div className="relative rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3 pr-20">
+                                            <p className="text-sm text-slate-600 dark:text-slate-300 whitespace-pre-wrap break-words">{shareMessage}</p>
+                                            <button onClick={() => handleCopy(shareMessage, 'message')} className="absolute top-2 right-2 flex items-center gap-1.5 rounded-md bg-slate-200 dark:bg-slate-700 px-2.5 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-300 dark:hover:bg-slate-600">
+                                                {copyMessageState ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                                                {copyMessageState ? 'Copied' : 'Copy'}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <h3 className="text-sm font-semibold text-center text-slate-700 dark:text-slate-300 mb-4 flex items-center justify-center gap-2">
+                                            <Share2 className="h-4 w-4" />
+                                            Quick Share
+                                        </h3>
+                                        <div className="flex justify-center items-center gap-3 sm:gap-4">
+                                            {socialPlatforms.map((platform) => (
+                                                <a key={platform.name} href={platform.url} onClick={platform.action} target="_blank" rel="noopener noreferrer"
+                                                    className={`flex flex-col items-center justify-center w-[72px] h-[72px] rounded-2xl text-white shadow-md transition-transform duration-200 ease-in-out hover:scale-105 active:scale-95 ${platform.color}`}>
+                                                    <platform.icon />
+                                                    <span className="mt-1 text-[10px] font-bold">{platform.name}</span>
+                                                </a>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    
+                                     <div className="flex items-center space-x-2">
+                                        <input
+                                        type="text"
+                                        readOnly
+                                        value={fullUrl}
+                                        className="flex-1 block w-full text-sm border-gray-300 dark:border-slate-700 bg-gray-200 dark:bg-slate-800 rounded-lg p-3"
+                                        />
+                                        <button
+                                        onClick={() => handleCopy(fullUrl, 'link')}
+                                        className="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                                        >
+                                            {copyLinkState ? <Check size={20} /> : <Copy size={20} />}
+                                        </button>
+                                    </div>
+
+
+                                </div>
+
+                                <div className="p-4 bg-slate-100 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+                                    <button type="button" onClick={handleClose} className="w-full px-6 py-3 bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-800 font-bold rounded-lg hover:bg-slate-900 dark:hover:bg-slate-100 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2">
+                                        Done
+                                    </button>
+                                </div>
+                            </Dialog.Panel>
+                        </Transition.Child>
+                    </div>
+                </div>
+            </Dialog>
+        </Transition.Root>
+    );
 };
 
 export default StoreLinkModal;

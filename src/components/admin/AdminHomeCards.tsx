@@ -208,6 +208,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [openModal, setOpenModal] = useState<number | null>(null);
   const [isTipsModalOpen, setIsTipsModalOpen] = useState(false);
   const [isViewsModalOpen, setIsViewsModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isCustomersModalOpen, setIsCustomersModalOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const { setIsModalOpen, onRefresh, uiVisible, onAnimationComplete, onOrdersCardClick } = props;
@@ -228,7 +229,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   }
 
   useEffect(() => {
-    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen;
+    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen;
     if (modalIsOpen) {
       window.history.pushState({ modalOpen: true }, '');
       const handlePopState = () => {
@@ -236,6 +237,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         setIsTipsModalOpen(false);
         setIsCustomersModalOpen(false);
         setIsViewsModalOpen(false);
+        setIsShareModalOpen(false);
         if (setIsModalOpen) setIsModalOpen(false);
       };
       window.addEventListener('popstate', handlePopState);
@@ -246,13 +248,15 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         }
       };
     }
-  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, setIsModalOpen]);
+  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, setIsModalOpen]);
 
   const handleOpenModal = (idx: number, cardLabel?: string) => {
     if (cardLabel === 'Tips') {
       setIsTipsModalOpen(true);
     } else if (cardLabel === 'Views') {
       setIsViewsModalOpen(true);
+    } else if (cardLabel === 'Share') {
+      setIsShareModalOpen(true);
     } else if (cardLabel === 'Manage Categories') {
       props.openManageCategories();
     } else if (cardLabel === 'Orders') {
@@ -277,12 +281,9 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   
   const handleGetMoreViewsClick = () => {
     setIsViewsModalOpen(false);
-    const shareCardIndex = cardData.findIndex(card => card.label === 'Share');
-    if (shareCardIndex !== -1) {
-      setTimeout(() => {
-        setOpenModal(shareCardIndex);
-      }, 50);
-    }
+    setTimeout(() => {
+      setIsShareModalOpen(true);
+    }, 50); // Small delay to prevent modal collision
   };
 
   const containerVariants: Variants = {
@@ -437,6 +438,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             })}
         </motion.div>
 
+      {/* === MODAL RENDERERS === */}
+
       <CustomersListModal 
         storeId={props.storeId}
         isOpen={isCustomersModalOpen}
@@ -456,6 +459,14 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         />
       )}
 
+      {isShareModalOpen && (
+          <StoreLinkModal 
+              {...props}
+              isOpen={isShareModalOpen}
+              handleClose={() => setIsShareModalOpen(false)}
+          />
+      )}
+
       {openModal !== null && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md"
@@ -467,7 +478,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           >
             {(() => {
               const card = cardsToRender[openModal];
-              if (!card || !card.component || card.label === 'Views') return null;
+              // Ensure we don't render the new modals in the old system
+              if (!card || !card.component || ['Views', 'Share'].includes(card.label)) return null;
               const ModalComponent = card.component;
               const modalProps = {
                 ...props,
