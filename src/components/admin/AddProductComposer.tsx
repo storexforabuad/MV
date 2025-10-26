@@ -129,33 +129,51 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
   };
   
   const handleProductChange = (index: number, field: string, value: string | number | boolean) => {
-    let newBatchProducts = batchProducts.map((p, i) => i === index ? { ...p, [field]: value } : p);
-
+    let newBatchProducts = batchProducts.map((p, i) => 
+        i === index ? { ...p, [field]: value } : p
+    );
     const changedProduct = newBatchProducts[index];
+
+    const applyTemplate = (templateProduct: BatchProduct, products: BatchProduct[]): BatchProduct[] => {
+        return products.map(p => {
+            if (p.id === templateProduct.id) return p; // Don't apply to the template itself
+            return {
+                ...p,
+                name: templateProduct.name,
+                price: templateProduct.price,
+                isPromo: templateProduct.isPromo,
+                promoPrice: templateProduct.promoPrice,
+                commission: templateProduct.commission,
+                categoryId: templateProduct.categoryId,
+                limitedStock: templateProduct.limitedStock,
+                soldOut: templateProduct.soldOut,
+            };
+        });
+    };
 
     if (field === 'useAsTemplate') {
         if (value === true) {
-            // Set this product as the new template
-            setTemplate({ ...changedProduct });
-            // Unset all others
-            newBatchProducts = newBatchProducts.map((p, i) => i === index ? p : { ...p, useAsTemplate: false });
+            // A new product is selected as a template.
+            const newTemplate = { ...changedProduct, useAsTemplate: true };
+            setTemplate(newTemplate);
+            // Unset 'useAsTemplate' for all other products.
+            newBatchProducts = newBatchProducts.map((p, i) => 
+                i === index ? newTemplate : { ...p, useAsTemplate: false }
+            );
+            // Apply all values from the new template to other products.
+            newBatchProducts = applyTemplate(newTemplate, newBatchProducts);
         } else {
-            // If the current template is being disabled, clear it
+            // The current template is being disabled.
             if(template?.id === changedProduct.id) {
                 setTemplate(null);
             }
         }
     } else if (template && template.id === changedProduct.id) {
-        // If the template itself is being edited, update the template state
-        const newTemplate = { ...template, [field]: value };
-        setTemplate(newTemplate);
-        // And apply changes to all other products
-        newBatchProducts = newBatchProducts.map((p, i) => {
-            if (i !== index) {
-                return { ...p, [field]: value };
-            }
-            return p;
-        });
+        // The template itself is being edited.
+        const updatedTemplate = { ...changedProduct };
+        setTemplate(updatedTemplate);
+        // Apply all values from the updated template to other products.
+        newBatchProducts = applyTemplate(updatedTemplate, newBatchProducts);
     }
 
     setBatchProducts(newBatchProducts);
