@@ -154,7 +154,7 @@ export async function updateProduct(storeId: string, productId: string, data: Pa
 
       // Sanitize the data to remove undefined fields
       const sanitizedData = { ...data };
-      Object.keys(sanitizedData).forEach(key => {
+      (Object.keys(sanitizedData) as Array<keyof typeof sanitizedData>).forEach(key => {
           if (sanitizedData[key] === undefined) {
               delete sanitizedData[key];
           }

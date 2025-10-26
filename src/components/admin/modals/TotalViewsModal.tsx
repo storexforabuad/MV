@@ -36,7 +36,7 @@ const TotalViewsModal: React.FC<TotalViewsModalProps> = ({
   onCategoryClick,
   onGetMoreViewsClick,
 }) => {
-  const productsArr = Array.isArray(products) ? products : [];
+  const productsArr = useMemo(() => (Array.isArray(products) ? products : []), [products]);
   const isEmpty = productsArr.length === 0;
 
   const { topCategory, topProducts } = useMemo(() => {

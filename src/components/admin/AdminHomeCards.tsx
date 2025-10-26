@@ -80,7 +80,7 @@ const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferral
   </div>
 );
 
-const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: any | null, glowClass: string}[] = [
+const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.ElementType | null, glowClass: string}[] = [
     {
         label: 'Tips',
         subtitle: 'Quick Guide',
@@ -215,7 +215,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
   const ordersIndex = cardData.findIndex(card => card.label === 'Orders');
   const cardsToRender = [...cardData];
-  const customersCard = {
+  const customersCard: typeof cardData[0] = {
     label: 'Customers',
     icon: Users,
     gradient: 'bg-gradient-to-br from-indigo-500 via-purple-600 to-violet-700',
@@ -306,6 +306,32 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         ease: "easeOut"
       }
     },
+  };
+  
+  const modalVariants: Variants = {
+      hidden: {
+          opacity: 0,
+          scale: 0.95,
+          y: 20,
+      },
+      visible: {
+          opacity: 1,
+          scale: 1,
+          y: 0,
+          transition: {
+              duration: 0.3,
+              ease: [0.25, 1, 0.5, 1],
+          },
+      },
+      exit: {
+          opacity: 0,
+          scale: 0.95,
+          y: 20,
+          transition: {
+              duration: 0.2,
+              ease: 'easeOut',
+          },
+      },
   };
 
   return (
@@ -472,8 +498,12 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md"
           onClick={handleCloseModal}
         >
-          <div
-            className="relative w-full max-w-sm sm:max-w-md md:max-w-lg mx-2 sm:mx-auto bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-2xl flex flex-col items-center animate-fadeIn"
+          <motion.div
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            variants={modalVariants}
+            className="relative w-full max-w-sm sm:max-w-md md:max-w-lg mx-2 sm:mx-auto bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-2xl flex flex-col items-center"
             onClick={e => e.stopPropagation()}
           >
             {(() => {
@@ -487,7 +517,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
               };
               return <ModalComponent {...modalProps} />;
             })()}
-          </div>
+          </motion.div>
         </div>
       )}
     </section>
