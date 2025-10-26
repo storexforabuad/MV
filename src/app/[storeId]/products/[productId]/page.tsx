@@ -246,7 +246,7 @@ return (
       <div className="flex flex-col lg:flex lg:flex-row gap-6 lg:gap-x-8">
         {/* Image Section */}
         <div className="flex-1 flex flex-col">
-          <div className="relative overflow-hidden rounded-2xl bg-gray-50 shadow-lg">
+          <div className="relative overflow-hidden rounded-2xl bg-gray-50 shadow-lg dark:shadow-xl dark:shadow-white/10">
             {imageLoading && (
               <div className="absolute inset-0 bg-gray-200 animate-pulse" />
             )}

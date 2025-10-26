@@ -61,10 +61,10 @@ export default function ProductCard({ product, storeId }: ProductCardProps) {
         onMouseLeave={() => setIsHovered(false)}
       >
         <div className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden
-          shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08),0_2px_6px_-1px_rgba(0,0,0,0.05)]
+          shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08),0_2px_6px_-1px_rgba(0,0,0,0.05)] dark:shadow-lg dark:shadow-white/10
           transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
           transform-gpu will-change-transform
-          group-hover:shadow-[0_16px_24px_-8px_rgba(0,0,0,0.12),0_4px_12px_-4px_rgba(0,0,0,0.08)]
+          group-hover:shadow-[0_16px_24px_-8px_rgba(0,0,0,0.12),0_4px_12px_-4px_rgba(0,0,0,0.08)] dark:group-hover:shadow-xl dark:group-hover:shadow-white/15
           group-hover:translate-y-[-4px]
           active:scale-[0.97]
           bg-white dark:bg-gray-900"
