@@ -5,7 +5,7 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { useParams, useRouter } from 'next/navigation';
 import { getProductById, incrementProductViews, getStoreMeta, getCategories } from '../../../../lib/db';
-import { Heart, ShoppingCart, Clock, Share2 } from 'lucide-react';
+import { Heart, ShoppingCart, Clock, Share2, PackageX, Search } from 'lucide-react';
 import { useCart } from '../../../../lib/cartContext';
 import { Product } from '../../../../types/product';
 import { Category } from '../../../../types/category';
@@ -304,12 +304,21 @@ return (
           </div>
 
           {product.soldOut ? (
-            <div className="sold-out-card">
-              <div className="mb-4 inline-flex items-center justify-center w-12 h-12 rounded-full bg-blue-100">
-                <Clock className="w-6 h-6 text-blue-600" />
-              </div>
-              <h3 className="text-lg font-medium mb-2">Currently Unavailable</h3>
-              <p className="text-sm text-gray-600">This item is out of stock. Please check back later.</p>
+            <div className="w-full text-center p-6 md:p-8 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 shadow-sm mt-4">
+                <div className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/50">
+                    <PackageX className="w-8 h-8 text-red-600 dark:text-red-400" />
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold card-text-gradient mb-2">Item Sold Out</h1>
+                <p className="text-base text-gray-600 dark:text-gray-400 max-w-sm mx-auto mb-8">
+                    This product is currently unavailable. We have plenty of other amazing items for you to discover!
+                </p>
+                <button
+                    onClick={() => router.push(`/${storeId}`)}
+                    className="group relative inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-medium shadow-lg transition-colors active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 bg-gray-900 text-white hover:bg-gray-800 focus:ring-gray-500 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-200 dark:focus:ring-gray-900 dark:focus:ring-offset-0"
+                >
+                    <Search className="w-5 h-5" />
+                    <span>Explore Other Products</span>
+                </button>
             </div>
           ) : (
             <>
