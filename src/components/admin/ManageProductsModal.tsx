@@ -17,7 +17,7 @@ interface ManageProductsModalProps {
   products: Product[];
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   categories: { id: string; name: string }[];
-  onUpdateProduct: (productId: string, data: Partial<Product>) => void;
+  onUpdateProduct: (productId: string, data: Partial<Product>) => Promise<void>;
   onDeleteProduct: (productId: string) => void;
 }
 type FilterType = 'all' | 'popular' | 'limited' | 'soldout';
@@ -161,9 +161,9 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
     }, 300);
   }
 
-  const handleProductSave = (updatedFields: Partial<Product>) => {
+  const handleProductSave = async (updatedFields: Partial<Product>) => {
       if(editingProduct) {
-        onUpdateProduct(editingProduct.id, updatedFields);
+        await onUpdateProduct(editingProduct.id, updatedFields);
         const updatedProduct = { ...editingProduct, ...updatedFields };
         setProducts(prevProducts => prevProducts.map(p => p.id === updatedProduct.id ? updatedProduct : p));
       }

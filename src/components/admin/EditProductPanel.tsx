@@ -1,4 +1,3 @@
-
 'use client';
 import React, { useState, useEffect, Fragment, useMemo, ChangeEvent } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
@@ -15,7 +14,7 @@ interface EditProductPanelProps {
   product: Product | null;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (updatedFields: Partial<Product>) => void;
+  onSave: (updatedFields: Partial<Product>) => Promise<void>;
   categories: { id: string; name: string }[];
 }
 
@@ -43,6 +42,7 @@ const StyledInput: React.FC<{ id: string, label: string, value: string | number,
 const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, onClose, onSave, categories }) => {
   const [formState, setFormState] = useState<Partial<ProductFormState>>({});
   const [isCategorySelectorOpen, setCategorySelectorOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
     if (isOpen && product) {
@@ -81,8 +81,8 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
     handleInputChange(field, isNaN(numericValue) ? null : numericValue);
   };
 
-  const handleSave = () => {
-    if (!product || !formState) return;
+  const handleSave = async () => {
+    if (!product || !formState || isSaving) return;
 
     const { basePrice, promoPrice, onPromo, ...restOfState } = formState;
 
@@ -112,10 +112,18 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
       payload.originalPrice = undefined; // Explicitly remove originalPrice if not on promo.
     }
     
-    onSave(payload);
-    ProductDetailCache.clear();
-    ProductCache.clear();
-    onClose();
+    setIsSaving(true);
+    try {
+        await onSave(payload);
+        ProductDetailCache.clear();
+        ProductCache.clear();
+        onClose();
+    } catch (error) {
+        console.error("Failed to save product changes:", error);
+        // Optionally, inform the user about the failure
+    } finally {
+        setIsSaving(false);
+    }
   };
 
   const commissionAmount = useMemo(() => {
@@ -243,10 +251,18 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                         </button>
                         <button
                             type="button"
-                            className="flex-1 inline-flex justify-center rounded-lg border border-transparent bg-gray-900 py-2 px-4 text-sm font-semibold text-white shadow-sm hover:bg-gray-800"
+                            className="flex-1 inline-flex justify-center items-center rounded-lg border border-transparent bg-gray-900 py-2 px-4 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 disabled:bg-gray-600 disabled:cursor-not-allowed"
                             onClick={handleSave}
+                            disabled={isSaving}
                         >
-                            Save Changes
+                            {isSaving ? (
+                                <>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-3"></div>
+                                    <span>Saving...</span>
+                                </>
+                            ) : (
+                                'Save Changes'
+                            )}
                         </button>
                       </div>
                     </div>

@@ -151,9 +151,10 @@ export default function AdminStorePage() {
   const handleUpdateProduct = async (productId: string, updatedData: Partial<Product>) => {
       try {
           await updateProduct(storeId, productId, updatedData);
-          fetchData();
+          await fetchData();
       } catch (error) {
           console.error("Failed to update product:", error);
+          throw error; // Re-throw the error to be caught by the caller
       }
   };
 
