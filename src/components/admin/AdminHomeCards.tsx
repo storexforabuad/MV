@@ -43,6 +43,7 @@ interface AdminHomeCardsProps {
   onRefresh: (showRefresh: boolean) => void;
   openManageCategories: () => void;
   onOrdersCardClick: () => void;
+  onProductsCardClick: () => void;
   isRefreshing: boolean;
   onAnimationComplete?: () => void;
   setIsModalOpen?: (open: boolean) => void;
@@ -151,7 +152,7 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       icon: Archive,
       gradient: 'bg-gradient-to-br from-slate-700 via-gray-800 to-zinc-900',
       text: 'text-white',
-      component: TotalProductsModal,
+      component: null,
       glowClass: 'dark:shadow-slate-600/30 shadow-slate-600/50',
     },
     {
@@ -211,7 +212,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isCustomersModalOpen, setIsCustomersModalOpen] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const { setIsModalOpen, onRefresh, uiVisible, onAnimationComplete, onOrdersCardClick } = props;
+  const { setIsModalOpen, onRefresh, uiVisible, onAnimationComplete, onOrdersCardClick, onProductsCardClick } = props;
 
   const ordersIndex = cardData.findIndex(card => card.label === 'Orders');
   const cardsToRender = [...cardData];
@@ -261,10 +262,12 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
       props.openManageCategories();
     } else if (cardLabel === 'Orders') {
       onOrdersCardClick();
+    } else if (cardLabel === 'Manage Products') {
+      onProductsCardClick();
     } else {
       setOpenModal(idx);
     }
-    if (props.setIsModalOpen && cardLabel !== 'Orders') props.setIsModalOpen(true);
+    if (props.setIsModalOpen && cardLabel !== 'Orders' && cardLabel !== 'Manage Products') props.setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {

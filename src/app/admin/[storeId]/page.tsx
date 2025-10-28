@@ -273,6 +273,7 @@ export default function AdminStorePage() {
                   onAnimationComplete={handleAnimationComplete}
                   onOrdersCardClick={() => setIsOrdersModalOpen(true)} // Wire up the click handler
                   openManageCategories={() => setIsManageCategoriesModalOpen(true)}
+                  onProductsCardClick={() => setIsManageModalOpen(true)}
                   totalCommissionEarned={commissionData.totalCommissionEarned}
                   totalReferralBonus={commissionData.totalReferralBonus}
                 />
