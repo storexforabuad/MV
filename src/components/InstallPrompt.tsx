@@ -7,6 +7,8 @@ import { usePathname, useParams } from 'next/navigation';
 import { getStoreMeta } from '../lib/db';
 
 export default function InstallPrompt() {
+  return null; // All install prompts are temporarily disabled.
+
   const { showPrompt, setShowPrompt, deferredPrompt } = useInstallPrompt();
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith('/admin') || pathname === '/signin';
