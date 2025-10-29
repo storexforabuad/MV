@@ -1,10 +1,12 @@
 'use client';
 
 import { motion, AnimatePresence, Variants } from 'framer-motion';
-import { X, ShoppingBag, User, MapPin, Phone } from 'lucide-react';
+import { X, ShoppingBag, User, MapPin, Phone, ReceiptIcon } from 'lucide-react';
 import Image from 'next/image';
 import { StoreOrder } from '@/app/actions/orderActions';
 import { formatPrice } from '@/utils/price';
+import { useState } from 'react';
+import { ReceiptModal } from '../../modals/ReceiptModal';
 
 interface AdminOrdersModalProps {
   isOpen: boolean;
@@ -25,49 +27,67 @@ const backdropVariants: Variants = {
 };
 
 const AdminOrderDetailCard = ({ order }: { order: StoreOrder }) => {
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+
   return (
-    <div className="bg-white dark:bg-slate-800/50 rounded-2xl shadow-md overflow-hidden transition-transform duration-300 hover:shadow-lg hover:scale-[1.02]">
-      <div className="p-4 border-b border-slate-200 dark:border-slate-700 grid grid-cols-12 gap-4 items-start">
-        {/* Product Image */}
-        <div className="col-span-3">
-          <div className="aspect-square relative rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700">
-            <Image 
-              src={order.product.images[0]} 
-              alt={order.product.name} 
-              layout="fill" 
-              objectFit="cover" 
-              className="transition-transform duration-300 group-hover:scale-105"
-            />
+    <>
+      <div className="bg-white dark:bg-slate-800/50 rounded-2xl shadow-md overflow-hidden transition-transform duration-300 hover:shadow-lg hover:scale-[1.02]">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-700 grid grid-cols-12 gap-4 items-start">
+          {/* Product Image */}
+          <div className="col-span-3">
+            <div className="aspect-square relative rounded-lg overflow-hidden bg-slate-100 dark:bg-slate-700">
+              <Image 
+                src={order.product.images[0]} 
+                alt={order.product.name} 
+                layout="fill" 
+                objectFit="cover" 
+                className="transition-transform duration-300 group-hover:scale-105"
+              />
+            </div>
+          </div>
+
+          {/* Product & Order Info */}
+          <div className="col-span-9 flex flex-col justify-center">
+              <p className="font-bold text-lg text-slate-800 dark:text-slate-100">{order.product.name}</p>
+              <p className="text-md font-semibold text-indigo-500 dark:text-indigo-400">{formatPrice(order.product.price)}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Qty: {order.quantity}</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">Ordered on: {new Date(order.orderDate).toLocaleString()}</p>
           </div>
         </div>
 
-        {/* Product & Order Info */}
-        <div className="col-span-9 flex flex-col justify-center">
-            <p className="font-bold text-lg text-slate-800 dark:text-slate-100">{order.product.name}</p>
-            <p className="text-md font-semibold text-indigo-500 dark:text-indigo-400">{formatPrice(order.product.price)}</p>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Qty: {order.quantity}</p>
-            <p className="text-xs text-slate-400 dark:text-slate-500 mt-2">Ordered on: {new Date(order.orderDate).toLocaleString()}</p>
+        {/* Customer Info */}
+        <div className="p-4 bg-slate-50 dark:bg-slate-900/50">
+          <div className="flex items-center gap-3 mb-3">
+            <User className="w-5 h-5 text-slate-500 dark:text-slate-400" />
+            <h4 className="font-semibold text-md text-slate-700 dark:text-slate-200">{order.customerInfo.name}</h4>
+          </div>
+          <div className="space-y-2 text-sm">
+              <div className="flex items-start gap-3">
+                  <Phone className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
+                  <span className="text-slate-600 dark:text-slate-300">{order.customerInfo.phoneNumber}</span>
+              </div>
+              <div className="flex items-start gap-3">
+                  <MapPin className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
+                  <span className="text-slate-600 dark:text-slate-300">{order.customerInfo.deliveryAddress.street}, {order.customerInfo.deliveryAddress.state}</span>
+              </div>
+          </div>
+        </div>
+        <div className="p-2 bg-slate-50 dark:bg-slate-900/50 flex justify-end">
+            <button 
+                onClick={() => setIsReceiptModalOpen(true)} 
+                className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
+              >
+                <ReceiptIcon className="w-4 h-4" />
+                <span>View Receipt</span>
+              </button>
         </div>
       </div>
-
-      {/* Customer Info */}
-      <div className="p-4 bg-slate-50 dark:bg-slate-900/50">
-        <div className="flex items-center gap-3 mb-3">
-          <User className="w-5 h-5 text-slate-500 dark:text-slate-400" />
-          <h4 className="font-semibold text-md text-slate-700 dark:text-slate-200">{order.customerInfo.name}</h4>
-        </div>
-        <div className="space-y-2 text-sm">
-            <div className="flex items-start gap-3">
-                <Phone className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
-                <span className="text-slate-600 dark:text-slate-300">{order.customerInfo.phoneNumber}</span>
-            </div>
-            <div className="flex items-start gap-3">
-                <MapPin className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
-                <span className="text-slate-600 dark:text-slate-300">{order.customerInfo.deliveryAddress.street}, {order.customerInfo.deliveryAddress.state}</span>
-            </div>
-        </div>
-      </div>
-    </div>
+      <ReceiptModal 
+        isOpen={isReceiptModalOpen} 
+        onClose={() => setIsReceiptModalOpen(false)} 
+        order={order} 
+      />
+    </>
   );
 }
 
