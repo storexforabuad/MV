@@ -26,17 +26,14 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const [quantity, setQuantity] = useState(1);
   const [deliveryMethod, setDeliveryMethod] = useState('home');
   const [customer, setCustomer] = useState<Customer | null>(initialCustomer);
-  const [bonusApplied, setBonusApplied] = useState(false);
 
   const { addOrder } = useOrders(customer?.id || null);
   const routeParams = useParams();
   const storeId = typeof routeParams?.storeId === 'string' ? routeParams.storeId : Array.isArray(routeParams?.storeId) ? routeParams.storeId[0] : undefined;
-  const referralBonus = storeId ? customer?.referralDataByStore?.[storeId]?.commissionEarned || 0 : 0;
 
   useEffect(() => {
     if (isOpen) {
       setQuantity(1); // Reset quantity when modal opens
-      setBonusApplied(false);
       if (initialCustomer) {
         getCustomerDetails(initialCustomer.id).then(details => {
           if (details) {
@@ -49,8 +46,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
   if (!product) return null;
 
-  const deliveryFee = 0; // Delivery fee is no longer charged in the modal
-  const total = product.price * quantity - (bonusApplied ? referralBonus : 0);
+  const total = product.price * quantity;
 
   const handlePlaceOrder = async () => {
     if (!product || !storeId || !storeMeta || !storeMeta.whatsapp || !customer) return;
@@ -58,7 +54,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
     try {
       const storeMetaWithId = { ...storeMeta, id: storeId };
       const referrerId = localStorage.getItem('referrerId');
-      await addOrder(product, storeMetaWithId, quantity, customer, referrerId, bonusApplied);
+      await addOrder(product, storeMetaWithId, quantity, customer, referrerId, false);
       toast.success('Order placed! Redirecting to WhatsApp...');
 
       const productUrl = `https://tinyurl.com/bizcononline/${storeId}/products/${product.id}`;
@@ -70,8 +66,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                       `💰 *Price:* ${formatPrice(product.price)}\n` +
                       `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n`+
                       `${deliveryMethod === 'home' && customer.deliveryAddress ? `📍 *To:* ${customer.deliveryAddress.street}\n` : ''}`+
-                      `${bonusApplied ? `🎉 *Referral Bonus:* -${formatPrice(referralBonus)}\n` : ''}` +
-                      `*Total:* ${formatPrice(total)}\n\n` +
+                      `*Total (excluding delivery):* ${formatPrice(total)}\n\n` +
+                      `Please provide delivery fee and payment details.\n\n` +
                       `Thank you! 🙏`;
 
       const encodedMessage = encodeURIComponent(message);
@@ -150,24 +146,11 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           <dd className="font-medium text-gray-900 dark:text-gray-200">TBD by vendor</dd>
                         </div>
                       )}
-                      <div className="flex justify-between">
-                        <dt>Referral bonus</dt>
-                        <dd className="font-medium text-green-600 dark:text-green-400">-{formatPrice(bonusApplied ? referralBonus : 0)}</dd>
-                      </div>
                       <div className="flex justify-between text-base font-medium text-gray-900 dark:text-white">
                         <dt>Total</dt>
                         <dd>{formatPrice(total)}</dd>
                       </div>
                     </dl>
-                    <button 
-                        onClick={() => setBonusApplied(true)}
-                        disabled={referralBonus < 100}
-                        className="mt-2 text-sm text-indigo-600 hover:text-indigo-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        Use ₦{referralBonus} bonus
-                    </button>
-                     {referralBonus < 100 && <p className="text-xs text-gray-500 dark:text-gray-400">Earn ₦{100-referralBonus} more to use your bonus</p>}
-                    
                   </div>
                 </div>
 

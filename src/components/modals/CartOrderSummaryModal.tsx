@@ -24,15 +24,12 @@ interface CartOrderSummaryModalProps {
 export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess, cartItems, storeMeta, customer: initialCustomer }: CartOrderSummaryModalProps) {
   const [deliveryMethod, setDeliveryMethod] = useState('home');
   const [customer, setCustomer] = useState<Customer | null>(initialCustomer);
-  const [bonusApplied, setBonusApplied] = useState(false);
   const { addOrder } = useOrders(customer?.id || null);
   const { dispatch } = useCart();
   const storeId = cartItems[0]?.storeId;
-  const referralBonus = storeId && typeof storeId === 'string' ? customer?.referralDataByStore?.[storeId]?.commissionEarned || 0 : 0;
 
   useEffect(() => {
     if (isOpen && initialCustomer) {
-      setBonusApplied(false);
       getCustomerDetails(initialCustomer.id).then(details => {
         if (details) {
           setCustomer(details);
@@ -44,8 +41,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
   if (cartItems.length === 0) return null;
 
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const deliveryFee = 0; // Delivery fee is no longer charged in the modal
-  const total = subtotal - (bonusApplied ? referralBonus : 0);
+  const total = subtotal;
 
   const handlePlaceOrder = async () => {
     if (!storeMeta || !storeMeta.whatsapp || !customer) return;
@@ -59,7 +55,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
       const referrerId = localStorage.getItem('referrerId');
       
       for (const item of cartItems) {
-        await addOrder(item, storeMetaWithId, item.quantity, customer, referrerId, bonusApplied);
+        await addOrder(item, storeMetaWithId, item.quantity, customer, referrerId, false);
       }
       
       toast.success('Order placed! Redirecting to WhatsApp...');
@@ -75,7 +71,6 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                       `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n`+
                       `${deliveryMethod === 'home' && customer.deliveryAddress ? `📍 *Address:* ${customer.deliveryAddress.street}\n` : ''}`+
                       `*Subtotal:* ${formatPrice(subtotal)}\n`+
-                      `${bonusApplied ? `🎉 *Referral Bonus:* -${formatPrice(referralBonus)}\n` : ''}` +
                       `*Total (excluding delivery):* ${formatPrice(total)}\n\n` +
                       `Please provide delivery fee and payment details.\n\n` +
                       `Thank you! 🙏`;
@@ -145,18 +140,8 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                           <dd className="font-medium text-gray-900 dark:text-gray-200">TBD by vendor</dd>
                         </div>
                       )}
-                      <div className="flex justify-between"><dt>Referral bonus</dt><dd className="font-medium text-green-600 dark:text-green-400">-{formatPrice(bonusApplied ? referralBonus : 0)}</dd></div>
                       <div className="flex justify-between text-base font-medium text-gray-900 dark:text-white"><dt>Total</dt><dd>{formatPrice(total)}</dd></div>
                     </dl>
-                    <button 
-                        onClick={() => setBonusApplied(true)}
-                        disabled={referralBonus < 100}
-                        className="mt-2 text-sm text-indigo-600 hover:text-indigo-500 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        Use ₦{referralBonus} bonus
-                    </button>
-                     {referralBonus < 100 && <p className="text-xs text-gray-500 dark:text-gray-400">Earn ₦{100-referralBonus} more to use your bonus</p>}
-                    
                   </div>
                 </div>
 
