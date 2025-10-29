@@ -5,7 +5,7 @@ import { motion, Variants } from 'framer-motion';
 import { useSpotlightContext } from '@/context/SpotlightContext';
 
 // Import modal components
-import TotalProductsModal from './modals/TotalProductsModal';
+
 import PopularProductsModal from './modals/PopularProductsModal';
 import LimitedStockModal from './modals/LimitedStockModal';
 import TotalViewsModal from './modals/TotalViewsModal';

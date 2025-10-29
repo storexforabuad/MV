@@ -5,7 +5,7 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { useParams, useRouter } from 'next/navigation';
 import { getProductById, incrementProductViews, getStoreMeta, getCategories } from '../../../../lib/db';
-import { Heart, ShoppingCart, Clock, Share2, PackageX, Search } from 'lucide-react';
+import { Heart, ShoppingCart, Share2, PackageX, Search } from 'lucide-react';
 import { useCart } from '../../../../lib/cartContext';
 import { Product } from '../../../../types/product';
 import { Category } from '../../../../types/category';
