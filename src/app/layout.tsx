@@ -38,8 +38,8 @@ export async function generateMetadata({ params }: { params: { storeId: string }
 
   // Default metadata if no storeId or store not found
   return {
-    title: "Alaniq INT.",
-    description: "Discover Beautiful RTW, Perfumes, Incense & More",
+    title: "BizCon™ Network",
+    description: "Discover Authentic Products At Affordable Prices",
     manifest: "/manifest.json",
     appleWebApp: {
       capable: true,
