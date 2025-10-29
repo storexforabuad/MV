@@ -1,10 +1,7 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import { Receipt } from '../common/Receipt';
-
-// This is a placeholder for the actual order type
-type Order = any;
+import { Receipt, Order } from '../common/Receipt';
 
 export function ReceiptModal({ isOpen, onClose, order }: { isOpen: boolean, onClose: () => void, order: Order }) {
     return (

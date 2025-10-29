@@ -3,8 +3,28 @@
 import { CheckCircleIcon, ShieldCheckIcon, TruckIcon } from '@heroicons/react/24/outline';
 import { Naira } from './Naira';
 
-// This is a placeholder for the actual order type, I'll need to find the correct type definition
-type Order = any;
+// Define a type for the items within an order
+export interface ReceiptItem {
+    id: string | number;
+    name: string;
+    price: number;
+    quantity: number;
+}
+
+// Define a flexible Order type to accommodate different data structures
+export interface Order {
+    id?: string | number;
+    createdAt?: string | number | Date;
+    orderDate?: string | number | Date;
+    items?: ReceiptItem[];
+    product?: {
+        id: string | number;
+        name: string;
+        price: number;
+    };
+    quantity?: number;
+    shipping?: number;
+}
 
 const GuaranteeIcon = ({ icon: Icon, text }: { icon: React.ElementType, text: string }) => (
     <div className="flex items-center gap-2 text-xs text-gray-500">
@@ -16,8 +36,8 @@ const GuaranteeIcon = ({ icon: Icon, text }: { icon: React.ElementType, text: st
 export function Receipt({ order }: { order: Order }) {
     if (!order) return null;
 
-    const items = order.items || (order.product ? [{ ...order.product, quantity: order.quantity || 1 }] : []);
-    const subtotal = items.reduce((acc: number, item: any) => acc + item.price * item.quantity, 0);
+    const items: ReceiptItem[] = order.items || (order.product ? [{ ...order.product, quantity: order.quantity || 1 }] : []);
+    const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
     const shipping = order.shipping || 0;
     const total = subtotal + shipping;
     const orderDate = order.orderDate || order.createdAt;
@@ -30,11 +50,13 @@ export function Receipt({ order }: { order: Order }) {
                 }}></div>
                 <div className="relative z-10 text-center mb-4">
                     <h2 className="text-2xl font-bold text-gray-800">Order Receipt</h2>
-                    <p className="text-sm text-gray-500">{new Date(orderDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    {orderDate && (
+                         <p className="text-sm text-gray-500">{new Date(orderDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                    )}
                 </div>
 
                 <div className="space-y-3 text-sm">
-                    {items.map((item: any, index: number) => (
+                    {items.map((item, index) => (
                         <div key={item.id || index} className="flex justify-between items-center">
                             <div>
                                 <p className="font-medium text-gray-800">{item.name}</p>

@@ -69,7 +69,7 @@ const StoreLinkModal: React.FC<StoreLinkModalProps> = ({ isOpen, handleClose, st
     };
 
     const formattedCategories = formatCategories(categories);
-    const defaultCaption = `🌟 Discover authentic ${formattedCategories} at affordable prices in the new ${storeName || 'Online Store'} Online Store! 🛒 -Powered by BizCon™ network. Tap the link below:`;
+    const defaultCaption = `🌟 Discover authentic ${formattedCategories} at affordable prices in the new ${storeName || 'Online Store'} Online Store! 🛒. Tap the link below:`;
     const shareMessage = `${promoCaption || defaultCaption}\n${fullUrl}`;
 
     const socialPlatforms = [
