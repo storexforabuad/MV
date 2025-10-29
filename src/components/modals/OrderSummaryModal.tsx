@@ -49,8 +49,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
   if (!product) return null;
 
-  const deliveryFee = deliveryMethod === 'home' ? 500 : 0;
-  const total = product.price * quantity + deliveryFee - (bonusApplied ? referralBonus : 0);
+  const deliveryFee = 0; // Delivery fee is no longer charged in the modal
+  const total = product.price * quantity - (bonusApplied ? referralBonus : 0);
 
   const handlePlaceOrder = async () => {
     if (!product || !storeId || !storeMeta || !storeMeta.whatsapp || !customer) return;
@@ -144,10 +144,12 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                         <dt>Item price</dt>
                         <dd className="font-medium text-gray-900 dark:text-gray-200">{formatPrice(product.price * quantity)}</dd>
                       </div>
-                      <div className="flex justify-between">
-                        <dt>Home delivery</dt>
-                        <dd className="font-medium text-gray-900 dark:text-gray-200">{formatPrice(deliveryFee)}</dd>
-                      </div>
+                      {deliveryMethod === 'home' && (
+                        <div className="flex justify-between">
+                          <dt>Home delivery</dt>
+                          <dd className="font-medium text-gray-900 dark:text-gray-200">TBD by vendor</dd>
+                        </div>
+                      )}
                       <div className="flex justify-between">
                         <dt>Referral bonus</dt>
                         <dd className="font-medium text-green-600 dark:text-green-400">-{formatPrice(bonusApplied ? referralBonus : 0)}</dd>

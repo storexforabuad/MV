@@ -44,8 +44,8 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
   if (cartItems.length === 0) return null;
 
   const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const deliveryFee = deliveryMethod === 'home' ? 500 : 0;
-  const total = subtotal + deliveryFee - (bonusApplied ? referralBonus : 0);
+  const deliveryFee = 0; // Delivery fee is no longer charged in the modal
+  const total = subtotal - (bonusApplied ? referralBonus : 0);
 
   const handlePlaceOrder = async () => {
     if (!storeMeta || !storeMeta.whatsapp || !customer) return;
@@ -75,9 +75,9 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                       `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n`+
                       `${deliveryMethod === 'home' && customer.deliveryAddress ? `📍 *Address:* ${customer.deliveryAddress.street}\n` : ''}`+
                       `*Subtotal:* ${formatPrice(subtotal)}\n`+
-                      `*Delivery Fee:* ${formatPrice(deliveryFee)}\n`+
                       `${bonusApplied ? `🎉 *Referral Bonus:* -${formatPrice(referralBonus)}\n` : ''}` +
-                      `*Total:* ${formatPrice(total)}\n\n` +
+                      `*Total (excluding delivery):* ${formatPrice(total)}\n\n` +
+                      `Please provide delivery fee and payment details.\n\n` +
                       `Thank you! 🙏`;
 
       const encodedMessage = encodeURIComponent(message);
@@ -139,7 +139,12 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                   <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
                     <dl className="space-y-1 text-sm text-gray-500 dark:text-gray-400">
                       <div className="flex justify-between"><dt>Subtotal</dt><dd className="font-medium text-gray-900 dark:text-gray-200">{formatPrice(subtotal)}</dd></div>
-                      <div className="flex justify-between"><dt>Home delivery</dt><dd className="font-medium text-gray-900 dark:text-gray-200">{formatPrice(deliveryFee)}</dd></div>
+                      {deliveryMethod === 'home' && (
+                        <div className="flex justify-between">
+                          <dt>Home delivery</dt>
+                          <dd className="font-medium text-gray-900 dark:text-gray-200">TBD by vendor</dd>
+                        </div>
+                      )}
                       <div className="flex justify-between"><dt>Referral bonus</dt><dd className="font-medium text-green-600 dark:text-green-400">-{formatPrice(bonusApplied ? referralBonus : 0)}</dd></div>
                       <div className="flex justify-between text-base font-medium text-gray-900 dark:text-white"><dt>Total</dt><dd>{formatPrice(total)}</dd></div>
                     </dl>
