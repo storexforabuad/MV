@@ -217,7 +217,7 @@ export default function ProductDetail() {
 
 return (
   <>
-    <Navbar storeName={storeMeta?.name || storeId || 'Alaniq INT.'} backButtonHref={`/${storeId}`} />
+    <Navbar storeName={storeMeta?.name || storeId || 'Store'} backButtonHref={`/${storeId}`} />
     <CustomerLookupModal 
       isOpen={isLoginModalOpen}
       onClose={() => {

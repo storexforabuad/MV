@@ -44,7 +44,7 @@ export async function generateMetadata({ params }: { params: { storeId: string }
     appleWebApp: {
       capable: true,
       statusBarStyle: "default",
-      title: "Alaniq INT.",
+      title: "BizCon™ Network",
     },
     formatDetection: {
       telephone: false,

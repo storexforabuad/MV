@@ -19,16 +19,16 @@ export interface BusinessConfig {
   }
   
   export const businessConfig: BusinessConfig = {
-    name: "Alaniq INT.",
-    shortName: "Alaniq INT. App",
-    description: "Your one-stop shop for all your fashion needs",
+    name: "Bizcon Network",
+    shortName: "Bizcon",
+    description: "Authentic Products at affordable prices",
     contact: {
       whatsapp: "+2348119772223",
       support: "+2348119772223",
       payment: {
-        accountName: "Aisha Ibrahim Lame",
-        accountNumber: "0057360918",
-        bankName: "Access Bank"
+        accountName: "Gambo Mustapha",
+        accountNumber: "8119772223",
+        bankName: "Opay"
       }
     },
     theme: {
