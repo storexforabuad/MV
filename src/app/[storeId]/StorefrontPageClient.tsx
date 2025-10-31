@@ -20,6 +20,7 @@ import ConnectionErrorToast from '@/components/ConnectionErrorToast';
 import { ProductListCache } from '@/lib/productCache';
 import ReferralBanner from '@/components/customer/ReferralBanner';
 import CustomerLookupModal from '@/components/customer/CustomerLookupModal';
+import NavigationStore from '@/lib/navigationStore';
 
 const ProductGrid = dynamic(
   () => import('../../components/products/ProductGrid'),
@@ -58,6 +59,7 @@ export default function StorefrontPageClient({ storeId }: { storeId: string }) {
   const productGridRef = useRef<HTMLDivElement>(null);
   const [isPending, startTransition] = useTransition();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const initialLoad = useRef(true);
 
   const fetchProducts = useCallback(async (categoryId: string, pageNum = 1, lastDoc: DocumentSnapshot | null = null) => {
     if (!storeId) return;
@@ -133,6 +135,12 @@ export default function StorefrontPageClient({ storeId }: { storeId: string }) {
   }, [storeId, fetchProducts]);
 
   useEffect(() => {
+    const savedState = NavigationStore.getState();
+    if (savedState.category && initialLoad.current) {
+        setActiveCategoryId(savedState.category);
+    }
+    initialLoad.current = false;
+
     if (!storeId) return;
     const fetchInitialData = async () => {
       try {
@@ -152,7 +160,22 @@ export default function StorefrontPageClient({ storeId }: { storeId: string }) {
       }
     };
     fetchInitialData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storeId, activeCategoryId, fetchProducts, setIsConnectionError]);
+
+
+    useEffect(() => {
+        const savedState = NavigationStore.getState();
+        if (savedState.category && savedState.scrollPosition > 0) {
+            // Wait for products to be loaded before scrolling
+            if (products.length > 0) {
+                window.scrollTo(0, savedState.scrollPosition);
+                NavigationStore.clearState();
+            }
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [products]);
+
 
   const fetchMoreProducts = useCallback(() => {
     if (!loading && hasMore) {
@@ -215,6 +238,7 @@ export default function StorefrontPageClient({ storeId }: { storeId: string }) {
                 products={products}
                 containerRef={productGridRef}
                 storeId={storeId}
+                activeCategoryId={activeCategoryId}
               />
               {hasMore && (
                 <div ref={observerRef} className="h-8 flex items-center justify-center">

@@ -5,6 +5,7 @@ import { Product } from '../../types/product';
 import { calculateDiscount, formatPrice } from '../../utils/price';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import { useProductDetailPrefetch } from '../../hooks/useProductDetailPrefetch';
+import NavigationStore from '@/lib/navigationStore';
 
 const DEFAULT_IMAGES = {
   small: '/default_product_400x400.png',
@@ -15,9 +16,10 @@ const DEFAULT_IMAGES = {
 interface ProductCardProps {
   product: Product;
   storeId?: string | null;
+  activeCategoryId: string;
 }
 
-export default function ProductCard({ product, storeId }: ProductCardProps) {
+export default function ProductCard({ product, storeId, activeCategoryId }: ProductCardProps) {
   const [imageLoading, setImageLoading] = useState(true);
   const [imgSrc, setImgSrc] = useState(product.images?.[0] || DEFAULT_IMAGES.medium);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -52,6 +54,10 @@ export default function ProductCard({ product, storeId }: ProductCardProps) {
     }
   };
 
+  const handleClick = () => {
+    NavigationStore.saveState(activeCategoryId, window.scrollY);
+  };
+
   return (
     <Link href={productLink} passHref>
       <div
@@ -59,6 +65,7 @@ export default function ProductCard({ product, storeId }: ProductCardProps) {
         className="relative group"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
+        onClick={handleClick}
       >
         <div className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden
           shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08),0_2px_6px_-1px_rgba(0,0,0,0.05)] dark:shadow-lg dark:shadow-white/10

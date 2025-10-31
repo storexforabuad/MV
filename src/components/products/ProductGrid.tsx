@@ -235,9 +235,10 @@ interface ProductGridProps {
   products: Product[];
   containerRef?: React.Ref<HTMLDivElement>;
   storeId?: string;
+  activeCategoryId: string;
 }
 
-const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId }: ProductGridProps) {
+const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId, activeCategoryId }: ProductGridProps) {
   const router = useRouter();
   const { customer, promptLogin } = useCustomer();
   const [isSingleColumn, setIsSingleColumn] = useState(false);
@@ -334,7 +335,7 @@ const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId 
               transition={transition}
               className="group block relative touch-manipulation"
             >
-              <ProductCard product={product} storeId={storeId} />
+              <ProductCard product={product} storeId={storeId} activeCategoryId={activeCategoryId} />
             </motion.div>
           ))
         )}
