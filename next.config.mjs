@@ -1,9 +1,12 @@
+
 import withBundleAnalyzer from '@next/bundle-analyzer';
 import withPWA from '@ducanh2912/next-pwa';
 import TerserPlugin from 'terser-webpack-plugin';
 import path from 'path';
-import { Configuration } from 'webpack';
-import type { NextConfig } from 'next';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const bundleAnalyzer = withBundleAnalyzer({
   enabled: process.env.ANALYZE === 'true',
@@ -26,7 +29,7 @@ const pwa = withPWA({
   }
 });
 
-const nextConfig: NextConfig = {
+const nextConfig = {
   // Add a development-only headers configuration to handle CORS issues in cloud workstations
   async headers() {
     return process.env.NODE_ENV === 'development'
@@ -65,7 +68,7 @@ const nextConfig: NextConfig = {
     optimizeCss: true,
     optimizePackageImports: ['@firebase/firestore', '@firebase/auth', 'lucide-react', 'framer-motion'],
   },
-  webpack: (config: Configuration, { dev, isServer }: { dev: boolean; isServer: boolean }) => {
+  webpack: (config, { dev, isServer }) => {
     if (!dev) {
       config.optimization = {
         ...config.optimization,
@@ -122,7 +125,7 @@ const nextConfig: NextConfig = {
             },
             vendors: {
               test: /[\\/]node_modules[\\/]/,
-              name(module: { context: string | undefined }) {
+              name(module) {
                 const packagePath = module.context?.replace(/\\/g, '/').match(/[\\/]node_modules[\\/](.*?)(?:[\\/]|$)/);
                 const packageName = packagePath ? packagePath[1] : 'vendors';
                 return `vendor.${packageName.replace('@', '').replace(/\//g, '.')}`;

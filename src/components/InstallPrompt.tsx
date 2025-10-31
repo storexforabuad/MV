@@ -49,7 +49,7 @@ export default function InstallPrompt() {
     setShowPrompt(false);
   };
 
-  if (!showPrompt || storeId) return null;
+  if (!showPrompt || !storeId) return null;
 
   return (
     <>

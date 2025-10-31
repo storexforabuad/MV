@@ -23,7 +23,6 @@ export async function generateMetadata({ params }: { params: { storeId: string }
       return {
         title: store.name,
         description: store.description || "Discover Amazing Products",
-        manifest: `/api/manifest?storeId=${params.storeId}`,
         appleWebApp: {
           capable: true,
           statusBarStyle: "default",
@@ -40,7 +39,6 @@ export async function generateMetadata({ params }: { params: { storeId: string }
   return {
     title: "BizCon™ Network",
     description: "Discover Authentic Products At Affordable Prices",
-    manifest: "/manifest.json",
     appleWebApp: {
       capable: true,
       statusBarStyle: "default",
