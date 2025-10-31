@@ -20,7 +20,7 @@ export function useInstallPrompt() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const dismissed = localStorage.getItem('pwaPromptDismissed');
+    const dismissed = sessionStorage.getItem('pwaPromptDismissed');
     
     if (!dismissed) {
       console.log('Setting up beforeinstallprompt listener'); // Debug log
@@ -43,7 +43,7 @@ export function useInstallPrompt() {
         window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       };
     } else {
-      console.log('Prompt was previously dismissed'); // Debug log
+      console.log('Prompt was previously dismissed this session'); // Debug log
     }
   }, []);
 

@@ -45,7 +45,7 @@ export default function InstallPrompt() {
   };
 
   const handleDismiss = () => {
-    localStorage.setItem('pwaPromptDismissed', 'true');
+    sessionStorage.setItem('pwaPromptDismissed', 'true');
     setShowPrompt(false);
   };
 
