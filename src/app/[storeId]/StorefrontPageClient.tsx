@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback, useRef, useTransition } from 'react';
+import { useState, useEffect, useCallback, useRef, useTransition, useLayoutEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { DocumentSnapshot } from 'firebase/firestore';
 import {
@@ -45,13 +45,14 @@ const PRODUCTS_PAGE_SIZE = 24;
 
 export default function StorefrontPageClient({ storeId }: { storeId: string }) {
   const scrollDirection = useScrollDirection();
+  const scrollRestoreState = useRef(NavigationStore.getState());
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [storeName, setStoreName] = useState('');
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
-  const [activeCategoryId, setActiveCategoryId] = useState('promo');
+  const [activeCategoryId, setActiveCategoryId] = useState(() => scrollRestoreState.current?.category || 'promo');
   const [lastVisible, setLastVisible] = useState<DocumentSnapshot | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const { isConnectionError, setIsConnectionError } = useConnectionCheck();
@@ -59,7 +60,6 @@ export default function StorefrontPageClient({ storeId }: { storeId: string }) {
   const productGridRef = useRef<HTMLDivElement>(null);
   const [isPending, startTransition] = useTransition();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const initialLoad = useRef(true);
 
   const fetchProducts = useCallback(async (categoryId: string, pageNum = 1, lastDoc: DocumentSnapshot | null = null) => {
     if (!storeId) return;
@@ -113,69 +113,39 @@ export default function StorefrontPageClient({ storeId }: { storeId: string }) {
   }, [storeId, setIsConnectionError]);
 
   const handleCategorySelect = useCallback((categoryId: string) => {
-    const cacheKey = `store_${storeId}_products_${categoryId || 'all'}_page1`;
-    const cachedData = ProductListCache.get(cacheKey);
+    scrollRestoreState.current = null;
+    NavigationStore.clearState();
 
-    if (cachedData) {
-      setProducts(cachedData);
-      setActiveCategoryId(categoryId);
-      setHasMore(cachedData.length === PRODUCTS_PAGE_SIZE);
-      setLastVisible(null);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-
-    startTransition(() => {
-      setActiveCategoryId(categoryId);
-      setLastVisible(null);
-      setHasMore(true);
-      fetchProducts(categoryId, 1, null);
-    });
+    setActiveCategoryId(categoryId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [storeId, fetchProducts]);
+  }, []);
 
   useEffect(() => {
-    const savedState = NavigationStore.getState();
-    if (savedState.category && initialLoad.current) {
-        setActiveCategoryId(savedState.category);
-    }
-    initialLoad.current = false;
-
     if (!storeId) return;
-    const fetchInitialData = async () => {
-      try {
-        const meta = await getStoreMeta(storeId);
-        setStoreName(meta?.name || storeId);
 
-        const cats = await getCategories(storeId);
-        setCategories(cats);
-
-        fetchProducts(activeCategoryId, 1, null);
-
-      } catch (error) {
-        console.error("Error fetching initial store data:", error);
-        setIsConnectionError(true);
-      } finally {
-        setInitialLoading(false);
-      }
-    };
-    fetchInitialData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storeId, activeCategoryId, fetchProducts, setIsConnectionError]);
-
-
-    useEffect(() => {
-        const savedState = NavigationStore.getState();
-        if (savedState.category && savedState.scrollPosition > 0) {
-            // Wait for products to be loaded before scrolling
-            if (products.length > 0) {
-                window.scrollTo(0, savedState.scrollPosition);
-                NavigationStore.clearState();
-            }
+    const fetchInitialAndCategoryData = async () => {
+        if (initialLoading) {
+            const meta = await getStoreMeta(storeId);
+            setStoreName(meta?.name || storeId);
+            const cats = await getCategories(storeId);
+            setCategories(cats);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [products]);
+        await fetchProducts(activeCategoryId, 1, null);
+    };
+    
+    fetchInitialAndCategoryData();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeId, activeCategoryId]);
 
+  useLayoutEffect(() => {
+    if (scrollRestoreState.current?.scrollPosition && products.length > 0) {
+        const { scrollPosition } = scrollRestoreState.current;
+        window.scrollTo(0, scrollPosition);
+        scrollRestoreState.current = null;
+        NavigationStore.clearState();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [products]);
 
   const fetchMoreProducts = useCallback(() => {
     if (!loading && hasMore) {
