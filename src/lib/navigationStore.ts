@@ -1,5 +1,5 @@
 // src/lib/navigationStore.ts
-type NavigationState = {
+export type NavigationState = {
     category: string;
     scrollPosition: number;
   }

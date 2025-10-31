@@ -20,7 +20,7 @@ import ConnectionErrorToast from '@/components/ConnectionErrorToast';
 import { ProductListCache } from '@/lib/productCache';
 import ReferralBanner from '@/components/customer/ReferralBanner';
 import CustomerLookupModal from '@/components/customer/CustomerLookupModal';
-import NavigationStore from '@/lib/navigationStore';
+import NavigationStore, { NavigationState } from '@/lib/navigationStore';
 
 const ProductGrid = dynamic(
   () => import('../../components/products/ProductGrid'),
@@ -45,7 +45,7 @@ const PRODUCTS_PAGE_SIZE = 24;
 
 export default function StorefrontPageClient({ storeId }: { storeId: string }) {
   const scrollDirection = useScrollDirection();
-  const scrollRestoreState = useRef(NavigationStore.getState());
+  const scrollRestoreState = useRef<NavigationState | null>(NavigationStore.getState());
 
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);

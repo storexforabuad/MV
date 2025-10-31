@@ -184,6 +184,7 @@ export default function BizconContent() {
                 products={products}
                 containerRef={productGridRef}
                 storeId=""
+                activeCategoryId={activeCategory}
               />
               {hasMore && (
                 <div ref={observerRef} className="h-8 flex items-center justify-center">
