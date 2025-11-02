@@ -120,11 +120,26 @@ const ProductRow = ({
 };
 
 
-const FilterChip = ({ label, value, activeFilter, onClick }: { label: string, value: FilterType, activeFilter: FilterType, onClick: (filter: FilterType) => void }) => (
-    <button onClick={() => onClick(value)} className={`flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-full transition-colors whitespace-nowrap ${activeFilter === value ? 'bg-gray-900 text-white' : 'bg-input-background text-text-primary hover:bg-button-secondary-hover'}`}>
-        {label}
-    </button>
-)
+const FilterChip = ({ label, value, activeFilter, onClick, count }: { label: string, value: FilterType, activeFilter: FilterType, onClick: (filter: FilterType) => void, count: number }) => {
+    const isActive = activeFilter === value;
+    return (
+        <button
+            onClick={() => onClick(value)}
+            className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-full transition-colors whitespace-nowrap ${
+                isActive
+                    ? 'bg-gray-900 text-white'
+                    : 'bg-input-background text-text-primary hover:bg-button-secondary-hover'
+            }`}
+        >
+            {label}
+            {isActive && (
+                <span className="bg-white/20 text-white text-xs font-bold flex items-center justify-center min-w-[24px] h-5 px-1.5 rounded-full">
+                    {count}
+                </span>
+            )}
+        </button>
+    );
+};
 
 
 // --- MAIN COMPONENT ---
@@ -137,6 +152,15 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [isBulkDeleteConfirmOpen, setIsBulkDeleteConfirmOpen] = useState(false);
+
+  const filterCounts = useMemo(() => {
+    return {
+      all: products.length,
+      popular: products.filter(p => p.views && p.views > 10).length,
+      limited: products.filter(p => p.limitedStock && !p.soldOut).length,
+      soldout: products.filter(p => p.soldOut).length,
+    };
+  }, [products]);
 
   const filteredProducts = useMemo(() => {
     return products
@@ -248,10 +272,10 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
                           </button>
                       </div>
                       <div className="mt-4 flex space-x-2 overflow-x-auto pb-2">
-                          <FilterChip label="All" value="all" activeFilter={activeFilter} onClick={setActiveFilter} />
-                          <FilterChip label="Popular" value="popular" activeFilter={activeFilter} onClick={setActiveFilter} />
-                          <FilterChip label="Limited Stock" value="limited" activeFilter={activeFilter} onClick={setActiveFilter} />
-                          <FilterChip label="Sold Out" value="soldout" activeFilter={activeFilter} onClick={setActiveFilter} />
+                          <FilterChip label="All" value="all" activeFilter={activeFilter} onClick={setActiveFilter} count={filterCounts.all} />
+                          <FilterChip label="Popular" value="popular" activeFilter={activeFilter} onClick={setActiveFilter} count={filterCounts.popular} />
+                          <FilterChip label="Limited Stock" value="limited" activeFilter={activeFilter} onClick={setActiveFilter} count={filterCounts.limited} />
+                          <FilterChip label="Sold Out" value="soldout" activeFilter={activeFilter} onClick={setActiveFilter} count={filterCounts.soldout} />
                       </div>
                   </div>
 

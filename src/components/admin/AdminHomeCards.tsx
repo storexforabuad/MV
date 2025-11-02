@@ -96,22 +96,22 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       subtitle: 'Caption',
       valueKey: 'storeLink',
       icon: Share2,
-      gradient: 'bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-600',
+      gradient: 'bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-600', // Keep original
       text: 'text-white',
       component: StoreLinkModal,
-      glowClass: 'dark:shadow-cyan-400/30 shadow-cyan-400/50',
+      glowClass: 'dark:shadow-cyan-400/30 shadow-cyan-400/50', // Keep original
     },
     {
-      label: 'Commission Earned',
+      label: 'Commission',
       valueKey: 'totalCommissionEarned',
-      icon: Percent,
+      icon: Percent, // Keep original
       gradient: 'bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700',
       text: 'text-white',
       component: CommissionEarnedModal,
       glowClass: 'dark:shadow-emerald-500/30 shadow-emerald-500/50',
     },
     {
-      label: 'Referral Bonus',
+      label: 'Bonus',
       valueKey: 'totalReferralBonus',
       icon: Gift, 
       gradient: 'bg-gradient-to-br from-orange-400 via-red-400 to-pink-500', 
@@ -123,26 +123,26 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       label: 'Views',
       valueKey: 'totalViews',
       icon: Eye,
-      gradient: 'bg-gradient-to-br from-purple-500 via-fuchsia-600 to-pink-700',
+      gradient: 'bg-gradient-to-br from-indigo-500 via-blue-600 to-purple-700', // New gradient for Views
       text: 'text-white',
       component: TotalViewsModal, 
-      glowClass: 'dark:shadow-fuchsia-500/30 shadow-fuchsia-500/50',
+      glowClass: 'dark:shadow-blue-500/30 shadow-blue-500/50', // New glow for Views
     },
     {
       label: 'Orders',
       valueKey: 'totalOrders',
       icon: ShoppingCart,
       gradient: 'bg-gradient-to-br from-sky-600 via-blue-700 to-indigo-800',
-      text: 'text-white',
+      text: 'text-white', // Keep original
       component: null,
-      glowClass: 'dark:shadow-blue-600/30 shadow-blue-600/50',
+      glowClass: 'dark:shadow-blue-600/30 shadow-blue-600/50', // Keep original
     },
     {
       label: 'Manage Categories',
       valueKey: 'totalCategories',
       icon: Tag,
       gradient: 'bg-gradient-to-br from-lime-500 via-green-600 to-emerald-700',
-      text: 'text-white',
+      text: 'text-white', // Keep original
       component: null, 
       glowClass: 'dark:shadow-green-500/30 shadow-green-500/50',
     },
@@ -153,25 +153,25 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       gradient: 'bg-gradient-to-br from-slate-700 via-gray-800 to-zinc-900',
       text: 'text-white',
       component: null,
-      glowClass: 'dark:shadow-slate-600/30 shadow-slate-600/50',
+      glowClass: 'dark:shadow-slate-600/30 shadow-slate-600/50', // Keep original
     },
     {
       label: 'Popular',
-      valueKey: 'popularProducts',
+      valueKey: 'popularProducts', // Kept for potential future use
       icon: Star,
-      gradient: 'bg-gradient-to-br from-yellow-400 via-yellow-500 to-yellow-600',
+      gradient: 'bg-gradient-to-br from-amber-400 to-yellow-500', // Apply new standard gradient
       text: 'text-white',
       component: PopularProductsModal,
-      glowClass: 'dark:shadow-yellow-500/30 shadow-yellow-500/50',
+      glowClass: 'dark:shadow-yellow-500/30 shadow-yellow-500/50', // Apply new standard glow
     },
     {
       label: 'Limited',
       valueKey: 'limitedStock',
       icon: AlertTriangle,
-      gradient: 'bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600',
+      gradient: 'bg-gradient-to-br from-amber-400 to-yellow-500',
       text: 'text-white',
       component: LimitedStockModal,
-      glowClass: 'dark:shadow-orange-500/30 shadow-orange-500/50',
+      glowClass: 'dark:shadow-yellow-500/30 shadow-yellow-500/50',
     },
     {
       label: 'Sold Out',
@@ -196,17 +196,17 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
 const formatCurrencyForCard = (amount: number) => {
     if (typeof amount !== 'number') return '₦0';
     if (amount >= 1000000) {
-      return `₦${(amount / 1000000).toFixed(1)}M`;
+ return `₦${(amount / 1000000).toFixed(1)}M`;
     }
     if (amount >= 1000) {
-      return `₦${(amount / 1000).toFixed(0)}K`;
+ return `₦${(amount / 1000).toFixed(0)}K`;
     }
-    return `₦${amount.toFixed(0)}`;
+ return `₦${amount.toFixed(0)}`;
   };
 
 export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const { spotlightStep, completeSpotlight } = useSpotlightContext();
-  const [openModal, setOpenModal] = useState<number | null>(null);
+  const [openModal, setOpenModal] = useState<number | null>(null); // Keep this for old modals
   const [isTipsModalOpen, setIsTipsModalOpen] = useState(false);
   const [isViewsModalOpen, setIsViewsModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -361,7 +361,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             onAnimationComplete={() => onAnimationComplete?.()}
         >
             <style jsx>{`
-              .card-blob {
+               .card-blob {
                 position: absolute;
                 top: -10px;
                 right: -10px;
@@ -384,8 +384,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
               }
             `}</style>
 
-            {cardsToRender.map((card, idx) => {
-              if (card.label === 'Customers') {
+            {cardsToRender.filter(card => card.label !== 'Popular' && card.label !== 'Limited' && card.label !== 'Sold Out').map((card, idx) => {
+              if (card.label === 'Customers' && card.component === AdminCustomersCard) {
                 return (
                   <motion.div key="customers-card" variants={itemVariants}>
                     <AdminCustomersCard 
@@ -398,7 +398,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                 );
               }
 
-              const Icon = card.icon;
+              const Icon = card.icon; // Assuming card.icon is a React component or element type
               const isHorizontal = card.label === 'Share' || card.label === 'Tips';
               const isTipsCard = card.label === 'Tips';
               const spotlightClasses = spotlightStep === 'tips' && isTipsCard ? 'relative z-50 pointer-events-auto' : '';
@@ -466,7 +466,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
               }
             })}
         </motion.div>
-
+      
       {/* === MODAL RENDERERS === */}
 
       <CustomersListModal 
