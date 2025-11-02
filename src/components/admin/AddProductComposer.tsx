@@ -301,7 +301,7 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
                 {currentStep === 2 && (
                     <motion.div key="pricing" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
                         <FloatingLabelInput label="Price" type="number" value={activeProduct.price} onChange={(e: ChangeEvent<HTMLInputElement>) => handleProductChange(activeProductIndex, 'price', parseFloat(e.target.value) || 0)} />
-                        <ModernToggle label="Add Promo Price" checked={activeProduct.isPromo} onChange={checked => handleProductChange(activeProductIndex, 'isPromo', checked)} />
+                        <ModernToggle label="Add Promo Price ?" checked={activeProduct.isPromo} onChange={checked => handleProductChange(activeProductIndex, 'isPromo', checked)} />
                         <AnimatePresence>
                             {activeProduct.isPromo && (
                                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
@@ -310,7 +310,7 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
                             )}
                         </AnimatePresence>
                         <div>
-                            <label className="block text-sm font-medium text-text-secondary">Commission</label>
+                            <label className="block text-sm font-medium text-text-secondary">Commission+Referral Bonus</label>
                             <div className="mt-2 bg-input-background p-4 rounded-lg">
                             <div className="flex justify-center items-center text-sm font-medium text-text-primary mb-2">
                                     <span>{activeProduct.commission}%</span>
