@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import {
   getProducts,
   getCategories,
@@ -15,6 +16,7 @@ import {
   fetchStoreOrders,
   StoreOrder
 } from '../../../lib/db';
+import { requestNotificationPermission } from '../../../lib/firebase-messaging';
 import { Product } from '../../../types/product';
 import { Category } from '../../../types/category';
 import { StoreMeta } from '../../../types/store';
@@ -27,6 +29,7 @@ import AddProductComposer from '../../../components/admin/AddProductComposer';
 import ManageProductsModal from '../../../components/admin/ManageProductsModal';
 import ManageCategoriesModal from '../../../components/admin/ManageCategoriesModal';
 import { AdminOrdersModal } from '../../../components/admin/modals/AdminOrdersModal';
+import WhatsAppComposerModal from '../../../components/admin/modals/WhatsAppComposerModal';
 import dynamic from 'next/dynamic';
 import PreviewSkeleton from '../../../components/admin/PreviewSkeleton';
 import { markOnboardingAsCompleted } from '../../../app/actions/onboardingActions';
@@ -93,6 +96,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [isManageCategoriesModalOpen, setIsManageCategoriesModalOpen] = useState(false);
   const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
+  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isPreviewLoading, setIsPreviewLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState<boolean | null>(null);
@@ -102,6 +106,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
   const [shouldShowSpotlight, setShouldShowSpotlight] = useState(false);
   const [commissionData, setCommissionData] = useState({ totalCommissionEarned: 0, totalReferralBonus: 0 });
 
+  const searchParams = useSearchParams();
   const { orders, refreshOrders } = useStoreOrders(storeId);
 
   const fetchData = useCallback(async (showRefresh = false) => {
@@ -143,7 +148,14 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
   useEffect(() => {
     if (!storeId) return;
     fetchData();
+    requestNotificationPermission(storeId);
   }, [storeId, fetchData]);
+
+  useEffect(() => {
+    if (searchParams.get('open') === 'whatsapp') {
+      setIsWhatsAppModalOpen(true);
+    }
+  }, [searchParams]);
 
   const handleUpdateProduct = async (productId: string, updatedData: Partial<Product>) => {
       try {
@@ -231,7 +243,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
     return <OnboardingFlow onComplete={handleOnboardingComplete} storeName={storeMeta?.name || ''} />;
   }
 
-  const isModalOpen = isComposerOpen || isManageModalOpen || isManageCategoriesModalOpen || isOrdersModalOpen;
+  const isModalOpen = isComposerOpen || isManageModalOpen || isManageCategoriesModalOpen || isOrdersModalOpen || isWhatsAppModalOpen;
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0 transition-colors">
@@ -323,6 +335,13 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
         isOpen={isOrdersModalOpen}
         onClose={() => setIsOrdersModalOpen(false)}
         orders={orders}
+      />
+
+      <WhatsAppComposerModal
+        isOpen={isWhatsAppModalOpen}
+        onClose={() => setIsWhatsAppModalOpen(false)}
+        storeId={storeId}
+        contacts={contacts}
       />
 
       <div className={`transition-opacity duration-500 ${uiVisible ? 'opacity-100' : 'opacity-0'}`}>
