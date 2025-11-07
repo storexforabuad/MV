@@ -22,7 +22,7 @@ import { Product } from '../../types/product';
 import { Category } from '../../types/category';
 import { WholesaleData } from '../../lib/db';
 import { getFirestore, collection, onSnapshot, query, where, Timestamp } from 'firebase/firestore';
-import { firebaseApp } from '../../lib/firebase';
+import { app as firebaseApp } from '../../lib/firebase';
 
 interface AdminHomeCardsProps {
   products: Product[];

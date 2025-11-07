@@ -152,7 +152,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
   }, [storeId, fetchData]);
 
   useEffect(() => {
-    if (searchParams.get('open') === 'whatsapp') {
+    if (searchParams && searchParams.get('open') === 'whatsapp') {
       setIsWhatsAppModalOpen(true);
     }
   }, [searchParams]);

@@ -9,7 +9,7 @@ import { getFirestore, collection, addDoc, serverTimestamp, query, onSnapshot, o
 import { uploadImageToCloudinary } from '../../../lib/cloudinaryClient';
 import { compressImage } from '../../../utils/imageCompression';
 import { WholesaleData } from '../../../lib/db';
-import { firebaseApp } from '../../../lib/firebase';
+import { app as firebaseApp } from '../../../lib/firebase';
 
 // -- TYPES --
 interface FirebaseScheduledMessage {
@@ -253,15 +253,16 @@ const WhatsAppComposerModal: React.FC<WhatsAppComposerProps> = ({ isOpen, onClos
             <div className="p-2 sm:p-4 space-y-4 h-full overflow-y-auto">
                 {items.map(item => {
                     const cardState = isReadyToPost(item) ? 'ready' : isUpcoming(item) ? 'upcoming' : item.status;
-                    const cardAccentColor = {
+                    const cardAccentColor: { [key: string]: string } = {
                         ready: 'border-amber-500',
                         upcoming: isDueSoon(item) ? 'border-blue-500' : 'border-border-color',
                         completed: 'border-green-500/50',
-                        missed: 'border-red-500/50'
-                    }[cardState] || 'border-border-color';
+                        missed: 'border-red-500/50',
+                        scheduled: 'border-border-color', // Added scheduled to fix the type error
+                    };
 
                     return (
-                        <div key={item.id} className={`rounded-xl bg-input-background p-4 border-2 ${cardAccentColor} shadow-sm transition-all duration-300`}>
+                        <div key={item.id} className={`rounded-xl bg-input-background p-4 border-2 ${cardAccentColor[cardState]} shadow-sm transition-all duration-300`}>
                             <p className="text-text-primary mb-3 whitespace-pre-wrap text-base">{item.message}</p>
                             {item.imageUrl && <div className="relative h-40 w-full rounded-lg overflow-hidden mb-3"><Image src={item.imageUrl} alt="Scheduled Image" layout="fill" objectFit="cover" /></div>}
                             
