@@ -9,7 +9,8 @@ import PopularProductsModal from './modals/PopularProductsModal';
 import LimitedStockModal from './modals/LimitedStockModal';
 import TotalViewsModal from './modals/TotalViewsModal';
 import StoreLinkModal from './modals/StoreLinkModal';
-import ReferralsModal from './modals/ReferralsModal';
+// import ReferralsModal from './modals/ReferralsModal'; // OLD - No longer needed
+import { AmbassadorHubModal } from './modals/AmbassadorHubModal'; // NEW
 import SoldOutModal from './modals/SoldOutModal';
 import TipsModal from './modals/TipsModal';
 import SpotlightTooltip from '../shared/SpotlightTooltip';
@@ -122,12 +123,13 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       glowClass: 'dark:shadow-emerald-500/30 shadow-emerald-500/50',
     },
     {
-      label: 'Bonus',
-      valueKey: 'totalReferralBonus',
+      label: 'Ambassador', // CHANGED from 'Bonus' and 'Referrals'
+      subtitle: 'Hub',
+      valueKey: 'referrals', // Keep for the number display
       icon: Gift, 
       gradient: 'bg-gradient-to-br from-orange-400 via-red-400 to-pink-500', 
       text: 'text-white',
-      component: ReferralBonusModal, 
+      component: null, // Set to null, handled separately
       glowClass: 'dark:shadow-red-400/30 shadow-red-400/50', 
     },
     {
@@ -184,15 +186,6 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       component: SoldOutModal,
       glowClass: 'dark:shadow-red-500/30 shadow-red-500/50',
     },
-    {
-      label: 'Referrals',
-      valueKey: 'referrals',
-      icon: Gift,
-      gradient: 'bg-gradient-to-br from-pink-500 via-rose-500 to-fuchsia-600',
-      text: 'text-white',
-      component: ReferralsModal,
-      glowClass: 'dark:shadow-rose-500/30 shadow-rose-500/50',
-    },
   ];
 
 const formatCurrencyForCard = (amount: number) => {
@@ -214,6 +207,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isCustomersModalOpen, setIsCustomersModalOpen] = useState(false);
   const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
+  const [isAmbassadorHubOpen, setIsAmbassadorHubOpen] = useState(false); // NEW STATE
   const [showWhatsAppNotification, setShowWhatsAppNotification] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const { setIsModalOpen, onRefresh, uiVisible, onAnimationComplete, onOrdersCardClick, onProductsCardClick, storeId } = props;
@@ -260,7 +254,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   }
 
   useEffect(() => {
-    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isWhatsAppModalOpen;
+    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isWhatsAppModalOpen || isAmbassadorHubOpen;
     if (modalIsOpen) {
       window.history.pushState({ modalOpen: true }, '');
       const handlePopState = () => {
@@ -270,6 +264,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         setIsViewsModalOpen(false);
         setIsShareModalOpen(false);
         setIsWhatsAppModalOpen(false);
+        setIsAmbassadorHubOpen(false); // NEW
         if (setIsModalOpen) setIsModalOpen(false);
       };
       window.addEventListener('popstate', handlePopState);
@@ -280,26 +275,19 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         }
       };
     }
-  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isWhatsAppModalOpen, setIsModalOpen]);
+  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isWhatsAppModalOpen, isAmbassadorHubOpen, setIsModalOpen]);
 
   const handleOpenModal = (idx: number, cardLabel?: string) => {
-    if (cardLabel === 'Tips') {
-      setIsTipsModalOpen(true);
-    } else if (cardLabel === 'Views') {
-      setIsViewsModalOpen(true);
-    } else if (cardLabel === 'Share') {
-      setIsShareModalOpen(true);
-    } else if (cardLabel === 'WhatsApp') {
-      setIsWhatsAppModalOpen(true);
-    } else if (cardLabel === 'Manage Categories') {
-      props.openManageCategories();
-    } else if (cardLabel === 'Orders') {
-      onOrdersCardClick();
-    } else if (cardLabel === 'Manage Products') {
-      onProductsCardClick();
-    } else {
-      setOpenModal(idx);
-    }
+    if (cardLabel === 'Tips') setIsTipsModalOpen(true);
+    else if (cardLabel === 'Views') setIsViewsModalOpen(true);
+    else if (cardLabel === 'Share') setIsShareModalOpen(true);
+    else if (cardLabel === 'WhatsApp') setIsWhatsAppModalOpen(true);
+    else if (cardLabel === 'Ambassador') setIsAmbassadorHubOpen(true); // NEW
+    else if (cardLabel === 'Manage Categories') props.openManageCategories();
+    else if (cardLabel === 'Orders') onOrdersCardClick();
+    else if (cardLabel === 'Manage Products') onProductsCardClick();
+    else setOpenModal(idx);
+    
     if (props.setIsModalOpen && cardLabel !== 'Orders' && cardLabel !== 'Manage Products') props.setIsModalOpen(true);
   };
 
@@ -324,56 +312,12 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     setIsViewsModalOpen(false);
     setTimeout(() => {
       setIsShareModalOpen(true);
-    }, 50); // Small delay to prevent modal collision
+    }, 50); 
   };
 
-  const containerVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  };
-
-  const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { 
-      opacity: 1, 
-      y: 0,
-      transition: {
-        duration: 0.5,
-        ease: "easeOut"
-      }
-    },
-  };
-  
-  const modalVariants: Variants = {
-      hidden: {
-          opacity: 0,
-          scale: 0.95,
-          y: 20,
-      },
-      visible: {
-          opacity: 1,
-          scale: 1,
-          y: 0,
-          transition: {
-              duration: 0.3,
-              ease: [0.25, 1, 0.5, 1],
-          },
-      },
-      exit: {
-          opacity: 0,
-          scale: 0.95,
-          y: 20,
-          transition: {
-              duration: 0.2,
-              ease: 'easeOut',
-          },
-      },
-  };
+  const containerVariants: Variants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
+  const itemVariants: Variants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } } };
+  const modalVariants: Variants = { hidden: { opacity: 0, scale: 0.95, y: 20 }, visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: [0.25, 1, 0.5, 1] } }, exit: { opacity: 0, scale: 0.95, y: 20, transition: { duration: 0.2, ease: 'easeOut' } } };
 
   return (
     <section className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 overflow-x-hidden">
@@ -399,44 +343,21 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             onAnimationComplete={() => onAnimationComplete?.()}
         >
             <style jsx>{`
-               .card-blob {
-                position: absolute;
-                top: -10px;
-                right: -10px;
-                width: 40px;
-                height: 40px;
-                background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, transparent 70%);
-                filter: blur(8px);
-                animation: blobMove 4s infinite alternate ease-in-out;
-                z-index: 0;
-              }
-              @keyframes blobMove {
-                0% { transform: scale(1) translateY(0); }
-                100% { transform: scale(1.05) translateY(3px); }
-              }
-              .dashboard-card {
-                min-width: 0;
-                max-width: 100%;
-                word-wrap: break-word;
-                overflow: hidden;
-              }
+               .card-blob { position: absolute; top: -10px; right: -10px; width: 40px; height: 40px; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, transparent 70%); filter: blur(8px); animation: blobMove 4s infinite alternate ease-in-out; z-index: 0; }
+              @keyframes blobMove { 0% { transform: scale(1) translateY(0); } 100% { transform: scale(1.05) translateY(3px); } }
+              .dashboard-card { min-width: 0; max-width: 100%; word-wrap: break-word; overflow: hidden; }
             `}</style>
 
             {cardsToRender.map((card, idx) => {
               if (card.label === 'Customers' && card.component === AdminCustomersCard) {
                 return (
                   <motion.div key="customers-card" variants={itemVariants}>
-                    <AdminCustomersCard 
-                      storeId={props.storeId} 
-                      onClick={() => setIsCustomersModalOpen(true)} 
-                      gradient={customersCard.gradient}
-                      glowClass={customersCard.glowClass}
-                    />
+                    <AdminCustomersCard storeId={props.storeId} onClick={() => setIsCustomersModalOpen(true)} gradient={customersCard.gradient} glowClass={customersCard.glowClass}/>
                   </motion.div>
                 );
               }
 
-              const Icon = card.icon; // Assuming card.icon is a React component or element type
+              const Icon = card.icon;
               const isHorizontal = card.label === 'Share' || card.label === 'Tips' || card.label === 'WhatsApp';
               const isTipsCard = card.label === 'Tips';
               const isWhatsAppCard = card.label === 'WhatsApp';
@@ -445,58 +366,30 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
               if (isHorizontal) {
                 return (
                   <motion.div key={card.label} variants={itemVariants} className={`relative ${spotlightClasses}`}>
-                    <button
-                      className={`dashboard-card relative flex flex-row items-center justify-center rounded-2xl p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`}
-                      tabIndex={0}
-                      type="button"
-                      onClick={() => handleOpenModal(idx, card.label)}
-                    >
-                      {isWhatsAppCard && showWhatsAppNotification && (
-                          <span className="absolute top-2 right-2 flex h-3 w-3">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                          </span>
-                      )}
+                    <button className={`dashboard-card relative flex flex-row items-center justify-center rounded-2xl p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card.label)}>
+                      {isWhatsAppCard && showWhatsAppNotification && (<span className="absolute top-2 right-2 flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></span>)}
                       <span className="card-blob" />
-                      <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white bg-opacity-20 shadow">
-                        <Icon className="w-5 h-5 sm:w-6 sm:h-6 drop-shadow" />
-                      </div>
+                      <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white bg-opacity-20 shadow"><Icon className="w-5 h-5 sm:w-6 sm:h-6 drop-shadow" /></div>
                       <div className="flex flex-col items-center ml-3 min-w-0 z-10">
-                        <div className="text-lg sm:text-xl font-bold drop-shadow">
-                          {card.label}
-                        </div>
-                        <div className="text-xs sm:text-sm font-medium opacity-90 text-center leading-tight">
-                          {card.subtitle}
-                        </div>
+                        <div className="text-lg sm:text-xl font-bold drop-shadow">{card.label}</div>
+                        <div className="text-xs sm:text-sm font-medium opacity-90 text-center leading-tight">{card.subtitle}</div>
                       </div>
                     </button>
-                    {spotlightStep === 'tips' && isTipsCard && (
-                      <SpotlightTooltip 
-                        text="Check here for helpful tips and stats about your dashboard."
-                        className="top-full mt-5 left-1/2 -translate-x-1/2"
-                      />
-                    )}
+                    {spotlightStep === 'tips' && isTipsCard && (<SpotlightTooltip text="Check here for helpful tips and stats about your dashboard." className="top-full mt-5 left-1/2 -translate-x-1/2"/>)}
                   </motion.div>
                 );
               } else {
                 return (
                   <motion.div key={card.label} variants={itemVariants}>
-                    <button
-                      className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`}
-                      tabIndex={0}
-                      type="button"
-                      onClick={() => handleOpenModal(idx, card.label)}
-                    >
+                    <button className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card.label)}>
                       <span className="card-blob" />
-                      <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white bg-opacity-20 mb-1 sm:mb-2 shadow">
-                        <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 drop-shadow" />
-                      </div>
+                      <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white bg-opacity-20 mb-1 sm:mb-2 shadow"><Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 drop-shadow" /></div>
                       <div className="flex flex-col items-center min-w-0 z-10 w-full">
                         <div className="text-lg sm:text-xl md:text-2xl font-bold drop-shadow">
                           {(() => {
-                            const value = card.valueKey ? (props as unknown as Record<string, unknown>)[card.valueKey] : '';
-                            if (card.label === 'Commission Earned') return formatCurrencyForCard(props.totalCommissionEarned);
-                            if (card.label === 'Referral Bonus') return formatCurrencyForCard(props.totalReferralBonus);
+                            const value = card.valueKey ? (props as any)[card.valueKey] : '';
+                            if (card.label === 'Commission') return formatCurrencyForCard(props.totalCommissionEarned);
+                            if (card.label === 'Ambassador') return props.referrals; // Display referral count
                             if (typeof value === 'number' || typeof value === 'string') return value;
                             return '';
                           })()}
@@ -514,64 +407,32 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
       
       {/* === MODAL RENDERERS === */}
 
-      <CustomersListModal 
-        storeId={props.storeId}
-        isOpen={isCustomersModalOpen}
-        onClose={() => setIsCustomersModalOpen(false)}
+      {/* NEW AMBASSADOR HUB MODAL */}
+      <AmbassadorHubModal 
+        isOpen={isAmbassadorHubOpen} 
+        onClose={() => setIsAmbassadorHubOpen(false)} 
+        storeId={props.storeId} 
+        onReferralAdded={props.onReferralAdded} 
       />
 
-      {isTipsModalOpen && (
-        <TipsModal {...props as AdminHomeCardsProps & { handleClose: () => void; }} handleClose={handleCloseTipsModal} />
-      )}
+      <CustomersListModal storeId={props.storeId} isOpen={isCustomersModalOpen} onClose={() => setIsCustomersModalOpen(false)}/>
 
-      {isViewsModalOpen && (
-        <TotalViewsModal 
-            {...props} 
-            isOpen={isViewsModalOpen} 
-            onClose={() => setIsViewsModalOpen(false)} 
-            onGetMoreViewsClick={handleGetMoreViewsClick}
-        />
-      )}
+      {isTipsModalOpen && (<TipsModal {...props as AdminHomeCardsProps & { handleClose: () => void; }} handleClose={handleCloseTipsModal} />)}
 
-      {isShareModalOpen && (
-          <StoreLinkModal 
-              {...props}
-              isOpen={isShareModalOpen}
-              handleClose={() => setIsShareModalOpen(false)}
-          />
-      )}
+      {isViewsModalOpen && (<TotalViewsModal {...props} isOpen={isViewsModalOpen} onClose={() => setIsViewsModalOpen(false)} onGetMoreViewsClick={handleGetMoreViewsClick}/>)}
 
-      {isWhatsAppModalOpen && (
-        <WhatsAppComposerModal
-          isOpen={isWhatsAppModalOpen}
-          onClose={handleCloseWhatsAppModal}
-          storeId={props.storeId}
-          contacts={props.contacts}
-        />
-      )}
+      {isShareModalOpen && (<StoreLinkModal {...props} isOpen={isShareModalOpen} handleClose={() => setIsShareModalOpen(false)}/>)}
+
+      {isWhatsAppModalOpen && (<WhatsAppComposerModal isOpen={isWhatsAppModalOpen} onClose={handleCloseWhatsAppModal} storeId={props.storeId} contacts={props.contacts}/>)}
 
       {openModal !== null && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md"
-          onClick={handleCloseModal}
-        >
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            variants={modalVariants}
-            className="relative w-full max-w-sm sm:max-w-md md:max-w-lg mx-2 sm:mx-auto bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-2xl flex flex-col items-center"
-            onClick={e => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md" onClick={handleCloseModal}>
+          <motion.div initial="hidden" animate="visible" exit="exit" variants={modalVariants} className="relative w-full max-w-sm sm:max-w-md md:max-w-lg mx-2 sm:mx-auto bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-2xl flex flex-col items-center" onClick={e => e.stopPropagation()}>
             {(() => {
               const card = cardsToRender[openModal];
-              // Ensure we don't render the new modals in the old system
-              if (!card || !card.component || ['Views', 'Share', 'WhatsApp'].includes(card.label)) return null;
+              if (!card || !card.component || ['Views', 'Share', 'WhatsApp', 'Ambassador'].includes(card.label)) return null;
               const ModalComponent = card.component;
-              const modalProps = {
-                ...props,
-                handleClose: handleCloseModal,
-              };
+              const modalProps = { ...props, handleClose: handleCloseModal };
               return <ModalComponent {...modalProps} />;
             })()}
           </motion.div>
