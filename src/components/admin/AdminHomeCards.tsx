@@ -167,15 +167,6 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       glowClass: 'dark:shadow-slate-600/30 shadow-slate-600/50', // Keep original
     },
     {
-      label: 'Popular',
-      valueKey: 'popularProducts', // Kept for potential future use
-      icon: Star,
-      gradient: 'bg-gradient-to-br from-amber-400 to-yellow-500', // Apply new standard gradient
-      text: 'text-white',
-      component: PopularProductsModal,
-      glowClass: 'dark:shadow-yellow-500/30 shadow-yellow-500/50', // Apply new standard glow
-    },
-    {
       label: 'Limited',
       valueKey: 'limitedStock',
       icon: AlertTriangle,
@@ -431,7 +422,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
               }
             `}</style>
 
-            {cardsToRender.filter(card => card.label !== 'Popular' && card.label !== 'Limited' && card.label !== 'Sold Out').map((card, idx) => {
+            {cardsToRender.map((card, idx) => {
               if (card.label === 'Customers' && card.component === AdminCustomersCard) {
                 return (
                   <motion.div key="customers-card" variants={itemVariants}>
