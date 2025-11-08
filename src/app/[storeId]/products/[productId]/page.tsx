@@ -298,7 +298,7 @@ return (
                   </span>
                 )}
             </div>
-            <div className="px-4 py-1 rounded-full border border-gray-300 dark:border-gray-700 shadow-sm flex items-center">
+            <div className="hidden px-4 py-1 rounded-full border border-gray-300 dark:border-gray-700 shadow-sm flex items-center">
               <AnimatedViewCount value={product?.views || 0} />
             </div>
           </div>

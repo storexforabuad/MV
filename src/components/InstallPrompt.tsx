@@ -7,7 +7,7 @@ import { usePathname, useParams } from 'next/navigation';
 import { getStoreMeta } from '../lib/db';
 
 export default function InstallPrompt() {
-  const { showPrompt, setShowPrompt, deferredPrompt } = useInstallPrompt();
+  const { showPrompt, handleInstall, handleDismiss } = useInstallPrompt();
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith('/admin') || pathname === '/signin';
   const params = useParams();
@@ -26,28 +26,6 @@ export default function InstallPrompt() {
     }
     fetchStoreName();
   }, [storeId]);
-
-  const handleInstall = async () => {
-    if (deferredPrompt) {
-      try {
-        await deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        console.log('Install prompt outcome:', outcome);
-        if (outcome === 'accepted') {
-          setShowPrompt(false);
-        }
-      } catch (error) {
-        console.error('Error showing install prompt:', error);
-      }
-    } else {
-      console.log('No deferred prompt available');
-    }
-  };
-
-  const handleDismiss = () => {
-    sessionStorage.setItem('pwaPromptDismissed', 'true');
-    setShowPrompt(false);
-  };
 
   if (!showPrompt || !storeId) return null;
 

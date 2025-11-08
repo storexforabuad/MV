@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { usePathname, useParams } from 'next/navigation';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -13,39 +14,65 @@ declare global {
   }
 }
 
+const PWA_PROMPT_LAST_SHOWN_KEY = 'pwaPromptLastShown';
+const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+
 export function useInstallPrompt() {
-  const [showPrompt, setShowPrompt] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [showPrompt, setShowPrompt] = useState(false);
 
+  const pathname = usePathname();
+  const params = useParams();
+  const storeId = typeof params?.storeId === 'string' ? params.storeId : '';
+  const isOnStoreHomepage = pathname === `/${storeId}`;
+
+  // 1. Effect for capturing the browser event. Runs only once.
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      console.log('beforeinstallprompt event captured.');
+    };
 
-    const dismissed = sessionStorage.getItem('pwaPromptDismissed');
-    
-    if (!dismissed) {
-      console.log('Setting up beforeinstallprompt listener'); // Debug log
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-      const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
-        console.log('Received beforeinstallprompt event'); // Debug log
-        e.preventDefault();
-        setDeferredPrompt(e);
-        setShowPrompt(true);
-      };
-
-      window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-      // Debug check for PWA criteria
-      if ('standalone' in navigator) {
-        console.log('App is installable');
-      }
-
-      return () => {
-        window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      };
-    } else {
-      console.log('Prompt was previously dismissed this session'); // Debug log
-    }
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
   }, []);
 
-  return { showPrompt, setShowPrompt, deferredPrompt };
+  // 2. Effect for deciding WHEN to show the prompt.
+  // This runs when the event is captured, or when the user navigates.
+  useEffect(() => {
+    if (deferredPrompt && isOnStoreHomepage) {
+      const lastPrompted = localStorage.getItem(PWA_PROMPT_LAST_SHOWN_KEY);
+      const now = new Date().getTime();
+
+      if (!lastPrompted || (now - parseInt(lastPrompted, 10)) > TWENTY_FOUR_HOURS) {
+        setShowPrompt(true);
+        localStorage.setItem(PWA_PROMPT_LAST_SHOWN_KEY, now.toString());
+        console.log('Prompt conditions met. Showing prompt and starting 24-hour cooldown.');
+      } else {
+        console.log('Not showing prompt, within 24-hour cooldown.');
+      }
+    }
+  }, [deferredPrompt, isOnStoreHomepage]);
+
+  const handleDismiss = useCallback(() => {
+    setShowPrompt(false);
+    console.log('PWA prompt UI dismissed by user.');
+  }, []);
+
+  const handleInstall = useCallback(() => {
+    if (!deferredPrompt) return;
+    
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      console.log(`PWA install prompt outcome: ${choiceResult.outcome}`);
+      setShowPrompt(false);
+    });
+
+  }, [deferredPrompt]);
+
+  return { showPrompt, handleInstall, handleDismiss };
 }
