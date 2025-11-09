@@ -9,7 +9,6 @@ import PopularProductsModal from './modals/PopularProductsModal';
 import LimitedStockModal from './modals/LimitedStockModal';
 import TotalViewsModal from './modals/TotalViewsModal';
 import StoreLinkModal from './modals/StoreLinkModal';
-// import ReferralsModal from './modals/ReferralsModal'; // OLD - No longer needed
 import { AmbassadorHubModal } from './modals/AmbassadorHubModal'; // NEW
 import SoldOutModal from './modals/SoldOutModal';
 import TipsModal from './modals/TipsModal';
@@ -123,13 +122,22 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       glowClass: 'dark:shadow-emerald-500/30 shadow-emerald-500/50',
     },
     {
+      label: 'Bonus',
+      valueKey: 'totalReferralBonus',
+      icon: Gift, // Keep original
+      gradient: 'bg-gradient-to-br from-pink-500 via-red-500 to-orange-500',
+      text: 'text-white',
+      component: ReferralBonusModal,
+      glowClass: 'dark:shadow-red-500/30 shadow-red-500/50',
+    },
+    {
       label: 'Ambassador', // CHANGED from 'Bonus' and 'Referrals'
       subtitle: 'Hub',
       valueKey: 'referrals', // Keep for the number display
-      icon: Gift, 
+      icon: Star, 
       gradient: 'bg-gradient-to-br from-orange-400 via-red-400 to-pink-500', 
       text: 'text-white',
-      component: null, // Set to null, handled separately
+      component: AmbassadorHubModal, // Set to null, handled separately
       glowClass: 'dark:shadow-red-400/30 shadow-red-400/50', 
     },
     {
@@ -167,24 +175,6 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       text: 'text-white',
       component: null,
       glowClass: 'dark:shadow-slate-600/30 shadow-slate-600/50', // Keep original
-    },
-    {
-      label: 'Limited',
-      valueKey: 'limitedStock',
-      icon: AlertTriangle,
-      gradient: 'bg-gradient-to-br from-amber-400 to-yellow-500',
-      text: 'text-white',
-      component: LimitedStockModal,
-      glowClass: 'dark:shadow-yellow-500/30 shadow-yellow-500/50',
-    },
-    {
-      label: 'Sold Out',
-      valueKey: 'soldOut',
-      icon: XCircle,
-      gradient: 'bg-gradient-to-br from-red-400 via-red-500 to-red-600',
-      text: 'text-white',
-      component: SoldOutModal,
-      glowClass: 'dark:shadow-red-500/30 shadow-red-500/50',
     },
   ];
 
@@ -389,6 +379,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                           {(() => {
                             const value = card.valueKey ? (props as any)[card.valueKey] : '';
                             if (card.label === 'Commission') return formatCurrencyForCard(props.totalCommissionEarned);
+                            if (card.label === 'Bonus') return formatCurrencyForCard(props.totalReferralBonus);
                             if (card.label === 'Ambassador') return props.referrals; // Display referral count
                             if (typeof value === 'number' || typeof value === 'string') return value;
                             return '';
@@ -430,7 +421,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           <motion.div initial="hidden" animate="visible" exit="exit" variants={modalVariants} className="relative w-full max-w-sm sm:max-w-md md:max-w-lg mx-2 sm:mx-auto bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-2xl flex flex-col items-center" onClick={e => e.stopPropagation()}>
             {(() => {
               const card = cardsToRender[openModal];
-              if (!card || !card.component || ['Views', 'Share', 'WhatsApp', 'Ambassador'].includes(card.label)) return null;
+              if (!card || !card.component || ['Views', 'Share', 'WhatsApp'].includes(card.label)) return null;
               const ModalComponent = card.component;
               const modalProps = { ...props, handleClose: handleCloseModal };
               return <ModalComponent {...modalProps} />;
