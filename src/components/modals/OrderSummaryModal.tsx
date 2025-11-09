@@ -163,7 +163,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                   <button type="button" className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600 px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm" onClick={onClose} disabled={isPlacingOrder}>Cancel</button>
                   <button type="button" className="inline-flex w-full justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 sm:text-sm disabled:opacity-50" onClick={handlePlaceOrder} disabled={isPlacingOrder}>
                     {isPlacingOrder ? (
-                      <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Ordering</>
+                      <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Ordering..</>
                     ) : (
                       'Place Order'
                     )}
