@@ -8,7 +8,7 @@ import { Product } from '@/types/product';
 import { StoreMeta } from '@/types/store';
 import { Customer } from '@/types/customer';
 import { formatPrice } from '@/utils/price';
-import { Minus, Plus } from 'lucide-react';
+import { Minus, Plus, Loader2 } from 'lucide-react';
 import { useOrders } from '@/hooks/useOrders';
 import toast from 'react-hot-toast';
 import { useParams } from 'next/navigation';
@@ -26,6 +26,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const [quantity, setQuantity] = useState(1);
   const [deliveryMethod, setDeliveryMethod] = useState('home');
   const [customer, setCustomer] = useState<Customer | null>(initialCustomer);
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
   const { addOrder } = useOrders(customer?.id || null);
   const routeParams = useParams();
@@ -51,6 +52,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const handlePlaceOrder = async () => {
     if (!product || !storeId || !storeMeta || !storeMeta.whatsapp || !customer) return;
 
+    setIsPlacingOrder(true);
     try {
       const storeMetaWithId = { ...storeMeta, id: storeId };
       const referrerId = localStorage.getItem('referrerId');
@@ -78,6 +80,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
     } catch (error) {
       console.error("Error placing order or redirecting to WhatsApp:", error);
       toast.error('Failed to place order. Please try again.');
+    } finally {
+      setIsPlacingOrder(false);
     }
   };
 
@@ -156,8 +160,14 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
                 {/* Action Buttons */}
                 <div className="mt-5 sm:mt-6 grid grid-cols-2 gap-3">
-                  <button type="button" className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600 px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm" onClick={onClose}>Cancel</button>
-                  <button type="button" className="inline-flex w-full justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 sm:text-sm" onClick={handlePlaceOrder}>Place Order</button>
+                  <button type="button" className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600 px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm" onClick={onClose} disabled={isPlacingOrder}>Cancel</button>
+                  <button type="button" className="inline-flex w-full justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 sm:text-sm disabled:opacity-50" onClick={handlePlaceOrder} disabled={isPlacingOrder}>
+                    {isPlacingOrder ? (
+                      <><Loader2 className="mr-2 h-5 w-5 animate-spin" /> Placing Order...</>
+                    ) : (
+                      'Place Order'
+                    )}
+                  </button>
                 </div>
               </Dialog.Panel>
             </Transition.Child>
