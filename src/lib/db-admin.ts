@@ -16,3 +16,5 @@ export async function getStoreMetaAdmin(storeId: string): Promise<StoreMeta | nu
     return null;
   }
 }
+
+export { adminDb };

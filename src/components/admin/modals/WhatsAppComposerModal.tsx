@@ -1,3 +1,4 @@
+
 'use client';
 import React, { useState, useEffect, Fragment, useCallback } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
@@ -277,6 +278,7 @@ const WhatsAppComposerModal: React.FC<WhatsAppComposerProps> = ({ isOpen, onClos
                                         upcoming: 'bg-blue-100 text-blue-800',
                                         completed: 'bg-green-100 text-green-800',
                                         missed: 'bg-red-100 text-red-800',
+                                        scheduled: 'bg-gray-100 text-gray-800',
                                     }[cardState]}`}>
                                     {cardState === 'ready' ? "Ready to Post" : cardState}
                                 </div>

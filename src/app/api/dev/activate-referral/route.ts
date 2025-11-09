@@ -1,6 +1,7 @@
+
 import { NextResponse } from 'next/server';
-import { doc, getDoc, updateDoc, increment, serverTimestamp } from 'firebase-admin/firestore';
-import { adminDb } from '@/lib/db-admin'; // Assuming adminDb is exported from db-admin
+import { FieldValue } from 'firebase-admin/firestore';
+import { adminDb } from '@/lib/firebase-admin'; // Corrected import path
 
 // Tiers based on active referrals count
 const TIERS = {
@@ -18,6 +19,10 @@ const getTier = (referralCount: number): string => {
 };
 
 export async function POST(request: Request) {
+  if (!adminDb) {
+    return NextResponse.json({ error: 'Firebase Admin SDK not initialized' }, { status: 500 });
+  }
+
   try {
     const body = await request.json();
     const { referrerStoreId, referralId, newRefereeStoreId } = body;
@@ -27,34 +32,34 @@ export async function POST(request: Request) {
     }
 
     // 1. Update the referral document
-    const referralRef = doc(adminDb, `stores/${referrerStoreId}/referrals`, referralId);
+    const referralRef = adminDb.doc(`stores/${referrerStoreId}/referrals/${referralId}`);
     
     const now = new Date();
     const commissionEndDate = new Date(now.getFullYear() + 1, now.getMonth(), now.getDate());
 
-    await updateDoc(referralRef, {
+    await referralRef.update({
       status: 'activated',
       refereeStoreId: newRefereeStoreId,
-      activatedAt: serverTimestamp(),
+      activatedAt: FieldValue.serverTimestamp(),
       commissionEndDate: commissionEndDate,
     });
 
     // 2. Update the referrer's store document
-    const referrerStoreRef = doc(adminDb, 'stores', referrerStoreId);
+    const referrerStoreRef = adminDb.doc(`stores/${referrerStoreId}`);
     
     // Get the current referral count before incrementing
-    const storeSnap = await getDoc(referrerStoreRef);
-    if (!storeSnap.exists()) {
+    const storeSnap = await referrerStoreRef.get();
+    if (!storeSnap.exists) {
         throw new Error(`Referrer store with ID ${referrerStoreId} not found.`);
     }
-    const currentReferrals = storeSnap.data().activeReferrals || 0;
+    const currentReferrals = storeSnap.data()?.activeReferrals || 0;
     const newReferralCount = currentReferrals + 1;
 
     // Determine the new tier
     const newTier = getTier(newReferralCount);
 
-    await updateDoc(referrerStoreRef, {
-      activeReferrals: increment(1),
+    await referrerStoreRef.update({
+      activeReferrals: FieldValue.increment(1),
       ambassadorTier: newTier,
     });
 

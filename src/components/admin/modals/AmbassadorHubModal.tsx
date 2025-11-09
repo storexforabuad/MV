@@ -1,7 +1,8 @@
+
 'use client';
 import { useState, FC, FormEvent, useEffect, useCallback, useMemo } from 'react';
 import { X, Gift, LayoutDashboard, Loader2 } from 'lucide-react';
-import { doc, getDoc, collection, getDocs, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, collection, getDocs, onSnapshot, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/db';
 import AmbassadorProgressBar from '../ambassador/AmbassadorProgressBar';
 import ReferralCard from '../ambassador/ReferralCard';
@@ -75,10 +76,20 @@ const ReferBusinessForm = ({ storeId, onReferralAdded }: { storeId: string; onRe
   );
 }
 
+// Define the shape of a referral object for TypeScript
+interface Referral {
+  id: string;
+  status: 'pending' | 'activated';
+  businessName: string;
+  refereeStoreId?: string;
+  activatedAt?: Timestamp;
+  createdAt?: Timestamp;
+}
+
 // --- Dashboard Tab Content ---
 const DashboardContent = ({ storeId, onReferralAdded }: { storeId: string; onReferralAdded: () => void; }) => {
     const [storeData, setStoreData] = useState({ ambassadorTier: 'bronze', activeReferrals: 0 });
-    const [referrals, setReferrals] = useState<any[]>([]);
+    const [referrals, setReferrals] = useState<Referral[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     
     useEffect(() => {
@@ -96,7 +107,7 @@ const DashboardContent = ({ storeId, onReferralAdded }: { storeId: string; onRef
 
         const referralsRef = collection(db, 'stores', storeId, 'referrals');
         const unsubscribeReferrals = onSnapshot(referralsRef, (snapshot) => {
-            const referralsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            const referralsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Referral));
             // Sort by pending first, then by date if available
             referralsList.sort((a, b) => {
                 if (a.status === 'pending' && b.status !== 'pending') return -1;
