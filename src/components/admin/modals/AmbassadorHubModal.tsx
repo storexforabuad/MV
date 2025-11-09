@@ -120,8 +120,6 @@ const DashboardContent = ({ storeId, onReferralAdded }: { storeId: string; onRef
             setIsLoading(false);
         });
         
-        // Callback to refresh parent if a new referral is added from the other tab
-        onReferralAdded();
 
         return () => {
             unsubscribeStore();
@@ -188,7 +186,7 @@ export const AmbassadorHubModal: FC<AmbassadorHubModalProps> = ({ isOpen, onClos
   );
 
   return (
-    <div className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center animation-fade-in" onClick={onClose}>
+    <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center animation-fade-in" onClick={onClose}>
         <style jsx>{`
           @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
           .animation-fade-in { animation: fade-in 0.2s ease-out; }

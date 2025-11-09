@@ -46,6 +46,7 @@ interface AdminHomeCardsProps {
   openManageCategories: () => void;
   onOrdersCardClick: () => void;
   onProductsCardClick: () => void;
+  onAmbassadorCardClick: () => void; // New prop
   isRefreshing: boolean;
   onAnimationComplete?: () => void;
   setIsModalOpen?: (open: boolean) => void;
@@ -57,6 +58,7 @@ interface AdminHomeCardsProps {
   promoCaption?: string;
   storeName?: string;
 }
+
 
 // Modal Components (assuming they are defined elsewhere and imported)
 const CommissionEarnedModal = ({ totalCommissionEarned, handleClose }: { totalCommissionEarned: number, handleClose: () => void }) => (
@@ -137,7 +139,7 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       icon: Star, 
       gradient: 'bg-gradient-to-br from-orange-400 via-red-400 to-pink-500', 
       text: 'text-white',
-      component: AmbassadorHubModal, // Set to null, handled separately
+      component: null, // Set to null, handled separately
       glowClass: 'dark:shadow-red-400/30 shadow-red-400/50', 
     },
     {
@@ -197,10 +199,9 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isCustomersModalOpen, setIsCustomersModalOpen] = useState(false);
   const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
-  const [isAmbassadorHubOpen, setIsAmbassadorHubOpen] = useState(false); // NEW STATE
   const [showWhatsAppNotification, setShowWhatsAppNotification] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
-  const { setIsModalOpen, onRefresh, uiVisible, onAnimationComplete, onOrdersCardClick, onProductsCardClick, storeId } = props;
+  const { setIsModalOpen, onRefresh, uiVisible, onAnimationComplete, onOrdersCardClick, onProductsCardClick, storeId, onAmbassadorCardClick } = props;
 
   useEffect(() => {
     if (!storeId) return;
@@ -244,7 +245,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   }
 
   useEffect(() => {
-    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isWhatsAppModalOpen || isAmbassadorHubOpen;
+    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isWhatsAppModalOpen;
     if (modalIsOpen) {
       window.history.pushState({ modalOpen: true }, '');
       const handlePopState = () => {
@@ -254,7 +255,6 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         setIsViewsModalOpen(false);
         setIsShareModalOpen(false);
         setIsWhatsAppModalOpen(false);
-        setIsAmbassadorHubOpen(false); // NEW
         if (setIsModalOpen) setIsModalOpen(false);
       };
       window.addEventListener('popstate', handlePopState);
@@ -265,14 +265,14 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         }
       };
     }
-  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isWhatsAppModalOpen, isAmbassadorHubOpen, setIsModalOpen]);
+  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isWhatsAppModalOpen, setIsModalOpen]);
 
   const handleOpenModal = (idx: number, cardLabel?: string) => {
     if (cardLabel === 'Tips') setIsTipsModalOpen(true);
     else if (cardLabel === 'Views') setIsViewsModalOpen(true);
     else if (cardLabel === 'Share') setIsShareModalOpen(true);
     else if (cardLabel === 'WhatsApp') setIsWhatsAppModalOpen(true);
-    else if (cardLabel === 'Ambassador') setIsAmbassadorHubOpen(true); // NEW
+    else if (cardLabel === 'Ambassador') onAmbassadorCardClick(); 
     else if (cardLabel === 'Manage Categories') props.openManageCategories();
     else if (cardLabel === 'Orders') onOrdersCardClick();
     else if (cardLabel === 'Manage Products') onProductsCardClick();
@@ -397,14 +397,6 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         </motion.div>
       
       {/* === MODAL RENDERERS === */}
-
-      {/* NEW AMBASSADOR HUB MODAL */}
-      <AmbassadorHubModal 
-        isOpen={isAmbassadorHubOpen} 
-        onClose={() => setIsAmbassadorHubOpen(false)} 
-        storeId={props.storeId} 
-        onReferralAdded={props.onReferralAdded} 
-      />
 
       <CustomersListModal storeId={props.storeId} isOpen={isCustomersModalOpen} onClose={() => setIsCustomersModalOpen(false)}/>
 
