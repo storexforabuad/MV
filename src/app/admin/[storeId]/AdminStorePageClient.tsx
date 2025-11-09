@@ -34,7 +34,7 @@ import dynamic from 'next/dynamic';
 import PreviewSkeleton from '../../../components/admin/PreviewSkeleton';
 import { markOnboardingAsCompleted } from '../../../app/actions/onboardingActions';
 import { useSpotlightContext } from '@/context/SpotlightContext';
-import { calculateStoreCommissions } from '../../../app/actions/orderActions';
+import { calculateCommissionAndBonus } from '../../../utils/calculations';
 
 const OnboardingFlow = dynamic(() => import('../../../components/admin/onboarding/OnboardingFlow'));
 
@@ -109,23 +109,28 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
   const searchParams = useSearchParams();
   const { orders, refreshOrders } = useStoreOrders(storeId);
 
+  useEffect(() => {
+    if (orders) {
+      const { totalCommissionEarned, totalReferralBonus } = calculateCommissionAndBonus(orders);
+      setCommissionData({ totalCommissionEarned, totalReferralBonus });
+    }
+  }, [orders]);
+
   const fetchData = useCallback(async (showRefresh = false) => {
     if (showRefresh) setIsRefreshing(true);
     try {
-      const [fetchedProducts, fetchedCategories, fetchedContacts, fetchedStoreMeta, fetchedReferrals, fetchedCommissionData] = await Promise.all([
+      const [fetchedProducts, fetchedCategories, fetchedContacts, fetchedStoreMeta, fetchedReferrals] = await Promise.all([
         getProducts(storeId),
         getCategories(storeId),
         getContacts(storeId),
         getStoreMeta(storeId),
         getReferrals(storeId),
-        calculateStoreCommissions(storeId)
       ]);
       setProducts(fetchedProducts);
       setCategories(fetchedCategories);
       setContacts(fetchedContacts);
       setStoreMeta(fetchedStoreMeta as StoreMeta);
       setReferrals(fetchedReferrals);
-      setCommissionData(fetchedCommissionData);
       refreshOrders(); // Refresh orders as well
 
       const hasCompletedOnboarding = localStorage.getItem('hasCompletedOnboarding') === 'true';

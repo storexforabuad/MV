@@ -247,33 +247,3 @@ export const incrementOrderCount = async (storeId: string, incrementValue: numbe
     // Decide on error handling strategy, e.g., silent fail or re-throw
   }
 };
-
-/**
- * Calculates the total commission earned and referral bonuses for a given store.
- */
-export const calculateStoreCommissions = async (storeId: string): Promise<{ totalCommissionEarned: number, totalReferralBonus: number }> => {
-    try {
-        const orders = await fetchStoreOrders(storeId);
-        let totalCommissionEarned = 0;
-        let totalReferralBonus = 0;
-
-        for (const order of orders) {
-            if (order.product && order.product.commission && typeof order.product.price === 'number') {
-                const commission = (order.product.price * order.product.commission) / 100;
-                totalCommissionEarned += commission;
-
-                // A referral bonus is 100% of the product commission
-                if (order.referralApplied) {
-                    totalReferralBonus += commission;
-                }
-            }
-        }
-
-        return { totalCommissionEarned, totalReferralBonus };
-
-    } catch (error) {
-        console.error("Error calculating store commissions:", error);
-        // In case of an error, return zero values to prevent the app from crashing.
-        return { totalCommissionEarned: 0, totalReferralBonus: 0 };
-    }
-};
