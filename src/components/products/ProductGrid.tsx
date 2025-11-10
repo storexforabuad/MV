@@ -2,7 +2,7 @@
 import { memo, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Info, Phone, MessageCircle, Star, Clock, X, MapPin } from 'lucide-react';
+import { Info, Phone, MessageCircle, Star, Clock, MapPin, Instagram } from 'lucide-react';
 import { Product } from '../../types/product';
 import { motion, LayoutGroup, AnimatePresence, Transition } from 'framer-motion';
 import Image from 'next/image';
@@ -71,7 +71,7 @@ function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean; onClos
         <AnimatePresence>
             {open && (
                 <motion.div
-                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-2"
+                    className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
@@ -79,11 +79,11 @@ function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean; onClos
                     onClick={onClose}
                 >
                     <motion.div
-                        className="relative w-full max-w-sm mx-auto rounded-2xl overflow-hidden shadow-2xl bg-white dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 flex flex-col items-center justify-center h-64"
-                        initial={{ y: 50, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: 50, opacity: 0 }}
-                        transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+                        className="relative w-full max-w-sm mx-auto rounded-2xl overflow-hidden shadow-2xl bg-background flex flex-col items-center justify-center h-64"
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.9, opacity: 0 }}
+                        transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                         onClick={e => e.stopPropagation()}
                     >
                         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-white"></div>
@@ -101,107 +101,82 @@ function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean; onClos
     <AnimatePresence>
       {open && (
         <motion.div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-2"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2, ease: "easeOut" }}
+          transition={{ duration: 0.3 }}
           onClick={onClose}
         >
           <motion.div
-            className="relative w-full max-w-sm mx-auto rounded-2xl overflow-hidden shadow-2xl bg-white dark:bg-slate-800 border border-slate-200/50 dark:border-slate-700/50 flex flex-col max-h-[90vh]"
-            initial={{ y: 50, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 50, opacity: 0 }}
-            transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
+            className="relative w-full max-w-md bg-[var(--modal-background)] rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden"
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.95, opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
             onClick={e => e.stopPropagation()}
           >
-            <div className="absolute top-2 right-2 z-10">
-              <motion.button
-                className="bg-gray-500/50 hover:bg-gray-600/60 rounded-full p-2"
-                onClick={onClose}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <X className="w-4 h-4 text-white" />
-              </motion.button>
-            </div>
-
-            <div className="flex-grow overflow-y-auto">
-              <div className="p-6 pt-8 text-center">
-                
+            <div className="flex-grow overflow-y-auto px-6 pt-6 pb-4">
+              <div className="text-center mb-6">
                 {storeMeta.ceoImage && (
                   <Image
                     src={storeMeta.ceoImage}
                     alt={storeMeta.ceoName || 'CEO'}
-                    width={96}
-                    height={96}
-                    className="w-24 h-24 rounded-full object-cover shadow-lg border-4 border-white dark:border-slate-700 mx-auto mb-4"
+                    width={80}
+                    height={80}
+                    className="w-20 h-20 rounded-full object-cover shadow-lg border-4 border-[var(--modal-background)] mx-auto mb-3"
                   />
                 )}
-
-                {storeMeta.businessDescription && (
-                  <p className="text-sm text-slate-600 dark:text-slate-300 mb-2">{storeMeta.businessDescription}</p>
-                )}
-
+                <h2 className="text-2xl font-bold text-text-primary card-text-gradient">{storeMeta.name}</h2>
                 {storeMeta.ceoName && (
-                  <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">{storeMeta.ceoName}</h2>
+                  <p className="text-base text-text-secondary mt-1">Led by {storeMeta.ceoName}</p>
                 )}
-                <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">CEO, {storeMeta.name}</p>
-
-                <div className="flex items-center justify-center gap-2">
-                  <div className="flex items-center gap-1">
-                    {[...Array(5)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />
-                    ))}
-                  </div>
-                  {/* <span className="text-xs text-slate-500 dark:text-slate-400">(4.8 stars from 476 reviews)</span> */}
+                {storeMeta.businessDescription && (
+                  <p className="text-sm text-text-secondary mt-3 max-w-sm mx-auto">{storeMeta.businessDescription}</p>
+                )}
+                <div className="flex items-center justify-center gap-1 mt-3">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
+                  ))}
                 </div>
               </div>
 
-              <div className="px-4 pb-6 space-y-3">
+              <div className="space-y-3">
                 {storeMeta.hasPhysicalShop && fullAddress && (
-                  <div className="flex items-start gap-3 p-3 bg-slate-50/80 dark:bg-slate-700/50 rounded-lg">
-                    <MapPin className="w-5 h-5 text-slate-600 dark:text-slate-300 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-slate-700 dark:text-slate-200">{fullAddress}</span>
+                  <div className="flex items-start gap-4 p-4 border border-border-color rounded-xl">
+                    <MapPin className="w-5 h-5 text-text-secondary flex-shrink-0 mt-1" />
+                    <span className="text-sm text-text-primary">{fullAddress}</span>
                   </div>
                 )}
-                
-                <div className="flex items-center gap-3 p-3 bg-slate-50/80 dark:bg-slate-700/50 rounded-lg">
-                  <Clock className="w-5 h-5 text-slate-600 dark:text-slate-300 flex-shrink-0" />
-                  <span className="text-sm text-slate-700 dark:text-slate-200 font-medium">Open 24/7</span>
+                <div className="flex items-center gap-4 p-4 border border-border-color rounded-xl">
+                  <Clock className="w-5 h-5 text-text-secondary flex-shrink-0" />
+                  <span className="text-sm text-text-primary font-medium">Open 24/7</span>
                 </div>
-
                 {storeMeta.businessInstagram && (
-                  <div className="flex items-center gap-3 p-3 bg-slate-50/80 dark:bg-slate-700/50 rounded-lg">
-                     <div className="w-5 h-5 bg-gradient-to-tr from-purple-500 to-pink-500 rounded-md flex items-center justify-center">
-                        <span className="text-white text-[10px] font-bold">IG</span>
-                      </div>
-                    <span className="text-sm text-slate-700 dark:text-slate-200">{storeMeta.businessInstagram}</span>
+                  <div className="flex items-center gap-4 p-4 border border-border-color rounded-xl">
+                    <Instagram className="w-5 h-5 text-text-secondary flex-shrink-0" />
+                    <span className="text-sm text-text-primary">{storeMeta.businessInstagram}</span>
                   </div>
                 )}
               </div>
-            </div>
 
-            <div className="p-4 bg-white dark:bg-slate-800 border-t border-slate-200/50 dark:border-slate-700/50">
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3 mt-6">
                 <motion.a
                   href={`tel:${storeMeta.whatsapp?.replace(/\s/g, '')}`}
-                  className="flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-600 text-white font-semibold py-3 rounded-xl shadow-lg"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  className="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-text-primary font-semibold py-3 rounded-xl"
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
                 >
                   <Phone className="w-4 h-4" />
                   <span className="text-sm">Call</span>
                 </motion.a>
-
                 <motion.a
                   href={`https://wa.me/${storeMeta.whatsapp?.replace(/\D/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text_white font-semibold py-3 rounded-xl shadow-lg"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
+                  className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl shadow-lg"
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
                 >
                   <MessageCircle className="w-4 h-4" />
                   <span className="text-sm">WhatsApp</span>
@@ -209,6 +184,15 @@ function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean; onClos
               </div>
             </div>
 
+            <div className="px-6 pb-5 pt-3 bg-[var(--modal-background)] border-t border-border-color">
+                <button onClick={onClose} className="w-full bg-slate-200 dark:bg-slate-800 text-text-primary font-semibold py-3 px-4 rounded-full hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors duration-200">
+                    Close
+                </button>
+                <div className="text-center text-xs text-text-secondary mt-3">
+                    in partnership with <strong>(Biz+Con)™ </strong>Network
+                </div>
+               
+            </div>
           </motion.div>
         </motion.div>
       )}
