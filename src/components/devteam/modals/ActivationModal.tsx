@@ -8,7 +8,7 @@ interface ActivationModalProps {
   referral: {
     id: string;
     businessName: string;
-    storeId: string; // This is the referrerStoreId
+    referrerStoreId: string; // Correct property for the referrer's store ID
   };
   onActivationSuccess: () => void;
 }
@@ -35,7 +35,7 @@ export const ActivationModal: FC<ActivationModalProps> = ({ isOpen, onClose, ref
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          referrerStoreId: referral.storeId,
+          referrerStoreId: referral.referrerStoreId, // Correctly use referrerStoreId
           referralId: referral.id,
           newRefereeStoreId: newRefereeStoreId.trim(),
         }),

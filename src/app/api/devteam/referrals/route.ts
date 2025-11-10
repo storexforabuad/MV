@@ -1,67 +1,67 @@
-'use server';
-import { NextResponse } from 'next/server';
-import { db } from '@/lib/firebase';
-import { collectionGroup, getDocs, Timestamp } from 'firebase/firestore';
 
+import { NextResponse } from 'next/server';
+import { db } from '@/lib/db'; // Adjusted import path for app router
+import { collectionGroup, getDocs, query } from 'firebase/firestore';
+
+// Define the shape of a referral object for the response
 interface Referral {
   id: string;
+  status: 'pending' | 'activated';
   businessName: string;
-  businessNumber: string;
-  storeId: string;
-  createdAt: string; // Changed to string for serialization
+  referrerStoreId: string; // The ID of the store that made the referral
+  refereeStoreId?: string;
+  activatedAt?: Date;
+  createdAt?: Date;
 }
 
-// GET all referrals for the dev team, grouped by store
+// Handler for GET requests
 export async function GET() {
   try {
-    const referralsQuery = collectionGroup(db, 'referrals');
+    // This is the collection group query. It looks for all collections named 'referrals'.
+    const referralsQuery = query(
+      collectionGroup(db, 'referrals')
+    );
+
     const querySnapshot = await getDocs(referralsQuery);
 
-    const referralsByStore: { [key: string]: Referral[] } = {};
+    const allReferrals: Referral[] = [];
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+      // The parent of the 'referrals' subcollection is the store document.
+      const referrerStoreId = doc.ref.parent.parent?.id;
 
-    querySnapshot.docs.forEach(doc => {
-      const referralData = doc.data();
-      const storeId = doc.ref.parent.parent?.id;
-
-      if (storeId) {
-        if (!referralsByStore[storeId]) {
-          referralsByStore[storeId] = [];
-        }
-
-        let createdAt: string;
-        // Safely convert the timestamp to an ISO string
-        if (referralData.createdAt instanceof Timestamp) {
-          createdAt = referralData.createdAt.toDate().toISOString();
-        } else {
-          // Provide a fallback for unexpected formats
-          createdAt = new Date().toISOString();
-        }
-
-        const referral: Referral = {
+      if (referrerStoreId) {
+        allReferrals.push({
           id: doc.id,
-          storeId: storeId,
-          businessName: referralData.businessName,
-          businessNumber: referralData.businessNumber,
-          createdAt: createdAt,
-        };
-        
-        referralsByStore[storeId].push(referral);
+          referrerStoreId: referrerStoreId,
+          status: data.status || 'pending',
+          businessName: data.businessName,
+          refereeStoreId: data.refereeStoreId,
+          // Convert Firestore Timestamps to JS Date objects for the API response
+          activatedAt: data.activatedAt?.toDate(),
+          createdAt: data.createdAt?.toDate(),
+        });
       }
     });
 
-    return NextResponse.json(referralsByStore, { status: 200 });
+    // Sort referrals to show pending ones first, then by creation date
+    allReferrals.sort((a, b) => {
+      if (a.status === 'pending' && b.status !== 'pending') return -1;
+      if (b.status === 'pending' && a.status !== 'pending') return 1;
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return dateB - dateA;
+    });
+
+    return NextResponse.json(allReferrals, { status: 200 });
 
   } catch (error) {
     console.error('Error fetching all referrals:', error);
-    if (error instanceof Error && error.message.includes('requires an index')) {
-        return NextResponse.json(
-            { 
-                error: 'Firestore index required', 
-                message: 'A Firestore index is required to complete this query. Please create the index in your Firebase console.' 
-            }, 
-            { status: 500 }
-        );
-    }
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
+}
+
+// To prevent other methods from being used
+export async function POST() {
+    return NextResponse.json({ message: 'Method Not Allowed' }, { status: 405 });
 }

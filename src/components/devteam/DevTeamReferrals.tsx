@@ -1,25 +1,21 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
-import { Gift, Loader2, ServerCrash, CheckCircle, Clock } from 'lucide-react';
+import { Gift, Loader2, ServerCrash, CheckCircle } from 'lucide-react';
 import { ActivationModal } from './modals/ActivationModal';
 
+// Updated Referral interface to match the new API response
 interface Referral {
   id: string;
   businessName: string;
-  businessNumber: string;
-  storeId: string;
-  createdAt: string;
   status: 'pending' | 'activated';
-  refereeStoreId?: string;
-  activatedAt?: string;
-}
-
-interface ReferralsByStore {
-  [key: string]: Referral[];
+  referrerStoreId: string; // ID of the store that made the referral
+  refereeStoreId?: string; // ID of the new store created from the referral
+  activatedAt?: string; // ISO string format
+  createdAt?: string;   // ISO string format
 }
 
 const DevTeamReferrals: React.FC = () => {
-  const [referralsByStore, setReferralsByStore] = useState<ReferralsByStore>({});
+  const [allReferrals, setAllReferrals] = useState<Referral[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'pending' | 'activated'>('pending');
@@ -29,14 +25,16 @@ const DevTeamReferrals: React.FC = () => {
 
   const fetchAllReferrals = async () => {
     setIsLoading(true);
+    setError(null);
     try {
+      // Fetch from the new centralized endpoint
       const response = await fetch('/api/devteam/referrals');
       if (!response.ok) {
-        throw new Error('Failed to fetch referrals for dev team');
+        const errData = await response.json();
+        throw new Error(errData.error || 'Failed to fetch referrals');
       }
-      const data: ReferralsByStore = await response.json();
-      // The API now returns a status field, so we can use it directly
-      setReferralsByStore(data);
+      const data: Referral[] = await response.json();
+      setAllReferrals(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An unknown error occurred');
     } finally {
@@ -59,22 +57,15 @@ const DevTeamReferrals: React.FC = () => {
   };
 
   const handleActivationSuccess = () => {
-    // Re-fetch all data to get the latest status
+    // Re-fetch all data to get the latest status after an activation
     fetchAllReferrals();
+    handleCloseModal();
   };
 
+  // Filter the flat list of referrals based on the active tab
   const filteredReferrals = useMemo(() => {
-    const filtered: ReferralsByStore = {};
-    for (const storeId in referralsByStore) {
-      const storeReferrals = referralsByStore[storeId].filter(ref => ref.status === activeTab);
-      if (storeReferrals.length > 0) {
-        filtered[storeId] = storeReferrals;
-      }
-    }
-    return filtered;
-  }, [referralsByStore, activeTab]);
-
-  const storeIds = Object.keys(filteredReferrals);
+    return allReferrals.filter(ref => ref.status === activeTab);
+  }, [allReferrals, activeTab]);
 
   const TabButton = ({ tab, label }: { tab: 'pending' | 'activated', label: string }) => (
     <button
@@ -112,40 +103,34 @@ const DevTeamReferrals: React.FC = () => {
           <p className="font-semibold text-red-600 dark:text-red-400">Error Loading Referrals</p>
           <p className="text-sm text-red-500 dark:text-red-400/80">{error}</p>
         </div>
-      ) : storeIds.length === 0 ? (
+      ) : filteredReferrals.length === 0 ? (
         <p className="text-center text-slate-500 dark:text-slate-400 py-6">No {activeTab} referrals found.</p>
       ) : (
-        <div className="space-y-6">
-          {storeIds.map(storeId => (
-            <div key={storeId} className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50">
-              <h3 className="font-bold text-md text-slate-700 dark:text-slate-200 mb-3 truncate">Referrer Store: <span className="font-mono text-sm bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded">{storeId}</span></h3>
-              <div className="space-y-3">
-                {filteredReferrals[storeId].map(ref => (
-                  <div key={ref.id} className="p-4 bg-white dark:bg-slate-800 rounded-lg flex justify-between items-center shadow-sm">
-                    <div>
-                      <p className="font-semibold text-slate-800 dark:text-slate-100">{ref.businessName}</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-300">{ref.businessNumber}</p>
-                      {ref.status === 'activated' && ref.refereeStoreId && (
-                        <p className="text-xs text-green-600 dark:text-green-400 mt-1">Activated as: <span className="font-mono bg-green-100 dark:bg-green-900/50 px-1 rounded">{ref.refereeStoreId}</span></p>
-                      )}
-                    </div>
-                    <div className="text-right">
-                        {ref.status === 'pending' ? (
-                            <button 
-                                onClick={() => handleOpenModal(ref)}
-                                className="px-4 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition-colors text-sm flex items-center"
-                            >
-                                <CheckCircle className="w-4 h-4 mr-1.5"/>
-                                Activate
-                            </button>
-                        ) : (
-                            <p className="text-xs text-slate-400 dark:text-slate-500">
-                                Activated: {ref.activatedAt ? new Date(ref.activatedAt).toLocaleDateString() : 'N/A'}
-                            </p>
-                        )}
-                    </div>
-                  </div>
-                ))}
+        <div className="space-y-4">
+          {/* We no longer group by store, just list all referrals */}
+          {filteredReferrals.map(ref => (
+            <div key={ref.id} className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg flex justify-between items-center border border-slate-200 dark:border-slate-700/50 shadow-sm">
+              <div>
+                <p className="font-bold text-lg text-slate-800 dark:text-slate-100">{ref.businessName}</p>
+                <p className="text-sm text-slate-600 dark:text-slate-300">Referred by: <span className="font-mono text-xs bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded">{ref.referrerStoreId}</span></p>
+                {ref.status === 'activated' && ref.refereeStoreId && (
+                  <p className="text-xs text-green-600 dark:text-green-400 mt-1">Activated as: <span className="font-mono bg-green-100 dark:bg-green-900/50 px-1 rounded">{ref.refereeStoreId}</span></p>
+                )}
+              </div>
+              <div className="text-right flex-shrink-0 ml-4">
+                {ref.status === 'pending' ? (
+                  <button 
+                    onClick={() => handleOpenModal(ref)}
+                    className="px-4 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition-colors text-sm flex items-center shadow-md hover:shadow-lg"
+                  >
+                    <CheckCircle className="w-4 h-4 mr-1.5"/>
+                    Activate
+                  </button>
+                ) : (
+                  <p className="text-xs text-slate-400 dark:text-slate-500">
+                    Activated: {ref.activatedAt ? new Date(ref.activatedAt).toLocaleDateString() : 'N/A'}
+                  </p>
+                )}
               </div>
             </div>
           ))}
