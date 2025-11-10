@@ -2,7 +2,7 @@
 import { memo, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Info, Phone, MessageCircle, Star, Clock, X, MapPin, User } from 'lucide-react';
+import { Info, Phone, MessageCircle, Star, Clock, X, MapPin } from 'lucide-react';
 import { Product } from '../../types/product';
 import { motion, LayoutGroup, AnimatePresence, Transition } from 'framer-motion';
 import Image from 'next/image';
@@ -253,7 +253,6 @@ const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId,
   const [aboutOpen, setAboutOpen] = useState(false);
   const [isOrdersModalOpen, setOrdersModalOpen] = useState(false);
   const [storeMeta, setStoreMeta] = useState<StoreMeta | null>(null);
-  const [isLoginRedirectPending, setIsLoginRedirectPending] = useState(false);
 
   useEffect(() => {
     async function fetchStoreMeta() {
@@ -263,22 +262,6 @@ const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId,
     }
     fetchStoreMeta();
   }, [storeId]);
-
-  useEffect(() => {
-    if (customer && isLoginRedirectPending && storeId) {
-      router.push(`/dashboard/${storeId}/${customer.id}`);
-      setIsLoginRedirectPending(false);
-    }
-  }, [customer, isLoginRedirectPending, storeId, router]);
-  
-  const handleDashboardClick = () => {
-    if (storeId && customer) {
-      router.push(`/dashboard/${storeId}/${customer.id}`);
-    } else if (storeId) {
-      setIsLoginRedirectPending(true);
-      promptLogin();
-    }
-  };
 
   const handleOrdersClick = () => {
     if (customer) {
@@ -313,12 +296,6 @@ const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId,
               aria-label="Toggle grid layout"
               text={isSingleColumn ? 'Double' : 'Single'}
             />
-            <GlassButton
-              onClick={handleDashboardClick}
-              aria-label="Customer activity"
-            >
-              <User className="w-5 h-5 text-[var(--text-primary)]" />
-            </GlassButton>
             <GlassButton
               onClick={() => setAboutOpen(true)}
               aria-label="About this business"

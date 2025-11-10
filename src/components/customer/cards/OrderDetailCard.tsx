@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
-import { Repeat, MessageSquare, CheckCircle, ReceiptIcon } from 'lucide-react';
+import { Repeat, MessageSquare, Clock, ReceiptIcon } from 'lucide-react';
 import { Order } from '../../../hooks/useOrders';
 import { formatPrice } from '../../../utils/price';
 import { ReceiptModal } from '../../modals/ReceiptModal';
@@ -80,9 +80,9 @@ export function OrderDetailCard({ order, addOrder, storeMeta }: OrderDetailCardP
             <p className="font-bold text-lg card-text-gradient truncate">{order.product.name}</p>
             <p className="text-sm text-text-secondary">Order placed on {orderDate}</p>
             <p className="text-lg font-semibold text-purple-400 mt-1">{formatPrice(order.product.price)}</p>
-            <div className="flex items-center gap-2 mt-2 text-sm font-medium text-green-400">
-              <CheckCircle className="w-4 h-4" />
-              <span>Delivered</span>
+            <div className="flex items-center gap-2 mt-2 text-sm font-medium text-yellow-400">
+              <Clock className="w-4 h-4" />
+              <span>Processing</span>
             </div>
           </div>
         </div>

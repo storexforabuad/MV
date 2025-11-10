@@ -39,6 +39,28 @@ const formatDateGroup = (dateStr: string) => {
   });
 };
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, x: -20 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    transition: {
+      duration: 0.5,
+      ease: "easeOut",
+    },
+  },
+};
+
 const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose, orders, addOrder, storeMeta }) => {
 
   const handleClose = () => {
@@ -112,21 +134,24 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose, orders, addO
                                 key={dateKey} 
                                 className="mb-6"
                                 initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0, transition: { delay: index * 0.1 } }}
+                                animate={{ opacity: 1, y: 0, transition: { delay: index * 0.2 } }}
                             >
                               <h4 className="font-bold text-lg card-text-gradient mb-2 sticky top-0 bg-background/80 backdrop-blur-sm py-2">{formatDateGroup(dateKey)}</h4>
-                              <div className="grid grid-cols-1 gap-4">
+                              <motion.div 
+                                className="grid grid-cols-1 gap-4"
+                                variants={containerVariants}
+                                initial="hidden"
+                                animate="visible"
+                              >
                                 {groupedOrders[dateKey].map(order => (
                                   <motion.div 
                                     key={order.product.id + order.orderDate} 
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ duration: 0.3, ease: 'easeOut' }}
+                                    variants={itemVariants}
                                   >
                                     <OrderDetailCard order={order} addOrder={addOrder} storeMeta={storeMeta} />
                                   </motion.div>
                                 ))}
-                              </div>
+                              </motion.div>
                             </motion.div>
                           ))}
                         </motion.div>
@@ -151,7 +176,7 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose, orders, addO
                   <div className="absolute bottom-0 left-0 right-0 z-20">
                     <div className="bg-background/80 backdrop-blur-sm p-4 border-t border-border-color">
                       <button onClick={handleClose} className="w-full bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-800 font-semibold py-3 px-4 rounded-full hover:bg-slate-700 dark:hover:bg-slate-200 transition-colors duration-200">
-                        Done
+                        close
                       </button>
                     </div>
                   </div>
