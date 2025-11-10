@@ -153,7 +153,7 @@ const EmptyCategory = () => (
           </div>
         )}
         
-        {storeId && <BusinessCardModal open={aboutOpen} onClose={() => setAboutOpen(false)} storeMeta={storeMeta || undefined} />}
+        {storeId && aboutOpen && <BusinessCardModal open={aboutOpen} onClose={() => setAboutOpen(false)} storeMeta={storeMeta || undefined} />}
         {storeId && storeMeta && <OrdersModal isOpen={isOrdersModalOpen} onClose={() => setOrdersModalOpen(false)} orders={orders} storeId={storeId} addOrder={addOrder} storeMeta={storeMeta} />}
         
         <motion.div
