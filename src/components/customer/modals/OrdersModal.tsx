@@ -3,7 +3,7 @@
 import React, { Fragment, useMemo } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { ShoppingCartIcon } from '@heroicons/react/24/solid';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { Order } from '../../../hooks/useOrders';
 import { OrderDetailCard } from '../cards/OrderDetailCard';
 import { StoreMeta } from '@/types/store';
@@ -39,7 +39,7 @@ const formatDateGroup = (dateStr: string) => {
   });
 };
 
-const containerVariants = {
+const containerVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
@@ -49,7 +49,7 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { opacity: 0, x: -20 },
   visible: {
     opacity: 1,
@@ -176,7 +176,7 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose, orders, addO
                   <div className="absolute bottom-0 left-0 right-0 z-20">
                     <div className="bg-background/80 backdrop-blur-sm p-4 border-t border-border-color">
                       <button onClick={handleClose} className="w-full bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-800 font-semibold py-3 px-4 rounded-full hover:bg-slate-700 dark:hover:bg-slate-200 transition-colors duration-200">
-                        close
+                        Done
                       </button>
                     </div>
                   </div>
