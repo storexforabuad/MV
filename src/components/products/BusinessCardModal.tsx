@@ -157,7 +157,7 @@ export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean;
                       close
                   </button>
                   <div className="text-center text-xs text-text-secondary mt-3">
-                      in partnership with <strong>(Biz+Con)™</strong>Network
+                      in partnership with <strong>(Biz+Con)™ </strong>Network
                   </div>
               </div>
             </motion.div>
