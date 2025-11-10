@@ -152,12 +152,13 @@ export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean;
               </div>
   
               <div className="px-6 pb-5 pt-3 bg-[var(--modal-background)] border-t border-border-color">
-                  <div className="text-center text-xs text-text-secondary mb-3">
-                      in partnership with <strong>(Biz+Con)™</strong>Network
-                  </div>
+                  
                   <button onClick={onClose} className="w-full bg-slate-200 dark:bg-slate-800 text-text-primary font-semibold py-3 px-4 rounded-full hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors duration-200">
                       close
                   </button>
+                  <div className="text-center text-xs text-text-secondary mt-3">
+                      in partnership with <strong>(Biz+Con)™</strong>Network
+                  </div>
               </div>
             </motion.div>
           </motion.div>
