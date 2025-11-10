@@ -176,7 +176,7 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose, orders, addO
                   <div className="absolute bottom-0 left-0 right-0 z-20">
                     <div className="bg-background/80 backdrop-blur-sm p-4 border-t border-border-color">
                       <button onClick={handleClose} className="w-full bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-800 font-semibold py-3 px-4 rounded-full hover:bg-slate-700 dark:hover:bg-slate-200 transition-colors duration-200">
-                        Done
+                        close
                       </button>
                     </div>
                   </div>
