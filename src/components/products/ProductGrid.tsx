@@ -2,7 +2,7 @@
 import { memo, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Info, Phone, MessageCircle, Star, Clock, X, MapPin, User } from 'lucide-react';
+import { Info, Phone, MessageCircle, Star, Clock, X, MapPin, User, Package } from 'lucide-react';
 import { Product } from '../../types/product';
 import { motion, LayoutGroup, AnimatePresence, Transition } from 'framer-motion';
 import Image from 'next/image';
@@ -23,11 +23,11 @@ const ProductCard = dynamic(() => import('./ProductCard'), {
   ssr: false
 });
 
-function GlassButton({ onClick, children, 'aria-label': ariaLabel, text }: { onClick: () => void; children?: ReactNode; 'aria-label': string; text?: string }) {
+function GlassButton({ onClick, children, 'aria-label': ariaLabel, text, badgeCount }: { onClick: () => void; children?: ReactNode; 'aria-label': string; text?: string; badgeCount?: number }) {
   const paddingClass = text ? 'px-4 py-3' : 'p-3';
   return (
     <motion.button
-      className={`card-glass rounded-full flex items-center justify-center gap-2 shadow-lg ${paddingClass}`}
+      className={`relative card-glass rounded-full flex items-center justify-center gap-2 shadow-lg ${paddingClass}`}
       onClick={onClick}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
@@ -35,6 +35,11 @@ function GlassButton({ onClick, children, 'aria-label': ariaLabel, text }: { onC
     >
       {children}
       {text && <span className="text-sm font-medium text-[var(--text-primary)]">{text}</span>}
+      {badgeCount !== undefined && (
+        <div className={`absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 rounded-full text-xs font-bold text-white ${badgeCount > 0 ? 'bg-red-500' : 'bg-gray-500'}`}>
+          {badgeCount}
+        </div>
+      )}
     </motion.button>
   );
 }
@@ -271,6 +276,15 @@ const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId,
     }
   };
 
+  const handleOrdersClick = () => {
+    if (storeId && customer) {
+      router.push(`/dashboard/${storeId}/${customer.id}?view=orders`);
+    } else if (storeId) {
+      setIsLoginRedirectPending(true);
+      promptLogin();
+    }
+  };
+
   const validProducts = products.filter(p => p && p.id && Array.isArray(p.images));
 
   const sortedProducts = [...validProducts].sort((a, b) => {
@@ -307,6 +321,13 @@ const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId,
               aria-label="About this business"
             >
               <Info className="w-5 h-5 text-[var(--text-primary)]" />
+            </GlassButton>
+            <GlassButton
+              onClick={handleOrdersClick}
+              aria-label="Your Orders"
+              badgeCount={0}
+            >
+              <Package className="w-5 h-5 text-[var(--text-primary)]" />
             </GlassButton>
           </div>
         </div>
