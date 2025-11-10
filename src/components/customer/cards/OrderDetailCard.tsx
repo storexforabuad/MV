@@ -7,28 +7,50 @@ import { Repeat, MessageSquare, CheckCircle, ReceiptIcon } from 'lucide-react';
 import { Order } from '../../../hooks/useOrders';
 import { formatPrice } from '../../../utils/price';
 import { ReceiptModal } from '../../modals/ReceiptModal';
+import { useCustomer } from '@/context/CustomerContext';
+import { StoreMeta } from '@/types/store';
+import { Product } from '@/types/product';
+import { Customer } from '@/types/customer';
 
 interface OrderDetailCardProps {
   order: Order;
+  addOrder: (product: Product, storeMeta: StoreMeta, quantity: number, customerInfo: Customer, referralCode: string | null, bonusApplied: boolean) => Promise<void>;
+  storeMeta: StoreMeta;
 }
 
-export function OrderDetailCard({ order }: OrderDetailCardProps) {
+export function OrderDetailCard({ order, addOrder, storeMeta }: OrderDetailCardProps) {
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+  const { customer } = useCustomer();
 
-  const handleReorder = () => {
-    const rawWhatsappNumber = order.storeMeta?.whatsapp;
-    if (!rawWhatsappNumber) {
+  const handleReorder = async () => {
+    if (!customer) {
+      toast.error('Please log in to reorder.');
+      return;
+    }
+
+    if (!storeMeta || !storeMeta.whatsapp) {
       toast.error("Seller's contact information is not available.");
       return;
     }
-    
-    const sanitizedWhatsappNumber = rawWhatsappNumber.replace(/\D/g, '');
-    const productUrl = `${window.location.origin}/${order.product.storeId}/products/${order.product.id}`;
-    
-    const message = `*Reorder Request*\n\n---\n\n*Product:* ${order.product.name}\n*Price:* ${formatPrice(order.product.price)}\n\nI would like to place another order for this item.\n\n*Product Link:* ${productUrl}`;
-    
-    const whatsappUrl = `https://wa.me/${sanitizedWhatsappNumber}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
+
+    try {
+      // 1. Record the new order in Firestore
+      await addOrder(order.product, storeMeta, 1, customer, null, false);
+
+      // 2. Open WhatsApp with the pre-filled message
+      const sanitizedWhatsappNumber = storeMeta.whatsapp.replace(/\D/g, '');
+      const productUrl = `${window.location.origin}/${order.product.storeId}/products/${order.product.id}`;
+      
+      const message = `*Reorder Request*\n\n---\n\n*Product:* ${order.product.name}\n*Price:* ${formatPrice(order.product.price)}\n\nI would like to place another order for this item.\n\n*Product Link:* ${productUrl}`;
+      
+      const whatsappUrl = `https://wa.me/${sanitizedWhatsappNumber}?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+      toast.success('Reorder placed successfully!');
+
+    } catch (error) {
+      console.error("Failed to place reorder:", error);
+      toast.error('There was an issue placing your reorder.');
+    }
   };
 
   const handleDispute = () => {
@@ -44,7 +66,7 @@ export function OrderDetailCard({ order }: OrderDetailCardProps) {
 
   return (
     <>
-      <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-md overflow-hidden transition-transform duration-300 ease-in-out hover:scale-[1.02] hover:shadow-xl">
+      <div className="bg-card-background rounded-2xl shadow-md overflow-hidden transition-transform duration-300 ease-in-out hover:scale-[1.02] hover:shadow-xl">
         <div className="flex gap-4 p-4">
           <div className="w-24 h-24 relative flex-shrink-0">
             <Image
@@ -55,33 +77,33 @@ export function OrderDetailCard({ order }: OrderDetailCardProps) {
             />
           </div>
           <div className="flex-1">
-            <p className="font-bold text-lg text-slate-800 dark:text-slate-100 truncate">{order.product.name}</p>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Order placed on {orderDate}</p>
-            <p className="text-lg font-semibold text-purple-600 dark:text-purple-400 mt-1">{formatPrice(order.product.price)}</p>
-            <div className="flex items-center gap-2 mt-2 text-sm font-medium text-green-600 dark:text-green-400">
+            <p className="font-bold text-lg card-text-gradient truncate">{order.product.name}</p>
+            <p className="text-sm text-text-secondary">Order placed on {orderDate}</p>
+            <p className="text-lg font-semibold text-purple-400 mt-1">{formatPrice(order.product.price)}</p>
+            <div className="flex items-center gap-2 mt-2 text-sm font-medium text-green-400">
               <CheckCircle className="w-4 h-4" />
               <span>Delivered</span>
             </div>
           </div>
         </div>
-        <div className="grid grid-cols-3 border-t border-slate-200 dark:border-slate-700">
+        <div className="grid grid-cols-3 border-t border-border-color">
           <button 
             onClick={handleReorder}
-            className="flex items-center justify-center gap-2 p-3 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
+            className="flex items-center justify-center gap-2 p-3 text-sm font-semibold text-text-secondary hover:bg-zinc-700 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
           >
             <Repeat className="w-4 h-4" />
             <span>Reorder</span>
           </button>
           <button 
             onClick={() => setIsReceiptModalOpen(true)}
-            className="flex items-center justify-center gap-2 p-3 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors duration-200 ease-in-out border-l border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
+            className="flex items-center justify-center gap-2 p-3 text-sm font-semibold text-text-secondary hover:bg-zinc-700 transition-colors duration-200 ease-in-out border-l border-border-color focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
           >
             <ReceiptIcon className="w-4 h-4" />
             <span>Receipt</span>
           </button>
           <button 
             onClick={handleDispute}
-            className="flex items-center justify-center gap-2 p-3 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors duration-200 ease-in-out border-l border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
+            className="flex items-center justify-center gap-2 p-3 text-sm font-semibold text-text-secondary hover:bg-zinc-700 transition-colors duration-200 ease-in-out border-l border-border-color focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
           >
             <MessageSquare className="w-4 h-4" />
             <span>Dispute</span>

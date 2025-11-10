@@ -2,13 +2,15 @@
 import { memo, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Info, Phone, MessageCircle, Star, Clock, X, MapPin, User, Package } from 'lucide-react';
+import { Info, Phone, MessageCircle, Star, Clock, X, MapPin, User } from 'lucide-react';
 import { Product } from '../../types/product';
 import { motion, LayoutGroup, AnimatePresence, Transition } from 'framer-motion';
 import Image from 'next/image';
 import { getStoreMeta } from '../../lib/db';
 import { StoreMeta } from '../../types/store';
 import { useCustomer } from '@/context/CustomerContext';
+import { useOrders } from '@/hooks/useOrders';
+import { OrdersModal } from '@/components/customer/modals/OrdersModal';
 
 const ProductCard = dynamic(() => import('./ProductCard'), {
   loading: () => (
@@ -197,7 +199,7 @@ function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean; onClos
                   href={`https://wa.me/${storeMeta.whatsapp?.replace(/\D/g, '')}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white font-semibold py-3 rounded-xl shadow-lg"
+                  className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text_white font-semibold py-3 rounded-xl shadow-lg"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -246,8 +248,10 @@ interface ProductGridProps {
 const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId, activeCategoryId }: ProductGridProps) {
   const router = useRouter();
   const { customer, promptLogin } = useCustomer();
+  const { orders, addOrder } = useOrders(customer?.id, storeId);
   const [isSingleColumn, setIsSingleColumn] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [isOrdersModalOpen, setOrdersModalOpen] = useState(false);
   const [storeMeta, setStoreMeta] = useState<StoreMeta | null>(null);
   const [isLoginRedirectPending, setIsLoginRedirectPending] = useState(false);
 
@@ -277,10 +281,9 @@ const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId,
   };
 
   const handleOrdersClick = () => {
-    if (storeId && customer) {
-      router.push(`/dashboard/${storeId}/${customer.id}?view=orders`);
-    } else if (storeId) {
-      setIsLoginRedirectPending(true);
+    if (customer) {
+      setOrdersModalOpen(true);
+    } else {
       promptLogin();
     }
   };
@@ -304,7 +307,7 @@ const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId,
     <LayoutGroup>
       {storeId && (
         <div className="sm:hidden fixed bottom-16 left-0 right-0 z-40 flex justify-center pointer-events-none">
-          <div className="flex items-center gap-2 pointer-events-auto">
+          <div className="flex items-center gap-1 pointer-events-auto">
             <GlassButton
               onClick={() => setIsSingleColumn(!isSingleColumn)}
               aria-label="Toggle grid layout"
@@ -325,15 +328,15 @@ const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId,
             <GlassButton
               onClick={handleOrdersClick}
               aria-label="Your Orders"
-              badgeCount={0}
-            >
-              <Package className="w-5 h-5 text-[var(--text-primary)]" />
-            </GlassButton>
+              text="Orders"
+              badgeCount={orders.length}
+            />
           </div>
         </div>
       )}
       
       {storeId && <BusinessCardModal open={aboutOpen} onClose={() => setAboutOpen(false)} storeMeta={storeMeta || undefined} />}
+      {storeId && storeMeta && <OrdersModal isOpen={isOrdersModalOpen} onClose={() => setOrdersModalOpen(false)} orders={orders} storeId={storeId} addOrder={addOrder} storeMeta={storeMeta} />}
       
       <motion.div
         ref={containerRef}

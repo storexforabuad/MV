@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { RefreshCw } from 'lucide-react';
@@ -12,6 +12,8 @@ import { CustomerMobileNav, CustomerSection } from '../../../../components/custo
 import { OrdersModal } from '../../../../components/customer/modals/OrdersModal';
 import { ReferralsModal } from '../../../../components/customer/modals/ReferralsModal';
 import { ProfileModal } from '../../../../components/customer/modals/ProfileModal';
+import { getStoreMeta } from '../../../../lib/db';
+import { StoreMeta } from '../../../../types/store';
 
 const sectionConfig = {
   home: { title: 'Dashboard', subtitle: 'A summary of your recent orders and interactions.' },
@@ -38,9 +40,19 @@ export default function DashboardPage() {
   const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
   const [isReferralsModalOpen, setIsReferralsModalOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [storeMeta, setStoreMeta] = useState<StoreMeta | null>(null);
 
   const storeId = params ? (Array.isArray(params.storeId) ? params.storeId[0] : params.storeId) : undefined;
-  const { orders, refetchOrders: fetchOrders, isLoading: loading } = useOrders(customer?.id || null, storeId);
+  const { orders, addOrder, refetchOrders: fetchOrders, isLoading: loading } = useOrders(customer?.id || null, storeId);
+
+  useEffect(() => {
+    async function fetchStoreMeta() {
+      if (!storeId) return;
+      const meta = await getStoreMeta(storeId as string);
+      setStoreMeta(meta);
+    }
+    fetchStoreMeta();
+  }, [storeId]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -81,14 +93,14 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="bg-slate-50 dark:bg-black min-h-screen">
+    <div className="bg-background min-h-screen">
       <Navbar storeName={currentSection.title} />
       <main className="p-4 pt-20 pb-28 max-w-2xl mx-auto">
         <div className={activeSection === 'home' ? '' : 'mt-8'}>
           {renderMainContent()}
         </div>
       </main>
-      {storeId && (
+      {storeId && storeMeta && (
         <>
           <CustomerMobileNav 
             activeSection={activeSection}
@@ -104,6 +116,8 @@ export default function DashboardPage() {
             onClose={() => setIsOrdersModalOpen(false)} 
             orders={orders}
             storeId={storeId}
+            addOrder={addOrder}
+            storeMeta={storeMeta}
           />
           <ReferralsModal 
             isOpen={isReferralsModalOpen} 
