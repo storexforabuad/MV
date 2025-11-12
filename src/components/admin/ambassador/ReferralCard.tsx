@@ -1,12 +1,12 @@
 'use client';
 import { FC, useEffect, useState } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
-import { db } from '@/lib/db';
+import { db, getCategories } from '@/lib/db';
 import { Naira } from '@/components/common/Naira';
-import { Eye, Loader2, ServerCrash } from 'lucide-react';
+import { Eye, Loader2, ServerCrash, Share2 } from 'lucide-react';
 
 interface ReferralCardProps {
-  referral: { // This is the referral document from the ambassador's sub-collection
+  referral: { 
     id: string;
     businessName: string;
     status: 'pending' | 'activated';
@@ -20,15 +20,21 @@ interface StoreData {
   totalCommissionEarned?: number;
 }
 
+interface Category {
+    id: string;
+    name: string;
+}
+
 const TIER_RATES = {
-  bronze: 0.05, // 5%
-  silver: 0.10, // 10%
-  gold: 0.15,   // 15%
-  platinum: 0.20, // 20%
+  bronze: 0.05, 
+  silver: 0.10, 
+  gold: 0.15,   
+  platinum: 0.20, 
 };
 
 const ReferralCard: FC<ReferralCardProps> = ({ referral, ambassadorTier }) => {
   const [storeData, setStoreData] = useState<StoreData | null>(null);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,8 +44,20 @@ const ReferralCard: FC<ReferralCardProps> = ({ referral, ambassadorTier }) => {
       return;
     }
 
-    const storeRef = doc(db, 'stores', referral.refereeStoreId);
-    
+    const storeId = referral.refereeStoreId;
+
+    const fetchStoreCategories = async () => {
+        try {
+            const fetchedCategories = await getCategories(storeId);
+            setCategories(fetchedCategories);
+        } catch (catError) {
+            console.error('Error fetching categories for share card:', catError);
+        }
+    };
+
+    fetchStoreCategories();
+
+    const storeRef = doc(db, 'stores', storeId);
     const unsubscribe = onSnapshot(storeRef, (storeSnap) => {
       if (storeSnap.exists()) {
         const data = storeSnap.data();
@@ -52,12 +70,54 @@ const ReferralCard: FC<ReferralCardProps> = ({ referral, ambassadorTier }) => {
       }
       setIsLoading(false);
     }, (err) => {
+      console.error(`Error fetching real-time store data for ${storeId}:`, err);
       setError(err instanceof Error ? err.message : 'An unknown error occurred.');
       setIsLoading(false);
     });
 
     return () => unsubscribe();
   }, [referral.refereeStoreId, referral.status]);
+
+  const handleShare = async () => {
+    if (!referral.refereeStoreId) return;
+
+    const storeUrl = `https://tinyurl.com/bizcononline/${referral.refereeStoreId}`;
+    
+    let formattedCategories = 'great products'; // Default text
+    if (categories.length > 0) {
+        const categoryNames = categories.map(c => c.name);
+        const firstFive = categoryNames.slice(0, 5);
+        formattedCategories = firstFive.join(', ');
+        if (categoryNames.length > 5) {
+            formattedCategories += ' and more';
+        }
+    }
+
+    const caption = `🌟 Discover authentic ${formattedCategories} at affordable prices in the new ${referral.businessName} Online Store! 🛒. Get discounts if you use my link top shop:`;
+    const shareMessage = `${caption}\n${storeUrl}`;
+
+    const shareData = {
+        title: `Visit ${referral.businessName}`,
+        text: shareMessage,
+        url: storeUrl,
+    };
+
+    if (navigator.share && navigator.canShare(shareData)) {
+        try {
+            await navigator.share(shareData);
+        } catch (err) {
+            console.error('Share API error:', err);
+        }
+    } else {
+        try {
+            await navigator.clipboard.writeText(shareMessage);
+            alert('Store link and caption copied to clipboard!');
+        } catch (err) {
+            console.error('Failed to copy to clipboard:', err);
+            alert('Failed to copy store link.');
+        }
+    }
+  };
 
   const tierRate = TIER_RATES[ambassadorTier.toLowerCase() as keyof typeof TIER_RATES] || 0;
   const earnedBonus = (storeData?.totalCommissionEarned || 0) * tierRate;
@@ -75,7 +135,7 @@ const ReferralCard: FC<ReferralCardProps> = ({ referral, ambassadorTier }) => {
 
   if (isLoading) {
     return (
-      <div className="bg-white dark:bg-slate-800/80 p-4 rounded-2xl shadow border border-slate-200 dark:border-slate-700/80 flex items-center justify-center min-h-[150px]">
+      <div className="bg-white dark:bg-slate-800/80 p-4 rounded-2xl shadow border border-slate-200 dark:border-slate-700/80 flex items-center justify-center min-h-[220px]">
           <Loader2 className="w-6 h-6 animate-spin text-orange-500"/>
       </div>
     );
@@ -93,40 +153,36 @@ const ReferralCard: FC<ReferralCardProps> = ({ referral, ambassadorTier }) => {
   }
 
   return (
-    <div className="bg-white dark:bg-slate-800 p-4 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 w-full">
-        {/* Business Name */}
-        <p className="font-bold text-lg text-slate-800 dark:text-slate-100">{referral.businessName}</p>
+    <div className="bg-white dark:bg-slate-800/80 p-4 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700/80 w-full flex flex-col">
+      <p className="font-bold text-lg text-slate-800 dark:text-slate-100 text-left mb-4">{referral.businessName}</p>
 
-        {/* Mentorship Stats */}
-        <div className="flex justify-around gap-4 my-4">
-            <div className="text-center">
-                <p className="text-xs text-slate-500 dark:text-slate-400">Store Views</p>
-                <div className="flex items-center justify-center gap-1.5 font-bold text-slate-700 dark:text-slate-200 text-lg">
-                    <Eye className="w-4 h-4 text-slate-400"/> {storeData?.totalViews ?? 0}
-                </div>
-            </div>
+      <div className="text-center mb-4">
+        <p className="text-xs text-slate-500 dark:text-slate-400">Store Views</p>
+        <div className="flex items-center justify-center gap-1.5 font-bold text-slate-700 dark:text-slate-200 text-2xl">
+          <Eye className="w-5 h-5 text-slate-400"/>
+          <span>{storeData?.totalViews ?? 0}</span>
         </div>
+      </div>
 
-        {/* Commission Section */}
-        <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg">
-            <div className="flex justify-between items-center text-sm mb-2">
-                <p className="text-slate-600 dark:text-slate-300">Referee Store&apos;s Commission:</p>
-                <p className="font-semibold flex items-center text-slate-700 dark:text-slate-200">
-                    <Naira className="w-3 h-3 mr-0.5"/> {storeData?.totalCommissionEarned?.toFixed(2) ?? '0.00'}
-                </p>
-            </div>
-            <div className="flex justify-between items-center text-sm">
-                <p className="text-slate-600 dark:text-slate-300">Your Tier Rate ({ambassadorTier}):</p>
-                <p className="font-semibold text-slate-700 dark:text-slate-200">{tierRate * 100}%</p>
-            </div>
-            <hr className="my-2 border-slate-200 dark:border-slate-700"/>
-            <div className="flex justify-between items-center font-bold text-orange-500">
-                <p>Your Earned Bonus:</p>
-                <p className="flex items-center text-lg">
-                    <Naira className="w-4 h-4 mr-0.5"/> {earnedBonus.toFixed(2)}
-                </p>
-            </div>
+      <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg mb-4">
+        <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+          <p className="text-slate-600 dark:text-slate-300 self-center">Your Tier Rate ({ambassadorTier}):</p>
+          <p className="font-semibold text-slate-800 dark:text-slate-200 text-right self-center">{tierRate * 100}%</p>
+
+          <p className="font-bold text-orange-500 text-base self-center">Your Earned Bonus:</p>
+          <div className="font-bold text-orange-500 flex items-baseline justify-end text-lg">
+            <Naira className="w-4 h-4 mr-0.5"/> 
+            <span>{earnedBonus.toFixed(2)}</span>
+          </div>
         </div>
+      </div>
+      
+      <button 
+        onClick={handleShare}
+        className="w-full mt-auto bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors duration-200">
+          <Share2 className="w-4 h-4" />
+          <span>Share Store</span>
+      </button>
     </div>
   );
 };
