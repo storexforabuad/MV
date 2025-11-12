@@ -149,6 +149,15 @@ export const addOrderToFirestore = async (
     const storeOrderRef = doc(db, 'stores', storeId, 'orders', newOrderId);
     batch.set(storeOrderRef, storeOrderPayload);
 
+    // --- New Store Analytics Update ---
+    const storeRef = doc(db, 'stores', storeId);
+    const commissionFromSale = product.commission ? (product.price * product.commission) / 100 : 0;
+    batch.update(storeRef, {
+        totalOrders: increment(1),
+        totalCommissionEarned: increment(commissionFromSale)
+    });
+    // --- End New Store Analytics Update ---
+
     await batch.commit();
 
     return {

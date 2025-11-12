@@ -21,7 +21,8 @@ import {
   startAfter,
   DocumentSnapshot,
   DocumentData,
-  Query
+  Query,
+  writeBatch
 } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Product } from '../types/product';
@@ -519,18 +520,23 @@ export async function incrementProductViews(storeId: string, productId: string):
   try {
     console.log('[PROD] Incrementing views for product:', productId, 'in store:', storeId);
     const productRef = doc(db, 'stores', storeId, 'products', productId);
-    const productSnap = await getDoc(productRef);
-    if (!productSnap.exists()) {
-      console.error('[PROD] Product not found');
-      return;
-    }
-    const currentViews = productSnap.data()?.views || 0;
-    console.log('[PROD] Current views:', currentViews);
-    await updateDoc(productRef, {
+    const storeRef = doc(db, 'stores', storeId);
+    const batch = writeBatch(db);
+
+    // Increment product views
+    batch.update(productRef, {
       views: increment(1),
       lastViewed: serverTimestamp()
     });
-    console.log('[PROD] Successfully incremented views to:', currentViews + 1);
+
+    // Increment total store views
+    batch.update(storeRef, { 
+      totalViews: increment(1) 
+    });
+
+    await batch.commit();
+    console.log('[PROD] Successfully incremented views for product and store.');
+
   } catch (error) {
     if (error instanceof FirebaseError) {
       console.error('[PROD] Firebase error incrementing views:', {

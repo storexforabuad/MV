@@ -3,7 +3,7 @@ import { FC, useEffect, useState } from 'react';
 import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/db';
 import { Naira } from '@/components/common/Naira';
-import { Eye, ShoppingCart, Loader2, ServerCrash } from 'lucide-react';
+import { Eye, Loader2, ServerCrash } from 'lucide-react';
 
 interface ReferralCardProps {
   referral: { // This is the referral document from the ambassador's sub-collection
@@ -17,7 +17,6 @@ interface ReferralCardProps {
 
 interface StoreData {
   totalViews?: number;
-  totalOrders?: number;
   totalCommissionEarned?: number;
 }
 
@@ -46,7 +45,6 @@ const ReferralCard: FC<ReferralCardProps> = ({ referral, ambassadorTier }) => {
         const data = storeSnap.data();
         setStoreData({
           totalViews: data.totalViews || 0,
-          totalOrders: data.totalOrders || 0,
           totalCommissionEarned: data.totalCommissionEarned || 0,
         });
       } else {
@@ -105,12 +103,6 @@ const ReferralCard: FC<ReferralCardProps> = ({ referral, ambassadorTier }) => {
                 <p className="text-xs text-slate-500 dark:text-slate-400">Store Views</p>
                 <div className="flex items-center justify-center gap-1.5 font-bold text-slate-700 dark:text-slate-200 text-lg">
                     <Eye className="w-4 h-4 text-slate-400"/> {storeData?.totalViews ?? 0}
-                </div>
-            </div>
-            <div className="text-center">
-                <p className="text-xs text-slate-500 dark:text-slate-400">Store Orders</p>
-                <div className="flex items-center justify-center gap-1.5 font-bold text-slate-700 dark:text-slate-200 text-lg">
-                    <ShoppingCart className="w-4 h-4 text-slate-400"/> {storeData?.totalOrders ?? 0}
                 </div>
             </div>
         </div>
