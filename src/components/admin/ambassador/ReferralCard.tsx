@@ -1,6 +1,6 @@
 'use client';
 import { FC, useEffect, useState } from 'react';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, onSnapshot } from 'firebase/firestore';
 import { db } from '@/lib/db';
 import { Naira } from '@/components/common/Naira';
 import { Eye, ShoppingCart, Loader2, ServerCrash } from 'lucide-react';
@@ -34,34 +34,31 @@ const ReferralCard: FC<ReferralCardProps> = ({ referral, ambassadorTier }) => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchRefereeStoreData = async () => {
-      if (referral.status !== 'activated' || !referral.refereeStoreId) {
-        setIsLoading(false);
-        return;
+    if (referral.status !== 'activated' || !referral.refereeStoreId) {
+      setIsLoading(false);
+      return;
+    }
+
+    const storeRef = doc(db, 'stores', referral.refereeStoreId);
+    
+    const unsubscribe = onSnapshot(storeRef, (storeSnap) => {
+      if (storeSnap.exists()) {
+        const data = storeSnap.data();
+        setStoreData({
+          totalViews: data.totalViews || 0,
+          totalOrders: data.totalOrders || 0,
+          totalCommissionEarned: data.totalCommissionEarned || 0,
+        });
+      } else {
+        setError('Referred store data not found.');
       }
+      setIsLoading(false);
+    }, (err) => {
+      setError(err instanceof Error ? err.message : 'An unknown error occurred.');
+      setIsLoading(false);
+    });
 
-      try {
-        const storeRef = doc(db, 'stores', referral.refereeStoreId);
-        const storeSnap = await getDoc(storeRef);
-
-        if (storeSnap.exists()) {
-          const data = storeSnap.data();
-          setStoreData({
-            totalViews: data.totalViews || 0,
-            totalOrders: data.totalOrders || 0,
-            totalCommissionEarned: data.totalCommissionEarned || 0,
-          });
-        } else {
-          throw new Error('Referred store data not found.');
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An unknown error occurred.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchRefereeStoreData();
+    return () => unsubscribe();
   }, [referral.refereeStoreId, referral.status]);
 
   const tierRate = TIER_RATES[ambassadorTier.toLowerCase() as keyof typeof TIER_RATES] || 0;
