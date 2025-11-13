@@ -298,13 +298,6 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
   
-  const handleGetMoreViewsClick = () => {
-    setIsViewsModalOpen(false);
-    setTimeout(() => {
-      setIsShareModalOpen(true);
-    }, 50); 
-  };
-
   const containerVariants: Variants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
   const itemVariants: Variants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } } };
   const modalVariants: Variants = { hidden: { opacity: 0, scale: 0.95, y: 20 }, visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: [0.25, 1, 0.5, 1] } }, exit: { opacity: 0, scale: 0.95, y: 20, transition: { duration: 0.2, ease: 'easeOut' } } };
@@ -402,7 +395,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
       {isTipsModalOpen && (<TipsModal {...props as AdminHomeCardsProps & { handleClose: () => void; }} handleClose={handleCloseTipsModal} />)}
 
-      {isViewsModalOpen && (<TotalViewsModal {...props} isOpen={isViewsModalOpen} onClose={() => setIsViewsModalOpen(false)} onGetMoreViewsClick={handleGetMoreViewsClick}/>)}
+      {isViewsModalOpen && (<TotalViewsModal storeId={storeId} isOpen={isViewsModalOpen} onClose={() => setIsViewsModalOpen(false)} />)}
 
       {isShareModalOpen && (<StoreLinkModal {...props} isOpen={isShareModalOpen} handleClose={() => setIsShareModalOpen(false)}/>)}
 

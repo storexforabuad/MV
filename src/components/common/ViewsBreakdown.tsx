@@ -7,7 +7,6 @@ import { db, getPopularProducts, getStoreMeta } from '@/lib/db';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 import { Eye, Loader2, ServerCrash, TrendingUp } from 'lucide-react';
 import { Product } from '@/types/product';
-import { StoreMeta } from '@/types/store';
 
 interface ViewsBreakdownProps {
   storeId: string;
@@ -16,6 +15,11 @@ interface ViewsBreakdownProps {
 interface DailyMetric {
   date: string;
   views: number;
+}
+
+interface StoreMeta {
+  name: string;
+  totalViews?: number;
 }
 
 const ViewsBreakdown: FC<ViewsBreakdownProps> = ({ storeId }) => {
@@ -52,7 +56,7 @@ const ViewsBreakdown: FC<ViewsBreakdownProps> = ({ storeId }) => {
         ]);
 
         setPopularProducts(products);
-        setStoreMeta(meta);
+        setStoreMeta(meta as StoreMeta);
 
       } catch (err) {
         console.error("Error fetching store breakdown data:", err);
@@ -86,7 +90,7 @@ const ViewsBreakdown: FC<ViewsBreakdownProps> = ({ storeId }) => {
   }
 
   const totalViewsLast7Days = dailyMetrics.reduce((acc, curr) => acc + curr.views, 0);
-  const bestDay = dailyMetrics.reduce((best, curr) => curr.views > best.views ? curr : best, dailyMetrics[0]);
+  const bestDay = [...dailyMetrics].sort((a, b) => b.views - a.views)[0];
 
   return (
     <div className="p-1 sm:p-2">
@@ -103,7 +107,7 @@ const ViewsBreakdown: FC<ViewsBreakdownProps> = ({ storeId }) => {
         <div className="bg-slate-100 dark:bg-slate-800/60 p-4 rounded-lg col-span-2 sm:col-span-1">
           <p className="text-sm text-slate-500 dark:text-slate-400">Best Day (Last 7 Days)</p>
           <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">{bestDay?.views ?? 0} views</p>
-          <p className="text-xs text-slate-400">{new Date(bestDay?.date).toLocaleDateString('en-US', { weekday: 'long' })}</p>
+          {bestDay && <p className="text-xs text-slate-400">{new Date(bestDay.date).toLocaleDateString('en-US', { weekday: 'long' })}</p>}
         </div>
       </div>
 
