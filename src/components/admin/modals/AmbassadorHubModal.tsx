@@ -1,11 +1,11 @@
-
 'use client';
 import { useState, FC, FormEvent, useEffect, useCallback, useMemo } from 'react';
-import { X, Gift, LayoutDashboard, Loader2 } from 'lucide-react';
-import { doc, getDoc, collection, getDocs, onSnapshot, Timestamp } from 'firebase/firestore';
+import { X, Gift, LayoutDashboard, Loader2, ArrowLeft } from 'lucide-react';
+import { doc, onSnapshot, collection, query, orderBy, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/db';
 import AmbassadorProgressBar from '../ambassador/AmbassadorProgressBar';
 import ReferralCard from '../ambassador/ReferralCard';
+import ViewsBreakdown from '@/components/common/ViewsBreakdown';
 
 // --- Re-usable "Refer a Business" Tab Content ---
 const ReferBusinessForm = ({ storeId, onReferralAdded }: { storeId: string; onReferralAdded: () => void; }) => {
@@ -76,7 +76,6 @@ const ReferBusinessForm = ({ storeId, onReferralAdded }: { storeId: string; onRe
   );
 }
 
-// Define the shape of a referral object for TypeScript
 interface Referral {
   id: string;
   status: 'pending' | 'activated';
@@ -86,8 +85,7 @@ interface Referral {
   createdAt?: Timestamp;
 }
 
-// --- Dashboard Tab Content ---
-const DashboardContent = ({ storeId, onReferralAdded }: { storeId: string; onReferralAdded: () => void; }) => {
+const DashboardContent = ({ storeId, onReferralAdded, onViewDetailsClick }: { storeId: string; onReferralAdded: () => void; onViewDetailsClick: (storeId: string) => void; }) => {
     const [storeData, setStoreData] = useState({ ambassadorTier: 'bronze', activeReferrals: 0 });
     const [referrals, setReferrals] = useState<Referral[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -106,21 +104,17 @@ const DashboardContent = ({ storeId, onReferralAdded }: { storeId: string; onRef
         });
 
         const referralsRef = collection(db, 'stores', storeId, 'referrals');
-        const unsubscribeReferrals = onSnapshot(referralsRef, (snapshot) => {
+        const unsubscribeReferrals = onSnapshot(query(referralsRef, orderBy('createdAt', 'desc')), (snapshot) => {
             const referralsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Referral));
-            // Sort by pending first, then by date if available
             referralsList.sort((a, b) => {
                 if (a.status === 'pending' && b.status !== 'pending') return -1;
                 if (b.status === 'pending' && a.status !== 'pending') return 1;
-                const dateA = a.activatedAt?.seconds || a.createdAt?.seconds || 0;
-                const dateB = b.activatedAt?.seconds || b.createdAt?.seconds || 0;
-                return dateB - dateA;
+                return (b.activatedAt?.seconds || 0) - (a.activatedAt?.seconds || 0);
             });
             setReferrals(referralsList);
             setIsLoading(false);
         });
         
-
         return () => {
             unsubscribeStore();
             unsubscribeReferrals();
@@ -145,6 +139,7 @@ const DashboardContent = ({ storeId, onReferralAdded }: { storeId: string; onRef
                             key={ref.id}
                             referral={ref}
                             ambassadorTier={storeData.ambassadorTier}
+                            onViewDetailsClick={onViewDetailsClick}
                         />
                     ))}
                     {referrals.length === 0 && (
@@ -158,7 +153,7 @@ const DashboardContent = ({ storeId, onReferralAdded }: { storeId: string; onRef
     );
 }
 
-// --- Main Hub Modal ---
+
 interface AmbassadorHubModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -168,6 +163,22 @@ interface AmbassadorHubModalProps {
 
 export const AmbassadorHubModal: FC<AmbassadorHubModalProps> = ({ isOpen, onClose, storeId, onReferralAdded }) => {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'refer'>('dashboard');
+  const [viewingStoreId, setViewingStoreId] = useState<string | null>(null);
+
+  const handleViewDetailsClick = (storeId: string) => {
+      setViewingStoreId(storeId);
+  };
+
+  const handleCloseDetails = () => {
+      setViewingStoreId(null);
+  };
+  
+  // Reset view when main modal is closed
+  useEffect(() => {
+    if (!isOpen) {
+      setViewingStoreId(null);
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -184,6 +195,8 @@ export const AmbassadorHubModal: FC<AmbassadorHubModalProps> = ({ isOpen, onClos
       {label}
     </button>
   );
+
+  const storeName = viewingStoreId ? 'Store' : ''; // Basic name, can be fetched for more detail
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center animation-fade-in" onClick={onClose}>
@@ -204,11 +217,29 @@ export const AmbassadorHubModal: FC<AmbassadorHubModalProps> = ({ isOpen, onClos
             </div>
             <div className="flex-grow overflow-y-auto p-4 sm:p-6">
                 {activeTab === 'dashboard' ? (
-                    <DashboardContent storeId={storeId} onReferralAdded={onReferralAdded}/>
+                    <DashboardContent storeId={storeId} onReferralAdded={onReferralAdded} onViewDetailsClick={handleViewDetailsClick}/>
                 ) : (
                     <ReferBusinessForm storeId={storeId} onReferralAdded={onReferralAdded} />
                 )}
             </div>
+
+            {/* Detailed Views Modal Layer */}
+            {viewingStoreId && (
+                <div className="absolute inset-0 z-10 bg-slate-50 dark:bg-slate-950 flex flex-col animation-fade-in">
+                     <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800 flex-shrink-0 bg-white dark:bg-slate-900">
+                        <button onClick={handleCloseDetails} className="flex items-center gap-2 p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Go back">
+                            <ArrowLeft className="w-5 h-5" />
+                            <span className="font-bold">Store Analytics</span>
+                        </button>
+                        <button onClick={onClose} className="p-2 rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors" aria-label="Close">
+                            <X className="w-6 h-6" />
+                        </button>
+                    </div>
+                    <div className="flex-grow overflow-y-auto p-4 sm:p-6">
+                        <ViewsBreakdown storeId={viewingStoreId} />
+                    </div>
+                </div>
+            )}
         </div>
     </div>
   );

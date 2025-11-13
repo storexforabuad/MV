@@ -518,7 +518,9 @@ export async function addContact(storeId: string, contact: Omit<Contact, 'id'>):
 
 export async function incrementProductViews(storeId: string, productId: string): Promise<void> {
   try {
-    console.log('[PROD] Incrementing views for product:', productId, 'in store:', storeId);
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const dailyMetricsRef = doc(db, 'stores', storeId, 'dailyMetrics', today);
+
     const productRef = doc(db, 'stores', storeId, 'products', productId);
     const storeRef = doc(db, 'stores', storeId);
     const batch = writeBatch(db);
@@ -534,8 +536,13 @@ export async function incrementProductViews(storeId: string, productId: string):
       totalViews: increment(1) 
     });
 
+    // Increment daily views
+    batch.set(dailyMetricsRef, { 
+        views: increment(1),
+        date: today
+    }, { merge: true });
+
     await batch.commit();
-    console.log('[PROD] Successfully incremented views for product and store.');
 
   } catch (error) {
     if (error instanceof FirebaseError) {
@@ -560,6 +567,7 @@ export async function incrementProductViews(storeId: string, productId: string):
     }
   }
 }
+
 
 // --- New & Updated Global Marketplace Functions ---
 
