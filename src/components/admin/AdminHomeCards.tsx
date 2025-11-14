@@ -1,5 +1,5 @@
 'use client';
-import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, MessageCircle } from 'lucide-react';
+import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send } from 'lucide-react';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { useSpotlightContext } from '@/context/SpotlightContext';
@@ -13,7 +13,7 @@ import { AmbassadorHubModal } from './modals/AmbassadorHubModal'; // NEW
 import SoldOutModal from './modals/SoldOutModal';
 import TipsModal from './modals/TipsModal';
 import SpotlightTooltip from '../shared/SpotlightTooltip';
-import WhatsAppComposerModal from './modals/WhatsAppComposerModal';
+import PostsComposerModal from './modals/PostsComposerModal'; // Renamed
 
 // Import the customer components
 import { AdminCustomersCard } from './AdminCustomersCard';
@@ -100,24 +100,24 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       subtitle: 'Caption',
       valueKey: 'storeLink',
       icon: Share2,
-      gradient: 'bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-600', // Keep original
+      gradient: 'bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-600',
       text: 'text-white',
       component: StoreLinkModal,
-      glowClass: 'dark:shadow-cyan-400/30 shadow-cyan-400/50', // Keep original
+      glowClass: 'dark:shadow-cyan-400/30 shadow-cyan-400/50',
     },
     {
-      label: 'WhatsApp',
-      subtitle: 'Scheduler',
-      icon: MessageCircle,
-      gradient: 'bg-gradient-to-br from-green-500 to-emerald-600',
+      label: 'Posts',
+      subtitle: 'Content Scheduler',
+      icon: Send, // Changed from MessageCircle
+      gradient: 'bg-gradient-to-br from-purple-500 to-violet-600', // New Color
       text: 'text-white',
-      component: WhatsAppComposerModal,
-      glowClass: 'dark:shadow-green-500/30 shadow-green-500/50',
+      component: PostsComposerModal,
+      glowClass: 'dark:shadow-violet-500/30 shadow-violet-500/50', // New Glow
     },
     {
       label: 'Commission',
       valueKey: 'totalCommissionEarned',
-      icon: Percent, // Keep original
+      icon: Percent,
       gradient: 'bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700',
       text: 'text-white',
       component: CommissionEarnedModal,
@@ -126,46 +126,46 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
     {
       label: 'Bonus',
       valueKey: 'totalReferralBonus',
-      icon: Gift, // Keep original
+      icon: Gift,
       gradient: 'bg-gradient-to-br from-pink-500 via-red-500 to-orange-500',
       text: 'text-white',
       component: ReferralBonusModal,
       glowClass: 'dark:shadow-red-500/30 shadow-red-500/50',
     },
     {
-      label: 'Ambassador', // CHANGED from 'Bonus' and 'Referrals'
+      label: 'Ambassador',
       subtitle: 'Hub',
-      valueKey: 'referrals', // Keep for the number display
+      valueKey: 'referrals',
       icon: Star, 
       gradient: 'bg-gradient-to-br from-orange-400 via-red-400 to-pink-500', 
       text: 'text-white',
-      component: null, // Set to null, handled separately
+      component: null,
       glowClass: 'dark:shadow-red-400/30 shadow-red-400/50', 
     },
     {
       label: 'Views',
       valueKey: 'totalViews',
       icon: Eye,
-      gradient: 'bg-gradient-to-br from-indigo-500 via-blue-600 to-purple-700', // New gradient for Views
+      gradient: 'bg-gradient-to-br from-indigo-500 via-blue-600 to-purple-700',
       text: 'text-white',
       component: TotalViewsModal, 
-      glowClass: 'dark:shadow-blue-500/30 shadow-blue-500/50', // New glow for Views
+      glowClass: 'dark:shadow-blue-500/30 shadow-blue-500/50',
     },
     {
       label: 'Orders',
       valueKey: 'totalOrders',
       icon: ShoppingCart,
       gradient: 'bg-gradient-to-br from-sky-600 via-blue-700 to-indigo-800',
-      text: 'text-white', // Keep original
+      text: 'text-white',
       component: null,
-      glowClass: 'dark:shadow-blue-600/30 shadow-blue-600/50', // Keep original
+      glowClass: 'dark:shadow-blue-600/30 shadow-blue-600/50',
     },
     {
       label: 'Manage Categories',
       valueKey: 'totalCategories',
       icon: Tag,
       gradient: 'bg-gradient-to-br from-lime-500 via-green-600 to-emerald-700',
-      text: 'text-white', // Keep original
+      text: 'text-white',
       component: null, 
       glowClass: 'dark:shadow-green-500/30 shadow-green-500/50',
     },
@@ -176,7 +176,7 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       gradient: 'bg-gradient-to-br from-slate-700 via-gray-800 to-zinc-900',
       text: 'text-white',
       component: null,
-      glowClass: 'dark:shadow-slate-600/30 shadow-slate-600/50', // Keep original
+      glowClass: 'dark:shadow-slate-600/30 shadow-slate-600/50',
     },
   ];
 
@@ -193,13 +193,13 @@ const formatCurrencyForCard = (amount: number) => {
 
 export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const { spotlightStep, completeSpotlight } = useSpotlightContext();
-  const [openModal, setOpenModal] = useState<number | null>(null); // Keep this for old modals
+  const [openModal, setOpenModal] = useState<number | null>(null);
   const [isTipsModalOpen, setIsTipsModalOpen] = useState(false);
   const [isViewsModalOpen, setIsViewsModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isCustomersModalOpen, setIsCustomersModalOpen] = useState(false);
-  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
-  const [showWhatsAppNotification, setShowWhatsAppNotification] = useState(false);
+  const [isPostsModalOpen, setIsPostsModalOpen] = useState(false); // Renamed
+  const [showPostsNotification, setShowPostsNotification] = useState(false); // Renamed
   const [refreshing, setRefreshing] = useState(false);
   const { setIsModalOpen, onRefresh, uiVisible, onAnimationComplete, onOrdersCardClick, onProductsCardClick, storeId, onAmbassadorCardClick } = props;
 
@@ -207,7 +207,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     if (!storeId) return;
 
     const db = getFirestore(firebaseApp);
-    const schedulesRef = collection(db, 'stores', storeId, 'whatsappSchedules');
+    const schedulesRef = collection(db, 'stores', storeId, 'posts');
 
     const now = Timestamp.now();
     const thirtyMinutesFromNow = new Timestamp(now.seconds + 30 * 60, now.nanoseconds);
@@ -220,10 +220,10 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-        setShowWhatsAppNotification(!snapshot.empty);
+        setShowPostsNotification(!snapshot.empty);
     }, (error) => {
         console.error("Error fetching upcoming schedules:", error);
-        setShowWhatsAppNotification(false);
+        setShowPostsNotification(false);
     });
 
     return () => unsubscribe();
@@ -245,7 +245,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   }
 
   useEffect(() => {
-    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isWhatsAppModalOpen;
+    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen;
     if (modalIsOpen) {
       window.history.pushState({ modalOpen: true }, '');
       const handlePopState = () => {
@@ -254,7 +254,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         setIsCustomersModalOpen(false);
         setIsViewsModalOpen(false);
         setIsShareModalOpen(false);
-        setIsWhatsAppModalOpen(false);
+        setIsPostsModalOpen(false);
         if (setIsModalOpen) setIsModalOpen(false);
       };
       window.addEventListener('popstate', handlePopState);
@@ -265,13 +265,13 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         }
       };
     }
-  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isWhatsAppModalOpen, setIsModalOpen]);
+  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, setIsModalOpen]);
 
   const handleOpenModal = (idx: number, cardLabel?: string) => {
     if (cardLabel === 'Tips') setIsTipsModalOpen(true);
     else if (cardLabel === 'Views') setIsViewsModalOpen(true);
     else if (cardLabel === 'Share') setIsShareModalOpen(true);
-    else if (cardLabel === 'WhatsApp') setIsWhatsAppModalOpen(true);
+    else if (cardLabel === 'Posts') setIsPostsModalOpen(true); // Changed
     else if (cardLabel === 'Ambassador') onAmbassadorCardClick(); 
     else if (cardLabel === 'Manage Categories') props.openManageCategories();
     else if (cardLabel === 'Orders') onOrdersCardClick();
@@ -293,8 +293,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     }
   };
 
-  const handleCloseWhatsAppModal = () => {
-    setIsWhatsAppModalOpen(false);
+  const handleClosePostsModal = () => { // Renamed
+    setIsPostsModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
   
@@ -341,16 +341,16 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
               }
 
               const Icon = card.icon;
-              const isHorizontal = card.label === 'Share' || card.label === 'Tips' || card.label === 'WhatsApp';
+              const isHorizontal = card.label === 'Share' || card.label === 'Tips' || card.label === 'Posts';
               const isTipsCard = card.label === 'Tips';
-              const isWhatsAppCard = card.label === 'WhatsApp';
+              const isPostsCard = card.label === 'Posts';
               const spotlightClasses = spotlightStep === 'tips' && isTipsCard ? 'relative z-50 pointer-events-auto' : '';
 
               if (isHorizontal) {
                 return (
                   <motion.div key={card.label} variants={itemVariants} className={`relative ${spotlightClasses}`}>
                     <button className={`dashboard-card relative flex flex-row items-center justify-center rounded-2xl p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card.label)}>
-                      {isWhatsAppCard && showWhatsAppNotification && (<span className="absolute top-2 right-2 flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></span>)}
+                      {isPostsCard && showPostsNotification && (<span className="absolute top-2 right-2 flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></span>)}
                       <span className="card-blob" />
                       <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white bg-opacity-20 shadow"><Icon className="w-5 h-5 sm:w-6 sm:h-6 drop-shadow" /></div>
                       <div className="flex flex-col items-center ml-3 min-w-0 z-10">
@@ -399,14 +399,14 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
       {isShareModalOpen && (<StoreLinkModal {...props} isOpen={isShareModalOpen} handleClose={() => setIsShareModalOpen(false)}/>)}
 
-      {isWhatsAppModalOpen && (<WhatsAppComposerModal isOpen={isWhatsAppModalOpen} onClose={handleCloseWhatsAppModal} storeId={props.storeId} contacts={props.contacts}/>)}
+      {isPostsModalOpen && (<PostsComposerModal isOpen={isPostsModalOpen} onClose={handleClosePostsModal} storeId={props.storeId} contacts={props.contacts} products={props.products} storeName={props.storeName}/>)}
 
       {openModal !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md" onClick={handleCloseModal}>
           <motion.div initial="hidden" animate="visible" exit="exit" variants={modalVariants} className="relative w-full max-w-sm sm:max-w-md md:max-w-lg mx-2 sm:mx-auto bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-2xl flex flex-col items-center" onClick={e => e.stopPropagation()}>
             {(() => {
               const card = cardsToRender[openModal];
-              if (!card || !card.component || ['Views', 'Share', 'WhatsApp'].includes(card.label)) return null;
+              if (!card || !card.component || ['Views', 'Share', 'Posts'].includes(card.label)) return null;
               const ModalComponent = card.component;
               const modalProps = { ...props, handleClose: handleCloseModal };
               return <ModalComponent {...modalProps} />;

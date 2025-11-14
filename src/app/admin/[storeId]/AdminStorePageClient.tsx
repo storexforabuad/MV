@@ -30,7 +30,7 @@ import ManageProductsModal from '../../../components/admin/ManageProductsModal';
 import ManageCategoriesModal from '../../../components/admin/ManageCategoriesModal';
 import { AdminOrdersModal } from '../../../components/admin/modals/AdminOrdersModal';
 import { AmbassadorHubModal } from '../../../components/admin/modals/AmbassadorHubModal';
-import WhatsAppComposerModal from '../../../components/admin/modals/WhatsAppComposerModal';
+import PostsComposerModal from '../../../components/admin/modals/PostsComposerModal';
 import dynamic from 'next/dynamic';
 import PreviewSkeleton from '../../../components/admin/PreviewSkeleton';
 import { markOnboardingAsCompleted } from '../../../app/actions/onboardingActions';
@@ -97,7 +97,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [isManageCategoriesModalOpen, setIsManageCategoriesModalOpen] = useState(false);
   const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
-  const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
+  const [isPostsModalOpen, setIsPostsModalOpen] = useState(false);
   const [isAmbassadorHubModalOpen, setIsAmbassadorHubModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isPreviewLoading, setIsPreviewLoading] = useState(true);
@@ -159,8 +159,8 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
   }, [storeId, fetchData]);
 
   useEffect(() => {
-    if (searchParams && searchParams.get('open') === 'whatsapp') {
-      setIsWhatsAppModalOpen(true);
+    if (searchParams && searchParams.get('open') === 'posts') {
+      setIsPostsModalOpen(true);
     }
      if (searchParams && searchParams.get('open') === 'ambassador-hub') {
       setIsAmbassadorHubModalOpen(true);
@@ -253,7 +253,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
     return <OnboardingFlow onComplete={handleOnboardingComplete} storeName={storeMeta?.name || ''} />;
   }
 
-  const isModalOpen = isComposerOpen || isManageModalOpen || isManageCategoriesModalOpen || isOrdersModalOpen || isWhatsAppModalOpen || isAmbassadorHubModalOpen;
+  const isModalOpen = isComposerOpen || isManageModalOpen || isManageCategoriesModalOpen || isOrdersModalOpen || isPostsModalOpen || isAmbassadorHubModalOpen;
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0 transition-colors">
@@ -355,11 +355,13 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
         onReferralAdded={() => fetchData(true)}
       />
 
-      <WhatsAppComposerModal
-        isOpen={isWhatsAppModalOpen}
-        onClose={() => setIsWhatsAppModalOpen(false)}
+      <PostsComposerModal
+        isOpen={isPostsModalOpen}
+        onClose={() => setIsPostsModalOpen(false)}
         storeId={storeId}
         contacts={contacts}
+        products={products}
+        storeName={storeMeta?.name}
       />
 
       <div className={`transition-opacity duration-500 ${uiVisible ? 'opacity-100' : 'opacity-0'}`}>
