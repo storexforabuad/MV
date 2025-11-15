@@ -1,5 +1,5 @@
 'use client';
-import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send } from 'lucide-react';
+import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe } from 'lucide-react';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { useSpotlightContext } from '@/context/SpotlightContext';
@@ -87,6 +87,15 @@ const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferral
 
 const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.ElementType | null, glowClass: string}[] = [
     {
+        label: '(Biz+Con)™',
+        subtitle: 'Network',
+        icon: Globe,
+        gradient: 'bg-gradient-to-br from-slate-700 via-gray-800 to-zinc-900',
+        text: 'text-white',
+        component: null,
+        glowClass: 'dark:shadow-slate-600/30 shadow-slate-600/50',
+    },
+    {
         label: 'Tips',
         subtitle: 'Quick Guide',
         icon: Lightbulb,
@@ -106,8 +115,8 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       glowClass: 'dark:shadow-cyan-400/30 shadow-cyan-400/50',
     },
     {
-      label: 'Posts',
-      subtitle: 'Content Scheduler',
+      label: 'Content',
+      subtitle: 'Scheduler',
       icon: Send, // Changed from MessageCircle
       gradient: 'bg-gradient-to-br from-purple-500 to-violet-600', // New Color
       text: 'text-white',
@@ -173,10 +182,10 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       label: 'Manage Products',
       valueKey: 'totalProducts',
       icon: Archive,
-      gradient: 'bg-gradient-to-br from-slate-700 via-gray-800 to-zinc-900',
+      gradient: 'bg-gradient-to-br from-rose-500 to-fuchsia-600',
       text: 'text-white',
       component: null,
-      glowClass: 'dark:shadow-slate-600/30 shadow-slate-600/50',
+      glowClass: 'dark:shadow-fuchsia-500/30 shadow-fuchsia-500/50',
     },
   ];
 
@@ -268,10 +277,11 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, setIsModalOpen]);
 
   const handleOpenModal = (idx: number, cardLabel?: string) => {
-    if (cardLabel === 'Tips') setIsTipsModalOpen(true);
+    if (cardLabel === '(Biz+Con)™') console.log('(Biz+Con)™ card clicked!');
+    else if (cardLabel === 'Tips') setIsTipsModalOpen(true);
     else if (cardLabel === 'Views') setIsViewsModalOpen(true);
     else if (cardLabel === 'Share') setIsShareModalOpen(true);
-    else if (cardLabel === 'Posts') setIsPostsModalOpen(true); // Changed
+    else if (cardLabel === 'Content') setIsPostsModalOpen(true); // Changed
     else if (cardLabel === 'Ambassador') onAmbassadorCardClick(); 
     else if (cardLabel === 'Manage Categories') props.openManageCategories();
     else if (cardLabel === 'Orders') onOrdersCardClick();
@@ -341,9 +351,9 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
               }
 
               const Icon = card.icon;
-              const isHorizontal = card.label === 'Share' || card.label === 'Tips' || card.label === 'Posts';
+              const isHorizontal = card.label === 'Share' || card.label === 'Tips' || card.label === 'Content' || card.label === '(Biz+Con)™';
               const isTipsCard = card.label === 'Tips';
-              const isPostsCard = card.label === 'Posts';
+              const isPostsCard = card.label === 'Content';
               const spotlightClasses = spotlightStep === 'tips' && isTipsCard ? 'relative z-50 pointer-events-auto' : '';
 
               if (isHorizontal) {
@@ -352,9 +362,9 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                     <button className={`dashboard-card relative flex flex-row items-center justify-center rounded-2xl p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card.label)}>
                       {isPostsCard && showPostsNotification && (<span className="absolute top-2 right-2 flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></span>)}
                       <span className="card-blob" />
-                      <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white bg-opacity-20 shadow"><Icon className="w-5 h-5 sm:w-6 sm:h-6 drop-shadow" /></div>
+                      <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white bg-opacity-20 shadow"><Icon className="w-5 h-5 sm:w-6 sm:h-6 drop-shadow" /></div>
                       <div className="flex flex-col items-center ml-3 min-w-0 z-10">
-                        <div className="text-lg sm:text-xl font-bold drop-shadow">{card.label}</div>
+                        <div className="text-base sm:text-lg font-bold drop-shadow">{card.label}</div>
                         <div className="text-xs sm:text-sm font-medium opacity-90 text-center leading-tight">{card.subtitle}</div>
                       </div>
                     </button>
@@ -366,7 +376,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                   <motion.div key={card.label} variants={itemVariants}>
                     <button className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card.label)}>
                       <span className="card-blob" />
-                      <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white bg-opacity-20 mb-1 sm:mb-2 shadow"><Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 drop-shadow" /></div>
+                      <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm-h-12 md:w-14 md:h-14 rounded-full bg-white bg-opacity-20 mb-1 sm:mb-2 shadow"><Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 drop-shadow" /></div>
                       <div className="flex flex-col items-center min-w-0 z-10 w-full">
                         <div className="text-lg sm:text-xl md:text-2xl font-bold drop-shadow">
                           {(() => {
@@ -406,7 +416,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           <motion.div initial="hidden" animate="visible" exit="exit" variants={modalVariants} className="relative w-full max-w-sm sm:max-w-md md:max-w-lg mx-2 sm:mx-auto bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-2xl flex flex-col items-center" onClick={e => e.stopPropagation()}>
             {(() => {
               const card = cardsToRender[openModal];
-              if (!card || !card.component || ['Views', 'Share', 'Posts'].includes(card.label)) return null;
+              if (!card || !card.component || ['Views', 'Share', 'Content'].includes(card.label)) return null;
               const ModalComponent = card.component;
               const modalProps = { ...props, handleClose: handleCloseModal };
               return <ModalComponent {...modalProps} />;
