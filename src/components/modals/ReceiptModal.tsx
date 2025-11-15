@@ -3,7 +3,7 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import { Receipt, Order } from '../common/Receipt';
 
-export function ReceiptModal({ isOpen, onClose, order }: { isOpen: boolean, onClose: () => void, order: Order }) {
+export function ReceiptModal({ isOpen, onClose, orders }: { isOpen: boolean, onClose: () => void, orders: Order[] }) {
     return (
         <AnimatePresence>
             {isOpen && (
@@ -22,7 +22,7 @@ export function ReceiptModal({ isOpen, onClose, order }: { isOpen: boolean, onCl
                         onClick={(e) => e.stopPropagation()} // Prevent closing when clicking on the modal content
                         className="relative w-full max-w-md"
                     >
-                        <Receipt order={order} />
+                        <Receipt orders={orders} />
                     </motion.div>
                 </motion.div>
             )}

@@ -33,14 +33,14 @@ const GuaranteeIcon = ({ icon: Icon, text }: { icon: React.ElementType, text: st
     </div>
 );
 
-export function Receipt({ order }: { order: Order }) {
-    if (!order) return null;
+export function Receipt({ orders }: { orders: Order[] }) {
+    if (!orders || orders.length === 0) return null;
 
-    const items: ReceiptItem[] = order.items || (order.product ? [{ ...order.product, quantity: order.quantity || 1 }] : []);
-    const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-    const shipping = order.shipping || 0;
+    const allItems = orders.flatMap(order => order.items || (order.product ? [{ ...order.product, quantity: order.quantity || 1 }] : []));
+    const subtotal = allItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+    const shipping = orders.reduce((acc, order) => acc + (order.shipping || 0), 0); // Sum up shipping costs if they vary per order
     const total = subtotal + shipping;
-    const orderDate = order.orderDate || order.createdAt;
+    const orderDate = orders[0].orderDate || orders[0].createdAt;
 
     return (
         <div className="bg-white rounded-2xl shadow-lg max-w-sm mx-auto font-sans relative overflow-hidden">
@@ -55,9 +55,9 @@ export function Receipt({ order }: { order: Order }) {
                     )}
                 </div>
 
-                <div className="space-y-3 text-sm">
-                    {items.map((item, index) => (
-                        <div key={item.id || index} className="flex justify-between items-center">
+                <div className="space-y-3 text-sm max-h-60 overflow-y-auto pr-2">
+                    {allItems.map((item, index) => (
+                        <div key={item.id ? `${item.id}-${index}` : index} className="flex justify-between items-center">
                             <div>
                                 <p className="font-medium text-gray-800">{item.name}</p>
                                 <p className="text-gray-500">Qty: {item.quantity}</p>
@@ -98,7 +98,7 @@ export function Receipt({ order }: { order: Order }) {
             </div>
 
             <div className="bg-gray-50 text-center py-3 px-6 rounded-b-2xl relative z-10">
-                <p className="text-xs text-gray-500 font-medium">Powered by BizCon™ Network</p>
+                <p className="text-xs text-gray-500 font-medium">Powered by (Biz+Con)™ Network</p>
             </div>
              <div className="absolute bottom-0 left-0 w-full h-16 bg-gray-50/50 backdrop-blur-xl" style={{
                     clipPath: 'ellipse(100% 55% at 48% 100%)'

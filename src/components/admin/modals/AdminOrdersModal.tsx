@@ -26,7 +26,7 @@ const backdropVariants: Variants = {
     exit: { opacity: 0 },
 };
 
-const OrderProductRow = ({ order, onViewReceipt }: { order: StoreOrder, onViewReceipt: () => void }) => {
+const OrderProductRow = ({ order }: { order: StoreOrder }) => {
   return (
     <div className="flex items-start gap-4 py-3">
       <div className="flex-shrink-0">
@@ -44,20 +44,11 @@ const OrderProductRow = ({ order, onViewReceipt }: { order: StoreOrder, onViewRe
         <p className="text-sm text-indigo-500 dark:text-indigo-400">{formatPrice(order.product.price)}</p>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Qty: {order.quantity}</p>
       </div>
-      <div className="flex-shrink-0">
-        <button
-          onClick={onViewReceipt}
-          className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold text-blue-600 bg-blue-100 rounded-full hover:bg-blue-200 transition-colors dark:bg-blue-900/50 dark:text-blue-300 dark:hover:bg-blue-900"
-        >
-          <ReceiptIcon className="w-3.5 h-3.5" />
-          <span>Receipt</span>
-        </button>
-      </div>
     </div>
   );
 };
 
-const CustomerOrdersCard = ({ orders, onViewReceipt }: { orders: StoreOrder[], onViewReceipt: (order: StoreOrder) => void }) => {
+const CustomerOrdersCard = ({ orders, onViewReceipt }: { orders: StoreOrder[], onViewReceipt: (orders: StoreOrder[]) => void }) => {
   const customerInfo = orders[0].customerInfo;
 
   return (
@@ -81,8 +72,18 @@ const CustomerOrdersCard = ({ orders, onViewReceipt }: { orders: StoreOrder[], o
 
       <div className="divide-y divide-slate-200 dark:divide-slate-700/50 px-4">
         {orders.map(order => (
-          <OrderProductRow key={order.id} order={order} onViewReceipt={() => onViewReceipt(order)} />
+          <OrderProductRow key={order.id} order={order} />
         ))}
+      </div>
+
+      <div className="p-2 bg-slate-50 dark:bg-slate-900/50 flex justify-end">
+          <button 
+              onClick={() => onViewReceipt(orders)} 
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              <ReceiptIcon className="w-4 h-4" />
+              <span>View Receipt</span>
+            </button>
       </div>
     </div>
   );
@@ -121,7 +122,7 @@ const groupOrdersByDayAndCustomer = (orders: StoreOrder[]) => {
 };
 
 export const AdminOrdersModal = ({ isOpen, onClose, orders }: AdminOrdersModalProps) => {
-  const [selectedOrderForReceipt, setSelectedOrderForReceipt] = useState<StoreOrder | null>(null);
+  const [selectedOrdersForReceipt, setSelectedOrdersForReceipt] = useState<StoreOrder[] | null>(null);
   const groupedOrders = groupOrdersByDayAndCustomer(orders);
 
   return (
@@ -168,7 +169,7 @@ export const AdminOrdersModal = ({ isOpen, onClose, orders }: AdminOrdersModalPr
                           <CustomerOrdersCard 
                             key={customerKey} 
                             orders={customerOrders}
-                            onViewReceipt={setSelectedOrderForReceipt}
+                            onViewReceipt={setSelectedOrdersForReceipt}
                           />
                         ))}
                       </div>
@@ -195,11 +196,11 @@ export const AdminOrdersModal = ({ isOpen, onClose, orders }: AdminOrdersModalPr
           </motion.div>
         </motion.div>
       )}
-      {selectedOrderForReceipt && (
+      {selectedOrdersForReceipt && (
         <ReceiptModal 
-          isOpen={!!selectedOrderForReceipt}
-          onClose={() => setSelectedOrderForReceipt(null)}
-          order={selectedOrderForReceipt}
+          isOpen={!!selectedOrdersForReceipt}
+          onClose={() => setSelectedOrdersForReceipt(null)}
+          orders={selectedOrdersForReceipt}
         />
       )}
     </AnimatePresence>
