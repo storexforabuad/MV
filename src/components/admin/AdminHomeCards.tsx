@@ -1,5 +1,5 @@
 'use client';
-import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe } from 'lucide-react';
+import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck } from 'lucide-react';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { useSpotlightContext } from '@/context/SpotlightContext';
@@ -14,6 +14,8 @@ import SoldOutModal from './modals/SoldOutModal';
 import TipsModal from './modals/TipsModal';
 import SpotlightTooltip from '../shared/SpotlightTooltip';
 import PostsComposerModal from './modals/PostsComposerModal'; // Renamed
+import { BizconNetworkModal } from './modals/BizconNetworkModal';
+import { DeliveriesHubModal } from './modals/DeliveriesHubModal';
 
 // Import the customer components
 import { AdminCustomersCard } from './AdminCustomersCard';
@@ -143,7 +145,6 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
     },
     {
       label: 'Ambassador',
-      subtitle: 'Hub',
       valueKey: 'referrals',
       icon: Star, 
       gradient: 'bg-gradient-to-br from-orange-400 via-red-400 to-pink-500', 
@@ -168,6 +169,15 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       text: 'text-white',
       component: null,
       glowClass: 'dark:shadow-blue-600/30 shadow-blue-600/50',
+    },
+    {
+        label: 'Deliveries',
+        valueKey: 'deliveries',
+        icon: Truck,
+        gradient: 'bg-gradient-to-br from-sky-400 to-blue-500',
+        text: 'text-white',
+        component: null,
+        glowClass: 'dark:shadow-sky-500/30 shadow-sky-500/50',
     },
     {
       label: 'Manage Categories',
@@ -207,8 +217,10 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [isViewsModalOpen, setIsViewsModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isCustomersModalOpen, setIsCustomersModalOpen] = useState(false);
-  const [isPostsModalOpen, setIsPostsModalOpen] = useState(false); // Renamed
-  const [showPostsNotification, setShowPostsNotification] = useState(false); // Renamed
+  const [isPostsModalOpen, setIsPostsModalOpen] = useState(false);
+  const [isBizconNetworkModalOpen, setIsBizconNetworkModalOpen] = useState(false);
+  const [isDeliveriesHubModalOpen, setIsDeliveriesHubModalOpen] = useState(false);
+  const [showPostsNotification, setShowPostsNotification] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const { setIsModalOpen, onRefresh, uiVisible, onAnimationComplete, onOrdersCardClick, onProductsCardClick, storeId, onAmbassadorCardClick } = props;
 
@@ -254,7 +266,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   }
 
   useEffect(() => {
-    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen;
+    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen;
     if (modalIsOpen) {
       window.history.pushState({ modalOpen: true }, '');
       const handlePopState = () => {
@@ -264,6 +276,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         setIsViewsModalOpen(false);
         setIsShareModalOpen(false);
         setIsPostsModalOpen(false);
+        setIsBizconNetworkModalOpen(false);
+        setIsDeliveriesHubModalOpen(false);
         if (setIsModalOpen) setIsModalOpen(false);
       };
       window.addEventListener('popstate', handlePopState);
@@ -274,18 +288,19 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         }
       };
     }
-  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, setIsModalOpen]);
+  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, setIsModalOpen]);
 
   const handleOpenModal = (idx: number, cardLabel?: string) => {
-    if (cardLabel === '(Biz+Con)™') console.log('(Biz+Con)™ card clicked!');
+    if (cardLabel === '(Biz+Con)™') setIsBizconNetworkModalOpen(true);
     else if (cardLabel === 'Tips') setIsTipsModalOpen(true);
     else if (cardLabel === 'Views') setIsViewsModalOpen(true);
     else if (cardLabel === 'Share') setIsShareModalOpen(true);
-    else if (cardLabel === 'Content') setIsPostsModalOpen(true); // Changed
-    else if (cardLabel === 'Ambassador') onAmbassadorCardClick(); 
+    else if (cardLabel === 'Content') setIsPostsModalOpen(true);
+    else if (cardLabel === 'Ambassador') onAmbassadorCardClick();
     else if (cardLabel === 'Manage Categories') props.openManageCategories();
     else if (cardLabel === 'Orders') onOrdersCardClick();
     else if (cardLabel === 'Manage Products') onProductsCardClick();
+    else if (cardLabel === 'Deliveries') setIsDeliveriesHubModalOpen(true);
     else setOpenModal(idx);
     
     if (props.setIsModalOpen && cardLabel !== 'Orders' && cardLabel !== 'Manage Products') props.setIsModalOpen(true);
@@ -303,8 +318,18 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     }
   };
 
-  const handleClosePostsModal = () => { // Renamed
+  const handleClosePostsModal = () => {
     setIsPostsModalOpen(false);
+    if (props.setIsModalOpen) props.setIsModalOpen(false);
+  }
+
+  const handleCloseBizconNetworkModal = () => {
+    setIsBizconNetworkModalOpen(false);
+    if (props.setIsModalOpen) props.setIsModalOpen(false);
+  }
+
+  const handleCloseDeliveriesHubModal = () => {
+    setIsDeliveriesHubModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
   
@@ -365,7 +390,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                       <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white bg-opacity-20 shadow"><Icon className="w-5 h-5 sm:w-6 sm:h-6 drop-shadow" /></div>
                       <div className="flex flex-col items-center ml-3 min-w-0 z-10">
                         <div className="text-base sm:text-lg font-bold drop-shadow">{card.label}</div>
-                        <div className="text-xs sm:text-sm font-medium opacity-90 text-center leading-tight">{card.subtitle}</div>
+                        {card.subtitle && <div className="text-xs sm:text-sm font-medium opacity-90 text-center leading-tight">{card.subtitle}</div>}
                       </div>
                     </button>
                     {spotlightStep === 'tips' && isTipsCard && (<SpotlightTooltip text="Check here for helpful tips and stats about your dashboard." className="top-full mt-5 left-1/2 -translate-x-1/2"/>)}
@@ -376,14 +401,17 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                   <motion.div key={card.label} variants={itemVariants}>
                     <button className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card.label)}>
                       <span className="card-blob" />
-                      <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm-h-12 md:w-14 md:h-14 rounded-full bg-white bg-opacity-20 mb-1 sm:mb-2 shadow"><Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 drop-shadow" /></div>
+                      <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white bg-opacity-20 mb-1 sm:mb-2 shadow">
+                        <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 drop-shadow" />
+                      </div>
                       <div className="flex flex-col items-center min-w-0 z-10 w-full">
                         <div className="text-lg sm:text-xl md:text-2xl font-bold drop-shadow">
                           {(() => {
                             const value = card.valueKey ? (props as any)[card.valueKey] : '';
                             if (card.label === 'Commission') return formatCurrencyForCard(props.totalCommissionEarned);
                             if (card.label === 'Bonus') return formatCurrencyForCard(props.totalReferralBonus);
-                            if (card.label === 'Ambassador') return props.referrals; // Display referral count
+                            if (card.label === 'Ambassador') return props.referrals;
+                            if (card.label === 'Deliveries') return 0;
                             if (typeof value === 'number' || typeof value === 'string') return value;
                             return '';
                           })()}
@@ -391,6 +419,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                         <div className="text-xs sm:text-sm font-medium opacity-90 text-center px-1 leading-tight">
                           {card.label === 'Manage Categories' ? 'Categories' : card.label === 'Manage Products' ? 'Products' : card.label}
                         </div>
+                         {card.subtitle && <div className="text-xs opacity-70 mt-1">{card.subtitle}</div>}
                       </div>
                     </button>
                   </motion.div>
@@ -410,6 +439,9 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
       {isShareModalOpen && (<StoreLinkModal {...props} isOpen={isShareModalOpen} handleClose={() => setIsShareModalOpen(false)}/>)}
 
       {isPostsModalOpen && (<PostsComposerModal isOpen={isPostsModalOpen} onClose={handleClosePostsModal} storeId={props.storeId} contacts={props.contacts} products={props.products} storeName={props.storeName}/>)}
+
+      <BizconNetworkModal isOpen={isBizconNetworkModalOpen} onClose={handleCloseBizconNetworkModal} />
+      <DeliveriesHubModal isOpen={isDeliveriesHubModalOpen} onClose={handleCloseDeliveriesHubModal} />
 
       {openModal !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md" onClick={handleCloseModal}>
