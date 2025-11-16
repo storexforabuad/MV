@@ -4,12 +4,12 @@ import { X } from 'lucide-react';
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-interface RevenueModalProps {
+interface ExpensesModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export default function RevenueModal({ isOpen, onClose }: RevenueModalProps) {
+export default function ExpensesModal({ isOpen, onClose }: ExpensesModalProps) {
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -46,7 +46,7 @@ export default function RevenueModal({ isOpen, onClose }: RevenueModalProps) {
           transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
         >
           <header className="flex items-center justify-between w-full max-w-7xl mx-auto mb-4">
-            <h2 className="text-2xl font-bold text-white">Revenue</h2>
+            <h2 className="text-2xl font-bold text-white">Expenses</h2>
             <button
               onClick={onClose}
               className="p-2 rounded-full text-white bg-white/10 hover:bg-white/20 transition-colors"
@@ -56,7 +56,7 @@ export default function RevenueModal({ isOpen, onClose }: RevenueModalProps) {
             </button>
           </header>
           <main className="flex-grow flex items-center justify-center w-full max-w-7xl mx-auto">
-            <p className="text-white/70">Revenue modal content is coming soon.</p>
+            <p className="text-white/70">Expenses modal content is coming soon.</p>
           </main>
         </motion.div>
       )}
