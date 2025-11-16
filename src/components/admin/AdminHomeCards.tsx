@@ -485,7 +485,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
       {isDeliveriesHubModalOpen && (<DeliveriesHubModal isOpen={isDeliveriesHubModalOpen} onClose={handleCloseDeliveriesHubModal} storeId={storeId} />)}
 
-      {isRevenueModalOpen && (<RevenueModal isOpen={isRevenueModalOpen} onClose={handleCloseRevenueModal} />)}
+      {isRevenueModalOpen && (<RevenueModal isOpen={isRevenueModalOpen} onClose={handleCloseRevenueModal} storeId={storeId} />)}
 
       {isExpensesModalOpen && (<ExpensesModal isOpen={isExpensesModalOpen} onClose={handleCloseExpensesModal} />)}
 
