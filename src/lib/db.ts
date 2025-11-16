@@ -31,7 +31,6 @@ import { StoreMeta } from '../types/store';
 // Re-export order actions from the new location
 export {
   addOrderToFirestore,
-  fetchOrdersFromFirestore,
   fetchStoreOrders,
 } from '../app/actions/orderActions';
 export type { StoreOrder } from '../app/actions/orderActions';

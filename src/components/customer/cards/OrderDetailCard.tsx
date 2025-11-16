@@ -36,6 +36,9 @@ export function OrderDetailCard({ order, addOrder, storeMeta }: OrderDetailCardP
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   const { customer } = useCustomer();
 
+  // Backward compatibility: Handle both new multi-product orders and old single-product orders.
+  const products = order.products || (order.product ? [{ ...order.product, quantity: order.quantity || 1 }] : []);
+
   const handleReorder = async () => {
     if (!customer) {
       toast.error('Please log in to reorder.');
@@ -48,11 +51,11 @@ export function OrderDetailCard({ order, addOrder, storeMeta }: OrderDetailCardP
     }
 
     try {
-      // This now sends all products in the order to be reordered.
-      await addOrder(order.products, storeMeta, customer, null, false);
+      // FIX: Use the backward-compatible 'products' array.
+      await addOrder(products, storeMeta, customer, null, false);
 
       const sanitizedWhatsappNumber = storeMeta.whatsapp.replace(/\D/g, '');
-      const productDetails = order.products.map(p => `* ${p.name} (Qty: ${p.quantity})`).join('\n');
+      const productDetails = products.map(p => `* ${p.name} (Qty: ${p.quantity || 1})`).join('\n');
       
       const message = `*Reorder Request*\n\nI would like to reorder the following items:\n${productDetails}`;
       
@@ -77,7 +80,8 @@ export function OrderDetailCard({ order, addOrder, storeMeta }: OrderDetailCardP
     day: 'numeric',
   });
 
-  const totalAmount = order.products.reduce((acc, p) => acc + p.price * p.quantity, 0);
+  // FIX: Use the backward-compatible 'products' array for calculation.
+  const totalAmount = products.reduce((acc, p) => acc + p.price * (p.quantity || 1), 0);
   const statusInfo = getStatusUI(order.orderStatus);
 
   return (
@@ -96,23 +100,30 @@ export function OrderDetailCard({ order, addOrder, storeMeta }: OrderDetailCardP
             </div>
 
             <div className="mt-4 space-y-3">
-                {order.products.map(product => (
-                    <div key={product.id} className="flex items-center gap-3">
-                        <div className="w-12 h-12 relative flex-shrink-0">
-                            <Image
-                                src={product.images[0]}
-                                alt={product.name}
-                                layout="fill"
-                                className="object-cover rounded-md"
-                            />
+                {/* FIX: Use the backward-compatible 'products' array for rendering. */}
+                {products.map((product, index) => {
+                    // Defensive check for images, as legacy product objects might not have an 'images' array.
+                    const imageUrl = product.images && product.images.length > 0 ? product.images[0] : product.image;
+                    return (
+                        <div key={product.id || index} className="flex items-center gap-3">
+                            <div className="w-12 h-12 relative flex-shrink-0">
+                                {imageUrl && (
+                                    <Image
+                                        src={imageUrl}
+                                        alt={product.name}
+                                        layout="fill"
+                                        className="object-cover rounded-md"
+                                    />
+                                )}
+                            </div>
+                            <div className="flex-1">
+                                <p className="font-semibold text-text-primary text-sm">{product.name}</p>
+                                <p className="text-xs text-text-secondary">Qty: {product.quantity || 1}</p>
+                            </div>
+                            <p className="font-semibold text-text-primary text-sm">{formatPrice(product.price * (product.quantity || 1))}</p>
                         </div>
-                        <div className="flex-1">
-                            <p className="font-semibold text-text-primary text-sm">{product.name}</p>
-                            <p className="text-xs text-text-secondary">Qty: {product.quantity}</p>
-                        </div>
-                        <p className="font-semibold text-text-primary text-sm">{formatPrice(product.price * product.quantity)}</p>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             <div className="mt-4 pt-4 border-t border-border-color flex justify-between items-center">
@@ -144,8 +155,7 @@ export function OrderDetailCard({ order, addOrder, storeMeta }: OrderDetailCardP
           </button>
         </div>
       </div>
-      {/* The ReceiptModal might need to be adapted for multi-product orders as well */}
-      {/* For now, this will likely show the receipt for the whole order */}
+      {/* The ReceiptModal already accepts an 'order' array and should be compatible */}
       <ReceiptModal 
         isOpen={isReceiptModalOpen} 
         onClose={() => setIsReceiptModalOpen(false)} 
