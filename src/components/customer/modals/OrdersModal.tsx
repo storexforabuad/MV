@@ -2,7 +2,7 @@
 
 import React, { Fragment, useMemo } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { ShoppingCartIcon } from '@heroicons/react/24/solid';
+import { ShoppingCartIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { Order } from '../../../hooks/useOrders';
 import { OrderDetailCard } from '../cards/OrderDetailCard';
@@ -15,7 +15,7 @@ interface OrdersModalProps {
   onClose: () => void;
   orders: Order[];
   storeId: string;
-  addOrder: (product: Product, storeMeta: StoreMeta, quantity: number, customerInfo: Customer, referralCode: string | null, bonusApplied: boolean) => Promise<void>;
+  addOrder: (products: Product[], storeMeta: StoreMeta, customerInfo: Customer, referralCode: string | null, bonusApplied: boolean) => Promise<void>; // Updated to accept multiple products
   storeMeta: StoreMeta;
 }
 
@@ -145,7 +145,7 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose, orders, addO
                               >
                                 {groupedOrders[dateKey].map(order => (
                                   <motion.div 
-                                    key={order.product.id + order.orderDate} 
+                                    key={order.id} 
                                     variants={itemVariants}
                                   >
                                     <OrderDetailCard order={order} addOrder={addOrder} storeMeta={storeMeta} />

@@ -2,34 +2,33 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
-import { addOrderToFirestore, fetchOrdersFromFirestore } from '@/app/actions/orderActions';
+import { addOrderToFirestore, fetchStoreOrders } from '@/app/actions/orderActions';
 import { Product } from '@/types/product';
 import { StoreMeta } from '@/types/store';
 import { Customer } from '@/types/customer';
 import { CartItem } from '@/lib/cartContext';
+import { Order } from '@/app/actions/orderActions';
 
-export interface Order {
-  id: string;
-  product: Product;
-  storeMeta: StoreMeta;
-  orderDate: string; // ISO string format
-  quantity: number;
-}
+export { type Order } from '@/app/actions/orderActions';
 
-export const useOrders = (customerId: string | null, storeId?: string) => {
+export const useOrders = (customerId: string | null, storeId: string) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchOrders = useCallback(async () => {
-    if (!customerId) {
+    if (!storeId || !customerId) {
       setOrders([]);
       setIsLoading(false);
       return;
     }
     try {
       setIsLoading(true);
-      const fetchedOrders = await fetchOrdersFromFirestore(customerId, storeId);
-      setOrders(fetchedOrders);
+      // We are now fetching all store orders and filtering by customer on the client
+      // This is not ideal for performance, but it aligns with the current refactor.
+      // A more performant solution would be to fetch from the customer's subcollection.
+      const allStoreOrders = await fetchStoreOrders(storeId);
+      const customerOrders = allStoreOrders.filter(o => o.customerInfo.id === customerId);
+      setOrders(customerOrders);
     } catch (error) {
       toast.error('Failed to fetch orders.');
       console.error(error);
@@ -40,16 +39,16 @@ export const useOrders = (customerId: string | null, storeId?: string) => {
 
   useEffect(() => {
     fetchOrders();
-  }, [customerId, fetchOrders]);
+  }, [fetchOrders]);
 
-  const addOrder = async (product: Product | CartItem, storeMeta: StoreMeta, quantity: number, customerInfo: Customer, referralCode: string | null, bonusApplied: boolean = false) => {
+  const addOrder = async (products: (Product | CartItem)[], storeMeta: StoreMeta, customerInfo: Customer, referralCode: string | null, bonusApplied: boolean = false) => {
     if (!customerId || !customerInfo) {
       throw new Error("User is not logged in.");
     }
 
     try {
-      const productToSend = { ...product, storeId: storeMeta.id } as Product;
-      const newOrder = await addOrderToFirestore(customerId, productToSend, storeMeta, quantity, customerInfo, referralCode, bonusApplied);
+      const productsToSend = products.map(p => ({ ...p, storeId: storeMeta.id })) as Product[];
+      const newOrder = await addOrderToFirestore(customerId, productsToSend, storeMeta, customerInfo, referralCode, bonusApplied);
       setOrders(prevOrders => [newOrder, ...prevOrders]);
     } catch (error) {
       console.error("Error in addOrder:", error);

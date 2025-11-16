@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
-import { Repeat, MessageSquare, Clock, ReceiptIcon } from 'lucide-react';
+import { Repeat, MessageSquare, Clock, ReceiptIcon, CheckCircle, Truck } from 'lucide-react';
 import { Order } from '../../../hooks/useOrders';
 import { formatPrice } from '../../../utils/price';
 import { ReceiptModal } from '../../modals/ReceiptModal';
@@ -14,9 +14,23 @@ import { Customer } from '@/types/customer';
 
 interface OrderDetailCardProps {
   order: Order;
-  addOrder: (product: Product, storeMeta: StoreMeta, quantity: number, customerInfo: Customer, referralCode: string | null, bonusApplied: boolean) => Promise<void>;
+  addOrder: (products: Product[], storeMeta: StoreMeta, customerInfo: Customer, referralCode: string | null, bonusApplied: boolean) => Promise<void>;
   storeMeta: StoreMeta;
 }
+
+const getStatusUI = (status: Order['orderStatus']) => {
+    switch (status) {
+        case 'shipped':
+            return { icon: <Truck className="w-4 h-4" />, text: 'Shipped', color: 'text-blue-400' };
+        case 'ready':
+            return { icon: <CheckCircle className="w-4 h-4" />, text: 'Ready for Pickup', color: 'text-green-400' };
+        case 'partially-ready':
+            return { icon: <CheckCircle className="w-4 h-4" />, text: 'Partially Ready', color: 'text-yellow-400' };
+        case 'processing':
+        default:
+            return { icon: <Clock className="w-4 h-4" />, text: 'Processing', color: 'text-yellow-400' };
+    }
+};
 
 export function OrderDetailCard({ order, addOrder, storeMeta }: OrderDetailCardProps) {
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
@@ -34,14 +48,13 @@ export function OrderDetailCard({ order, addOrder, storeMeta }: OrderDetailCardP
     }
 
     try {
-      // 1. Record the new order in Firestore
-      await addOrder(order.product, storeMeta, 1, customer, null, false);
+      // This now sends all products in the order to be reordered.
+      await addOrder(order.products, storeMeta, customer, null, false);
 
-      // 2. Open WhatsApp with the pre-filled message
       const sanitizedWhatsappNumber = storeMeta.whatsapp.replace(/\D/g, '');
-      const productUrl = `${window.location.origin}/${order.product.storeId}/products/${order.product.id}`;
+      const productDetails = order.products.map(p => `* ${p.name} (Qty: ${p.quantity})`).join('\n');
       
-      const message = `*Reorder Request*\n\n---\n\n*Product:* ${order.product.name}\n*Price:* ${formatPrice(order.product.price)}\n\nI would like to place another order for this item.\n\n*Product Link:* ${productUrl}`;
+      const message = `*Reorder Request*\n\nI would like to reorder the following items:\n${productDetails}`;
       
       const whatsappUrl = `https://wa.me/${sanitizedWhatsappNumber}?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
@@ -54,7 +67,7 @@ export function OrderDetailCard({ order, addOrder, storeMeta }: OrderDetailCardP
   };
 
   const handleDispute = () => {
-    console.log('Dispute initiated for order:', order.product.id);
+    console.log('Dispute initiated for order:', order.id);
     toast.success('Dispute functionality will be added soon!');
   };
 
@@ -64,27 +77,48 @@ export function OrderDetailCard({ order, addOrder, storeMeta }: OrderDetailCardP
     day: 'numeric',
   });
 
+  const totalAmount = order.products.reduce((acc, p) => acc + p.price * p.quantity, 0);
+  const statusInfo = getStatusUI(order.orderStatus);
+
   return (
     <>
       <div className="bg-card-background rounded-2xl shadow-md overflow-hidden transition-transform duration-300 ease-in-out hover:scale-[1.02] hover:shadow-xl">
-        <div className="flex gap-4 p-4">
-          <div className="w-24 h-24 relative flex-shrink-0">
-            <Image
-              src={order.product.images[0]}
-              alt={order.product.name}
-              layout="fill"
-              className="object-cover rounded-lg"
-            />
-          </div>
-          <div className="flex-1">
-            <p className="font-bold text-lg card-text-gradient truncate">{order.product.name}</p>
-            <p className="text-sm text-text-secondary">Order placed on {orderDate}</p>
-            <p className="text-lg font-semibold text-purple-400 mt-1">{formatPrice(order.product.price)}</p>
-            <div className="flex items-center gap-2 mt-2 text-sm font-medium text-yellow-400">
-              <Clock className="w-4 h-4" />
-              <span>Processing</span>
+        <div className="p-4">
+            <div className="flex justify-between items-start">
+                <div>
+                    <p className="font-bold text-lg card-text-gradient truncate">Order #{order.id.substring(0, 6)}</p>
+                    <p className="text-sm text-text-secondary">Placed on {orderDate}</p>
+                </div>
+                <div className={`flex items-center gap-2 text-sm font-medium ${statusInfo.color}`}>
+                    {statusInfo.icon}
+                    <span>{statusInfo.text}</span>
+                </div>
             </div>
-          </div>
+
+            <div className="mt-4 space-y-3">
+                {order.products.map(product => (
+                    <div key={product.id} className="flex items-center gap-3">
+                        <div className="w-12 h-12 relative flex-shrink-0">
+                            <Image
+                                src={product.images[0]}
+                                alt={product.name}
+                                layout="fill"
+                                className="object-cover rounded-md"
+                            />
+                        </div>
+                        <div className="flex-1">
+                            <p className="font-semibold text-text-primary text-sm">{product.name}</p>
+                            <p className="text-xs text-text-secondary">Qty: {product.quantity}</p>
+                        </div>
+                        <p className="font-semibold text-text-primary text-sm">{formatPrice(product.price * product.quantity)}</p>
+                    </div>
+                ))}
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-border-color flex justify-between items-center">
+                <p className="font-semibold text-text-secondary">Total</p>
+                <p className="text-lg font-bold text-purple-400">{formatPrice(totalAmount)}</p>
+            </div>
         </div>
         <div className="grid grid-cols-3 border-t border-border-color">
           <button 
@@ -98,7 +132,7 @@ export function OrderDetailCard({ order, addOrder, storeMeta }: OrderDetailCardP
             onClick={() => setIsReceiptModalOpen(true)}
             className="flex items-center justify-center gap-2 p-3 text-sm font-semibold text-text-secondary hover:bg-zinc-700 transition-colors duration-200 ease-in-out border-l border-border-color focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
           >
-            <ReceiptIcon className="w-4 h-4" />
+            <ReceiptIcon className={isReceiptModalOpen ? "w-4 h-4 text-purple-400": "w-4 h-4"} />
             <span>Receipt</span>
           </button>
           <button 
@@ -110,10 +144,12 @@ export function OrderDetailCard({ order, addOrder, storeMeta }: OrderDetailCardP
           </button>
         </div>
       </div>
+      {/* The ReceiptModal might need to be adapted for multi-product orders as well */}
+      {/* For now, this will likely show the receipt for the whole order */}
       <ReceiptModal 
         isOpen={isReceiptModalOpen} 
         onClose={() => setIsReceiptModalOpen(false)} 
-        order={order} 
+        orders={[order]} // The modal expects an array of orders 
       />
     </>
   );

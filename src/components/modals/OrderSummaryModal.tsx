@@ -28,9 +28,9 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const [customer, setCustomer] = useState<Customer | null>(initialCustomer);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
-  const { addOrder } = useOrders(customer?.id || null);
   const routeParams = useParams();
   const storeId = typeof routeParams?.storeId === 'string' ? routeParams.storeId : Array.isArray(routeParams?.storeId) ? routeParams.storeId[0] : undefined;
+  const { addOrder } = useOrders(customer?.id || null, storeId!);
 
   useEffect(() => {
     if (isOpen) {
@@ -56,7 +56,11 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
     try {
       const storeMetaWithId = { ...storeMeta, id: storeId };
       const referrerId = localStorage.getItem('referrerId');
-      await addOrder(product, storeMetaWithId, quantity, customer, referrerId, false);
+      
+      // FIX: The product needs to be in an array, and quantity must be part of the product object.
+      const productToOrder = { ...product, quantity };
+      await addOrder([productToOrder], storeMetaWithId, customer, referrerId, false);
+
       toast.success('Order placed! Redirecting to WhatsApp...');
 
       const productUrl = `https://tinyurl.com/bizcononline/${storeId}/products/${product.id}`;

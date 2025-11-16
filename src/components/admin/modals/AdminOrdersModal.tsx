@@ -1,12 +1,13 @@
 'use client';
 
 import { motion, AnimatePresence, Variants } from 'framer-motion';
-import { X, ShoppingBag, User, MapPin, Phone, ReceiptIcon } from 'lucide-react';
+import { X, ShoppingBag, User, MapPin, Phone, ReceiptIcon, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
 import { StoreOrder } from '@/app/actions/orderActions';
 import { formatPrice } from '@/utils/price';
 import { useState } from 'react';
 import { ReceiptModal } from '../../modals/ReceiptModal';
+import { MarkOrderReadyModal } from './MarkOrderReadyModal';
 
 interface AdminOrdersModalProps {
   isOpen: boolean;
@@ -26,71 +27,87 @@ const backdropVariants: Variants = {
     exit: { opacity: 0 },
 };
 
-const OrderProductRow = ({ order }: { order: StoreOrder }) => {
+const OrderProductRow = ({ product }: { product: any }) => {
+  // Defensive check for images, as legacy product objects might not have them.
+  const imageUrl = product.images && product.images.length > 0 ? product.images[0] : product.image;
+
   return (
     <div className="flex items-start gap-4 py-3">
       <div className="flex-shrink-0">
         <div className="aspect-square w-16 h-16 relative rounded-md overflow-hidden bg-slate-100 dark:bg-slate-700">
-          <Image
-            src={order.product.images[0]}
-            alt={order.product.name}
-            layout="fill"
-            objectFit="cover"
-          />
+          {imageUrl && (
+            <Image
+              src={imageUrl}
+              alt={product.name}
+              layout="fill"
+              objectFit="cover"
+            />
+          )}
         </div>
       </div>
       <div className="flex-grow">
-        <p className="font-semibold text-slate-800 dark:text-slate-100">{order.product.name}</p>
-        <p className="text-sm text-indigo-500 dark:text-indigo-400">{formatPrice(order.product.price)}</p>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Qty: {order.quantity}</p>
+        <p className="font-semibold text-slate-800 dark:text-slate-100">{product.name}</p>
+        <p className="text-sm text-indigo-500 dark:text-indigo-400">{formatPrice(product.price)}</p>
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Qty: {product.quantity || 1}</p>
       </div>
     </div>
   );
 };
 
-const CustomerOrdersCard = ({ orders, onViewReceipt }: { orders: StoreOrder[], onViewReceipt: (orders: StoreOrder[]) => void }) => {
-  const customerInfo = orders[0].customerInfo;
+const CustomerOrdersCard = ({ order, onViewReceipt, onMarkReady }: { order: any, onViewReceipt: (order: StoreOrder) => void, onMarkReady: (order: StoreOrder) => void }) => {
+  const { customerInfo } = order;
+  // Backward compatibility: Handle both new multi-product orders and old single-product orders.
+  const products = order.products || (order.product ? [{ ...order.product, quantity: order.quantity || 1 }] : []);
 
   return (
     <div className="bg-white dark:bg-slate-800/50 rounded-2xl shadow-md overflow-hidden transition-transform duration-300 hover:shadow-lg hover:scale-[1.02]">
-      <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
-        <div className="flex items-center gap-3 mb-3">
-          <User className="w-5 h-5 text-slate-500 dark:text-slate-400" />
-          <h4 className="font-semibold text-md text-slate-700 dark:text-slate-200">{customerInfo.name}</h4>
+      {customerInfo && (
+        <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-3 mb-3">
+            <User className="w-5 h-5 text-slate-500 dark:text-slate-400" />
+            <h4 className="font-semibold text-md text-slate-700 dark:text-slate-200">{customerInfo.name}</h4>
+            </div>
+            <div className="space-y-2 text-sm">
+            <div className="flex items-start gap-3">
+                <Phone className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
+                <span className="text-slate-600 dark:text-slate-300">{customerInfo.phoneNumber}</span>
+            </div>
+            <div className="flex items-start gap-3">
+                <MapPin className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
+                <span className="text-slate-600 dark:text-slate-300">{customerInfo.deliveryAddress.street}, {customerInfo.deliveryAddress.state}</span>
+            </div>
+            </div>
         </div>
-        <div className="space-y-2 text-sm">
-          <div className="flex items-start gap-3">
-            <Phone className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
-            <span className="text-slate-600 dark:text-slate-300">{customerInfo.phoneNumber}</span>
-          </div>
-          <div className="flex items-start gap-3">
-            <MapPin className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
-            <span className="text-slate-600 dark:text-slate-300">{customerInfo.deliveryAddress.street}, {customerInfo.deliveryAddress.state}</span>
-          </div>
-        </div>
-      </div>
+      )}
 
       <div className="divide-y divide-slate-200 dark:divide-slate-700/50 px-4">
-        {orders.map(order => (
-          <OrderProductRow key={order.id} order={order} />
+        {products.map((product: any, index: number) => (
+          <OrderProductRow key={product.id || index} product={product} />
         ))}
       </div>
 
-      <div className="p-2 bg-slate-50 dark:bg-slate-900/50 flex justify-end">
+      <div className="p-2 bg-slate-50 dark:bg-slate-900/50 flex justify-end gap-2">
           <button 
-              onClick={() => onViewReceipt(orders)} 
+              onClick={() => onViewReceipt(order)} 
               className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
             >
               <ReceiptIcon className="w-4 h-4" />
               <span>View Receipt</span>
+            </button>
+            <button 
+              onClick={() => onMarkReady(order)} 
+              className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600 transition-colors"
+            >
+              <CheckCircle className="w-4 h-4" />
+              <span>Mark as Ready</span>
             </button>
       </div>
     </div>
   );
 };
 
-const groupOrdersByDayAndCustomer = (orders: StoreOrder[]) => {
-  const groups: { [day: string]: { [customerPhone: string]: StoreOrder[] } } = {};
+const groupOrdersByDay = (orders: StoreOrder[]) => {
+  const groups: { [day: string]: StoreOrder[] } = {};
 
   orders.forEach(order => {
     const orderDate = new Date(order.orderDate);
@@ -108,22 +125,28 @@ const groupOrdersByDayAndCustomer = (orders: StoreOrder[]) => {
     }
 
     if (!groups[dayKey]) {
-      groups[dayKey] = {};
+      groups[dayKey] = [];
     }
-
-    const customerKey = order.customerInfo.phoneNumber;
-    if (!groups[dayKey][customerKey]) {
-      groups[dayKey][customerKey] = [];
-    }
-    groups[dayKey][customerKey].push(order);
+    groups[dayKey].push(order);
   });
 
   return groups;
 };
 
 export const AdminOrdersModal = ({ isOpen, onClose, orders }: AdminOrdersModalProps) => {
-  const [selectedOrdersForReceipt, setSelectedOrdersForReceipt] = useState<StoreOrder[] | null>(null);
-  const groupedOrders = groupOrdersByDayAndCustomer(orders);
+  const [selectedOrderForReceipt, setSelectedOrderForReceipt] = useState<StoreOrder | null>(null);
+  const [selectedOrderForReadiness, setSelectedOrderForReadiness] = useState<StoreOrder | null>(null);
+
+  const groupedOrders = groupOrdersByDay(orders);
+
+  const handleMarkReady = (order: StoreOrder) => {
+      setSelectedOrderForReadiness(order);
+  }
+
+  const handleCloseMarkReadyModal = () => {
+    setSelectedOrderForReadiness(null);
+    onClose(); // Or refetch orders
+  }
 
   return (
     <AnimatePresence>
@@ -134,7 +157,7 @@ export const AdminOrdersModal = ({ isOpen, onClose, orders }: AdminOrdersModalPr
           animate="visible"
           exit="exit"
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center"
-          onClick={onClose} // Close main modal if backdrop is clicked
+          onClick={onClose}
         >
           <motion.div
             variants={modalVariants}
@@ -142,7 +165,7 @@ export const AdminOrdersModal = ({ isOpen, onClose, orders }: AdminOrdersModalPr
             animate="visible"
             exit="exit"
             className="fixed bottom-0 left-0 right-0 top-0 sm:top-auto sm:bottom-auto h-full w-full bg-slate-100 dark:bg-slate-900 shadow-2xl flex flex-col z-50 sm:max-h-[90vh] sm:max-w-md sm:rounded-2xl"
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside modal
+            onClick={(e) => e.stopPropagation()}
           >
             <header className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex-shrink-0">
               <div className="flex items-center gap-3">
@@ -161,15 +184,16 @@ export const AdminOrdersModal = ({ isOpen, onClose, orders }: AdminOrdersModalPr
             <main className="flex-grow p-4 overflow-y-auto">
               {orders.length > 0 ? (
                 <div className="space-y-6">
-                  {Object.entries(groupedOrders).map(([day, customers]) => (
+                  {Object.entries(groupedOrders).map(([day, dayOrders]) => (
                     <div key={day}>
                       <h3 className="font-bold text-lg text-slate-600 dark:text-slate-300 mb-3">{day}</h3>
                       <div className="space-y-4">
-                        {Object.entries(customers).map(([customerKey, customerOrders]) => (
+                        {dayOrders.map((order) => (
                           <CustomerOrdersCard 
-                            key={customerKey} 
-                            orders={customerOrders}
-                            onViewReceipt={setSelectedOrdersForReceipt}
+                            key={order.id} 
+                            order={order}
+                            onViewReceipt={setSelectedOrderForReceipt}
+                            onMarkReady={handleMarkReady}
                           />
                         ))}
                       </div>
@@ -187,7 +211,7 @@ export const AdminOrdersModal = ({ isOpen, onClose, orders }: AdminOrdersModalPr
             
             <footer className="p-4 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 sm:hidden">
                 <button 
-                    onClick={onClose} 
+                    onClick={onClose}
                     className="w-full px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-colors"
                 >
                     Close
@@ -196,12 +220,19 @@ export const AdminOrdersModal = ({ isOpen, onClose, orders }: AdminOrdersModalPr
           </motion.div>
         </motion.div>
       )}
-      {selectedOrdersForReceipt && (
+      {selectedOrderForReceipt && (
         <ReceiptModal 
-          isOpen={!!selectedOrdersForReceipt}
-          onClose={() => setSelectedOrdersForReceipt(null)}
-          orders={selectedOrdersForReceipt}
+          isOpen={!!selectedOrderForReceipt}
+          onClose={() => setSelectedOrderForReceipt(null)}
+          orders={[selectedOrderForReceipt]} // ReceiptModal expects an array
         />
+      )}
+      {selectedOrderForReadiness && (
+          <MarkOrderReadyModal 
+            isOpen={!!selectedOrderForReadiness}
+            onClose={handleCloseMarkReadyModal}
+            order={selectedOrderForReadiness}
+          />
       )}
     </AnimatePresence>
   );

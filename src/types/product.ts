@@ -22,4 +22,5 @@ export interface Product {
   storeId: string; // Added storeId
   commission?: number;
   onPromo?: boolean;
+  status: 'processing' | 'ready' | 'shipped';
 }
