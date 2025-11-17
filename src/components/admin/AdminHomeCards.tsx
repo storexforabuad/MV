@@ -77,15 +77,16 @@ const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferral
   </div>
 );
 
-const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.ElementType | null, glowClass: string}[] = [
+const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.ElementType | null, glowClass: string, isAiCard?: boolean}[] = [
     {
         label: '(Biz+Con)™',
         subtitle: 'Network',
         icon: Globe,
-        gradient: 'bg-gradient-to-br from-slate-700 via-gray-800 to-zinc-900',
+        gradient: 'bg-black',
         text: 'text-white',
         component: null,
         glowClass: 'dark:shadow-slate-600/30 shadow-slate-600/50',
+        isAiCard: true,
     },
     {
         label: 'Tips',
@@ -394,9 +395,32 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             onAnimationComplete={() => onAnimationComplete?.()}
         >
             <style jsx>{`
-               .card-blob { position: absolute; top: -10px; right: -10px; width: 40px; height: 40px; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, transparent 70%); filter: blur(8px); animation: blobMove 4s infinite alternate ease-in-out; z-index: 0; }
-              @keyframes blobMove { 0% { transform: scale(1) translateY(0); } 100% { transform: scale(1.05) translateY(3px); } }
-              .dashboard-card { min-width: 0; max-width: 100%; word-wrap: break-word; overflow: hidden; }
+                .card-blob { position: absolute; top: -10px; right: -10px; width: 40px; height: 40px; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, transparent 70%); filter: blur(8px); animation: blobMove 4s infinite alternate ease-in-out; z-index: 0; }
+                @keyframes blobMove { 0% { transform: scale(1) translateY(0); } 100% { transform: scale(1.05) translateY(3px); } }
+                .dashboard-card { min-width: 0; max-width: 100%; word-wrap: break-word; overflow: hidden; }
+                .ai-text-gradient {
+                    background: linear-gradient(90deg, #fde047, #22d3ee, #a855f7, #ec4899, #4ade80, #f97316, #fde047);
+                    background-size: 400% 100%;
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    color: transparent;
+                    animation: ai-gradient-flow 10s linear infinite;
+                }
+                .ai-icon-glow {
+                    animation: ai-icon-glow-anim 10s linear infinite;
+                }
+                @keyframes ai-gradient-flow {
+                    0% { background-position: 0% 50%; }
+                    100% { background-position: 100% 50%; }
+                }
+                @keyframes ai-icon-glow-anim {
+                    0%, 100% { stroke: #fde047; }
+                    16% { stroke: #22d3ee; }
+                    32% { stroke: #a855f7; }
+                    48% { stroke: #ec4899; }
+                    64% { stroke: #4ade80; }
+                    80% { stroke: #f97316; }
+                }
             `}</style>
 
             {cardsToRender.map((card, idx) => {
@@ -420,10 +444,10 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                     <button className={`dashboard-card relative flex flex-row items-center justify-center rounded-2xl p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card.label)}>
                       {isPostsCard && showPostsNotification && (<span className="absolute top-2 right-2 flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></span>)}
                       <span className="card-blob" />
-                      <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white bg-opacity-20 shadow"><Icon className="w-5 h-5 sm:w-6 sm:h-6 drop-shadow" /></div>
+                      <div className={`flex-shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white bg-opacity-20 shadow ${card.isAiCard ? '!bg-transparent' : ''}`}><Icon className={`w-5 h-5 sm:w-6 sm:h-6 drop-shadow ${card.isAiCard ? 'ai-icon-glow' : ''}`} /></div>
                       <div className="flex flex-col items-center ml-3 min-w-0 z-10">
-                        <div className="text-base sm:text-lg font-bold drop-shadow">{card.label}</div>
-                        {card.subtitle && <div className="text-xs sm:text-sm font-medium opacity-90 text-center leading-tight">{card.subtitle}</div>}
+                        <div className={`text-base sm:text-lg font-bold drop-shadow ${card.isAiCard ? 'ai-text-gradient' : ''}`}>{card.label}</div>
+                        {card.subtitle && <div className={`text-xs sm:text-sm font-medium opacity-90 text-center leading-tight ${card.isAiCard ? 'ai-text-gradient' : ''}`}>{card.subtitle}</div>}
                       </div>
                     </button>
                     {spotlightStep === 'tips' && isTipsCard && (<SpotlightTooltip text="Check here for helpful tips and stats about your dashboard." className="top-full mt-5 left-1/2 -translate-x-1/2"/>)}
