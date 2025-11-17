@@ -17,9 +17,8 @@ import PostsComposerModal from './modals/PostsComposerModal';
 import { BizconNetworkModal } from './modals/BizconNetworkModal';
 import { DeliveriesHubModal } from './modals/DeliveriesHubModal';
 import RevenueModal from './modals/RevenueModal';
-import CommissionModal from './modals/CommissionModal'; // New!
+import CommissionModal from './modals/CommissionModal';
 import ExpensesModal from './modals/ExpensesModal';
-
 
 // Import the customer components
 import { AdminCustomersCard } from './AdminCustomersCard';
@@ -47,13 +46,13 @@ interface AdminHomeCardsProps {
   uiVisible: boolean;
   totalRevenue: number;
   totalExpenses: number;
-  totalCommission: number; // Corrected prop name
+  totalCommission: number;
   totalReferralBonus: number;
   onRefresh: (showRefresh: boolean) => void;
   openManageCategories: () => void;
   onOrdersCardClick: () => void;
   onProductsCardClick: () => void;
-  onAmbassadorCardClick: () => void; // New prop
+  onAmbassadorCardClick: () => void;
   isRefreshing: boolean;
   onAnimationComplete?: () => void;
   setIsModalOpen?: (open: boolean) => void;
@@ -65,8 +64,6 @@ interface AdminHomeCardsProps {
   promoCaption?: string;
   storeName?: string;
 }
-
-// Removed the old inline CommissionEarnedModal
 
 const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferralBonus: number, handleClose: () => void }) => (
   <div className="p-6 text-center">
@@ -112,20 +109,20 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
     {
       label: 'Content',
       subtitle: 'Scheduler',
-      icon: Send, // Changed from MessageCircle
-      gradient: 'bg-gradient-to-br from-purple-500 to-violet-600', // New Color
+      icon: Send,
+      gradient: 'bg-gradient-to-br from-purple-500 to-violet-600',
       text: 'text-white',
       component: PostsComposerModal,
-      glowClass: 'dark:shadow-violet-500/30 shadow-violet-500/50', // New Glow
+      glowClass: 'dark:shadow-violet-500/30 shadow-violet-500/50',
     },
     {
       label: 'Commission',
       valueKey: 'totalCommission',
       icon: Percent,
-      gradient: 'bg-gradient-to-br from-purple-500 via-violet-700 to-indigo-900', // Updated color
+      gradient: 'bg-gradient-to-br from-red-500 via-red-600 to-orange-700', // Swapped from Expenses
       text: 'text-white',
-      component: null, // Will be handled by a dedicated modal opener
-      glowClass: 'dark:shadow-violet-500/30 shadow-violet-500/50',
+      component: null,
+      glowClass: 'dark:shadow-red-500/30 shadow-red-500/50', // Swapped from Expenses
     },
     {
       label: 'Bonus',
@@ -149,10 +146,10 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
       label: 'Expenses',
       valueKey: 'totalExpenses',
       icon: TrendingDown,
-      gradient: 'bg-gradient-to-br from-red-500 via-red-600 to-orange-700',
+      gradient: 'bg-gradient-to-br from-purple-500 via-violet-700 to-indigo-900', // Swapped from Commission
       text: 'text-white',
       component: null,
-      glowClass: 'dark:shadow-red-500/30 shadow-red-500/50',
+      glowClass: 'dark:shadow-violet-500/30 shadow-violet-500/50', // Swapped from Commission
     },
     {
       label: 'Ambassador',
@@ -232,7 +229,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [isBizconNetworkModalOpen, setIsBizconNetworkModalOpen] = useState(false);
   const [isDeliveriesHubModalOpen, setIsDeliveriesHubModalOpen] = useState(false);
   const [isRevenueModalOpen, setIsRevenueModalOpen] = useState(false);
-  const [isCommissionModalOpen, setIsCommissionModalOpen] = useState(false); // New state
+  const [isCommissionModalOpen, setIsCommissionModalOpen] = useState(false);
   const [isExpensesModalOpen, setIsExpensesModalOpen] = useState(false);
   const [showPostsNotification, setShowPostsNotification] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -313,7 +310,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     else if (cardLabel === 'Views') setIsViewsModalOpen(true);
     else if (cardLabel === 'Share') setIsShareModalOpen(true);
     else if (cardLabel === 'Content') setIsPostsModalOpen(true);
-    else if (cardLabel === 'Commission') setIsCommissionModalOpen(true); // New!
+    else if (cardLabel === 'Commission') setIsCommissionModalOpen(true);
     else if (cardLabel === 'Ambassador') onAmbassadorCardClick();
     else if (cardLabel === 'Manage Categories') props.openManageCategories();
     else if (cardLabel === 'Orders') onOrdersCardClick();
@@ -359,7 +356,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
-  const handleCloseCommissionModal = () => { // New!
+  const handleCloseCommissionModal = () => {
     setIsCommissionModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
@@ -447,7 +444,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                             if (card.label === 'Commission') return formatCurrencyForCard(props.totalCommission);
                             if (card.label === 'Bonus') return formatCurrencyForCard(props.totalReferralBonus);
                             if (card.label === 'Revenue') return formatCurrencyForCard(props.totalRevenue);
-                            if (card.label === 'Expenses') return formatCurrencyForCard(props.totalExpenses);
+                            if (card.label === 'Expenses') return formatCurrencyForCard(props.totalExpenses + props.totalCommission);
                             if (card.label === 'Ambassador') return props.referrals;
                             if (card.label === 'Deliveries') return 0;
                             if (typeof value === 'number' || typeof value === 'string') return value;
@@ -486,7 +483,14 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
       {isCommissionModalOpen && (<CommissionModal isOpen={isCommissionModalOpen} onClose={handleCloseCommissionModal} storeId={storeId} />)} 
 
-      {isExpensesModalOpen && (<ExpensesModal isOpen={isExpensesModalOpen} onClose={handleCloseExpensesModal} />)}
+      {isExpensesModalOpen && (
+        <ExpensesModal 
+            isOpen={isExpensesModalOpen} 
+            onClose={handleCloseExpensesModal} 
+            totalCommission={props.totalCommission}
+            totalExpenses={props.totalExpenses}
+        />
+      )}
 
       {openModal !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md" onClick={handleCloseModal}>
