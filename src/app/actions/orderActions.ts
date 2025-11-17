@@ -347,28 +347,26 @@ export const getReadyForDeliveryOrders = async (storeId: string): Promise<StoreO
 }
 
 /**
- * Fetches revenue analytics for the store, including lifetime revenue and 7-day history.
+ * Fetches revenue analytics for the store, including lifetime revenue, 7-day history,
+ * and top-earning products.
  */
 export const getRevenueAnalytics = async (storeId: string) => {
     try {
-        // 1. Get lifetime revenue directly from the store document.
+        // --- Base Analytics (Lifetime & Historical) ---
         const storeRef = doc(db, 'stores', storeId);
         const storeSnap = await getDoc(storeRef);
         const lifetimeRevenue = storeSnap.data()?.totalRevenue || 0;
 
-        // 2. Get the last 7 days of metrics data from Firestore.
         const metricsRef = collection(db, 'stores', storeId, 'dailyMetrics');
-        const q = query(metricsRef, orderBy("date", "desc"), limit(7));
-        const metricsSnap = await getDocs(q);
+        const metricsQuery = query(metricsRef, orderBy("date", "desc"), limit(7));
+        const metricsSnap = await getDocs(metricsQuery);
         const last7DaysOfData = metricsSnap.docs.map(d => d.data());
 
-        // 3. Create a perfect 7-day date range and zero-fill missing days.
         const historicalData: { date: string; totalRevenue: number }[] = [];
         for (let i = 6; i >= 0; i--) {
             const d = new Date();
             d.setDate(d.getDate() - i);
             const dateStr = d.toISOString().split('T')[0];
-            
             const dayData = last7DaysOfData.find(data => data.date === dateStr);
             historicalData.push({
                 date: dateStr,
@@ -376,10 +374,38 @@ export const getRevenueAnalytics = async (storeId: string) => {
             });
         }
 
+        // --- Top Earning Products Analysis ---
+        const ordersRef = collection(db, 'stores', storeId, 'orders');
+        const ordersQuery = query(ordersRef, where('orderStatus', '==', 'ready'));
+        const ordersSnap = await getDocs(ordersQuery);
+
+        const productRevenue: { [key: string]: { name: string; totalRevenue: number } } = {};
+
+        ordersSnap.forEach(orderDoc => {
+            const order = orderDoc.data();
+            if (Array.isArray(order.products)) {
+                order.products.forEach((product: Product) => {
+                    if (product.id && product.price) {
+                        if (!productRevenue[product.id]) {
+                            productRevenue[product.id] = { name: product.name, totalRevenue: 0 };
+                        }
+                        productRevenue[product.id].totalRevenue += product.price;
+                    }
+                });
+            }
+        });
+
+        const topEarningProducts = Object.entries(productRevenue)
+            .map(([id, data]) => ({ id, ...data }))
+            .sort((a, b) => b.totalRevenue - a.totalRevenue)
+            .slice(0, 5);
+
         return {
             lifetimeRevenue,
             historicalData,
+            topEarningProducts, // New data being returned
         };
+
     } catch (error) {
         console.error("Error fetching revenue analytics:", error);
         throw new Error("Failed to fetch revenue analytics.");

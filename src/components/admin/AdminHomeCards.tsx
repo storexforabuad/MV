@@ -9,14 +9,15 @@ import PopularProductsModal from './modals/PopularProductsModal';
 import LimitedStockModal from './modals/LimitedStockModal';
 import TotalViewsModal from './modals/TotalViewsModal';
 import StoreLinkModal from './modals/StoreLinkModal';
-import { AmbassadorHubModal } from './modals/AmbassadorHubModal'; // NEW
+import { AmbassadorHubModal } from './modals/AmbassadorHubModal';
 import SoldOutModal from './modals/SoldOutModal';
 import TipsModal from './modals/TipsModal';
 import SpotlightTooltip from '../shared/SpotlightTooltip';
-import PostsComposerModal from './modals/PostsComposerModal'; // Renamed
+import PostsComposerModal from './modals/PostsComposerModal';
 import { BizconNetworkModal } from './modals/BizconNetworkModal';
 import { DeliveriesHubModal } from './modals/DeliveriesHubModal';
 import RevenueModal from './modals/RevenueModal';
+import CommissionModal from './modals/CommissionModal'; // New!
 import ExpensesModal from './modals/ExpensesModal';
 
 
@@ -46,7 +47,7 @@ interface AdminHomeCardsProps {
   uiVisible: boolean;
   totalRevenue: number;
   totalExpenses: number;
-  totalCommissionEarned: number;
+  totalCommission: number; // Corrected prop name
   totalReferralBonus: number;
   onRefresh: (showRefresh: boolean) => void;
   openManageCategories: () => void;
@@ -65,19 +66,7 @@ interface AdminHomeCardsProps {
   storeName?: string;
 }
 
-
-// Modal Components (assuming they are defined elsewhere and imported)
-const CommissionEarnedModal = ({ totalCommissionEarned, handleClose }: { totalCommissionEarned: number, handleClose: () => void }) => (
-  <div className="p-6 text-center">
-    <Percent className="w-12 h-12 mx-auto text-green-500 mb-4" />
-    <h3 className="text-2xl font-bold mb-2">Total Commission Earned</h3>
-    <p className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-emerald-600">
-      ₦{totalCommissionEarned.toFixed(2)}
-    </p>
-    <p className="text-sm text-text-secondary mt-2">This is the Bizcon™ Network Commission generated from store activity contributed towards Business systems maintenance, Bizcon™ Network membership, and referral bonuses.</p>
-    <button onClick={handleClose} className="mt-6 bg-blue-500 text-white font-bold py-2 px-4 rounded-lg">Close</button>
-  </div>
-);
+// Removed the old inline CommissionEarnedModal
 
 const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferralBonus: number, handleClose: () => void }) => (
   <div className="p-6 text-center">
@@ -131,12 +120,12 @@ const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCar
     },
     {
       label: 'Commission',
-      valueKey: 'totalCommissionEarned',
+      valueKey: 'totalCommission',
       icon: Percent,
-      gradient: 'bg-gradient-to-br from-green-500 via-emerald-600 to-teal-700',
+      gradient: 'bg-gradient-to-br from-purple-500 via-violet-700 to-indigo-900', // Updated color
       text: 'text-white',
-      component: CommissionEarnedModal,
-      glowClass: 'dark:shadow-emerald-500/30 shadow-emerald-500/50',
+      component: null, // Will be handled by a dedicated modal opener
+      glowClass: 'dark:shadow-violet-500/30 shadow-violet-500/50',
     },
     {
       label: 'Bonus',
@@ -243,6 +232,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [isBizconNetworkModalOpen, setIsBizconNetworkModalOpen] = useState(false);
   const [isDeliveriesHubModalOpen, setIsDeliveriesHubModalOpen] = useState(false);
   const [isRevenueModalOpen, setIsRevenueModalOpen] = useState(false);
+  const [isCommissionModalOpen, setIsCommissionModalOpen] = useState(false); // New state
   const [isExpensesModalOpen, setIsExpensesModalOpen] = useState(false);
   const [showPostsNotification, setShowPostsNotification] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -290,7 +280,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   }
 
   useEffect(() => {
-    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isExpensesModalOpen;
+    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen;
     if (modalIsOpen) {
       window.history.pushState({ modalOpen: true }, '');
       const handlePopState = () => {
@@ -303,6 +293,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         setIsBizconNetworkModalOpen(false);
         setIsDeliveriesHubModalOpen(false);
         setIsRevenueModalOpen(false);
+        setIsCommissionModalOpen(false);
         setIsExpensesModalOpen(false);
         if (setIsModalOpen) setIsModalOpen(false);
       };
@@ -314,7 +305,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         }
       };
     }
-  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isExpensesModalOpen, setIsModalOpen]);
+  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, setIsModalOpen]);
 
   const handleOpenModal = (idx: number, cardLabel?: string) => {
     if (cardLabel === '(Biz+Con)™') setIsBizconNetworkModalOpen(true);
@@ -322,6 +313,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     else if (cardLabel === 'Views') setIsViewsModalOpen(true);
     else if (cardLabel === 'Share') setIsShareModalOpen(true);
     else if (cardLabel === 'Content') setIsPostsModalOpen(true);
+    else if (cardLabel === 'Commission') setIsCommissionModalOpen(true); // New!
     else if (cardLabel === 'Ambassador') onAmbassadorCardClick();
     else if (cardLabel === 'Manage Categories') props.openManageCategories();
     else if (cardLabel === 'Orders') onOrdersCardClick();
@@ -364,6 +356,11 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
   const handleCloseRevenueModal = () => {
     setIsRevenueModalOpen(false);
+    if (props.setIsModalOpen) props.setIsModalOpen(false);
+  }
+
+  const handleCloseCommissionModal = () => { // New!
+    setIsCommissionModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
@@ -447,7 +444,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                         <div className="text-lg sm:text-xl md:text-2xl font-bold drop-shadow">
                           {(() => {
                             const value = card.valueKey ? (props as any)[card.valueKey] : '';
-                            if (card.label === 'Commission') return formatCurrencyForCard(props.totalCommissionEarned);
+                            if (card.label === 'Commission') return formatCurrencyForCard(props.totalCommission);
                             if (card.label === 'Bonus') return formatCurrencyForCard(props.totalReferralBonus);
                             if (card.label === 'Revenue') return formatCurrencyForCard(props.totalRevenue);
                             if (card.label === 'Expenses') return formatCurrencyForCard(props.totalExpenses);
@@ -486,6 +483,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
       {isDeliveriesHubModalOpen && (<DeliveriesHubModal isOpen={isDeliveriesHubModalOpen} onClose={handleCloseDeliveriesHubModal} storeId={storeId} />)}
 
       {isRevenueModalOpen && (<RevenueModal isOpen={isRevenueModalOpen} onClose={handleCloseRevenueModal} storeId={storeId} />)}
+
+      {isCommissionModalOpen && (<CommissionModal isOpen={isCommissionModalOpen} onClose={handleCloseCommissionModal} storeId={storeId} />)} 
 
       {isExpensesModalOpen && (<ExpensesModal isOpen={isExpensesModalOpen} onClose={handleCloseExpensesModal} />)}
 

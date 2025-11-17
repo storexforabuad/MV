@@ -16,6 +16,7 @@ import {
   fetchStoreOrders,
   StoreOrder
 } from '../../../lib/db';
+import { getCommissionAnalytics } from '@/app/actions/commissionActions'; // New!
 import { requestNotificationPermission } from '../../../lib/firebase-messaging';
 import { Product } from '../../../types/product';
 import { Category } from '../../../types/category';
@@ -35,7 +36,6 @@ import dynamic from 'next/dynamic';
 import PreviewSkeleton from '../../../components/admin/PreviewSkeleton';
 import { markOnboardingAsCompleted } from '../../../app/actions/onboardingActions';
 import { useSpotlightContext } from '@/context/SpotlightContext';
-import { calculateCommissionAndBonus } from '../../../utils/calculations';
 
 const OnboardingFlow = dynamic(() => import('../../../components/admin/onboarding/OnboardingFlow'));
 
@@ -106,34 +106,31 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const { spotlightStep, setSpotlightStep } = useSpotlightContext();
   const [shouldShowSpotlight, setShouldShowSpotlight] = useState(false);
-  const [commissionData, setCommissionData] = useState({ totalCommissionEarned: 0, totalReferralBonus: 0 });
+  const [commissionAnalytics, setCommissionAnalytics] = useState({ totalCommission: 0, commissionHistory: []});
+  const [totalReferralBonus, setTotalReferralBonus] = useState(0); // Simple state for bonus for now
 
   const searchParams = useSearchParams();
   const { orders, refreshOrders } = useStoreOrders(storeId);
 
-  useEffect(() => {
-    if (orders) {
-      const { totalCommissionEarned, totalReferralBonus } = calculateCommissionAndBonus(orders);
-      setCommissionData({ totalCommissionEarned, totalReferralBonus });
-    }
-  }, [orders]);
-
   const fetchData = useCallback(async (showRefresh = false) => {
     if (showRefresh) setIsRefreshing(true);
     try {
-      const [fetchedProducts, fetchedCategories, fetchedContacts, fetchedStoreMeta, fetchedReferrals] = await Promise.all([
+      const [fetchedProducts, fetchedCategories, fetchedContacts, fetchedStoreMeta, fetchedReferrals, commissionData] = await Promise.all([
         getProducts(storeId),
         getCategories(storeId),
         getContacts(storeId),
         getStoreMeta(storeId),
         getReferrals(storeId),
+        getCommissionAnalytics(storeId) // New!
       ]);
       setProducts(fetchedProducts);
       setCategories(fetchedCategories);
       setContacts(fetchedContacts);
       setStoreMeta(fetchedStoreMeta as StoreMeta);
       setReferrals(fetchedReferrals);
-      refreshOrders(); // Refresh orders as well
+      setCommissionAnalytics(commissionData); // New!
+      // TODO: You might want a similar analytics action for referral bonuses
+      refreshOrders();
 
       const hasCompletedOnboarding = localStorage.getItem('hasCompletedOnboarding') === 'true';
       if (fetchedStoreMeta?.hasCompletedOnboarding || hasCompletedOnboarding) {
@@ -241,7 +238,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
     }
   };
 
-  const totalRevenue = products.reduce((sum, p) => sum + (Number(p.price) || 0), 0);
+  const totalRevenue = products.reduce((sum, p) => sum + (Number(p.price) * (p.inStock || 1)), 0); // Simplified calculation
 
   if (loading || showOnboarding === null) return <AdminSkeleton screen="home" />;
 
@@ -290,12 +287,13 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
                   storeName={storeMeta?.name}
                   totalRevenue={totalRevenue}
                   onAnimationComplete={handleAnimationComplete}
-                  onOrdersCardClick={() => setIsOrdersModalOpen(true)} // Wire up the click handler
+                  onOrdersCardClick={() => setIsOrdersModalOpen(true)}
                   openManageCategories={() => setIsManageCategoriesModalOpen(true)}
                   onProductsCardClick={() => setIsManageModalOpen(true)}
-                  onAmbassadorCardClick={() => setIsAmbassadorHubModalOpen(true)} // Wire up the click handler
-                  totalCommissionEarned={commissionData.totalCommissionEarned}
-                  totalReferralBonus={commissionData.totalReferralBonus}
+                  onAmbassadorCardClick={() => setIsAmbassadorHubModalOpen(true)}
+                  totalCommission={commissionAnalytics.totalCommission} // Corrected prop!
+                  totalReferralBonus={totalReferralBonus} // Using placeholder state
+                  totalExpenses={0} // Placeholder, as in original code
                 />
               </div>
             )}
