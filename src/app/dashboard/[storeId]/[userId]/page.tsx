@@ -43,7 +43,7 @@ export default function DashboardPage() {
   const [storeMeta, setStoreMeta] = useState<StoreMeta | null>(null);
 
   const storeId = params ? (Array.isArray(params.storeId) ? params.storeId[0] : params.storeId) : undefined;
-  const { orders, addOrder, refetchOrders: fetchOrders, isLoading: loading } = useOrders(customer?.id || null, storeId);
+  const { orders, addOrder, refetchOrders: fetchOrders, isLoading: loading } = useOrders(customer?.id || null, storeId || '');
 
   useEffect(() => {
     async function fetchStoreMeta() {

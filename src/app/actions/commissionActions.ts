@@ -34,7 +34,7 @@ interface SimpleStoreOrder {
     customerInfo: CustomerInfo;
 }
 
-interface CommissionEvent {
+export interface CommissionEvent {
     orderId: string;
     customerName: string;
     commissionAmount: number;

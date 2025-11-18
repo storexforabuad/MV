@@ -63,6 +63,7 @@ interface AdminHomeCardsProps {
   totalContacts: number;
   promoCaption?: string;
   storeName?: string;
+  deliveries: number;
 }
 
 const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferralBonus: number, handleClose: () => void }) => (

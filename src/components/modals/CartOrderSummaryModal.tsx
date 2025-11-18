@@ -26,7 +26,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
   const [customer, setCustomer] = useState<Customer | null>(initialCustomer);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const storeId = cartItems[0]?.storeId;
-  const { addOrder } = useOrders(customer?.id || null, storeId);
+  const { addOrder } = useOrders(customer?.id || null, storeId || "");
   const { dispatch } = useCart();
 
   useEffect(() => {
@@ -151,7 +151,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
 
                 <div className="mt-5 sm:mt-6 grid grid-cols-2 gap-3">
                   <button type="button" className="w-full rounded-md border border-gray-300 bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600 px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" onClick={onClose}>Cancel</button>
-                  <button type="button" className="w-full rounded-md border border-transparent bg-green-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:bg-green-400 disabled:cursor-not-allowed" onClick={handlePlaceOrder} disabled={isPlacingOrder}>
+                  <button type="button" className="w-full rounded-md border border-transparent bg-green-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:bg-green-400 disabled:cursor-not-allowed" onClick={handlePlaceOrder} disabled={isPlacingOrder || !storeId}>
                     {isPlacingOrder ? (
                       <>
                         <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

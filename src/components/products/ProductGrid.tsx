@@ -89,7 +89,7 @@ const EmptyCategory = () => (
   const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId, activeCategoryId }: ProductGridProps) {
     const router = useRouter();
     const { customer, promptLogin } = useCustomer();
-    const { orders, addOrder } = useOrders(customer?.id ?? null, storeId);
+    const { orders, addOrder } = useOrders(customer?.id ?? null, storeId || "");
     const [isSingleColumn, setIsSingleColumn] = useState(false);
     const [aboutOpen, setAboutOpen] = useState(false);
     const [isOrdersModalOpen, setOrdersModalOpen] = useState(false);

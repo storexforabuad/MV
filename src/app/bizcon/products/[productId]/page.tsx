@@ -15,7 +15,6 @@ import { calculateDiscount, formatPrice } from '../../../../utils/price';
 import { ViewHistoryCache } from '../../../../lib/viewHistoryCache';
 import { ProductDetailCache } from '../../../../lib/productDetailCache';
 import Navbar from '../../../../components/layout/navbar';
-import { incrementOrderCount } from '../../../../app/actions/orderActions';
 
 // Dynamic imports
 const ProductDetailSkeleton = dynamic(() => import('../../../../components/ProductDetailSkeleton'), {
@@ -38,7 +37,7 @@ export default function ProductDetail() {
   const { customer } = useCustomer();
 
   const storeId = useMemo(() => searchParams ? searchParams.get('storeId') : null, [searchParams]);
-  const { addOrder } = useOrders(customer?.id || null, storeId || undefined); // Pass storeId in global context
+  const { addOrder } = useOrders(customer?.id || null, storeId || ''); // Pass storeId in global context
   const [storeMeta, setStoreMeta] = useState<StoreMeta | null>(null);
 
   const [imageLoading, setImageLoading] = useState(true);
@@ -105,8 +104,7 @@ export default function ProductDetail() {
   const handleOrderNow = async () => {
     if (!product?.storeId || !storeMeta || !storeMeta.whatsapp || !customer) return;
 
-    addOrder(product, storeMeta, 1, customer, null);
-    await incrementOrderCount(product.storeId, 1);
+    addOrder([product], storeMeta, customer, null, false);
 
     const message = 
       `🛍️ *New Order Request*\n\n` +

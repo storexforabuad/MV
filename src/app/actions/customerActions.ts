@@ -1,5 +1,3 @@
-'use server';
-
 import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, orderBy, doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/db";
 import { Customer, DeliveryAddress } from "@/types/customer";
@@ -214,7 +212,8 @@ export const fetchStoreCustomers = async (storeId: string): Promise<StoreCustome
 
             const customerRecord = customerDataMap.get(customerId)!;
             customerRecord.totalOrdersInStore += 1;
-            customerRecord.totalSpentInStore += order.product.price * order.quantity;
+            const orderTotal = order.products.reduce((sum, product) => sum + product.price * product.quantity, 0);
+            customerRecord.totalSpentInStore += orderTotal;
         }
 
         if (orderedUniqueCustomerIds.length > 0) {

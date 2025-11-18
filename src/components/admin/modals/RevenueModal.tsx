@@ -36,7 +36,7 @@ const formatCurrency = (amount: number) => {
     return `₦${amount.toLocaleString()}`;
 };
 
-const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType>) => {
+const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType> & { payload?: any[], label?: any }) => {
   if (active && payload && payload.length) {
     const date = new Date(label);
     const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });

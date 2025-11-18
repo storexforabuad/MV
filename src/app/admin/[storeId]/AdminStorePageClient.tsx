@@ -16,7 +16,7 @@ import {
   fetchStoreOrders,
   StoreOrder
 } from '../../../lib/db';
-import { getCommissionAnalytics } from '@/app/actions/commissionActions'; // New!
+import { getCommissionAnalytics, CommissionEvent } from '@/app/actions/commissionActions';
 import { requestNotificationPermission } from '../../../lib/firebase-messaging';
 import { Product } from '../../../types/product';
 import { Category } from '../../../types/category';
@@ -43,6 +43,11 @@ interface Referral {
   id: string;
   businessName: string;
   businessNumber: string;
+}
+
+interface CommissionAnalyticsData {
+  totalCommission: number;
+  commissionHistory: CommissionEvent[];
 }
 
 // A new hook to fetch store orders
@@ -106,7 +111,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const { spotlightStep, setSpotlightStep } = useSpotlightContext();
   const [shouldShowSpotlight, setShouldShowSpotlight] = useState(false);
-  const [commissionAnalytics, setCommissionAnalytics] = useState({ totalCommission: 0, commissionHistory: []});
+  const [commissionAnalytics, setCommissionAnalytics] = useState<CommissionAnalyticsData>({ totalCommission: 0, commissionHistory: []});
   const [totalReferralBonus, setTotalReferralBonus] = useState(0); // Simple state for bonus for now
 
   const searchParams = useSearchParams();
@@ -238,7 +243,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
     }
   };
 
-  const totalRevenue = products.reduce((sum, p) => sum + (Number(p.price) * (p.inStock || 1)), 0); // Simplified calculation
+  const totalRevenue = products.reduce((sum, p) => sum + (Number(p.price) * (p.inStock ? 1 : 0)), 0);
 
   if (loading || showOnboarding === null) return <AdminSkeleton screen="home" />;
 
@@ -294,6 +299,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
                   totalCommission={commissionAnalytics.totalCommission} // Corrected prop!
                   totalReferralBonus={totalReferralBonus} // Using placeholder state
                   totalExpenses={0} // Placeholder, as in original code
+                  deliveries={0} // Placeholder, as in original code
                 />
               </div>
             )}
@@ -344,6 +350,8 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
         isOpen={isOrdersModalOpen}
         onClose={() => setIsOrdersModalOpen(false)}
         orders={orders}
+        storeId={storeId}
+        onOrderUpdated={refreshOrders}
       />
 
        <AmbassadorHubModal

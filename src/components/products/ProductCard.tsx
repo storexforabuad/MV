@@ -66,14 +66,15 @@ export default function ProductCard({ product, storeId, activeCategoryId }: Prod
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={handleClick}
+        style={{ WebkitTapHighlightColor: 'transparent' }}
       >
         <div className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden
           shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08),0_2px_6px_-1px_rgba(0,0,0,0.05)] dark:shadow-lg dark:shadow-white/10
-          transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
+          transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]
           transform-gpu will-change-transform
           group-hover:shadow-[0_16px_24px_-8px_rgba(0,0,0,0.12),0_4px_12px_-4px_rgba(0,0,0,0.08)] dark:group-hover:shadow-xl dark:group-hover:shadow-white/15
           group-hover:translate-y-[-4px]
-          active:scale-[0.97]
+          active:scale-[0.97] active:ring-4 active:ring-blue-500/40 dark:active:ring-sky-400/40 active:ring-offset-2 active:ring-offset-white dark:active:ring-offset-gray-900
           bg-white dark:bg-gray-900"
           style={{
             transform: 'translate3d(0,0,0)',

@@ -37,7 +37,7 @@ export function OrderDetailCard({ order, addOrder, storeMeta }: OrderDetailCardP
   const { customer } = useCustomer();
 
   // Backward compatibility: Handle both new multi-product orders and old single-product orders.
-  const products = order.products || (order.product ? [{ ...order.product, quantity: order.quantity || 1 }] : []);
+  const products = order.products || [];
 
   const handleReorder = async () => {
     if (!customer) {
@@ -103,7 +103,7 @@ export function OrderDetailCard({ order, addOrder, storeMeta }: OrderDetailCardP
                 {/* FIX: Use the backward-compatible 'products' array for rendering. */}
                 {products.map((product, index) => {
                     // Defensive check for images, as legacy product objects might not have an 'images' array.
-                    const imageUrl = product.images && product.images.length > 0 ? product.images[0] : product.image;
+                    const imageUrl = product.images && product.images.length > 0 ? product.images[0] : undefined;
                     return (
                         <div key={product.id || index} className="flex items-center gap-3">
                             <div className="w-12 h-12 relative flex-shrink-0">

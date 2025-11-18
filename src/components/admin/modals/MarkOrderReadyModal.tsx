@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, CheckCircle, ShoppingBag } from 'lucide-react';
 import Image from 'next/image';
 import { useState } from 'react';
-import { StoreOrder, updateOrderStatus } from '@/app/actions/orderActions';
+import { StoreOrder } from '@/app/actions/orderActions';
 import { formatPrice } from '@/utils/price';
 import toast from 'react-hot-toast';
 
@@ -12,6 +12,8 @@ interface MarkOrderReadyModalProps {
   isOpen: boolean;
   onClose: () => void;
   order: StoreOrder;
+  onConfirm: (order: StoreOrder, productIds: string[]) => void;
+  isUpdating: boolean;
 }
 
 const OrderProduct = ({ product, isSelected, onSelect }: { product: any, isSelected: boolean, onSelect: (productId: string) => void }) => {
@@ -45,9 +47,8 @@ const OrderProduct = ({ product, isSelected, onSelect }: { product: any, isSelec
     )
 }
 
-export const MarkOrderReadyModal = ({ isOpen, onClose, order }: MarkOrderReadyModalProps) => {
+export const MarkOrderReadyModal = ({ isOpen, onClose, order, onConfirm, isUpdating }: MarkOrderReadyModalProps) => {
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   const handleSelectProduct = (productId: string) => {
     setSelectedProductIds(prev =>
@@ -55,25 +56,12 @@ export const MarkOrderReadyModal = ({ isOpen, onClose, order }: MarkOrderReadyMo
     );
   };
 
-  const handleConfirm = async () => {
+  const handleConfirm = () => {
     if (selectedProductIds.length === 0) {
         toast.error("Please select at least one product.");
         return;
     }
-    
-    setIsLoading(true);
-    const toastId = toast.loading('Updating order status...');
-
-    try {
-        await updateOrderStatus(order.storeMeta.id, order.id, selectedProductIds);
-        toast.success('Order status updated successfully!', { id: toastId });
-        onClose();
-    } catch (error) {
-        console.error("Error updating order status:", error);
-        toast.error('Failed to update order status. Please try again.', { id: toastId });
-    } finally {
-        setIsLoading(false);
-    }
+    onConfirm(order, selectedProductIds);
   };
 
   return (
@@ -120,17 +108,17 @@ export const MarkOrderReadyModal = ({ isOpen, onClose, order }: MarkOrderReadyMo
             <footer className="p-4 border-t border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 flex-shrink-0 flex justify-end items-center gap-4">
                 <button 
                     onClick={onClose} 
-                    disabled={isLoading}
+                    disabled={isUpdating}
                     className="px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors disabled:opacity-50"
                 >
                     Cancel
                 </button>
                 <button 
                     onClick={handleConfirm}
-                    disabled={isLoading || selectedProductIds.length === 0}
+                    disabled={isUpdating || selectedProductIds.length === 0}
                     className="flex items-center gap-2 px-6 py-2 text-sm font-semibold text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                    {isLoading ? 'Confirming...' : `Confirm (${selectedProductIds.length})`}
+                    {isUpdating ? 'Confirming...' : `Confirm (${selectedProductIds.length})`}
                 </button>
             </footer>
           </motion.div>
