@@ -11,9 +11,10 @@ interface NavbarProps {
   storeName?: string;
   scrollDirection?: 'up' | 'down';
   backButtonHref?: string;
+  onTitleClick?: () => void;
 }
 
-export default function Navbar({ storeName, scrollDirection = 'up', backButtonHref }: NavbarProps) {
+export default function Navbar({ storeName, scrollDirection = 'up', backButtonHref, onTitleClick }: NavbarProps) {
   const { state } = useCart();
   const { theme, toggleTheme } = useTheme();
   const [isBouncing, setIsBouncing] = useState(false);
@@ -22,7 +23,7 @@ export default function Navbar({ storeName, scrollDirection = 'up', backButtonHr
   const router = useRouter();
   const isAdminRoute = pathname?.startsWith('/admin');
   const isStorefront = !isAdminRoute && !!pathname && pathname.split('/').length > 1 && pathname.split('/')[1].length > 0;
-  
+
   const pathSegments = pathname?.split('/').filter(Boolean) || [];
   const isStoreProductPage = pathSegments.length === 3 && pathSegments[1] === 'products';
   const isProductPage = pathname?.startsWith('/products/');
@@ -37,7 +38,7 @@ export default function Navbar({ storeName, scrollDirection = 'up', backButtonHr
     }
     setPrevTotalItems(state.totalItems);
   }, [state.totalItems, prevTotalItems]);
-  
+
   const handleBack = () => {
     if (showBackButton) {
       router.back();
@@ -77,9 +78,18 @@ export default function Navbar({ storeName, scrollDirection = 'up', backButtonHr
             ) : storeName ? (
               <div className="flex items-center gap-2">
                 <ShoppingBag className="h-8 w-8 text-text-primary" />
-                <span className="text-xl font-semibold flex items-center gap-2 premium-title-gradient">
-                  {storeName}
-                </span>
+                {onTitleClick ? (
+                  <button
+                    onClick={onTitleClick}
+                    className="text-xl font-semibold flex items-center gap-2 premium-title-gradient hover:opacity-80 transition-opacity text-left"
+                  >
+                    {storeName}
+                  </button>
+                ) : (
+                  <span className="text-xl font-semibold flex items-center gap-2 premium-title-gradient">
+                    {storeName}
+                  </span>
+                )}
               </div>
             ) : (
               <Link href="/" className="flex items-center gap-2">
@@ -90,7 +100,7 @@ export default function Navbar({ storeName, scrollDirection = 'up', backButtonHr
               </Link>
             )}
           </div>
-          
+
           <div className="flex items-center gap-4">
             <button
               onClick={toggleTheme}
@@ -103,23 +113,23 @@ export default function Navbar({ storeName, scrollDirection = 'up', backButtonHr
                 <Sun className="w-5 h-5 text-text-primary" />
               )}
             </button>
-  
+
             {!isAdminRoute && (
-              <Link 
+              <Link
                 href="/cart"
                 className="relative group p-2"
               >
                 <div className="relative">
-                  <Heart 
+                  <Heart
                     className={`h-7 w-7 text-text-primary transition-colors ${state.totalItems > 0 ? 'fill-current text-red-500' : ''}`}
                   />
-                  <span 
+                  <span
                     className={`absolute -top-1 -right-1 
                       text-xs rounded-full h-5 w-5 flex items-center justify-center
                       transition-all duration-300
                       ${isBouncing ? 'animate-badge-bounce' : ''}
-                      ${state.totalItems > 0 
-                        ? 'bg-red-500/80 text-white' 
+                      ${state.totalItems > 0
+                        ? 'bg-red-500/80 text-white'
                         : 'bg-gray-500/80 text-white'
                       }`}
                     style={{

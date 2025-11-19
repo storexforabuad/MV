@@ -7,9 +7,9 @@ import {
   getProductsByCategory,
   getCategories,
   getStoreMeta,
-  getStorePopularProducts, 
+  getStorePopularProducts,
 }
-from '@/lib/db';
+  from '@/lib/db';
 import { useConnectionCheck } from '@/hooks/useConnectionCheck';
 import { useScrollDirection } from '@/hooks/useScrollDirection';
 import Navbar from '@/components/layout/navbar';
@@ -26,6 +26,18 @@ const ProductGrid = dynamic(
   () => import('../../components/products/ProductGrid'),
   { ssr: false }
 );
+
+const BusinessCardModal = dynamic(() => import('../../components/products/BusinessCardModal').then(mod => mod.BusinessCardModal), {
+  ssr: false,
+  loading: () => (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 p-4">
+      <div className="relative w-full max-w-sm mx-auto rounded-2xl overflow-hidden shadow-2xl bg-background flex flex-col items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-white"></div>
+        <p className="mt-4 text-slate-500 dark:text-slate-400">Loading Business Info...</p>
+      </div>
+    </div>
+  )
+});
 
 const ProductGridSkeleton = () => (
   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 gap-3 sm:gap-4 px-4">
@@ -60,6 +72,8 @@ export default function StorefrontPageClient({ storeId }: { storeId: string }) {
   const productGridRef = useRef<HTMLDivElement>(null);
   const [isPending, startTransition] = useTransition();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
+  const [storeMeta, setStoreMeta] = useState<any | null>(null);
 
   const fetchProducts = useCallback(async (categoryId: string, pageNum = 1, lastDoc: DocumentSnapshot | null = null) => {
     if (!storeId) return;
@@ -97,8 +111,8 @@ export default function StorefrontPageClient({ storeId }: { storeId: string }) {
           ProductListCache.set(cacheKey, fetchedProducts);
         }
       }
-      
-      if(fetchedProducts) {
+
+      if (fetchedProducts) {
         setProducts(prev => pageNum === 1 ? fetchedProducts : [...prev, ...fetchedProducts]);
         setHasMore(fetchedProducts.length === PRODUCTS_PAGE_SIZE);
       }
@@ -124,27 +138,28 @@ export default function StorefrontPageClient({ storeId }: { storeId: string }) {
     if (!storeId) return;
 
     const fetchInitialAndCategoryData = async () => {
-        if (initialLoading) {
-            const meta = await getStoreMeta(storeId);
-            setStoreName(meta?.name || storeId);
-            const cats = await getCategories(storeId);
-            setCategories(cats);
-        }
-        await fetchProducts(activeCategoryId, 1, null);
+      if (initialLoading) {
+        const meta = await getStoreMeta(storeId);
+        setStoreName(meta?.name || storeId);
+        setStoreMeta(meta);
+        const cats = await getCategories(storeId);
+        setCategories(cats);
+      }
+      await fetchProducts(activeCategoryId, 1, null);
     };
-    
+
     fetchInitialAndCategoryData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storeId, activeCategoryId]);
 
   useLayoutEffect(() => {
     if (scrollRestoreState.current?.scrollPosition && products.length > 0) {
-        const { scrollPosition } = scrollRestoreState.current;
-        window.scrollTo(0, scrollPosition);
-        scrollRestoreState.current = null;
-        NavigationStore.clearState();
+      const { scrollPosition } = scrollRestoreState.current;
+      window.scrollTo(0, scrollPosition);
+      scrollRestoreState.current = null;
+      NavigationStore.clearState();
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [products]);
 
   const fetchMoreProducts = useCallback(() => {
@@ -174,11 +189,12 @@ export default function StorefrontPageClient({ storeId }: { storeId: string }) {
 
   return (
     <div className="min-h-screen bg-background overscroll-none">
-      <Navbar 
-        storeName={storeName} 
-        scrollDirection={scrollDirection} 
+      <Navbar
+        storeName={storeName}
+        scrollDirection={scrollDirection}
+        onTitleClick={() => setAboutOpen(true)}
       />
-      <CategoryBar 
+      <CategoryBar
         onCategorySelect={handleCategorySelect}
         activeCategoryId={activeCategoryId}
         categories={categories}
@@ -191,7 +207,7 @@ export default function StorefrontPageClient({ storeId }: { storeId: string }) {
         onSuccess={() => setIsLoginModalOpen(false)}
       />
       <div className="pt-44 pb-safe-area-inset-bottom">
-        <ReferralBanner 
+        <ReferralBanner
           storeId={storeId}
           storeName={storeName}
           onLoginClick={() => setIsLoginModalOpen(true)}
@@ -204,15 +220,18 @@ export default function StorefrontPageClient({ storeId }: { storeId: string }) {
               {isConnectionError && (
                 <ConnectionErrorToast onRetry={() => fetchProducts(activeCategoryId, 1, null)} />
               )}
-              <ProductGrid 
+              <ProductGrid
                 products={products}
                 containerRef={productGridRef}
                 storeId={storeId}
                 activeCategoryId={activeCategoryId}
+                onAboutClick={() => setAboutOpen(true)}
+                storeMeta={storeMeta}
               />
+              {storeId && aboutOpen && <BusinessCardModal open={aboutOpen} onClose={() => setAboutOpen(false)} storeMeta={storeMeta || undefined} />}
               {hasMore && (
                 <div ref={observerRef} className="h-8 flex items-center justify-center">
-                   {loading && <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>}
+                  {loading && <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>}
                 </div>
               )}
             </>

@@ -57,13 +57,13 @@ export default function BizconContent() {
   const fetchProducts = useCallback(async (category: string, lastDoc: DocumentSnapshot | null = null) => {
     if (loading) return;
     setLoading(true);
-    
+
     const isInitialLoad = lastDoc === null;
 
     try {
       let result: PaginatedProductsResult;
       const cacheKey = `bizcon_products_${category}_page1`;
-      
+
       switch (category) {
         case 'Promo':
           result = await getGlobalPromoProducts(lastDoc, PRODUCTS_PAGE_SIZE);
@@ -78,7 +78,7 @@ export default function BizconContent() {
           result = await getAllProductsByCategory(category, lastDoc, PRODUCTS_PAGE_SIZE);
           break;
       }
-      
+
       if (result && result.products) {
         if (isInitialLoad) {
           ProductListCache.set(cacheKey, result.products);
@@ -89,7 +89,7 @@ export default function BizconContent() {
       } else {
         setHasMore(false);
       }
-      
+
     } catch (error) {
       console.error(`Error fetching products for category ${category}:`, error);
       setIsConnectionError(true);
@@ -166,7 +166,7 @@ export default function BizconContent() {
     <div className="min-h-screen bg-background overscroll-none">
       <Navbar storeName={storeName} />
       <div className="pt-16 pb-safe-area-inset-bottom">
-        <CategoryBar 
+        <CategoryBar
           onCategorySelect={handleCategorySelect}
           activeCategoryId={activeCategory}
           categories={categories}
@@ -180,15 +180,16 @@ export default function BizconContent() {
               {isConnectionError && (
                 <ConnectionErrorToast onRetry={() => fetchProducts(activeCategory, null)} />
               )}
-              <ProductGrid 
+              <ProductGrid
                 products={products}
                 containerRef={productGridRef}
                 storeId=""
                 activeCategoryId={activeCategory}
+                onAboutClick={() => { }}
               />
               {hasMore && (
                 <div ref={observerRef} className="h-8 flex items-center justify-center">
-                   {loading && <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>}
+                  {loading && <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>}
                 </div>
               )}
             </>
