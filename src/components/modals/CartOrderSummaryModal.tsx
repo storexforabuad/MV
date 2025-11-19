@@ -56,10 +56,10 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
       }
       const storeMetaWithId = { ...storeMeta, id: storeId };
       const referrerId = localStorage.getItem('referrerId');
-      
+
       // FIX: Submit all cart items as a single order.
       await addOrder(cartItems, storeMetaWithId, customer, referrerId, false);
-      
+
       toast.success('Order placed! Redirecting to WhatsApp...');
 
       const itemsSummary = cartItems.map(item => {
@@ -68,19 +68,20 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
       }).join('\n\n');
 
       const message = `🛍️ *New Order Request*\n\n` +
-                      `Hello! I would like to order the following items:\n\n` +
-                      `${itemsSummary}\n\n`+
-                      `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n`+
-                      `${deliveryMethod === 'home' && customer.deliveryAddress ? `📍 *Address:* ${customer.deliveryAddress.street}\n` : ''}`+
-                      `*Subtotal:* ${formatPrice(subtotal)}\n`+
-                      `*Total (excluding delivery):* ${formatPrice(total)}\n\n` +
-                      `Please provide delivery fee and payment details.\n\n` +
-                      `Thank you! 🙏`;
+        `Hello! I would like to order the following items:\n\n` +
+        `${itemsSummary}\n\n` +
+        `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n` +
+        `${deliveryMethod === 'home' && customer.deliveryAddress ? `📍 *Address:* ${customer.deliveryAddress.street}\n` : ''}` +
+        `*Subtotal:* ${formatPrice(subtotal)}\n` +
+        `*Total (excluding delivery):* ${formatPrice(total)}\n\n` +
+        `Please provide delivery fee and payment details.\n\n` +
+        `Thank you! 🙏`;
 
       const encodedMessage = encodeURIComponent(message);
       const whatsappUrl = `https://wa.me/${storeMeta.whatsapp.replace(/\D/g, '')}?text=${encodedMessage}`;
 
-      window.open(whatsappUrl, '_blank');
+      // Use window.location.href instead of window.open for better iOS compatibility
+      window.location.href = whatsappUrl;
       dispatch({ type: 'CLEAR_CART' });
       onOrderSuccess();
     } catch (error) {
@@ -123,7 +124,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
 
                   {/* Delivery Method & Payment Details */}
                   <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
-                     <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200">Delivery Method</h4>
+                    <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200">Delivery Method</h4>
                     <div className="mt-2 grid grid-cols-2 gap-4">
                       <div onClick={() => setDeliveryMethod('home')} className={`flex cursor-pointer items-center rounded-lg border p-4 ${deliveryMethod === 'home' ? 'border-indigo-500 ring-1 ring-indigo-500' : 'border-gray-300 dark:border-gray-600'}`}>
                         <HomeIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" /><span className="ml-3 text-sm font-medium dark:text-gray-300">Home Delivery</span>
@@ -134,7 +135,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                     </div>
                     {deliveryMethod === 'home' && customer && customer.deliveryAddress && <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">To: {customer.name} - {customer.deliveryAddress.street}</p>}
                   </div>
-                  
+
                   <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
                     <dl className="space-y-1 text-sm text-gray-500 dark:text-gray-400">
                       <div className="flex justify-between"><dt>Subtotal</dt><dd className="font-medium text-gray-900 dark:text-gray-200">{formatPrice(subtotal)}</dd></div>

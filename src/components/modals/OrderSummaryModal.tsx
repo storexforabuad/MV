@@ -56,7 +56,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
     try {
       const storeMetaWithId = { ...storeMeta, id: storeId };
       const referrerId = localStorage.getItem('referrerId');
-      
+
       // FIX: The product needs to be in an array, and quantity must be part of the product object.
       const productToOrder = { ...product, quantity };
       await addOrder([productToOrder], storeMetaWithId, customer, referrerId, false);
@@ -65,21 +65,22 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
       const productUrl = `https://tinyurl.com/bizcononline/${storeId}/products/${product.id}`;
       const message = `🛍️ *New Order Request*\n\n` +
-                      `Hello! I would like to order this item:\n\n` +
-                      `*${product.name}*\n` +
-                      `🔗 *Product Link:* ${productUrl}\n` +
-                      `🔢 *Quantity:* ${quantity}\n` +
-                      `💰 *Price:* ${formatPrice(product.price)}\n` +
-                      `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n`+
-                      `${deliveryMethod === 'home' && customer.deliveryAddress ? `📍 *To:* ${customer.deliveryAddress.street}\n` : ''}`+
-                      `*Total (excluding delivery):* ${formatPrice(total)}\n\n` +
-                      `Please provide delivery fee and payment details.\n\n` +
-                      `Thank you! 🙏`;
+        `Hello! I would like to order this item:\n\n` +
+        `*${product.name}*\n` +
+        `🔗 *Product Link:* ${productUrl}\n` +
+        `🔢 *Quantity:* ${quantity}\n` +
+        `💰 *Price:* ${formatPrice(product.price)}\n` +
+        `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n` +
+        `${deliveryMethod === 'home' && customer.deliveryAddress ? `📍 *To:* ${customer.deliveryAddress.street}\n` : ''}` +
+        `*Total (excluding delivery):* ${formatPrice(total)}\n\n` +
+        `Please provide delivery fee and payment details.\n\n` +
+        `Thank you! 🙏`;
 
       const encodedMessage = encodeURIComponent(message);
       const whatsappUrl = `https://wa.me/${storeMeta.whatsapp.replace(/\D/g, '')}?text=${encodedMessage}`;
 
-      window.open(whatsappUrl, '_blank');
+      // Use window.location.href instead of window.open for better iOS compatibility
+      window.location.href = whatsappUrl;
       onClose();
     } catch (error) {
       console.error("Error placing order or redirecting to WhatsApp:", error);
