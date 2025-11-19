@@ -228,7 +228,7 @@ export default function StorefrontPageClient({ storeId }: { storeId: string }) {
                 onAboutClick={() => setAboutOpen(true)}
                 storeMeta={storeMeta}
               />
-              {storeId && aboutOpen && <BusinessCardModal open={aboutOpen} onClose={() => setAboutOpen(false)} storeMeta={storeMeta || undefined} />}
+              {storeId && <BusinessCardModal open={aboutOpen} onClose={() => setAboutOpen(false)} storeMeta={storeMeta || undefined} />}
               {hasMore && (
                 <div ref={observerRef} className="h-8 flex items-center justify-center">
                   {loading && <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>}

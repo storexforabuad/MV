@@ -1,16 +1,9 @@
 
-import { memo, useState, useEffect, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
-import dynamic from 'next/dynamic';
-import { Info, Phone, MessageCircle, Star, Clock, MapPin, Instagram } from 'lucide-react';
-import { Product } from '../../types/product';
-import { motion, LayoutGroup, AnimatePresence, Transition } from 'framer-motion';
+import { useEffect } from 'react';
+import { Phone, MessageCircle, Star, Clock, MapPin, Instagram, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { getStoreMeta } from '../../lib/db';
 import { StoreMeta } from '../../types/store';
-import { useCustomer } from '@/context/CustomerContext';
-import { useOrders } from '@/hooks/useOrders';
-import { OrdersModal } from '@/components/customer/modals/OrdersModal';
 
 
 export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean; onClose: () => void; storeMeta?: StoreMeta }) {
@@ -83,7 +76,18 @@ export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean;
             transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
             onClick={e => e.stopPropagation()}
           >
-            <div className="flex-grow overflow-y-auto px-6 pt-6 pb-4">
+            {/* Close Button - X Icon */}
+            <motion.button
+              onClick={onClose}
+              className="absolute top-4 right-4 z-10 p-2 rounded-full bg-slate-200/80 dark:bg-slate-800/80 backdrop-blur-sm hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors duration-200 shadow-lg"
+              whileHover={{ scale: 1.1, rotate: 90 }}
+              whileTap={{ scale: 0.9 }}
+              aria-label="Close modal"
+            >
+              <X className="w-5 h-5 text-text-primary" />
+            </motion.button>
+
+            <div className="flex-grow overflow-y-auto px-6 pt-6 pb-6">
               <div className="text-center mb-6">
                 {storeMeta.ceoImage && (
                   <Image
@@ -149,28 +153,22 @@ export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean;
                   <span className="text-sm">WhatsApp</span>
                 </motion.a>
               </div>
-            </div>
 
-            <div className="px-6 pb-5 pt-3 bg-[var(--modal-background)] border-t border-border-color">
-
-              <button onClick={onClose} className="w-full bg-slate-200 dark:bg-slate-800 text-text-primary font-semibold py-3 px-4 rounded-full hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors duration-200">
-                close
-              </button>
-              <div className="text-center text-xs text-text-secondary mt-3">
+              <div className="text-center text-xs text-text-secondary mt-6">
                 <style jsx>{`
-                        .ai-text-gradient {
-                            background: linear-gradient(90deg, #fde047, #22d3ee, #a855f7, #ec4899, #4ade80, #f97316, #fde047);
-                            background-size: 400% 100%;
-                            -webkit-background-clip: text;
-                            -webkit-text-fill-color: transparent;
-                            color: transparent;
-                            animation: ai-gradient-flow 10s linear infinite;
-                        }
-                        @keyframes ai-gradient-flow {
-                            0% { background-position: 0% 50%; }
-                            100% { background-position: 100% 50%; }
-                        }
-                      `}</style>
+                  .ai-text-gradient {
+                    background: linear-gradient(90deg, #fde047, #22d3ee, #a855f7, #ec4899, #4ade80, #f97316, #fde047);
+                    background-size: 400% 100%;
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    color: transparent;
+                    animation: ai-gradient-flow 10s linear infinite;
+                  }
+                  @keyframes ai-gradient-flow {
+                    0% { background-position: 0% 50%; }
+                    100% { background-position: 100% 50%; }
+                  }
+                `}</style>
                 in partnership with <strong className="ai-text-gradient">(Biz+Con)™ </strong>Network
               </div>
             </div>
