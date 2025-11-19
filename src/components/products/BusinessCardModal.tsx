@@ -159,10 +159,17 @@ export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean;
                   .ai-text-gradient {
                     background: linear-gradient(90deg, #fde047, #22d3ee, #a855f7, #ec4899, #4ade80, #f97316, #fde047);
                     background-size: 400% 100%;
+                    background-clip: text;
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
                     color: transparent;
+                    will-change: background-position;
+                    -webkit-animation: ai-gradient-flow 10s linear infinite;
                     animation: ai-gradient-flow 10s linear infinite;
+                  }
+                  @-webkit-keyframes ai-gradient-flow {
+                    0% { background-position: 0% 50%; }
+                    100% { background-position: 100% 50%; }
                   }
                   @keyframes ai-gradient-flow {
                     0% { background-position: 0% 50%; }
