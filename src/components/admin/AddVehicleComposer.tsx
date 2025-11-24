@@ -12,6 +12,7 @@ import { uploadImageToCloudinary } from '../../lib/cloudinaryClient';
 import { compressImage } from '../../utils/imageCompression';
 import { formatPrice } from '../../utils/price';
 import ProductUploadTips from './ProductUploadTips';
+import CategorySelectorModal from './modals/CategorySelectorModal';
 
 // --- TYPES ---
 type UploadStatus = 'idle' | 'compressing' | 'uploading' | 'success' | 'error';
@@ -41,6 +42,7 @@ interface VehicleFormData {
     commission: number;
     description: string;
     customsDuty: 'paid' | 'unpaid' | 'n/a';
+    categoryId: string;
 }
 
 interface AddVehicleComposerProps {
@@ -48,6 +50,7 @@ interface AddVehicleComposerProps {
     onClose: () => void;
     storeId: string;
     onProductAdded: () => void;
+    categories: { id: string; name: string }[];
 }
 
 // --- HELPER COMPONENTS ---
@@ -88,7 +91,7 @@ const FloatingLabelInput: React.FC<{ label: string, value: string | number, onCh
 
 // --- MAIN COMPOSER COMPONENT ---
 
-const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose, storeId, onProductAdded }) => {
+const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose, storeId, onProductAdded, categories }) => {
     const [currentStep, setCurrentStep] = useState(0); // 0: Upload, 1: Details, 2: Specs, 3: Pricing, 4: Uploading, 5: Summary
     const [vehicleData, setVehicleData] = useState<VehicleFormData>({
         id: Date.now().toString(),
@@ -106,11 +109,13 @@ const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose
         price: 0,
         commission: 5,
         description: '',
-        customsDuty: 'paid'
+        customsDuty: 'paid',
+        categoryId: ''
     });
 
     const [uploadProgress, setUploadProgress] = useState<UploadProgress[]>([]);
     const [isUploading, setIsUploading] = useState(false);
+    const [isCategorySelectorOpen, setCategorySelectorOpen] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const resetState = () => {
@@ -131,7 +136,8 @@ const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose
             price: 0,
             commission: 5,
             description: '',
-            customsDuty: 'paid'
+            customsDuty: 'paid',
+            categoryId: ''
         });
         setUploadProgress([]);
         setIsUploading(false);
@@ -162,20 +168,21 @@ const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose
 
     const handleSubmit = async () => {
         // Validation
-        if (!vehicleData.make || !vehicleData.model || !vehicleData.price) {
-            toast.error("Please fill in all required fields.");
+        if (!vehicleData.make || !vehicleData.model || !vehicleData.price || !vehicleData.categoryId) {
+            toast.error("Please fill in all required fields including category.");
             return;
         }
 
         setIsUploading(true);
         setCurrentStep(4); // Move to uploading screen
 
-        const initialProgress: UploadProgress[] = vehicleData.files.map((f, i) => ({
-            id: `${i}`,
-            fileName: f.name,
+        const vehicleName = `${vehicleData.year} ${vehicleData.make} ${vehicleData.model}`.trim() || 'Vehicle';
+        const initialProgress: UploadProgress[] = [{
+            id: 'vehicle-upload',
+            fileName: vehicleName,
             status: 'idle',
-            statusText: 'Waiting...'
-        }));
+            statusText: `Preparing to upload ${vehicleData.files.length} image${vehicleData.files.length > 1 ? 's' : ''}...`
+        }];
         setUploadProgress(initialProgress);
 
         const uploadedImageUrls: string[] = [];
@@ -183,22 +190,45 @@ const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose
 
         for (let i = 0; i < vehicleData.files.length; i++) {
             const file = vehicleData.files[i];
-            const progressId = `${i}`;
 
             try {
-                setUploadProgress(prev => prev.map(p => p.id === progressId ? { ...p, status: 'compressing', statusText: 'Compressing...' } : p));
+                setUploadProgress([{
+                    id: 'vehicle-upload',
+                    fileName: vehicleName,
+                    status: 'compressing',
+                    statusText: `Compressing image ${i + 1} / ${vehicleData.files.length}...`
+                }]);
                 const compressedFile = await compressImage(file);
 
-                setUploadProgress(prev => prev.map(p => p.id === progressId ? { ...p, status: 'uploading', statusText: 'Uploading...' } : p));
+                setUploadProgress([{
+                    id: 'vehicle-upload',
+                    fileName: vehicleName,
+                    status: 'uploading',
+                    statusText: `Uploading image ${i + 1} / ${vehicleData.files.length}...`
+                }]);
                 const imageUrl = await uploadImageToCloudinary(compressedFile, storeId);
                 uploadedImageUrls.push(imageUrl);
-
-                setUploadProgress(prev => prev.map(p => p.id === progressId ? { ...p, status: 'success', statusText: 'Success!', imageUrl } : p));
                 successCount++;
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : String(error);
-                setUploadProgress(prev => prev.map(p => p.id === progressId ? { ...p, status: 'error', statusText: 'Failed', error: errorMessage } : p));
+                setUploadProgress([{
+                    id: 'vehicle-upload',
+                    fileName: vehicleName,
+                    status: 'error',
+                    statusText: `Failed at image ${i + 1}`,
+                    error: errorMessage
+                }]);
+                break;
             }
+        }
+
+        if (successCount === vehicleData.files.length) {
+            setUploadProgress([{
+                id: 'vehicle-upload',
+                fileName: vehicleName,
+                status: 'success',
+                statusText: `All ${successCount} image${successCount > 1 ? 's' : ''} uploaded successfully!`
+            }]);
         }
 
         if (successCount > 0) {
@@ -226,6 +256,7 @@ const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose
                     storeId: storeId,
                     views: 0,
                     commission: vehicleData.commission,
+                    categoryId: vehicleData.categoryId,
                     createdAt: { toMillis: () => Date.now() } as any // Placeholder, will be replaced by serverTimestamp in db function
                 };
 
@@ -297,6 +328,15 @@ const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose
                                 ))}
                             </div>
                         </div>
+
+                        <button
+                            onClick={() => setCategorySelectorOpen(true)}
+                            className="w-full text-left p-4 bg-input-background rounded-lg border-2 border-input-border"
+                        >
+                            <span className={vehicleData.categoryId ? 'text-text-primary' : 'text-text-secondary'}>
+                                {categories.find(c => c.id === vehicleData.categoryId)?.name || 'Select a category'}
+                            </span>
+                        </button>
                     </MotionDiv>
                 );
 
@@ -384,14 +424,26 @@ const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose
                 return (
                     <MotionDiv key={4} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 sm:p-6">
                         <h3 className="text-xl font-semibold text-center text-text-primary mb-4">Uploading Vehicle...</h3>
-                        <div className="space-y-3 max-h-80 overflow-y-auto">
+                        <div className="space-y-3">
                             {uploadProgress.map(p => (
-                                <div key={p.id} className="flex items-center gap-4 p-2 bg-input-background rounded-lg">
-                                    <div className="flex-1">
+                                <div key={p.id} className="flex items-center gap-4 p-4 bg-input-background rounded-lg">
+                                    <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
+                                        {vehicleData.files[0] && (
+                                            <Image
+                                                src={URL.createObjectURL(vehicleData.files[0])}
+                                                alt="Vehicle preview"
+                                                width={64}
+                                                height={64}
+                                                className="object-cover w-full h-full"
+                                            />
+                                        )}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
                                         <p className="font-semibold text-text-primary truncate">{p.fileName}</p>
                                         <p className="text-sm text-text-secondary">{p.statusText}</p>
+                                        {p.error && <p className="text-xs text-red-500 mt-1">{p.error}</p>}
                                     </div>
-                                    <div>
+                                    <div className="flex-shrink-0">
                                         {p.status === 'uploading' && <ArrowPathIcon className="w-6 h-6 text-blue-500 animate-spin" />}
                                         {p.status === 'compressing' && <ArrowPathIcon className="w-6 h-6 text-yellow-500 animate-spin" />}
                                         {p.status === 'success' && <CheckCircleIcon className="w-6 h-6 text-green-500" />}
@@ -484,6 +536,16 @@ const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose
                     </div>
                 </div>
             </Dialog>
+            <CategorySelectorModal
+                isOpen={isCategorySelectorOpen}
+                onClose={() => setCategorySelectorOpen(false)}
+                categories={categories}
+                selectedCategoryId={vehicleData.categoryId}
+                onSelect={(categoryId: string) => {
+                    handleChange('categoryId', categoryId);
+                    setCategorySelectorOpen(false);
+                }}
+            />
         </Transition.Root>
     );
 };

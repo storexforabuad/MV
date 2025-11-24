@@ -69,6 +69,7 @@ export interface VehicleProduct extends BaseProduct {
   // Availability (simpler than general products)
   available: boolean;       // true = for sale, false = sold
   reserved?: boolean;       // Someone made an offer but hasn't paid
+  categoryId?: string;      // Optional category for organization
 }
 
 // ==========================================

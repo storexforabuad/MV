@@ -329,6 +329,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
           isOpen={isComposerOpen}
           onClose={() => setIsComposerOpen(false)}
           storeId={storeId}
+          categories={categories}
           onProductAdded={() => fetchData()}
         />
       ) : (
