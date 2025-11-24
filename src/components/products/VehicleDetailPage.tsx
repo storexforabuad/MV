@@ -187,38 +187,41 @@ Looking forward to viewing!`;
                     </motion.div>
                 </AnimatePresence>
 
-                {/* Navigation Arrows - Desktop */}
+                {/* Navigation Arrows - Glassmorphic & Mobile Friendly */}
                 {product.images.length > 1 && (
                     <>
                         <button
-                            onClick={handlePrevImage}
+                            onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
                             disabled={currentImageIndex === 0}
-                            className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-white/80 backdrop-blur-md rounded-full shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white transition-colors pointer-events-auto hidden md:block"
+                            className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/10 backdrop-blur-md border border-white/10 text-white disabled:opacity-0 transition-all hover:bg-black/20 active:scale-95 z-10"
+                            aria-label="Previous image"
                         >
-                            <ChevronLeftIcon className="w-6 h-6 text-gray-800" />
+                            <ChevronLeftIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                         </button>
 
                         <button
-                            onClick={handleNextImage}
+                            onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
                             disabled={currentImageIndex === product.images.length - 1}
-                            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-white/80 backdrop-blur-md rounded-full shadow-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white transition-colors pointer-events-auto hidden md:block"
+                            className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/10 backdrop-blur-md border border-white/10 text-white disabled:opacity-0 transition-all hover:bg-black/20 active:scale-95 z-10"
+                            aria-label="Next image"
                         >
-                            <ChevronRightIcon className="w-6 h-6 text-gray-800" />
+                            <ChevronRightIcon className="w-5 h-5 sm:w-6 sm:h-6" />
                         </button>
                     </>
                 )}
 
-                {/* Dot Indicators - Glassmorphic & Tiny */}
+                {/* Dot Indicators - Glassmorphic & Proportional */}
                 {product.images.length > 1 && (
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 p-2 rounded-full bg-black/10 backdrop-blur-sm border border-white/10 z-10">
+                    <div className="absolute bottom-12 sm:bottom-16 left-1/2 -translate-x-1/2 flex items-center justify-center gap-2 p-1.5 rounded-full bg-black/20 backdrop-blur-md border border-white/10 z-10">
                         {product.images.map((_, idx) => (
                             <button
                                 key={idx}
-                                onClick={() => setCurrentImageIndex(idx)}
-                                className={`rounded-full transition-all duration-300 p-0 border-none outline-none ${idx === currentImageIndex
-                                    ? 'bg-white w-2 h-2 shadow-sm'
-                                    : 'bg-white/40 w-1.5 h-1.5 hover:bg-white/60'
+                                onClick={(e) => { e.stopPropagation(); setCurrentImageIndex(idx); }}
+                                className={`rounded-full transition-all duration-300 p-0 m-0 border-none outline-none flex-shrink-0 ${idx === currentImageIndex
+                                    ? 'bg-white w-[8px] h-[8px] shadow-sm'
+                                    : 'bg-white/40 w-[6px] h-[6px] hover:bg-white/60'
                                     }`}
+                                style={{ minWidth: idx === currentImageIndex ? '8px' : '6px', minHeight: idx === currentImageIndex ? '8px' : '6px' }}
                                 aria-label={`View image ${idx + 1}`}
                             />
                         ))}
