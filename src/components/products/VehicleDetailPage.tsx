@@ -4,10 +4,12 @@ import { Product, VehicleProduct } from '../../types/product';
 import { StoreMeta } from '../../types/store';
 import { formatPrice } from '../../utils/price';
 import { ChevronLeftIcon, ChevronRightIcon, ShareIcon } from '@heroicons/react/24/outline';
+import { CalendarIcon, MapPinIcon, SparklesIcon, CogIcon, BoltIcon, TruckIcon, SwatchIcon, TagIcon } from '@heroicons/react/24/solid';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { isVehicleProduct } from '../../utils/productHelpers';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useCustomer } from '@/context/CustomerContext';
 
 interface VehicleDetailPageProps {
     product: Product;
@@ -15,15 +17,33 @@ interface VehicleDetailPageProps {
     storeId: string;
 }
 
-const SpecRow = ({ label, value }: { label: string, value: string | number }) => (
-    <div className="flex flex-col">
-        <span className="text-xs text-text-secondary uppercase tracking-wider">{label}</span>
-        <span className="text-sm font-medium text-text-primary">{value}</span>
+const SpecRow = ({ label, value, icon }: { label: string, value: string | number, icon?: React.ReactNode }) => (
+    <div className="flex items-start gap-2.5">
+        {icon && <div className="text-gray-500 dark:text-gray-400 mt-0.5 flex-shrink-0">{icon}</div>}
+        <div className="flex flex-col min-w-0">
+            <span className="text-xs text-text-secondary uppercase tracking-wider">{label}</span>
+            <span className="text-sm font-medium text-text-primary truncate">{value}</span>
+        </div>
     </div>
 );
 
+function GlassButton({ onClick, children, 'aria-label': ariaLabel }: { onClick: () => void; children: React.ReactNode; 'aria-label': string }) {
+    return (
+        <motion.button
+            className="relative card-glass rounded-full flex items-center justify-center p-3 shadow-lg pointer-events-auto"
+            onClick={onClick}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            aria-label={ariaLabel}
+        >
+            {children}
+        </motion.button>
+    );
+}
+
 export default function VehicleDetailPage({ product, storeMeta, storeId }: VehicleDetailPageProps) {
     const router = useRouter();
+    const { customer } = useCustomer();
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [touchStart, setTouchStart] = useState(0);
     const [touchEnd, setTouchEnd] = useState(0);
@@ -106,21 +126,44 @@ Looking forward to viewing!`;
         window.open(whatsappUrl, '_blank');
     };
 
+    const handleShare = async () => {
+        const url = new URL(window.location.href);
+        if (customer?.referralCode) {
+            url.searchParams.set('ref', customer.referralCode);
+        }
+
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: product.name,
+                    text: `Check out this ${product.name} on ${storeMeta.name}`,
+                    url: url.toString(),
+                });
+            } catch (error) {
+                console.error('Error sharing:', error);
+            }
+        } else {
+            navigator.clipboard.writeText(url.toString());
+            // You might want to add a toast notification here
+            alert('Link copied to clipboard!');
+        }
+    };
+
     return (
-        <div className="min-h-screen bg-background pb-24">
+        <div className="min-h-screen bg-background">
             {/* Top Navigation */}
             <div className="fixed top-0 left-0 right-0 z-50 p-4 flex justify-between items-center bg-transparent pointer-events-none">
-                <button onClick={() => router.back()} className="p-2 bg-white/80 backdrop-blur-md rounded-full shadow-sm pointer-events-auto">
-                    <ChevronLeftIcon className="w-6 h-6 text-gray-800" />
-                </button>
-                <button className="p-2 bg-white/80 backdrop-blur-md rounded-full shadow-sm pointer-events-auto">
-                    <ShareIcon className="w-6 h-6 text-gray-800" />
-                </button>
+                <GlassButton onClick={() => router.back()} aria-label="Go back">
+                    <ChevronLeftIcon className="w-6 h-6 text-text-primary" />
+                </GlassButton>
+                <GlassButton onClick={handleShare} aria-label="Share product">
+                    <ShareIcon className="w-6 h-6 text-text-primary" />
+                </GlassButton>
             </div>
 
             {/* Swipeable Image Gallery */}
             <div
-                className="relative w-full h-[40vh] sm:h-[50vh] md:h-[60vh] bg-gray-100 overflow-hidden"
+                className="relative w-full h-[50vh] sm:h-[60vh] md:h-[70vh] bg-gray-100 overflow-hidden"
                 onTouchStart={handleTouchStart}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
@@ -165,16 +208,16 @@ Looking forward to viewing!`;
                     </>
                 )}
 
-                {/* Dot Indicators - Optimized for Mobile */}
+                {/* Dot Indicators - Glassmorphic & Tiny */}
                 {product.images.length > 1 && (
-                    <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 p-2 rounded-full bg-black/10 backdrop-blur-sm border border-white/10 z-10">
                         {product.images.map((_, idx) => (
                             <button
                                 key={idx}
                                 onClick={() => setCurrentImageIndex(idx)}
-                                className={`h-1.5 rounded-full transition-all pointer-events-auto ${idx === currentImageIndex
-                                    ? 'bg-white w-4'
-                                    : 'bg-white/50 w-1.5'
+                                className={`rounded-full transition-all duration-300 p-0 border-none outline-none ${idx === currentImageIndex
+                                    ? 'bg-white w-2 h-2 shadow-sm'
+                                    : 'bg-white/40 w-1.5 h-1.5 hover:bg-white/60'
                                     }`}
                                 aria-label={`View image ${idx + 1}`}
                             />
@@ -184,33 +227,44 @@ Looking forward to viewing!`;
             </div>
 
             {/* Product Info Section - Mobile Optimized */}
-            <div className="px-3 sm:px-4 py-4 sm:py-6 space-y-4 sm:space-y-6 -mt-4 sm:-mt-6 relative bg-background rounded-t-3xl shadow-xl">
+            <div className="px-4 py-6 space-y-6 -mt-6 relative bg-background rounded-t-[2rem] shadow-[0_-8px_30px_rgba(0,0,0,0.12)] pb-32">
                 <div className="flex flex-col gap-1 pt-2">
-                    <div className="flex justify-between items-start">
-                        <h1 className="text-xl sm:text-2xl font-bold text-text-primary leading-tight">
-                            {product.name}
-                        </h1>
+                    <h1 className="text-xl sm:text-2xl font-bold text-text-primary leading-tight">
+                        {product.name}
+                    </h1>
+                    <div className="flex items-center gap-3 mt-1">
+                        <p className="text-2xl sm:text-3xl font-bold text-text-primary card-text-gradient">
+                            {formatPrice(product.price)}
+                        </p>
+                        {product.available && (
+                            <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wide shadow-sm ${product.vehicleDetails.condition === 'brand-new'
+                                ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                : product.vehicleDetails.condition === 'foreign-used'
+                                    ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                                    : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                                }`}>
+                                {product.vehicleDetails.condition === 'brand-new' ? 'Brand New' :
+                                    product.vehicleDetails.condition === 'foreign-used' ? 'Foreign Used' : 'Nigerian Used'}
+                            </span>
+                        )}
                     </div>
-                    <p className="text-2xl sm:text-3xl font-bold text-text-primary card-text-gradient mt-1 sm:mt-2">
-                        {formatPrice(product.price)}
-                    </p>
                 </div>
 
                 {/* Vehicle Specs Grid */}
                 {product.vehicleDetails && (
                     <div className="bg-card-background rounded-xl p-4 sm:p-5 border border-border-color shadow-sm">
-                        <h3 className="font-semibold text-base sm:text-lg text-text-primary mb-3 sm:mb-4">Vehicle Specifications</h3>
-                        <div className="grid grid-cols-2 gap-y-3 sm:gap-y-4 gap-x-2">
-                            <SpecRow label="Make" value={product.vehicleDetails.make} />
-                            <SpecRow label="Model" value={product.vehicleDetails.model} />
-                            <SpecRow label="Year" value={product.vehicleDetails.year} />
-                            <SpecRow label="Mileage" value={`${product.vehicleDetails.mileage?.toLocaleString() ?? 'N/A'} km`} />
-                            <SpecRow label="Condition" value={product.vehicleDetails.condition?.replace('-', ' ') ?? 'N/A'} />
-                            <SpecRow label="Transmission" value={product.vehicleDetails.transmission} />
-                            <SpecRow label="Fuel Type" value={product.vehicleDetails.fuelType} />
-                            <SpecRow label="Body Type" value={product.vehicleDetails.bodyType} />
-                            <SpecRow label="Color" value={product.vehicleDetails.color} />
-                            <SpecRow label="Location" value={product.vehicleDetails.location} />
+                        <h3 className="font-semibold text-base sm:text-lg text-text-primary mb-4">Vehicle Specifications</h3>
+                        <div className="grid grid-cols-2 gap-y-4 gap-x-3">
+                            <SpecRow label="Make" value={product.vehicleDetails.make} icon={<TagIcon className="w-4 h-4" />} />
+                            <SpecRow label="Model" value={product.vehicleDetails.model} icon={<TagIcon className="w-4 h-4" />} />
+                            <SpecRow label="Year" value={product.vehicleDetails.year} icon={<CalendarIcon className="w-4 h-4" />} />
+                            <SpecRow label="Mileage" value={`${product.vehicleDetails.mileage?.toLocaleString() ?? 'N/A'} km`} icon={<TruckIcon className="w-4 h-4" />} />
+                            <SpecRow label="Condition" value={product.vehicleDetails.condition?.replace('-', ' ') ?? 'N/A'} icon={<SparklesIcon className="w-4 h-4" />} />
+                            <SpecRow label="Transmission" value={product.vehicleDetails.transmission} icon={<CogIcon className="w-4 h-4" />} />
+                            <SpecRow label="Fuel Type" value={product.vehicleDetails.fuelType} icon={<BoltIcon className="w-4 h-4" />} />
+                            <SpecRow label="Body Type" value={product.vehicleDetails.bodyType} icon={<TruckIcon className="w-4 h-4" />} />
+                            <SpecRow label="Color" value={product.vehicleDetails.color} icon={<SwatchIcon className="w-4 h-4" />} />
+                            <SpecRow label="Location" value={product.vehicleDetails.location} icon={<MapPinIcon className="w-4 h-4" />} />
                         </div>
                     </div>
                 )}
@@ -234,7 +288,7 @@ Looking forward to viewing!`;
                 </button>
                 <button
                     onClick={handleScheduleTestDrive}
-                    className="flex-[2] bg-blue-600 text-white py-3 sm:py-3.5 rounded-xl text-sm sm:text-base font-semibold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20"
+                    className="flex-[2] bg-slate-900 dark:bg-emerald-500 text-white py-3 sm:py-3.5 rounded-xl text-sm sm:text-base font-semibold hover:bg-slate-800 dark:hover:bg-emerald-600 transition-colors shadow-lg"
                 >
                     📅 Schedule Test Drive
                 </button>
