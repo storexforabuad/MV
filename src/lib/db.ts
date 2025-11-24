@@ -1,19 +1,19 @@
 import { db, storage } from './firebase';
 import { FirebaseError } from 'firebase/app';
 import { StockNotification } from '../types/stockNotification';
-import { 
-  collection, 
-  getDocs, 
-  query, 
-  where, 
-  doc, 
-  getDoc, 
-  addDoc, 
-  updateDoc, 
-  deleteDoc, 
-  orderBy, 
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  doc,
+  getDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  orderBy,
   limit,
-  serverTimestamp ,
+  serverTimestamp,
   increment,
   setDoc,
   Timestamp,
@@ -27,6 +27,7 @@ import {
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Product } from '../types/product';
 import { StoreMeta } from '../types/store';
+import { ensureProductType, isGeneralProduct } from '../utils/productHelpers';
 
 // Re-export order actions from the new location
 export {
@@ -143,28 +144,35 @@ export async function getStoreMeta(storeId: string): Promise<StoreMeta | null> {
   }
 }
 
-// Update updateProduct to require storeId
 export async function updateProduct(storeId: string, productId: string, data: Partial<Product>): Promise<void> {
   try {
     const productRef = doc(db, 'stores', storeId, 'products', productId);
     const productSnap = await getDoc(productRef);
-    
+
     if (productSnap.exists()) {
       const currentData = productSnap.data();
 
       // Sanitize the data to remove undefined fields
       const sanitizedData = { ...data };
       (Object.keys(sanitizedData) as Array<keyof typeof sanitizedData>).forEach(key => {
-          if (sanitizedData[key] === undefined) {
-              delete sanitizedData[key];
-          }
+        if (sanitizedData[key] === undefined) {
+          delete sanitizedData[key];
+        }
       });
-      
-      if (currentData.soldOut === true && sanitizedData.soldOut === false) {
-        sanitizedData.backInStock = true; 
-        await handleBackInStock(storeId, productId); 
+
+      // Type-specific logic for "back in stock"
+      const currentProduct = ensureProductType({ ...currentData, id: productId });
+
+      if (isGeneralProduct(currentProduct)) {
+        // Only general products have soldOut/backInStock logic
+        const generalUpdateData = data as Partial<import('../types/product').GeneralProduct>;
+
+        if (currentData.soldOut === true && generalUpdateData.soldOut === false) {
+          (sanitizedData as any).backInStock = true;
+          await handleBackInStock(storeId, productId);
+        }
       }
-      
+
       await updateDoc(productRef, sanitizedData);
     }
   } catch (error) {
@@ -173,6 +181,28 @@ export async function updateProduct(storeId: string, productId: string, data: Pa
   }
 }
 
+export async function addProduct(storeId: string, product: Omit<Product, 'id'>): Promise<string> {
+  try {
+    const productsRef = collection(db, 'stores', storeId, 'products');
+
+    // Ensure productType is set (fallback for safety)
+    const productWithType = {
+      ...product,
+      productType: product.productType || 'general'
+    };
+
+    const docRef = await addDoc(productsRef, {
+      ...productWithType,
+      createdAt: serverTimestamp(),
+      views: 0
+    });
+    await updateDoc(docRef, { id: docRef.id });
+    return docRef.id;
+  } catch (error) {
+    console.error('Error adding product:', error);
+    throw error;
+  }
+}
 
 async function handleBackInStock(storeId: string, productId: string): Promise<void> {
   try {
@@ -193,7 +223,7 @@ async function handleBackInStock(storeId: string, productId: string): Promise<vo
             subscription: notification.pushSubscription,
             message: {
               text: `${product.name} is back in stock!`,
-              productId: productId 
+              productId: productId
             }
           }),
         });
@@ -211,7 +241,7 @@ async function handleBackInStock(storeId: string, productId: string): Promise<vo
 }
 
 export async function hasUserRegisteredForNotification(
-  productId: string, 
+  productId: string,
   deviceInfo: { userAgent: string; platform: string; language: string }
 ): Promise<boolean> {
   try {
@@ -224,7 +254,7 @@ export async function hasUserRegisteredForNotification(
       where('deviceInfo.language', '==', deviceInfo.language),
       where('notificationStatus', '==', 'pending')
     );
-    
+
     const snapshot = await getDocs(q);
     return !snapshot.empty;
   } catch (error) {
@@ -232,6 +262,7 @@ export async function hasUserRegisteredForNotification(
     return false;
   }
 }
+
 export async function createStockNotification(
   notification: Omit<StockNotification, 'id' | 'createdAt'>
 ): Promise<string> {
@@ -252,11 +283,11 @@ export async function getStockNotificationsForProduct(productId: string): Promis
   try {
     const stockNotificationsRef = collection(db, 'stockNotifications');
     const q = query(
-      stockNotificationsRef, 
+      stockNotificationsRef,
       where('productId', '==', productId),
       where('notificationStatus', '==', 'pending')
     );
-    
+
     const snapshot = await getDocs(q);
     return snapshot.docs.map(doc => ({
       id: doc.id,
@@ -269,7 +300,7 @@ export async function getStockNotificationsForProduct(productId: string): Promis
 }
 
 export async function updateNotificationStatus(
-  notificationId: string, 
+  notificationId: string,
   status: 'sent' | 'pending'
 ): Promise<void> {
   try {
@@ -306,7 +337,7 @@ export async function getProductsByCategory(storeId: string, categoryId: string)
   try {
     const productsRef = collection(db, 'stores', storeId, 'products');
     const q = query(
-      productsRef, 
+      productsRef,
       where('categoryId', '==', categoryId),
       orderBy('createdAt', 'desc')
     );
@@ -316,7 +347,7 @@ export async function getProductsByCategory(storeId: string, categoryId: string)
       const transformedData = transformProductData(data);
       return {
         ...transformedData,
-        id: doc.id, 
+        id: doc.id,
       } as Product;
     });
   } catch (error) {
@@ -362,29 +393,12 @@ export async function getProductById(storeId: string | null, id: string): Promis
       }
       productData = { id: productSnap.id, ...productSnap.data() };
     }
-    
+
     return transformProductData(productData) as Product;
 
   } catch (error) {
     console.error('Error fetching product:', error);
     return null;
-  }
-}
-
-
-export async function addProduct(storeId: string, product: Omit<Product, 'id'>): Promise<string> {
-  try {
-    const productsRef = collection(db, 'stores', storeId, 'products');
-    const docRef = await addDoc(productsRef, {
-      ...product,
-      createdAt: serverTimestamp(),
-      views: 0
-    });
-    await updateDoc(docRef, { id: docRef.id });
-    return docRef.id;
-  } catch (error) {
-    console.error('Error adding product:', error);
-    throw error;
   }
 }
 
@@ -426,7 +440,7 @@ export async function getCategories(storeId: string): Promise<{ id: string, name
 export async function addCategory(storeId: string, name: string): Promise<void> {
   try {
     const categoriesRef = collection(db, 'stores', storeId, 'categories');
-    await addDoc(categoriesRef, { 
+    await addDoc(categoriesRef, {
       name,
       createdAt: serverTimestamp()
     });
@@ -438,7 +452,7 @@ export async function addCategory(storeId: string, name: string): Promise<void> 
 export async function updateCategory(storeId: string, id: string, name: string): Promise<void> {
   try {
     const categoryRef = doc(db, 'stores', storeId, 'categories', id);
-    await updateDoc(categoryRef, { 
+    await updateDoc(categoryRef, {
       name,
       updatedAt: serverTimestamp()
     });
@@ -467,12 +481,12 @@ export async function getPopularProducts(storeId: string, limitCount: number = 6
     const q = query(productsRef, orderBy('views', 'desc'), limit(limitCount));
     const querySnapshot = await getDocs(q);
     return querySnapshot.docs.map(doc => {
-        const data = doc.data();
-        const transformedData = transformProductData(data);
-        return {
-            ...transformedData,
-            id: doc.id,
-        } as Product;
+      const data = doc.data();
+      const transformedData = transformProductData(data);
+      return {
+        ...transformedData,
+        id: doc.id,
+      } as Product;
     });
   } catch (error) {
     console.error('Error fetching popular products:', error);
@@ -531,14 +545,14 @@ export async function incrementProductViews(storeId: string, productId: string):
     });
 
     // Increment total store views
-    batch.update(storeRef, { 
-      totalViews: increment(1) 
+    batch.update(storeRef, {
+      totalViews: increment(1)
     });
 
     // Increment daily views
-    batch.set(dailyMetricsRef, { 
-        views: increment(1),
-        date: today
+    batch.set(dailyMetricsRef, {
+      views: increment(1),
+      date: today
     }, { merge: true });
 
     await batch.commit();
@@ -573,13 +587,13 @@ export async function incrementProductViews(storeId: string, productId: string):
 async function executePaginatedQuery(q: Query): Promise<PaginatedProductsResult> {
   const snapshot = await getDocs(q);
   const products = snapshot.docs.map(doc => {
-      const data = doc.data();
-      const transformedData = transformProductData(data);
-      return {
-          ...transformedData,
-          id: doc.id,
-          storeId: doc.ref.parent.parent?.id,
-      } as Product;
+    const data = doc.data();
+    const transformedData = transformProductData(data);
+    return {
+      ...transformedData,
+      id: doc.id,
+      storeId: doc.ref.parent.parent?.id,
+    } as Product;
   });
   const lastVisible = snapshot.docs.length > 0 ? snapshot.docs[snapshot.docs.length - 1] : null;
   return { products, lastVisible };
@@ -693,18 +707,19 @@ export async function getPopularCategories(): Promise<{ id: string; name: string
     const productsRef = collectionGroup(db, 'products');
     const snapshot = await getDocs(productsRef);
     const products = snapshot.docs.map(doc => {
-        const data = doc.data();
-        return transformProductData(data) as Product;
+      const data = doc.data();
+      return transformProductData(data) as Product;
     });
 
     const categoryViews: { [key: string]: number } = {};
 
     products.forEach(product => {
-      if (product.category) {
-        if (!categoryViews[product.category]) {
-          categoryViews[product.category] = 0;
+      const typedProduct = ensureProductType(product);
+      if (isGeneralProduct(typedProduct) && typedProduct.category) {
+        if (!categoryViews[typedProduct.category]) {
+          categoryViews[typedProduct.category] = 0;
         }
-        categoryViews[product.category] += product.views || 0;
+        categoryViews[typedProduct.category] += typedProduct.views || 0;
       }
     });
 

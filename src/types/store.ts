@@ -24,7 +24,7 @@ export interface StoreMeta {
   ceoEmail?: string;
   ceoPhone?: string;
   ceoInstagram?: string;
-  
+
   // Physical address details
   hasPhysicalShop?: boolean;
   shopNumber?: string;
@@ -32,6 +32,9 @@ export interface StoreMeta {
   streetAddress?: string;
   state?: string;
   country?: string;
+
+  // Store Vertical
+  storeType?: 'general' | 'automotive';
 }
 
 export interface ProductCategory {

@@ -19,6 +19,7 @@ import {
 import { getCommissionAnalytics, CommissionEvent } from '@/app/actions/commissionActions';
 import { requestNotificationPermission } from '../../../lib/firebase-messaging';
 import { Product } from '../../../types/product';
+import { isGeneralProduct } from '../../../utils/productHelpers';
 import { Category } from '../../../types/category';
 import { StoreMeta } from '../../../types/store';
 import AdminHeader from '../../../components/admin/AdminHeader';
@@ -27,6 +28,7 @@ import MobileNav from '../../../components/admin/MobileNav';
 import FloatingActionButton from '../../../components/admin/FloatingActionButton';
 import AdminHomeCards from '../../../components/admin/AdminHomeCards';
 import AddProductComposer from '../../../components/admin/AddProductComposer';
+import AddVehicleComposer from '../../../components/admin/AddVehicleComposer';
 import ManageProductsModal from '../../../components/admin/ManageProductsModal';
 import ManageCategoriesModal from '../../../components/admin/ManageCategoriesModal';
 import { AdminOrdersModal } from '../../../components/admin/modals/AdminOrdersModal';
@@ -76,18 +78,18 @@ const useStoreOrders = (storeId: string) => {
 };
 
 async function getReferrals(storeId: string): Promise<Referral[]> {
-    if (!storeId) return [];
-    try {
-      const response = await fetch(`/api/stores/${storeId}/referrals`);
-      if (!response.ok) {
-        console.error("Failed to fetch referrals");
-        return [];
-      }
-      return response.json();
-    } catch (error) {
-      console.error("Error in getReferrals:", error);
+  if (!storeId) return [];
+  try {
+    const response = await fetch(`/api/stores/${storeId}/referrals`);
+    if (!response.ok) {
+      console.error("Failed to fetch referrals");
       return [];
     }
+    return response.json();
+  } catch (error) {
+    console.error("Error in getReferrals:", error);
+    return [];
+  }
 }
 
 export default function AdminStorePageClient({ storeId }: { storeId: string }) {
@@ -111,7 +113,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const { spotlightStep, setSpotlightStep } = useSpotlightContext();
   const [shouldShowSpotlight, setShouldShowSpotlight] = useState(false);
-  const [commissionAnalytics, setCommissionAnalytics] = useState<CommissionAnalyticsData>({ totalCommission: 0, commissionHistory: []});
+  const [commissionAnalytics, setCommissionAnalytics] = useState<CommissionAnalyticsData>({ totalCommission: 0, commissionHistory: [] });
   const [totalReferralBonus, setTotalReferralBonus] = useState(0); // Simple state for bonus for now
 
   const searchParams = useSearchParams();
@@ -164,55 +166,55 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
     if (searchParams && searchParams.get('open') === 'posts') {
       setIsPostsModalOpen(true);
     }
-     if (searchParams && searchParams.get('open') === 'ambassador-hub') {
+    if (searchParams && searchParams.get('open') === 'ambassador-hub') {
       setIsAmbassadorHubModalOpen(true);
     }
   }, [searchParams]);
 
   const handleUpdateProduct = async (productId: string, updatedData: Partial<Product>) => {
-      try {
-          await updateProduct(storeId, productId, updatedData);
-          await fetchData();
-      } catch (error) {
-          console.error("Failed to update product:", error);
-          throw error; // Re-throw the error to be caught by the caller
-      }
+    try {
+      await updateProduct(storeId, productId, updatedData);
+      await fetchData();
+    } catch (error) {
+      console.error("Failed to update product:", error);
+      throw error; // Re-throw the error to be caught by the caller
+    }
   };
 
   const handleDeleteProduct = async (productId: string) => {
-      try {
-          await deleteProduct(storeId, productId);
-          fetchData();
-      } catch (error) {
-          console.error("Failed to delete product:", error);
-      }
+    try {
+      await deleteProduct(storeId, productId);
+      fetchData();
+    } catch (error) {
+      console.error("Failed to delete product:", error);
+    }
   };
 
   const handleAddCategory = async (name: string) => {
     try {
-        await addCategory(storeId, name);
-        fetchData();
+      await addCategory(storeId, name);
+      fetchData();
     } catch (error) {
-        console.error("Failed to add category:", error);
+      console.error("Failed to add category:", error);
     }
   };
 
   const handleUpdateCategory = async (categoryId: string, name: string) => {
-      try {
-          await updateCategory(storeId, categoryId, name);
-          fetchData();
-      } catch (error) {
-          console.error("Failed to update category:", error);
-      }
+    try {
+      await updateCategory(storeId, categoryId, name);
+      fetchData();
+    } catch (error) {
+      console.error("Failed to update category:", error);
+    }
   };
 
   const handleDeleteCategory = async (categoryId: string) => {
-      try {
-          await deleteCategory(storeId, categoryId);
-          fetchData();
-      } catch (error) {
-          console.error("Failed to delete category:", error);
-      }
+    try {
+      await deleteCategory(storeId, categoryId);
+      fetchData();
+    } catch (error) {
+      console.error("Failed to delete category:", error);
+    }
   };
 
   useEffect(() => {
@@ -243,7 +245,12 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
     }
   };
 
-  const totalRevenue = products.reduce((sum, p) => sum + (Number(p.price) * (p.inStock ? 1 : 0)), 0);
+  const totalRevenue = products.reduce((sum, p) => {
+    if (isGeneralProduct(p)) {
+      return sum + (Number(p.price) * (p.inStock ? 1 : 0));
+    }
+    return sum + Number(p.price); // For vehicles, assume 1? Or just price.
+  }, 0);
 
   if (loading || showOnboarding === null) return <AdminSkeleton screen="home" />;
 
@@ -259,8 +266,8 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0 transition-colors">
-      {!isModalOpen && <AdminHeader onLogout={async () => {}} isRefreshing={false} />}
-      
+      {!isModalOpen && <AdminHeader onLogout={async () => { }} isRefreshing={false} />}
+
       {activeSection !== 'preview' ? (
         <main className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">
           <Suspense fallback={<AdminSkeleton isNavigation={true} />}>
@@ -277,13 +284,13 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
                   totalProducts={products.length}
                   totalCategories={categories.length}
                   popularProducts={products.filter(p => p.views && p.views > 10).length}
-                  limitedStock={products.filter(p => p.limitedStock).length}
+                  limitedStock={products.filter(p => isGeneralProduct(p) && p.limitedStock).length}
                   totalViews={products.reduce((sum, p) => sum + (p.views || 0), 0)}
                   debtors={0}
                   subscriptionStatus={"Active"}
                   referrals={referrals.length}
                   onReferralAdded={() => fetchData(true)}
-                  soldOut={products.filter(p => (typeof p.inStock === 'number' && p.inStock === 0) || p.soldOut === true).length}
+                  soldOut={products.filter(p => isGeneralProduct(p) && ((typeof p.inStock === 'number' && p.inStock === 0) || p.soldOut === true)).length}
                   totalContacts={contacts.reduce((sum, region) => sum + (region.contacts?.length || 0), 0)}
                   storeId={storeId}
                   totalOrders={orders.length} // Use live order count
@@ -317,13 +324,22 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
         </div>
       )}
 
-      <AddProductComposer 
-        isOpen={isComposerOpen} 
-        onClose={() => setIsComposerOpen(false)} 
-        storeId={storeId} 
-        categories={categories} 
-        onProductAdded={() => fetchData()} 
-      />
+      {storeMeta?.storeType === 'automotive' ? (
+        <AddVehicleComposer
+          isOpen={isComposerOpen}
+          onClose={() => setIsComposerOpen(false)}
+          storeId={storeId}
+          onProductAdded={() => fetchData()}
+        />
+      ) : (
+        <AddProductComposer
+          isOpen={isComposerOpen}
+          onClose={() => setIsComposerOpen(false)}
+          storeId={storeId}
+          categories={categories}
+          onProductAdded={() => fetchData()}
+        />
+      )}
 
       <ManageProductsModal
         isOpen={isManageModalOpen}
@@ -354,7 +370,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
         onOrderUpdated={refreshOrders}
       />
 
-       <AmbassadorHubModal
+      <AmbassadorHubModal
         isOpen={isAmbassadorHubModalOpen}
         onClose={() => setIsAmbassadorHubModalOpen(false)}
         storeId={storeId}
@@ -372,14 +388,14 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
 
       <div className={`transition-opacity duration-500 ${uiVisible ? 'opacity-100' : 'opacity-0'}`}>
         {activeSection !== 'preview' && <FloatingActionButton isModalOpen={isModalOpen} />}
-        { spotlightStep !== 'tips' && !isModalOpen && 
-          <MobileNav 
-            activeSection={activeSection} 
-            setActiveSection={setActiveSection} 
-            onAddProductClick={() => setIsComposerOpen(true)} 
+        {spotlightStep !== 'tips' && !isModalOpen &&
+          <MobileNav
+            activeSection={activeSection}
+            setActiveSection={setActiveSection}
+            onAddProductClick={() => setIsComposerOpen(true)}
             onManageProductsClick={() => setIsManageModalOpen(true)}
             onManageCategoriesClick={() => setIsManageCategoriesModalOpen(true)}
-          /> 
+          />
         }
       </div>
     </div>

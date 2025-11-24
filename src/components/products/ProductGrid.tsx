@@ -11,6 +11,20 @@ import { StoreMeta } from '../../types/store';
 import { useCustomer } from '@/context/CustomerContext';
 import { useOrders } from '@/hooks/useOrders';
 import { OrdersModal } from '@/components/customer/modals/OrdersModal';
+import { ensureProductType } from '../../utils/productHelpers';
+
+const VehicleCard = dynamic(() => import('./VehicleCard'), {
+  loading: () => (
+    <div className="animate-pulse bg-card-background rounded-2xl h-[280px]">
+      <div className="h-48 bg-gray-200 rounded-t-2xl"></div>
+      <div className="p-4 space-y-3">
+        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+      </div>
+    </div>
+  ),
+  ssr: false
+});
 
 const ProductCard = dynamic(() => import('./ProductCard'), {
   loading: () => (
@@ -148,16 +162,23 @@ const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId,
             <EmptyCategory />
           </div>
         ) : (
-          sortedProducts.map((product) => (
-            <motion.div
-              key={product.id}
-              layout
-              transition={transition}
-              className="group block relative touch-manipulation"
-            >
-              <ProductCard product={product} storeId={storeId} activeCategoryId={activeCategoryId} />
-            </motion.div>
-          ))
+          sortedProducts.map((product) => {
+            const productWithType = ensureProductType(product);
+            return (
+              <motion.div
+                key={product.id}
+                layout
+                transition={transition}
+                className="group block relative touch-manipulation"
+              >
+                {productWithType.productType === 'vehicle' ? (
+                  <VehicleCard product={productWithType} storeId={storeId} />
+                ) : (
+                  <ProductCard product={productWithType} storeId={storeId} activeCategoryId={activeCategoryId} />
+                )}
+              </motion.div>
+            );
+          })
         )}
       </motion.div>
     </LayoutGroup>
