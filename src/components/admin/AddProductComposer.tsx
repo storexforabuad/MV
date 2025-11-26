@@ -38,7 +38,7 @@ interface BatchProduct {
   limitedStock: boolean;
   soldOut: boolean;
   useAsTemplate: boolean;
-  useAsTemplate: boolean;
+
   sizeOption?: SizeOption;          // ← ADD THIS
   availableSizes?: string[];        // ← ADD THIS
 }
@@ -132,7 +132,7 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
     }
   };
 
-  const handleProductChange = (index: number, field: string, value: string | number | boolean) => {
+  const handleProductChange = (index: number, field: string, value: string | number | boolean | undefined | string[]) => {
     let newBatchProducts = batchProducts.map((p, i) =>
       i === index ? { ...p, [field]: value } : p
     );
