@@ -25,9 +25,9 @@ const modalVariants: Variants = {
 };
 
 const backdropVariants: Variants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 },
-    exit: { opacity: 0 },
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+  exit: { opacity: 0 },
 };
 
 const OrderProductRow = ({ product }: { product: any }) => {
@@ -44,6 +44,11 @@ const OrderProductRow = ({ product }: { product: any }) => {
       </div>
       <div className="flex-grow">
         <p className="font-semibold text-slate-800 dark:text-slate-100">{product.name}</p>
+        {product.selectedSize && (
+          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 mt-1 mb-1">
+            Size: {product.selectedSize}
+          </span>
+        )}
         <p className="text-sm text-indigo-500 dark:text-indigo-400">{formatPrice(product.price)}</p>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Qty: {product.quantity || 1}</p>
       </div>
@@ -58,20 +63,20 @@ const CustomerOrdersCard = ({ order, onViewReceipt, onMarkReady }: { order: Stor
     <div className="bg-white dark:bg-slate-800/50 rounded-2xl shadow-md overflow-hidden transition-transform duration-300 hover:shadow-lg hover:scale-[1.02]">
       {customerInfo && (
         <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-3 mb-3">
-                <User className="w-5 h-5 text-slate-500 dark:text-slate-400" />
-                <h4 className="font-semibold text-md text-slate-700 dark:text-slate-200">{customerInfo.name}</h4>
+          <div className="flex items-center gap-3 mb-3">
+            <User className="w-5 h-5 text-slate-500 dark:text-slate-400" />
+            <h4 className="font-semibold text-md text-slate-700 dark:text-slate-200">{customerInfo.name}</h4>
+          </div>
+          <div className="space-y-2 text-sm">
+            <div className="flex items-start gap-3">
+              <Phone className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
+              <span className="text-slate-600 dark:text-slate-300">{customerInfo.phoneNumber}</span>
             </div>
-            <div className="space-y-2 text-sm">
-                <div className="flex items-start gap-3">
-                    <Phone className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
-                    <span className="text-slate-600 dark:text-slate-300">{customerInfo.phoneNumber}</span>
-                </div>
-                <div className="flex items-start gap-3">
-                    <MapPin className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
-                    <span className="text-slate-600 dark:text-slate-300">{customerInfo.deliveryAddress.street}, {customerInfo.deliveryAddress.state}</span>
-                </div>
+            <div className="flex items-start gap-3">
+              <MapPin className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
+              <span className="text-slate-600 dark:text-slate-300">{customerInfo.deliveryAddress.street}, {customerInfo.deliveryAddress.state}</span>
             </div>
+          </div>
         </div>
       )}
 
@@ -82,14 +87,14 @@ const CustomerOrdersCard = ({ order, onViewReceipt, onMarkReady }: { order: Stor
       </div>
 
       <div className="p-2 bg-slate-50 dark:bg-slate-900/50 flex justify-end gap-2">
-          <button onClick={() => onViewReceipt(order)} className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors">
-              <ReceiptIcon className="w-4 h-4" />
-              <span>View Receipt</span>
-          </button>
-          <button onClick={() => onMarkReady(order)} className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600 transition-colors">
-              <CheckCircle className="w-4 h-4" />
-              <span>Mark as Ready</span>
-          </button>
+        <button onClick={() => onViewReceipt(order)} className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors">
+          <ReceiptIcon className="w-4 h-4" />
+          <span>View Receipt</span>
+        </button>
+        <button onClick={() => onMarkReady(order)} className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600 transition-colors">
+          <CheckCircle className="w-4 h-4" />
+          <span>Mark as Ready</span>
+        </button>
       </div>
     </div>
   );
@@ -120,20 +125,20 @@ export const AdminOrdersModal = ({ isOpen, onClose, orders, onOrderUpdated, stor
   const groupedOrders = groupOrdersByDay(orders);
 
   const handleMarkReady = (order: StoreOrder) => {
-      setSelectedOrderForReadiness(order);
+    setSelectedOrderForReadiness(order);
   }
 
   const handleConfirmMarkReady = (order: StoreOrder, productIds: string[]) => {
     startTransition(async () => {
-        try {
-            await updateOrderStatus(storeId, order.id, productIds);
-            toast.success('Order status updated!');
-            onOrderUpdated(); // This will trigger a refetch in the parent component
-            setSelectedOrderForReadiness(null); // Close the readiness modal
-        } catch (error) {
-            toast.error('Failed to update order status.');
-            console.error(error);
-        }
+      try {
+        await updateOrderStatus(storeId, order.id, productIds);
+        toast.success('Order status updated!');
+        onOrderUpdated(); // This will trigger a refetch in the parent component
+        setSelectedOrderForReadiness(null); // Close the readiness modal
+      } catch (error) {
+        toast.error('Failed to update order status.');
+        console.error(error);
+      }
     });
   };
 
@@ -185,7 +190,7 @@ export const AdminOrdersModal = ({ isOpen, onClose, orders, onOrderUpdated, stor
         <ReceiptModal isOpen={!!selectedOrderForReceipt} onClose={() => setSelectedOrderForReceipt(null)} orders={[selectedOrderForReceipt]} />
       )}
       {selectedOrderForReadiness && (
-          <MarkOrderReadyModal isOpen={!!selectedOrderForReadiness} onClose={handleCloseMarkReadyModal} order={selectedOrderForReadiness} onConfirm={handleConfirmMarkReady} isUpdating={isPending} />
+        <MarkOrderReadyModal isOpen={!!selectedOrderForReadiness} onClose={handleCloseMarkReadyModal} order={selectedOrderForReadiness} onConfirm={handleConfirmMarkReady} isUpdating={isPending} />
       )}
     </AnimatePresence>
   );

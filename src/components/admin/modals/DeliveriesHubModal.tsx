@@ -8,9 +8,9 @@ import Image from 'next/image';
 import { formatPrice } from '@/utils/price';
 
 interface DeliveriesHubModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  storeId: string;
+    isOpen: boolean;
+    onClose: () => void;
+    storeId: string;
 }
 
 const DeliveryOrderCard = ({ order }: { order: StoreOrder }) => {
@@ -51,13 +51,18 @@ const DeliveryOrderCard = ({ order }: { order: StoreOrder }) => {
                         </div>
                         <div>
                             <p className="font-semibold text-sm text-slate-800 dark:text-slate-100">{product.name}</p>
+                            {product.selectedSize && (
+                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 mt-0.5 mb-0.5">
+                                    Size: {product.selectedSize}
+                                </span>
+                            )}
                             <p className="text-xs text-slate-500 dark:text-slate-400">Qty: {product.quantity}</p>
                         </div>
                     </div>
                 ))}
             </div>
 
-             <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-700">
+            <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-700">
                 <div className="flex items-start gap-3">
                     <MapPin className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
                     <span className="text-slate-600 dark:text-slate-300 text-sm">{customerInfo.deliveryAddress.street}, {customerInfo.deliveryAddress.state}</span>
