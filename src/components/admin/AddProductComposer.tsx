@@ -132,10 +132,14 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
     }
   };
 
-  const handleProductChange = (index: number, field: string, value: string | number | boolean | undefined | string[]) => {
-    let newBatchProducts = batchProducts.map((p, i) =>
-      i === index ? { ...p, [field]: value } : p
-    );
+  const handleProductChange = (index: number, field: string | Partial<BatchProduct>, value?: string | number | boolean | undefined | string[]) => {
+    let newBatchProducts = batchProducts.map((p, i) => {
+      if (i !== index) return p;
+      if (typeof field === 'string') {
+        return { ...p, [field]: value };
+      }
+      return { ...p, ...field };
+    });
     const changedProduct = newBatchProducts[index];
 
     const applyTemplate = (templateProduct: BatchProduct, products: BatchProduct[]): BatchProduct[] => {
@@ -287,7 +291,7 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
                   exit={{ opacity: 0, x: -100 }}
                   transition={{ ease: 'easeInOut' }}
                 >
-                  <Image src={URL.createObjectURL(activeProduct.file)} alt="Product Preview" layout="fill" className="object-cover rounded-t-lg" />
+                  <Image src={URL.createObjectURL(activeProduct.file)} alt="Product Preview" fill className="object-cover rounded-t-lg" />
                 </motion.div>
               </AnimatePresence>
               {batchProducts.length > 1 && (
@@ -342,12 +346,16 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
                     onChange={checked => {
                       if (checked) {
                         // Enable - set default to baby-clothes
-                        handleProductChange(activeProductIndex, 'sizeOption', 'baby-clothes');
-                        handleProductChange(activeProductIndex, 'availableSizes', getSizesForOption('baby-clothes'));
+                        handleProductChange(activeProductIndex, {
+                          sizeOption: 'baby-clothes',
+                          availableSizes: getSizesForOption('baby-clothes')
+                        });
                       } else {
                         // Disable - clear the fields
-                        handleProductChange(activeProductIndex, 'sizeOption', undefined);
-                        handleProductChange(activeProductIndex, 'availableSizes', undefined);
+                        handleProductChange(activeProductIndex, {
+                          sizeOption: undefined,
+                          availableSizes: undefined
+                        });
                       }
                     }}
                   />
@@ -360,14 +368,17 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
                         exit={{ opacity: 0, height: 0 }}
                         className="space-y-2 pt-2"
                       >
+
                         <p className="text-sm font-medium text-text-secondary">Select Size Category:</p>
                         <div className="grid grid-cols-1 gap-2">
                           {(['baby-clothes', 'kids-shoes', 'adult-shoes'] as const).map(option => (
                             <button
                               key={option}
                               onClick={() => {
-                                handleProductChange(activeProductIndex, 'sizeOption', option);
-                                handleProductChange(activeProductIndex, 'availableSizes', getSizesForOption(option));
+                                handleProductChange(activeProductIndex, {
+                                  sizeOption: option,
+                                  availableSizes: getSizesForOption(option)
+                                });
                               }}
                               className={`p-3 rounded-lg border-2 text-left transition-all ${activeProduct.sizeOption === option
                                 ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20'
@@ -387,9 +398,10 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
                   </AnimatePresence>
                   {/* ↑↑↑ END OF NEW BLOCK ↑↑↑ */}
                 </motion.div>
-              )}
-            </div>
-          </MotionDiv>
+              )
+              }
+            </div >
+          </MotionDiv >
         );
       case 4: // Uploading
         return (
