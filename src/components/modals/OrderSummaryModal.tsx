@@ -20,9 +20,10 @@ interface OrderSummaryModalProps {
   product: Product | null;
   storeMeta: StoreMeta | null;
   customer: Customer | null;
+  selectedSize?: string; // Added selectedSize prop
 }
 
-export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta, customer: initialCustomer }: OrderSummaryModalProps) {
+export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta, customer: initialCustomer, selectedSize }: OrderSummaryModalProps) {
   const [quantity, setQuantity] = useState(1);
   const [deliveryMethod, setDeliveryMethod] = useState('home');
   const [customer, setCustomer] = useState<Customer | null>(initialCustomer);
@@ -58,7 +59,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
       const referrerId = localStorage.getItem('referrerId');
 
       // FIX: The product needs to be in an array, and quantity must be part of the product object.
-      const productToOrder = { ...product, quantity };
+      // Include selectedSize in the order object
+      const productToOrder = { ...product, quantity, selectedSize };
       await addOrder([productToOrder], storeMetaWithId, customer, referrerId, false);
 
       toast.success('Order placed! Redirecting to WhatsApp...');
@@ -69,6 +71,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
         `*${product.name}*\n` +
         `🔗 *Product Link:* ${productUrl}\n` +
         `🔢 *Quantity:* ${quantity}\n` +
+        (selectedSize ? `📏 *Size:* ${selectedSize}\n` : '') + // Add Size to WhatsApp message
         `💰 *Price:* ${formatPrice(product.price)}\n` +
         `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n` +
         `${deliveryMethod === 'home' && customer.deliveryAddress ? `📍 *To:* ${customer.deliveryAddress.street}\n` : ''}` +
@@ -114,6 +117,11 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                     <Image src={product.images[0]} alt={product.name} width={64} height={64} className="h-16 w-16 rounded-md object-cover" />
                     <div className="flex-1">
                       <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200">{product.name}</h4>
+                      {selectedSize && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 mt-1 mb-1">
+                          Size: {selectedSize}
+                        </span>
+                      )}
                       <p className="text-sm text-gray-500 dark:text-gray-400">{formatPrice(product.price)}</p>
                     </div>
                     <div className="flex items-center">

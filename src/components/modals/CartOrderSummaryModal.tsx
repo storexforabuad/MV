@@ -64,7 +64,8 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
 
       const itemsSummary = cartItems.map(item => {
         const productUrl = `https://tinyurl.com/bizcononline/${storeId}/products/${item.id}`;
-        return `*${item.name}* (x${item.quantity}) - ${formatPrice(item.price * item.quantity)}\n🔗 ${productUrl}`;
+        const sizeText = item.selectedSize ? ` (Size: ${item.selectedSize})` : '';
+        return `*${item.name}*${sizeText} (x${item.quantity}) - ${formatPrice(item.price * item.quantity)}\n🔗 ${productUrl}`;
       }).join('\n\n');
 
       const message = `🛍️ *New Order Request*\n\n` +
@@ -111,10 +112,15 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
 
                   <div className="mt-4 max-h-60 overflow-y-auto pr-2">
                     {cartItems.map(item => (
-                      <div key={item.id} className="flex items-center space-x-4 py-2">
+                      <div key={item.id + (item.selectedSize || '')} className="flex items-center space-x-4 py-2">
                         <Image src={item.images[0]} alt={item.name} width={48} height={48} className="h-12 w-12 rounded-md object-cover" />
                         <div className="flex-1">
                           <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200">{item.name}</h4>
+                          {item.selectedSize && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 mt-1">
+                              Size: {item.selectedSize}
+                            </span>
+                          )}
                           <p className="text-sm text-gray-500 dark:text-gray-400">{formatPrice(item.price)} x {item.quantity}</p>
                         </div>
                         <p className="text-sm font-medium text-gray-900 dark:text-gray-200">{formatPrice(item.price * item.quantity)}</p>

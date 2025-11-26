@@ -20,6 +20,8 @@ import OrderSummaryModal from '../../../../components/modals/OrderSummaryModal';
 import toast from 'react-hot-toast';
 import VehicleDetailPage from '../../../../components/products/VehicleDetailPage';
 import { ensureProductType, isGeneralProduct, isVehicleProduct } from '../../../../utils/productHelpers';
+import SizeSelector from '../../../../components/products/SizeSelector';
+import { SizePreferencesCache } from '../../../../lib/sizePreferencesCache';
 
 // Dynamic imports
 const ProductDetailSkeleton = dynamic(() => import('../../../../components/ProductDetailSkeleton'), {
@@ -43,9 +45,8 @@ export default function ProductDetail() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [shareIntent, setShareIntent] = useState(false);
-
+  const [selectedSize, setSelectedSize] = useState<string | undefined>(undefined);
   const { customer } = useCustomer();
-
   const [imageLoading, setImageLoading] = useState(true);
 
   const discount = product ? calculateDiscount(product.price, product.originalPrice) : null;
@@ -142,10 +143,32 @@ export default function ProductDetail() {
 
   useEffect(() => {
     if (product) {
-      const productInCart = state.items.find(item => item.id === product.id);
+      // Check if this specific product variant (ID + Size) is in the cart
+      const productInCart = state.items.find(item =>
+        item.id === product.id &&
+        // If product has size options, match size. Otherwise, ignore size.
+        (product.sizeOption ? item.selectedSize === selectedSize : true)
+      );
       setIsInCart(!!productInCart);
     }
-  }, [product, state.items]);
+  }, [product, state.items, selectedSize]);
+
+  // Load size preference on mount
+  useEffect(() => {
+    if (product?.sizeOption) {
+      const cachedSize = SizePreferencesCache.get(product.id);
+      if (cachedSize && product.availableSizes?.includes(cachedSize)) {
+        setSelectedSize(cachedSize);
+      }
+    }
+  }, [product]);
+
+  // Save size preference when changed
+  useEffect(() => {
+    if (product?.id && selectedSize) {
+      SizePreferencesCache.set(product.id, selectedSize);
+    }
+  }, [product, selectedSize]);
 
   useEffect(() => {
     if (storeId) {
@@ -182,6 +205,11 @@ export default function ProductDetail() {
   }
 
   const handlePlaceOrderClick = () => {
+    if (product?.sizeOption && !selectedSize) {
+      toast.error('Please select a size first');
+      return;
+    }
+
     if (customer) {
       setIsOrderModalOpen(true);
     } else {
@@ -192,10 +220,18 @@ export default function ProductDetail() {
   const handleToggleCart = () => {
     if (!product || !storeId) return;
 
+    if (product.sizeOption && !selectedSize) {
+      toast.error('Please select a size first');
+      return;
+    }
+
     setIsTogglingCart(true);
 
     if (isInCart) {
-      dispatch({ type: 'REMOVE_ITEM', payload: product.id });
+      dispatch({
+        type: 'REMOVE_ITEM',
+        payload: { id: product.id, selectedSize }
+      });
     } else {
       dispatch({
         type: 'ADD_ITEM',
@@ -203,6 +239,7 @@ export default function ProductDetail() {
           ...product,
           quantity: 1,
           storeId: storeId,
+          selectedSize: selectedSize,
         }
       });
     }
@@ -257,6 +294,7 @@ export default function ProductDetail() {
         onClose={() => setIsOrderModalOpen(false)}
         product={product}
         storeId={storeId!} // Changed from storeMeta/customer to storeId to match component prop
+        selectedSize={selectedSize}
       />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8 pt-[calc(var(--navbar-height)+1rem)] lg:pt-[calc(var(--navbar-height)+2rem)]">
         <div className="flex flex-col lg:flex lg:flex-row gap-6 lg:gap-x-8">
@@ -350,6 +388,17 @@ export default function ProductDetail() {
                     </>
                   )}
                 </div>
+
+                {generalProduct.sizeOption && generalProduct.availableSizes && (
+                  <div className="mb-6">
+                    <SizeSelector
+                      selectedSize={selectedSize}
+                      onSizeSelect={setSelectedSize}
+                      sizes={generalProduct.availableSizes}
+                      sizeCategory={generalProduct.sizeOption}
+                    />
+                  </div>
+                )}
 
                 {generalProduct.features && (
                   <div className="mb-8">
