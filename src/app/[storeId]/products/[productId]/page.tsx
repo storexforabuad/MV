@@ -293,7 +293,8 @@ export default function ProductDetail() {
         isOpen={isOrderModalOpen}
         onClose={() => setIsOrderModalOpen(false)}
         product={product}
-        storeId={storeId!} // Changed from storeMeta/customer to storeId to match component prop
+        storeMeta={storeMeta}
+        customer={customer}
         selectedSize={selectedSize}
       />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8 pt-[calc(var(--navbar-height)+1rem)] lg:pt-[calc(var(--navbar-height)+2rem)]">
