@@ -241,7 +241,7 @@ export default function ProductDetail() {
           setIsLoginModalOpen(false);
           setShareIntent(false);
         }}
-        onLoginSuccess={() => { // Changed from onSuccess to onLoginSuccess to match component prop
+        onSuccess={() => {
           setIsLoginModalOpen(false);
           if (shareIntent) {
             toast.success("You're logged in! Sharing with your referral link.");
@@ -251,7 +251,6 @@ export default function ProductDetail() {
             toast.success("You're logged in! You can now place your order.");
           }
         }}
-        storeId={storeId!} // Added storeId prop which is required
       />
       <OrderSummaryModal
         isOpen={isOrderModalOpen}
