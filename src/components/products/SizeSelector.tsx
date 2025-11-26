@@ -1,0 +1,80 @@
+'use client';
+
+import React from 'react';
+import { motion } from 'framer-motion';
+
+interface SizeSelectorProps {
+    sizes: string[];
+    selectedSize: string | undefined;
+    onSizeSelect: (size: string) => void;
+    sizeCategory: 'baby-clothes' | 'kids-shoes' | 'adult-shoes';
+    className?: string;
+}
+
+const SIZE_CATEGORY_LABELS: Record<string, string> = {
+    'baby-clothes': 'Baby Clothes',
+    'kids-shoes': 'Kids Shoes',
+    'adult-shoes': 'Adult Shoes',
+};
+
+const SIZE_CATEGORY_HELPERS: Record<string, string> = {
+    'baby-clothes': 'Select age range',
+    'kids-shoes': 'Select shoe size',
+    'adult-shoes': 'Select shoe size',
+};
+
+export const SizeSelector: React.FC<SizeSelectorProps> = ({
+    sizes,
+    selectedSize,
+    onSizeSelect,
+    sizeCategory,
+    className = '',
+}) => {
+    const categoryLabel = SIZE_CATEGORY_LABELS[sizeCategory] || 'Select Size';
+    const helperText = SIZE_CATEGORY_HELPERS[sizeCategory];
+
+    return (
+        <div className={`space-y-3 ${className}`}>
+            <div>
+                <h3 className="text-base font-semibold text-text-primary">
+                    {categoryLabel}
+                </h3>
+                <p className="text-sm text-text-secondary">{helperText}</p>
+            </div>
+
+            <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
+                {sizes.map((size) => {
+                    const isSelected = selectedSize === size;
+
+                    return (
+                        <motion.button
+                            key={size}
+                            onClick={() => onSizeSelect(size)}
+                            whileTap={{ scale: 0.95 }}
+                            className={`
+                relative px-3 py-2.5 rounded-lg font-semibold text-sm
+                transition-all duration-200 border-2
+                ${isSelected
+                                    ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/30'
+                                    : 'bg-input-background border-input-border text-text-primary hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20'
+                                }
+              `}
+                        >
+                            {size}
+                            {isSelected && (
+                                <motion.div
+                                    layoutId="size-selector"
+                                    className="absolute inset-0 bg-blue-600 rounded-lg -z-10"
+                                    initial={false}
+                                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                                />
+                            )}
+                        </motion.button>
+                    );
+                })}
+            </div>
+        </div>
+    );
+};
+
+export default SizeSelector;

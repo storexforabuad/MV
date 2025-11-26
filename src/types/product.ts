@@ -35,6 +35,10 @@ export interface GeneralProduct extends BaseProduct {
   selectedSize?: string;
   size?: string;
   status: 'processing' | 'ready' | 'shipped';
+
+  // Size options (NEW)
+  sizeOption?: 'baby-clothes' | 'kids-shoes' | 'adult-shoes';
+  availableSizes?: string[]; // Auto-populated based on sizeOption
 }
 
 // ==========================================
