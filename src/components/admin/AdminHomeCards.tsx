@@ -78,147 +78,147 @@ const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferral
   </div>
 );
 
-const cardData: {label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.ElementType | null, glowClass: string, isAiCard?: boolean}[] = [
-    {
-        label: '(Biz+Con)™',
-        subtitle: 'Network',
-        icon: Globe,
-        gradient: 'bg-black',
-        text: 'text-white',
-        component: null,
-        glowClass: 'dark:shadow-slate-600/30 shadow-slate-600/50',
-        isAiCard: true,
-    },
-    {
-        label: 'Tips',
-        subtitle: 'Quick Guide',
-        icon: Lightbulb,
-        gradient: 'bg-gradient-to-br from-amber-400 to-yellow-500',
-        text: 'text-white',
-        component: TipsModal,
-        glowClass: 'dark:shadow-yellow-500/30 shadow-yellow-500/50',
-    },
-    {
-      label: 'Share',
-      subtitle: 'Caption',
-      valueKey: 'storeLink',
-      icon: Share2,
-      gradient: 'bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-600',
-      text: 'text-white',
-      component: StoreLinkModal,
-      glowClass: 'dark:shadow-cyan-400/30 shadow-cyan-400/50',
-    },
-    {
-      label: 'Content',
-      subtitle: 'Scheduler',
-      icon: Send,
-      gradient: 'bg-gradient-to-br from-purple-500 to-violet-600',
-      text: 'text-white',
-      component: PostsComposerModal,
-      glowClass: 'dark:shadow-violet-500/30 shadow-violet-500/50',
-    },
-    {
-      label: 'Commission',
-      valueKey: 'totalCommission',
-      icon: Percent,
-      gradient: 'bg-gradient-to-br from-red-500 via-red-600 to-orange-700', // Swapped from Expenses
-      text: 'text-white',
-      component: null,
-      glowClass: 'dark:shadow-red-500/30 shadow-red-500/50', // Swapped from Expenses
-    },
-    {
-      label: 'Bonus',
-      valueKey: 'totalReferralBonus',
-      icon: Gift,
-      gradient: 'bg-gradient-to-br from-pink-500 via-red-500 to-orange-500',
-      text: 'text-white',
-      component: ReferralBonusModal,
-      glowClass: 'dark:shadow-red-500/30 shadow-red-500/50',
-    },
-    {
-      label: 'Revenue',
-      valueKey: 'totalRevenue',
-      icon: TrendingUp,
-      gradient: 'bg-gradient-to-br from-green-400 via-green-500 to-emerald-600',
-      text: 'text-white',
-      component: null,
-      glowClass: 'dark:shadow-green-500/30 shadow-green-500/50',
-    },
-    {
-      label: 'Expenses',
-      valueKey: 'totalExpenses',
-      icon: TrendingDown,
-      gradient: 'bg-gradient-to-br from-purple-500 via-violet-700 to-indigo-900', // Swapped from Commission
-      text: 'text-white',
-      component: null,
-      glowClass: 'dark:shadow-violet-500/30 shadow-violet-500/50', // Swapped from Commission
-    },
-    {
-      label: 'Ambassador',
-      valueKey: 'referrals',
-      icon: Star, 
-      gradient: 'bg-gradient-to-br from-orange-400 via-red-400 to-pink-500', 
-      text: 'text-white',
-      component: null,
-      glowClass: 'dark:shadow-red-400/30 shadow-red-400/50', 
-    },
-    {
-      label: 'Views',
-      valueKey: 'totalViews',
-      icon: Eye,
-      gradient: 'bg-gradient-to-br from-indigo-500 via-blue-600 to-purple-700',
-      text: 'text-white',
-      component: TotalViewsModal, 
-      glowClass: 'dark:shadow-blue-500/30 shadow-blue-500/50',
-    },
-    {
-      label: 'Orders',
-      valueKey: 'totalOrders',
-      icon: ShoppingCart,
-      gradient: 'bg-gradient-to-br from-sky-600 via-blue-700 to-indigo-800',
-      text: 'text-white',
-      component: null,
-      glowClass: 'dark:shadow-blue-600/30 shadow-blue-600/50',
-    },
-    {
-        label: 'Deliveries',
-        valueKey: 'deliveries',
-        icon: Truck,
-        gradient: 'bg-gradient-to-br from-sky-400 to-blue-500',
-        text: 'text-white',
-        component: null,
-        glowClass: 'dark:shadow-sky-500/30 shadow-sky-500/50',
-    },
-    {
-      label: 'Manage Categories',
-      valueKey: 'totalCategories',
-      icon: Tag,
-      gradient: 'bg-gradient-to-br from-lime-500 via-green-600 to-emerald-700',
-      text: 'text-white',
-      component: null, 
-      glowClass: 'dark:shadow-green-500/30 shadow-green-500/50',
-    },
-    {
-      label: 'Manage Products',
-      valueKey: 'totalProducts',
-      icon: Archive,
-      gradient: 'bg-gradient-to-br from-rose-500 to-fuchsia-600',
-      text: 'text-white',
-      component: null,
-      glowClass: 'dark:shadow-fuchsia-500/30 shadow-fuchsia-500/50',
-    },
-  ];
+const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.ElementType | null, glowClass: string, isAiCard?: boolean }[] = [
+  {
+    label: '(Biz+Con)™',
+    subtitle: 'Network',
+    icon: Globe,
+    gradient: 'bg-gray-500',
+    text: 'text-white',
+    component: null,
+    glowClass: 'dark:shadow-slate-600/30 shadow-slate-600/50',
+    isAiCard: true,
+  },
+  {
+    label: 'Tips',
+    subtitle: 'Quick Guide',
+    icon: Lightbulb,
+    gradient: 'bg-gradient-to-br from-amber-400 to-yellow-500',
+    text: 'text-white',
+    component: TipsModal,
+    glowClass: 'dark:shadow-yellow-500/30 shadow-yellow-500/50',
+  },
+  {
+    label: 'Share',
+    subtitle: 'Caption',
+    valueKey: 'storeLink',
+    icon: Share2,
+    gradient: 'bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-600',
+    text: 'text-white',
+    component: StoreLinkModal,
+    glowClass: 'dark:shadow-cyan-400/30 shadow-cyan-400/50',
+  },
+  {
+    label: 'Content',
+    subtitle: 'Scheduler',
+    icon: Send,
+    gradient: 'bg-gradient-to-br from-purple-500 to-violet-600',
+    text: 'text-white',
+    component: PostsComposerModal,
+    glowClass: 'dark:shadow-violet-500/30 shadow-violet-500/50',
+  },
+  {
+    label: 'Commission',
+    valueKey: 'totalCommission',
+    icon: Percent,
+    gradient: 'bg-gradient-to-br from-red-500 via-red-600 to-orange-700', // Swapped from Expenses
+    text: 'text-white',
+    component: null,
+    glowClass: 'dark:shadow-red-500/30 shadow-red-500/50', // Swapped from Expenses
+  },
+  {
+    label: 'Bonus',
+    valueKey: 'totalReferralBonus',
+    icon: Gift,
+    gradient: 'bg-gradient-to-br from-pink-500 via-red-500 to-orange-500',
+    text: 'text-white',
+    component: ReferralBonusModal,
+    glowClass: 'dark:shadow-red-500/30 shadow-red-500/50',
+  },
+  {
+    label: 'Revenue',
+    valueKey: 'totalRevenue',
+    icon: TrendingUp,
+    gradient: 'bg-gradient-to-br from-green-400 via-green-500 to-emerald-600',
+    text: 'text-white',
+    component: null,
+    glowClass: 'dark:shadow-green-500/30 shadow-green-500/50',
+  },
+  {
+    label: 'Expenses',
+    valueKey: 'totalExpenses',
+    icon: TrendingDown,
+    gradient: 'bg-gradient-to-br from-purple-500 via-violet-700 to-indigo-900', // Swapped from Commission
+    text: 'text-white',
+    component: null,
+    glowClass: 'dark:shadow-violet-500/30 shadow-violet-500/50', // Swapped from Commission
+  },
+  {
+    label: 'Ambassador',
+    valueKey: 'referrals',
+    icon: Star,
+    gradient: 'bg-gradient-to-br from-orange-400 via-red-400 to-pink-500',
+    text: 'text-white',
+    component: null,
+    glowClass: 'dark:shadow-red-400/30 shadow-red-400/50',
+  },
+  {
+    label: 'Views',
+    valueKey: 'totalViews',
+    icon: Eye,
+    gradient: 'bg-gradient-to-br from-indigo-500 via-blue-600 to-purple-700',
+    text: 'text-white',
+    component: TotalViewsModal,
+    glowClass: 'dark:shadow-blue-500/30 shadow-blue-500/50',
+  },
+  {
+    label: 'Orders',
+    valueKey: 'totalOrders',
+    icon: ShoppingCart,
+    gradient: 'bg-gradient-to-br from-sky-600 via-blue-700 to-indigo-800',
+    text: 'text-white',
+    component: null,
+    glowClass: 'dark:shadow-blue-600/30 shadow-blue-600/50',
+  },
+  {
+    label: 'Deliveries',
+    valueKey: 'deliveries',
+    icon: Truck,
+    gradient: 'bg-gradient-to-br from-sky-400 to-blue-500',
+    text: 'text-white',
+    component: null,
+    glowClass: 'dark:shadow-sky-500/30 shadow-sky-500/50',
+  },
+  {
+    label: 'Manage Categories',
+    valueKey: 'totalCategories',
+    icon: Tag,
+    gradient: 'bg-gradient-to-br from-lime-500 via-green-600 to-emerald-700',
+    text: 'text-white',
+    component: null,
+    glowClass: 'dark:shadow-green-500/30 shadow-green-500/50',
+  },
+  {
+    label: 'Manage Products',
+    valueKey: 'totalProducts',
+    icon: Archive,
+    gradient: 'bg-gradient-to-br from-rose-500 to-fuchsia-600',
+    text: 'text-white',
+    component: null,
+    glowClass: 'dark:shadow-fuchsia-500/30 shadow-fuchsia-500/50',
+  },
+];
 
 const formatCurrencyForCard = (amount: number) => {
-    if (typeof amount !== 'number') return '₦0';
-    if (amount >= 1000000) {
- return `₦${(amount / 1000000).toFixed(1)}M`;
-    }
-    if (amount >= 1000) {
- return `₦${(amount / 1000).toFixed(0)}K`;
-    }
- return `₦${amount.toFixed(0)}`;
-  };
+  if (typeof amount !== 'number') return '₦0';
+  if (amount >= 1000000) {
+    return `₦${(amount / 1000000).toFixed(1)}M`;
+  }
+  if (amount >= 1000) {
+    return `₦${(amount / 1000).toFixed(0)}K`;
+  }
+  return `₦${amount.toFixed(0)}`;
+};
 
 export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const { spotlightStep, completeSpotlight } = useSpotlightContext();
@@ -247,17 +247,17 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     const thirtyMinutesFromNow = new Timestamp(now.seconds + 30 * 60, now.nanoseconds);
 
     const q = query(
-        schedulesRef,
-        where('status', '==', 'scheduled'),
-        where('scheduledTime', '>=', now),
-        where('scheduledTime', '<', thirtyMinutesFromNow)
+      schedulesRef,
+      where('status', '==', 'scheduled'),
+      where('scheduledTime', '>=', now),
+      where('scheduledTime', '<', thirtyMinutesFromNow)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-        setShowPostsNotification(!snapshot.empty);
+      setShowPostsNotification(!snapshot.empty);
     }, (error) => {
-        console.error("Error fetching upcoming schedules:", error);
-        setShowPostsNotification(false);
+      console.error("Error fetching upcoming schedules:", error);
+      setShowPostsNotification(false);
     });
 
     return () => unsubscribe();
@@ -321,7 +321,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     else if (cardLabel === 'Revenue') setIsRevenueModalOpen(true);
     else if (cardLabel === 'Expenses') setIsExpensesModalOpen(true);
     else setOpenModal(idx);
-    
+
     if (props.setIsModalOpen && cardLabel !== 'Orders' && cardLabel !== 'Manage Products') props.setIsModalOpen(true);
   };
 
@@ -329,7 +329,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     setOpenModal(null);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   };
-  
+
   const handleCloseTipsModal = () => {
     setIsTipsModalOpen(false);
     if (spotlightStep === 'tips') {
@@ -367,35 +367,35 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     setIsExpensesModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
-  
+
   const containerVariants: Variants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
   const itemVariants: Variants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } } };
   const modalVariants: Variants = { hidden: { opacity: 0, scale: 0.95, y: 20 }, visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: [0.25, 1, 0.5, 1] } }, exit: { opacity: 0, scale: 0.95, y: 20, transition: { duration: 0.2, ease: 'easeOut' } } };
 
   return (
     <section className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 overflow-x-hidden">
-        <div className="mb-4">
-            <button
-                onClick={async () => {
-                  setRefreshing(true);
-                  await onRefresh(true);
-                  setRefreshing(false);
-                }}
-                disabled={refreshing}
-                className="col-span-2 sm:col-span-3 md:col-span-4 w-full bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white font-bold py-3 px-4 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center dark:hover:shadow-lg dark:hover:shadow-blue-700/30"
-            >
-                <RefreshCw className={`mr-2 h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
-                {refreshing ? 'Refreshing...' : 'Refresh'}
-            </button>
-        </div>
-        <motion.div 
-            className="grid grid-cols-2 sm:grid-cols-3 md:col-span-4 gap-2 sm:gap-4"
-            variants={containerVariants}
-            initial="hidden"
-            animate={uiVisible ? 'visible' : 'hidden'}
-            onAnimationComplete={() => onAnimationComplete?.()}
+      <div className="mb-4">
+        <button
+          onClick={async () => {
+            setRefreshing(true);
+            await onRefresh(true);
+            setRefreshing(false);
+          }}
+          disabled={refreshing}
+          className="col-span-2 sm:col-span-3 md:col-span-4 w-full bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white font-bold py-3 px-4 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center dark:hover:shadow-lg dark:hover:shadow-blue-700/30"
         >
-            <style jsx>{`
+          <RefreshCw className={`mr-2 h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
+          {refreshing ? 'Refreshing...' : 'Refresh'}
+        </button>
+      </div>
+      <motion.div
+        className="grid grid-cols-2 sm:grid-cols-3 md:col-span-4 gap-2 sm:gap-4"
+        variants={containerVariants}
+        initial="hidden"
+        animate={uiVisible ? 'visible' : 'hidden'}
+        onAnimationComplete={() => onAnimationComplete?.()}
+      >
+        <style jsx>{`
                 .card-blob { position: absolute; top: -10px; right: -10px; width: 40px; height: 40px; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, transparent 70%); filter: blur(8px); animation: blobMove 4s infinite alternate ease-in-out; z-index: 0; }
                 @keyframes blobMove { 0% { transform: scale(1) translateY(0); } 100% { transform: scale(1.05) translateY(3px); } }
                 .dashboard-card { min-width: 0; max-width: 100%; word-wrap: break-word; overflow: hidden; }
@@ -424,81 +424,81 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                 }
             `}</style>
 
-            {cardsToRender.map((card, idx) => {
-              if (card.label === 'Customers' && card.component === AdminCustomersCard) {
-                return (
-                  <motion.div key="customers-card" variants={itemVariants}>
-                    <AdminCustomersCard storeId={props.storeId} onClick={() => setIsCustomersModalOpen(true)} gradient={customersCard.gradient} glowClass={customersCard.glowClass}/>
-                  </motion.div>
-                );
-              }
+        {cardsToRender.map((card, idx) => {
+          if (card.label === 'Customers' && card.component === AdminCustomersCard) {
+            return (
+              <motion.div key="customers-card" variants={itemVariants}>
+                <AdminCustomersCard storeId={props.storeId} onClick={() => setIsCustomersModalOpen(true)} gradient={customersCard.gradient} glowClass={customersCard.glowClass} />
+              </motion.div>
+            );
+          }
 
-              const Icon = card.icon;
-              const isHorizontal = card.label === 'Share' || card.label === 'Tips' || card.label === 'Content' || card.label === '(Biz+Con)™';
-              const isTipsCard = card.label === 'Tips';
-              const isPostsCard = card.label === 'Content';
-              const spotlightClasses = spotlightStep === 'tips' && isTipsCard ? 'relative z-50 pointer-events-auto' : '';
+          const Icon = card.icon;
+          const isHorizontal = card.label === 'Share' || card.label === 'Tips' || card.label === 'Content' || card.label === '(Biz+Con)™';
+          const isTipsCard = card.label === 'Tips';
+          const isPostsCard = card.label === 'Content';
+          const spotlightClasses = spotlightStep === 'tips' && isTipsCard ? 'relative z-50 pointer-events-auto' : '';
 
-              if (isHorizontal) {
-                return (
-                  <motion.div key={card.label} variants={itemVariants} className={`relative ${spotlightClasses}`}>
-                    <button className={`dashboard-card relative flex flex-row items-center justify-center rounded-2xl p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card.label)}>
-                      {isPostsCard && showPostsNotification && (<span className="absolute top-2 right-2 flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></span>)}
-                      <span className="card-blob" />
-                      <div className={`flex-shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white bg-opacity-20 shadow`}><Icon className={`w-5 h-5 sm:w-6 sm:h-6 drop-shadow ${card.isAiCard ? 'ai-icon-glow' : ''}`} /></div>
-                      <div className="flex flex-col items-center ml-3 min-w-0 z-10">
-                        <div className={`text-base sm:text-lg font-bold drop-shadow ${card.isAiCard ? 'ai-text-gradient' : ''}`}>{card.label}</div>
-                        {card.subtitle && <div className={`text-xs sm:text-sm font-medium opacity-90 text-center leading-tight ${card.isAiCard ? 'ai-text-gradient' : ''}`}>{card.subtitle}</div>}
-                      </div>
-                    </button>
-                    {spotlightStep === 'tips' && isTipsCard && (<SpotlightTooltip text="Check here for helpful tips and stats about your dashboard." className="top-full mt-5 left-1/2 -translate-x-1/2"/>)}
-                  </motion.div>
-                );
-              } else {
-                return (
-                  <motion.div key={card.label} variants={itemVariants}>
-                    <button className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card.label)}>
-                      <span className="card-blob" />
-                      <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white bg-opacity-20 mb-1 sm:mb-2 shadow">
-                        <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 drop-shadow" />
-                      </div>
-                      <div className="flex flex-col items-center min-w-0 z-10 w-full">
-                        <div className="text-lg sm:text-xl md:text-2xl font-bold drop-shadow">
-                          {(() => {
-                            const value = card.valueKey ? (props as any)[card.valueKey] : '';
-                            if (card.label === 'Commission') return formatCurrencyForCard(props.totalCommission);
-                            if (card.label === 'Bonus') return formatCurrencyForCard(props.totalReferralBonus);
-                            if (card.label === 'Revenue') return formatCurrencyForCard(props.totalRevenue);
-                            if (card.label === 'Expenses') return formatCurrencyForCard(props.totalExpenses + props.totalCommission);
-                            if (card.label === 'Ambassador') return props.referrals;
-                            if (card.label === 'Deliveries') return 0;
-                            if (typeof value === 'number' || typeof value === 'string') return value;
-                            return '';
-                          })()}
-                        </div>
-                        <div className="text-xs sm:text-sm font-medium opacity-90 text-center px-1 leading-tight">
-                          {card.label === 'Manage Categories' ? 'Categories' : card.label === 'Manage Products' ? 'Products' : card.label}
-                        </div>
-                         {card.subtitle && <div className="text-xs opacity-70 mt-1">{card.subtitle}</div>}
-                      </div>
-                    </button>
-                  </motion.div>
-                );
-              }
-            })}
-        </motion.div>
-      
+          if (isHorizontal) {
+            return (
+              <motion.div key={card.label} variants={itemVariants} className={`relative ${spotlightClasses}`}>
+                <button className={`dashboard-card relative flex flex-row items-center justify-center rounded-2xl p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card.label)}>
+                  {isPostsCard && showPostsNotification && (<span className="absolute top-2 right-2 flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></span>)}
+                  <span className="card-blob" />
+                  <div className={`flex-shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white bg-opacity-20 shadow`}><Icon className={`w-5 h-5 sm:w-6 sm:h-6 drop-shadow ${card.isAiCard ? 'ai-icon-glow' : ''}`} /></div>
+                  <div className="flex flex-col items-center ml-3 min-w-0 z-10">
+                    <div className={`text-base sm:text-lg font-bold drop-shadow ${card.isAiCard ? 'ai-text-gradient' : ''}`}>{card.label}</div>
+                    {card.subtitle && <div className={`text-xs sm:text-sm font-medium opacity-90 text-center leading-tight ${card.isAiCard ? 'ai-text-gradient' : ''}`}>{card.subtitle}</div>}
+                  </div>
+                </button>
+                {spotlightStep === 'tips' && isTipsCard && (<SpotlightTooltip text="Check here for helpful tips and stats about your dashboard." className="top-full mt-5 left-1/2 -translate-x-1/2" />)}
+              </motion.div>
+            );
+          } else {
+            return (
+              <motion.div key={card.label} variants={itemVariants}>
+                <button className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card.label)}>
+                  <span className="card-blob" />
+                  <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white bg-opacity-20 mb-1 sm:mb-2 shadow">
+                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 drop-shadow" />
+                  </div>
+                  <div className="flex flex-col items-center min-w-0 z-10 w-full">
+                    <div className="text-lg sm:text-xl md:text-2xl font-bold drop-shadow">
+                      {(() => {
+                        const value = card.valueKey ? (props as any)[card.valueKey] : '';
+                        if (card.label === 'Commission') return formatCurrencyForCard(props.totalCommission);
+                        if (card.label === 'Bonus') return formatCurrencyForCard(props.totalReferralBonus);
+                        if (card.label === 'Revenue') return formatCurrencyForCard(props.totalRevenue);
+                        if (card.label === 'Expenses') return formatCurrencyForCard(props.totalExpenses + props.totalCommission);
+                        if (card.label === 'Ambassador') return props.referrals;
+                        if (card.label === 'Deliveries') return 0;
+                        if (typeof value === 'number' || typeof value === 'string') return value;
+                        return '';
+                      })()}
+                    </div>
+                    <div className="text-xs sm:text-sm font-medium opacity-90 text-center px-1 leading-tight">
+                      {card.label === 'Manage Categories' ? 'Categories' : card.label === 'Manage Products' ? 'Products' : card.label}
+                    </div>
+                    {card.subtitle && <div className="text-xs opacity-70 mt-1">{card.subtitle}</div>}
+                  </div>
+                </button>
+              </motion.div>
+            );
+          }
+        })}
+      </motion.div>
+
       {/* === MODAL RENDERERS === */}
 
-      <CustomersListModal storeId={props.storeId} isOpen={isCustomersModalOpen} onClose={() => setIsCustomersModalOpen(false)}/>
+      <CustomersListModal storeId={props.storeId} isOpen={isCustomersModalOpen} onClose={() => setIsCustomersModalOpen(false)} />
 
       {isTipsModalOpen && (<TipsModal {...props as AdminHomeCardsProps & { handleClose: () => void; }} handleClose={handleCloseTipsModal} />)}
 
       {isViewsModalOpen && (<TotalViewsModal storeId={storeId} isOpen={isViewsModalOpen} onClose={() => setIsViewsModalOpen(false)} />)}
 
-      {isShareModalOpen && (<StoreLinkModal {...props} isOpen={isShareModalOpen} handleClose={() => setIsShareModalOpen(false)}/>)}
+      {isShareModalOpen && (<StoreLinkModal {...props} isOpen={isShareModalOpen} handleClose={() => setIsShareModalOpen(false)} />)}
 
-      {isPostsModalOpen && (<PostsComposerModal isOpen={isPostsModalOpen} onClose={handleClosePostsModal} storeId={props.storeId} contacts={props.contacts} products={props.products} storeName={props.storeName}/>)}
+      {isPostsModalOpen && (<PostsComposerModal isOpen={isPostsModalOpen} onClose={handleClosePostsModal} storeId={props.storeId} contacts={props.contacts} products={props.products} storeName={props.storeName} />)}
 
       {isBizconNetworkModalOpen && (<BizconNetworkModal isOpen={isBizconNetworkModalOpen} onClose={handleCloseBizconNetworkModal} />)}
 
@@ -506,14 +506,14 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
       {isRevenueModalOpen && (<RevenueModal isOpen={isRevenueModalOpen} onClose={handleCloseRevenueModal} storeId={storeId} />)}
 
-      {isCommissionModalOpen && (<CommissionModal isOpen={isCommissionModalOpen} onClose={handleCloseCommissionModal} storeId={storeId} />)} 
+      {isCommissionModalOpen && (<CommissionModal isOpen={isCommissionModalOpen} onClose={handleCloseCommissionModal} storeId={storeId} />)}
 
       {isExpensesModalOpen && (
-        <ExpensesModal 
-            isOpen={isExpensesModalOpen} 
-            onClose={handleCloseExpensesModal} 
-            totalCommission={props.totalCommission}
-            totalExpenses={props.totalExpenses}
+        <ExpensesModal
+          isOpen={isExpensesModalOpen}
+          onClose={handleCloseExpensesModal}
+          totalCommission={props.totalCommission}
+          totalExpenses={props.totalExpenses}
         />
       )}
 
