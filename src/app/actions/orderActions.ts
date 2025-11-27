@@ -2,18 +2,18 @@
 
 import { db } from '@/lib/db';
 import {
-  collection,
-  getDocs,
-  query,
-  orderBy,
-  Timestamp,
-  doc,
-  getDoc,
-  writeBatch,
-  where,
-  limit,
-  increment,
-  updateDoc,
+    collection,
+    getDocs,
+    query,
+    orderBy,
+    Timestamp,
+    doc,
+    getDoc,
+    writeBatch,
+    where,
+    limit,
+    increment,
+    updateDoc,
 } from 'firebase/firestore';
 import { Product } from '@/types/product';
 import { StoreMeta } from '@/types/store';
@@ -46,127 +46,127 @@ interface OrderProduct extends Product {
 
 // Interface for the complete order data as stored in Firestore.
 interface FirestoreOrderData {
-  products: OrderProduct[];
-  storeMeta: StoreMeta;
-  orderDate: Timestamp;
-  customerId: string;
-  orderStatus: 'processing' | 'partially-ready' | 'ready' | 'shipped';
-  customerInfo: {
-    id: string;
-    name: string;
-    phoneNumber: string;
-    deliveryAddress: DeliveryAddress;
-  };
-  referralApplied?: boolean;
+    products: OrderProduct[];
+    storeMeta: StoreMeta;
+    orderDate: Timestamp;
+    customerId: string;
+    orderStatus: 'processing' | 'partially-ready' | 'ready' | 'shipped';
+    customerInfo: {
+        id: string;
+        name: string;
+        phoneNumber: string;
+        deliveryAddress: DeliveryAddress;
+    };
+    referralApplied?: boolean;
 }
 
 /**
  * Adds a new order to Firestore, creating it in both the customer's and store's collections atomically.
  */
 export const addOrderToFirestore = async (
-  customerId: string,
-  products: Product[], 
-  storeMeta: StoreMeta,
-  customer: Customer,
-  referralCode: string | null,
-  bonusApplied: boolean = false,
+    customerId: string,
+    products: Product[],
+    storeMeta: StoreMeta,
+    customer: Customer,
+    referralCode: string | null,
+    bonusApplied: boolean = false,
 ): Promise<Order> => {
-  try {
-    const storeId = storeMeta.id;
-    if (!storeId) throw new Error("Store ID is missing.");
+    try {
+        const storeId = storeMeta.id;
+        if (!storeId) throw new Error("Store ID is missing.");
 
-    const customerRef = doc(db, 'customers', customerId);
-    const customerSnap = await getDoc(customerRef);
-    if (!customerSnap.exists()) throw new Error("Customer not found.");
-    const customerData = customerSnap.data() as Customer;
+        const customerRef = doc(db, 'customers', customerId);
+        const customerSnap = await getDoc(customerRef);
+        if (!customerSnap.exists()) throw new Error("Customer not found.");
+        const customerData = customerSnap.data() as Customer;
 
-    const orderDate = Timestamp.now();
-    const newOrderId = doc(collection(db, 'dummy')).id;
-    const batch = writeBatch(db);
-    let referralWasApplied = false;
+        const orderDate = Timestamp.now();
+        const newOrderId = doc(collection(db, 'dummy')).id;
+        const batch = writeBatch(db);
+        let referralWasApplied = false;
 
-    if (referralCode) {
-      const firstEligibleProduct = products.find(p => p.commission && p.commission > 0);
-      if (firstEligibleProduct) {
-        const referrersQuery = query(collection(db, 'customers'), where("referralCode", "==", referralCode), limit(1));
-        const referrerSnap = await getDocs(referrersQuery);
-        
-        if (!referrerSnap.empty) {
-          const referrerDoc = referrerSnap.docs[0];
-          const referrerId = referrerDoc.id;
-          const customerOrdersQuery = query(collection(db, 'customers', customerId, 'orders'), limit(1));
-          const customerOrdersSnap = await getDocs(customerOrdersQuery);
+        if (referralCode) {
+            const firstEligibleProduct = products.find(p => p.commission && p.commission > 0);
+            if (firstEligibleProduct) {
+                const referrersQuery = query(collection(db, 'customers'), where("referralCode", "==", referralCode), limit(1));
+                const referrerSnap = await getDocs(referrersQuery);
 
-          if (referrerId !== customerId && customerOrdersSnap.empty) {
-            referralWasApplied = true;
-            const commissionValue = (firstEligibleProduct.price * firstEligibleProduct.commission!) / 100;
-            const referrerRef = doc(db, 'customers', referrerId);
-            batch.update(referrerRef, {
-              [`referralDataByStore.${storeId}.commissionEarned`]: increment(commissionValue),
-              [`referralDataByStore.${storeId}.referralCount`]: increment(1)
-            });
-            const newReferralHistoryRef = doc(db, 'customers', referrerId, 'referrals', newOrderId);
-            batch.set(newReferralHistoryRef, {
-              refereeId: customerId,
-              refereeName: customer.name,
-              productName: firstEligibleProduct.name,
-              commissionEarned: commissionValue,
-              orderDate: orderDate,
-              storeId: storeId,
-            });
-          }
+                if (!referrerSnap.empty) {
+                    const referrerDoc = referrerSnap.docs[0];
+                    const referrerId = referrerDoc.id;
+                    const customerOrdersQuery = query(collection(db, 'customers', customerId, 'orders'), limit(1));
+                    const customerOrdersSnap = await getDocs(customerOrdersQuery);
+
+                    if (referrerId !== customerId && customerOrdersSnap.empty) {
+                        referralWasApplied = true;
+                        const commissionValue = (firstEligibleProduct.price * firstEligibleProduct.commission!) / 100;
+                        const referrerRef = doc(db, 'customers', referrerId);
+                        batch.update(referrerRef, {
+                            [`referralDataByStore.${storeId}.commissionEarned`]: increment(commissionValue),
+                            [`referralDataByStore.${storeId}.referralCount`]: increment(1)
+                        });
+                        const newReferralHistoryRef = doc(db, 'customers', referrerId, 'referrals', newOrderId);
+                        batch.set(newReferralHistoryRef, {
+                            refereeId: customerId,
+                            refereeName: customer.name,
+                            productName: firstEligibleProduct.name,
+                            commissionEarned: commissionValue,
+                            orderDate: orderDate,
+                            storeId: storeId,
+                        });
+                    }
+                }
+            }
         }
-      }
+
+        if (bonusApplied) {
+            batch.update(customerRef, { totalReferralCommission: 0 });
+        }
+
+        const productsWithStatus: OrderProduct[] = products.map(p => ({ ...p, status: 'processing' }));
+
+        const orderPayload: FirestoreOrderData = {
+            products: productsWithStatus,
+            storeMeta,
+            orderDate,
+            customerId,
+            orderStatus: 'processing',
+            customerInfo: {
+                id: customerId,
+                name: customerData.name,
+                phoneNumber: customerData.phoneNumber,
+                deliveryAddress: customerData.deliveryAddress,
+            },
+            ...(referralWasApplied && { referralApplied: true }),
+        };
+
+        const customerOrderRef = doc(db, 'customers', customerId, 'orders', newOrderId);
+        batch.set(customerOrderRef, orderPayload);
+
+        const storeOrderRef = doc(db, 'stores', storeId, 'orders', newOrderId);
+        batch.set(storeOrderRef, orderPayload);
+
+        const totalCommissionFromSale = products.reduce((acc, p) => acc + (p.commission ? (p.price * p.commission) / 100 : 0), 0);
+        const storeRef = doc(db, 'stores', storeId);
+        batch.update(storeRef, {
+            totalOrders: increment(1),
+            totalCommissionEarned: increment(totalCommissionFromSale)
+        });
+
+        await batch.commit();
+
+        return {
+            id: newOrderId,
+            products,
+            storeMeta,
+            orderDate: orderDate.toDate().toISOString(),
+            orderStatus: 'processing',
+        };
+
+    } catch (error) {
+        console.error("FATAL: Error adding order to Firestore:", JSON.stringify(error, null, 2));
+        throw new Error("Failed to place order.");
     }
-
-    if (bonusApplied) {
-        batch.update(customerRef, { totalReferralCommission: 0 });
-    }
-
-    const productsWithStatus: OrderProduct[] = products.map(p => ({ ...p, status: 'processing' }));
-
-    const orderPayload: FirestoreOrderData = {
-      products: productsWithStatus,
-      storeMeta,
-      orderDate,
-      customerId,
-      orderStatus: 'processing',
-      customerInfo: {
-        id: customerId,
-        name: customerData.name,
-        phoneNumber: customerData.phoneNumber,
-        deliveryAddress: customerData.deliveryAddress,
-      },
-      ...(referralWasApplied && { referralApplied: true }),
-    };
-
-    const customerOrderRef = doc(db, 'customers', customerId, 'orders', newOrderId);
-    batch.set(customerOrderRef, orderPayload);
-
-    const storeOrderRef = doc(db, 'stores', storeId, 'orders', newOrderId);
-    batch.set(storeOrderRef, orderPayload);
-
-    const totalCommissionFromSale = products.reduce((acc, p) => acc + (p.commission ? (p.price * p.commission) / 100 : 0), 0);
-    const storeRef = doc(db, 'stores', storeId);
-    batch.update(storeRef, {
-        totalOrders: increment(1),
-        totalCommissionEarned: increment(totalCommissionFromSale)
-    });
-
-    await batch.commit();
-
-    return {
-      id: newOrderId,
-      products,
-      storeMeta,
-      orderDate: orderDate.toDate().toISOString(),
-      orderStatus: 'processing',
-    };
-
-  } catch (error) {
-    console.error("FATAL: Error adding order to Firestore:", JSON.stringify(error, null, 2));
-    throw new Error("Failed to place order.");
-  }
 };
 
 /**
@@ -183,7 +183,7 @@ export const updateOrderStatus = async (storeId: string, orderId: string, produc
     const previousStatus = orderData.orderStatus || 'processing';
 
     const currentProducts = orderData.products || (orderData.product ? [{ ...orderData.product, quantity: orderData.quantity || 1 }] : []);
-    
+
     const updatedProducts = currentProducts.map((product: any) => {
         if (productIds.includes(product.id)) {
             return { ...product, status: 'ready' as const };
@@ -197,12 +197,12 @@ export const updateOrderStatus = async (storeId: string, orderId: string, produc
     let newOrderStatus: Order['orderStatus'] = 'processing';
     if (allReady) newOrderStatus = 'ready';
     else if (someReady) newOrderStatus = 'partially-ready';
-    
+
     // --- Revenue Recognition Logic ---
     if (newOrderStatus === 'ready' && previousStatus !== 'ready') {
         try {
             const batch = writeBatch(db);
-            
+
             // 1. Calculate total revenue for this order
             const orderTotal = updatedProducts.reduce((sum: number, p: any) => sum + (p.price || 0), 0);
 
@@ -213,7 +213,7 @@ export const updateOrderStatus = async (storeId: string, orderId: string, produc
             // 3. Update the dailyMetrics subcollection
             const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
             const metricRef = doc(db, 'stores', storeId, 'dailyMetrics', today);
-            batch.set(metricRef, { 
+            batch.set(metricRef, {
                 date: today,
                 totalRevenue: increment(orderTotal),
                 ordersCompleted: increment(1)
@@ -316,17 +316,17 @@ const transformOrderData = (doc: any): StoreOrder => {
  * Fetches all orders for a specific store, with manual sorting to prevent index errors.
  */
 export const fetchStoreOrders = async (storeId: string): Promise<StoreOrder[]> => {
-  try {
-    const ordersRef = collection(db, 'stores', storeId, 'orders');
-    const q = query(ordersRef, orderBy('orderDate', 'desc'));
-    const querySnapshot = await getDocs(q);
-    const orders = querySnapshot.docs.map(transformOrderData);
-    orders.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
-    return orders;
-  } catch (error) {
-    console.error("Error fetching store orders from Firestore:", error);
-    throw new Error("Failed to fetch store orders.");
-  }
+    try {
+        const ordersRef = collection(db, 'stores', storeId, 'orders');
+        const q = query(ordersRef, orderBy('orderDate', 'desc'));
+        const querySnapshot = await getDocs(q);
+        const orders = querySnapshot.docs.map(transformOrderData);
+        orders.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
+        return orders;
+    } catch (error) {
+        console.error("Error fetching store orders from Firestore:", error);
+        throw new Error("Failed to fetch store orders.");
+    }
 };
 
 /**
@@ -374,15 +374,43 @@ export const getRevenueAnalytics = async (storeId: string) => {
             });
         }
 
-        // --- Top Earning Products Analysis ---
+        // --- Top Earning Products & Bonus Analysis ---
         const ordersRef = collection(db, 'stores', storeId, 'orders');
         const ordersQuery = query(ordersRef, where('orderStatus', '==', 'ready'));
         const ordersSnap = await getDocs(ordersQuery);
 
         const productRevenue: { [key: string]: { name: string; totalRevenue: number } } = {};
+        let lifetimeBonus = 0;
+        const dailyBonusMap: { [date: string]: number } = {};
 
         ordersSnap.forEach(orderDoc => {
             const order = orderDoc.data();
+
+            // Calculate Bonus
+            let orderBonus = 0;
+            if (order.referralApplied && Array.isArray(order.products)) {
+                order.products.forEach((product: Product) => {
+                    if (product.commission && typeof product.price === 'number') {
+                        orderBonus += (product.price * product.commission) / 100;
+                    }
+                });
+            }
+            lifetimeBonus += orderBonus;
+
+            // Map Bonus to Date (for last 7 days)
+            let orderDateStr = '';
+            if (order.orderDate && typeof order.orderDate.toDate === 'function') {
+                orderDateStr = order.orderDate.toDate().toISOString().split('T')[0];
+            } else if (typeof order.orderDate === 'string') {
+                orderDateStr = order.orderDate.split('T')[0];
+            }
+
+            if (orderDateStr) {
+                if (!dailyBonusMap[orderDateStr]) dailyBonusMap[orderDateStr] = 0;
+                dailyBonusMap[orderDateStr] += orderBonus;
+            }
+
+            // Product Revenue Logic
             if (Array.isArray(order.products)) {
                 order.products.forEach((product: Product) => {
                     if (product.id && product.price) {
@@ -400,10 +428,17 @@ export const getRevenueAnalytics = async (storeId: string) => {
             .sort((a, b) => b.totalRevenue - a.totalRevenue)
             .slice(0, 5);
 
+        // Merge Bonus into Historical Data
+        const enrichedHistoricalData = historicalData.map(day => ({
+            ...day,
+            totalBonus: dailyBonusMap[day.date] || 0
+        }));
+
         return {
             lifetimeRevenue,
-            historicalData,
-            topEarningProducts, // New data being returned
+            lifetimeBonus,
+            historicalData: enrichedHistoricalData,
+            topEarningProducts,
         };
 
     } catch (error) {

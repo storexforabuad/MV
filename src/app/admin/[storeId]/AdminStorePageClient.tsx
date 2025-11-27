@@ -92,6 +92,8 @@ async function getReferrals(storeId: string): Promise<Referral[]> {
   }
 }
 
+import { calculateCommissionAndBonus } from '../../../utils/calculations';
+
 export default function AdminStorePageClient({ storeId }: { storeId: string }) {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -114,11 +116,18 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
   const { spotlightStep, setSpotlightStep } = useSpotlightContext();
   const [shouldShowSpotlight, setShouldShowSpotlight] = useState(false);
   const [commissionAnalytics, setCommissionAnalytics] = useState<CommissionAnalyticsData>({ totalCommission: 0, commissionHistory: [] });
-  const [totalReferralBonus, setTotalReferralBonus] = useState(0); // Simple state for bonus for now
+  const [totalReferralBonus, setTotalReferralBonus] = useState(0);
   const [isHomeCardModalOpen, setIsHomeCardModalOpen] = useState(false);
 
   const searchParams = useSearchParams();
   const { orders, refreshOrders } = useStoreOrders(storeId);
+
+  useEffect(() => {
+    if (orders) {
+      const { totalReferralBonus: calculatedBonus } = calculateCommissionAndBonus(orders);
+      setTotalReferralBonus(calculatedBonus);
+    }
+  }, [orders]);
 
   const fetchData = useCallback(async (showRefresh = false) => {
     if (showRefresh) setIsRefreshing(true);

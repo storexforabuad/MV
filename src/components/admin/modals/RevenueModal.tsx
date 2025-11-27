@@ -25,15 +25,16 @@ interface TopProduct {
 
 interface RevenueData {
   lifetimeRevenue: number;
-  historicalData: { date: string; totalRevenue: number }[];
+  lifetimeBonus: number;
+  historicalData: { date: string; totalRevenue: number; totalBonus: number }[];
   topEarningProducts: TopProduct[];
 }
 
 // --- HELPER & CUSTOM COMPONENTS ---
 
 const formatCurrency = (amount: number) => {
-    if (typeof amount !== 'number') return '₦0';
-    return `₦${amount.toLocaleString()}`;
+  if (typeof amount !== 'number') return '₦0';
+  return `₦${amount.toLocaleString()}`;
 };
 
 const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameType> & { payload?: any[], label?: any }) => {
@@ -41,11 +42,27 @@ const CustomTooltip = ({ active, payload, label }: TooltipProps<ValueType, NameT
     const date = new Date(label);
     const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
     const fullDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const revenue = payload.find(p => p.dataKey === 'totalRevenue')?.value || 0;
+    const bonus = payload.find(p => p.dataKey === 'totalBonus')?.value || 0;
+    const total = revenue + bonus;
 
     return (
-      <div className="bg-white dark:bg-slate-900/80 backdrop-blur-sm p-3 rounded-lg border border-slate-200 dark:border-slate-700 shadow-lg">
-        <p className="text-sm font-bold text-slate-800 dark:text-white">{dayName}, {fullDate}</p>
-        <p className="text-lg text-green-600 dark:text-green-400 font-semibold">{formatCurrency(payload[0].value as number)}</p>
+      <div className="bg-white dark:bg-slate-900/80 backdrop-blur-sm p-3 rounded-lg border border-slate-200 dark:border-slate-700 shadow-lg min-w-[150px]">
+        <p className="text-sm font-bold text-slate-800 dark:text-white mb-2">{dayName}, {fullDate}</p>
+        <div className="space-y-1">
+          <div className="flex justify-between text-sm">
+            <span className="text-slate-500 dark:text-slate-400">Sales:</span>
+            <span className="font-semibold text-green-600 dark:text-green-400">{formatCurrency(revenue)}</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-slate-500 dark:text-slate-400">Bonus:</span>
+            <span className="font-semibold text-amber-500 dark:text-amber-400">{formatCurrency(bonus)}</span>
+          </div>
+          <div className="border-t border-slate-200 dark:border-slate-700 pt-1 mt-1 flex justify-between text-sm font-bold">
+            <span className="text-slate-700 dark:text-slate-200">Total:</span>
+            <span className="text-slate-900 dark:text-white">{formatCurrency(total)}</span>
+          </div>
+        </div>
       </div>
     );
   }
@@ -68,7 +85,7 @@ export default function RevenueModal({ isOpen, onClose, storeId }: RevenueModalP
     if (isOpen) {
       document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden';
-      
+
       const fetchData = async () => {
         if (!storeId) {
           setError("Store ID is missing.");
@@ -104,9 +121,16 @@ export default function RevenueModal({ isOpen, onClose, storeId }: RevenueModalP
   const { totalRevenueLast7Days, averageDailyRevenue, bestDay } = useMemo(() => {
     if (!data?.historicalData) return { totalRevenueLast7Days: 0, averageDailyRevenue: 0, bestDay: null };
 
-    const total = data.historicalData.reduce((acc, curr) => acc + curr.totalRevenue, 0);
+    // Calculate totals including bonus
+    const total = data.historicalData.reduce((acc, curr) => acc + curr.totalRevenue + curr.totalBonus, 0);
     const average = total / (data.historicalData.length || 1);
-    const best = data.historicalData.reduce((max, day) => day.totalRevenue > max.totalRevenue ? day : max, data.historicalData[0] || { totalRevenue: 0 });
+
+    // Find best day based on total (revenue + bonus)
+    const best = data.historicalData.reduce((max, day) => {
+      const dayTotal = day.totalRevenue + day.totalBonus;
+      const maxTotal = (max.totalRevenue || 0) + (max.totalBonus || 0);
+      return dayTotal > maxTotal ? day : max;
+    }, data.historicalData[0] || { totalRevenue: 0, totalBonus: 0 });
 
     return { totalRevenueLast7Days: total, averageDailyRevenue: average, bestDay: best };
   }, [data]);
@@ -153,31 +177,40 @@ export default function RevenueModal({ isOpen, onClose, storeId }: RevenueModalP
               <div>
                 {/* === KPIs Start === */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
-                    <div className="bg-green-50 dark:bg-gradient-to-br dark:from-green-600 dark:via-emerald-700 dark:to-teal-900 p-4 sm:p-6 rounded-2xl shadow-md">
-                        <p className="text-sm text-green-800 dark:text-green-200">Revenue (Last 7 Days)</p>
-                        <p className="text-3xl sm:text-4xl font-bold flex items-center text-slate-900 dark:text-white"><Naira/>{totalRevenueLast7Days.toLocaleString()}</p>
+                  <div className="bg-green-50 dark:bg-gradient-to-br dark:from-green-600 dark:via-emerald-700 dark:to-teal-900 p-4 sm:p-6 rounded-2xl shadow-md">
+                    <p className="text-sm text-green-800 dark:text-green-200">Revenue (Last 7 Days)</p>
+                    <p className="text-3xl sm:text-4xl font-bold flex items-center text-slate-900 dark:text-white"><Naira />{totalRevenueLast7Days.toLocaleString()}</p>
+                  </div>
+                  <div className="bg-slate-100 dark:bg-gradient-to-br dark:from-slate-700 dark:via-gray-800 dark:to-zinc-900 p-4 sm:p-6 rounded-2xl shadow-md">
+                    <p className="text-sm text-slate-600 dark:text-slate-300">All-Time Gross Revenue</p>
+                    <div className="flex flex-col">
+                      <p className="text-3xl sm:text-4xl font-bold flex items-center text-slate-900 dark:text-white">
+                        <Naira />{(data.lifetimeRevenue + data.lifetimeBonus).toLocaleString()}
+                      </p>
+                      {data.lifetimeBonus > 0 && (
+                        <p className="text-xs text-amber-600 dark:text-amber-400 font-medium mt-1">
+                          Includes <Naira />{data.lifetimeBonus.toLocaleString()} Bonus
+                        </p>
+                      )}
                     </div>
-                    <div className="bg-slate-100 dark:bg-gradient-to-br dark:from-slate-700 dark:via-gray-800 dark:to-zinc-900 p-4 sm:p-6 rounded-2xl shadow-md">
-                        <p className="text-sm text-slate-600 dark:text-slate-300">All-Time Gross Revenue</p>
-                        <p className="text-3xl sm:text-4xl font-bold flex items-center text-slate-900 dark:text-white"><Naira/>{data.lifetimeRevenue.toLocaleString()}</p>
-                    </div>
+                  </div>
                 </div>
-                
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-                    <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl flex items-center gap-4">
-                        <div className="bg-yellow-100 dark:bg-yellow-900/50 p-3 rounded-full"><Star className="w-6 h-6 text-yellow-500 dark:text-yellow-400"/></div>
-                        <div>
-                            <p className="text-sm text-slate-500 dark:text-slate-400">Best Day (Last 7 Days)</p>
-                            <p className="text-lg font-semibold text-slate-900 dark:text-white">{formatCurrency(bestDay?.totalRevenue || 0)}</p>
-                        </div>
+                  <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl flex items-center gap-4">
+                    <div className="bg-yellow-100 dark:bg-yellow-900/50 p-3 rounded-full"><Star className="w-6 h-6 text-yellow-500 dark:text-yellow-400" /></div>
+                    <div>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Best Day (Last 7 Days)</p>
+                      <p className="text-lg font-semibold text-slate-900 dark:text-white">{formatCurrency((bestDay?.totalRevenue || 0) + (bestDay?.totalBonus || 0))}</p>
                     </div>
-                    <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl flex items-center gap-4">
-                        <div className="bg-blue-100 dark:bg-blue-900/50 p-3 rounded-full"><TrendingUp className="w-6 h-6 text-blue-500 dark:text-blue-400"/></div>
-                        <div>
-                            <p className="text-sm text-slate-500 dark:text-slate-400">Avg. Daily Revenue</p>
-                            <p className="text-lg font-semibold text-slate-900 dark:text-white">{formatCurrency(Math.round(averageDailyRevenue))}</p>
-                        </div>
+                  </div>
+                  <div className="bg-slate-100 dark:bg-slate-800 p-4 rounded-xl flex items-center gap-4">
+                    <div className="bg-blue-100 dark:bg-blue-900/50 p-3 rounded-full"><TrendingUp className="w-6 h-6 text-blue-500 dark:text-blue-400" /></div>
+                    <div>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">Avg. Daily Revenue</p>
+                      <p className="text-lg font-semibold text-slate-900 dark:text-white">{formatCurrency(Math.round(averageDailyRevenue))}</p>
                     </div>
+                  </div>
                 </div>
                 {/* === KPIs End === */}
 
@@ -190,17 +223,22 @@ export default function RevenueModal({ isOpen, onClose, storeId }: RevenueModalP
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={data.historicalData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                         <defs>
-                            <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                                <stop offset="5%" stopColor="#10b981" stopOpacity={0.7}/>
-                                <stop offset="95%" stopColor="#10b981" stopOpacity={0.1}/>
-                            </linearGradient>
+                          <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.7} />
+                            <stop offset="95%" stopColor="#10b981" stopOpacity={0.1} />
+                          </linearGradient>
+                          <linearGradient id="colorBonus" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.7} />
+                            <stop offset="95%" stopColor="#f59e0b" stopOpacity={0.1} />
+                          </linearGradient>
                         </defs>
                         <CartesianGrid strokeDasharray="3 3" stroke="#94a3b8" strokeOpacity={0.3} />
                         <XAxis dataKey="date" tickFormatter={(str) => new Date(str).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} />
                         <YAxis tickFormatter={(val) => `₦${Number(val) / 1000}k`} tick={{ fill: '#64748b' }} axisLine={false} tickLine={false} />
                         <Tooltip content={<CustomTooltip />} cursor={{ fill: 'rgba(100, 116, 139, 0.1)' }} />
-                        <ReferenceLine y={averageDailyRevenue} stroke="#f59e0b" strokeDasharray="4 4" strokeWidth={1.5} />
-                        <Bar dataKey="totalRevenue" fill="url(#colorRevenue)" name="Revenue" radius={[4, 4, 0, 0]} />
+                        <ReferenceLine y={averageDailyRevenue} stroke="#3b82f6" strokeDasharray="4 4" strokeWidth={1.5} />
+                        <Bar dataKey="totalRevenue" stackId="a" fill="url(#colorRevenue)" name="Sales" radius={[0, 0, 4, 4]} />
+                        <Bar dataKey="totalBonus" stackId="a" fill="url(#colorBonus)" name="Bonus" radius={[4, 4, 0, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -209,22 +247,22 @@ export default function RevenueModal({ isOpen, onClose, storeId }: RevenueModalP
 
                 {/* === Top Products Start === */}
                 {data.topEarningProducts && data.topEarningProducts.length > 0 && (
-                    <div className="pb-4">
-                        <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
-                            <Trophy className="w-5 h-5 text-amber-500 dark:text-amber-400" /> Top Earning Products
-                        </h3>
-                        <div className="space-y-3">
-                            {data.topEarningProducts.map((product, index) => (
-                                <div key={product.id} className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3 rounded-lg flex justify-between items-center text-sm">
-                                    <div className="flex items-center gap-4">
-                                        <span className="font-bold text-slate-500 w-4">{index + 1}.</span>
-                                        <p className="text-slate-800 dark:text-slate-100 font-medium truncate">{product.name}</p>
-                                    </div>
-                                    <p className="font-semibold text-green-700 dark:text-green-400 whitespace-nowrap">{formatCurrency(product.totalRevenue)}</p>
-                                </div>
-                            ))}
+                  <div className="pb-4">
+                    <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2">
+                      <Trophy className="w-5 h-5 text-amber-500 dark:text-amber-400" /> Top Earning Products
+                    </h3>
+                    <div className="space-y-3">
+                      {data.topEarningProducts.map((product, index) => (
+                        <div key={product.id} className="bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 p-3 rounded-lg flex justify-between items-center text-sm">
+                          <div className="flex items-center gap-4">
+                            <span className="font-bold text-slate-500 w-4">{index + 1}.</span>
+                            <p className="text-slate-800 dark:text-slate-100 font-medium truncate">{product.name}</p>
+                          </div>
+                          <p className="font-semibold text-green-700 dark:text-green-400 whitespace-nowrap">{formatCurrency(product.totalRevenue)}</p>
                         </div>
+                      ))}
                     </div>
+                  </div>
                 )}
                 {/* === Top Products End === */}
               </div>
@@ -233,13 +271,13 @@ export default function RevenueModal({ isOpen, onClose, storeId }: RevenueModalP
 
           {/* --- Footer --- */}
           <footer className="flex-shrink-0 w-full max-w-5xl mx-auto p-4 sm:p-6 border-t border-slate-200 dark:border-slate-800">
-             <button 
-                type="button" 
-                className="w-full rounded-lg bg-slate-200 dark:bg-slate-700 px-4 py-3 text-base font-semibold text-slate-800 dark:text-white shadow-sm hover:bg-slate-300 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-950"
-                onClick={onClose}
-              >
-                Close
-              </button>
+            <button
+              type="button"
+              className="w-full rounded-lg bg-slate-200 dark:bg-slate-700 px-4 py-3 text-base font-semibold text-slate-800 dark:text-white shadow-sm hover:bg-slate-300 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-950"
+              onClick={onClose}
+            >
+              Close
+            </button>
           </footer>
         </motion.div>
       )}

@@ -6,15 +6,18 @@ export const calculateCommissionAndBonus = (orders: StoreOrder[]) => {
   let totalReferralBonus = 0;
 
   for (const order of orders) {
-    for (const product of order.products) {
-        if (product.commission && typeof product.price === 'number') {
-            const commission = (product.price * product.commission) / 100;
-            totalCommissionEarned += commission;
+    // Only calculate commission and bonus for orders that are ready (in delivery hub)
+    if (order.orderStatus !== 'ready') continue;
 
-            if (order.referralApplied) {
-                totalReferralBonus += commission;
-            }
+    for (const product of order.products) {
+      if (product.commission && typeof product.price === 'number') {
+        const commission = (product.price * product.commission) / 100;
+        totalCommissionEarned += commission;
+
+        if (order.referralApplied) {
+          totalReferralBonus += commission;
         }
+      }
     }
   }
 

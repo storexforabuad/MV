@@ -118,15 +118,6 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     glowClass: 'dark:shadow-violet-500/30 shadow-violet-500/50',
   },
   {
-    label: 'Commission',
-    valueKey: 'totalCommission',
-    icon: Percent,
-    gradient: 'bg-gradient-to-br from-red-500 via-red-600 to-orange-700', // Swapped from Expenses
-    text: 'text-white',
-    component: null,
-    glowClass: 'dark:shadow-red-500/30 shadow-red-500/50', // Swapped from Expenses
-  },
-  {
     label: 'Bonus',
     valueKey: 'totalReferralBonus',
     icon: Gift,
