@@ -473,13 +473,13 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
       {/* === MODAL RENDERERS === */}
 
-      <CustomersListModal storeId={props.storeId} isOpen={isCustomersModalOpen} onClose={() => setIsCustomersModalOpen(false)} />
+      <CustomersListModal storeId={props.storeId} isOpen={isCustomersModalOpen} onClose={() => { setIsCustomersModalOpen(false); if (props.setIsModalOpen) props.setIsModalOpen(false); }} />
 
       {isTipsModalOpen && (<TipsModal {...props as AdminHomeCardsProps & { handleClose: () => void; }} handleClose={handleCloseTipsModal} />)}
 
-      {isViewsModalOpen && (<TotalViewsModal storeId={storeId} isOpen={isViewsModalOpen} onClose={() => setIsViewsModalOpen(false)} />)}
+      {isViewsModalOpen && (<TotalViewsModal storeId={storeId} isOpen={isViewsModalOpen} onClose={() => { setIsViewsModalOpen(false); if (props.setIsModalOpen) props.setIsModalOpen(false); }} />)}
 
-      {isShareModalOpen && (<StoreLinkModal {...props} isOpen={isShareModalOpen} handleClose={() => setIsShareModalOpen(false)} />)}
+      {isShareModalOpen && (<StoreLinkModal {...props} isOpen={isShareModalOpen} handleClose={() => { setIsShareModalOpen(false); if (props.setIsModalOpen) props.setIsModalOpen(false); }} />)}
 
       {isPostsModalOpen && (<PostsComposerModal isOpen={isPostsModalOpen} onClose={handleClosePostsModal} storeId={props.storeId} contacts={props.contacts} products={props.products} storeName={props.storeName} />)}
 
