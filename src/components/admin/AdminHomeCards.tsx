@@ -117,15 +117,7 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     component: PostsComposerModal,
     glowClass: 'dark:shadow-violet-500/30 shadow-violet-500/50',
   },
-  {
-    label: 'Bonus',
-    valueKey: 'totalReferralBonus',
-    icon: Gift,
-    gradient: 'bg-gradient-to-br from-pink-500 via-red-500 to-orange-500',
-    text: 'text-white',
-    component: ReferralBonusModal,
-    glowClass: 'dark:shadow-red-500/30 shadow-red-500/50',
-  },
+
   {
     label: 'Revenue',
     valueKey: 'totalRevenue',
