@@ -115,6 +115,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
   const [shouldShowSpotlight, setShouldShowSpotlight] = useState(false);
   const [commissionAnalytics, setCommissionAnalytics] = useState<CommissionAnalyticsData>({ totalCommission: 0, commissionHistory: [] });
   const [totalReferralBonus, setTotalReferralBonus] = useState(0); // Simple state for bonus for now
+  const [isHomeCardModalOpen, setIsHomeCardModalOpen] = useState(false);
 
   const searchParams = useSearchParams();
   const { orders, refreshOrders } = useStoreOrders(storeId);
@@ -262,7 +263,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
     return <OnboardingFlow onComplete={handleOnboardingComplete} storeName={storeMeta?.name || ''} />;
   }
 
-  const isModalOpen = isComposerOpen || isManageModalOpen || isManageCategoriesModalOpen || isOrdersModalOpen || isPostsModalOpen || isAmbassadorHubModalOpen;
+  const isModalOpen = isComposerOpen || isManageModalOpen || isManageCategoriesModalOpen || isOrdersModalOpen || isPostsModalOpen || isAmbassadorHubModalOpen || isHomeCardModalOpen;
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0 transition-colors">
@@ -307,6 +308,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
                   totalReferralBonus={totalReferralBonus} // Using placeholder state
                   totalExpenses={0} // Placeholder, as in original code
                   deliveries={0} // Placeholder, as in original code
+                  setIsModalOpen={setIsHomeCardModalOpen}
                 />
               </div>
             )}

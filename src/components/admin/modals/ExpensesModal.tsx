@@ -13,8 +13,8 @@ interface ExpensesModalProps {
 }
 
 const formatCurrency = (amount: number) => {
-    if (typeof amount !== 'number') return '₦0.00';
-    return amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  if (typeof amount !== 'number') return '₦0.00';
+  return amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
 export default function ExpensesModal({ isOpen, onClose, totalCommission, totalExpenses }: ExpensesModalProps) {
@@ -32,86 +32,112 @@ export default function ExpensesModal({ isOpen, onClose, totalCommission, totalE
     };
   }, [isOpen, onClose]);
 
-  const modalVariants = { hidden: { opacity: 0, y: '100%' }, visible: { opacity: 1, y: 0 }, exit: { opacity: 0, y: '100%' } };
+  const modalVariants = { hidden: { opacity: 0, scale: 0.95 }, visible: { opacity: 1, scale: 1 }, exit: { opacity: 0, scale: 0.95 } };
+  const backdropVariants = { hidden: { opacity: 0 }, visible: { opacity: 1 }, exit: { opacity: 0 } };
 
   const grandTotal = (totalCommission || 0) + (totalExpenses || 0);
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div
-          className="fixed inset-0 z-50 flex flex-col bg-slate-950 text-white"
-          initial="hidden" animate="visible" exit="exit"
-          variants={modalVariants}
-          transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
-        >
-          {/* --- Header --- */}
-          <header className="flex-shrink-0 flex items-center justify-between w-full max-w-5xl mx-auto p-4 sm:p-6 border-b border-slate-800">
-            <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-3">
-              <TrendingDown size={28} className="text-red-500" /> Expenses Breakdown
-            </h2>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-full text-slate-400 bg-slate-800 hover:bg-slate-700 hover:text-white transition-colors"
-              aria-label="Close modal"
-            >
-              <X size={24} />
-            </button>
-          </header>
+        <div className="fixed inset-0 z-50 flex items-center justify-center sm:p-6">
+          <motion.div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            initial="hidden" animate="visible" exit="exit"
+            variants={backdropVariants}
+            onClick={onClose}
+            aria-hidden="true"
+          />
 
-          {/* --- Main Scrollable Content --- */}
-          <main className="flex-grow w-full max-w-5xl mx-auto overflow-y-auto p-4 sm:p-6">
-            <div className="space-y-4">
+          <motion.div
+            className="relative w-full h-full sm:h-auto sm:max-h-[90vh] sm:max-w-md bg-white dark:bg-slate-900 sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col"
+            initial="hidden" animate="visible" exit="exit"
+            variants={modalVariants}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* --- Header --- */}
+            <header className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 z-10">
+              <h2 className="text-xl font-bold flex items-center gap-2 text-slate-800 dark:text-white">
+                <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-full">
+                  <TrendingDown className="w-5 h-5 text-red-600 dark:text-red-500" />
+                </div>
+                Expenses Breakdown
+              </h2>
+              <button
+                onClick={onClose}
+                className="p-2 rounded-full text-slate-500 hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
+                aria-label="Close modal"
+              >
+                <X size={20} />
+              </button>
+            </header>
+
+            {/* --- Main Scrollable Content --- */}
+            <main className="flex-grow overflow-y-auto p-5 space-y-4 bg-gray-50 dark:bg-slate-950/50">
 
               {/* Bizcon Commission Expense */}
-              <div className="bg-slate-900 p-4 rounded-lg border border-slate-800 flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                  <div className="bg-red-900/50 p-2 rounded-full">
-                    <Percent className="w-5 h-5 text-red-400" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-slate-100">Bizcon™ Network Commission</p>
-                    <p className="text-sm text-slate-400">Platform, maintenance, and network fees</p>
+              <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-slate-700 shadow-sm">
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-red-50 dark:bg-red-900/20 p-2 rounded-lg">
+                      <Percent className="w-5 h-5 text-red-500 dark:text-red-400" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-800 dark:text-slate-100">Bizcon™ Commission</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Platform & network fees</p>
+                    </div>
                   </div>
                 </div>
-                <p className="font-semibold text-lg text-red-400 flex items-center"><Naira />{formatCurrency(totalCommission)}</p>
+                <div className="flex justify-end mt-2">
+                  <p className="font-bold text-lg text-red-600 dark:text-red-400 flex items-center">
+                    <span className="text-sm font-normal text-slate-400 mr-1">-</span>
+                    <Naira />{formatCurrency(totalCommission)}
+                  </p>
+                </div>
               </div>
 
               {/* Other Expenses */}
-              <div className="bg-slate-900 p-4 rounded-lg border border-slate-800 flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                  <div className="bg-red-900/50 p-2 rounded-full">
-                     <TrendingDown className="w-5 h-5 text-red-400" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-slate-100">Other Expenses</p>
-                    <p className="text-sm text-slate-400">Manually tracked operational costs</p>
+              <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-slate-700 shadow-sm">
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className="bg-red-50 dark:bg-red-900/20 p-2 rounded-lg">
+                      <TrendingDown className="w-5 h-5 text-red-500 dark:text-red-400" />
+                    </div>
+                    <div>
+                      <p className="font-semibold text-slate-800 dark:text-slate-100">Other Expenses</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Operational costs</p>
+                    </div>
                   </div>
                 </div>
-                 <p className="font-semibold text-lg text-red-400 flex items-center"><Naira />{formatCurrency(totalExpenses)}</p>
+                <div className="flex justify-end mt-2">
+                  <p className="font-bold text-lg text-red-600 dark:text-red-400 flex items-center">
+                    <span className="text-sm font-normal text-slate-400 mr-1">-</span>
+                    <Naira />{formatCurrency(totalExpenses)}
+                  </p>
+                </div>
               </div>
 
-            </div>
+            </main>
 
-            {/* --- Grand Total --- */}
-            <div className="mt-8 pt-4 border-t border-slate-800 flex justify-between items-center">
-                <p className="text-lg font-bold text-slate-200">Total Expenses</p>
-                <p className="text-2xl font-bold text-red-400 flex items-center"><Naira />{formatCurrency(grandTotal)}</p>
-            </div>
-
-          </main>
-
-          {/* --- Footer --- */}
-          <footer className="flex-shrink-0 w-full max-w-5xl mx-auto p-4 sm:p-6 border-t border-slate-800">
-             <button 
-                type="button" 
-                className="w-full rounded-lg bg-slate-700 px-4 py-3 text-base font-semibold text-white shadow-sm hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-slate-950"
+            {/* --- Footer / Grand Total --- */}
+            <footer className="p-5 border-t border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+              <div className="flex justify-between items-center mb-4">
+                <p className="text-base font-medium text-slate-600 dark:text-slate-400">Total Expenses</p>
+                <p className="text-2xl font-bold text-slate-900 dark:text-white flex items-center">
+                  <Naira />{formatCurrency(grandTotal)}
+                </p>
+              </div>
+              <button
+                type="button"
+                className="w-full rounded-xl bg-slate-900 dark:bg-slate-800 text-white py-3.5 font-semibold shadow-lg hover:bg-slate-800 dark:hover:bg-slate-700 transition-all active:scale-[0.98]"
                 onClick={onClose}
               >
                 Close
               </button>
-          </footer>
-        </motion.div>
+            </footer>
+          </motion.div>
+        </div>
       )}
     </AnimatePresence>
   );
