@@ -83,7 +83,7 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     label: '(Biz+Con)™',
     subtitle: 'Network',
     icon: Globe,
-    gradient: 'bg-gray-500',
+    gradient: 'bg-gray-600',
     text: 'text-white',
     component: null,
     glowClass: 'dark:shadow-slate-600/30 shadow-slate-600/50',
@@ -131,10 +131,10 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     label: 'Expenses',
     valueKey: 'totalExpenses',
     icon: TrendingDown,
-    gradient: 'bg-gradient-to-br from-purple-500 via-violet-700 to-indigo-900', // Swapped from Commission
+    gradient: 'bg-gradient-to-br from-orange-500 via-red-500 to-red-600',
     text: 'text-white',
     component: null,
-    glowClass: 'dark:shadow-violet-500/30 shadow-violet-500/50', // Swapped from Commission
+    glowClass: 'dark:shadow-orange-500/30 shadow-orange-500/50',
   },
   {
     label: 'Ambassador',
@@ -185,10 +185,10 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     label: 'Manage Products',
     valueKey: 'totalProducts',
     icon: Archive,
-    gradient: 'bg-gradient-to-br from-rose-500 to-fuchsia-600',
+    gradient: 'bg-gradient-to-br from-blue-600 to-indigo-800',
     text: 'text-white',
     component: null,
-    glowClass: 'dark:shadow-fuchsia-500/30 shadow-fuchsia-500/50',
+    glowClass: 'dark:shadow-blue-600/30 shadow-blue-600/50',
   },
 ];
 
