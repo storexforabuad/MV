@@ -109,19 +109,11 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     component: StoreLinkModal,
     glowClass: 'dark:shadow-cyan-400/30 shadow-cyan-400/50',
   },
-  {
-    label: 'Content',
-    subtitle: 'Scheduler',
-    icon: Send,
-    gradient: 'bg-gradient-to-br from-pink-500 via-rose-500 to-red-600',
-    text: 'text-white',
-    component: PostsComposerModal,
-    glowClass: 'dark:shadow-pink-500/30 shadow-pink-500/50',
-  },
+
   {
     label: 'Posts',
     subtitle: 'Share Products',
-    icon: Upload,
+    icon: Send,
     gradient: 'bg-gradient-to-br from-purple-500 to-violet-600',
     text: 'text-white',
     component: null,

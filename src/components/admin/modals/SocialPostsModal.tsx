@@ -406,7 +406,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({
                                 />
                             ) : (
                                 <div
-                                    className="w-full bg-gray-50 dark:bg-gray-800/50 border-2 border-transparent rounded-xl px-4 py-3 text-[15px] text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                    className="w-full bg-gray-50 dark:bg-gray-800/50 border-2 border-transparent rounded-xl px-4 py-3 text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap break-words cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                                     onClick={() => setIsEditingCaption(true)}
                                 >
                                     {finalCaption}

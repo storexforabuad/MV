@@ -66,7 +66,7 @@ ${condition === 'brand-new' ? '✨ Brand New!' : '🔥 Great Condition!'}
 
 ${product.description.slice(0, 100)}${product.description.length > 100 ? '...' : ''}
 
-📲 Order now: https://tinyurl.com/bizcononline/${storeId}
+📲 Order now: https://tinyurl.com/bizcononline/${storeId}/products/${product.id}
 
 ${hashtags.join(' ')}`;
         }
@@ -78,7 +78,7 @@ ${product.description.slice(0, 120)}${product.description.length > 120 ? '...' :
 💰 ${price}
 ${product.onPromo ? '🎉 Special Promo!' : ''}
 
-📦 Order now: https://tinyurl.com/bizcononline/${storeId}
+📦 Order now: https://tinyurl.com/bizcononline/${storeId}/products/${product.id}
 
 ${hashtags.join(' ')}`;
     },
@@ -108,7 +108,7 @@ Price: ${price}
 
 ${product.description.slice(0, 150)}${product.description.length > 150 ? '...' : ''}
 
-View details: https://tinyurl.com/bizcononline/${storeId}
+View details: https://tinyurl.com/bizcononline/${storeId}/products/${product.id}
 
 ${hashtags.join(' ')}`;
         }
@@ -120,7 +120,7 @@ ${product.description.slice(0, 180)}${product.description.length > 180 ? '...' :
 Price: ${price}
 ${product.onPromo ? '\n🎯 Limited time offer' : ''}
 
-Shop now: https://tinyurl.com/bizcononline/${storeId}
+Shop now: https://tinyurl.com/bizcononline/${storeId}/products/${product.id}
 
 ${hashtags.join(' ')}`;
     },
@@ -153,7 +153,7 @@ ${product.description.slice(0, 100)}${product.description.length > 100 ? '...' :
 
 ⚡ Grab this deal before it's gone!
 
-📲 Click to order: https://tinyurl.com/bizcononline/${storeId}
+📲 Click to order: https://tinyurl.com/bizcononline/${storeId}/products/${product.id}
 
 ${hashtags.join(' ')}`;
         }
@@ -169,7 +169,7 @@ ${isOnPromo ? '🔥 Save Now!' : ''}
 ${product.description.slice(0, 100)}${product.description.length > 100 ? '...' : ''}
 
 👉 Order now before it's gone!
-🛒 https://tinyurl.com/bizcononline/${storeId}
+🛒 https://tinyurl.com/bizcononline/${storeId}/products/${product.id}
 
 ${hashtags.join(' ')}`;
     },
@@ -192,7 +192,7 @@ const minimalistTemplate: CaptionTemplate = {
 
 ${price}
 
-https://tinyurl.com/bizcononline/${storeId}
+https://tinyurl.com/bizcononline/${storeId}/products/${product.id}
 
 ${hashtags.join(' ')}`;
         }
@@ -203,7 +203,7 @@ ${price}
 
 ${product.description.slice(0, 100)}${product.description.length > 100 ? '...' : ''}
 
-https://tinyurl.com/bizcononline/${storeId}
+https://tinyurl.com/bizcononline/${storeId}/products/${product.id}
 
 ${hashtags.join(' ')}`;
     },
