@@ -40,12 +40,12 @@ export const CustomersListModal: React.FC<CustomersListModalProps> = ({ storeId,
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-      <div className="bg-gray-100 flex flex-col h-full w-full max-w-4xl rounded-lg shadow-xl">
+      <div className="bg-gray-100 flex flex-col h-full w-full max-w-4xl rounded-b-lg rounded-t-none shadow-xl">
         {/* Modal Header */}
-        <header className="flex items-center justify-between p-4 border-b bg-white rounded-t-lg">
+        <header className="flex items-center justify-between p-4 border-b bg-white rounded-t-none">
           <h2 className="text-xl font-semibold text-gray-800">Customers</h2>
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="p-2 rounded-full hover:bg-gray-200 transition-colors"
             aria-label="Close"
           >
@@ -65,15 +65,15 @@ export const CustomersListModal: React.FC<CustomersListModalProps> = ({ storeId,
 
           {!isLoading && error && (
             <div className="flex flex-col items-center justify-center h-full text-center">
-                <p className="text-red-500">{error}</p>
+              <p className="text-red-500">{error}</p>
             </div>
           )}
 
           {!isLoading && !error && customers.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center text-gray-500">
-                <Users className="h-12 w-12 mb-4" />
-                <h3 className="text-lg font-semibold">No Customers Yet</h3>
-                <p>When a customer places their first order, they will appear here.</p>
+              <Users className="h-12 w-12 mb-4" />
+              <h3 className="text-lg font-semibold">No Customers Yet</h3>
+              <p>When a customer places their first order, they will appear here.</p>
             </div>
           )}
 

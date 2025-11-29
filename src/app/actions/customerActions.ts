@@ -6,13 +6,13 @@ import { StoreOrder } from "./orderActions";
 
 // Helper to serialize Firestore Timestamps
 const serializeTimestamp = (timestamp: unknown): string => {
-    if (timestamp instanceof Timestamp) {
-        return timestamp.toDate().toISOString();
-    } 
-    if (timestamp instanceof Date) {
-        return timestamp.toISOString();
-    }
-    return new Date().toISOString(); 
+  if (timestamp instanceof Timestamp) {
+    return timestamp.toDate().toISOString();
+  }
+  if (timestamp instanceof Date) {
+    return timestamp.toISOString();
+  }
+  return new Date().toISOString();
 };
 
 export const getCustomerDetails = async (customerId: string): Promise<Customer | null> => {
@@ -23,9 +23,9 @@ export const getCustomerDetails = async (customerId: string): Promise<Customer |
     if (customerSnap.exists()) {
       const data = customerSnap.data();
       return {
-          id: customerSnap.id,
-          ...data,
-          createdAt: serializeTimestamp(data.createdAt),
+        id: customerSnap.id,
+        ...data,
+        createdAt: serializeTimestamp(data.createdAt),
       } as unknown as Customer;
     } else {
       console.log("No such customer!");
@@ -69,9 +69,9 @@ export const findCustomerByPhone = async (phoneNumber: string): Promise<Customer
       const doc = querySnapshot.docs[0];
       const data = doc.data();
       return {
-          id: doc.id,
-          ...data,
-          createdAt: serializeTimestamp(data.createdAt),
+        id: doc.id,
+        ...data,
+        createdAt: serializeTimestamp(data.createdAt),
       } as unknown as Customer;
     }
     return null;
@@ -152,24 +152,24 @@ export interface StoreCustomer {
  * Lightweight action for dashboard cards.
  */
 export const getStoreCustomerCount = async (storeId: string): Promise<number> => {
-    try {
-        const ordersRef = collection(db, 'stores', storeId, 'orders');
-        const q = query(ordersRef);
-        const querySnapshot = await getDocs(q);
+  try {
+    const ordersRef = collection(db, 'stores', storeId, 'orders');
+    const q = query(ordersRef);
+    const querySnapshot = await getDocs(q);
 
-        const customerIds = new Set<string>();
-        querySnapshot.forEach(doc => {
-            const data = doc.data() as StoreOrder;
-            if (data.customerInfo && data.customerInfo.id) {
-                customerIds.add(data.customerInfo.id);
-            }
-        });
+    const customerIds = new Set<string>();
+    querySnapshot.forEach(doc => {
+      const data = doc.data() as StoreOrder;
+      if (data.customerInfo && data.customerInfo.id) {
+        customerIds.add(data.customerInfo.id);
+      }
+    });
 
-        return customerIds.size;
-    } catch (error) {
-        console.error("Error in getStoreCustomerCount:", error);
-        throw new Error("Failed to get customer count.");
-    }
+    return customerIds.size;
+  } catch (error) {
+    console.error("Error in getStoreCustomerCount:", error);
+    throw new Error("Failed to get customer count.");
+  }
 };
 
 /**
@@ -177,66 +177,67 @@ export const getStoreCustomerCount = async (storeId: string): Promise<number> =>
  * Gathers and aggregates data from store orders and global customer documents.
  */
 export const fetchStoreCustomers = async (storeId: string): Promise<StoreCustomer[]> => {
-    try {
-        const ordersRef = collection(db, 'stores', storeId, 'orders');
-        const ordersQuery = query(ordersRef, orderBy('orderDate', 'desc'));
-        const ordersSnapshot = await getDocs(ordersQuery);
-        const orders = ordersSnapshot.docs.map(doc => doc.data() as StoreOrder);
+  try {
+    const ordersRef = collection(db, 'stores', storeId, 'orders');
+    const ordersQuery = query(ordersRef, orderBy('orderDate', 'desc'));
+    const ordersSnapshot = await getDocs(ordersQuery);
+    const orders = ordersSnapshot.docs.map(doc => doc.data() as StoreOrder);
 
-        if (orders.length === 0) {
-            return [];
-        }
-
-        const customerDataMap = new Map<string, StoreCustomer>();
-        const orderedUniqueCustomerIds: string[] = [];
-
-        for (const order of orders) {
-            if (!order.customerInfo || !order.customerInfo.id) continue;
-
-            const customerId = order.customerInfo.id;
-            
-            if (!customerDataMap.has(customerId)) {
-                orderedUniqueCustomerIds.push(customerId);
-                customerDataMap.set(customerId, {
-                    id: customerId,
-                    name: order.customerInfo.name,
-                    phoneNumber: order.customerInfo.phoneNumber,
-                    deliveryAddress: order.customerInfo.deliveryAddress,
-                    mostRecentOrderDate: serializeTimestamp(order.orderDate),
-                    totalOrdersInStore: 0,
-                    totalSpentInStore: 0,
-                    successfulReferralCount: 0,
-                    totalReferralCommission: 0,
-                });
-            }
-
-            const customerRecord = customerDataMap.get(customerId)!;
-            customerRecord.totalOrdersInStore += 1;
-            const orderTotal = order.products.reduce((sum, product) => sum + product.price * product.quantity, 0);
-            customerRecord.totalSpentInStore += orderTotal;
-        }
-
-        if (orderedUniqueCustomerIds.length > 0) {
-            const globalCustomersQuery = query(collection(db, 'customers'), where('__name__', 'in', orderedUniqueCustomerIds));
-            const globalCustomersSnapshot = await getDocs(globalCustomersQuery);
-            const globalCustomersMap = new Map<string, Customer>();
-            globalCustomersSnapshot.forEach(doc => {
-                globalCustomersMap.set(doc.id, doc.data() as Customer);
-            });
-
-            customerDataMap.forEach((customerRecord, customerId) => {
-                const globalData = globalCustomersMap.get(customerId);
-                if (globalData) {
-                    customerRecord.successfulReferralCount = globalData.successfulReferralCount || 0;
-                    customerRecord.totalReferralCommission = globalData.totalReferralCommission || 0;
-                }
-            });
-        }
-
-        return orderedUniqueCustomerIds.map(id => customerDataMap.get(id)!);
-
-    } catch (error) {
-        console.error("Error in fetchStoreCustomers:", error);
-        throw new Error("Failed to fetch store customers.");
+    if (orders.length === 0) {
+      return [];
     }
+
+    const customerDataMap = new Map<string, StoreCustomer>();
+    const orderedUniqueCustomerIds: string[] = [];
+
+    for (const order of orders) {
+      if (!order.customerInfo || !order.customerInfo.id) continue;
+
+      const customerId = order.customerInfo.id;
+
+      if (!customerDataMap.has(customerId)) {
+        orderedUniqueCustomerIds.push(customerId);
+        customerDataMap.set(customerId, {
+          id: customerId,
+          name: order.customerInfo.name,
+          phoneNumber: order.customerInfo.phoneNumber,
+          deliveryAddress: order.customerInfo.deliveryAddress,
+          mostRecentOrderDate: serializeTimestamp(order.orderDate),
+          totalOrdersInStore: 0,
+          totalSpentInStore: 0,
+          successfulReferralCount: 0,
+          totalReferralCommission: 0,
+        });
+      }
+
+      const customerRecord = customerDataMap.get(customerId)!;
+      customerRecord.totalOrdersInStore += 1;
+      const products = order.products || [];
+      const orderTotal = products.reduce((sum, product) => sum + (product.price || 0) * (product.quantity || 1), 0);
+      customerRecord.totalSpentInStore += orderTotal;
+    }
+
+    if (orderedUniqueCustomerIds.length > 0) {
+      const globalCustomersQuery = query(collection(db, 'customers'), where('__name__', 'in', orderedUniqueCustomerIds));
+      const globalCustomersSnapshot = await getDocs(globalCustomersQuery);
+      const globalCustomersMap = new Map<string, Customer>();
+      globalCustomersSnapshot.forEach(doc => {
+        globalCustomersMap.set(doc.id, doc.data() as Customer);
+      });
+
+      customerDataMap.forEach((customerRecord, customerId) => {
+        const globalData = globalCustomersMap.get(customerId);
+        if (globalData) {
+          customerRecord.successfulReferralCount = globalData.successfulReferralCount || 0;
+          customerRecord.totalReferralCommission = globalData.totalReferralCommission || 0;
+        }
+      });
+    }
+
+    return orderedUniqueCustomerIds.map(id => customerDataMap.get(id)!);
+
+  } catch (error) {
+    console.error("Error in fetchStoreCustomers:", error);
+    throw new Error("Failed to fetch store customers.");
+  }
 };

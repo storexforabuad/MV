@@ -83,7 +83,7 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     label: '(Biz+Con)™',
     subtitle: 'Network',
     icon: Globe,
-    gradient: 'bg-gray-600',
+    gradient: 'bg-gray-700',
     text: 'text-white',
     component: null,
     glowClass: 'dark:shadow-slate-600/30 shadow-slate-600/50',
@@ -140,46 +140,46 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     label: 'Ambassador',
     valueKey: 'referrals',
     icon: Star,
-    gradient: 'bg-gradient-to-br from-orange-400 via-red-400 to-pink-500',
-    text: 'text-white',
-    component: null,
-    glowClass: 'dark:shadow-red-400/30 shadow-red-400/50',
-  },
-  {
-    label: 'Views',
-    valueKey: 'totalViews',
-    icon: Eye,
-    gradient: 'bg-gradient-to-br from-indigo-500 via-blue-600 to-purple-700',
-    text: 'text-white',
-    component: TotalViewsModal,
-    glowClass: 'dark:shadow-blue-500/30 shadow-blue-500/50',
-  },
-  {
-    label: 'Orders',
-    valueKey: 'totalOrders',
-    icon: ShoppingCart,
     gradient: 'bg-gradient-to-br from-sky-600 via-blue-700 to-indigo-800',
     text: 'text-white',
     component: null,
     glowClass: 'dark:shadow-blue-600/30 shadow-blue-600/50',
   },
   {
+    label: 'Views',
+    valueKey: 'totalViews',
+    icon: Eye,
+    gradient: 'bg-gradient-to-br from-sky-400 to-blue-500',
+    text: 'text-white',
+    component: TotalViewsModal,
+    glowClass: 'dark:shadow-sky-500/30 shadow-sky-500/50',
+  },
+  {
+    label: 'Orders',
+    valueKey: 'totalOrders',
+    icon: ShoppingCart,
+    gradient: 'bg-gradient-to-br from-orange-400 via-orange-500 to-amber-600',
+    text: 'text-white',
+    component: null,
+    glowClass: 'dark:shadow-orange-500/30 shadow-orange-500/50',
+  },
+  {
     label: 'Deliveries',
     valueKey: 'deliveries',
     icon: Truck,
-    gradient: 'bg-gradient-to-br from-sky-400 to-blue-500',
+    gradient: 'bg-gradient-to-br from-lime-500 via-green-600 to-emerald-700',
     text: 'text-white',
     component: null,
-    glowClass: 'dark:shadow-sky-500/30 shadow-sky-500/50',
+    glowClass: 'dark:shadow-green-500/30 shadow-green-500/50',
   },
   {
     label: 'Manage Categories',
     valueKey: 'totalCategories',
     icon: Tag,
-    gradient: 'bg-gradient-to-br from-lime-500 via-green-600 to-emerald-700',
+    gradient: 'bg-gradient-to-br from-rose-500 via-orange-500 to-amber-500',
     text: 'text-white',
     component: null,
-    glowClass: 'dark:shadow-green-500/30 shadow-green-500/50',
+    glowClass: 'dark:shadow-orange-500/30 shadow-orange-500/50',
   },
   {
     label: 'Manage Products',
@@ -411,7 +411,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           if (card.label === 'Customers' && card.component === AdminCustomersCard) {
             return (
               <motion.div key="customers-card" variants={itemVariants}>
-                <AdminCustomersCard storeId={props.storeId} onClick={() => setIsCustomersModalOpen(true)} gradient={customersCard.gradient} glowClass={customersCard.glowClass} />
+                <AdminCustomersCard storeId={props.storeId} onClick={() => { setIsCustomersModalOpen(true); if (props.setIsModalOpen) props.setIsModalOpen(true); }} gradient={customersCard.gradient} glowClass={customersCard.glowClass} />
               </motion.div>
             );
           }

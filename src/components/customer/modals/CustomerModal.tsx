@@ -23,7 +23,7 @@ export function CustomerModal({ isOpen, onClose, title, children }: CustomerModa
           onClick={onClose}
         >
           <motion.div
-            className="relative w-full sm:max-w-lg mx-auto bg-slate-50 dark:bg-slate-900 rounded-3xl shadow-2xl flex flex-col max-h-[90vh]"
+            className="relative w-full sm:max-w-lg mx-auto bg-slate-50 dark:bg-slate-900 rounded-b-3xl rounded-t-none shadow-2xl flex flex-col max-h-[90vh]"
             initial={{ y: '100vh', opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100vh', opacity: 0 }}
