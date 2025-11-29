@@ -318,7 +318,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     else if (cardLabel === 'Expenses') setIsExpensesModalOpen(true);
     else setOpenModal(idx);
 
-    if (props.setIsModalOpen && cardLabel !== 'Orders' && cardLabel !== 'Manage Products') props.setIsModalOpen(true);
+    if (props.setIsModalOpen && cardLabel !== 'Orders' && cardLabel !== 'Manage Products' && cardLabel !== 'Ambassador' && cardLabel !== 'Manage Categories') props.setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {

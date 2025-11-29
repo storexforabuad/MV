@@ -139,9 +139,8 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({
                     <Image
                         src={product.images[0] || 'https://placehold.co/400'}
                         alt={product.name}
-                        layout="fill"
-                        objectFit="cover"
-                        className="absolute inset-0"
+                        fill
+                        className="absolute inset-0 object-cover"
                         sizes="(max-width: 640px) 50vw, 33vw"
                     />
 
@@ -274,8 +273,8 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({
                             <Image
                                 src={selectedProduct.images[0] || 'https://placehold.co/400'}
                                 alt={selectedProduct.name}
-                                layout="fill"
-                                objectFit="cover"
+                                fill
+                                className="object-cover"
                                 sizes="80px"
                             />
                         </div>
