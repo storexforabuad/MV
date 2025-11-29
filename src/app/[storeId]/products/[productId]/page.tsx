@@ -147,7 +147,7 @@ export default function ProductDetail() {
       const productInCart = state.items.find(item =>
         item.id === product.id &&
         // If product has size options, match size. Otherwise, ignore size.
-        (product.sizeOption ? item.selectedSize === selectedSize : true)
+        ('sizeOption' in product && product.sizeOption ? item.selectedSize === selectedSize : true)
       );
       setIsInCart(!!productInCart);
     }
@@ -155,7 +155,7 @@ export default function ProductDetail() {
 
   // Load size preference on mount
   useEffect(() => {
-    if (product?.sizeOption) {
+    if (product && 'sizeOption' in product && product.sizeOption) {
       const cachedSize = SizePreferencesCache.get(product.id);
       if (cachedSize && product.availableSizes?.includes(cachedSize)) {
         setSelectedSize(cachedSize);
@@ -354,7 +354,7 @@ export default function ProductDetail() {
                 )}
               </div>
               <div className="hidden px-4 py-1 rounded-full border border-gray-300 dark:border-gray-700 shadow-sm flex items-center">
-                <AnimatedViewCount productId={product.id} storeId={storeId!} initialViews={product.views || 0} />
+                <AnimatedViewCount value={product.views || 0} />
               </div>
             </div>
 

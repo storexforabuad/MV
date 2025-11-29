@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { StoreOrder, getReadyForDeliveryOrders } from '@/app/actions/orderActions';
 import Image from 'next/image';
+import { isGeneralProduct } from '@/utils/productHelpers';
 import { formatPrice } from '@/utils/price';
 
 interface DeliveriesHubModalProps {
@@ -44,22 +45,25 @@ const DeliveryOrderCard = ({ order }: { order: StoreOrder }) => {
             </div>
 
             <div className="divide-y divide-slate-200 dark:divide-slate-700/50 px-4">
-                {products.filter(p => p.status === 'ready').map(product => (
-                    <div key={product.id} className="flex items-center gap-4 py-3">
-                        <div className="aspect-square w-12 h-12 relative rounded-md overflow-hidden bg-slate-100 dark:bg-slate-700">
-                            <Image src={product.images[0]} alt={product.name} layout="fill" objectFit="cover" />
+                {products.filter(p => isGeneralProduct(p) && p.status === 'ready').map(p => {
+                    const product = p as import('@/types/product').GeneralProduct;
+                    return (
+                        <div key={product.id} className="flex items-center gap-4 py-3">
+                            <div className="aspect-square w-12 h-12 relative rounded-md overflow-hidden bg-slate-100 dark:bg-slate-700">
+                                <Image src={product.images[0]} alt={product.name} layout="fill" objectFit="cover" />
+                            </div>
+                            <div>
+                                <p className="font-semibold text-sm text-slate-800 dark:text-slate-100">{product.name}</p>
+                                {product.selectedSize && (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 mt-0.5 mb-0.5">
+                                        Size: {product.selectedSize}
+                                    </span>
+                                )}
+                                <p className="text-xs text-slate-500 dark:text-slate-400">Qty: {product.quantity}</p>
+                            </div>
                         </div>
-                        <div>
-                            <p className="font-semibold text-sm text-slate-800 dark:text-slate-100">{product.name}</p>
-                            {product.selectedSize && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 mt-0.5 mb-0.5">
-                                    Size: {product.selectedSize}
-                                </span>
-                            )}
-                            <p className="text-xs text-slate-500 dark:text-slate-400">Qty: {product.quantity}</p>
-                        </div>
-                    </div>
-                ))}
+                    );
+                })}
             </div>
 
             <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-700">

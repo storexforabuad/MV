@@ -127,8 +127,8 @@ const FilterChip = ({ label, value, activeFilter, onClick, count }: { label: str
     <button
       onClick={() => onClick(value)}
       className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-full transition-colors whitespace-nowrap ${isActive
-          ? 'bg-gray-900 text-white'
-          : 'bg-input-background text-text-primary hover:bg-button-secondary-hover'
+        ? 'bg-gray-900 text-white'
+        : 'bg-input-background text-text-primary hover:bg-button-secondary-hover'
         }`}
     >
       {label}
@@ -188,7 +188,7 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
   const handleProductSave = async (updatedFields: Partial<Product>) => {
     if (editingProduct) {
       await onUpdateProduct(editingProduct.id, updatedFields);
-      const updatedProduct = { ...editingProduct, ...updatedFields };
+      const updatedProduct = { ...editingProduct, ...updatedFields } as Product;
       setProducts(prevProducts => prevProducts.map(p => p.id === updatedProduct.id ? updatedProduct : p));
     }
   }
@@ -264,8 +264,8 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
                             setSelectedProducts([]);
                           }}
                           className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${isSelectMode
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-input-background text-text-primary hover:bg-button-secondary-hover'
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-input-background text-text-primary hover:bg-button-secondary-hover'
                             }`}>
                           {isSelectMode ? 'Cancel' : 'Mark'}
                         </button>

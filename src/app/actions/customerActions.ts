@@ -213,7 +213,10 @@ export const fetchStoreCustomers = async (storeId: string): Promise<StoreCustome
       const customerRecord = customerDataMap.get(customerId)!;
       customerRecord.totalOrdersInStore += 1;
       const products = order.products || [];
-      const orderTotal = products.reduce((sum, product) => sum + (product.price || 0) * (product.quantity || 1), 0);
+      const orderTotal = products.reduce((sum, product) => {
+        const quantity = 'quantity' in product ? product.quantity : 1;
+        return sum + (product.price || 0) * (quantity || 1);
+      }, 0);
       customerRecord.totalSpentInStore += orderTotal;
     }
 

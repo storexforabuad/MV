@@ -20,23 +20,26 @@ interface EditProductPanelProps {
 
 // Defines the shape of the form's state, which is clearer than the DB schema
 interface ProductFormState extends Omit<Product, 'price' | 'originalPrice'> {
-    basePrice: number | null;
-    promoPrice: number | null;
+  basePrice: number | null;
+  promoPrice: number | null;
+  // General product specific fields (optional for vehicle products)
+  limitedStock?: boolean;
+  soldOut?: boolean;
 }
 
 // A simple styled input
 const StyledInput: React.FC<{ id: string, label: string, value: string | number, onChange: (e: ChangeEvent<HTMLInputElement>) => void, type?: string, placeholder?: string }> = ({ id, label, value, onChange, type = 'text', placeholder = '' }) => (
-    <div>
-        <label htmlFor={id} className="block text-sm font-medium text-text-secondary">{label}</label>
-        <input
-            type={type}
-            id={id}
-            value={value}
-            onChange={onChange}
-            placeholder={placeholder}
-            className="mt-1 block w-full bg-input-background p-3 rounded-lg border-none text-text-primary placeholder:text-text-secondary focus:ring-2 focus:ring-blue-500"
-        />
-    </div>
+  <div>
+    <label htmlFor={id} className="block text-sm font-medium text-text-secondary">{label}</label>
+    <input
+      type={type}
+      id={id}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      className="mt-1 block w-full bg-input-background p-3 rounded-lg border-none text-text-primary placeholder:text-text-secondary focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
 );
 
 const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, onClose, onSave, categories }) => {
@@ -46,29 +49,29 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
 
   useEffect(() => {
     if (isOpen && product) {
-        const isPromo = product.onPromo;
-        const dbPrice = product.price;
-        const dbOriginalPrice = product.originalPrice;
+      const isPromo = product.onPromo;
+      const dbPrice = product.price;
+      const dbOriginalPrice = product.originalPrice;
 
-        let basePrice, promoPrice;
+      let basePrice, promoPrice;
 
-        if (isPromo) {
-            basePrice = dbOriginalPrice;
-            promoPrice = dbPrice;
-        } else {
-            basePrice = dbPrice;
-            promoPrice = null; // Use null for empty promo price
-        }
+      if (isPromo) {
+        basePrice = dbOriginalPrice;
+        promoPrice = dbPrice;
+      } else {
+        basePrice = dbPrice;
+        promoPrice = null; // Use null for empty promo price
+      }
 
-        setFormState({ 
-            ...product,
-            basePrice: basePrice,
-            promoPrice: promoPrice,
-        });
+      setFormState({
+        ...product,
+        basePrice: basePrice,
+        promoPrice: promoPrice,
+      });
     } else {
-        setTimeout(() => {
-            setFormState({});
-        }, 300);
+      setTimeout(() => {
+        setFormState({});
+      }, 300);
     }
   }, [isOpen, product]);
 
@@ -111,18 +114,18 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
       payload.price = basePrice;
       payload.originalPrice = undefined; // Explicitly remove originalPrice if not on promo.
     }
-    
+
     setIsSaving(true);
     try {
-        await onSave(payload);
-        ProductDetailCache.clear();
-        ProductCache.clear();
-        onClose();
+      await onSave(payload);
+      ProductDetailCache.clear();
+      ProductCache.clear();
+      onClose();
     } catch (error) {
-        console.error("Failed to save product changes:", error);
-        // Optionally, inform the user about the failure
+      console.error("Failed to save product changes:", error);
+      // Optionally, inform the user about the failure
     } finally {
-        setIsSaving(false);
+      setIsSaving(false);
     }
   };
 
@@ -133,158 +136,158 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
   }, [formState]);
 
   const currentCategoryName = useMemo(() => {
-      const categoryId = formState?.categoryId;
-      if (!categoryId) return 'Uncategorized';
-      return categories.find(c => c.id === categoryId)?.name || 'Uncategorized';
+    const categoryId = formState?.categoryId;
+    if (!categoryId) return 'Uncategorized';
+    return categories.find(c => c.id === categoryId)?.name || 'Uncategorized';
   }, [formState, categories]);
 
   if (!formState || !product) return null;
 
   return (
     <>
-    <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
-        <Transition.Child as={Fragment} enter="ease-in-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in-out duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-          <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" />
-        </Transition.Child>
+      <Transition.Root show={isOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={onClose}>
+          <Transition.Child as={Fragment} enter="ease-in-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in-out duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
+            <div className="fixed inset-0 bg-black bg-opacity-50 transition-opacity" />
+          </Transition.Child>
 
-        <div className="fixed inset-0 overflow-hidden">
-          <div className="absolute inset-0 overflow-hidden">
-            <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
-              <Transition.Child as={Fragment} enter="transform transition ease-in-out duration-300" enterFrom="translate-x-full" enterTo="translate-x-0" leave="transform transition ease-in-out duration-200" leaveFrom="translate-x-0" leaveTo="translate-x-full">
-                <Dialog.Panel className="pointer-events-auto w-screen max-w-md">
-                  <div className="flex h-full flex-col overflow-y-scroll bg-background shadow-xl">
+          <div className="fixed inset-0 overflow-hidden">
+            <div className="absolute inset-0 overflow-hidden">
+              <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
+                <Transition.Child as={Fragment} enter="transform transition ease-in-out duration-300" enterFrom="translate-x-full" enterTo="translate-x-0" leave="transform transition ease-in-out duration-200" leaveFrom="translate-x-0" leaveTo="translate-x-full">
+                  <Dialog.Panel className="pointer-events-auto w-screen max-w-md">
+                    <div className="flex h-full flex-col overflow-y-scroll bg-background shadow-xl">
 
-                    <div className="p-4 bg-background sticky top-0 z-10 border-b border-border-color">
-                      <div className="flex items-center justify-between">
-                        <Dialog.Title className="text-lg font-bold text-text-primary">Edit Product</Dialog.Title>
-                        <button type="button" className="rounded-full p-1 text-text-secondary hover:bg-button-secondary-hover" onClick={onClose}><span className="sr-only">Close panel</span><XMarkIcon className="h-6 w-6" aria-hidden="true" /></button>
+                      <div className="p-4 bg-background sticky top-0 z-10 border-b border-border-color">
+                        <div className="flex items-center justify-between">
+                          <Dialog.Title className="text-lg font-bold text-text-primary">Edit Product</Dialog.Title>
+                          <button type="button" className="rounded-full p-1 text-text-secondary hover:bg-button-secondary-hover" onClick={onClose}><span className="sr-only">Close panel</span><XMarkIcon className="h-6 w-6" aria-hidden="true" /></button>
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="relative flex-1 p-4 space-y-6">
+                      <div className="relative flex-1 p-4 space-y-6">
 
                         <StyledInput
-                            id="product-name"
-                            label="Product Name"
-                            value={formState.name ?? ''}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) => handleInputChange('name', e.target.value)}
+                          id="product-name"
+                          label="Product Name"
+                          value={formState.name ?? ''}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => handleInputChange('name', e.target.value)}
                         />
 
-                         <div>
-                            <h3 className="block text-sm font-medium text-text-secondary">Category</h3>
-                            <button onClick={() => setCategorySelectorOpen(true)} className="mt-1 flex justify-between items-center w-full bg-input-background p-3 rounded-lg text-left">
-                                <span className="text-text-primary">{currentCategoryName}</span>
-                                <ChevronRightIcon className="h-5 w-5 text-text-secondary" />
-                            </button>
+                        <div>
+                          <h3 className="block text-sm font-medium text-text-secondary">Category</h3>
+                          <button onClick={() => setCategorySelectorOpen(true)} className="mt-1 flex justify-between items-center w-full bg-input-background p-3 rounded-lg text-left">
+                            <span className="text-text-primary">{currentCategoryName}</span>
+                            <ChevronRightIcon className="h-5 w-5 text-text-secondary" />
+                          </button>
                         </div>
-                        
+
                         <StyledInput
-                            id="price"
-                            label="Price"
-                            value={formState.basePrice ?? ''}
-                            onChange={(e: ChangeEvent<HTMLInputElement>) => handlePriceChange('basePrice', e.target.value)}
-                            type="number"
+                          id="price"
+                          label="Price"
+                          value={formState.basePrice ?? ''}
+                          onChange={(e: ChangeEvent<HTMLInputElement>) => handlePriceChange('basePrice', e.target.value)}
+                          type="number"
                         />
 
                         <div className="space-y-3">
-                           <ModernSwitch
-                                label="Promo"
-                                checked={formState.onPromo || false}
-                                onChange={(checked) => handleInputChange('onPromo', checked)}
-                            />
+                          <ModernSwitch
+                            label="Promo"
+                            checked={formState.onPromo || false}
+                            onChange={(checked) => handleInputChange('onPromo', checked)}
+                          />
 
-                            <AnimatePresence>
-                                {formState.onPromo && (
-                                    <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}>
-                                        <StyledInput
-                                            id="promo-price"
-                                            label="Promo Price"
-                                            value={formState.promoPrice ?? ''}
-                                            onChange={(e) => handlePriceChange('promoPrice', e.target.value)}
-                                            type="number"
-                                        />
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+                          <AnimatePresence>
+                            {formState.onPromo && (
+                              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}>
+                                <StyledInput
+                                  id="promo-price"
+                                  label="Promo Price"
+                                  value={formState.promoPrice ?? ''}
+                                  onChange={(e) => handlePriceChange('promoPrice', e.target.value)}
+                                  type="number"
+                                />
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-text-secondary">Commission</label>
-                            <div className="mt-2 bg-input-background p-4 rounded-lg">
+                          <label className="block text-sm font-medium text-text-secondary">Commission</label>
+                          <div className="mt-2 bg-input-background p-4 rounded-lg">
                             <div className="flex justify-center items-center text-sm font-medium text-text-primary mb-2">
-                                    <span>{formState.commission || 0}%</span>
-                                    <span className="text-text-secondary mx-2">-</span>
-                                    <span className="font-bold">{formatPrice(commissionAmount)}</span>
-                                 </div>
-                                <input type="range" min="2" max="12" value={formState.commission || 0} onChange={e => handleInputChange('commission', parseInt(e.target.value))} className="w-full h-2.5 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-lg appearance-none cursor-pointer glass-slider"/>
-                                
+                              <span>{formState.commission || 0}%</span>
+                              <span className="text-text-secondary mx-2">-</span>
+                              <span className="font-bold">{formatPrice(commissionAmount)}</span>
                             </div>
+                            <input type="range" min="2" max="12" value={formState.commission || 0} onChange={e => handleInputChange('commission', parseInt(e.target.value))} className="w-full h-2.5 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-lg appearance-none cursor-pointer glass-slider" />
+
+                          </div>
                         </div>
 
                         <div className="space-y-1">
-                            <h3 className="text-sm font-medium text-text-secondary mb-2">Inventory</h3>
-                            <ModernSwitch
-                                label="Limited Stock"
-                                description="Mark item as having limited availability."
-                                checked={formState.limitedStock || false}
-                                onChange={(checked) => handleInputChange('limitedStock', checked)}
-                            />
-                             <ModernSwitch
-                                label="Sold Out"
-                                description="Mark item as completely unavailable."
-                                checked={formState.soldOut || false}
-                                onChange={(checked) => handleInputChange('soldOut', checked)}
-                            />
+                          <h3 className="text-sm font-medium text-text-secondary mb-2">Inventory</h3>
+                          <ModernSwitch
+                            label="Limited Stock"
+                            description="Mark item as having limited availability."
+                            checked={formState.limitedStock || false}
+                            onChange={(checked) => handleInputChange('limitedStock', checked)}
+                          />
+                          <ModernSwitch
+                            label="Sold Out"
+                            description="Mark item as completely unavailable."
+                            checked={formState.soldOut || false}
+                            onChange={(checked) => handleInputChange('soldOut', checked)}
+                          />
                         </div>
 
-                    </div>
+                      </div>
 
-                    <div className="flex-shrink-0 border-t border-border-color px-4 py-3 bg-background sticky bottom-0">
-                      <div className="flex gap-3">
-                        <button
+                      <div className="flex-shrink-0 border-t border-border-color px-4 py-3 bg-background sticky bottom-0">
+                        <div className="flex gap-3">
+                          <button
                             type="button"
                             className="flex-1 inline-flex justify-center rounded-lg bg-input-background py-2 px-4 text-sm font-semibold text-text-primary shadow-sm hover:bg-button-secondary-hover"
                             onClick={onClose}
-                        >
+                          >
                             Cancel
-                        </button>
-                        <button
+                          </button>
+                          <button
                             type="button"
                             className="flex-1 inline-flex justify-center items-center rounded-lg border border-transparent bg-gray-900 py-2 px-4 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 disabled:bg-gray-600 disabled:cursor-not-allowed"
                             onClick={handleSave}
                             disabled={isSaving}
-                        >
+                          >
                             {isSaving ? (
-                                <>
-                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-3"></div>
-                                    <span>Saving...</span>
-                                </>
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-3"></div>
+                                <span>Saving...</span>
+                              </>
                             ) : (
-                                'Save Changes'
+                              'Save Changes'
                             )}
-                        </button>
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </Dialog.Panel>
-              </Transition.Child>
+                  </Dialog.Panel>
+                </Transition.Child>
+              </div>
             </div>
           </div>
-        </div>
-      </Dialog>
-    </Transition.Root>
+        </Dialog>
+      </Transition.Root>
 
-    <CategorySelectorModal
+      <CategorySelectorModal
         isOpen={isCategorySelectorOpen}
         onClose={() => setCategorySelectorOpen(false)}
         categories={categories}
         selectedCategoryId={formState.categoryId}
         onSelect={(categoryId: string) => {
-            handleInputChange('categoryId', categoryId);
-            setCategorySelectorOpen(false);
+          handleInputChange('categoryId', categoryId);
+          setCategorySelectorOpen(false);
         }}
-    />
+      />
     </>
   );
 };

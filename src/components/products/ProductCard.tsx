@@ -43,6 +43,8 @@ export default function ProductCard({ product, storeId, activeCategoryId }: Prod
 
 
   const discount = calculateDiscount(product.price, product.originalPrice);
+  const isSoldOut = product.productType === 'general' ? product.soldOut : !product.available;
+  const isLimitedStock = product.productType === 'general' ? product.limitedStock : false;
 
   const handleImageError = () => {
     if (imgSrc !== DEFAULT_IMAGES.medium) {
@@ -86,7 +88,7 @@ export default function ProductCard({ product, storeId, activeCategoryId }: Prod
             <div className="absolute inset-0 bg-[var(--skeleton-background)] animate-pulse z-10" />
           )}
 
-          {product.soldOut && (
+          {isSoldOut && (
             <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center z-20">
               <div className="badge-wrapper transform-gpu transition-transform duration-200 group-hover:scale-105">
                 <span className="product-badge bg-[var(--badge-red-bg)] text-[var(--badge-red-text)] shadow-sm">
@@ -96,9 +98,9 @@ export default function ProductCard({ product, storeId, activeCategoryId }: Prod
             </div>
           )}
 
-          {!product.soldOut && (
+          {!isSoldOut && (
             <div className="absolute top-2 left-2 z-10 flex flex-col items-start gap-2">
-              {product.limitedStock && (
+              {isLimitedStock && (
                 <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
                   <span className="product-badge bg-[var(--badge-yellow-bg)] text-[var(--badge-yellow-text)] shadow-sm whitespace-nowrap">
                     Limited Stock
@@ -138,7 +140,7 @@ export default function ProductCard({ product, storeId, activeCategoryId }: Prod
             {product.name}
           </h3>
           <div className="flex flex-col items-start gap-1">
-            {!product.soldOut && product.originalPrice && product.originalPrice > product.price && (
+            {!isSoldOut && product.originalPrice && product.originalPrice > product.price && (
               <p className="text-sm text-text-secondary line-through">
                 {formatPrice(product.originalPrice)}
               </p>

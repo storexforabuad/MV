@@ -27,8 +27,8 @@ export default function PopularProducts({ storeId }: { storeId: string }) {
     return (
       <div className="animate-pulse space-y-4">
         {[...Array(6)].map((_, i) => (
-          <div 
-            key={i} 
+          <div
+            key={i}
             className="bg-card-hover h-64 rounded-lg transition-colors"
           />
         ))}
@@ -39,8 +39,8 @@ export default function PopularProducts({ storeId }: { storeId: string }) {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {products.map((product) => (
-        <Link 
-          key={product.id} 
+        <Link
+          key={product.id}
           href={`/products/${product.id}`}
           className="group bg-card-background rounded-lg shadow-[var(--shadow-md)] 
             hover:shadow-[var(--shadow-lg)] p-4 transition-all duration-300 
@@ -78,13 +78,13 @@ export default function PopularProducts({ storeId }: { storeId: string }) {
             </div>
           </div>
 
-          {product.limitedStock && (
-  <div className="absolute top-2 left-2 z-10 inline-flex items-center px-2.5 py-0.5 
+          {product.productType === 'general' && product.limitedStock && (
+            <div className="absolute top-2 left-2 z-10 inline-flex items-center px-2.5 py-0.5 
     rounded-full text-xs font-medium bg-[var(--badge-red-bg)] text-[var(--badge-red-text)] 
     shadow-sm animate-fade-in">
-    Limited Stock
-  </div>
-)}
+              Limited Stock
+            </div>
+          )}
         </Link>
       ))}
     </div>

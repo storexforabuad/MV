@@ -40,9 +40,9 @@ export interface StoreOrder extends Order {
 }
 
 // Interface for individual products within an order in Firestore.
-interface OrderProduct extends Product {
+type OrderProduct = Product & {
     status: 'processing' | 'ready' | 'shipped';
-}
+};
 
 // Interface for the complete order data as stored in Firestore.
 interface FirestoreOrderData {

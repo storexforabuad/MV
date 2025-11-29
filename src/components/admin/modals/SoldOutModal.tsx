@@ -22,7 +22,13 @@ const SoldOutModal: React.FC<SoldOutModalProps> = ({
   handleClose,
 }) => {
   const productsArr = Array.isArray(products) ? products : [];
-  const soldOutArr = productsArr.filter(p => (typeof p.inStock === 'number' && p.inStock === 0) || p.soldOut === true);
+  const soldOutArr = productsArr.filter(p => {
+    if (p.productType === 'vehicle') {
+      return !p.available;
+    }
+    // General product
+    return p.soldOut === true || p.quantity === 0;
+  });
   const isEmpty = productsArr.length === 0;
   const hasSoldOutItems = soldOutArr.length > 0;
   const topSoldOut = soldOutArr.slice(0, 5);
@@ -85,18 +91,18 @@ const SoldOutModal: React.FC<SoldOutModalProps> = ({
               <p className="text-xs font-semibold text-text-secondary mb-2 pl-1">Out of Stock Items</p>
               <ul className="space-y-2">
                 {topSoldOut.map((product) => (
-                  <li 
-                    key={product.id} 
+                  <li
+                    key={product.id}
                     className="flex items-center gap-3 p-2 rounded-lg bg-background-alt transition-colors border-b border-border-color last:border-b-0"
                   >
                     <div className="w-10 h-10 rounded-lg bg-background overflow-hidden flex items-center justify-center flex-shrink-0">
                       {product.images?.[0] ? (
-                        <Image 
-                          src={product.images[0]} 
-                          alt={product.name} 
-                          width={40} 
-                          height={40} 
-                          className="w-full h-full object-cover" 
+                        <Image
+                          src={product.images[0]}
+                          alt={product.name}
+                          width={40}
+                          height={40}
+                          className="w-full h-full object-cover"
                         />
                       ) : (
                         <span className="text-xs text-text-tertiary">No Img</span>
