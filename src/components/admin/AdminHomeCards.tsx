@@ -1,5 +1,5 @@
 'use client';
-import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown } from 'lucide-react';
+import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload } from 'lucide-react';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { useSpotlightContext } from '@/context/SpotlightContext';
@@ -14,6 +14,7 @@ import SoldOutModal from './modals/SoldOutModal';
 import TipsModal from './modals/TipsModal';
 import SpotlightTooltip from '../shared/SpotlightTooltip';
 import PostsComposerModal from './modals/PostsComposerModal';
+import SocialPostsModal from './modals/SocialPostsModal';
 import { BizconNetworkModal } from './modals/BizconNetworkModal';
 import { DeliveriesHubModal } from './modals/DeliveriesHubModal';
 import RevenueModal from './modals/RevenueModal';
@@ -117,6 +118,15 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     component: PostsComposerModal,
     glowClass: 'dark:shadow-violet-500/30 shadow-violet-500/50',
   },
+  {
+    label: 'Posts',
+    subtitle: 'Share Products',
+    icon: Upload,
+    gradient: 'bg-gradient-to-br from-pink-500 via-rose-500 to-red-600',
+    text: 'text-white',
+    component: null,
+    glowClass: 'dark:shadow-pink-500/30 shadow-pink-500/50',
+  },
 
   {
     label: 'Revenue',
@@ -211,6 +221,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isCustomersModalOpen, setIsCustomersModalOpen] = useState(false);
   const [isPostsModalOpen, setIsPostsModalOpen] = useState(false);
+  const [isSocialPostsModalOpen, setIsSocialPostsModalOpen] = useState(false);
   const [isBizconNetworkModalOpen, setIsBizconNetworkModalOpen] = useState(false);
   const [isDeliveriesHubModalOpen, setIsDeliveriesHubModalOpen] = useState(false);
   const [isRevenueModalOpen, setIsRevenueModalOpen] = useState(false);
@@ -262,7 +273,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   }
 
   useEffect(() => {
-    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen;
+    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen;
     if (modalIsOpen) {
       window.history.pushState({ modalOpen: true }, '');
       const handlePopState = () => {
@@ -272,6 +283,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         setIsViewsModalOpen(false);
         setIsShareModalOpen(false);
         setIsPostsModalOpen(false);
+        setIsSocialPostsModalOpen(false);
         setIsBizconNetworkModalOpen(false);
         setIsDeliveriesHubModalOpen(false);
         setIsRevenueModalOpen(false);
@@ -287,7 +299,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         }
       };
     }
-  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, setIsModalOpen]);
+  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, setIsModalOpen]);
 
   const handleOpenModal = (idx: number, cardLabel?: string) => {
     if (cardLabel === '(Biz+Con)™') setIsBizconNetworkModalOpen(true);
@@ -295,6 +307,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     else if (cardLabel === 'Views') setIsViewsModalOpen(true);
     else if (cardLabel === 'Share') setIsShareModalOpen(true);
     else if (cardLabel === 'Content') setIsPostsModalOpen(true);
+    else if (cardLabel === 'Posts') setIsSocialPostsModalOpen(true);
     else if (cardLabel === 'Commission') setIsCommissionModalOpen(true);
     else if (cardLabel === 'Ambassador') onAmbassadorCardClick();
     else if (cardLabel === 'Manage Categories') props.openManageCategories();
@@ -323,6 +336,11 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
   const handleClosePostsModal = () => {
     setIsPostsModalOpen(false);
+    if (props.setIsModalOpen) props.setIsModalOpen(false);
+  }
+
+  const handleCloseSocialPostsModal = () => {
+    setIsSocialPostsModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
@@ -482,6 +500,16 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
       {isShareModalOpen && (<StoreLinkModal {...props} isOpen={isShareModalOpen} handleClose={() => { setIsShareModalOpen(false); if (props.setIsModalOpen) props.setIsModalOpen(false); }} />)}
 
       {isPostsModalOpen && (<PostsComposerModal isOpen={isPostsModalOpen} onClose={handleClosePostsModal} storeId={props.storeId} contacts={props.contacts} products={props.products} storeName={props.storeName} />)}
+
+      {isSocialPostsModalOpen && (
+        <SocialPostsModal
+          isOpen={isSocialPostsModalOpen}
+          onClose={handleCloseSocialPostsModal}
+          storeId={props.storeId}
+          storeName={props.storeName || ''}
+          products={props.products}
+        />
+      )}
 
       {isBizconNetworkModalOpen && (<BizconNetworkModal isOpen={isBizconNetworkModalOpen} onClose={handleCloseBizconNetworkModal} />)}
 
