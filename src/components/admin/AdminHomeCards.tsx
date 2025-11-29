@@ -113,19 +113,19 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     label: 'Content',
     subtitle: 'Scheduler',
     icon: Send,
-    gradient: 'bg-gradient-to-br from-purple-500 to-violet-600',
+    gradient: 'bg-gradient-to-br from-pink-500 via-rose-500 to-red-600',
     text: 'text-white',
     component: PostsComposerModal,
-    glowClass: 'dark:shadow-violet-500/30 shadow-violet-500/50',
+    glowClass: 'dark:shadow-pink-500/30 shadow-pink-500/50',
   },
   {
     label: 'Posts',
     subtitle: 'Share Products',
     icon: Upload,
-    gradient: 'bg-gradient-to-br from-pink-500 via-rose-500 to-red-600',
+    gradient: 'bg-gradient-to-br from-purple-500 to-violet-600',
     text: 'text-white',
     component: null,
-    glowClass: 'dark:shadow-pink-500/30 shadow-pink-500/50',
+    glowClass: 'dark:shadow-violet-500/30 shadow-violet-500/50',
   },
 
   {

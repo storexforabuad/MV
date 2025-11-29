@@ -48,6 +48,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({
     const [selectedPlatforms, setSelectedPlatforms] = useState<SocialPlatform[]>(['Instagram', 'Facebook']);
     const [selectedTemplateId, setSelectedTemplateId] = useState('casual');
     const [customCaption, setCustomCaption] = useState('');
+    const [isEditingCaption, setIsEditingCaption] = useState(false);
     const [copiedRecently, setCopiedRecently] = useState(false);
 
     // Get ranked products for suggestions
@@ -166,7 +167,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({
                     <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 mb-1.5 leading-tight">
                         {product.name}
                     </h3>
-                    <p className="text-lg font-bold text-pink-600 dark:text-pink-400 mb-2">
+                    <p className="text-lg font-bold text-purple-600 dark:text-purple-400 mb-2">
                         ₦{product.price.toLocaleString()}
                     </p>
 
@@ -189,7 +190,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({
     // Render Suggested Tab
     const renderSuggestedTab = () => (
         <div className="p-4 space-y-4">
-            <div className="flex items-center gap-2 text-pink-600 dark:text-pink-400 mb-2">
+            <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 mb-2">
                 <SparklesIcon className="w-5 h-5" />
                 <h3 className="font-semibold text-base">Smart Suggestions</h3>
             </div>
@@ -280,7 +281,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({
                         </div>
                         <div className="flex-1 min-w-0">
                             <h4 className="font-semibold text-[15px] text-gray-900 dark:text-gray-100 truncate mb-0.5">{selectedProduct.name}</h4>
-                            <p className="text-lg font-bold text-pink-600 dark:text-pink-400">₦{selectedProduct.price.toLocaleString()}</p>
+                            <p className="text-lg font-bold text-purple-600 dark:text-purple-400">₦{selectedProduct.price.toLocaleString()}</p>
                         </div>
                         <button
                             onClick={() => {
@@ -345,22 +346,22 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({
                                             setCustomCaption('');
                                         }}
                                         className={`w-full p-4 rounded-xl text-left transition-all border-2 ${isSelected
-                                            ? 'border-gray-400 dark:border-gray-500 bg-gray-50 dark:bg-gray-800 shadow-sm'
-                                            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-850 hover:bg-gray-50 dark:hover:bg-gray-800'
+                                            ? 'border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/20 shadow-sm'
+                                            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750'
                                             }`}
                                         whileTap={{ scale: 0.98 }}
                                     >
                                         <div className="flex items-center gap-3">
                                             <span className="text-2xl">{icons[template.id as keyof typeof icons]}</span>
                                             <div className="flex-1">
-                                                <div className={`font-semibold text-[15px] ${isSelected ? 'text-gray-900 dark:text-gray-100' : 'text-gray-900 dark:text-gray-100'}`}>
+                                                <div className={`font-semibold text-[15px] ${isSelected ? 'text-purple-900 dark:text-purple-100' : 'text-gray-900 dark:text-gray-100'}`}>
                                                     {template.name}
                                                 </div>
-                                                <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 capitalize">
+                                                <div className={`text-xs mt-0.5 capitalize ${isSelected ? 'text-purple-700 dark:text-purple-300' : 'text-gray-500 dark:text-gray-400'}`}>
                                                     {template.style} tone
                                                 </div>
                                             </div>
-                                            {isSelected && <CheckIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />}
+                                            {isSelected && <CheckIcon className="w-5 h-5 text-purple-600 dark:text-purple-400" />}
                                         </div>
                                     </motion.button>
                                 );
@@ -370,26 +371,59 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({
 
                     {/* Caption Editor */}
                     <div>
-                        <label className="block text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wide">
-                            Caption
-                        </label>
-                        <div className="relative">
-                            <textarea
-                                value={customCaption}
-                                onChange={(e) => setCustomCaption(e.target.value)}
-                                className="w-full bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl px-4 py-3 text-[15px] text-gray-900 dark:text-gray-100 leading-relaxed focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600 focus:border-transparent transition-all resize-none"
-                                rows={10}
-                                placeholder="Your caption will appear here..."
-                            />
-                            <div className="flex justify-between items-center mt-2 text-xs">
-                                <span className="text-gray-500 dark:text-gray-400">{finalCaption.length} characters</span>
+                        <div className="flex justify-between items-center mb-3">
+                            <label className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
+                                Caption
+                            </label>
+                            {!isEditingCaption ? (
                                 <button
-                                    onClick={() => setCustomCaption(generatedCaption)}
-                                    className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium active:scale-95 transition-all"
+                                    onClick={() => setIsEditingCaption(true)}
+                                    className="text-xs font-medium text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 flex items-center gap-1"
                                 >
-                                    Reset to Original
+                                    <PencilSquareIcon className="w-3.5 h-3.5" />
+                                    Edit
                                 </button>
-                            </div>
+                            ) : (
+                                <button
+                                    onClick={() => setIsEditingCaption(false)}
+                                    className="text-xs font-medium text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 flex items-center gap-1"
+                                >
+                                    <CheckIcon className="w-3.5 h-3.5" />
+                                    Done
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="relative">
+                            {isEditingCaption ? (
+                                <textarea
+                                    value={customCaption || finalCaption}
+                                    onChange={(e) => setCustomCaption(e.target.value)}
+                                    className="w-full bg-white dark:bg-gray-800 border-2 border-purple-200 dark:border-purple-900/30 rounded-xl px-4 py-3 text-[15px] text-gray-900 dark:text-gray-100 leading-relaxed focus:outline-none focus:ring-2 focus:ring-purple-400 dark:focus:ring-purple-600 focus:border-transparent transition-all resize-none"
+                                    rows={10}
+                                    placeholder="Your caption will appear here..."
+                                    autoFocus
+                                />
+                            ) : (
+                                <div
+                                    className="w-full bg-gray-50 dark:bg-gray-800/50 border-2 border-transparent rounded-xl px-4 py-3 text-[15px] text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                    onClick={() => setIsEditingCaption(true)}
+                                >
+                                    {finalCaption}
+                                </div>
+                            )}
+
+                            {isEditingCaption && (
+                                <div className="flex justify-between items-center mt-2 text-xs">
+                                    <span className="text-gray-500 dark:text-gray-400">{finalCaption.length} characters</span>
+                                    <button
+                                        onClick={() => setCustomCaption(generatedCaption)}
+                                        className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium active:scale-95 transition-all"
+                                    >
+                                        Reset to Original
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -430,7 +464,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({
                     <motion.button
                         onClick={handleCopyCaption}
                         disabled={!finalCaption || selectedPlatforms.length === 0}
-                        className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-r from-pink-500 to-red-500 dark:from-pink-600 dark:to-red-600 text-white font-bold text-base hover:from-pink-600 hover:to-red-600 dark:hover:from-pink-700 dark:hover:to-red-700 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg"
+                        className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-r from-purple-500 to-violet-600 dark:from-purple-600 dark:to-violet-700 text-white font-bold text-base hover:from-purple-600 hover:to-violet-700 dark:hover:from-purple-700 dark:hover:to-violet-800 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg"
                         whileTap={{ scale: 0.98 }}
                     >
                         <SparklesIcon className="w-6 h-6" />
@@ -473,7 +507,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({
                                     {/* iOS-style Header with blur */}
                                     <div className="px-4 py-3 flex justify-between items-center border-b border-gray-200 dark:border-gray-700 flex-shrink-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg">
                                         <Dialog.Title as="h3" className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                                            <div className="w-8 h-8 bg-gradient-to-br from-pink-500 to-red-500 rounded-lg flex items-center justify-center">
+                                            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-violet-600 rounded-lg flex items-center justify-center">
                                                 <span className="text-white text-base">📱</span>
                                             </div>
                                             Social Posts
