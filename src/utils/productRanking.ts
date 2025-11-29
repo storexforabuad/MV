@@ -1,5 +1,6 @@
 import { Product } from '@/types/product';
 import { ProductScore } from '@/types/socialPost';
+export type { ProductScore };
 
 // Configurable weights for ranking algorithm
 const WEIGHTS = {
