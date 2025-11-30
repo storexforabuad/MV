@@ -179,7 +179,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
             whileHover={{ y: -4 }}
             whileTap={{ scale: 0.98 }}
         >
-            <div className="aspect-square relative overflow-hidden bg-gray-100 dark:bg-gray-700">
+            <div className="aspect-[3/4] relative overflow-hidden bg-gray-100 dark:bg-gray-700">
                 <Image
                     src={product.images[0] || 'https://placehold.co/400'}
                     alt={product.name}
