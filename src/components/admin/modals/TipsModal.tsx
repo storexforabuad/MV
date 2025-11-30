@@ -1,7 +1,7 @@
 'use client';
 import { X, Lightbulb, Navigation, ShoppingBag, BarChart2, Sparkles, TrendingUp, Gift, Package, Globe, DollarSign, Truck, Star, Share2, Tags, Zap, Users } from 'lucide-react';
-import Modal from './Modal';
 import { useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 
 interface TipsModalProps {
   handleClose: () => void;
@@ -155,7 +155,7 @@ const TabButton = ({
     onClick={onClick}
     className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold transition-all duration-200 border-b-2 ${active
         ? 'text-purple-600 dark:text-purple-400 border-purple-600 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/20'
-        : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-purple-500 dark:hover:text-purple-300 hover:border-purple-300 dark:hover:border-purple-600 hover:bg-gray-50 dark:hover:bg-gray-800/50'
+        : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-purple-500 dark:hover:text-purple-300 hover:border-purple-300 dark:hover:border-purple-600 hover:bg-gray-50 dark:hover:bg-slate-800/50'
       }`}
   >
     <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -207,60 +207,76 @@ export default function TipsModal({ handleClose }: TipsModalProps) {
   const currentTips = tipsData[activeTab];
 
   return (
-    <Modal onClose={handleClose}>
-      <div className="w-full h-screen sm:h-auto sm:max-h-[90vh] flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 dark:border-slate-700 flex-shrink-0 bg-white dark:bg-slate-900">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg">
-              <Lightbulb className="w-6 h-6 text-white" />
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0, y: '100vh' }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: '100vh' }}
+        transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+        className="fixed inset-0 z-[100] flex flex-col bg-white dark:bg-slate-900"
+      >
+        {/* Decorative gradient background (optional) */}
+        <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-br from-purple-50 via-white to-white dark:from-purple-900/10 dark:via-slate-900 dark:to-slate-900 pointer-events-none" />
+
+        <div className="relative z-10 flex flex-col h-full">
+          {/* Header */}
+          <header className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 dark:border-slate-700 flex-shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg">
+                <Lightbulb className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
+                  Tips & Tricks
+                </h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Master your store</p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
-                Tips & Tricks
-              </h2>
-              <p className="text-xs text-gray-500 dark:text-gray-400">Master your store</p>
-            </div>
+            <button
+              onClick={handleClose}
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+              aria-label="Close modal"
+            >
+              <X className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+            </button>
+          </header>
+
+          {/* Tabs */}
+          <div className="flex border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 flex-shrink-0">
+            {tabs.map((tab) => (
+              <TabButton
+                key={tab.id}
+                active={activeTab === tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                icon={tab.icon}
+                label={tab.label}
+              />
+            ))}
           </div>
-          <button
-            onClick={handleClose}
-            className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg"
-            aria-label="Close modal"
-          >
-            <X className="w-6 h-6" />
-          </button>
-        </div>
 
-        {/* Tabs */}
-        <div className="flex border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 flex-shrink-0">
-          {tabs.map((tab) => (
-            <TabButton
-              key={tab.id}
-              active={activeTab === tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              icon={tab.icon}
-              label={tab.label}
-            />
-          ))}
-        </div>
+          {/* Content */}
+          <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-32">
+            <div className="max-w-3xl mx-auto space-y-4">
+              {currentTips.map((tip, index) => (
+                <TipCard key={index} tip={tip} />
+              ))}
+            </div>
+          </main>
 
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-white dark:bg-slate-900">
-          {currentTips.map((tip, index) => (
-            <TipCard key={index} tip={tip} />
-          ))}
+          {/* Footer */}
+          <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-slate-700">
+            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent dark:from-slate-900 dark:to-transparent pointer-events-none" />
+            <div className="relative max-w-3xl mx-auto">
+              <button
+                onClick={handleClose}
+                className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+              >
+                Got it, Let's Go! 🚀
+              </button>
+            </div>
+          </footer>
         </div>
-
-        {/* Footer */}
-        <div className="p-4 sm:p-5 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 flex-shrink-0">
-          <button
-            onClick={handleClose}
-            className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
-          >
-            Got it, Let's Go! 🚀
-          </button>
-        </div>
-      </div>
-    </Modal>
+      </motion.div>
+    </AnimatePresence>
   );
 }
