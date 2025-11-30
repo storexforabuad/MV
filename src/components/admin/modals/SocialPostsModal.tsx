@@ -175,11 +175,11 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                 setSelectedProduct(product);
                 setCurrentTab('creator');
             }}
-            className="group relative flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition-all text-left"
+            className="group relative flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition-all text-left p-0 w-full"
             whileHover={{ y: -4 }}
             whileTap={{ scale: 0.98 }}
         >
-            <div className="aspect-[3/4] relative overflow-hidden bg-gray-100 dark:bg-gray-700">
+            <div className="aspect-[3/4] relative overflow-hidden bg-gray-100 dark:bg-gray-700 w-full">
                 <Image
                     src={product.images[0] || 'https://placehold.co/400'}
                     alt={product.name}
