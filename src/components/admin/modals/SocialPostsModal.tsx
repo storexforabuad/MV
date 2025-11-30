@@ -2,7 +2,7 @@
 
 import { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { XMarkIcon, SparklesIcon, CubeIcon, PencilSquareIcon, CheckIcon, MagnifyingGlassIcon, ShareIcon, ClipboardDocumentIcon, LightBulbIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, SparklesIcon, CubeIcon, PencilSquareIcon, CheckIcon, MagnifyingGlassIcon, LightBulbIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { Product } from '@/types/product';
 import { Category } from '@/types/category';
@@ -237,15 +237,15 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                     onClick={() => setActiveShareModal('link')}
                     className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 font-medium hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-all active:scale-95 border border-purple-100 dark:border-purple-800"
                 >
-                    <ShareIcon className="w-4 h-4" />
-                    <span className="text-sm">Copy & Share Link</span>
+                    {/* <ShareIcon className="w-4 h-4" /> */}
+                    <span className="text-sm">Copy Link</span>
                 </button>
                 <button
                     onClick={() => setActiveShareModal('caption')}
                     className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 font-medium hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-all active:scale-95 border border-purple-100 dark:border-purple-800"
                 >
-                    <ClipboardDocumentIcon className="w-4 h-4" />
-                    <span className="text-sm">Copy Link & Caption</span>
+                    {/* <ClipboardDocumentIcon className="w-4 h-4" /> */}
+                    <span className="text-sm">Copy Link + Caption</span>
                 </button>
             </div>
 

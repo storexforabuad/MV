@@ -29,6 +29,7 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ isModalOpen
 
   const whatsAppNumber = businessConfig.contact.whatsapp.replace('+', '');
   const contactLink = `https://wa.me/${whatsAppNumber}?text=${encodeURIComponent("Hello, I need help with my store.")}`;
+  const featureRequestLink = `https://wa.me/${whatsAppNumber}?text=${encodeURIComponent("Hi! I'd like to request a new feature for my store.")}`;
   const callLink = `tel:${businessConfig.contact.support}`;
 
   const menuItems = [
@@ -45,6 +46,13 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ isModalOpen
       action: () => window.open(callLink, '_self'),
       bg: 'bg-blue-500/20',
       iconColor: 'text-blue-500'
+    },
+    {
+      label: 'Request a feature',
+      icon: HelpCircle,
+      action: () => window.open(featureRequestLink, '_blank'),
+      bg: 'bg-purple-500/20',
+      iconColor: 'text-purple-500'
     }
   ];
 
@@ -53,7 +61,7 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ isModalOpen
   }
 
   return (
-    <div 
+    <div
       className={`fixed bottom-24 right-6 transition-transform duration-500 ease-in-out z-50 ${isMounted ? 'scale-100' : 'scale-0'} ${isModalOpen ? 'translate-x-[150%]' : 'translate-x-0'}`}
       aria-live="polite"
     >
@@ -65,7 +73,10 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ isModalOpen
               className="flex items-center gap-3 animate-spring-in"
               style={{ animationDelay: `${index * 50}ms` }}
             >
-              <span className="card-glass text-sm font-semibold py-2 px-4 rounded-lg shadow-md">
+              <span
+                onClick={item.action}
+                className="card-glass text-sm font-semibold py-2 px-4 rounded-lg shadow-md cursor-pointer hover:scale-105 active:scale-95 transition-transform"
+              >
                 {item.label}
               </span>
               <button
