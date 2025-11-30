@@ -1,5 +1,5 @@
 'use client';
-import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload } from 'lucide-react';
+import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone } from 'lucide-react';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { useSpotlightContext } from '@/context/SpotlightContext';
@@ -20,6 +20,7 @@ import { DeliveriesHubModal } from './modals/DeliveriesHubModal';
 import RevenueModal from './modals/RevenueModal';
 import CommissionModal from './modals/CommissionModal';
 import ExpensesModal from './modals/ExpensesModal';
+import { AdvertisingModal } from './modals/AdvertisingModal';
 
 // Import the customer components
 import { AdminCustomersCard } from './AdminCustomersCard';
@@ -100,14 +101,13 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     glowClass: 'dark:shadow-yellow-500/30 shadow-yellow-500/50',
   },
   {
-    label: 'Share',
-    subtitle: 'Caption',
-    valueKey: 'storeLink',
-    icon: Share2,
-    gradient: 'bg-gradient-to-br from-cyan-500 via-blue-500 to-indigo-600',
+    label: 'Advert',
+    subtitle: 'Boost Sales',
+    icon: Megaphone,
+    gradient: 'bg-gradient-to-br from-pink-500 via-rose-500 to-purple-600',
     text: 'text-white',
-    component: StoreLinkModal,
-    glowClass: 'dark:shadow-cyan-400/30 shadow-cyan-400/50',
+    component: null,
+    glowClass: 'dark:shadow-pink-500/30 shadow-pink-500/50',
   },
 
   {
@@ -219,6 +219,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [isRevenueModalOpen, setIsRevenueModalOpen] = useState(false);
   const [isCommissionModalOpen, setIsCommissionModalOpen] = useState(false);
   const [isExpensesModalOpen, setIsExpensesModalOpen] = useState(false);
+  const [isAdvertisingModalOpen, setIsAdvertisingModalOpen] = useState(false);
   const [showPostsNotification, setShowPostsNotification] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const { setIsModalOpen, onRefresh, uiVisible, onAnimationComplete, onOrdersCardClick, onProductsCardClick, storeId, onAmbassadorCardClick } = props;
@@ -265,7 +266,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   }
 
   useEffect(() => {
-    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen;
+    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen || isAdvertisingModalOpen;
     if (modalIsOpen) {
       window.history.pushState({ modalOpen: true }, '');
       const handlePopState = () => {
@@ -281,6 +282,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         setIsRevenueModalOpen(false);
         setIsCommissionModalOpen(false);
         setIsExpensesModalOpen(false);
+        setIsAdvertisingModalOpen(false);
         if (setIsModalOpen) setIsModalOpen(false);
       };
       window.addEventListener('popstate', handlePopState);
@@ -291,7 +293,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         }
       };
     }
-  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, setIsModalOpen]);
+  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, isAdvertisingModalOpen, setIsModalOpen]);
 
   const handleOpenModal = (idx: number, card: typeof cardData[0]) => {
     const { label, subtitle } = card;
@@ -311,6 +313,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     else if (label === 'Deliveries') setIsDeliveriesHubModalOpen(true);
     else if (label === 'Revenue') setIsRevenueModalOpen(true);
     else if (label === 'Expenses') setIsExpensesModalOpen(true);
+    else if (label === 'Advert') setIsAdvertisingModalOpen(true);
     else setOpenModal(idx);
 
     if (props.setIsModalOpen && label !== 'Orders' && label !== 'Manage Products' && label !== 'Ambassador' && label !== 'Manage Categories') props.setIsModalOpen(true);
@@ -361,6 +364,11 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
   const handleCloseExpensesModal = () => {
     setIsExpensesModalOpen(false);
+    if (props.setIsModalOpen) props.setIsModalOpen(false);
+  }
+
+  const handleCloseAdvertisingModal = () => {
+    setIsAdvertisingModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
@@ -430,7 +438,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           }
 
           const Icon = card.icon;
-          const isHorizontal = card.label === 'Share' || card.label === 'Tips' || card.label === 'Content' || card.label === '(Biz+Con)™';
+          const isHorizontal = card.label === 'Share' || card.label === 'Tips' || card.label === 'Content' || card.label === '(Biz+Con)™' || card.label === 'Advert';
           const isTipsCard = card.label === 'Tips';
           const isPostsCard = card.label === 'Content';
           const spotlightClasses = spotlightStep === 'tips' && isTipsCard ? 'relative z-50 pointer-events-auto' : '';
@@ -514,6 +522,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           totalExpenses={props.totalExpenses}
         />
       )}
+
+      {isAdvertisingModalOpen && (<AdvertisingModal isOpen={isAdvertisingModalOpen} onClose={handleCloseAdvertisingModal} />)}
 
       {openModal !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md" onClick={handleCloseModal}>
