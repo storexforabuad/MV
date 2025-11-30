@@ -2,7 +2,7 @@
 
 import { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { XMarkIcon, SparklesIcon, CubeIcon, PencilSquareIcon, CheckIcon, MagnifyingGlassIcon, ShareIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, SparklesIcon, CubeIcon, PencilSquareIcon, CheckIcon, MagnifyingGlassIcon, ShareIcon, ClipboardDocumentIcon, LightBulbIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { Product } from '@/types/product';
 import { Category } from '@/types/category';
@@ -221,6 +221,14 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                     <SparklesIcon className="w-5 h-5" />
                     <h3 className="font-semibold text-base">Smart Suggestions</h3>
                 </div>
+            </div>
+
+            {/* Info Box */}
+            <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800 rounded-xl p-4 mb-4 flex gap-3">
+                <LightBulbIcon className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                <p className="text-sm text-blue-800 dark:text-blue-200 leading-relaxed">
+                    Sharing your store link and products is the best way to get more views and sales. Copy your link or a ready-made caption below and share it everywhere!
+                </p>
             </div>
 
             {/* Share Buttons */}
