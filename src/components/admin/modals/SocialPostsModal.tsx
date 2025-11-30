@@ -1,27 +1,15 @@
 'use client';
 
-import React, { useState, useMemo, Fragment } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { XMarkIcon, SparklesIcon, CubeIcon, PencilSquareIcon, CheckIcon, MagnifyingGlassIcon, ShareIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
-import {
-    XMarkIcon,
-    MagnifyingGlassIcon,
-    SparklesIcon,
-    CubeIcon,
-    PencilSquareIcon,
-
-    CheckIcon,
-} from '@heroicons/react/24/solid';
 import { Product } from '@/types/product';
-import { SocialPlatform } from '@/types/socialPost';
-import { getRankedProducts, ProductScore } from '@/utils/productRanking';
-import { captionTemplates, generateCaption } from '@/utils/captionTemplates';
-import {
-    platformConfigs,
-    copyToClipboard,
-    downloadImage,
-} from '@/utils/socialMediaHelpers';
+import { Category } from '@/types/category';
+import { ProductScore, getRankedProducts } from '@/utils/productRanking';
+import { captionTemplates } from '@/utils/captionTemplates';
+import { motion, AnimatePresence } from 'framer-motion';
+import toast from 'react-hot-toast';
 
 interface SocialPostsModalProps {
     isOpen: boolean;
@@ -29,19 +17,27 @@ interface SocialPostsModalProps {
     storeId: string;
     storeName: string;
     products: Product[];
-    storeType?: 'general' | 'automotive';
+    categories?: Category[];
 }
 
 type TabType = 'suggested' | 'all' | 'creator';
+type SocialPlatform = 'Instagram' | 'Facebook' | 'Twitter' | 'WhatsApp' | 'LinkedIn';
 
-const SocialPostsModal: React.FC<SocialPostsModalProps> = ({
-    isOpen,
-    onClose,
-    storeId,
-    storeName,
-    products,
-    storeType,
-}) => {
+const formatCategories = (categories: Category[] | undefined) => {
+    if (!categories || categories.length === 0) return 'products';
+    const categoryNames = categories.map(c => c.name);
+    const count = categoryNames.length;
+    if (count <= 5) {
+        if (count === 1) return categoryNames[0];
+        if (count === 2) return categoryNames.join(' and ');
+        const last = categoryNames.pop();
+        return `${categoryNames.join(', ')}, and ${last}`;
+    }
+    const firstFive = categoryNames.slice(0, 5);
+    return `${firstFive.join(', ')}, and more products`;
+};
+
+const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, storeId, storeName, products, categories }) => {
     const [currentTab, setCurrentTab] = useState<TabType>('suggested');
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
@@ -51,148 +47,198 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({
     const [isEditingCaption, setIsEditingCaption] = useState(false);
     const [copiedRecently, setCopiedRecently] = useState(false);
 
+    // Share Modal States
+    const [activeShareModal, setActiveShareModal] = useState<'none' | 'link' | 'caption'>('none');
+    const [shareMessage, setShareMessage] = useState('');
+
     // Get ranked products for suggestions
-    const suggestedProducts = useMemo(() => {
-        return getRankedProducts(products, 15);
-    }, [products]);
+    const rankedProducts = getRankedProducts(products);
+    const suggestedProducts = rankedProducts.slice(0, 6); // Top 6 suggestions
 
-    // Filter products for "All Products" tab
-    const filteredProducts = useMemo(() => {
-        if (!searchTerm) return products;
-        return products.filter(p =>
-            p.name.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-    }, [products, searchTerm]);
+    // Filter products for "All" tab
+    const filteredProducts = products.filter(p =>
+        p.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
-    // Generate caption when product or template changes
-    const generatedCaption = useMemo(() => {
-        if (!selectedProduct) return '';
-        return generateCaption(selectedProduct, storeName, storeId, selectedTemplateId);
-    }, [selectedProduct, storeName, storeId, selectedTemplateId]);
-
-    // Use custom caption if edited, otherwise use generated
-    const finalCaption = customCaption || generatedCaption;
-
-    // Update custom caption when generated caption changes
-    React.useEffect(() => {
-        if (selectedProduct && !customCaption) {
-            setCustomCaption(generatedCaption);
+    // Initialize share message
+    useEffect(() => {
+        if (categories) {
+            const formattedCategories = formatCategories(categories);
+            const defaultStoreCaption = `🌟 Discover authentic ${formattedCategories} at affordable prices in the new ${storeName || 'Online Store'} Online Store! 🛒. Tap the link below:`;
+            const fullStoreUrl = `https://tinyurl.com/bizcononline/${storeId}`;
+            setShareMessage(`${defaultStoreCaption}\n${fullStoreUrl}`);
         }
-    }, [generatedCaption, selectedProduct, customCaption]);
+    }, [categories, storeName, storeId]);
 
+    const handleCopyShare = (text: string) => {
+        navigator.clipboard.writeText(text);
+        toast.success('Copied to clipboard!');
+        setTimeout(() => setActiveShareModal('none'), 1500);
+    };
+
+    // Function to handle closing the modal and resetting state
     const handleClose = () => {
         onClose();
-        // Reset state after animation
-        setTimeout(() => {
-            setCurrentTab('suggested');
-            setSelectedProduct(null);
-            setSearchTerm('');
-            setCustomCaption('');
-            setSelectedTemplateId('casual');
-        }, 300);
+        // Reset all states when modal closes
+        setCurrentTab('suggested');
+        setSelectedProduct(null);
+        setSearchTerm('');
+        setSelectedPlatforms(['Instagram', 'Facebook']);
+        setSelectedTemplateId('casual');
+        setCustomCaption('');
+        setIsEditingCaption(false);
+        setCopiedRecently(false);
+        setActiveShareModal('none');
+        // shareMessage is reset by useEffect on categories change
     };
 
-    const handleProductSelect = (product: Product) => {
-        setSelectedProduct(product);
-        setCustomCaption(''); // Reset to use generated caption
-        setCurrentTab('creator');
-    };
+    // Platform configurations
+    const platformConfigs: { name: SocialPlatform; icon: string }[] = [
+        { name: 'Instagram', icon: '📸' },
+        { name: 'Facebook', icon: '👍' },
+        { name: 'Twitter', icon: '🐦' },
+        { name: 'WhatsApp', icon: '💬' },
+        { name: 'LinkedIn', icon: '💼' },
+    ];
 
-    const togglePlatform = (platform: SocialPlatform) => {
+    // Toggle platform selection
+    const togglePlatform = (platformName: SocialPlatform) => {
         setSelectedPlatforms(prev =>
-            prev.includes(platform)
-                ? prev.filter(p => p !== platform)
-                : [...prev, platform]
+            prev.includes(platformName)
+                ? prev.filter(p => p !== platformName)
+                : [...prev, platformName]
         );
     };
 
-    const handleCopyCaption = async () => {
-        const success = await copyToClipboard(finalCaption);
-        if (success) {
+    // Generate caption based on selected product and template
+    const generatedCaption = (() => {
+        if (!selectedProduct) return '';
+
+        const template = captionTemplates.find(t => t.id === selectedTemplateId);
+        if (!template) return '';
+
+        let caption = template.generate(selectedProduct, storeName, storeId);
+
+        // Add platform-specific hashtags or mentions
+        if (selectedPlatforms.includes('Instagram')) {
+            caption += `\n\n#${selectedProduct.name.replace(/\s/g, '')} #${selectedProduct.category?.replace(/\s/g, '') || 'Product'} #ShopNow`;
+        }
+        if (selectedPlatforms.includes('Twitter')) {
+            caption += `\n\nCheck out this amazing product! #${selectedProduct.name.replace(/\s/g, '')}`;
+        }
+        // Add more platform-specific logic as needed
+
+        return caption;
+    })();
+
+    // Final caption to display/use (custom or generated)
+    const finalCaption = customCaption || generatedCaption;
+
+    // Handle copy caption
+    const handleCopyCaption = () => {
+        if (finalCaption) {
+            navigator.clipboard.writeText(finalCaption);
             setCopiedRecently(true);
+            toast.success('Caption copied!');
             setTimeout(() => setCopiedRecently(false), 2000);
         }
     };
 
+    // Handle download image
     const handleDownloadImage = async () => {
-        if (!selectedProduct || !selectedProduct.images[0]) return;
-        const filename = `${selectedProduct.name.replace(/\s+/g, '-')}.jpg`;
-        await downloadImage(selectedProduct.images[0], filename);
+        if (selectedProduct?.images[0]) {
+            try {
+                const response = await fetch(selectedProduct.images[0]);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${selectedProduct.name.replace(/\s/g, '_')}.jpg`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                toast.success('Image downloaded!');
+            } catch (error) {
+                console.error('Error downloading image:', error);
+                toast.error('Failed to download image.');
+            }
+        }
     };
 
     // Render Product Card
-    const renderProductCard = (product: Product, scoreData?: ProductScore) => {
-        const isVehicle = product.productType === 'vehicle';
-        const isUnavailable = isVehicle ? !product.available : (product.productType === 'general' && product.soldOut);
-
-        return (
-            <motion.button
-                key={product.id}
-                onClick={() => !isUnavailable && handleProductSelect(product)}
-                disabled={isUnavailable}
-                className={`relative rounded-2xl overflow-hidden bg-white dark:bg-gray-800 shadow-sm transition-all duration-200 ${isUnavailable ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-md active:scale-[0.98]'
-                    }`}
-                whileHover={!isUnavailable ? { y: -2, scale: 1.01 } : {}}
-                whileTap={!isUnavailable ? { scale: 0.98 } : {}}
-            >
-                {/* Product Image */}
-                <div className="relative w-full pt-[100%] bg-gray-100 dark:bg-gray-700">
-                    <Image
-                        src={product.images[0] || 'https://placehold.co/400'}
-                        alt={product.name}
-                        fill
-                        className="absolute inset-0 object-cover"
-                        sizes="(max-width: 640px) 50vw, 33vw"
-                    />
-
-                    {/* Refined Badge Overlay */}
-                    {scoreData && scoreData.badge && (
-                        <div className="absolute top-2 left-2 backdrop-blur-md bg-white/80 dark:bg-gray-900/80 text-gray-900 dark:text-gray-100 text-[10px] font-semibold px-2 py-1 rounded-full flex items-center gap-1 shadow-sm border border-gray-200/50 dark:border-gray-700/50">
-                            <span className="text-xs">{scoreData.emoji}</span>
-                            <span>{scoreData.badge}</span>
-                        </div>
-                    )}
-
-                    {isUnavailable && (
-                        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center">
-                            <span className="text-white font-semibold text-sm px-3 py-1.5 rounded-full bg-black/30 backdrop-blur-sm">
-                                {isVehicle ? 'Sold' : 'Out of Stock'}
-                            </span>
-                        </div>
-                    )}
-                </div>
-
-                {/* Product Info */}
-                <div className="p-3">
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 mb-1.5 leading-tight">
-                        {product.name}
-                    </h3>
-                    <p className="text-lg font-bold text-purple-600 dark:text-purple-400 mb-2">
-                        ₦{product.price.toLocaleString()}
-                    </p>
-
-                    {/* Quick Stats */}
-                    <div className="flex items-center justify-between text-[11px] text-gray-500 dark:text-gray-400">
-                        <span className="flex items-center gap-1">
-                            👁️ {product.views || 0} views
-                        </span>
-                        {product.productType === 'general' && product.limitedStock && (
-                            <span className="text-orange-600 dark:text-orange-400 font-semibold flex items-center gap-0.5">
-                                ⏰ Low Stock
-                            </span>
-                        )}
+    const renderProductCard = (product: Product, scoreData?: ProductScore) => (
+        <motion.button
+            key={product.id}
+            layoutId={`product-${product.id}`}
+            onClick={() => {
+                setSelectedProduct(product);
+                setCurrentTab('creator');
+            }}
+            className="group relative flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition-all text-left"
+            whileHover={{ y: -4 }}
+            whileTap={{ scale: 0.98 }}
+        >
+            <div className="aspect-square relative overflow-hidden bg-gray-100 dark:bg-gray-700">
+                <Image
+                    src={product.images[0] || 'https://placehold.co/400'}
+                    alt={product.name}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    sizes="(max-width: 640px) 50vw, 33vw"
+                />
+                {scoreData && (
+                    <div className="absolute top-2 left-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-semibold shadow-sm flex items-center gap-1">
+                        <span>{scoreData.emoji}</span>
+                        <span className="capitalize text-gray-900 dark:text-gray-100">{scoreData.reason.replace('-', ' ')}</span>
                     </div>
+                )}
+            </div>
+
+            <div className="p-3 flex flex-col flex-1">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 mb-1.5 leading-tight">
+                    {product.name}
+                </h3>
+                <p className="text-lg font-bold text-purple-600 dark:text-purple-400 mb-2">
+                    ₦{product.price.toLocaleString()}
+                </p>
+
+                <div className="mt-auto flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                    <span className="flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                        {product.views || 0} views
+                    </span>
                 </div>
-            </motion.button>
-        );
-    };
+            </div>
+        </motion.button>
+    );
 
     // Render Suggested Tab
     const renderSuggestedTab = () => (
         <div className="p-4 space-y-4">
-            <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400 mb-2">
-                <SparklesIcon className="w-5 h-5" />
-                <h3 className="font-semibold text-base">Smart Suggestions</h3>
+            <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2 text-purple-600 dark:text-purple-400">
+                    <SparklesIcon className="w-5 h-5" />
+                    <h3 className="font-semibold text-base">Smart Suggestions</h3>
+                </div>
+            </div>
+
+            {/* Share Buttons */}
+            <div className="grid grid-cols-2 gap-3 mb-4">
+                <button
+                    onClick={() => setActiveShareModal('link')}
+                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 font-medium hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-all active:scale-95 border border-purple-100 dark:border-purple-800"
+                >
+                    <ShareIcon className="w-4 h-4" />
+                    <span className="text-sm">Copy & Share Link</span>
+                </button>
+                <button
+                    onClick={() => setActiveShareModal('caption')}
+                    className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-300 font-medium hover:bg-purple-100 dark:hover:bg-purple-900/40 transition-all active:scale-95 border border-purple-100 dark:border-purple-800"
+                >
+                    <ClipboardDocumentIcon className="w-4 h-4" />
+                    <span className="text-sm">Copy Link & Caption</span>
+                </button>
             </div>
 
             {suggestedProducts.length > 0 ? (
@@ -579,6 +625,77 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({
                         </Transition.Child>
                     </div>
                 </div>
+
+                {/* Share Modals */}
+                <Transition show={activeShareModal !== 'none'} as={Fragment}>
+                    <Dialog as="div" className="relative z-[60]" onClose={() => setActiveShareModal('none')}>
+                        <Transition.Child
+                            as={Fragment}
+                            enter="ease-out duration-300"
+                            enterFrom="opacity-0"
+                            enterTo="opacity-100"
+                            leave="ease-in duration-200"
+                            leaveFrom="opacity-100"
+                            leaveTo="opacity-0"
+                        >
+                            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
+                        </Transition.Child>
+
+                        <div className="fixed inset-0 overflow-y-auto">
+                            <div className="flex min-h-full items-center justify-center p-4 text-center">
+                                <Transition.Child
+                                    as={Fragment}
+                                    enter="ease-out duration-300"
+                                    enterFrom="opacity-0 scale-95"
+                                    enterTo="opacity-100 scale-100"
+                                    leave="ease-in duration-200"
+                                    leaveFrom="opacity-100 scale-100"
+                                    leaveTo="opacity-0 scale-95"
+                                >
+                                    <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-900 p-6 text-left align-middle shadow-xl transition-all border border-gray-200 dark:border-gray-700">
+                                        <Dialog.Title as="h3" className="text-lg font-bold leading-6 text-gray-900 dark:text-white mb-4">
+                                            {activeShareModal === 'link' ? 'Share Store Link' : 'Share with Caption'}
+                                        </Dialog.Title>
+
+                                        <div className="mt-2">
+                                            {activeShareModal === 'link' ? (
+                                                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                                                    <p className="text-sm text-gray-600 dark:text-gray-300 break-all font-mono">
+                                                        {`https://tinyurl.com/bizcononline/${storeId}`}
+                                                    </p>
+                                                </div>
+                                            ) : (
+                                                <textarea
+                                                    value={shareMessage}
+                                                    onChange={(e) => setShareMessage(e.target.value)}
+                                                    rows={6}
+                                                    className="w-full bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                                                />
+                                            )}
+                                        </div>
+
+                                        <div className="mt-6 flex gap-3">
+                                            <button
+                                                type="button"
+                                                className="flex-1 justify-center rounded-xl border border-transparent bg-purple-100 dark:bg-purple-900/30 px-4 py-3 text-sm font-medium text-purple-900 dark:text-purple-100 hover:bg-purple-200 dark:hover:bg-purple-900/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 transition-all"
+                                                onClick={() => setActiveShareModal('none')}
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                type="button"
+                                                className="flex-1 justify-center rounded-xl border border-transparent bg-purple-600 px-4 py-3 text-sm font-bold text-white hover:bg-purple-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 transition-all shadow-lg shadow-purple-500/30"
+                                                onClick={() => handleCopyShare(activeShareModal === 'link' ? `https://tinyurl.com/bizcononline/${storeId}` : shareMessage)}
+                                            >
+                                                Copy
+                                            </button>
+                                        </div>
+                                    </Dialog.Panel>
+                                </Transition.Child>
+                            </div>
+                        </div>
+                    </Dialog>
+                </Transition>
             </Dialog>
         </Transition.Root>
     );

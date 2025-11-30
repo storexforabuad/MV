@@ -111,8 +111,8 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
   },
 
   {
-    label: 'Posts',
-    subtitle: 'Share Products',
+    label: 'Share',
+    subtitle: 'Content',
     icon: Send,
     gradient: 'bg-gradient-to-br from-purple-500 to-violet-600',
     text: 'text-white',
@@ -142,10 +142,10 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     label: 'Ambassador',
     valueKey: 'referrals',
     icon: Star,
-    gradient: 'bg-gradient-to-br from-sky-600 via-blue-700 to-indigo-800',
+    gradient: 'bg-gradient-to-br from-indigo-500 via-purple-600 to-violet-700',
     text: 'text-white',
     component: null,
-    glowClass: 'dark:shadow-blue-600/30 shadow-blue-600/50',
+    glowClass: 'dark:shadow-violet-500/30 shadow-violet-500/50',
   },
   {
     label: 'Views',
@@ -254,10 +254,10 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const customersCard: typeof cardData[0] = {
     label: 'Customers',
     icon: Users,
-    gradient: 'bg-gradient-to-br from-indigo-500 via-purple-600 to-violet-700',
+    gradient: 'bg-gradient-to-br from-sky-600 via-blue-700 to-indigo-800',
     text: 'text-white',
     component: AdminCustomersCard,
-    glowClass: 'dark:shadow-violet-500/30 shadow-violet-500/50'
+    glowClass: 'dark:shadow-blue-600/30 shadow-blue-600/50'
   };
 
   if (ordersIndex !== -1) {
@@ -293,24 +293,27 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     }
   }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, setIsModalOpen]);
 
-  const handleOpenModal = (idx: number, cardLabel?: string) => {
-    if (cardLabel === '(Biz+Con)™') setIsBizconNetworkModalOpen(true);
-    else if (cardLabel === 'Tips') setIsTipsModalOpen(true);
-    else if (cardLabel === 'Views') setIsViewsModalOpen(true);
-    else if (cardLabel === 'Share') setIsShareModalOpen(true);
-    else if (cardLabel === 'Content') setIsPostsModalOpen(true);
-    else if (cardLabel === 'Posts') setIsSocialPostsModalOpen(true);
-    else if (cardLabel === 'Commission') setIsCommissionModalOpen(true);
-    else if (cardLabel === 'Ambassador') onAmbassadorCardClick();
-    else if (cardLabel === 'Manage Categories') props.openManageCategories();
-    else if (cardLabel === 'Orders') onOrdersCardClick();
-    else if (cardLabel === 'Manage Products') onProductsCardClick();
-    else if (cardLabel === 'Deliveries') setIsDeliveriesHubModalOpen(true);
-    else if (cardLabel === 'Revenue') setIsRevenueModalOpen(true);
-    else if (cardLabel === 'Expenses') setIsExpensesModalOpen(true);
+  const handleOpenModal = (idx: number, card: typeof cardData[0]) => {
+    const { label, subtitle } = card;
+    if (label === '(Biz+Con)™') setIsBizconNetworkModalOpen(true);
+    else if (label === 'Tips') setIsTipsModalOpen(true);
+    else if (label === 'Views') setIsViewsModalOpen(true);
+    else if (label === 'Share') {
+      if (subtitle === 'Content') setIsSocialPostsModalOpen(true);
+      else setIsShareModalOpen(true);
+    }
+    else if (label === 'Content') setIsPostsModalOpen(true);
+    else if (label === 'Commission') setIsCommissionModalOpen(true);
+    else if (label === 'Ambassador') onAmbassadorCardClick();
+    else if (label === 'Manage Categories') props.openManageCategories();
+    else if (label === 'Orders') onOrdersCardClick();
+    else if (label === 'Manage Products') onProductsCardClick();
+    else if (label === 'Deliveries') setIsDeliveriesHubModalOpen(true);
+    else if (label === 'Revenue') setIsRevenueModalOpen(true);
+    else if (label === 'Expenses') setIsExpensesModalOpen(true);
     else setOpenModal(idx);
 
-    if (props.setIsModalOpen && cardLabel !== 'Orders' && cardLabel !== 'Manage Products' && cardLabel !== 'Ambassador' && cardLabel !== 'Manage Categories') props.setIsModalOpen(true);
+    if (props.setIsModalOpen && label !== 'Orders' && label !== 'Manage Products' && label !== 'Ambassador' && label !== 'Manage Categories') props.setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
@@ -434,8 +437,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
           if (isHorizontal) {
             return (
-              <motion.div key={card.label} variants={itemVariants} className={`relative ${spotlightClasses}`}>
-                <button className={`dashboard-card relative flex flex-row items-center justify-center rounded-2xl p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card.label)}>
+              <motion.div key={`${card.label}-${idx}`} variants={itemVariants} className={`relative ${spotlightClasses}`}>
+                <button className={`dashboard-card relative flex flex-row items-center justify-center rounded-2xl p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card)}>
                   {isPostsCard && showPostsNotification && (<span className="absolute top-2 right-2 flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></span>)}
                   <span className="card-blob" />
                   <div className={`flex-shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white bg-opacity-20 shadow`}><Icon className={`w-5 h-5 sm:w-6 sm:h-6 drop-shadow ${card.isAiCard ? 'ai-icon-glow' : ''}`} /></div>
@@ -449,8 +452,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             );
           } else {
             return (
-              <motion.div key={card.label} variants={itemVariants}>
-                <button className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card.label)}>
+              <motion.div key={`${card.label}-${idx}`} variants={itemVariants}>
+                <button className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card)}>
                   <span className="card-blob" />
                   <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white bg-opacity-20 mb-1 sm:mb-2 shadow">
                     <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 drop-shadow" />
@@ -493,19 +496,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
       {isPostsModalOpen && (<PostsComposerModal isOpen={isPostsModalOpen} onClose={handleClosePostsModal} storeId={props.storeId} contacts={props.contacts} products={props.products} storeName={props.storeName} />)}
 
-      {isSocialPostsModalOpen && (
-        <SocialPostsModal
-          isOpen={isSocialPostsModalOpen}
-          onClose={handleCloseSocialPostsModal}
-          storeId={props.storeId}
-          storeName={props.storeName || ''}
-          products={props.products}
-        />
-      )}
-
-      {isBizconNetworkModalOpen && (<BizconNetworkModal isOpen={isBizconNetworkModalOpen} onClose={handleCloseBizconNetworkModal} />)}
-
-      {isDeliveriesHubModalOpen && (<DeliveriesHubModal isOpen={isDeliveriesHubModalOpen} onClose={handleCloseDeliveriesHubModal} storeId={storeId} />)}
+      {isSocialPostsModalOpen && (<SocialPostsModal isOpen={isSocialPostsModalOpen} onClose={handleCloseSocialPostsModal} storeId={props.storeId} storeName={props.storeName || 'Store'} products={props.products} categories={props.categories} />)}
 
       {isRevenueModalOpen && (<RevenueModal isOpen={isRevenueModalOpen} onClose={handleCloseRevenueModal} storeId={storeId} />)}
 
