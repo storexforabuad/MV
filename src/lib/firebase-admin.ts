@@ -7,14 +7,21 @@ const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
 // Initialize the app if it hasn't been initialized already
 if (!admin.apps.length) {
   if (!serviceAccount) {
-    console.error('Firebase admin initialization error: FIREBASE_SERVICE_ACCOUNT_KEY environment variable is not set.');
+    console.error('❌ Firebase admin initialization error: FIREBASE_SERVICE_ACCOUNT_KEY environment variable is not set.');
+    console.error('ℹ️  Please ensure you have a .env.local file with FIREBASE_SERVICE_ACCOUNT_KEY defined.');
   } else {
     try {
+      const parsedAccount = JSON.parse(serviceAccount);
+      console.log('✅ Service account parsed successfully');
+      console.log('ℹ️  Project ID:', parsedAccount.project_id);
+
       admin.initializeApp({
-        credential: admin.credential.cert(JSON.parse(serviceAccount)),
+        credential: admin.credential.cert(parsedAccount),
       });
+      console.log('✅ Firebase Admin SDK initialized successfully');
     } catch (e) {
-      console.error('Firebase admin initialization error', e);
+      console.error('❌ Firebase admin initialization error:', e);
+      console.error('ℹ️  Make sure FIREBASE_SERVICE_ACCOUNT_KEY is valid JSON');
     }
   }
 }

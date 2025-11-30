@@ -502,6 +502,18 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
       {isShareModalOpen && (<StoreLinkModal {...props} isOpen={isShareModalOpen} handleClose={() => { setIsShareModalOpen(false); if (props.setIsModalOpen) props.setIsModalOpen(false); }} />)}
 
+      {isPostsModalOpen && (<PostsComposerModal isOpen={isPostsModalOpen} onClose={handleClosePostsModal} storeId={props.storeId} contacts={props.contacts} products={props.products} storeName={props.storeName} />)}
+
+      {isSocialPostsModalOpen && (<SocialPostsModal isOpen={isSocialPostsModalOpen} onClose={handleCloseSocialPostsModal} storeId={props.storeId} storeName={props.storeName || 'Store'} products={props.products} categories={props.categories} />)}
+
+      {isBizconNetworkModalOpen && (<BizconNetworkModal isOpen={isBizconNetworkModalOpen} onClose={handleCloseBizconNetworkModal} />)}
+
+      {isDeliveriesHubModalOpen && (<DeliveriesHubModal isOpen={isDeliveriesHubModalOpen} onClose={handleCloseDeliveriesHubModal} storeId={storeId} />)}
+
+      {isRevenueModalOpen && (<RevenueModal isOpen={isRevenueModalOpen} onClose={handleCloseRevenueModal} storeId={storeId} />)}
+
+      {isCommissionModalOpen && (<CommissionModal isOpen={isCommissionModalOpen} onClose={handleCloseCommissionModal} storeId={storeId} />)}
+
       {isExpensesModalOpen && (
         <ExpensesModal
           isOpen={isExpensesModalOpen}
