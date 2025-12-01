@@ -363,7 +363,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
         categories={categories}
         onUpdateProduct={handleUpdateProduct}
         onDeleteProduct={handleDeleteProduct}
-        onAdd Category={handleAddCategory}
+        onAddCategory={handleAddCategory}
       />
 
       <ManageCategoriesModal
