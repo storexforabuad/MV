@@ -16,6 +16,7 @@ interface EditProductPanelProps {
   onClose: () => void;
   onSave: (updatedFields: Partial<Product>) => Promise<void>;
   categories: { id: string; name: string }[];
+  onAddCategory: (name: string) => Promise<void>;
 }
 
 // Defines the shape of the form's state, which is clearer than the DB schema
@@ -42,7 +43,7 @@ const StyledInput: React.FC<{ id: string, label: string, value: string | number,
   </div>
 );
 
-const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, onClose, onSave, categories }) => {
+const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, onClose, onSave, categories, onAddCategory }) => {
   const [formState, setFormState] = useState<Partial<ProductFormState>>({});
   const [isCategorySelectorOpen, setCategorySelectorOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -287,6 +288,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
           handleInputChange('categoryId', categoryId);
           setCategorySelectorOpen(false);
         }}
+        onAddCategory={onAddCategory}
       />
     </>
   );

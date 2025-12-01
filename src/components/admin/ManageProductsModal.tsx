@@ -20,6 +20,7 @@ interface ManageProductsModalProps {
   categories: { id: string; name: string }[];
   onUpdateProduct: (productId: string, data: Partial<Product>) => Promise<void>;
   onDeleteProduct: (productId: string) => void;
+  onAddCategory: (name: string) => Promise<void>; // ADD THIS LINE
 }
 type FilterType = 'all' | 'popular' | 'limited' | 'soldout';
 
@@ -144,7 +145,7 @@ const FilterChip = ({ label, value, activeFilter, onClick, count }: { label: str
 
 // --- MAIN COMPONENT ---
 
-const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClose, products, setProducts, categories, onUpdateProduct, onDeleteProduct }) => {
+const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClose, products, setProducts, categories, onUpdateProduct, onDeleteProduct, onAddCategory }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
@@ -346,6 +347,7 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
         onClose={() => setEditingProduct(null)}
         onSave={handleProductSave}
         categories={categories}
+        onAddCategory={onAddCategory}
       />
       <ConfirmationDialog
         isOpen={!!productToDelete}

@@ -342,6 +342,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
           storeId={storeId}
           categories={categories}
           onProductAdded={() => fetchData()}
+          onAddCategory={handleAddCategory}
         />
       ) : (
         <AddProductComposer
@@ -362,6 +363,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
         categories={categories}
         onUpdateProduct={handleUpdateProduct}
         onDeleteProduct={handleDeleteProduct}
+        onAdd Category={handleAddCategory}
       />
 
       <ManageCategoriesModal

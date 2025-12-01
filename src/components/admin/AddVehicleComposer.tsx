@@ -51,6 +51,7 @@ interface AddVehicleComposerProps {
     storeId: string;
     onProductAdded: () => void;
     categories: { id: string; name: string }[];
+    onAddCategory: (name: string) => Promise<void>;
 }
 
 // --- HELPER COMPONENTS ---
@@ -91,7 +92,7 @@ const FloatingLabelInput: React.FC<{ label: string, value: string | number, onCh
 
 // --- MAIN COMPOSER COMPONENT ---
 
-const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose, storeId, onProductAdded, categories }) => {
+const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose, storeId, onProductAdded, categories, onAddCategory }) => {
     const [currentStep, setCurrentStep] = useState(0); // 0: Upload, 1: Details, 2: Specs, 3: Pricing, 4: Uploading, 5: Summary
     const [vehicleData, setVehicleData] = useState<VehicleFormData>({
         id: Date.now().toString(),
@@ -545,6 +546,7 @@ const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose
                     handleChange('categoryId', categoryId);
                     setCategorySelectorOpen(false);
                 }}
+                onAddCategory={onAddCategory}
             />
         </Transition.Root>
     );
