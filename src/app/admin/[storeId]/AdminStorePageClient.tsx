@@ -350,6 +350,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
           storeId={storeId}
           categories={categories}
           onProductAdded={() => fetchData()}
+          onAddCategory={handleAddCategory} // ADD THIS LINE
         />
       )}
 

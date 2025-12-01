@@ -48,6 +48,7 @@ interface AddProductComposerProps {
   storeId: string;
   categories: { id: string; name: string }[];
   onProductAdded: () => void;
+  onAddCategory: (name: string) => Promise<void>; // ADD THIS LINE
 }
 
 // --- HELPER COMPONENTS ---
@@ -80,7 +81,7 @@ const FloatingLabelInput: React.FC<{ label: string, value: string | number, onCh
 
 // --- MAIN COMPOSER COMPONENT ---
 
-const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose, storeId, categories, onProductAdded }) => {
+const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose, storeId, categories, onProductAdded, onAddCategory }) => {
   const [currentStep, setCurrentStep] = useState(0); // 0: Upload, 1: Details, 2: Pricing, 3: Inventory, 4: Uploading, 5: Summary
   const [batchProducts, setBatchProducts] = useState<BatchProduct[]>([]);
   const [activeProductIndex, setActiveProductIndex] = useState(0);
@@ -522,6 +523,7 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
             handleProductChange(activeProductIndex, 'categoryId', categoryId);
             setCategorySelectorOpen(false);
           }}
+          onAddCategory={onAddCategory} // ADD THIS LINE
         />
       </Dialog>
     </Transition.Root>
