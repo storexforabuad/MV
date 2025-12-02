@@ -141,7 +141,7 @@ const ReferralsModal: React.FC<ReferralsModalProps> = ({ isOpen, onClose, storeI
                   </div>
 
                   {/* Content */}
-                  <div className="flex-1 overflow-y-auto p-4">
+                  <div className="flex-1 overflow-y-auto p-4 pb-24">
                     <AnimatePresence mode="wait">
                       {!customer ? (
                         <motion.div
@@ -300,8 +300,8 @@ const ReferralsModal: React.FC<ReferralsModalProps> = ({ isOpen, onClose, storeI
                   </div>
 
                   {/* Footer */}
-                  <div className="absolute bottom-0 left-0 right-0 z-20">
-                    <div className="bg-background/80 backdrop-blur-sm p-4 border-t border-border-color">
+                  <div className="border-t border-border-color">
+                    <div className="bg-background p-4">
                       <button onClick={handleClose} className="w-full bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-800 font-semibold py-3 px-4 rounded-full hover:bg-slate-700 dark:hover:bg-slate-200 transition-colors duration-200">
                         close
                       </button>
