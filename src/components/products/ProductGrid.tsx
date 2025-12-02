@@ -2,7 +2,7 @@
 import { memo, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Info, Phone, MessageCircle, Star, Clock, MapPin, Instagram } from 'lucide-react';
+import { Info, Phone, MessageCircle, Star, Clock, MapPin, Instagram, Gift } from 'lucide-react';
 import { Product } from '../../types/product';
 import { motion, LayoutGroup, AnimatePresence, Transition } from 'framer-motion';
 import Image from 'next/image';
@@ -11,6 +11,7 @@ import { StoreMeta } from '../../types/store';
 import { useCustomer } from '@/context/CustomerContext';
 import { useOrders } from '@/hooks/useOrders';
 import { OrdersModal } from '@/components/customer/modals/OrdersModal';
+import { ReferralsModal } from '@/components/customer/modals/ReferralsModal';
 import { ensureProductType } from '../../utils/productHelpers';
 
 const VehicleCard = dynamic(() => import('./VehicleCard'), {
@@ -96,10 +97,19 @@ const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId,
   const { orders, addOrder } = useOrders(customer?.id ?? null, storeId || "");
   const [isSingleColumn, setIsSingleColumn] = useState(false);
   const [isOrdersModalOpen, setOrdersModalOpen] = useState(false);
+  const [isReferralModalOpen, setReferralModalOpen] = useState(false);
 
   const handleOrdersClick = () => {
     if (customer) {
       setOrdersModalOpen(true);
+    } else {
+      promptLogin();
+    }
+  };
+
+  const handleReferralsClick = () => {
+    if (customer) {
+      setReferralModalOpen(true);
     } else {
       promptLogin();
     }
@@ -137,6 +147,12 @@ const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId,
               <Info className="w-5 h-5 text-[var(--text-primary)]" />
             </GlassButton>
             <GlassButton
+              onClick={handleReferralsClick}
+              aria-label="Your Referral Bonuses"
+            >
+              <Gift className="w-5 h-5 text-[var(--text-primary)]" />
+            </GlassButton>
+            <GlassButton
               onClick={handleOrdersClick}
               aria-label="Your Orders"
               text="Orders"
@@ -147,6 +163,7 @@ const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId,
       )}
 
       {storeId && storeMeta && <OrdersModal isOpen={isOrdersModalOpen} onClose={() => setOrdersModalOpen(false)} orders={orders} storeId={storeId} addOrder={addOrder} storeMeta={storeMeta} />}
+      {storeId && <ReferralsModal isOpen={isReferralModalOpen} onClose={() => setReferralModalOpen(false)} storeId={storeId} />}
 
       <motion.div
         ref={containerRef}

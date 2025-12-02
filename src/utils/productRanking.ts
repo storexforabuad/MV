@@ -5,12 +5,14 @@ import { detectPriceDrop } from './priceUtils';
 export type { ProductScore };
 
 // Configurable weights for ranking algorithm
+// Configurable weights for ranking algorithm
 const WEIGHTS = {
-    views: 0.40,           // Popularity (40%)
-    recency: 0.25,         // How new the product is (25%)
-    stockUrgency: 0.15,    // Low stock urgency (15%)
-    shareFreshness: 0.15,  // Avoid recently shared products (15%)
+    views: 0.35,           // Popularity (35%) - Reduced to make room
+    recency: 0.20,         // General freshness (20%) - Reduced slightly
+    stockUrgency: 0.10,    // Low stock urgency (10%) - Reduced slightly
+    shareFreshness: 0.10,  // Avoid recently shared products (10%)
     priceDrop: 0.05,       // Price drop boost (5%)
+    newArrival: 0.20,      // 🆕 NEW: 48h Boost (20%)
     // Note: Revenue removed since orders aren't directly linked to products yet
 };
 
@@ -70,6 +72,40 @@ function calculateRecencyScore(product: Product): number {
     if (ageInDays < 7) return 100;
     // Linear decay over 30 days
     if (ageInDays < 30) return 100 - ((ageInDays - 7) / 23) * 100;
+    return 0;
+}
+
+/**
+ * Calculates bonus for brand new products (< 48 hours)
+ * Returns 100 if < 48h old, 0 otherwise
+ */
+function calculateNewArrivalScore(product: Product): number {
+    const now = Date.now();
+    let createdAtMs: number;
+    const createdAt = product.createdAt;
+
+    if (!createdAt) return 0;
+
+    // Handle different date formats (same as recency)
+    if (typeof createdAt === 'object' && createdAt !== null && 'toMillis' in createdAt && typeof createdAt.toMillis === 'function') {
+        createdAtMs = createdAt.toMillis();
+    } else if (createdAt instanceof Date) {
+        createdAtMs = createdAt.getTime();
+    } else if (typeof createdAt === 'string') {
+        createdAtMs = new Date(createdAt).getTime();
+    } else if (typeof createdAt === 'number') {
+        createdAtMs = createdAt;
+    } else {
+        return 0;
+    }
+
+    if (isNaN(createdAtMs) || createdAtMs <= 0) return 0;
+
+    const ageInHours = (now - createdAtMs) / (1000 * 60 * 60);
+
+    // Boost for first 48 hours
+    if (ageInHours < 48) return 100;
+
     return 0;
 }
 
@@ -151,9 +187,11 @@ function calculateStockUrgency(product: Product): number {
 function getSuggestionReason(
     viewsScore: number,
     recencyScore: number,
-    urgencyScore: number
+    urgencyScore: number,
+    newArrivalScore: number
 ): ProductScore['reason'] {
     // Prioritize by highest individual score
+    if (newArrivalScore > 0) return 'new'; // Always prioritize brand new items
     if (recencyScore >= 90) return 'new';
     if (urgencyScore >= 80) return 'low-stock';
     if (viewsScore >= 70) return 'trending';
@@ -215,6 +253,7 @@ export function calculateProductScore(
     const urgencyScore = calculateStockUrgency(product);
     const freshnessScore = calculateShareFreshnessScore(metrics);
     const priceDropScore = calculatePriceDropScore(product);
+    const newArrivalScore = calculateNewArrivalScore(product);
 
     // Calculate weighted total score
     const totalScore =
@@ -222,10 +261,11 @@ export function calculateProductScore(
         (recencyScore * WEIGHTS.recency) +
         (urgencyScore * WEIGHTS.stockUrgency) +
         (freshnessScore * WEIGHTS.shareFreshness) +
-        (priceDropScore * WEIGHTS.priceDrop);
+        (priceDropScore * WEIGHTS.priceDrop) +
+        (newArrivalScore * WEIGHTS.newArrival);
 
     // Determine reason
-    const reason = getSuggestionReason(viewsScore, recencyScore, urgencyScore);
+    const reason = getSuggestionReason(viewsScore, recencyScore, urgencyScore, newArrivalScore);
     const { badge, emoji } = getBadgeDetails(reason);
 
     return {
