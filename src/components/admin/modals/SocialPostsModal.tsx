@@ -10,6 +10,8 @@ import { ProductScore, getRankedProducts } from '@/utils/productRanking';
 import { captionTemplates } from '@/utils/captionTemplates';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
+import { trackProductShare, getBatchProductMetrics } from '@/lib/productMetrics';
+import { ProductMetrics, SocialPlatform as MetricsPlatform } from '@/types/productMetrics';
 
 interface SocialPostsModalProps {
     isOpen: boolean;
@@ -51,14 +53,38 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
     const [activeShareModal, setActiveShareModal] = useState<'none' | 'link' | 'caption'>('none');
     const [shareMessage, setShareMessage] = useState('');
 
-    // Get ranked products for suggestions
-    const rankedProducts = getRankedProducts(products);
+    // Product Metrics State
+    const [metricsMap, setMetricsMap] = useState<Map<string, ProductMetrics>>(new Map());
+    const [isLoadingMetrics, setIsLoadingMetrics] = useState(true);
+
+    // Get ranked products for suggestions (with metrics)
+    const rankedProducts = getRankedProducts(products, metricsMap);
     const suggestedProducts = rankedProducts.slice(0, 6); // Top 6 suggestions
 
     // Filter products for "All" tab
     const filteredProducts = products.filter(p =>
         p.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    // Fetch metrics on mount
+    useEffect(() => {
+        async function loadMetrics() {
+            if (products.length === 0) {
+                setIsLoadingMetrics(false);
+                return;
+            }
+
+            setIsLoadingMetrics(true);
+            const productIds = products.map(p => p.id);
+            const metrics = await getBatchProductMetrics(storeId, productIds);
+            setMetricsMap(metrics);
+            setIsLoadingMetrics(false);
+        }
+
+        if (isOpen) {
+            loadMetrics();
+        }
+    }, [isOpen, products, storeId]);
 
     // Initialize share message
     useEffect(() => {
@@ -135,11 +161,26 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
     const finalCaption = customCaption || generatedCaption;
 
     // Handle copy caption
-    const handleCopyCaption = () => {
-        if (finalCaption) {
+    const handleCopyCaption = async () => {
+        if (finalCaption && selectedProduct) {
             navigator.clipboard.writeText(finalCaption);
             setCopiedRecently(true);
             toast.success('Caption copied!');
+
+            // Track the share for each selected platform
+            const platformKeys: MetricsPlatform[] = selectedPlatforms.map(
+                p => p.toLowerCase() as MetricsPlatform
+            );
+
+            for (const platform of platformKeys) {
+                await trackProductShare(storeId, selectedProduct.id, platform);
+            }
+
+            // Refresh metrics after tracking
+            const productIds = products.map(p => p.id);
+            const updatedMetrics = await getBatchProductMetrics(storeId, productIds);
+            setMetricsMap(updatedMetrics);
+
             setTimeout(() => setCopiedRecently(false), 2000);
         }
     };
@@ -166,52 +207,91 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
         }
     };
 
+    // Helper function to format "last shared" text
+    const getLastSharedText = (metrics?: ProductMetrics): string | null => {
+        if (!metrics || !metrics.lastSharedAt) return null;
+
+        const now = Date.now();
+        const lastSharedMs = metrics.lastSharedAt.toMillis();
+        const daysSince = Math.floor((now - lastSharedMs) / (1000 * 60 * 60 * 24));
+
+        if (daysSince === 0) return 'Shared today';
+        if (daysSince === 1) return 'Shared yesterday';
+        if (daysSince < 7) return `Shared ${daysSince} days ago`;
+        if (daysSince < 14) return `Shared ${Math.floor(daysSince / 7)} week ago`;
+        if (daysSince < 30) return `Shared ${Math.floor(daysSince / 7)} weeks ago`;
+
+        return `Shared ${Math.floor(daysSince / 30)} month${daysSince >= 60 ? 's' : ''} ago`;
+    };
+
     // Render Product Card
-    const renderProductCard = (product: Product, scoreData?: ProductScore) => (
-        <motion.button
-            key={product.id}
-            layoutId={`product-${product.id}`}
-            onClick={() => {
-                setSelectedProduct(product);
-                setCurrentTab('creator');
-            }}
-            className="group relative flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition-all text-left p-0 w-full"
-            whileHover={{ y: -4 }}
-            whileTap={{ scale: 0.98 }}
-        >
-            <div className="aspect-[3/4] relative overflow-hidden bg-gray-100 dark:bg-gray-700 w-full">
-                <Image
-                    src={product.images[0] || 'https://placehold.co/400'}
-                    alt={product.name}
-                    fill
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    sizes="(max-width: 640px) 50vw, 33vw"
-                />
-                {scoreData && (
-                    <div className="absolute top-2 left-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-semibold shadow-sm flex items-center gap-1">
-                        <span>{scoreData.emoji}</span>
-                        <span className="capitalize text-gray-900 dark:text-gray-100">{scoreData.reason.replace('-', ' ')}</span>
-                    </div>
-                )}
-            </div>
+    const renderProductCard = (product: Product, scoreData?: ProductScore) => {
+        const metrics = metricsMap.get(product.id);
+        const lastSharedText = getLastSharedText(metrics);
 
-            <div className="p-3 flex flex-col flex-1">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 mb-1.5 leading-tight">
-                    {product.name}
-                </h3>
-                <p className="text-lg font-bold text-purple-600 dark:text-purple-400 mb-2">
-                    ₦{product.price.toLocaleString()}
-                </p>
+        return (
+            <motion.button
+                key={product.id}
+                layoutId={`product-${product.id}`}
+                onClick={() => {
+                    setSelectedProduct(product);
+                    setCurrentTab('creator');
+                }}
+                className="group relative flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition-all text-left p-0 w-full"
+                whileHover={{ y: -4 }}
+                whileTap={{ scale: 0.98 }}
+            >
+                <div className="aspect-[3/4] relative overflow-hidden bg-gray-100 dark:bg-gray-700 w-full">
+                    <Image
+                        src={product.images[0] || 'https://placehold.co/400'}
+                        alt={product.name}
+                        fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        sizes="(max-width: 640px) 50vw, 33vw"
+                    />
+                    {scoreData && (
+                        <div className="absolute top-2 left-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-semibold shadow-sm flex items-center gap-1">
+                            <span>{scoreData.emoji}</span>
+                            <span className="capitalize text-gray-900 dark:text-gray-100">{scoreData.reason.replace('-', ' ')}</span>
+                        </div>
+                    )}
 
-                <div className="mt-auto flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                    <span className="flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                        {product.views || 0} views
-                    </span>
+                    {/* Last shared badge */}
+                    {lastSharedText && (
+                        <div className="absolute top-2 right-2 bg-purple-100/90 dark:bg-purple-900/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-medium shadow-sm flex items-center gap-1">
+                            <span>📅</span>
+                            <span className="text-purple-900 dark:text-purple-100">
+                                {lastSharedText}
+                            </span>
+                        </div>
+                    )}
                 </div>
-            </div>
-        </motion.button>
-    );
+
+                <div className="p-3 flex flex-col flex-1">
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 mb-1.5 leading-tight">
+                        {product.name}
+                    </h3>
+                    <p className="text-lg font-bold text-purple-600 dark:text-purple-400 mb-2">
+                        ₦{product.price.toLocaleString()}
+                    </p>
+
+                    <div className="mt-auto flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                        <span className="flex items-center gap-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                            {product.views || 0} views
+                        </span>
+                        {/* Share count */}
+                        {metrics && metrics.totalShares > 0 && (
+                            <span className="flex items-center gap-1">
+                                <span>·</span>
+                                <span>📲 {metrics.totalShares}x</span>
+                            </span>
+                        )}
+                    </div>
+                </div>
+            </motion.button>
+        );
+    };
 
     // Render Suggested Tab
     const renderSuggestedTab = () => (

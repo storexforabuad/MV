@@ -1,12 +1,14 @@
 import { Product } from '@/types/product';
 import { ProductScore } from '@/types/socialPost';
+import { ProductMetrics } from '@/types/productMetrics';
 export type { ProductScore };
 
 // Configurable weights for ranking algorithm
 const WEIGHTS = {
-    views: 0.5,        // Popularity (50%)
-    recency: 0.3,      // How new the product is (30%)
-    stockUrgency: 0.2, // Low stock urgency (20%)
+    views: 0.45,           // Popularity (45%)
+    recency: 0.25,         // How new the product is (25%)
+    stockUrgency: 0.15,    // Low stock urgency (15%)
+    shareFreshness: 0.15,  // Avoid recently shared products (15%)
     // Note: Revenue removed since orders aren't directly linked to products yet
 };
 
@@ -70,6 +72,36 @@ function calculateRecencyScore(product: Product): number {
 }
 
 /**
+ * Calculates share freshness penalty
+ * Returns 0-100 where:
+ * - 100 = Never shared or shared long ago (good for suggestions)
+ * - 0 = Shared very recently (bad for suggestions)
+ */
+function calculateShareFreshnessScore(metrics?: ProductMetrics): number {
+    if (!metrics || !metrics.lastSharedAt) {
+        return 100; // Never shared = perfect for sharing
+    }
+
+    const now = Date.now();
+    const lastSharedMs = metrics.lastSharedAt.toMillis();
+    const daysSinceShared = (now - lastSharedMs) / (1000 * 60 * 60 * 24);
+
+    // Handle future timestamps (clock skew)
+    if (daysSinceShared < 0) {
+        console.warn('Future timestamp detected:', metrics.lastSharedAt);
+        return 100;
+    }
+
+    // Aggressive penalty for recently shared products
+    if (daysSinceShared < 1) return 0;   // Shared today = skip
+    if (daysSinceShared < 3) return 20;  // Shared 1-3 days ago = low priority
+    if (daysSinceShared < 7) return 60;  // Shared 3-7 days ago = medium priority
+    if (daysSinceShared < 14) return 90; // Shared 1-2 weeks ago = high priority
+
+    return 100; // Shared > 2 weeks ago = perfect
+}
+
+/**
  * Calculates stock urgency score for general products
  */
 function calculateStockUrgency(product: Product): number {
@@ -123,8 +155,13 @@ function getBadgeDetails(reason: ProductScore['reason']): { badge: string; emoji
 
 /**
  * Calculates weighted score for a single product
+ * Now accepts optional metrics for share freshness scoring
  */
-export function calculateProductScore(product: Product, allProducts: Product[]): ProductScore {
+export function calculateProductScore(
+    product: Product,
+    allProducts: Product[],
+    metrics?: ProductMetrics
+): ProductScore {
     // Skip unavailable automotive products or sold out general products
     if (product.productType === 'vehicle' && !product.available) {
         return {
@@ -154,12 +191,14 @@ export function calculateProductScore(product: Product, allProducts: Product[]):
     const viewsScore = normalize(product.views || 0, minViews, maxViews);
     const recencyScore = calculateRecencyScore(product);
     const urgencyScore = calculateStockUrgency(product);
+    const freshnessScore = calculateShareFreshnessScore(metrics);
 
     // Calculate weighted total score
     const totalScore =
         (viewsScore * WEIGHTS.views) +
         (recencyScore * WEIGHTS.recency) +
-        (urgencyScore * WEIGHTS.stockUrgency);
+        (urgencyScore * WEIGHTS.stockUrgency) +
+        (freshnessScore * WEIGHTS.shareFreshness);
 
     // Determine reason
     const reason = getSuggestionReason(viewsScore, recencyScore, urgencyScore);
@@ -177,12 +216,20 @@ export function calculateProductScore(product: Product, allProducts: Product[]):
 /**
  * Gets ranked products sorted by score
  * @param products All products
+ * @param metricsMap Optional map of product metrics for share freshness scoring
  * @param limit Maximum number of products to return
  * @returns Sorted array of product scores
  */
-export function getRankedProducts(products: Product[], limit: number = 20): ProductScore[] {
+export function getRankedProducts(
+    products: Product[],
+    metricsMap?: Map<string, ProductMetrics>,
+    limit: number = 20
+): ProductScore[] {
     const scoredProducts = products
-        .map(product => calculateProductScore(product, products))
+        .map(product => {
+            const metrics = metricsMap?.get(product.id);
+            return calculateProductScore(product, products, metrics);
+        })
         .filter(scored => scored.score > 0); // Filter out unavailable/sold out
 
     // Sort by score descending
