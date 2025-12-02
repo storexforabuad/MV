@@ -25,7 +25,7 @@ const tipsData: Record<TabType, Tip[]> = {
       iconColor: 'text-sky-500',
       iconBg: 'bg-sky-100 dark:bg-sky-900/30',
       title: 'Navigate Like a Pro',
-      description: 'Use the bottom navigation tabs to quickly switch between Dashboard, Products, Orders, and Store views. Each section gives you powerful tools to manage your business.',
+      description: 'Use the bottom navigation tabs to quickly switch between Home(Overview), Store(Preview), Products(Upload), and Categories. Each section gives you powerful tools to manage your business.',
     },
     {
       icon: BarChart2,
@@ -154,12 +154,34 @@ const TabButton = ({
   <button
     onClick={onClick}
     className={`flex-1 flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 px-2 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold transition-all duration-200 border-b-2 ${active
-        ? 'text-purple-600 dark:text-purple-400 border-purple-600 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/20'
-        : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-purple-500 dark:hover:text-purple-300 hover:border-purple-300 dark:hover:border-purple-600 hover:bg-gray-50 dark:hover:bg-slate-800/50'
+      ? 'text-orange-600 dark:text-orange-400 border-orange-500 dark:border-orange-400 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20'
+      : 'text-gray-500 dark:text-gray-400 border-transparent hover:text-orange-500 dark:hover:text-orange-300 hover:border-orange-300 dark:hover:border-orange-600 hover:bg-gray-50 dark:hover:bg-slate-800/50'
       }`}
   >
-    <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+    {/* Desktop: Always show icon and label */}
+    <Icon className="hidden sm:block w-5 h-5" />
     <span className="hidden sm:inline">{label}</span>
+
+    {/* Mobile: Show icon when inactive, show prominent label when active */}
+    <AnimatePresence mode="wait">
+      {active ? (
+        <motion.span
+          key="label"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
+          transition={{
+            duration: 0.25,
+            ease: [0.4, 0, 0.2, 1]
+          }}
+          className="sm:hidden text-sm font-bold whitespace-nowrap"
+        >
+          {label}
+        </motion.span>
+      ) : (
+        <Icon key="icon" className="sm:hidden w-5 h-5" />
+      )}
+    </AnimatePresence>
   </button>
 );
 
@@ -216,7 +238,7 @@ export default function TipsModal({ handleClose }: TipsModalProps) {
         className="fixed inset-0 z-[100] flex flex-col bg-white dark:bg-slate-900"
       >
         {/* Decorative gradient background (optional) */}
-        <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-br from-purple-50 via-white to-white dark:from-purple-900/10 dark:via-slate-900 dark:to-slate-900 pointer-events-none" />
+        <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-br from-yellow-50 via-orange-50/30 to-white dark:from-yellow-900/10 dark:via-orange-900/5 dark:to-slate-900 pointer-events-none" />
 
         <div className="relative z-10 flex flex-col h-full">
           {/* Header */}
@@ -269,7 +291,7 @@ export default function TipsModal({ handleClose }: TipsModalProps) {
             <div className="relative max-w-3xl mx-auto">
               <button
                 onClick={handleClose}
-                className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
               >
                 Got it, Let's Go! 🚀
               </button>

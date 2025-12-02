@@ -137,7 +137,7 @@ export function AdvertisingModal({ isOpen, onClose }: AdvertisingModalProps) {
                                                         <p className="text-sm md:text-base text-gray-700 dark:text-gray-300 leading-relaxed">
                                                             Soon, you'll be able to advertise your products and store link across all major social media platforms.
                                                             Reach more customers, track engagement, and grow your business with integrated advertising tools
-                                                            designed specifically for Nigerian vendors.
+                                                            designed specifically for (Biz+Con)™ vendors.
                                                         </p>
                                                     </div>
                                                 </div>
