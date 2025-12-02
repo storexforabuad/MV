@@ -458,7 +458,7 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
           <div className="flex min-h-full items-stretch justify-center text-center md:items-center md:px-2 lg:px-4">
             <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-full md:translate-y-0 md:scale-95" enterTo="opacity-100 translate-y-0 md:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 md:scale-100" leaveTo="opacity-0 translate-y-full md:translate-y-0 md:scale-95">
               <Dialog.Panel className="relative flex w-full max-w-lg transform text-left text-base transition md:my-8">
-                <div className="relative flex w-full flex-col overflow-hidden  md:rounded-2xl bg-card-background shadow-2xl">
+                <div className="relative flex w-full flex-col overflow-hidden  md:rounded-2xl bg-white dark:bg-slate-900 shadow-2xl">
                   <div className="p-4 sm:p-6 flex justify-between items-center border-b border-border-color">
                     <Dialog.Title as="h3" className="text-xl font-bold text-text-primary">
                       {currentStep === 4 ? 'Uploading...' : currentStep === 5 ? 'Summary' : 'Add New Product'}

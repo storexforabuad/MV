@@ -3,14 +3,14 @@ import {
   HomeIcon as HomeIconOutline,
   CubeIcon as CubeIconOutline,
   TagIcon as TagIconOutline,
-  EyeIcon as EyeIconOutline,
+  BuildingStorefrontIcon as BuildingStorefrontIconOutline,
   PlusIcon
 } from '@heroicons/react/24/outline';
 import {
   HomeIcon as HomeIconSolid,
   CubeIcon as CubeIconSolid,
   TagIcon as TagIconSolid,
-  EyeIcon as EyeIconSolid
+  BuildingStorefrontIcon as BuildingStorefrontIconSolid
 } from '@heroicons/react/24/solid';
 import { useSpotlightContext } from '@/context/SpotlightContext';
 
@@ -25,7 +25,7 @@ interface MobileNavProps {
 
 const navItems = [
   { id: 'home', iconOutline: HomeIconOutline, iconSolid: HomeIconSolid, label: 'Home' },
-  { id: 'preview', iconOutline: EyeIconOutline, iconSolid: EyeIconSolid, label: 'Store' },
+  { id: 'preview', iconOutline: BuildingStorefrontIconOutline, iconSolid: BuildingStorefrontIconSolid, label: 'Store' },
   { id: 'add', iconOutline: PlusIcon, iconSolid: PlusIcon, label: 'Upload' },
   { id: 'manage', iconOutline: CubeIconOutline, iconSolid: CubeIconSolid, label: 'Products' },
   { id: 'categories', iconOutline: TagIconOutline, iconSolid: TagIconSolid, label: 'Categories' },
