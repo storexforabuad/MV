@@ -38,7 +38,7 @@ function formatPrice(product: Product): string {
     const currentPrice = `₦${product.price.toLocaleString()}`;
 
     if (product.onPromo && product.originalPrice && product.originalPrice > product.price) {
-        const strikethrough = `~~₦${product.originalPrice.toLocaleString()}~~`;
+        const strikethrough = `~₦${product.originalPrice.toLocaleString()}~`;
         return `${strikethrough} ${currentPrice}`;
     }
 

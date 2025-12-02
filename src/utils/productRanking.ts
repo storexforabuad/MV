@@ -1,14 +1,16 @@
 import { Product } from '@/types/product';
 import { ProductScore } from '@/types/socialPost';
 import { ProductMetrics } from '@/types/productMetrics';
+import { detectPriceDrop } from './priceUtils';
 export type { ProductScore };
 
 // Configurable weights for ranking algorithm
 const WEIGHTS = {
-    views: 0.45,           // Popularity (45%)
+    views: 0.40,           // Popularity (40%)
     recency: 0.25,         // How new the product is (25%)
     stockUrgency: 0.15,    // Low stock urgency (15%)
     shareFreshness: 0.15,  // Avoid recently shared products (15%)
+    priceDrop: 0.05,       // Price drop boost (5%)
     // Note: Revenue removed since orders aren't directly linked to products yet
 };
 
@@ -102,6 +104,26 @@ function calculateShareFreshnessScore(metrics?: ProductMetrics): number {
 }
 
 /**
+ * Calculates price drop boost score
+ * Products with bigger discounts get higher scores
+ * Returns 0-100 where higher = better deal
+ */
+function calculatePriceDropScore(product: Product): number {
+    const dropInfo = detectPriceDrop(product);
+
+    if (!dropInfo) return 0; // No discount
+
+    // Score based on discount size
+    if (dropInfo.dropPercent >= 50) return 100; // Huge drop (50%+)
+    if (dropInfo.dropPercent >= 40) return 90;  // Large drop (40-49%)
+    if (dropInfo.dropPercent >= 30) return 70;  // Good drop (30-39%)
+    if (dropInfo.dropPercent >= 20) return 50;  // Medium drop (20-29%)
+    if (dropInfo.dropPercent >= 15) return 30;  // Small drop (15-19%)
+
+    return 0; // Less than 15% = no boost
+}
+
+/**
  * Calculates stock urgency score for general products
  */
 function calculateStockUrgency(product: Product): number {
@@ -192,13 +214,15 @@ export function calculateProductScore(
     const recencyScore = calculateRecencyScore(product);
     const urgencyScore = calculateStockUrgency(product);
     const freshnessScore = calculateShareFreshnessScore(metrics);
+    const priceDropScore = calculatePriceDropScore(product);
 
     // Calculate weighted total score
     const totalScore =
         (viewsScore * WEIGHTS.views) +
         (recencyScore * WEIGHTS.recency) +
         (urgencyScore * WEIGHTS.stockUrgency) +
-        (freshnessScore * WEIGHTS.shareFreshness);
+        (freshnessScore * WEIGHTS.shareFreshness) +
+        (priceDropScore * WEIGHTS.priceDrop);
 
     // Determine reason
     const reason = getSuggestionReason(viewsScore, recencyScore, urgencyScore);
