@@ -61,7 +61,7 @@ const ReferralsModal: React.FC<ReferralsModalProps> = ({ isOpen, onClose, storeI
   const { customer } = useCustomer();
   const { referrals, isLoading } = useReferrals(customer?.id || null, storeId);
 
-  const referralLink = customer ? `${typeof window !== 'undefined' ? window.location.origin : ''}/${storeId}?ref=${customer.referralCode}` : '';
+  const referralLink = customer ? `https://tinyurl.com/bizcononline/${storeId}?ref=${customer.referralCode}` : '';
 
   const referralData = customer?.referralDataByStore?.[storeId];
   const commissionEarned = referralData?.commissionEarned || 0;
@@ -203,7 +203,7 @@ const ReferralsModal: React.FC<ReferralsModalProps> = ({ isOpen, onClose, storeI
                           >
                             <h4 className="text-sm font-semibold text-text-primary mb-2">🎯 How It Works</h4>
                             <p className="text-xs text-text-secondary leading-relaxed">
-                              Share your unique referral link with friends. When a new customer uses your link to make their first purchase on a product with commission, you'll earn 100% of the commission!
+                              Share your unique referral link with friends. When a new customer uses your link to make their first purchase, you'll earn a percentage, gifts and so much more!
                             </p>
                           </motion.div>
 
