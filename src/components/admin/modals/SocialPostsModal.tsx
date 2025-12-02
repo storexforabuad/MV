@@ -256,9 +256,9 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                         </div>
                     )}
 
-                    {/* Last shared badge */}
+                    {/* Last shared badge - positioned below the trending badge */}
                     {lastSharedText && (
-                        <div className="absolute top-2 right-2 bg-purple-100/90 dark:bg-purple-900/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-medium shadow-sm flex items-center gap-1">
+                        <div className="absolute top-9 left-2 bg-purple-100/90 dark:bg-purple-900/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-medium shadow-sm flex items-center gap-1">
                             <span>📅</span>
                             <span className="text-purple-900 dark:text-purple-100">
                                 {lastSharedText}
