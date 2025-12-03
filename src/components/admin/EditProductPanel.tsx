@@ -93,6 +93,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
     // The final payload to be sent for saving.
     const payload: Partial<Product> = {
       ...restOfState,
+      productType: formState.productType || 'general',
       onPromo: onPromo,
     };
 

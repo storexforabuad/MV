@@ -252,15 +252,15 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                         sizes="(max-width: 640px) 50vw, 33vw"
                     />
                     {scoreData && (
-                        <div className={`absolute ${priceDropInfo ? 'bottom-2' : 'top-2'} left-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-semibold shadow-sm flex items-center gap-1`}>
+                        <div className="absolute top-2 left-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-semibold shadow-sm flex items-center gap-1">
                             <span>{scoreData.emoji}</span>
                             <span className="capitalize text-gray-900 dark:text-gray-100">{scoreData.reason.replace('-', ' ')}</span>
                         </div>
                     )}
 
-                    {/* Last shared badge - positioned relative to trending badge */}
+                    {/* Last shared badge - positioned below trending badge */}
                     {lastSharedText && (
-                        <div className={`absolute ${priceDropInfo ? 'bottom-9' : 'top-9'} left-2 bg-purple-100/90 dark:bg-purple-900/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-medium shadow-sm flex items-center gap-1`}>
+                        <div className="absolute top-9 left-2 bg-purple-100/90 dark:bg-purple-900/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-medium shadow-sm flex items-center gap-1">
                             <span>📅</span>
                             <span className="text-purple-900 dark:text-purple-100">
                                 {lastSharedText}
@@ -268,9 +268,9 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                         </div>
                     )}
 
-                    {/* Price drop badge - positioned on top-right */}
+                    {/* Price drop badge - positioned on bottom-right */}
                     {priceDropInfo && (
-                        <div className={`absolute top-2 right-2 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold shadow-lg flex items-center gap-1 ${priceDropInfo.urgency === 'high'
+                        <div className={`absolute bottom-2 right-2 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold shadow-lg flex items-center gap-1 ${priceDropInfo.urgency === 'high'
                             ? 'bg-red-500/95 text-white animate-pulse'
                             : priceDropInfo.urgency === 'medium'
                                 ? 'bg-orange-500/95 text-white'

@@ -136,7 +136,7 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose, orders, addO
                               initial={{ opacity: 0, y: 20 }}
                               animate={{ opacity: 1, y: 0, transition: { delay: index * 0.2 } }}
                             >
-                              <h4 className="font-bold text-lg card-text-gradient mb-2 sticky top-0 bg-background/80 backdrop-blur-sm py-2 z-10">{formatDateGroup(dateKey)}</h4>
+                              <h4 className="font-bold text-lg mb-2 sticky top-0 bg-background py-2 z-10 -mx-4 px-4"><span className="card-text-gradient">{formatDateGroup(dateKey)}</span></h4>
                               <motion.div
                                 className="grid grid-cols-1 gap-4"
                                 variants={containerVariants}
@@ -174,7 +174,7 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose, orders, addO
 
                   {/* Footer */}
                   <div className="absolute bottom-0 left-0 right-0 z-20">
-                    <div className="bg-background/80 backdrop-blur-sm p-4 border-t border-border-color">
+                    <div className="bg-background p-4 border-t border-border-color">
                       <button onClick={handleClose} className="w-full bg-slate-800 dark:bg-slate-100 text-white dark:text-slate-800 font-semibold py-3 px-4 rounded-full hover:bg-slate-700 dark:hover:bg-slate-200 transition-colors duration-200">
                         close
                       </button>

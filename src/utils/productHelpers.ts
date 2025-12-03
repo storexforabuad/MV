@@ -11,7 +11,7 @@ export function ensureProductType(product: any): Product {
 
 // Type Guard Helpers
 export function isGeneralProduct(product: Product): product is GeneralProduct {
-    return product.productType === 'general';
+    return product.productType === 'general' || !product.productType;
 }
 
 export function isVehicleProduct(product: Product): product is VehicleProduct {
