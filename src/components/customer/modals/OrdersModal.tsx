@@ -32,10 +32,10 @@ const formatDateGroup = (dateStr: string) => {
   if (date.toDateString() === yesterday.toDateString()) {
     return 'Yesterday';
   }
-  return date.toLocaleDateString('en-US', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric' 
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
   });
 };
 
@@ -82,7 +82,7 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose, orders, addO
   }, [orders]);
 
   const sortedDateKeys = useMemo(() => {
-      return Object.keys(groupedOrders).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
+    return Object.keys(groupedOrders).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
   }, [groupedOrders]);
 
   return (
@@ -117,7 +117,7 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose, orders, addO
                 <div className="relative flex w-full flex-col overflow-hidden bg-background shadow-2xl h-screen md:h-[90vh] md:rounded-2xl">
 
                   {/* Header */}
-                  <div className="p-4 flex justify-between items-center border-b border-border-color sticky top-0 bg-background/80 backdrop-blur-sm z-10">
+                  <div className="p-4 flex justify-between items-center border-b border-border-color sticky top-0 bg-background/80 backdrop-blur-sm z-20">
                     <div className="flex items-center gap-2">
                       <Dialog.Title as="h3" className="text-xl font-bold card-text-gradient">My Orders</Dialog.Title>
                     </div>
@@ -125,27 +125,27 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose, orders, addO
                   </div>
 
                   {/* Order List */}
-                  <div className="flex-1 overflow-y-auto p-4">
+                  <div className="flex-1 overflow-y-auto px-4 pb-4">
                     <AnimatePresence>
                       {orders && orders.length > 0 ? (
-                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                           {sortedDateKeys.map((dateKey, index) => (
-                            <motion.div 
-                                key={dateKey} 
-                                className="mb-6"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0, transition: { delay: index * 0.2 } }}
+                            <motion.div
+                              key={dateKey}
+                              className="mb-6"
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0, transition: { delay: index * 0.2 } }}
                             >
-                              <h4 className="font-bold text-lg card-text-gradient mb-2 sticky top-0 bg-background/80 backdrop-blur-sm py-2">{formatDateGroup(dateKey)}</h4>
-                              <motion.div 
+                              <h4 className="font-bold text-lg card-text-gradient mb-2 sticky top-0 bg-background/80 backdrop-blur-sm py-2 z-10">{formatDateGroup(dateKey)}</h4>
+                              <motion.div
                                 className="grid grid-cols-1 gap-4"
                                 variants={containerVariants}
                                 initial="hidden"
                                 animate="visible"
                               >
                                 {groupedOrders[dateKey].map(order => (
-                                  <motion.div 
-                                    key={order.id} 
+                                  <motion.div
+                                    key={order.id}
                                     variants={itemVariants}
                                   >
                                     <OrderDetailCard order={order} addOrder={addOrder} storeMeta={storeMeta} />
@@ -156,7 +156,7 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose, orders, addO
                           ))}
                         </motion.div>
                       ) : (
-                        <motion.div 
+                        <motion.div
                           key="empty-state"
                           initial={{ opacity: 0, scale: 0.95 }}
                           animate={{ opacity: 1, scale: 1 }}
