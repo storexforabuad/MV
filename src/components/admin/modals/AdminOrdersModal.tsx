@@ -1,7 +1,7 @@
 'use client';
 
-import { motion, AnimatePresence, Variants } from 'framer-motion';
-import { X, ShoppingBag, User, MapPin, Phone, ReceiptIcon, CheckCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShoppingCart, User, MapPin, Phone, ReceiptIcon, CheckCircle } from 'lucide-react';
 import Image from 'next/image';
 import { StoreOrder, updateOrderStatus } from '@/app/actions/orderActions';
 import { formatPrice } from '@/utils/price';
@@ -14,21 +14,9 @@ interface AdminOrdersModalProps {
   isOpen: boolean;
   onClose: () => void;
   orders: StoreOrder[];
-  onOrderUpdated: () => void; // Callback to refetch orders
+  onOrderUpdated: () => void;
   storeId: string;
 }
-
-const modalVariants: Variants = {
-  hidden: { y: '100%', opacity: 0 },
-  visible: { y: '0%', opacity: 1, transition: { type: 'spring', damping: 25, stiffness: 150 } },
-  exit: { y: '100%', opacity: 0, transition: { duration: 0.2 } },
-};
-
-const backdropVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1 },
-  exit: { opacity: 0 },
-};
 
 const OrderProductRow = ({ product }: { product: any }) => {
   const imageUrl = product.images && product.images.length > 0 ? product.images[0] : product.image;
@@ -49,7 +37,7 @@ const OrderProductRow = ({ product }: { product: any }) => {
             Size: {product.selectedSize}
           </span>
         )}
-        <p className="text-sm text-indigo-500 dark:text-indigo-400">{formatPrice(product.price)}</p>
+        <p className="text-sm text-orange-500 dark:text-orange-400">{formatPrice(product.price)}</p>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Qty: {product.quantity || 1}</p>
       </div>
     </div>
@@ -123,6 +111,7 @@ export const AdminOrdersModal = ({ isOpen, onClose, orders, onOrderUpdated, stor
   const [selectedOrderForReadiness, setSelectedOrderForReadiness] = useState<StoreOrder | null>(null);
 
   const groupedOrders = groupOrdersByDay(orders);
+  const modalVariants = { hidden: { opacity: 0, y: '100%' }, visible: { opacity: 1, y: 0 }, exit: { opacity: 0, y: '100%' } };
 
   const handleMarkReady = (order: StoreOrder) => {
     setSelectedOrderForReadiness(order);
@@ -133,8 +122,8 @@ export const AdminOrdersModal = ({ isOpen, onClose, orders, onOrderUpdated, stor
       try {
         await updateOrderStatus(storeId, order.id, productIds);
         toast.success('Order status updated!');
-        onOrderUpdated(); // This will trigger a refetch in the parent component
-        setSelectedOrderForReadiness(null); // Close the readiness modal
+        onOrderUpdated();
+        setSelectedOrderForReadiness(null);
       } catch (error) {
         toast.error('Failed to update order status.');
         console.error(error);
@@ -149,41 +138,62 @@ export const AdminOrdersModal = ({ isOpen, onClose, orders, onOrderUpdated, stor
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div variants={backdropVariants} initial="hidden" animate="visible" exit="exit" className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40" onClick={onClose}>
-          <motion.div variants={modalVariants} initial="hidden" animate="visible" exit="exit" className="fixed bottom-0 left-0 right-0 top-0 sm:top-auto sm:bottom-auto h-full w-full bg-slate-100 dark:bg-slate-900 shadow-2xl flex flex-col z-50 sm:max-h-[90vh] sm:max-w-md sm:rounded-2xl" onClick={(e) => e.stopPropagation()}>
-            <header className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 flex-shrink-0">
-              <div className="flex items-center gap-3">
-                <ShoppingBag className="w-6 h-6 text-indigo-500" />
-                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">All Store Orders ({orders.length})</h2>
-              </div>
-              <button onClick={onClose} className="p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" aria-label="Close orders modal">
-                <X className="w-6 h-6 text-slate-600 dark:text-slate-300" />
-              </button>
-            </header>
+        <motion.div
+          className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
+          initial="hidden" animate="visible" exit="exit"
+          variants={modalVariants}
+          transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+        >
+          {/* --- Header --- */}
+          <header className="flex-shrink-0 flex items-center justify-between w-full max-w-5xl mx-auto p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+                All Store Orders ({orders.length})
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Manage your orders</p>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-amber-600 flex items-center justify-center shadow-lg">
+              <ShoppingCart className="w-6 h-6 text-white" />
+            </div>
+          </header>
 
-            <main className="flex-grow p-4 overflow-y-auto">
-              {orders.length > 0 ? (
-                <div className="space-y-6">
-                  {Object.entries(groupedOrders).map(([day, dayOrders]) => (
-                    <div key={day}>
-                      <h3 className="font-bold text-lg text-slate-600 dark:text-slate-300 mb-3">{day}</h3>
-                      <div className="space-y-4">
-                        {dayOrders.map((order) => (
-                          <CustomerOrdersCard key={order.id} order={order} onViewReceipt={setSelectedOrderForReceipt} onMarkReady={handleMarkReady} />
-                        ))}
-                      </div>
+          {/* --- Main Scrollable Content --- */}
+          <main className="flex-grow w-full max-w-5xl mx-auto overflow-y-auto p-4 sm:p-6 scrollbar-hide">
+            {orders.length > 0 ? (
+              <div className="space-y-6">
+                {Object.entries(groupedOrders).map(([day, dayOrders]) => (
+                  <div key={day}>
+                    <h3 className="font-bold text-lg text-slate-600 dark:text-slate-300 mb-3">{day}</h3>
+                    <div className="space-y-4">
+                      {dayOrders.map((order) => (
+                        <CustomerOrdersCard key={order.id} order={order} onViewReceipt={setSelectedOrderForReceipt} onMarkReady={handleMarkReady} />
+                      ))}
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-center h-full text-center text-slate-500 dark:text-slate-400">
-                  <ShoppingBag className="w-16 h-16 mb-4 text-slate-400" />
-                  <h3 className="text-xl font-semibold">No Orders Yet</h3>
-                  <p className="max-w-xs mt-2">As soon as customers place orders, they will appear here.</p>
-                </div>
-              )}
-            </main>
-          </motion.div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-center text-slate-500 dark:text-slate-400">
+                <ShoppingCart className="w-16 h-16 mb-4 text-slate-400" />
+                <h3 className="text-xl font-semibold">No Orders Yet</h3>
+                <p className="max-w-xs mt-2">As soon as customers place orders, they will appear here.</p>
+              </div>
+            )}
+          </main>
+
+          {/* --- Footer --- */}
+          <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-slate-700">
+            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent dark:from-slate-950 dark:to-transparent pointer-events-none" />
+            <div className="relative max-w-5xl mx-auto">
+              <motion.button
+                onClick={onClose}
+                className="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+                whileTap={{ scale: 0.98 }}
+              >
+                Done
+              </motion.button>
+            </div>
+          </footer>
         </motion.div>
       )}
       {selectedOrderForReceipt && (

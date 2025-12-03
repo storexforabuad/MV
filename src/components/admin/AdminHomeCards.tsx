@@ -66,6 +66,7 @@ interface AdminHomeCardsProps {
   promoCaption?: string;
   storeName?: string;
   deliveries: number;
+  ambassadorTier?: string;
 }
 
 const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferralBonus: number, handleClose: () => void }) => (
@@ -142,10 +143,10 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     label: 'Ambassador',
     valueKey: 'referrals',
     icon: Star,
-    gradient: 'bg-gradient-to-br from-indigo-500 via-purple-600 to-violet-700',
+    gradient: 'bg-gradient-to-br from-amber-600 via-orange-700 to-yellow-800', // Default bronze, will be overridden
     text: 'text-white',
     component: null,
-    glowClass: 'dark:shadow-violet-500/30 shadow-violet-500/50',
+    glowClass: 'dark:shadow-orange-500/30 shadow-orange-500/50',
   },
   {
     label: 'Views',
@@ -429,6 +430,44 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             `}</style>
 
         {cardsToRender.map((card, idx) => {
+          // Dynamic Ambassador card with tier-based color
+          if (card.label === 'Ambassador') {
+            const tier = (props.ambassadorTier || 'bronze').toLowerCase();
+            const tierGradients = {
+              bronze: 'bg-gradient-to-br from-amber-600 via-orange-700 to-yellow-800',
+              silver: 'bg-gradient-to-br from-gray-400 via-slate-500 to-gray-600',
+              gold: 'bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-600',
+              platinum: 'bg-gradient-to-br from-slate-300 via-gray-400 to-zinc-500',
+            };
+            const tierGlows = {
+              bronze: 'dark:shadow-orange-500/30 shadow-orange-500/50',
+              silver: 'dark:shadow-gray-500/30 shadow-gray-500/50',
+              gold: 'dark:shadow-yellow-500/30 shadow-yellow-500/50',
+              platinum: 'dark:shadow-gray-400/30 shadow-gray-400/50',
+            };
+            const gradient = tierGradients[tier as keyof typeof tierGradients] || tierGradients.bronze;
+            const glowClass = tierGlows[tier as keyof typeof tierGlows] || tierGlows.bronze;
+
+            return (
+              <motion.div key={`ambassador-${idx}`} variants={itemVariants}>
+                <button className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${gradient} text-white ${glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card)}>
+                  <span className="card-blob" />
+                  <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white bg-opacity-20 mb-1 sm:mb-2 shadow">
+                    <Star className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 drop-shadow" />
+                  </div>
+                  <div className="flex flex-col items-center min-w-0 z-10 w-full">
+                    <div className="text-lg sm:text-xl md:text-2xl font-bold drop-shadow">
+                      {props.referrals}
+                    </div>
+                    <div className="text-xs sm:text-sm font-medium opacity-90 text-center px-1 leading-tight">
+                      Ambassador
+                    </div>
+                  </div>
+                </button>
+              </motion.div>
+            );
+          }
+
           if (card.label === 'Customers' && card.component === AdminCustomersCard) {
             return (
               <motion.div key="customers-card" variants={itemVariants}>

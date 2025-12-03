@@ -118,6 +118,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
   const [commissionAnalytics, setCommissionAnalytics] = useState<CommissionAnalyticsData>({ totalCommission: 0, commissionHistory: [] });
   const [totalReferralBonus, setTotalReferralBonus] = useState(0);
   const [isHomeCardModalOpen, setIsHomeCardModalOpen] = useState(false);
+  const [ambassadorTier, setAmbassadorTier] = useState<string>('bronze');
 
   const searchParams = useSearchParams();
   const { orders, refreshOrders } = useStoreOrders(storeId);
@@ -146,6 +147,12 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
       setStoreMeta(fetchedStoreMeta as StoreMeta);
       setReferrals(fetchedReferrals);
       setCommissionAnalytics(commissionData); // New!
+
+      // Fetch ambassadorTier from store document
+      if (fetchedStoreMeta) {
+        setAmbassadorTier((fetchedStoreMeta as any).ambassadorTier || 'bronze');
+      }
+
       // TODO: You might want a similar analytics action for referral bonuses
       refreshOrders();
 
@@ -318,6 +325,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
                   totalExpenses={0} // Placeholder, as in original code
                   deliveries={0} // Placeholder, as in original code
                   setIsModalOpen={setIsHomeCardModalOpen}
+                  ambassadorTier={ambassadorTier}
                 />
               </div>
             )}
