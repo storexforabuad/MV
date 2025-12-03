@@ -6,7 +6,7 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, ReferenceLine, TooltipProps
 } from 'recharts';
 import { NameType, ValueType } from 'recharts/types/component/DefaultTooltipContent';
-import { X, Loader2, ServerCrash, TrendingUp, CircleDollarSign, Calendar, Star, Trophy } from 'lucide-react';
+import { Loader2, ServerCrash, TrendingUp, CircleDollarSign, Calendar, Star, Trophy } from 'lucide-react';
 import { getRevenueAnalytics } from '@/app/actions/orderActions';
 import { Naira } from '@/components/common/Naira';
 
@@ -148,17 +148,16 @@ export default function RevenueModal({ isOpen, onClose, storeId }: RevenueModalP
           transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
         >
           {/* --- Header --- */}
-          <header className="flex-shrink-0 flex items-center justify-between w-full max-w-5xl mx-auto p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800">
-            <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-3">
-              <CircleDollarSign size={28} className="text-green-500" /> Revenue Analytics
-            </h2>
-            <button
-              onClick={onClose}
-              className="p-2 rounded-full text-slate-500 bg-slate-100 hover:bg-slate-200 dark:text-slate-400 dark:bg-slate-800 dark:hover:bg-slate-700 dark:hover:text-white transition-colors"
-              aria-label="Close modal"
-            >
-              <X size={24} />
-            </button>
+          <header className="flex-shrink-0 flex items-center justify-between w-full max-w-5xl mx-auto p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+                Revenue Analytics
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Track your earnings</p>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
+              <CircleDollarSign className="w-6 h-6 text-white" />
+            </div>
           </header>
 
           {/* --- Main Scrollable Content --- */}
@@ -270,14 +269,17 @@ export default function RevenueModal({ isOpen, onClose, storeId }: RevenueModalP
           </main>
 
           {/* --- Footer --- */}
-          <footer className="flex-shrink-0 w-full max-w-5xl mx-auto p-4 sm:p-6 border-t border-slate-200 dark:border-slate-800">
-            <button
-              type="button"
-              className="w-full rounded-lg bg-slate-200 dark:bg-slate-700 px-4 py-3 text-base font-semibold text-slate-800 dark:text-white shadow-sm hover:bg-slate-300 dark:hover:bg-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-slate-950"
-              onClick={onClose}
-            >
-              Close
-            </button>
+          <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-slate-700">
+            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent dark:from-slate-900 dark:to-transparent pointer-events-none" />
+            <div className="relative max-w-5xl mx-auto">
+              <motion.button
+                onClick={onClose}
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+                whileTap={{ scale: 0.98 }}
+              >
+                Done
+              </motion.button>
+            </div>
           </footer>
         </motion.div>
       )}

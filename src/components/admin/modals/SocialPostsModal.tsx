@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useState, useEffect } from 'react';
+import { Send } from 'lucide-react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon, SparklesIcon, CubeIcon, PencilSquareIcon, CheckIcon, MagnifyingGlassIcon, LightBulbIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
@@ -655,18 +656,15 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                 <div className="relative flex w-full h-screen md:h-[90vh] md:rounded-2xl flex-col overflow-hidden bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 shadow-2xl">
                                     {/* iOS-style Header with blur */}
                                     <div className="px-4 py-3 flex justify-between items-center border-b border-gray-200 dark:border-gray-700 flex-shrink-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg">
-                                        <Dialog.Title as="h3" className="text-lg font-bold text-gray-900 dark:text-gray-100 flex items-center gap-2">
-                                            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-violet-600 rounded-lg flex items-center justify-center">
-                                                <span className="text-white text-base">📱</span>
-                                            </div>
-                                            Social Posts
-                                        </Dialog.Title>
-                                        <button
-                                            onClick={handleClose}
-                                            className="w-8 h-8 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 active:bg-gray-200 dark:active:bg-gray-700 flex items-center justify-center transition-all"
-                                        >
-                                            <XMarkIcon className="h-5 w-5 text-gray-600 dark:text-gray-400" />
-                                        </button>
+                                        <div>
+                                            <Dialog.Title as="h3" className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                                Social Posts
+                                            </Dialog.Title>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400">Share Content</p>
+                                        </div>
+                                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg">
+                                            <Send className="w-6 h-6 text-white" />
+                                        </div>
                                     </div>
 
                                     {/* iOS Segmented Control Tabs */}
@@ -723,6 +721,20 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                             </motion.div>
                                         </AnimatePresence>
                                     </div>
+
+                                    {/* Footer */}
+                                    <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-gray-700">
+                                        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent dark:from-gray-900 dark:to-transparent pointer-events-none" />
+                                        <div className="relative max-w-3xl mx-auto">
+                                            <motion.button
+                                                onClick={handleClose}
+                                                className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+                                                whileTap={{ scale: 0.98 }}
+                                            >
+                                                Done
+                                            </motion.button>
+                                        </div>
+                                    </footer>
                                 </div>
                             </Dialog.Panel>
                         </Transition.Child>

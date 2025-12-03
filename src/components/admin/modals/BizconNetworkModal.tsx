@@ -1,6 +1,6 @@
 'use client';
 
-import { X, Zap, TrendingUp, Star, Globe, Sparkles, Building2, CreditCard, Smartphone } from 'lucide-react';
+import { Zap, TrendingUp, Star, Globe, Sparkles, Building2, CreditCard, Smartphone } from 'lucide-react';
 import { AnimatePresence, motion, Variants } from 'framer-motion';
 import { ReactNode } from 'react';
 
@@ -86,23 +86,15 @@ export const BizconNetworkModal = ({ isOpen, onClose }: BizconNetworkModalProps)
           <div className="relative z-10 flex flex-col h-full">
             {/* Header */}
             <header className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 dark:border-slate-700 flex-shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg">
-                  <Globe className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
-                    (Biz+Con)™ Network
-                  </h2>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">Built for Vendors, by Vendors</p>
-                </div>
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
+                  (Biz+Con)™ Network
+                </h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Built for Vendors, by Vendors</p>
               </div>
-              <button
-                onClick={onClose}
-                className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
-              >
-                <X className="w-6 h-6 text-gray-600 dark:text-gray-400" />
-              </button>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg">
+                <Globe className="w-6 h-6 text-white" />
+              </div>
             </header>
 
             {/* Content */}

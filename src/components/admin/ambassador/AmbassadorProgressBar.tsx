@@ -34,33 +34,39 @@ const AmbassadorProgressBar: FC<AmbassadorProgressBarProps> = ({ ambassadorTier,
   }
 
   return (
-    <div className="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 w-full">
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-bold text-slate-800 dark:text-white">Your Ambassador Tier</h3>
-        <span 
-          className="font-bold py-1 px-3 rounded-full text-sm capitalize"
-          style={{ backgroundColor: currentTier.color, color: '#333' }}
-        >
-          {currentTier.name}
-        </span>
-      </div>
-      
-      <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5 mb-2">
-        <div 
-          className="h-2.5 rounded-full transition-all duration-500 ease-out"
-          style={{ width: `${progressPercentage}%`, backgroundColor: currentTier.color }}
-        ></div>
-      </div>
+    <div className="relative overflow-hidden bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700 w-full transition-all duration-300" style={{ borderColor: `${currentTier.color}40` }}>
+      <div
+        className="absolute inset-0 opacity-10 pointer-events-none transition-all duration-300"
+        style={{ background: `linear-gradient(135deg, ${currentTier.color} 0%, transparent 100%)` }}
+      />
+      <div className="relative z-10">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-lg font-bold text-slate-800 dark:text-white">Your Ambassador Tier</h3>
+          <span
+            className="font-bold py-1 px-3 rounded-full text-sm capitalize"
+            style={{ backgroundColor: currentTier.color, color: '#333' }}
+          >
+            {currentTier.name}
+          </span>
+        </div>
 
-      <div className="text-center text-sm text-slate-600 dark:text-slate-300">
-        {nextTier && referralsNeeded > 0 ? (
-          <p>You have <span className="font-bold text-slate-800 dark:text-white">{activeReferrals}</span> active referrals. Refer <span className="font-bold text-orange-500">{referralsNeeded}</span> more to reach <span className="font-bold" style={{color: nextTier.color}}>{nextTier.name}</span>!</p>
-        ) : !nextTier ? (
-          <div className="flex items-center justify-center font-bold" style={{color: currentTier.color}}>
-            <Trophy className="w-5 h-5 mr-2"/>
-            <p>Congratulations! You've reached the highest tier!</p>
-          </div>
-        ) : null}
+        <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5 mb-2">
+          <div
+            className="h-2.5 rounded-full transition-all duration-500 ease-out"
+            style={{ width: `${progressPercentage}%`, backgroundColor: currentTier.color }}
+          ></div>
+        </div>
+
+        <div className="text-center text-sm text-slate-600 dark:text-slate-300">
+          {nextTier && referralsNeeded > 0 ? (
+            <p>You have <span className="font-bold text-slate-800 dark:text-white">{activeReferrals}</span> active referrals. Refer <span className="font-bold text-orange-500">{referralsNeeded}</span> more to reach <span className="font-bold" style={{ color: nextTier.color }}>{nextTier.name}</span>!</p>
+          ) : !nextTier ? (
+            <div className="flex items-center justify-center font-bold" style={{ color: currentTier.color }}>
+              <Trophy className="w-5 h-5 mr-2" />
+              <p>Congratulations! You've reached the highest tier!</p>
+            </div>
+          ) : null}
+        </div>
       </div>
     </div>
   );

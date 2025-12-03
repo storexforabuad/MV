@@ -1,6 +1,6 @@
 'use client';
 
-import { X, Percent, TrendingDown } from 'lucide-react';
+import { Percent, TrendingDown } from 'lucide-react';
 import { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Naira } from '@/components/common/Naira';
@@ -57,20 +57,16 @@ export default function ExpensesModal({ isOpen, onClose, totalCommission, totalE
             onClick={(e) => e.stopPropagation()}
           >
             {/* --- Header --- */}
-            <header className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 z-10">
-              <h2 className="text-xl font-bold flex items-center gap-2 text-slate-800 dark:text-white">
-                <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-full">
-                  <TrendingDown className="w-5 h-5 text-red-600 dark:text-red-500" />
-                </div>
-                Expenses Breakdown
-              </h2>
-              <button
-                onClick={onClose}
-                className="p-2 rounded-full text-slate-500 hover:bg-gray-100 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500"
-                aria-label="Close modal"
-              >
-                <X size={20} />
-              </button>
+            <header className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 dark:border-slate-700 flex-shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg z-10">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+                  Expenses Breakdown
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Track your spending</p>
+              </div>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-rose-600 flex items-center justify-center shadow-lg">
+                <TrendingDown className="w-6 h-6 text-white" />
+              </div>
             </header>
 
             {/* --- Main Scrollable Content --- */}
@@ -121,20 +117,20 @@ export default function ExpensesModal({ isOpen, onClose, totalCommission, totalE
             </main>
 
             {/* --- Footer / Grand Total --- */}
-            <footer className="p-5 border-t border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <footer className="p-4 sm:p-5 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
               <div className="flex justify-between items-center mb-4">
                 <p className="text-base font-medium text-slate-600 dark:text-slate-400">Total Expenses</p>
                 <p className="text-2xl font-bold text-slate-900 dark:text-white flex items-center">
                   <Naira />{formatCurrency(grandTotal)}
                 </p>
               </div>
-              <button
-                type="button"
-                className="w-full rounded-xl bg-slate-900 dark:bg-slate-800 text-white py-3.5 font-semibold shadow-lg hover:bg-slate-800 dark:hover:bg-slate-700 transition-all active:scale-[0.98]"
+              <motion.button
                 onClick={onClose}
+                className="w-full bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+                whileTap={{ scale: 0.98 }}
               >
-                Close
-              </button>
+                Done
+              </motion.button>
             </footer>
           </motion.div>
         </div>

@@ -1,5 +1,5 @@
 'use client';
-import { X, Lightbulb, Navigation, ShoppingBag, BarChart2, Sparkles, TrendingUp, Gift, Package, Globe, DollarSign, Truck, Star, Share2, Tags, Zap, Users } from 'lucide-react';
+import { Lightbulb, Navigation, ShoppingBag, BarChart2, Sparkles, TrendingUp, Gift, Package, Globe, DollarSign, Truck, Star, Share2, Tags, Zap, Users } from 'lucide-react';
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -243,24 +243,15 @@ export default function TipsModal({ handleClose }: TipsModalProps) {
         <div className="relative z-10 flex flex-col h-full">
           {/* Header */}
           <header className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 dark:border-slate-700 flex-shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg">
-                <Lightbulb className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
-                  Tips & Tricks
-                </h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Master your store</p>
-              </div>
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
+                Tips & Tricks
+              </h2>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Master your store</p>
             </div>
-            <button
-              onClick={handleClose}
-              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
-              aria-label="Close modal"
-            >
-              <X className="w-6 h-6 text-gray-600 dark:text-gray-400" />
-            </button>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center shadow-lg">
+              <Lightbulb className="w-6 h-6 text-white" />
+            </div>
           </header>
 
           {/* Tabs */}
