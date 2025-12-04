@@ -1,13 +1,12 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, User, MapPin, Phone, ReceiptIcon, CheckCircle } from 'lucide-react';
+import { ShoppingCart, User, MapPin, Phone, CheckCircle, MessageCircle } from 'lucide-react';
 import Image from 'next/image';
 import { StoreOrder, updateOrderStatus } from '@/app/actions/orderActions';
 import { formatPrice } from '@/utils/price';
 import { useState, useTransition } from 'react';
 import { toast } from 'react-hot-toast';
-import { ReceiptModal } from '../../modals/ReceiptModal';
 import { MarkOrderReadyModal } from './MarkOrderReadyModal';
 
 interface AdminOrdersModalProps {
@@ -44,46 +43,63 @@ const OrderProductRow = ({ product }: { product: any }) => {
   );
 };
 
-const CustomerOrdersCard = ({ order, onViewReceipt, onMarkReady }: { order: StoreOrder, onViewReceipt: (order: StoreOrder) => void, onMarkReady: (order: StoreOrder) => void }) => {
+const CustomerOrdersCard = ({ order, onMarkReady }: { order: StoreOrder, onMarkReady: (order: StoreOrder) => void }) => {
   const { customerInfo, products } = order;
 
   return (
-    <div className="bg-white dark:bg-slate-800/50 rounded-2xl shadow-md overflow-hidden transition-transform duration-300 hover:shadow-lg hover:scale-[1.02]">
+    <div className="bg-white dark:bg-slate-800/50 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50 overflow-hidden transition-all duration-300 hover:shadow-md">
       {customerInfo && (
-        <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700">
-          <div className="flex items-center gap-3 mb-3">
-            <User className="w-5 h-5 text-slate-500 dark:text-slate-400" />
-            <h4 className="font-semibold text-md text-slate-700 dark:text-slate-200">{customerInfo.name}</h4>
+        <div className="p-5 bg-white dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700/50">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
+                <User className="w-5 h-5 text-slate-500 dark:text-slate-400" />
+              </div>
+              <div>
+                <h4 className="font-bold text-base text-slate-800 dark:text-slate-100">{customerInfo.name}</h4>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Customer</p>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <a href={`tel:${customerInfo.phoneNumber}`} className="flex items-center justify-center w-10 h-10 rounded-full bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 transition-colors">
+                <Phone className="w-5 h-5" />
+              </a>
+              <a href={`https://wa.me/${customerInfo.phoneNumber.replace('+', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-10 h-10 rounded-full bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 transition-colors">
+                <MessageCircle className="w-5 h-5" />
+              </a>
+            </div>
           </div>
-          <div className="space-y-2 text-sm">
+
+          <div className="space-y-3 pl-1">
             <div className="flex items-start gap-3">
               <Phone className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
-              <span className="text-slate-600 dark:text-slate-300">{customerInfo.phoneNumber}</span>
+              <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">{customerInfo.phoneNumber}</span>
             </div>
             <div className="flex items-start gap-3">
               <MapPin className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
-              <span className="text-slate-600 dark:text-slate-300">{customerInfo.deliveryAddress.street}, {customerInfo.deliveryAddress.state}</span>
+              <span className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{customerInfo.deliveryAddress.street}, {customerInfo.deliveryAddress.state}</span>
             </div>
           </div>
         </div>
       )}
 
-      <div className="divide-y divide-slate-200 dark:divide-slate-700/50 px-4">
+      <div className="divide-y divide-slate-100 dark:divide-slate-700/50 px-5 py-2">
         {products.map((product: any, index: number) => (
           <OrderProductRow key={product.id || index} product={product} />
         ))}
       </div>
 
-      <div className="p-2 bg-slate-50 dark:bg-slate-900/50 flex justify-end gap-2">
-        <button onClick={() => onViewReceipt(order)} className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors">
-          <ReceiptIcon className="w-4 h-4" />
-          <span>View Receipt</span>
-        </button>
-        <button onClick={() => onMarkReady(order)} className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-green-500 rounded-lg hover:bg-green-600 transition-colors">
-          <CheckCircle className="w-4 h-4" />
-          <span>Mark as Ready</span>
-        </button>
-      </div>
+      <button
+        onClick={() => onMarkReady(order)}
+        disabled={order.orderStatus === 'ready'}
+        className={`w-full flex items-center justify-center gap-2 py-4 text-sm font-bold text-white transition-colors rounded-b-2xl rounded-t-none mt-2 ${order.orderStatus === 'ready'
+            ? 'bg-slate-400 cursor-not-allowed'
+            : 'bg-green-500 hover:bg-green-600 active:bg-green-700'
+          }`}
+      >
+        <CheckCircle className="w-5 h-5" />
+        <span>{order.orderStatus === 'ready' ? 'Shipped' : 'Mark as Ready'}</span>
+      </button>
     </div>
   );
 };
@@ -107,7 +123,6 @@ const groupOrdersByDay = (orders: StoreOrder[]) => {
 
 export const AdminOrdersModal = ({ isOpen, onClose, orders, onOrderUpdated, storeId }: AdminOrdersModalProps) => {
   const [isPending, startTransition] = useTransition();
-  const [selectedOrderForReceipt, setSelectedOrderForReceipt] = useState<StoreOrder | null>(null);
   const [selectedOrderForReadiness, setSelectedOrderForReadiness] = useState<StoreOrder | null>(null);
 
   const groupedOrders = groupOrdersByDay(orders);
@@ -166,7 +181,7 @@ export const AdminOrdersModal = ({ isOpen, onClose, orders, onOrderUpdated, stor
                     <h3 className="font-bold text-lg text-slate-600 dark:text-slate-300 mb-3">{day}</h3>
                     <div className="space-y-4">
                       {dayOrders.map((order) => (
-                        <CustomerOrdersCard key={order.id} order={order} onViewReceipt={setSelectedOrderForReceipt} onMarkReady={handleMarkReady} />
+                        <CustomerOrdersCard key={order.id} order={order} onMarkReady={handleMarkReady} />
                       ))}
                     </div>
                   </div>
@@ -195,9 +210,6 @@ export const AdminOrdersModal = ({ isOpen, onClose, orders, onOrderUpdated, stor
             </div>
           </footer>
         </motion.div>
-      )}
-      {selectedOrderForReceipt && (
-        <ReceiptModal isOpen={!!selectedOrderForReceipt} onClose={() => setSelectedOrderForReceipt(null)} orders={[selectedOrderForReceipt]} />
       )}
       {selectedOrderForReadiness && (
         <MarkOrderReadyModal isOpen={!!selectedOrderForReadiness} onClose={handleCloseMarkReadyModal} order={selectedOrderForReadiness} onConfirm={handleConfirmMarkReady} isUpdating={isPending} />

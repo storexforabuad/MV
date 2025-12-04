@@ -405,27 +405,37 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                 @keyframes blobMove { 0% { transform: scale(1) translateY(0); } 100% { transform: scale(1.05) translateY(3px); } }
                 .dashboard-card { min-width: 0; max-width: 100%; word-wrap: break-word; overflow: hidden; }
                 .ai-text-gradient {
-                    background: linear-gradient(90deg, #fde047, #22d3ee, #a855f7, #ec4899, #4ade80, #f97316, #fde047);
-                    background-size: 400% 100%;
+                    background: linear-gradient(90deg, 
+                        #fbbf24, /* amber-400 */
+                        #10b981, /* emerald-500 */
+                        #3b82f6, /* blue-500 */
+                        #8b5cf6, /* violet-500 */
+                        #ec4899, /* pink-500 */
+                        #f97316, /* orange-500 */
+                        #14b8a6, /* teal-500 */
+                        #fbbf24  /* amber-400 - loop */
+                    );
+                    background-size: 800% 100%;
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
                     color: transparent;
-                    animation: ai-gradient-flow 10s linear infinite;
+                    animation: ai-gradient-flow 20s linear infinite;
                 }
                 .ai-icon-glow {
-                    animation: ai-icon-glow-anim 10s linear infinite;
+                    animation: ai-icon-glow-anim 20s linear infinite;
                 }
                 @keyframes ai-gradient-flow {
                     0% { background-position: 0% 50%; }
                     100% { background-position: 100% 50%; }
                 }
                 @keyframes ai-icon-glow-anim {
-                    0%, 100% { stroke: #fde047; }
-                    16% { stroke: #22d3ee; }
-                    32% { stroke: #a855f7; }
-                    48% { stroke: #ec4899; }
-                    64% { stroke: #4ade80; }
-                    80% { stroke: #f97316; }
+                    0%, 100% { stroke: #fbbf24; filter: drop-shadow(0 0 8px #fbbf24); }
+                    14% { stroke: #10b981; filter: drop-shadow(0 0 8px #10b981); }
+                    28% { stroke: #3b82f6; filter: drop-shadow(0 0 8px #3b82f6); }
+                    42% { stroke: #8b5cf6; filter: drop-shadow(0 0 8px #8b5cf6); }
+                    56% { stroke: #ec4899; filter: drop-shadow(0 0 8px #ec4899); }
+                    70% { stroke: #f97316; filter: drop-shadow(0 0 8px #f97316); }
+                    84% { stroke: #14b8a6; filter: drop-shadow(0 0 8px #14b8a6); }
                 }
             `}</style>
 

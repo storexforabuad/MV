@@ -5,9 +5,11 @@ import { getStores, getProducts, getPopularProducts } from '../../lib/db';
 import { StoreMeta } from '../../types/store';
 import { getStoreCaption, updateStoreCaption } from '../actions/devActions';
 import { resetAllOnboardingStatuses } from '../actions/onboardingActions'; // Import the new server action
+import { resetStoreViews } from '../actions/resetViews'; // Import reset views action
+import { clearStoreOrders, clearAllCustomerOrders } from '../actions/clearOrders'; // Import clear orders actions
 import CategoryManagement from '../../components/CategoryManagement';
 import Link from 'next/link';
-import { ShoppingBag, ClipboardListIcon, PlusCircle, Save, RefreshCw } from 'lucide-react';
+import { ShoppingBag, ClipboardListIcon, PlusCircle, Save, RefreshCw, Trash2, XCircle } from 'lucide-react';
 import CreateStoreModal from '../../components/admin/modals/CreateStoreModal';
 import { motion } from 'framer-motion';
 import DevTeamReferrals from '../../components/devteam/DevTeamReferrals';
@@ -31,6 +33,9 @@ export default function DevteamPage() {
   const [promoCaption, setPromoCaption] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [isResetting, setIsResetting] = useState(false); // State for the reset button
+  const [isResettingViews, setIsResettingViews] = useState(false); // State for reset views button
+  const [isClearingStoreOrders, setIsClearingStoreOrders] = useState(false); // State for clear store orders
+  const [isClearingAllOrders, setIsClearingAllOrders] = useState(false); // State for clear all orders
 
   const fetchStores = useCallback(async () => {
     const data = await getStores();
@@ -98,6 +103,64 @@ export default function DevteamPage() {
     alert(result.message);
   };
 
+  const handleResetViews = async () => {
+    const confirmed = confirm('⚠️ Are you sure you want to reset ALL views for supermom-ng store? This cannot be undone!');
+    if (!confirmed) return;
+
+    setIsResettingViews(true);
+    try {
+      const result = await resetStoreViews('supermom-ng');
+      alert(`✅ Successfully reset views!\n\n- ${result.productsUpdated} products updated\n- ${result.metricsDeleted} metrics deleted`);
+      // Refresh stats to show updated view counts
+      fetchStats();
+    } catch (error) {
+      alert('❌ Failed to reset views. Check console for details.');
+      console.error(error);
+    } finally {
+      setIsResettingViews(false);
+    }
+  };
+
+  const handleClearStoreOrders = async () => {
+    const confirmed = confirm('⚠️ DANGER: Are you sure you want to DELETE ALL orders for supermom-ng store?\n\nThis will:\n- Delete all store orders\n- Delete all customer orders for this store\n- Reset store stats\n\nThis CANNOT be undone!');
+    if (!confirmed) return;
+
+    setIsClearingStoreOrders(true);
+    try {
+      const result = await clearStoreOrders('supermom-ng');
+      alert(`✅ Successfully deleted orders!\n\n- ${result.storeOrdersDeleted} store orders deleted\n- ${result.customerOrdersDeleted} customer orders deleted`);
+      fetchStats();
+    } catch (error) {
+      alert('❌ Failed to delete orders. Check console for details.');
+      console.error(error);
+    } finally {
+      setIsClearingStoreOrders(false);
+    }
+  };
+
+  const handleClearAllOrders = async () => {
+    const confirmed = confirm('🚨 EXTREME DANGER 🚨\n\nAre you ABSOLUTELY SURE you want to DELETE ALL ORDERS from ALL CUSTOMERS on the ENTIRE PLATFORM?\n\nThis is IRREVERSIBLE and will affect ALL stores!\n\nType "DELETE ALL ORDERS" in the next prompt to confirm.');
+    if (!confirmed) return;
+
+    const doubleConfirm = prompt('Type exactly: DELETE ALL ORDERS');
+    if (doubleConfirm !== 'DELETE ALL ORDERS') {
+      alert('Cancelled. Text did not match.');
+      return;
+    }
+
+    setIsClearingAllOrders(true);
+    try {
+      const result = await clearAllCustomerOrders();
+      alert(`✅ All orders deleted!\n\n- ${result.customersProcessed} customers processed\n- ${result.totalOrdersDeleted} total orders deleted`);
+      fetchStats();
+    } catch (error) {
+      alert('❌ Failed to delete all orders. Check console for details.');
+      console.error(error);
+    } finally {
+      setIsClearingAllOrders(false);
+    }
+  };
+
   const selectedStoreMeta = stores.find(s => s.id === selectedStore);
   const selectedStoreStats = storeStats.find(s => s.id === selectedStore);
 
@@ -113,7 +176,7 @@ export default function DevteamPage() {
         </header>
 
         <div className="max-w-4xl mx-auto">
-          <div className="flex justify-center gap-4 mb-6">
+          <div className="flex justify-center gap-4 mb-6 flex-wrap">
             <button
               onClick={() => setIsModalOpen(true)}
               className="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:bg-blue-700 transition-transform transform hover:scale-105"
@@ -128,6 +191,30 @@ export default function DevteamPage() {
             >
               <RefreshCw className={`w-5 h-5 ${isResetting ? 'animate-spin' : ''}`} />
               {isResetting ? 'Resetting...' : 'Reset All Onboarding'}
+            </button>
+            <button
+              onClick={handleResetViews}
+              disabled={isResettingViews}
+              className="flex items-center gap-2 bg-orange-600 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:bg-orange-700 transition-transform transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              <Trash2 className={`w-5 h-5 ${isResettingViews ? 'animate-spin' : ''}`} />
+              {isResettingViews ? 'Resetting Views...' : 'Reset Supermom Views'}
+            </button>
+            <button
+              onClick={handleClearStoreOrders}
+              disabled={isClearingStoreOrders}
+              className="flex items-center gap-2 bg-rose-600 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:bg-rose-700 transition-transform transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed"
+            >
+              <XCircle className={`w-5 h-5 ${isClearingStoreOrders ? 'animate-spin' : ''}`} />
+              {isClearingStoreOrders ? 'Clearing...' : 'Clear Supermom Orders'}
+            </button>
+            <button
+              onClick={handleClearAllOrders}
+              disabled={isClearingAllOrders}
+              className="flex items-center gap-2 bg-red-900 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:bg-red-950 transition-transform transform hover:scale-105 disabled:bg-gray-400 disabled:cursor-not-allowed border-2 border-red-500"
+            >
+              <XCircle className={`w-5 h-5 ${isClearingAllOrders ? 'animate-spin' : ''}`} />
+              {isClearingAllOrders ? 'Clearing...' : '🚨 Clear ALL Orders'}
             </button>
           </div>
 

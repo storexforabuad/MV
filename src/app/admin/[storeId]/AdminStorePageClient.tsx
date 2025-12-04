@@ -17,6 +17,7 @@ import {
   StoreOrder
 } from '../../../lib/db';
 import { getCommissionAnalytics, CommissionEvent } from '@/app/actions/commissionActions';
+import { getRevenueAnalytics, getReadyForDeliveryOrders } from '@/app/actions/orderActions'; // Import revenue and delivery analytics
 import { requestNotificationPermission } from '../../../lib/firebase-messaging';
 import { Product } from '../../../types/product';
 import { isGeneralProduct } from '../../../utils/productHelpers';
@@ -117,6 +118,8 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
   const [shouldShowSpotlight, setShouldShowSpotlight] = useState(false);
   const [commissionAnalytics, setCommissionAnalytics] = useState<CommissionAnalyticsData>({ totalCommission: 0, commissionHistory: [] });
   const [totalReferralBonus, setTotalReferralBonus] = useState(0);
+  const [realTotalRevenue, setRealTotalRevenue] = useState(0); // New state for real revenue
+  const [deliveriesCount, setDeliveriesCount] = useState(0); // New state for deliveries count
   const [isHomeCardModalOpen, setIsHomeCardModalOpen] = useState(false);
   const [ambassadorTier, setAmbassadorTier] = useState<string>('bronze');
 
@@ -133,20 +136,32 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
   const fetchData = useCallback(async (showRefresh = false) => {
     if (showRefresh) setIsRefreshing(true);
     try {
-      const [fetchedProducts, fetchedCategories, fetchedContacts, fetchedStoreMeta, fetchedReferrals, commissionData] = await Promise.all([
+      const [fetchedProducts, fetchedCategories, fetchedContacts, fetchedStoreMeta, fetchedReferrals, commissionData, revenueData, deliveryOrders] = await Promise.all([
         getProducts(storeId),
         getCategories(storeId),
         getContacts(storeId),
         getStoreMeta(storeId),
         getReferrals(storeId),
-        getCommissionAnalytics(storeId) // New!
+        getCommissionAnalytics(storeId),
+        getRevenueAnalytics(storeId), // Fetch revenue data
+        getReadyForDeliveryOrders(storeId) // Fetch delivery orders
       ]);
       setProducts(fetchedProducts);
       setCategories(fetchedCategories);
       setContacts(fetchedContacts);
       setStoreMeta(fetchedStoreMeta as StoreMeta);
       setReferrals(fetchedReferrals);
-      setCommissionAnalytics(commissionData); // New!
+      setCommissionAnalytics(commissionData);
+
+      // Set real revenue (Revenue + Bonus)
+      if (revenueData) {
+        setRealTotalRevenue(revenueData.lifetimeRevenue + revenueData.lifetimeBonus);
+      }
+
+      // Set deliveries count
+      if (deliveryOrders) {
+        setDeliveriesCount(deliveryOrders.length);
+      }
 
       // Fetch ambassadorTier from store document
       if (fetchedStoreMeta) {
@@ -262,12 +277,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
     }
   };
 
-  const totalRevenue = products.reduce((sum, p) => {
-    if (isGeneralProduct(p)) {
-      return sum + (Number(p.price) * (p.inStock ? 1 : 0));
-    }
-    return sum + Number(p.price); // For vehicles, assume 1? Or just price.
-  }, 0);
+
 
   if (loading || showOnboarding === null) return <AdminSkeleton screen="home" />;
 
@@ -314,7 +324,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
                   promoCaption={storeMeta?.promoCaption}
                   uiVisible={uiVisible}
                   storeName={storeMeta?.name}
-                  totalRevenue={totalRevenue}
+                  totalRevenue={realTotalRevenue} // Use the fetched real revenue
                   onAnimationComplete={handleAnimationComplete}
                   onOrdersCardClick={() => setIsOrdersModalOpen(true)}
                   openManageCategories={() => setIsManageCategoriesModalOpen(true)}
@@ -323,7 +333,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
                   totalCommission={commissionAnalytics.totalCommission} // Corrected prop!
                   totalReferralBonus={totalReferralBonus} // Using placeholder state
                   totalExpenses={0} // Placeholder, as in original code
-                  deliveries={0} // Placeholder, as in original code
+                  deliveries={deliveriesCount} // Use the fetched deliveries count
                   setIsModalOpen={setIsHomeCardModalOpen}
                   ambassadorTier={ambassadorTier}
                 />

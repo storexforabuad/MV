@@ -89,7 +89,10 @@ const ViewsBreakdown: FC<ViewsBreakdownProps> = ({ storeId }) => {
     );
   }
 
-  const totalViewsLast7Days = dailyMetrics.reduce((acc, curr) => acc + curr.views, 0);
+  const totalViewsLast7Days = dailyMetrics.reduce((acc, curr) => {
+    const views = typeof curr.views === 'number' && !isNaN(curr.views) ? curr.views : 0;
+    return acc + views;
+  }, 0);
   const bestDay = [...dailyMetrics].sort((a, b) => b.views - a.views)[0];
 
   return (
@@ -98,7 +101,7 @@ const ViewsBreakdown: FC<ViewsBreakdownProps> = ({ storeId }) => {
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6 text-center">
         <div className="bg-slate-100 dark:bg-slate-800/60 p-4 rounded-lg">
           <p className="text-sm text-slate-500 dark:text-slate-400">Views (Last 7 Days)</p>
-          <p className="text-3xl font-bold text-slate-800 dark:text-slate-100">{totalViewsLast7Days}</p>
+          <p className="text-3xl font-bold text-slate-800 dark:text-slate-100">{totalViewsLast7Days || 0}</p>
         </div>
         <div className="bg-slate-100 dark:bg-slate-800/60 p-4 rounded-lg">
           <p className="text-sm text-slate-500 dark:text-slate-400">All-Time Views</p>

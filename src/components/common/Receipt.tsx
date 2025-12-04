@@ -9,6 +9,7 @@ export interface ReceiptItem {
     name: string;
     price: number;
     quantity: number;
+    selectedSize?: string;
 }
 
 // Define a flexible Order type to accommodate different data structures
@@ -17,6 +18,7 @@ export interface Order {
     createdAt?: string | number | Date;
     orderDate?: string | number | Date;
     items?: ReceiptItem[];
+    products?: ReceiptItem[]; // Support products array from StoreOrder
     product?: {
         id: string | number;
         name: string;
@@ -36,7 +38,32 @@ const GuaranteeIcon = ({ icon: Icon, text }: { icon: React.ElementType, text: st
 export function Receipt({ orders }: { orders: Order[] }) {
     if (!orders || orders.length === 0) return null;
 
-    const allItems = orders.flatMap(order => order.items || (order.product ? [{ ...order.product, quantity: order.quantity || 1 }] : []));
+    // Normalize the orders to extract items/products
+    const allItems = orders.flatMap(order => {
+        // Priority: products > items > product
+        if (order.products && Array.isArray(order.products)) {
+            return order.products.map(p => ({
+                id: p.id,
+                name: p.name,
+                price: p.price,
+                quantity: p.quantity || 1,
+                selectedSize: (p as any).selectedSize
+            }));
+        }
+        if (order.items && Array.isArray(order.items)) {
+            return order.items;
+        }
+        if (order.product) {
+            return [{
+                id: order.product.id,
+                name: order.product.name,
+                price: order.product.price,
+                quantity: order.quantity || 1
+            }];
+        }
+        return [];
+    });
+
     const subtotal = allItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
     const shipping = orders.reduce((acc, order) => acc + (order.shipping || 0), 0); // Sum up shipping costs if they vary per order
     const total = subtotal + shipping;
@@ -51,7 +78,7 @@ export function Receipt({ orders }: { orders: Order[] }) {
                 <div className="relative z-10 text-center mb-4">
                     <h2 className="text-2xl font-bold text-gray-800">Order Receipt</h2>
                     {orderDate && (
-                         <p className="text-sm text-gray-500">{new Date(orderDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                        <p className="text-sm text-gray-500">{new Date(orderDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
                     )}
                 </div>
 
@@ -60,7 +87,12 @@ export function Receipt({ orders }: { orders: Order[] }) {
                         <div key={item.id ? `${item.id}-${index}` : index} className="flex justify-between items-center">
                             <div>
                                 <p className="font-medium text-gray-800">{item.name}</p>
-                                <p className="text-gray-500">Qty: {item.quantity}</p>
+                                {item.selectedSize && (
+                                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 mt-1">
+                                        Size: {item.selectedSize}
+                                    </span>
+                                )}
+                                <p className="text-gray-500 mt-0.5">Qty: {item.quantity}</p>
                             </div>
                             <div className="text-gray-800 font-medium">
                                 <Naira amount={item.price * item.quantity} />
@@ -100,9 +132,9 @@ export function Receipt({ orders }: { orders: Order[] }) {
             <div className="bg-gray-50 text-center py-3 px-6 rounded-b-2xl relative z-10">
                 <p className="text-xs text-gray-500 font-medium">Powered by (Biz+Con)™ Network</p>
             </div>
-             <div className="absolute bottom-0 left-0 w-full h-16 bg-gray-50/50 backdrop-blur-xl" style={{
-                    clipPath: 'ellipse(100% 55% at 48% 100%)'
-                }}></div>
+            <div className="absolute bottom-0 left-0 w-full h-16 bg-gray-50/50 backdrop-blur-xl" style={{
+                clipPath: 'ellipse(100% 55% at 48% 100%)'
+            }}></div>
         </div>
     );
 }
