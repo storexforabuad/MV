@@ -159,7 +159,16 @@ export function OrderDetailCard({ order, addOrder, storeMeta }: OrderDetailCardP
       <ReceiptModal
         isOpen={isReceiptModalOpen}
         onClose={() => setIsReceiptModalOpen(false)}
-        orders={[order]} // The modal expects an array of orders 
+        orders={[{
+          ...order,
+          products: products.map(p => ({
+            id: p.id,
+            name: p.name,
+            price: p.price,
+            quantity: p.productType === 'general' ? p.quantity : 1,
+            selectedSize: (p as any).selectedSize
+          }))
+        }]} // The modal expects an array of orders 
       />
     </>
   );
