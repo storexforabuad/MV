@@ -31,7 +31,7 @@ const TotalProductsModal: React.FC<TotalProductsModalProps> = ({
       return (bTime || 0) - (aTime || 0);
     })
     .slice(0, 5);
-  
+
   const handlePrimaryAction = () => {
     if (isEmpty) {
       setActiveSection('add');
@@ -86,18 +86,18 @@ const TotalProductsModal: React.FC<TotalProductsModalProps> = ({
               <p className="text-xs font-semibold text-text-secondary dark:text-slate-400 mb-2 pl-1">Latest Additions</p>
               <ul className="space-y-2">
                 {latestProducts.map((product) => (
-                  <li 
-                    key={product.id} 
+                  <li
+                    key={product.id}
                     className="flex items-center gap-3 p-2 rounded-lg bg-background-alt dark:bg-slate-700/40 transition-colors border-b border-border-color dark:border-slate-700 last:border-b-0"
                   >
                     <div className="w-10 h-10 rounded-lg bg-background dark:bg-slate-800 overflow-hidden flex items-center justify-center flex-shrink-0">
                       {product.images?.[0] ? (
-                        <Image 
-                          src={product.images[0]} 
-                          alt={product.name} 
-                          width={40} 
-                          height={40} 
-                          className="w-full h-full object-cover" 
+                        <Image
+                          src={product.images[0]}
+                          alt={product.name}
+                          width={40}
+                          height={40}
+                          className="w-full h-full object-cover"
                         />
                       ) : (
                         <span className="text-xs text-text-tertiary dark:text-slate-500">No Img</span>
@@ -105,7 +105,7 @@ const TotalProductsModal: React.FC<TotalProductsModalProps> = ({
                     </div>
                     <div className="flex flex-col min-w-0">
                       <span className="font-medium text-text-primary dark:text-white truncate">{product.name}</span>
-                      <span className="text-xs text-text-secondary dark:text-slate-400">{product.category || 'Uncategorized'}</span>
+                      <span className="text-xs text-text-secondary dark:text-slate-400">{'category' in product && product.category ? product.category : 'Uncategorized'}</span>
                     </div>
                   </li>
                 ))}

@@ -78,6 +78,29 @@ export interface VehicleProduct extends BaseProduct {
 }
 
 // ==========================================
+// LIVESTOCK PRODUCT (Fish, Poultry, etc.)
+// ==========================================
+export interface LivestockProduct extends BaseProduct {
+  productType: 'livestock';
+
+  // Livestock-specific fields
+  species?: string;                    // "Catfish", "Tilapia", "Chicken"
+  lifeStage?: 'fingerling' | 'juvenile' | 'table-size' | 'broodstock';
+  priceUnit?: 'kg' | 'piece';          // Selling by weight or per piece
+  waterType?: 'freshwater' | 'saltwater';
+  averageWeight?: number;              // Average weight in kg
+  stock?: number;                      // Available stock (kg or pieces)
+
+  // Availability
+  available: boolean;
+  soldOut?: boolean;
+  limitedStock?: boolean;
+  inStock?: boolean;
+  quantity?: number;
+  categoryId?: string;
+}
+
+// ==========================================
 // MASTER UNION TYPE
 // ==========================================
-export type Product = GeneralProduct | VehicleProduct;
+export type Product = GeneralProduct | VehicleProduct | LivestockProduct;

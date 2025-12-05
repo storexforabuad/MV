@@ -149,7 +149,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
 
         // Add platform-specific hashtags or mentions
         if (selectedPlatforms.includes('Instagram')) {
-            caption += `\n\n#${selectedProduct.name.replace(/\s/g, '')} #${selectedProduct.category?.replace(/\s/g, '') || 'Product'} #ShopNow`;
+            caption += `\n\n#${selectedProduct.name.replace(/\s/g, '')} #${'category' in selectedProduct && selectedProduct.category ? selectedProduct.category.replace(/\s/g, '') : 'Product'} #ShopNow`;
         }
         if (selectedPlatforms.includes('Twitter')) {
             caption += `\n\nCheck out this amazing product! #${selectedProduct.name.replace(/\s/g, '')}`;

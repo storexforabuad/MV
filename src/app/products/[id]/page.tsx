@@ -218,8 +218,8 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                   </span>
                 )}
                 {isGeneralProduct(product) && (
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border border-gray-200 ${getCategoryColor(product.category).background} ${getCategoryColor(product.category).text}`}>
-                    {product.category}
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border border-gray-200 ${getCategoryColor((product as import('../../../types/product').GeneralProduct).category).background} ${getCategoryColor((product as import('../../../types/product').GeneralProduct).category).text}`}>
+                    {(product as import('../../../types/product').GeneralProduct).category}
                   </span>
                 )}
               </div>

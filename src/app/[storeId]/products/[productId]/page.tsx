@@ -205,7 +205,7 @@ export default function ProductDetail() {
   }
 
   const handlePlaceOrderClick = () => {
-    if (product?.sizeOption && !selectedSize) {
+    if ('sizeOption' in product && product.sizeOption && !selectedSize) {
       toast.error('Please select a size first');
       return;
     }
@@ -220,7 +220,7 @@ export default function ProductDetail() {
   const handleToggleCart = () => {
     if (!product || !storeId) return;
 
-    if (product.sizeOption && !selectedSize) {
+    if ('sizeOption' in product && product.sizeOption && !selectedSize) {
       toast.error('Please select a size first');
       return;
     }
@@ -265,9 +265,14 @@ export default function ProductDetail() {
     };
   };
 
-  // We know it's a general product here because of the check above
-  const generalProduct = product as import('../../../../types/product').GeneralProduct;
-  const canOrder = generalProduct && !generalProduct.soldOut;
+  // Determine if we can order this product
+  const isGeneralProduct = product.productType === 'general';
+  const isLivestockProduct = product.productType === 'livestock';
+  const canOrder = isGeneralProduct
+    ? !(product as import('../../../../types/product').GeneralProduct).soldOut
+    : isLivestockProduct
+      ? (product as import('../../../../types/product').LivestockProduct).available
+      : true;
 
   return (
     <>
@@ -337,12 +342,12 @@ export default function ProductDetail() {
           <div className="mt-4 lg:mt-0 flex flex-col">
             <div className="flex items-center justify-between mb-2">
               <div className="flex flex-wrap gap-1.5">
-                {generalProduct.limitedStock && (
+                {isGeneralProduct && (product as import('../../../../types/product').GeneralProduct).limitedStock && (
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border border-gray-200 bg-[var(--badge-yellow-bg)] text-[var(--badge-yellow-text)]">
                     Limited Stock
                   </span>
                 )}
-                {generalProduct.soldOut && (
+                {isGeneralProduct && (product as import('../../../../types/product').GeneralProduct).soldOut && (
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border border-gray-200 bg-[var(--badge-red-bg)] text-[var(--badge-red-text)]">
                     Sold Out
                   </span>
@@ -363,7 +368,7 @@ export default function ProductDetail() {
               </div>
             </div>
 
-            {generalProduct.soldOut ? (
+            {isGeneralProduct && (product as import('../../../../types/product').GeneralProduct).soldOut ? (
               <div className="w-full text-center p-6 md:p-8 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 shadow-sm mt-4">
                 <div className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/50">
                   <PackageX className="w-8 h-8 text-red-600 dark:text-red-400" />
@@ -402,21 +407,21 @@ export default function ProductDetail() {
                   )}
                 </div>
 
-                {generalProduct.sizeOption && generalProduct.availableSizes && (
+                {isGeneralProduct && (product as import('../../../../types/product').GeneralProduct).sizeOption && (product as import('../../../../types/product').GeneralProduct).availableSizes && (
                   <div className="mb-6">
                     <SizeSelector
                       selectedSize={selectedSize}
                       onSizeSelect={setSelectedSize}
-                      sizes={generalProduct.availableSizes}
-                      sizeCategory={generalProduct.sizeOption}
+                      sizes={(product as import('../../../../types/product').GeneralProduct).availableSizes!}
+                      sizeCategory={(product as import('../../../../types/product').GeneralProduct).sizeOption!}
                     />
                   </div>
                 )}
 
-                {generalProduct.features && (
+                {isGeneralProduct && (product as import('../../../../types/product').GeneralProduct).features && (
                   <div className="mb-8">
                     <ul className="space-y-2">
-                      {generalProduct.features.map((feature, index) => (
+                      {(product as import('../../../../types/product').GeneralProduct).features!.map((feature, index) => (
                         <li key={index} className="flex items-center text-gray-600 dark:text-gray-300"><span className="mr-2">•</span>{feature}</li>
                       ))}
                     </ul>

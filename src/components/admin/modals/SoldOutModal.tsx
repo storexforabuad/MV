@@ -110,7 +110,7 @@ const SoldOutModal: React.FC<SoldOutModalProps> = ({
                     </div>
                     <div className="flex flex-col min-w-0">
                       <span className="font-medium text-text-primary truncate">{product.name}</span>
-                      <span className="text-xs text-text-secondary">{product.category || 'Uncategorized'}</span>
+                      <span className="text-xs text-text-secondary">{'category' in product && product.category ? product.category : 'Uncategorized'}</span>
                     </div>
                   </li>
                 ))}

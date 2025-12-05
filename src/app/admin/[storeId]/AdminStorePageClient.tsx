@@ -321,7 +321,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
                   subscriptionStatus={"Active"}
                   referrals={referrals.length}
                   onReferralAdded={() => fetchData(true)}
-                  soldOut={products.filter(p => isGeneralProduct(p) && ((typeof p.inStock === 'number' && p.inStock === 0) || p.soldOut === true)).length}
+                  soldOut={products.filter(p => isGeneralProduct(p) && (p as import('../../../types/product').GeneralProduct).soldOut === true).length}
                   totalContacts={contacts.reduce((sum, region) => sum + (region.contacts?.length || 0), 0)}
                   storeId={storeId}
                   totalOrders={orders.length} // Use live order count
