@@ -5,7 +5,7 @@ import { ShoppingCart, User, MapPin, Phone, CheckCircle, MessageCircle } from 'l
 import Image from 'next/image';
 import { StoreOrder, updateOrderStatus } from '@/app/actions/orderActions';
 import { formatPrice } from '@/utils/price';
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { MarkOrderReadyModal } from './MarkOrderReadyModal';
 
@@ -15,6 +15,7 @@ interface AdminOrdersModalProps {
   orders: StoreOrder[];
   onOrderUpdated: () => void;
   storeId: string;
+  highlightOrderId?: string | null;
 }
 
 const OrderProductRow = ({ product }: { product: any }) => {
@@ -43,11 +44,21 @@ const OrderProductRow = ({ product }: { product: any }) => {
   );
 };
 
-const CustomerOrdersCard = ({ order, onMarkReady }: { order: StoreOrder, onMarkReady: (order: StoreOrder) => void }) => {
+const CustomerOrdersCard = ({ order, onMarkReady, isHighlighted }: { order: StoreOrder, onMarkReady: (order: StoreOrder) => void, isHighlighted?: boolean }) => {
   const { customerInfo, products } = order;
 
   return (
-    <div className="bg-white dark:bg-slate-800/50 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700/50 overflow-hidden transition-all duration-300 hover:shadow-md">
+    <motion.div
+      id={`order-${order.id}`}
+      className={`bg-white dark:bg-slate-800/50 rounded-2xl shadow-sm border overflow-hidden transition-all duration-300 hover:shadow-md ${isHighlighted
+          ? 'border-blue-500 ring-2 ring-blue-500 shadow-lg shadow-blue-500/20'
+          : 'border-slate-100 dark:border-slate-700/50'
+        }`}
+      animate={isHighlighted ? {
+        scale: [1, 1.02, 1],
+      } : {}}
+      transition={{ duration: 0.5, repeat: 3 }}
+    >
       {customerInfo && (
         <div className="p-5 bg-white dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700/50">
           <div className="flex items-center justify-between mb-4">
@@ -93,14 +104,14 @@ const CustomerOrdersCard = ({ order, onMarkReady }: { order: StoreOrder, onMarkR
         onClick={() => onMarkReady(order)}
         disabled={order.orderStatus === 'ready'}
         className={`w-full flex items-center justify-center gap-2 py-4 text-sm font-bold text-white transition-colors rounded-b-2xl rounded-t-none mt-2 ${order.orderStatus === 'ready'
-            ? 'bg-slate-400 cursor-not-allowed'
-            : 'bg-green-500 hover:bg-green-600 active:bg-green-700'
+          ? 'bg-slate-400 cursor-not-allowed'
+          : 'bg-green-500 hover:bg-green-600 active:bg-green-700'
           }`}
       >
         <CheckCircle className="w-5 h-5" />
         <span>{order.orderStatus === 'ready' ? 'Shipped' : 'Mark as Ready'}</span>
       </button>
-    </div>
+    </motion.div>
   );
 };
 
@@ -121,12 +132,22 @@ const groupOrdersByDay = (orders: StoreOrder[]) => {
   return groups;
 };
 
-export const AdminOrdersModal = ({ isOpen, onClose, orders, onOrderUpdated, storeId }: AdminOrdersModalProps) => {
+export const AdminOrdersModal = ({ isOpen, onClose, orders, onOrderUpdated, storeId, highlightOrderId }: AdminOrdersModalProps) => {
   const [isPending, startTransition] = useTransition();
   const [selectedOrderForReadiness, setSelectedOrderForReadiness] = useState<StoreOrder | null>(null);
 
   const groupedOrders = groupOrdersByDay(orders);
   const modalVariants = { hidden: { opacity: 0, y: '100%' }, visible: { opacity: 1, y: 0 }, exit: { opacity: 0, y: '100%' } };
+
+  // Auto-scroll to highlighted order
+  useEffect(() => {
+    if (highlightOrderId && isOpen) {
+      setTimeout(() => {
+        const element = document.getElementById(`order-${highlightOrderId}`);
+        element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300); // Delay for modal animation
+    }
+  }, [highlightOrderId, isOpen]);
 
   const handleMarkReady = (order: StoreOrder) => {
     setSelectedOrderForReadiness(order);
@@ -181,7 +202,12 @@ export const AdminOrdersModal = ({ isOpen, onClose, orders, onOrderUpdated, stor
                     <h3 className="font-bold text-lg text-slate-600 dark:text-slate-300 mb-3">{day}</h3>
                     <div className="space-y-4">
                       {dayOrders.map((order) => (
-                        <CustomerOrdersCard key={order.id} order={order} onMarkReady={handleMarkReady} />
+                        <CustomerOrdersCard
+                          key={order.id}
+                          order={order}
+                          onMarkReady={handleMarkReady}
+                          isHighlighted={highlightOrderId === order.id}
+                        />
                       ))}
                     </div>
                   </div>

@@ -18,6 +18,7 @@ import {
 import { Product } from '@/types/product';
 import { StoreMeta } from '@/types/store';
 import { Customer, DeliveryAddress } from '@/types/customer';
+import { sendVendorNotification } from './sendVendorNotification';
 
 // Base type for orders returned to the client.
 export interface Order {
@@ -154,6 +155,11 @@ export const addOrderToFirestore = async (
         });
 
         await batch.commit();
+
+        // Send push notification to vendor (fail-safe: errors won't break order placement)
+        sendVendorNotification(storeId, newOrderId, customerData.name).catch(err =>
+            console.error('Failed to send vendor notification:', err)
+        );
 
         return {
             id: newOrderId,

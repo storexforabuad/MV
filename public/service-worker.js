@@ -2,41 +2,47 @@ self.addEventListener('push', (event) => {
   if (!event.data) return;
 
   const data = event.data.json();
-  
+
   const options = {
-    body: data.text,
-    icon: '/icon-192x192.png',
-    badge: '/icon-192x192.png',
+    body: data.notification?.body || data.text,
+    icon: '/icons/icon-192x192.png',
+    badge: '/icons/icon-192x192.png',
     vibrate: [200, 100, 200],
+    tag: data.data?.orderId || 'order-notification',
+    requireInteraction: true, // Keeps notification visible until clicked
     data: {
-      productId: data.productId // Store productId for click handler
+      url: data.data?.url, // Deep link URL
+      type: data.data?.type,
+      orderId: data.data?.orderId,
+      storeId: data.data?.storeId
     }
   };
 
   event.waitUntil(
-    self.registration.showNotification('Bizcon Network', options)
+    self.registration.showNotification(
+      data.notification?.title || 'Bizcon Network',
+      options
+    )
   );
 });
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  
-  // Get the productId from notification data
-  const productId = event.notification.data.productId;
-  
-  // Create the product URL
-  const productUrl = new URL(`/products/${productId}`, self.location.origin).href;
-  
+
+  const targetUrl = event.notification.data.url || '/';
+  const fullUrl = new URL(targetUrl, self.location.origin).href;
+
   event.waitUntil(
-    clients.matchAll({ type: 'window' }).then((windowClients) => {
-      // Check if there's already a window with the product page open
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      // Check if admin dashboard is already open
       for (const client of windowClients) {
-        if (client.url === productUrl) {
-          return client.focus();
+        if (client.url.includes('/admin/')) {
+          // Focus existing window and navigate
+          return client.focus().then(() => client.navigate(fullUrl));
         }
       }
-      // If no existing window, open a new one
-      return clients.openWindow(productUrl);
+      // If no admin window open, create new one
+      return clients.openWindow(fullUrl);
     })
   );
 });

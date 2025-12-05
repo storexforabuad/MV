@@ -1,5 +1,6 @@
 import * as admin from 'firebase-admin';
 import { Firestore } from 'firebase-admin/firestore';
+import { getMessaging } from 'firebase-admin/messaging';
 
 // Check if the service account key is available
 const serviceAccount = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
@@ -36,4 +37,13 @@ try {
   console.error('Failed to get firestore instance from admin', e);
 }
 
-export { adminDb };
+// Export messaging instance for push notifications
+let messaging: ReturnType<typeof getMessaging> | null;
+try {
+  messaging = admin.apps.length > 0 ? getMessaging() : null;
+} catch (e) {
+  messaging = null;
+  console.error('Failed to get messaging instance from admin', e);
+}
+
+export { adminDb, messaging };

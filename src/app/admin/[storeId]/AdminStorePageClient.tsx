@@ -123,6 +123,7 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
   const [deliveriesCount, setDeliveriesCount] = useState(0); // New state for deliveries count
   const [isHomeCardModalOpen, setIsHomeCardModalOpen] = useState(false);
   const [ambassadorTier, setAmbassadorTier] = useState<string>('bronze');
+  const [highlightOrderId, setHighlightOrderId] = useState<string | null>(null);
 
   const searchParams = useSearchParams();
   const { orders, refreshOrders } = useStoreOrders(storeId);
@@ -201,6 +202,14 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
     }
     if (searchParams && searchParams.get('open') === 'ambassador-hub') {
       setIsAmbassadorHubModalOpen(true);
+    }
+    // Handle order deep linking
+    if (searchParams && searchParams.get('open') === 'orders') {
+      const orderId = searchParams.get('orderId');
+      if (orderId) {
+        setHighlightOrderId(orderId);
+      }
+      setIsOrdersModalOpen(true);
     }
   }, [searchParams]);
 
@@ -410,10 +419,14 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
 
       <AdminOrdersModal
         isOpen={isOrdersModalOpen}
-        onClose={() => setIsOrdersModalOpen(false)}
+        onClose={() => {
+          setIsOrdersModalOpen(false);
+          setHighlightOrderId(null); // Clear highlight on close
+        }}
         orders={orders}
         storeId={storeId}
         onOrderUpdated={refreshOrders}
+        highlightOrderId={highlightOrderId}
       />
 
       <AmbassadorHubModal
