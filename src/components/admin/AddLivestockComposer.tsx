@@ -10,10 +10,8 @@ import { Product } from '../../types/product';
 import { addProduct } from '../../lib/db';
 import { uploadImageToCloudinary } from '../../lib/cloudinaryClient';
 import { compressImage } from '../../utils/imageCompression';
-import { formatPrice } from '../../utils/price';
 import CategorySelectorModal from './modals/CategorySelectorModal';
 import ProductUploadTips from './ProductUploadTips';
-import { SizeOption, getSizesForOption } from '../../utils/sizeOptions';
 
 
 // --- TYPES ---
@@ -33,22 +31,26 @@ interface BatchProduct {
   price: number;
   isPromo: boolean;
   promoPrice?: number;
-  commission: number;
   categoryId: string;
   limitedStock: boolean;
   soldOut: boolean;
   useAsTemplate: boolean;
 
-  sizeOption?: SizeOption;          // ← ADD THIS
-  availableSizes?: string[];        // ← ADD THIS
+  // Livestock Specific
+  species: string;
+  lifeStage: 'fingerling' | 'juvenile' | 'table-size' | 'broodstock';
+  priceUnit: 'kg' | 'piece';
+  averageWeight: number;
+  waterType: 'freshwater' | 'saltwater';
+  stock: number;
 }
-interface AddProductComposerProps {
+interface AddLivestockComposerProps {
   isOpen: boolean;
   onClose: () => void;
   storeId: string;
   categories: { id: string; name: string }[];
   onProductAdded: () => void;
-  onAddCategory: (name: string) => Promise<void>; // ADD THIS LINE
+  onAddCategory: (name: string) => Promise<void>;
 }
 
 // --- HELPER COMPONENTS ---
@@ -81,8 +83,8 @@ const FloatingLabelInput: React.FC<{ label: string, value: string | number, onCh
 
 // --- MAIN COMPOSER COMPONENT ---
 
-const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose, storeId, categories, onProductAdded, onAddCategory }) => {
-  const [currentStep, setCurrentStep] = useState(0); // 0: Upload, 1: Details, 2: Pricing, 3: Inventory, 4: Uploading, 5: Summary
+const AddLivestockComposer: React.FC<AddLivestockComposerProps> = ({ isOpen, onClose, storeId, categories, onProductAdded, onAddCategory }) => {
+  const [currentStep, setCurrentStep] = useState(0);
   const [batchProducts, setBatchProducts] = useState<BatchProduct[]>([]);
   const [activeProductIndex, setActiveProductIndex] = useState(0);
   const [isCategorySelectorOpen, setCategorySelectorOpen] = useState(false);
@@ -102,9 +104,8 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
 
   const handleClose = () => {
     onClose();
-    // Delay reset to allow for exit animation
     setTimeout(resetState, 300);
-  }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -117,11 +118,16 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
           price: template?.price || 0,
           isPromo: template?.isPromo || false,
           promoPrice: template?.promoPrice,
-          commission: template?.commission || 10,
           categoryId: template?.categoryId || '',
           limitedStock: template?.limitedStock || false,
           soldOut: template?.soldOut || false,
           useAsTemplate: false,
+          species: template?.species || '',
+          lifeStage: template?.lifeStage || 'table-size',
+          priceUnit: template?.priceUnit || 'kg',
+          waterType: template?.waterType || 'freshwater',
+          stock: template?.stock || 0,
+          averageWeight: template?.averageWeight || 0,
         };
         return baseProduct;
       });
@@ -133,7 +139,7 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
     }
   };
 
-  const handleProductChange = (index: number, field: string | Partial<BatchProduct>, value?: string | number | boolean | undefined | string[]) => {
+  const handleProductChange = (index: number, field: string | Partial<BatchProduct>, value?: string | number | boolean | undefined) => {
     let newBatchProducts = batchProducts.map((p, i) => {
       if (i !== index) return p;
       if (typeof field === 'string') {
@@ -145,45 +151,42 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
 
     const applyTemplate = (templateProduct: BatchProduct, products: BatchProduct[]): BatchProduct[] => {
       return products.map(p => {
-        if (p.id === templateProduct.id) return p; // Don't apply to the template itself
+        if (p.id === templateProduct.id) return p;
         return {
           ...p,
           name: templateProduct.name,
           price: templateProduct.price,
           isPromo: templateProduct.isPromo,
           promoPrice: templateProduct.promoPrice,
-          commission: templateProduct.commission,
           categoryId: templateProduct.categoryId,
           limitedStock: templateProduct.limitedStock,
           soldOut: templateProduct.soldOut,
-          sizeOption: templateProduct.sizeOption,           // ← ADD THIS
-          availableSizes: templateProduct.availableSizes,   // ← ADD THIS
+          species: templateProduct.species,
+          lifeStage: templateProduct.lifeStage,
+          priceUnit: templateProduct.priceUnit,
+          waterType: templateProduct.waterType,
+          stock: templateProduct.stock,
+          averageWeight: templateProduct.averageWeight,
         };
       });
     };
 
     if (field === 'useAsTemplate') {
       if (value === true) {
-        // A new product is selected as a template.
         const newTemplate = { ...changedProduct, useAsTemplate: true };
         setTemplate(newTemplate);
-        // Unset 'useAsTemplate' for all other products.
         newBatchProducts = newBatchProducts.map((p, i) =>
           i === index ? newTemplate : { ...p, useAsTemplate: false }
         );
-        // Apply all values from the new template to other products.
         newBatchProducts = applyTemplate(newTemplate, newBatchProducts);
       } else {
-        // The current template is being disabled.
         if (template?.id === changedProduct.id) {
           setTemplate(null);
         }
       }
     } else if (template && template.id === changedProduct.id) {
-      // The template itself is being edited.
       const updatedTemplate = { ...changedProduct };
       setTemplate(updatedTemplate);
-      // Apply all values from the updated template to other products.
       newBatchProducts = applyTemplate(updatedTemplate, newBatchProducts);
     }
 
@@ -191,18 +194,17 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
   };
 
   const handleSubmit = async () => {
-    // Validation
     for (let i = 0; i < batchProducts.length; i++) {
       const p = batchProducts[i];
       if (!p.name || !p.price || !p.categoryId) {
         toast.error(`Please fill all required fields for "${p.name}".`);
         setActiveProductIndex(i);
-        setCurrentStep(1); // Go back to details
+        setCurrentStep(1);
         return;
       }
     }
     setIsUploading(true);
-    setCurrentStep(4); // Move to uploading screen
+    setCurrentStep(4);
 
     const initialProgress: UploadProgress[] = batchProducts.map(p => ({ id: p.id, fileName: p.name, status: 'idle', statusText: 'Waiting...' }));
     setUploadProgress(initialProgress);
@@ -217,24 +219,31 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
         setUploadProgress(prev => prev.map(p => p.id === productData.id ? { ...p, status: 'uploading', statusText: 'Uploading...' } : p));
         const imageUrl = await uploadImageToCloudinary(compressedFile, storeId);
 
-        const productToAdd: Partial<Product> = {
+        // Build product object without any undefined values
+        const productToAdd: Record<string, any> = {
           name: productData.name,
           price: productData.isPromo ? productData.promoPrice! : productData.price,
           categoryId: productData.categoryId,
           images: [imageUrl],
-          description: '', // Add description field later if needed
+          description: '',
           soldOut: productData.soldOut,
           limitedStock: productData.limitedStock,
           inStock: !productData.soldOut,
-          commission: productData.commission,
+          available: !productData.soldOut, // Required for non-general product types
+          commission: 2.5,
           storeId: storeId,
           views: 0,
           quantity: 1,
-          sizeOption: productData.sizeOption,           // ← ADD THIS
-          availableSizes: productData.availableSizes,   // ← ADD THIS
+          productType: 'livestock',
+          species: productData.species || '',
+          lifeStage: productData.lifeStage || 'table-size',
+          priceUnit: productData.priceUnit || 'kg',
+          waterType: productData.waterType || 'freshwater',
+          averageWeight: productData.averageWeight || 0,
+          stock: productData.stock || 0,
         };
 
-        if (productData.isPromo) {
+        if (productData.isPromo && productData.promoPrice) {
           productToAdd.originalPrice = productData.price;
         }
 
@@ -243,16 +252,17 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
         setUploadProgress(prev => prev.map(p => p.id === productData.id ? { ...p, status: 'success', statusText: 'Success!', imageUrl } : p));
         successCount++;
       } catch (error) {
+        console.error("Error adding product:", error);
         const errorMessage = error instanceof Error ? error.message : String(error);
         setUploadProgress(prev => prev.map(p => p.id === productData.id ? { ...p, status: 'error', statusText: 'Failed', error: errorMessage } : p));
       }
     }
 
     if (successCount > 0) {
-      onProductAdded(); // Trigger re-fetch on parent page
+      onProductAdded();
     }
     setIsUploading(false);
-    setCurrentStep(5); // Move to summary
+    setCurrentStep(5);
   };
 
   const renderStepContent = () => {
@@ -260,7 +270,7 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
     const MotionDiv = motion.div;
 
     switch (currentStep) {
-      case 0: // Initial Upload Step
+      case 0:
         return (
           <MotionDiv key={0} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="p-4 sm:p-6">
             <input type="file" accept="image/*" multiple onChange={handleFileChange} ref={fileInputRef} className="hidden" />
@@ -273,11 +283,10 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
           </MotionDiv>
         );
 
-      case 1: // Details Step
-      case 2: // Pricing Step
-      case 3: // Inventory Step
+      case 1:
+      case 2:
+      case 3:
         if (!activeProduct) return null;
-        const commissionAmount = (activeProduct.isPromo ? activeProduct.promoPrice || 0 : activeProduct.price || 0) * (activeProduct.commission / 100);
         const categoryName = categories.find(c => c.id === activeProduct.categoryId)?.name || 'Select a category';
 
         return (
@@ -305,106 +314,93 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
             <div className="p-4 sm:p-6 space-y-6">
               {currentStep === 1 && (
                 <motion.div key="details" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-                  <FloatingLabelInput label="Product Name" value={activeProduct.name} onChange={(e: ChangeEvent<HTMLInputElement>) => handleProductChange(activeProductIndex, 'name', e.target.value)} />
+                  <FloatingLabelInput label="Product Name" value={activeProduct.name} onChange={(e) => handleProductChange(activeProductIndex, 'name', e.target.value)} />
                   <button onClick={() => setCategorySelectorOpen(true)} className="w-full text-left p-4 bg-input-background rounded-lg border-2 border-input-border">
                     <span className={activeProduct.categoryId ? 'text-text-primary' : 'text-text-secondary'}>{categoryName}</span>
                   </button>
+
+
+                  <div>
+                    <label className="block text-sm font-medium text-text-secondary mb-2">Life Stage</label>
+                    <select
+                      value={activeProduct.lifeStage}
+                      onChange={(e) => handleProductChange(activeProductIndex, 'lifeStage', e.target.value)}
+                      className="w-full p-3 bg-input-background rounded-lg border-2 border-input-border text-text-primary focus:ring-2 focus:ring-blue-600"
+                    >
+                      <option value="fingerling">Fingerling</option>
+                      <option value="juvenile">Juvenile</option>
+                      <option value="table-size">Table Size</option>
+                      <option value="broodstock">Broodstock</option>
+                    </select>
+                  </div>
+
                 </motion.div>
               )}
               {currentStep === 2 && (
                 <motion.div key="pricing" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-                  <FloatingLabelInput label="Price" type="number" value={activeProduct.price} onChange={(e: ChangeEvent<HTMLInputElement>) => handleProductChange(activeProductIndex, 'price', parseFloat(e.target.value) || 0)} />
-                  <ModernToggle label="Add Promo Price ?" checked={activeProduct.isPromo} onChange={checked => handleProductChange(activeProductIndex, 'isPromo', checked)} />
+                  <FloatingLabelInput label="Price" type="number" value={activeProduct.price} onChange={(e) => handleProductChange(activeProductIndex, 'price', parseFloat(e.target.value) || 0)} />
+
+                  <div>
+                    <label className="block text-sm font-medium text-text-secondary mb-2">Pricing Unit</label>
+                    <div className="flex gap-4">
+                      <button
+                        onClick={() => handleProductChange(activeProductIndex, 'priceUnit', 'kg')}
+                        className={`flex-1 p-3 rounded-lg border-2 text-text-primary ${activeProduct.priceUnit === 'kg' ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-input-border'}`}
+                      >
+                        Per Kg
+                      </button>
+                      <button
+                        onClick={() => handleProductChange(activeProductIndex, 'priceUnit', 'piece')}
+                        className={`flex-1 p-3 rounded-lg border-2 text-text-primary ${activeProduct.priceUnit === 'piece' ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-input-border'}`}
+                      >
+                        Per Piece
+                      </button>
+                    </div>
+                  </div>
+
+                  <ModernToggle label="Add Promo Price?" checked={activeProduct.isPromo} onChange={checked => handleProductChange(activeProductIndex, 'isPromo', checked)} />
                   <AnimatePresence>
                     {activeProduct.isPromo && (
                       <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
-                        <FloatingLabelInput label="Promo Price" type="number" value={activeProduct.promoPrice || ''} onChange={(e: ChangeEvent<HTMLInputElement>) => handleProductChange(activeProductIndex, 'promoPrice', parseFloat(e.target.value) || 0)} />
+                        <FloatingLabelInput label="Promo Price" type="number" value={activeProduct.promoPrice || ''} onChange={(e) => handleProductChange(activeProductIndex, 'promoPrice', parseFloat(e.target.value) || 0)} />
                       </motion.div>
                     )}
                   </AnimatePresence>
-                  <div>
-                    <label className="block text-sm font-medium text-text-secondary">Commission+Referral Bonus</label>
-                    <div className="mt-2 bg-input-background p-4 rounded-lg">
-                      <div className="flex justify-center items-center text-sm font-medium text-text-primary mb-2">
-                        <span>{activeProduct.commission}%</span>
-                        <span className="text-text-secondary mx-2">-</span>
-                        <span className="font-bold">{formatPrice(commissionAmount)}</span>
-                      </div>
-                      <input type="range" min="2" max="12" value={activeProduct.commission} onChange={e => handleProductChange(activeProductIndex, 'commission', parseInt(e.target.value))} className="w-full h-2.5 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-lg appearance-none cursor-pointer glass-slider" />
 
-                    </div>
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                    <p className="text-sm text-blue-800 dark:text-blue-200">
+                      <span className="font-bold">Note:</span> A fixed commission of <span className="font-bold">2.5%</span> applies to all livestock sales.
+                    </p>
                   </div>
                 </motion.div>
               )}
               {currentStep === 3 && (
-                <motion.div key="inventory" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
-                  <ModernToggle label="Batch Upload Mode" checked={activeProduct.useAsTemplate} onChange={checked => handleProductChange(activeProductIndex, 'useAsTemplate', checked)} />
-                  <ModernToggle label="Mark as Limited Stock" checked={activeProduct.limitedStock} onChange={checked => handleProductChange(activeProductIndex, 'limitedStock', checked)} />
-                  <ModernToggle label="Mark as Sold Out" checked={activeProduct.soldOut} onChange={checked => handleProductChange(activeProductIndex, 'soldOut', checked)} />
-                  <ModernToggle
-                    label="Add Size Options"
-                    checked={!!activeProduct.sizeOption}
-                    onChange={checked => {
-                      if (checked) {
-                        // Enable - set default to baby-clothes
-                        handleProductChange(activeProductIndex, {
-                          sizeOption: 'baby-clothes',
-                          availableSizes: getSizesForOption('baby-clothes')
-                        });
-                      } else {
-                        // Disable - clear the fields
-                        handleProductChange(activeProductIndex, {
-                          sizeOption: undefined,
-                          availableSizes: undefined
-                        });
-                      }
-                    }}
+                <motion.div key="inventory" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+                  <FloatingLabelInput
+                    label={`Stock Available (${activeProduct.priceUnit === 'kg' ? 'Kilos' : 'Pieces'}) - Optional`}
+                    type="number"
+                    value={activeProduct.stock || ''}
+                    onChange={(e) => handleProductChange(activeProductIndex, 'stock', parseFloat(e.target.value) || 0)}
                   />
 
-                  <AnimatePresence>
-                    {activeProduct.sizeOption !== undefined && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="space-y-2 pt-2"
-                      >
+                  <FloatingLabelInput
+                    label="Average Weight (Kg) - Optional"
+                    type="number"
+                    value={activeProduct.averageWeight || ''}
+                    onChange={(e) => handleProductChange(activeProductIndex, 'averageWeight', parseFloat(e.target.value) || 0)}
+                  />
 
-                        <p className="text-sm font-medium text-text-secondary">Select Size Category:</p>
-                        <div className="grid grid-cols-1 gap-2">
-                          {(['baby-clothes', 'kids-shoes', 'adult-shoes'] as const).map(option => (
-                            <button
-                              key={option}
-                              onClick={() => {
-                                handleProductChange(activeProductIndex, {
-                                  sizeOption: option,
-                                  availableSizes: getSizesForOption(option)
-                                });
-                              }}
-                              className={`p-3 rounded-lg border-2 text-left transition-all ${activeProduct.sizeOption === option
-                                ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20'
-                                : 'border-input-border bg-input-background hover:border-blue-400'
-                                }`}
-                            >
-                              <div className="font-semibold text-text-primary">
-                                {option === 'baby-clothes' && 'Baby Clothes (3m - 24m)'}
-                                {option === 'kids-shoes' && 'Kids Shoes (20 - 35)'}
-                                {option === 'adult-shoes' && 'Adult Shoes (36 - 42)'}
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                  {/* ↑↑↑ END OF NEW BLOCK ↑↑↑ */}
+                  <div className="pt-4 border-t border-border-color space-y-2">
+                    <ModernToggle label="Batch Upload Mode" checked={activeProduct.useAsTemplate} onChange={checked => handleProductChange(activeProductIndex, 'useAsTemplate', checked)} />
+                    <ModernToggle label="Mark as Limited Stock" checked={activeProduct.limitedStock} onChange={checked => handleProductChange(activeProductIndex, 'limitedStock', checked)} />
+                    <ModernToggle label="Mark as Sold Out" checked={activeProduct.soldOut} onChange={checked => handleProductChange(activeProductIndex, 'soldOut', checked)} />
+                  </div>
                 </motion.div>
-              )
-              }
-            </div >
-          </MotionDiv >
+              )}
+            </div>
+          </MotionDiv>
         );
-      case 4: // Uploading
+      case 4:
         return (
           <MotionDiv key={4} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 sm:p-6">
             <h3 className="text-xl font-semibold text-center text-text-primary mb-4">Uploading Products...</h3>
@@ -427,7 +423,7 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
             </div>
           </MotionDiv>
         );
-      case 5: // Summary
+      case 5:
         const successes = uploadProgress.filter(p => p.status === 'success').length;
         const failures = uploadProgress.filter(p => p.status === 'error').length;
         return (
@@ -441,34 +437,31 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
 
       default: return null;
     }
-  }
+  };
 
   const STEPS = [{ name: 'Upload' }, { name: 'Details' }, { name: 'Pricing' }, { name: 'Stock' }];
 
   return (
     <Transition.Root show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-40" onClose={handleClose}>
-        {/* --- Overlay --- */}
         <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
           <div className="fixed inset-0 bg-black bg-opacity-75 backdrop-blur-sm transition-opacity" />
         </Transition.Child>
 
-        {/* --- Modal Content --- */}
         <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
           <div className="flex min-h-full items-stretch justify-center text-center md:items-center md:px-2 lg:px-4">
             <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-full md:translate-y-0 md:scale-95" enterTo="opacity-100 translate-y-0 md:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 md:scale-100" leaveTo="opacity-0 translate-y-full md:translate-y-0 md:scale-95">
               <Dialog.Panel className="relative flex w-full max-w-lg transform text-left text-base transition md:my-8">
-                <div className="relative flex w-full flex-col overflow-hidden  md:rounded-2xl bg-white dark:bg-slate-900 shadow-2xl">
+                <div className="relative flex w-full flex-col overflow-hidden md:rounded-2xl bg-white dark:bg-slate-900 shadow-2xl">
                   <div className="p-4 sm:p-6 flex justify-between items-center border-b border-border-color">
                     <Dialog.Title as="h3" className="text-xl font-bold text-text-primary">
-                      {currentStep === 4 ? 'Uploading...' : currentStep === 5 ? 'Summary' : 'Add New Product'}
+                      {currentStep === 4 ? 'Uploading...' : currentStep === 5 ? 'Summary' : 'Add New Livestock'}
                     </Dialog.Title>
                     <button onClick={handleClose} className="p-1 rounded-full hover:bg-button-secondary transition">
                       <XMarkIcon className="h-6 w-6 text-text-secondary" />
                     </button>
                   </div>
 
-                  {/* Progress Bar */}
                   {currentStep > 0 && currentStep < 4 && (
                     <div className="w-full bg-input-background h-1.5">
                       <motion.div
@@ -486,9 +479,8 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
                     </AnimatePresence>
                   </div>
 
-                  {/* Navigation */}
                   <div className="p-4 sm:p-6 flex justify-between sm:justify-end gap-4 border-t border-border-color">
-                    {currentStep === 0 && ( // New Cancel Button for initial step
+                    {currentStep === 0 && (
                       <button onClick={handleClose} className="w-full rounded-lg border border-border-color bg-button-secondary py-2 px-4 text-sm font-semibold text-text-primary shadow-sm hover:bg-button-secondary-hover focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Cancel</button>
                     )}
                     {currentStep > 0 && currentStep < 4 && (
@@ -523,11 +515,11 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
             handleProductChange(activeProductIndex, 'categoryId', categoryId);
             setCategorySelectorOpen(false);
           }}
-          onAddCategory={onAddCategory} // ADD THIS LINE
+          onAddCategory={onAddCategory}
         />
       </Dialog>
     </Transition.Root>
   );
 };
 
-export default AddProductComposer;
+export default AddLivestockComposer;

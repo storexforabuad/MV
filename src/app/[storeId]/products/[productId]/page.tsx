@@ -113,8 +113,8 @@ export default function ProductDetail() {
           ViewHistoryCache.add(typedProduct);
           await incrementProductViews(storeId, productId);
 
-          // Only fetch category for general products
-          if (isGeneralProduct(typedProduct) && typedProduct.categoryId) {
+          // Fetch category for all product types
+          if (typedProduct.categoryId) {
             const categories = await getCategories(storeId);
             const productCategory = categories.find(c => c.id === typedProduct.categoryId);
             if (productCategory) {
@@ -260,8 +260,8 @@ export default function ProductDetail() {
     };
 
     return colorMap[categoryName] || {
-      background: 'bg-[var(--badge-blue-bg)]',
-      text: 'text-[var(--badge-blue-text)]'
+      background: 'bg-emerald-100 dark:bg-emerald-900/30',
+      text: 'text-emerald-800 dark:text-emerald-300'
     };
   };
 
@@ -352,7 +352,7 @@ export default function ProductDetail() {
                     {category.name}
                   </span>
                 )}
-                {product.productType === 'livestock' && (product as any).lifeStage && (
+                {(product as any).productType === 'livestock' && (product as any).lifeStage && (
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border border-gray-200 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 capitalize">
                     {(product as any).lifeStage.replace('-', ' ')}
                   </span>
@@ -386,7 +386,7 @@ export default function ProductDetail() {
                 <div className="flex items-center gap-3 mb-6">
                   <p className="text-2xl font-semibold card-text-gradient">
                     {formatPrice(product.price)}
-                    {product.productType === 'livestock' && (
+                    {(product as any).productType === 'livestock' && (
                       <span className="text-lg font-normal text-gray-500 dark:text-gray-400">
                         /{(product as any).priceUnit === 'kg' ? 'kg' : 'pc'}
                       </span>
@@ -423,24 +423,7 @@ export default function ProductDetail() {
                   </div>
                 )}
 
-                {product.productType === 'livestock' && (
-                  <div className="mb-8 space-y-3">
-                    <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
-                      <span className="text-gray-500 dark:text-gray-400">Species</span>
-                      <span className="font-medium text-gray-900 dark:text-gray-100">{(product as any).species}</span>
-                    </div>
-                    <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
-                      <span className="text-gray-500 dark:text-gray-400">Water Type</span>
-                      <span className="font-medium text-gray-900 dark:text-gray-100 capitalize">{(product as any).waterType}</span>
-                    </div>
-                    {(product as any).averageWeight > 0 && (
-                      <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
-                        <span className="text-gray-500 dark:text-gray-400">Average Weight</span>
-                        <span className="font-medium text-gray-900 dark:text-gray-100">{(product as any).averageWeight} kg</span>
-                      </div>
-                    )}
-                  </div>
-                )}
+
 
                 <div className="flex flex-col gap-3">
                   <div className="flex items-stretch gap-3">

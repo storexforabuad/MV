@@ -33,9 +33,8 @@ const CategorySelectorModal: React.FC<CategorySelectorProps> = ({
         setIsSubmitting(true);
         try {
             await onAddCategory(trimmedName);
-            // Find the newly created category (it should be the last one added)
-            // Since we don't have the ID yet, we'll wait for the parent to refresh
-            // and close the creation form
+            // The parent will optimistically add the category to the list
+            // Close the creation form and let the user see it in the list
             setNewCategoryName('');
             setIsCreating(false);
         } catch (error) {
@@ -144,8 +143,8 @@ const CategorySelectorModal: React.FC<CategorySelectorProps> = ({
                                             key={cat.id}
                                             onClick={() => onSelect(cat.id)}
                                             className={`w-full text-left p-4 text-lg font-medium rounded-lg transition-all ${selectedCategoryId === cat.id
-                                                    ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-2 border-blue-500'
-                                                    : 'text-text-primary hover:bg-button-secondary-hover border-2 border-transparent'
+                                                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-2 border-blue-500'
+                                                : 'text-text-primary hover:bg-button-secondary-hover border-2 border-transparent'
                                                 }`}
                                         >
                                             {cat.name}

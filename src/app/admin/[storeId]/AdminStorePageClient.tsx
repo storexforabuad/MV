@@ -225,10 +225,13 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
 
   const handleAddCategory = async (name: string) => {
     try {
-      await addCategory(storeId, name);
-      fetchData();
+      const newCategory = await addCategory(storeId, name);
+      // Optimistically update the categories list immediately
+      setCategories(prev => [...prev, newCategory]);
     } catch (error) {
       console.error("Failed to add category:", error);
+      // If failed, re-fetch to ensure consistency
+      fetchData();
     }
   };
 

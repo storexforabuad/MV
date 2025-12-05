@@ -437,15 +437,17 @@ export async function getCategories(storeId: string): Promise<{ id: string, name
   }
 }
 
-export async function addCategory(storeId: string, name: string): Promise<void> {
+export async function addCategory(storeId: string, name: string): Promise<{ id: string; name: string }> {
   try {
     const categoriesRef = collection(db, 'stores', storeId, 'categories');
-    await addDoc(categoriesRef, {
+    const docRef = await addDoc(categoriesRef, {
       name,
       createdAt: serverTimestamp()
     });
+    return { id: docRef.id, name };
   } catch (error) {
     console.error('Error adding category:', error);
+    throw error;
   }
 }
 
