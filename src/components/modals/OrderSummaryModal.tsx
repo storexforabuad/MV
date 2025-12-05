@@ -70,7 +70,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
         `Hello! I would like to order this item:\n\n` +
         `*${product.name}*\n` +
         `🔗 *Product Link:* ${productUrl}\n` +
-        `🔢 *Quantity:* ${quantity}\n` +
+        `🔗 *Product Link:* ${productUrl}\n` +
+        `🔢 *Quantity:* ${quantity} ${product.productType === 'livestock' ? ((product as any).priceUnit === 'kg' ? 'kg' : 'pcs') : ''}\n` +
         (selectedSize ? `📏 *Size:* ${selectedSize}\n` : '') + // Add Size to WhatsApp message
         `💰 *Price:* ${formatPrice(product.price)}\n` +
         `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n` +
@@ -122,12 +123,22 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           Size: {selectedSize}
                         </span>
                       )}
-                      <p className="text-sm text-gray-500 dark:text-gray-400">{formatPrice(product.price)}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">
+                        {formatPrice(product.price)}
+                        {product.productType === 'livestock' && (
+                          <span>/{(product as any).priceUnit === 'kg' ? 'kg' : 'pc'}</span>
+                        )}
+                      </p>
                     </div>
-                    <div className="flex items-center">
-                      <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="p-1 text-gray-500 dark:text-gray-400"><Minus size={16} /></button>
-                      <span className="px-3 text-sm font-medium text-gray-900 dark:text-gray-200">{quantity}</span>
-                      <button onClick={() => setQuantity(q => q + 1)} className="p-1 text-gray-500 dark:text-gray-400"><Plus size={16} /></button>
+                    <div className="flex flex-col items-center gap-1">
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {product.productType === 'livestock' && (product as any).priceUnit === 'kg' ? 'Select Kilos' : 'Quantity'}
+                      </span>
+                      <div className="flex items-center">
+                        <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="p-1 text-gray-500 dark:text-gray-400"><Minus size={16} /></button>
+                        <span className="px-3 text-sm font-medium text-gray-900 dark:text-gray-200">{quantity}</span>
+                        <button onClick={() => setQuantity(q => q + 1)} className="p-1 text-gray-500 dark:text-gray-400"><Plus size={16} /></button>
+                      </div>
                     </div>
                   </div>
 

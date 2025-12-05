@@ -65,7 +65,8 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
       const itemsSummary = cartItems.map(item => {
         const productUrl = `https://tinyurl.com/bizcononline/${storeId}/products/${item.id}`;
         const sizeText = item.selectedSize ? ` (Size: ${item.selectedSize})` : '';
-        return `*${item.name}*${sizeText} (x${item.quantity}) - ${formatPrice(item.price * item.quantity)}\n🔗 ${productUrl}`;
+        const unitText = item.productType === 'livestock' ? ((item as any).priceUnit === 'kg' ? 'kg' : 'pcs') : '';
+        return `*${item.name}*${sizeText} (x${item.quantity}${unitText}) - ${formatPrice(item.price * item.quantity)}\n🔗 ${productUrl}`;
       }).join('\n\n');
 
       const message = `🛍️ *New Order Request*\n\n` +
@@ -121,7 +122,12 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                               Size: {item.selectedSize}
                             </span>
                           )}
-                          <p className="text-sm text-gray-500 dark:text-gray-400">{formatPrice(item.price)} x {item.quantity}</p>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">
+                            {formatPrice(item.price)} x {item.quantity}
+                            {item.productType === 'livestock' && (
+                              <span> {(item as any).priceUnit === 'kg' ? 'kg' : 'pcs'}</span>
+                            )}
+                          </p>
                         </div>
                         <p className="text-sm font-medium text-gray-900 dark:text-gray-200">{formatPrice(item.price * item.quantity)}</p>
                       </div>

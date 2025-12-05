@@ -147,6 +147,11 @@ export default function ProductCard({ product, storeId, activeCategoryId }: Prod
             )}
             <p className="text-lg font-bold text-text-primary card-text-gradient">
               {formatPrice(product.price)}
+              {product.productType === 'livestock' && (
+                <span className="text-sm font-normal text-text-secondary">
+                  /{product.priceUnit === 'kg' ? 'kg' : 'pc'}
+                </span>
+              )}
             </p>
           </div>
         </div>

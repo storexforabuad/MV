@@ -352,6 +352,11 @@ export default function ProductDetail() {
                     {category.name}
                   </span>
                 )}
+                {product.productType === 'livestock' && (product as any).lifeStage && (
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border border-gray-200 bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 capitalize">
+                    {(product as any).lifeStage.replace('-', ' ')}
+                  </span>
+                )}
               </div>
               <div className="hidden px-4 py-1 rounded-full border border-gray-300 dark:border-gray-700 shadow-sm flex items-center">
                 <AnimatedViewCount value={product.views || 0} />
@@ -379,7 +384,14 @@ export default function ProductDetail() {
               <>
                 <h1 className="text-2xl sm:text-3xl font-bold card-text-gradient mb-4">{product.name}</h1>
                 <div className="flex items-center gap-3 mb-6">
-                  <p className="text-2xl font-semibold card-text-gradient">{formatPrice(product.price)}</p>
+                  <p className="text-2xl font-semibold card-text-gradient">
+                    {formatPrice(product.price)}
+                    {product.productType === 'livestock' && (
+                      <span className="text-lg font-normal text-gray-500 dark:text-gray-400">
+                        /{(product as any).priceUnit === 'kg' ? 'kg' : 'pc'}
+                      </span>
+                    )}
+                  </p>
                   {discount && typeof product.originalPrice === 'number' && (
                     <>
                       <p className="text-lg text-gray-500 dark:text-gray-400 line-through">{formatPrice(product.originalPrice)}</p>
@@ -408,6 +420,25 @@ export default function ProductDetail() {
                         <li key={index} className="flex items-center text-gray-600 dark:text-gray-300"><span className="mr-2">•</span>{feature}</li>
                       ))}
                     </ul>
+                  </div>
+                )}
+
+                {product.productType === 'livestock' && (
+                  <div className="mb-8 space-y-3">
+                    <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
+                      <span className="text-gray-500 dark:text-gray-400">Species</span>
+                      <span className="font-medium text-gray-900 dark:text-gray-100">{(product as any).species}</span>
+                    </div>
+                    <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
+                      <span className="text-gray-500 dark:text-gray-400">Water Type</span>
+                      <span className="font-medium text-gray-900 dark:text-gray-100 capitalize">{(product as any).waterType}</span>
+                    </div>
+                    {(product as any).averageWeight > 0 && (
+                      <div className="flex items-center justify-between py-2 border-b border-gray-100 dark:border-gray-800">
+                        <span className="text-gray-500 dark:text-gray-400">Average Weight</span>
+                        <span className="font-medium text-gray-900 dark:text-gray-100">{(product as any).averageWeight} kg</span>
+                      </div>
+                    )}
                   </div>
                 )}
 

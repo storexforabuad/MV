@@ -230,6 +230,7 @@ export default function CreateStoreModal({
                   >
                     <option value="general">🛍️ General Store (Fashion, Retail, Food, etc.)</option>
                     <option value="automotive">🚗 Automotive (Car Dealership)</option>
+                    <option value="livestock">🐟 Livestock (Fishery & Aquaculture)</option>
                   </select>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     This determines the product fields and storefront design.

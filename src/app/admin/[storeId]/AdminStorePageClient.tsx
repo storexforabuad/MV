@@ -30,6 +30,7 @@ import FloatingActionButton from '../../../components/admin/FloatingActionButton
 import AdminHomeCards from '../../../components/admin/AdminHomeCards';
 import AddProductComposer from '../../../components/admin/AddProductComposer';
 import AddVehicleComposer from '../../../components/admin/AddVehicleComposer';
+import AddLivestockComposer from '../../../components/admin/AddLivestockComposer';
 import ManageProductsModal from '../../../components/admin/ManageProductsModal';
 import ManageCategoriesModal from '../../../components/admin/ManageCategoriesModal';
 import { AdminOrdersModal } from '../../../components/admin/modals/AdminOrdersModal';
@@ -355,6 +356,15 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
 
       {storeMeta?.storeType === 'automotive' ? (
         <AddVehicleComposer
+          isOpen={isComposerOpen}
+          onClose={() => setIsComposerOpen(false)}
+          storeId={storeId}
+          categories={categories}
+          onProductAdded={() => fetchData()}
+          onAddCategory={handleAddCategory}
+        />
+      ) : storeMeta?.storeType === 'livestock' ? (
+        <AddLivestockComposer
           isOpen={isComposerOpen}
           onClose={() => setIsComposerOpen(false)}
           storeId={storeId}

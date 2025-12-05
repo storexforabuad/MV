@@ -214,21 +214,85 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                           </AnimatePresence>
                         </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-text-secondary">Commission</label>
-                          <div className="mt-2 bg-input-background p-4 rounded-lg">
-                            <div className="flex justify-center items-center text-sm font-medium text-text-primary mb-2">
-                              <span>{formState.commission || 0}%</span>
-                              <span className="text-text-secondary mx-2">-</span>
-                              <span className="font-bold">{formatPrice(commissionAmount)}</span>
-                            </div>
-                            <input type="range" min="2" max="12" value={formState.commission || 0} onChange={e => handleInputChange('commission', parseInt(e.target.value))} className="w-full h-2.5 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-lg appearance-none cursor-pointer glass-slider" />
+                        {/* Commission Slider Removed - Fixed 2.5% globally */}
 
+                        {formState.productType === 'livestock' && (
+                          <div className="space-y-4 border-t border-border-color pt-4">
+                            <h3 className="text-sm font-medium text-text-secondary">Livestock Details</h3>
+
+                            <StyledInput
+                              id="species"
+                              label="Species"
+                              value={(formState as any).species ?? ''}
+                              onChange={(e) => handleInputChange('species' as any, e.target.value)}
+                            />
+
+                            <div>
+                              <label className="block text-sm font-medium text-text-secondary mb-2">Life Stage</label>
+                              <select
+                                value={(formState as any).lifeStage ?? 'table-size'}
+                                onChange={(e) => handleInputChange('lifeStage' as any, e.target.value)}
+                                className="w-full p-3 bg-input-background rounded-lg border-none text-text-primary focus:ring-2 focus:ring-blue-500"
+                              >
+                                <option value="fingerling">Fingerling</option>
+                                <option value="juvenile">Juvenile</option>
+                                <option value="table-size">Table Size</option>
+                                <option value="broodstock">Broodstock</option>
+                              </select>
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-text-secondary mb-2">Water Type</label>
+                              <select
+                                value={(formState as any).waterType ?? 'freshwater'}
+                                onChange={(e) => handleInputChange('waterType' as any, e.target.value)}
+                                className="w-full p-3 bg-input-background rounded-lg border-none text-text-primary focus:ring-2 focus:ring-blue-500"
+                              >
+                                <option value="freshwater">Freshwater</option>
+                                <option value="saltwater">Saltwater</option>
+                              </select>
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-text-secondary mb-2">Pricing Unit</label>
+                              <div className="flex gap-4">
+                                <button
+                                  type="button"
+                                  onClick={() => handleInputChange('priceUnit' as any, 'kg')}
+                                  className={`flex-1 p-3 rounded-lg border-2 ${(formState as any).priceUnit === 'kg' ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-input-border'}`}
+                                >
+                                  Per Kg
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleInputChange('priceUnit' as any, 'piece')}
+                                  className={`flex-1 p-3 rounded-lg border-2 ${(formState as any).priceUnit === 'piece' ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-input-border'}`}
+                                >
+                                  Per Piece
+                                </button>
+                              </div>
+                            </div>
+
+                            <StyledInput
+                              id="stock"
+                              label={`Stock Available (${(formState as any).priceUnit === 'kg' ? 'Kilos' : 'Pieces'})`}
+                              type="number"
+                              value={(formState as any).stock ?? 0}
+                              onChange={(e) => handleInputChange('stock' as any, parseFloat(e.target.value) || 0)}
+                            />
+
+                            <StyledInput
+                              id="averageWeight"
+                              label="Average Weight (Kg) - Optional"
+                              type="number"
+                              value={(formState as any).averageWeight ?? ''}
+                              onChange={(e) => handleInputChange('averageWeight' as any, parseFloat(e.target.value) || 0)}
+                            />
                           </div>
-                        </div>
+                        )}
 
                         <div className="space-y-1">
-                          <h3 className="text-sm font-medium text-text-secondary mb-2">Inventory</h3>
+                          <h3 className="text-sm font-medium text-text-secondary mb-2">Inventory Status</h3>
                           <ModernSwitch
                             label="Limited Stock"
                             description="Mark item as having limited availability."
