@@ -18,7 +18,7 @@ const pwa = withPWA({
   disable: process.env.NODE_ENV === 'development',
   fallbacks: {
     document: '/offline',
-    image: '/static/images/fallback.png',
+    // image: '/static/images/fallback.png', // Removed to prevent 404
     audio: '',
     video: '',
     font: ''
@@ -34,15 +34,15 @@ const nextConfig = {
   async headers() {
     return process.env.NODE_ENV === 'development'
       ? [
-          {
-            source: '/:path*',
-            headers: [
-              { key: 'Access-Control-Allow-Origin', value: '*' },
-              { key: 'Access-Control-Allow-Methods', value: 'GET, OPTIONS, PATCH, DELETE, POST, PUT' },
-              { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version' },
-            ],
-          },
-        ]
+        {
+          source: '/:path*',
+          headers: [
+            { key: 'Access-Control-Allow-Origin', value: '*' },
+            { key: 'Access-Control-Allow-Methods', value: 'GET, OPTIONS, PATCH, DELETE, POST, PUT' },
+            { key: 'Access-Control-Allow-Headers', value: 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version' },
+          ],
+        },
+      ]
       : [];
   },
   images: {
