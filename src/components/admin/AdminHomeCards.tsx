@@ -198,10 +198,10 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     label: 'Events',
     valueKey: 'events',
     icon: CalendarDays,
-    gradient: 'bg-gradient-to-br from-purple-500 via-purple-600 to-indigo-700',
+    gradient: 'bg-gradient-to-br from-pink-500 via-rose-500 to-red-600',
     text: 'text-white',
     component: null,
-    glowClass: 'dark:shadow-purple-600/30 shadow-purple-600/50',
+    glowClass: 'dark:shadow-pink-500/30 shadow-pink-500/50',
   },
 ];
 
@@ -543,6 +543,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                         if (card.label === 'Expenses') return formatCurrencyForCard(props.totalExpenses + props.totalCommission);
                         if (card.label === 'Ambassador') return props.referrals;
                         if (card.label === 'Deliveries') return 0;
+                        if (card.label === 'Events') return 0;
                         if (typeof value === 'number' || typeof value === 'string') return value;
                         return '';
                       })()}
