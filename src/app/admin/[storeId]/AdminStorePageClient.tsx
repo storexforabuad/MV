@@ -332,10 +332,10 @@ export default function AdminStorePageClient({
 
 
 
-  if (loading || showOnboarding === null) return <AdminSkeleton screen="home" />;
+  if (loading || showOnboarding === null) return <AdminSkeleton />;
 
   if (isTransitioning) {
-    return <AdminSkeleton screen="home" />;
+    return <AdminSkeleton />;
   }
 
   if (showOnboarding) {
@@ -350,7 +350,7 @@ export default function AdminStorePageClient({
 
       {activeSection !== 'preview' ? (
         <main className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">
-          <Suspense fallback={<AdminSkeleton isNavigation={true} />}>
+          <Suspense fallback={<AdminSkeleton contentOnly={true} />}>
             {activeSection === 'home' && (
               <div className={`mb-8 transition-opacity duration-500 ${uiVisible ? 'opacity-100' : 'opacity-0'}`}>
                 <AdminHomeCards
