@@ -44,7 +44,8 @@ export async function sendVendorNotification(
         const shortOrderId = orderId.slice(-6);
 
         // Construct deep link URL with query parameters
-        const deepLinkUrl = `/admin/${storeId}?open=orders&orderId=${orderId}`;
+        // Use tinyurl format as requested
+        const deepLinkUrl = `https://tinyurl.com/bizcononline/admin/${storeId}?open=orders&orderId=${orderId}`;
 
         // Send notification via FCM
         const message = {
