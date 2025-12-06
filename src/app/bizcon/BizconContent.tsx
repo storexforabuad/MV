@@ -186,6 +186,8 @@ export default function BizconContent() {
                 storeId=""
                 activeCategoryId={activeCategory}
                 onAboutClick={() => { }}
+                isOrdersModalOpen={false}
+                setOrdersModalOpen={() => { }}
               />
               {hasMore && (
                 <div ref={observerRef} className="h-8 flex items-center justify-center">
