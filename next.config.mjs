@@ -54,10 +54,10 @@ const nextConfig = {
       },
     ],
   },
-  env: {
-    NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-    VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
-  },
+  // env: {
+  //   NEXT_PUBLIC_VAPID_PUBLIC_KEY: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+  //   VAPID_PRIVATE_KEY: process.env.VAPID_PRIVATE_KEY,
+  // },
   // Bundle optimization settings
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production' ? {

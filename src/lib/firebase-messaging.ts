@@ -10,6 +10,8 @@ export const requestNotificationPermission = async (storeId: string) => {
     return;
   }
 
+  console.log('[DEBUG] Checking VAPID Key:', VAPID_KEY ? 'Present' : 'Missing');
+
   if (!VAPID_KEY) {
     console.error('VAPID key not configured. Please set NEXT_PUBLIC_VAPID_PUBLIC_KEY in .env.local');
     return;
