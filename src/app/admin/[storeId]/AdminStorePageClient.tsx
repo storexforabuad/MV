@@ -136,7 +136,9 @@ export default function AdminStorePageClient({
   const [showOnboarding, setShowOnboarding] = useState<boolean | null>(
     initialStoreMeta?.hasCompletedOnboarding ? false : null
   );
-  const [uiVisible, setUiVisible] = useState(false);
+  const [uiVisible, setUiVisible] = useState(
+    !!initialStoreMeta?.hasCompletedOnboarding
+  );
   const [isTransitioning, setIsTransitioning] = useState(false);
   const { spotlightStep, setSpotlightStep } = useSpotlightContext();
   const [shouldShowSpotlight, setShouldShowSpotlight] = useState(false);
@@ -227,7 +229,7 @@ export default function AdminStorePageClient({
     const hasCompletedOnboarding = localStorage.getItem('hasCompletedOnboarding') === 'true';
     if (initialStoreMeta?.hasCompletedOnboarding || hasCompletedOnboarding) {
       setShowOnboarding(false);
-      setUiVisible(true);
+      if (!uiVisible) setUiVisible(true); // Only set if not already true
     } else {
       setShowOnboarding(true);
       setUiVisible(false);
