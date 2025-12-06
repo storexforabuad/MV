@@ -269,11 +269,28 @@ const transformOrderData = (doc: any): StoreOrder => {
     // --- Defensive Data Transformation --- 
 
     // 1. Products: Default to an empty array if missing or corrupt.
-    let products = data.products || (data.product ? [{ ...data.product, quantity: data.quantity || 1 }] : []);
-    if (!Array.isArray(products)) {
+    // 1. Products: Default to an empty array if missing or corrupt.
+    let rawProducts = data.products || (data.product ? [{ ...data.product, quantity: data.quantity || 1 }] : []);
+    if (!Array.isArray(rawProducts)) {
         console.warn(`Corrupt 'products' field for order ${doc.id}. Falling back to empty array.`);
-        products = [];
+        rawProducts = [];
     }
+
+    // Sanitize products to ensure no Timestamps remain
+    const products = rawProducts.map((p: any) => {
+        const sanitized = { ...p };
+        // Convert known Timestamp fields
+        if (sanitized.createdAt && typeof sanitized.createdAt.toDate === 'function') {
+            sanitized.createdAt = sanitized.createdAt.toDate().toISOString();
+        }
+        // Defensive: Convert any other Timestamp values found at the top level of the product
+        Object.keys(sanitized).forEach(key => {
+            if (sanitized[key] && typeof sanitized[key] === 'object' && typeof sanitized[key].toDate === 'function') {
+                sanitized[key] = sanitized[key].toDate().toISOString();
+            }
+        });
+        return sanitized;
+    });
 
     // 2. Order Date: Default to now, with robust parsing for multiple formats.
     let orderDateStr = new Date().toISOString();

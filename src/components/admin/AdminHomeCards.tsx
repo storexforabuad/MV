@@ -196,7 +196,6 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
   },
   {
     label: 'Events',
-    valueKey: 'events',
     icon: CalendarDays,
     gradient: 'bg-gradient-to-br from-pink-500 via-rose-500 to-red-600',
     text: 'text-white',

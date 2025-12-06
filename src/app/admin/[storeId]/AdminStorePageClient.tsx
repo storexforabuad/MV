@@ -28,20 +28,20 @@ import AdminSkeleton from '../../../components/admin/AdminSkeleton';
 import MobileNav from '../../../components/admin/MobileNav';
 import FloatingActionButton from '../../../components/admin/FloatingActionButton';
 import AdminHomeCards from '../../../components/admin/AdminHomeCards';
-import AddProductComposer from '../../../components/admin/AddProductComposer';
-import AddVehicleComposer from '../../../components/admin/AddVehicleComposer';
-import AddLivestockComposer from '../../../components/admin/AddLivestockComposer';
-import ManageProductsModal from '../../../components/admin/ManageProductsModal';
-import ManageCategoriesModal from '../../../components/admin/ManageCategoriesModal';
-import { AdminOrdersModal } from '../../../components/admin/modals/AdminOrdersModal';
-import { AmbassadorHubModal } from '../../../components/admin/modals/AmbassadorHubModal';
-import PostsComposerModal from '../../../components/admin/modals/PostsComposerModal';
 import dynamic from 'next/dynamic';
 import PreviewSkeleton from '../../../components/admin/PreviewSkeleton';
 import { markOnboardingAsCompleted } from '../../../app/actions/onboardingActions';
 import { useSpotlightContext } from '@/context/SpotlightContext';
 
-const OnboardingFlow = dynamic(() => import('../../../components/admin/onboarding/OnboardingFlow'));
+const OnboardingFlow = dynamic(() => import('../../../components/admin/onboarding/OnboardingFlow'), { ssr: false });
+const AddProductComposer = dynamic(() => import('../../../components/admin/AddProductComposer'), { ssr: false });
+const AddVehicleComposer = dynamic(() => import('../../../components/admin/AddVehicleComposer'), { ssr: false });
+const AddLivestockComposer = dynamic(() => import('../../../components/admin/AddLivestockComposer'), { ssr: false });
+const ManageProductsModal = dynamic(() => import('../../../components/admin/ManageProductsModal'), { ssr: false });
+const ManageCategoriesModal = dynamic(() => import('../../../components/admin/ManageCategoriesModal'), { ssr: false });
+const AdminOrdersModal = dynamic(() => import('../../../components/admin/modals/AdminOrdersModal').then(mod => mod.AdminOrdersModal), { ssr: false });
+const AmbassadorHubModal = dynamic(() => import('../../../components/admin/modals/AmbassadorHubModal').then(mod => mod.AmbassadorHubModal), { ssr: false });
+const PostsComposerModal = dynamic(() => import('../../../components/admin/modals/PostsComposerModal'), { ssr: false });
 
 interface Referral {
   id: string;
@@ -55,9 +55,10 @@ interface CommissionAnalyticsData {
 }
 
 // A new hook to fetch store orders
-const useStoreOrders = (storeId: string) => {
-  const [orders, setOrders] = useState<StoreOrder[]>([]);
-  const [loading, setLoading] = useState(true);
+// A new hook to fetch store orders
+const useStoreOrders = (storeId: string, initialOrders: StoreOrder[]) => {
+  const [orders, setOrders] = useState<StoreOrder[]>(initialOrders);
+  const [loading, setLoading] = useState(false);
 
   const fetchOrders = useCallback(async () => {
     if (!storeId) return;
@@ -71,10 +72,6 @@ const useStoreOrders = (storeId: string) => {
       setLoading(false);
     }
   }, [storeId]);
-
-  useEffect(() => {
-    fetchOrders();
-  }, [fetchOrders]);
 
   return { orders, loading, refreshOrders: fetchOrders };
 };
@@ -96,13 +93,37 @@ async function getReferrals(storeId: string): Promise<Referral[]> {
 
 import { calculateCommissionAndBonus } from '../../../utils/calculations';
 
-export default function AdminStorePageClient({ storeId }: { storeId: string }) {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [contacts, setContacts] = useState<WholesaleData[]>([]);
-  const [referrals, setReferrals] = useState<Referral[]>([]);
-  const [storeMeta, setStoreMeta] = useState<StoreMeta | null>(null);
-  const [loading, setLoading] = useState(true);
+interface AdminStorePageClientProps {
+  storeId: string;
+  initialProducts: Product[];
+  initialCategories: Category[];
+  initialContacts: WholesaleData[];
+  initialStoreMeta: StoreMeta | null;
+  initialReferrals: Referral[];
+  initialCommissionAnalytics: CommissionAnalyticsData;
+  initialRevenueAnalytics: any;
+  initialDeliveryOrders: StoreOrder[];
+  initialOrders: StoreOrder[];
+}
+
+export default function AdminStorePageClient({
+  storeId,
+  initialProducts,
+  initialCategories,
+  initialContacts,
+  initialStoreMeta,
+  initialReferrals,
+  initialCommissionAnalytics,
+  initialRevenueAnalytics,
+  initialDeliveryOrders,
+  initialOrders
+}: AdminStorePageClientProps) {
+  const [products, setProducts] = useState<Product[]>(initialProducts);
+  const [categories, setCategories] = useState<Category[]>(initialCategories);
+  const [contacts, setContacts] = useState<WholesaleData[]>(initialContacts);
+  const [referrals, setReferrals] = useState<Referral[]>(initialReferrals);
+  const [storeMeta, setStoreMeta] = useState<StoreMeta | null>(initialStoreMeta);
+  const [loading, setLoading] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
@@ -112,21 +133,23 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
   const [isAmbassadorHubModalOpen, setIsAmbassadorHubModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isPreviewLoading, setIsPreviewLoading] = useState(true);
-  const [showOnboarding, setShowOnboarding] = useState<boolean | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState<boolean | null>(
+    initialStoreMeta?.hasCompletedOnboarding ? false : null
+  );
   const [uiVisible, setUiVisible] = useState(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const { spotlightStep, setSpotlightStep } = useSpotlightContext();
   const [shouldShowSpotlight, setShouldShowSpotlight] = useState(false);
-  const [commissionAnalytics, setCommissionAnalytics] = useState<CommissionAnalyticsData>({ totalCommission: 0, commissionHistory: [] });
+  const [commissionAnalytics, setCommissionAnalytics] = useState<CommissionAnalyticsData>(initialCommissionAnalytics);
   const [totalReferralBonus, setTotalReferralBonus] = useState(0);
-  const [realTotalRevenue, setRealTotalRevenue] = useState(0); // New state for real revenue
-  const [deliveriesCount, setDeliveriesCount] = useState(0); // New state for deliveries count
+  const [realTotalRevenue, setRealTotalRevenue] = useState(initialRevenueAnalytics ? initialRevenueAnalytics.lifetimeRevenue + initialRevenueAnalytics.lifetimeBonus : 0);
+  const [deliveriesCount, setDeliveriesCount] = useState(initialDeliveryOrders.length);
   const [isHomeCardModalOpen, setIsHomeCardModalOpen] = useState(false);
   const [ambassadorTier, setAmbassadorTier] = useState<string>('bronze');
   const [highlightOrderId, setHighlightOrderId] = useState<string | null>(null);
 
   const searchParams = useSearchParams();
-  const { orders, refreshOrders } = useStoreOrders(storeId);
+  const { orders, refreshOrders } = useStoreOrders(storeId, initialOrders);
 
   useEffect(() => {
     if (orders) {
@@ -192,9 +215,24 @@ export default function AdminStorePageClient({ storeId }: { storeId: string }) {
 
   useEffect(() => {
     if (!storeId) return;
-    fetchData();
+    // Only request notification permission on mount, data is already here!
     requestNotificationPermission(storeId);
-  }, [storeId, fetchData]);
+
+    // Initialize ambassador tier from props
+    if (initialStoreMeta) {
+      setAmbassadorTier((initialStoreMeta as any).ambassadorTier || 'bronze');
+    }
+
+    // Initialize onboarding state
+    const hasCompletedOnboarding = localStorage.getItem('hasCompletedOnboarding') === 'true';
+    if (initialStoreMeta?.hasCompletedOnboarding || hasCompletedOnboarding) {
+      setShowOnboarding(false);
+      setUiVisible(true);
+    } else {
+      setShowOnboarding(true);
+      setUiVisible(false);
+    }
+  }, [storeId, initialStoreMeta]);
 
   useEffect(() => {
     if (searchParams && searchParams.get('open') === 'posts') {
