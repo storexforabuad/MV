@@ -16,6 +16,15 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
+// Instantly activate service worker
+self.addEventListener('install', (event) => {
+    self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+    event.waitUntil(clients.claim());
+});
+
 // Handle background messages
 messaging.onBackgroundMessage((payload) => {
     console.log('Received background message:', payload);
@@ -38,18 +47,33 @@ self.addEventListener('notificationclick', (event) => {
     event.notification.close();
 
     const targetUrl = event.notification.data?.url || '/';
+    const notificationType = event.notification.data?.type;
     const fullUrl = new URL(targetUrl, self.location.origin).href;
 
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-            // Check if admin dashboard is already open
-            for (const client of windowClients) {
-                if (client.url.includes('/admin/')) {
-                    // Focus existing window and navigate
-                    return client.focus().then(() => client.navigate(fullUrl));
+
+            // For vendor notifications - check if admin dashboard is open
+            if (notificationType === 'new_order') {
+                for (const client of windowClients) {
+                    if (client.url.includes('/admin/')) {
+                        return client.focus().then(() => client.navigate(fullUrl));
+                    }
                 }
             }
-            // If no admin window open, create new one
+
+            // For customer notifications - check if storefront is open
+            if (notificationType === 'order_status_update') {
+                const storeId = event.notification.data?.storeId;
+                for (const client of windowClients) {
+                    // Check if URL contains storeId but NOT admin
+                    if (storeId && client.url.includes(storeId) && !client.url.includes('/admin/')) {
+                        return client.focus().then(() => client.navigate(fullUrl));
+                    }
+                }
+            }
+
+            // If no matching window open, create new one
             return clients.openWindow(fullUrl);
         })
     );

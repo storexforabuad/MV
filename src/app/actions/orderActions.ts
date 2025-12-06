@@ -19,6 +19,7 @@ import { Product } from '@/types/product';
 import { StoreMeta } from '@/types/store';
 import { Customer, DeliveryAddress } from '@/types/customer';
 import { sendVendorNotification } from './sendVendorNotification';
+import { sendCustomerNotification } from './sendCustomerNotification';
 
 // Base type for orders returned to the client.
 export interface Order {
@@ -52,6 +53,7 @@ interface FirestoreOrderData {
     orderDate: Timestamp;
     customerId: string;
     orderStatus: 'processing' | 'partially-ready' | 'ready' | 'shipped';
+    deliveryMethod: 'home' | 'pickup';
     customerInfo: {
         id: string;
         name: string;
@@ -71,6 +73,7 @@ export const addOrderToFirestore = async (
     customer: Customer,
     referralCode: string | null,
     bonusApplied: boolean = false,
+    deliveryMethod: 'home' | 'pickup' = 'home',
 ): Promise<Order> => {
     try {
         const storeId = storeMeta.id;
@@ -132,6 +135,7 @@ export const addOrderToFirestore = async (
             orderDate,
             customerId,
             orderStatus: 'processing',
+            deliveryMethod,
             customerInfo: {
                 id: customerId,
                 name: customerData.name,
@@ -245,6 +249,15 @@ export const updateOrderStatus = async (storeId: string, orderId: string, produc
     const customerOrderRef = doc(db, 'customers', orderData.customerId, 'orders', orderId);
     if ((await getDoc(customerOrderRef)).exists()) {
         await updateDoc(customerOrderRef, { products: updatedProducts, orderStatus: newOrderStatus });
+    }
+
+    // Send notification to customer (fail-safe)
+    if (newOrderStatus === 'ready' || newOrderStatus === 'partially-ready') {
+        const customerId = orderData.customerId;
+        const storeName = orderData.storeMeta?.name || 'Store';
+        sendCustomerNotification(customerId, orderId, storeName, newOrderStatus).catch(err =>
+            console.error('Failed to send customer notification:', err)
+        );
     }
 };
 

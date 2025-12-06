@@ -61,7 +61,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
       // FIX: The product needs to be in an array, and quantity must be part of the product object.
       // Include selectedSize in the order object
       const productToOrder = { ...product, quantity, selectedSize };
-      await addOrder([productToOrder], storeMetaWithId, customer, referrerId, false);
+      await addOrder([productToOrder], storeMetaWithId, customer, referrerId, false, deliveryMethod as 'home' | 'pickup');
 
       toast.success('Order placed! Redirecting to WhatsApp...');
 

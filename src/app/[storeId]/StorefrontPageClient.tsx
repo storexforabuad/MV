@@ -21,6 +21,11 @@ import { ProductListCache } from '@/lib/productCache';
 import ReferralBanner from '@/components/customer/ReferralBanner';
 import CustomerLookupModal from '@/components/customer/CustomerLookupModal';
 import NavigationStore, { NavigationState } from '@/lib/navigationStore';
+import { requestCustomerNotificationPermission } from '@/lib/requestCustomerNotifications';
+import { useCustomer } from '@/context/CustomerContext';
+import { getMessaging, onMessage } from 'firebase/messaging';
+import { app } from '@/lib/firebase';
+import toast from 'react-hot-toast';
 
 const ProductGrid = dynamic(
   () => import('../../components/products/ProductGrid'),
@@ -74,6 +79,77 @@ export default function StorefrontPageClient({ storeId }: { storeId: string }) {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [storeMeta, setStoreMeta] = useState<any | null>(null);
+  const [highlightOrderId, setHighlightOrderId] = useState<string | null>(null);
+  const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
+  const { customer } = useCustomer();
+
+  // Handle deep linking
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('open') === 'orders') {
+        const orderId = params.get('orderId');
+        if (orderId) {
+          setHighlightOrderId(orderId);
+        }
+        setIsOrdersModalOpen(true);
+      }
+    }
+  }, []);
+
+  const handleNotificationRequest = async () => {
+    if (customer?.id) {
+      return requestCustomerNotificationPermission(customer.id);
+    }
+    return { success: false, error: 'No customer ID' };
+  };
+
+  // Handle foreground notifications
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      try {
+        const messaging = getMessaging(app);
+        const unsubscribe = onMessage(messaging, (payload) => {
+          console.log('Foreground message received:', payload);
+
+          if (payload.notification) {
+            toast.custom((t) => (
+              <div
+                className={`${t.visible ? 'animate-enter' : 'animate-leave'
+                  } max-w-md w-full bg-white dark:bg-gray-800 shadow-lg rounded-lg pointer-events-auto flex ring-1 ring-black ring-opacity-5 cursor-pointer`}
+                onClick={() => {
+                  if (payload.data?.orderId) {
+                    setHighlightOrderId(payload.data.orderId);
+                    setIsOrdersModalOpen(true);
+                    toast.dismiss(t.id);
+                  }
+                }}
+              >
+                <div className="flex-1 w-0 p-4">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 pt-0.5">
+                      <span className="text-2xl">📦</span>
+                    </div>
+                    <div className="ml-3 flex-1">
+                      <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                        {payload.notification?.title}
+                      </p>
+                      <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                        {payload.notification?.body}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ), { duration: 5000 });
+          }
+        });
+        return () => unsubscribe();
+      } catch (error) {
+        console.error('Error setting up foreground message listener:', error);
+      }
+    }
+  }, []);
 
   const fetchProducts = useCallback(async (categoryId: string, pageNum = 1, lastDoc: DocumentSnapshot | null = null) => {
     if (!storeId) return;
@@ -227,6 +303,10 @@ export default function StorefrontPageClient({ storeId }: { storeId: string }) {
                 activeCategoryId={activeCategoryId}
                 onAboutClick={() => setAboutOpen(true)}
                 storeMeta={storeMeta}
+                isOrdersModalOpen={isOrdersModalOpen}
+                setOrdersModalOpen={setIsOrdersModalOpen}
+                highlightOrderId={highlightOrderId}
+                onNotificationRequest={handleNotificationRequest}
               />
               {storeId && <BusinessCardModal open={aboutOpen} onClose={() => setAboutOpen(false)} storeMeta={storeMeta || undefined} />}
               {hasMore && (

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
 import { Repeat, MessageSquare, Clock, ReceiptIcon, CheckCircle, Truck } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { Order } from '../../../hooks/useOrders';
 import { formatPrice } from '../../../utils/price';
 import { ReceiptModal } from '../../modals/ReceiptModal';
@@ -16,6 +17,7 @@ interface OrderDetailCardProps {
   order: Order;
   addOrder: (products: Product[], storeMeta: StoreMeta, customerInfo: Customer, referralCode: string | null, bonusApplied: boolean) => Promise<void>;
   storeMeta: StoreMeta;
+  isHighlighted?: boolean;
 }
 
 const getStatusUI = (status: Order['orderStatus']) => {
@@ -32,7 +34,7 @@ const getStatusUI = (status: Order['orderStatus']) => {
   }
 };
 
-export function OrderDetailCard({ order, addOrder, storeMeta }: OrderDetailCardProps) {
+export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted }: OrderDetailCardProps) {
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   const { customer } = useCustomer();
 
@@ -86,7 +88,8 @@ export function OrderDetailCard({ order, addOrder, storeMeta }: OrderDetailCardP
 
   return (
     <>
-      <div className="bg-card-background rounded-2xl shadow-md overflow-hidden transition-transform duration-300 ease-in-out hover:scale-[1.02] hover:shadow-xl">
+      <div className={`bg-card-background rounded-2xl shadow-md overflow-hidden transition-all duration-300 ease-in-out hover:scale-[1.02] hover:shadow-xl ${isHighlighted ? 'ring-2 ring-green-500 shadow-lg shadow-green-500/20' : ''
+        }`}>
         <div className="p-4">
           <div className="flex justify-between items-start">
             <div>
@@ -94,8 +97,22 @@ export function OrderDetailCard({ order, addOrder, storeMeta }: OrderDetailCardP
               <p className="text-sm text-text-secondary">Placed on {orderDate}</p>
             </div>
             <div className={`flex items-center gap-2 text-sm font-medium ${statusInfo.color}`}>
-              {statusInfo.icon}
-              <span>{statusInfo.text}</span>
+              {isHighlighted && order.orderStatus === 'ready' ? (
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.5, repeat: 2, repeatType: "reverse" }}
+                  className="flex items-center gap-2"
+                >
+                  {statusInfo.icon}
+                  <span>{statusInfo.text}</span>
+                </motion.div>
+              ) : (
+                <>
+                  {statusInfo.icon}
+                  <span>{statusInfo.text}</span>
+                </>
+              )}
             </div>
           </div>
 

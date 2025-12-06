@@ -17,6 +17,8 @@ interface OrdersModalProps {
   storeId: string;
   addOrder: (products: Product[], storeMeta: StoreMeta, customerInfo: Customer, referralCode: string | null, bonusApplied: boolean) => Promise<void>; // Updated to accept multiple products
   storeMeta: StoreMeta;
+  highlightOrderId?: string | null;
+  onNotificationRequest?: () => Promise<{ success: boolean; error?: string }>;
 }
 
 // Helper function to format the date header
@@ -61,7 +63,37 @@ const itemVariants: Variants = {
   },
 };
 
-const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose, orders, addOrder, storeMeta }) => {
+const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose, orders, addOrder, storeMeta, highlightOrderId, onNotificationRequest }) => {
+  const [hasRequestedNotifications, setHasRequestedNotifications] = React.useState(false);
+
+  // Request notification permission if user has placed an order
+  React.useEffect(() => {
+    if (isOpen && orders.length > 0 && !hasRequestedNotifications && onNotificationRequest) {
+      // If permission is default, ask for it
+      if (Notification.permission === 'default') {
+        onNotificationRequest().then(() => {
+          setHasRequestedNotifications(true);
+        });
+      }
+      // If permission is ALREADY granted, ensure we have the token saved
+      else if (Notification.permission === 'granted') {
+        console.log('Permission already granted, ensuring token is saved...');
+        onNotificationRequest().then(() => {
+          setHasRequestedNotifications(true);
+        });
+      }
+    }
+  }, [isOpen, orders.length, hasRequestedNotifications, onNotificationRequest]);
+
+  // Auto-scroll to highlighted order
+  React.useEffect(() => {
+    if (highlightOrderId && isOpen) {
+      setTimeout(() => {
+        const element = document.getElementById(`customer-order-${highlightOrderId}`);
+        element?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 300);
+    }
+  }, [highlightOrderId, isOpen]);
 
   const handleClose = () => {
     onClose();
@@ -147,8 +179,14 @@ const OrdersModal: React.FC<OrdersModalProps> = ({ isOpen, onClose, orders, addO
                                   <motion.div
                                     key={order.id}
                                     variants={itemVariants}
+                                    id={`customer-order-${order.id}`}
                                   >
-                                    <OrderDetailCard order={order} addOrder={addOrder} storeMeta={storeMeta} />
+                                    <OrderDetailCard
+                                      order={order}
+                                      addOrder={addOrder}
+                                      storeMeta={storeMeta}
+                                      isHighlighted={highlightOrderId === order.id}
+                                    />
                                   </motion.div>
                                 ))}
                               </motion.div>

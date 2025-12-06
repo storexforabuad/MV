@@ -58,7 +58,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
       const referrerId = localStorage.getItem('referrerId');
 
       // FIX: Submit all cart items as a single order.
-      await addOrder(cartItems, storeMetaWithId, customer, referrerId, false);
+      await addOrder(cartItems, storeMetaWithId, customer, referrerId, false, deliveryMethod as 'home' | 'pickup');
 
       toast.success('Order placed! Redirecting to WhatsApp...');
 

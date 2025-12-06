@@ -89,14 +89,28 @@ interface ProductGridProps {
   activeCategoryId: string;
   onAboutClick: () => void;
   storeMeta?: StoreMeta | null;
+  isOrdersModalOpen: boolean;
+  setOrdersModalOpen: (isOpen: boolean) => void;
+  highlightOrderId?: string | null;
+  onNotificationRequest?: () => Promise<{ success: boolean; error?: string }>;
 }
 
-const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId, activeCategoryId, onAboutClick, storeMeta }: ProductGridProps) {
+const ProductGrid = memo(function ProductGrid({
+  products,
+  containerRef,
+  storeId,
+  activeCategoryId,
+  onAboutClick,
+  storeMeta,
+  isOrdersModalOpen,
+  setOrdersModalOpen,
+  highlightOrderId,
+  onNotificationRequest
+}: ProductGridProps) {
   const router = useRouter();
   const { customer, promptLogin } = useCustomer();
   const { orders, addOrder } = useOrders(customer?.id ?? null, storeId || "");
   const [isSingleColumn, setIsSingleColumn] = useState(false);
-  const [isOrdersModalOpen, setOrdersModalOpen] = useState(false);
   const [isReferralModalOpen, setReferralModalOpen] = useState(false);
 
   const handleOrdersClick = () => {
@@ -162,7 +176,18 @@ const ProductGrid = memo(function ProductGrid({ products, containerRef, storeId,
         </div>
       )}
 
-      {storeId && storeMeta && <OrdersModal isOpen={isOrdersModalOpen} onClose={() => setOrdersModalOpen(false)} orders={orders} storeId={storeId} addOrder={addOrder} storeMeta={storeMeta} />}
+      {storeId && storeMeta && (
+        <OrdersModal
+          isOpen={isOrdersModalOpen}
+          onClose={() => setOrdersModalOpen(false)}
+          orders={orders}
+          storeId={storeId}
+          addOrder={addOrder}
+          storeMeta={storeMeta}
+          highlightOrderId={highlightOrderId}
+          onNotificationRequest={onNotificationRequest}
+        />
+      )}
       {storeId && <ReferralsModal isOpen={isReferralModalOpen} onClose={() => setReferralModalOpen(false)} storeId={storeId} />}
 
       <motion.div
