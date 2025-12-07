@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useMemo, Fragment, useRef } from 'react';
+import React, { useState, useMemo, Fragment, useRef, useEffect, useCallback } from 'react';
 import { Dialog, Transition, Menu } from '@headlessui/react';
 import { XMarkIcon, MagnifyingGlassIcon, EllipsisVerticalIcon, EyeIcon } from '@heroicons/react/24/solid';
 import Image from 'next/image';
@@ -10,6 +10,7 @@ import EditProductPanel from './EditProductPanel';
 import ConfirmationDialog from '../common/ConfirmationDialog';
 import { useDynamicMenuPosition } from '@/hooks/useDynamicMenuPosition';
 import { isGeneralProduct } from '../../utils/productHelpers';
+import { useInView } from 'react-intersection-observer';
 
 // --- TYPES ---
 interface ManageProductsModalProps {
@@ -20,15 +21,15 @@ interface ManageProductsModalProps {
   categories: { id: string; name: string }[];
   onUpdateProduct: (productId: string, data: Partial<Product>) => Promise<void>;
   onDeleteProduct: (productId: string) => void;
-  onAddCategory: (name: string) => Promise<void>; // ADD THIS LINE
+  onAddCategory: (name: string) => Promise<void>;
 }
 type FilterType = 'all' | 'popular' | 'limited' | 'soldout';
 
 // --- SUB-COMPONENTS ---
 
-const ProductRow = ({
+const ProductRow = React.memo(({
   product,
-  categories,
+  categoryName,
   onEdit,
   onDeleteRequest,
   isSelectMode,
@@ -36,14 +37,13 @@ const ProductRow = ({
   onSelect
 }: {
   product: Product,
-  categories: { id: string, name: string }[],
+  categoryName: string,
   onEdit: (product: Product) => void,
   onDeleteRequest: (product: Product) => void,
   isSelectMode: boolean,
   isSelected: boolean,
   onSelect: (productId: string) => void
 }) => {
-  const categoryName = categories.find(c => c.id === product.categoryId)?.name || 'Uncategorized';
   const { menuPosition, calculateMenuPosition } = useDynamicMenuPosition();
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -119,7 +119,8 @@ const ProductRow = ({
       )}
     </div>
   )
-};
+});
+ProductRow.displayName = 'ProductRow';
 
 
 const FilterChip = ({ label, value, activeFilter, onClick, count }: { label: string, value: FilterType, activeFilter: FilterType, onClick: (filter: FilterType) => void, count: number }) => {
@@ -154,6 +155,10 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [isBulkDeleteConfirmOpen, setIsBulkDeleteConfirmOpen] = useState(false);
 
+  // Progressive Loading State
+  const [visibleCount, setVisibleCount] = useState(20);
+  const { ref: loadMoreRef, inView } = useInView();
+
   const filterCounts = useMemo(() => {
     return {
       all: products.length,
@@ -174,7 +179,19 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
       .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
   }, [products, searchQuery, activeFilter]);
 
-  const handleClose = () => {
+  // Reset visible count when filters change
+  useEffect(() => {
+    setVisibleCount(20);
+  }, [searchQuery, activeFilter, isOpen]);
+
+  // Load more when scrolling to bottom
+  useEffect(() => {
+    if (inView && visibleCount < filteredProducts.length) {
+      setVisibleCount(prev => Math.min(prev + 20, filteredProducts.length));
+    }
+  }, [inView, filteredProducts.length, visibleCount]);
+
+  const handleClose = useCallback(() => {
     onClose();
     setTimeout(() => {
       setSearchQuery('');
@@ -183,56 +200,69 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
       setProductToDelete(null);
       setIsSelectMode(false);
       setSelectedProducts([]);
+      setVisibleCount(20);
     }, 300);
-  }
+  }, [onClose]);
 
-  const handleProductSave = async (updatedFields: Partial<Product>) => {
+  const handleProductSave = useCallback(async (updatedFields: Partial<Product>) => {
     if (editingProduct) {
       await onUpdateProduct(editingProduct.id, updatedFields);
       const updatedProduct = { ...editingProduct, ...updatedFields } as Product;
       setProducts(prevProducts => prevProducts.map(p => p.id === updatedProduct.id ? updatedProduct : p));
     }
-  }
+  }, [editingProduct, onUpdateProduct, setProducts]);
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = useCallback(() => {
     if (productToDelete) {
       onDeleteProduct(productToDelete.id);
       setProducts(prevProducts => prevProducts.filter(p => p.id !== productToDelete.id));
       setProductToDelete(null); // Close the dialog
     }
-  };
+  }, [productToDelete, onDeleteProduct, setProducts]);
 
-  const handleToggleSelection = (productId: string) => {
+  const handleToggleSelection = useCallback((productId: string) => {
     setSelectedProducts(prev =>
       prev.includes(productId)
         ? prev.filter(id => id !== productId)
         : [...prev, productId]
     );
-  };
+  }, []);
 
-  const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSelectAll = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
       setSelectedProducts(filteredProducts.map(p => p.id));
     } else {
       setSelectedProducts([]);
     }
-  };
+  }, [filteredProducts]);
 
-  const handleBulkDeleteRequest = () => {
+  const handleBulkDeleteRequest = useCallback(() => {
     if (selectedProducts.length > 0) {
       setIsBulkDeleteConfirmOpen(true);
     }
-  };
+  }, [selectedProducts]);
 
-  const handleConfirmBulkDelete = () => {
+  const handleConfirmBulkDelete = useCallback(() => {
     selectedProducts.forEach(id => {
       onDeleteProduct(id);
     });
     setProducts(prev => prev.filter(p => !selectedProducts.includes(p.id)));
     setSelectedProducts([]);
     setIsBulkDeleteConfirmOpen(false);
-  };
+  }, [selectedProducts, onDeleteProduct, setProducts]);
 
+
+  // Memoize categories lookup map for performance
+  const categoryMap = useMemo(() => {
+    return categories.reduce((acc, cat) => {
+      acc[cat.id] = cat.name;
+      return acc;
+    }, {} as Record<string, string>);
+  }, [categories]);
+
+  const visibleProducts = useMemo(() => {
+    return filteredProducts.slice(0, visibleCount);
+  }, [filteredProducts, visibleCount]);
 
   return (
     <>
@@ -301,8 +331,26 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
                         </div>
                       )}
                       <div className="grid grid-cols-1 gap-1">
-                        {filteredProducts.length > 0 ? (
-                          filteredProducts.map(p => <ProductRow key={p.id} product={p} categories={categories} onEdit={setEditingProduct} onDeleteRequest={setProductToDelete} isSelectMode={isSelectMode} isSelected={selectedProducts.includes(p.id)} onSelect={handleToggleSelection} />)
+                        {visibleProducts.length > 0 ? (
+                          <>
+                            {visibleProducts.map(p => (
+                              <ProductRow
+                                key={p.id}
+                                product={p}
+                                categoryName={p.categoryId ? categoryMap[p.categoryId] : 'Uncategorized'}
+                                onEdit={setEditingProduct}
+                                onDeleteRequest={setProductToDelete}
+                                isSelectMode={isSelectMode}
+                                isSelected={selectedProducts.includes(p.id)}
+                                onSelect={handleToggleSelection}
+                              />
+                            ))}
+                            {visibleCount < filteredProducts.length && (
+                              <div ref={loadMoreRef} className="py-4 text-center text-sm text-text-secondary">
+                                Loading more...
+                              </div>
+                            )}
+                          </>
                         ) : (
                           <div className="text-center py-16"><p className="font-semibold text-text-primary">No products found</p><p className="text-text-secondary mt-1">Try adjusting your search or filters.</p></div>
                         )}
