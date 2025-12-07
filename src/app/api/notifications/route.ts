@@ -1,21 +1,13 @@
 import { NextResponse } from 'next/server';
-// import webpush from 'web-push';
+import webpush from 'web-push';
 
-// Temporarily disable web-push notification feature
-// webpush.setVapidDetails(
-//   'mailto:mlawal44@gmail.com',
-//   process.env.VAPID_PUBLIC_KEY!,
-//   process.env.VAPID_PRIVATE_KEY!
-// );
+webpush.setVapidDetails(
+  'mailto:mlawal44@gmail.com',
+  process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY!,
+  process.env.VAPID_PRIVATE_KEY!
+);
 
-export async function POST() {
-  // Return a dummy response to disable notifications
-  return NextResponse.json(
-    { disabled: true, message: 'Push notifications are temporarily disabled.' },
-    { status: 200 }
-  );
-
-  /*
+export async function POST(request: Request) {
   try {
     const { subscription, message } = await request.json();
 
@@ -39,5 +31,4 @@ export async function POST() {
       { status: 500 }
     );
   }
-  */
 }
