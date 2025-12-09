@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useMemo, Fragment } from 'react';
-import { Dialog, Transition, Menu } from '@headlessui/react';
+import { Menu, Transition } from '@headlessui/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { XMarkIcon, MagnifyingGlassIcon, EllipsisVerticalIcon, EyeIcon, PlusIcon, CubeIcon } from '@heroicons/react/24/solid';
 import { Product } from '../../types/product';
 import { Category } from '../../types/category';
@@ -12,7 +13,7 @@ interface ManageCategoriesModalProps {
   onClose: () => void;
   products: Product[];
   categories: Category[];
-  storeId: string; // Add this line
+  storeId: string;
   onAddCategory: (name: string) => Promise<void>;
   onUpdateCategory: (id: string, name: string) => Promise<void>;
   onDeleteCategory: (id: string) => Promise<void>;
@@ -37,9 +38,9 @@ const EditableCategoryRow = ({ onSave, onCancel, categoryName = '' }: { onSave: 
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Enter category name"
-        className="flex-1 bg-transparent border-b border-blue-500 focus:ring-0 focus:outline-none text-text-primary" />
+        className="flex-1 bg-transparent border-b border-blue-500 focus:ring-0 focus:outline-none text-gray-900 dark:text-gray-100" />
       <button onClick={() => onSave(name)} className="px-3 py-1 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700">Save</button>
-      <button onClick={onCancel} className="px-3 py-1 text-sm font-semibold text-text-secondary hover:bg-input-background rounded-md">Cancel</button>
+      <button onClick={onCancel} className="px-3 py-1 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md">Cancel</button>
     </div>
   );
 };
@@ -54,10 +55,10 @@ const CategoryRow = ({
   onDeleteRequest: (category: EnrichedCategory) => void
 }) => {
   return (
-    <div className={`flex items-center gap-4 p-3 rounded-lg transition-colors hover:bg-input-background`}>
+    <div className={`flex items-center gap-4 p-3 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800`}>
       <div className="flex-1 overflow-hidden">
-        <p className="font-semibold text-text-primary truncate">{category.name}</p>
-        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-secondary">
+        <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">{category.name}</p>
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
           <div className="flex items-center gap-1">
             <CubeIcon className="w-4 h-4" />
             <span>{category.productCount} products</span>
@@ -69,12 +70,12 @@ const CategoryRow = ({
         </div>
       </div>
       <Menu as="div" className="relative flex-shrink-0">
-        <Menu.Button className="p-2 rounded-full hover:bg-button-secondary-hover">
-          <EllipsisVerticalIcon className="w-5 h-5 text-text-secondary" />
+        <Menu.Button className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
+          <EllipsisVerticalIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
         </Menu.Button>
         <Transition as={Fragment} enter="transition ease-out duration-100" enterFrom="transform opacity-0 scale-95" enterTo="transform opacity-100 scale-100" leave="transition ease-in duration-75" leaveFrom="transform opacity-100 scale-100" leaveTo="transform opacity-0 scale-95">
-          <Menu.Items className="absolute right-0 w-48 mt-2 origin-top-right bg-card-background divide-y divide-border-color rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20">
-            <div className="px-1 py-1 "><Menu.Item>{({ active }) => (<button onClick={() => onEdit(category)} className={`${active ? 'bg-button-secondary-hover text-text-primary' : 'text-text-secondary'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Edit</button>)}</Menu.Item></div>
+          <Menu.Items className="absolute right-0 w-48 mt-2 origin-top-right bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20">
+            <div className="px-1 py-1 "><Menu.Item>{({ active }) => (<button onClick={() => onEdit(category)} className={`${active ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Edit</button>)}</Menu.Item></div>
             <div className="px-1 py-1"><Menu.Item>{({ active }) => (<button onClick={() => onDeleteRequest(category)} className={`${active ? 'bg-red-500 text-white' : 'text-red-500'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Delete</button>)}</Menu.Item></div>
           </Menu.Items>
         </Transition>
@@ -84,7 +85,7 @@ const CategoryRow = ({
 };
 
 const SortButton = ({ label, value, activeSort, onClick }: { label: string, value: SortType, activeSort: SortType, onClick: (sort: SortType) => void }) => (
-  <button onClick={() => onClick(value)} className={`flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-full transition-colors whitespace-nowrap ${activeSort === value ? 'bg-gray-900 text-white' : 'bg-input-background text-text-primary hover:bg-button-secondary-hover'}`}>
+  <button onClick={() => onClick(value)} className={`flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-full transition-colors whitespace-nowrap ${activeSort === value ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
     {label}
   </button>
 )
@@ -157,74 +158,77 @@ const ManageCategoriesModal: React.FC<ManageCategoriesModalProps> = ({ isOpen, o
     }
   };
 
+  const modalVariants = { hidden: { opacity: 0, y: '100%' }, visible: { opacity: 1, y: 0 }, exit: { opacity: 0, y: '100%' } };
+
   return (
     <>
-      <Transition.Root show={isOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-40" onClose={handleClose}>
-          <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0"><div className="fixed inset-0 bg-black bg-opacity-75 backdrop-blur-sm transition-opacity" /></Transition.Child>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+            initial="hidden" animate="visible" exit="exit"
+            variants={modalVariants}
+            transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+          >
+            {/* Header */}
+            <header className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 dark:border-slate-700 flex-shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Manage Categories</h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">Organize your products</p>
+              </div>
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                <CubeIcon className="w-6 h-6 text-white" />
+              </div>
+            </header>
 
-          <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
-            <div className="flex min-h-full items-stretch justify-center text-center md:items-center md:px-2 lg:px-4">
-              <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-full md:translate-y-0 md:scale-95" enterTo="opacity-100 translate-y-0 md:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 md:scale-100" leaveTo="opacity-0 translate-y-full md:translate-y-0 md:scale-95">
-                <Dialog.Panel className="relative flex w-full max-w-2xl transform text-left text-base transition md:my-8">
-                  <div className="relative flex w-full flex-col overflow-hidden bg-white dark:bg-slate-900 shadow-2xl h-screen md:h-[90vh] md:rounded-2xl">
-
-                    {/* Header */}
-                    <div className="p-4 flex justify-between items-center border-b border-border-color">
-                      <Dialog.Title as="h3" className="text-xl font-bold text-text-primary">Manage Categories</Dialog.Title>
-                      <button onClick={handleClose} className="p-1 rounded-full hover:bg-button-secondary-hover transition"><XMarkIcon className="h-6 w-6 text-text-secondary" /></button>
-                    </div>
-
-                    {/* Sticky Search & Sort */}
-                    <div className="sticky top-0 z-10 bg-card-background/80 backdrop-blur-sm p-4 border-b border-border-color">
-                      <div className="flex gap-2">
-                        <div className="relative flex-1">
-                          <MagnifyingGlassIcon className="pointer-events-none absolute top-3.5 left-4 h-5 w-5 text-text-secondary" />
-                          <input type="text" placeholder="Search categories..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="block w-full rounded-lg border-2 border-input-border bg-input-background py-3 pl-11 pr-4 text-text-primary placeholder:text-text-secondary focus:border-blue-500 focus:ring-0 sm:text-sm" />
-                        </div>
-                        <button
-                          onClick={() => setIsAddingCategory(true)}
-                          className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors bg-input-background text-text-primary hover:bg-button-secondary-hover`}>
-                          <PlusIcon className="h-5 w-5" />
-                        </button>
-                      </div>
-                      <div className="mt-4 flex space-x-2 overflow-x-auto pb-2">
-                        <SortButton label="Name (A-Z)" value="name" activeSort={activeSort} onClick={setActiveSort} />
-                        <SortButton label="Most Views" value="most_views" activeSort={activeSort} onClick={setActiveSort} />
-                        <SortButton label="Most Products" value="most_products" activeSort={activeSort} onClick={setActiveSort} />
-                      </div>
-                    </div>
-
-                    {/* Category List */}
-                    <div className="flex-1 overflow-y-auto p-2 pb-24">
-                      {isAddingCategory && <EditableCategoryRow onSave={handleSaveAdd} onCancel={() => setIsAddingCategory(false)} />}
-                      <div className="grid grid-cols-1 gap-1">
-                        {sortedAndFilteredCategories.map(c => (
-                          editingCategoryId === c.id ?
-                            <EditableCategoryRow key={c.id} categoryName={c.name} onSave={handleSaveEdit} onCancel={() => setEditingCategoryId(null)} /> :
-                            <CategoryRow key={c.id} category={c} onEdit={() => setEditingCategoryId(c.id)} onDeleteRequest={setCategoryToDelete} />
-                        ))}
-                        {sortedAndFilteredCategories.length === 0 && !isAddingCategory && (
-                          <div className="text-center py-16"><p className="font-semibold text-text-primary">No categories found</p><p className="text-text-secondary mt-1">Try adjusting your search or filters.</p></div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Footer */}
-                    <div className="absolute bottom-0 left-0 right-0 z-20">
-                      <div className="bg-card-background p-4 border-t border-border-color">
-                        <button onClick={handleClose} className="w-full bg-gray-900 text-white font-semibold py-3 px-4 rounded-lg hover:bg-gray-800 transition">
-                          Done
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </Dialog.Panel>
-              </Transition.Child>
+            {/* Sticky Search & Sort */}
+            <div className="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm p-4 border-b border-gray-200 dark:border-slate-700">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <MagnifyingGlassIcon className="pointer-events-none absolute top-3.5 left-4 h-5 w-5 text-gray-400 dark:text-gray-500" />
+                  <input type="text" placeholder="Search categories..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="block w-full rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 py-3 pl-11 pr-4 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-blue-500 focus:ring-0 sm:text-sm" />
+                </div>
+                <button
+                  onClick={() => setIsAddingCategory(true)}
+                  className="px-4 py-2 text-sm font-semibold rounded-lg transition-colors bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700">
+                  <PlusIcon className="h-5 w-5" />
+                </button>
+              </div>
+              <div className="mt-4 flex space-x-2 overflow-x-auto pb-2">
+                <SortButton label="Name (A-Z)" value="name" activeSort={activeSort} onClick={setActiveSort} />
+                <SortButton label="Most Views" value="most_views" activeSort={activeSort} onClick={setActiveSort} />
+                <SortButton label="Most Products" value="most_products" activeSort={activeSort} onClick={setActiveSort} />
+              </div>
             </div>
-          </div>
-        </Dialog>
-      </Transition.Root>
+
+            {/* Category List */}
+            <main className="flex-1 overflow-y-auto p-4 pb-24">
+              {isAddingCategory && <EditableCategoryRow onSave={handleSaveAdd} onCancel={() => setIsAddingCategory(false)} />}
+              <div className="grid grid-cols-1 gap-1">
+                {sortedAndFilteredCategories.map(c => (
+                  editingCategoryId === c.id ?
+                    <EditableCategoryRow key={c.id} categoryName={c.name} onSave={handleSaveEdit} onCancel={() => setEditingCategoryId(null)} /> :
+                    <CategoryRow key={c.id} category={c} onEdit={() => setEditingCategoryId(c.id)} onDeleteRequest={setCategoryToDelete} />
+                ))}
+                {sortedAndFilteredCategories.length === 0 && !isAddingCategory && (
+                  <div className="text-center py-16"><p className="font-semibold text-gray-900 dark:text-gray-100">No categories found</p><p className="text-gray-500 dark:text-gray-400 mt-1">Try adjusting your search or filters.</p></div>
+                )}
+              </div>
+            </main>
+
+            {/* Footer */}
+            <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+              <motion.button
+                onClick={handleClose}
+                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+                whileTap={{ scale: 0.98 }}
+              >
+                Done
+              </motion.button>
+            </footer>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <ConfirmationDialog
         isOpen={!!categoryToDelete}

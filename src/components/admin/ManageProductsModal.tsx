@@ -1,6 +1,7 @@
 'use client';
 import React, { useState, useMemo, Fragment, useRef, useEffect, useCallback, useDeferredValue } from 'react';
-import { Dialog, Transition, Menu } from '@headlessui/react';
+import { Menu, Transition } from '@headlessui/react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { XMarkIcon, MagnifyingGlassIcon, EllipsisVerticalIcon, EyeIcon } from '@heroicons/react/24/solid';
 import { Archive, Percent } from 'lucide-react';
 import Image from 'next/image';
@@ -272,158 +273,155 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
     return filteredProducts.slice(0, visibleCount);
   }, [filteredProducts, visibleCount]);
 
+  const modalVariants = { hidden: { opacity: 0, y: '100%' }, visible: { opacity: 1, y: 0 }, exit: { opacity: 0, y: '100%' } };
+
   return (
     <>
-      <Transition.Root show={isOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={handleClose}>
-          <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0"><div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" /></Transition.Child>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+            initial="hidden" animate="visible" exit="exit"
+            variants={modalVariants}
+            transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+          >
+            {/* Header */}
+            <header className="px-4 py-3 flex justify-between items-center border-b border-gray-200 dark:border-gray-700 flex-shrink-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg">
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
+                  Manage Products
+                </h2>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Inventory & Stock</p>
+              </div>
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-800 rounded-xl flex items-center justify-center shadow-lg">
+                <Archive className="w-6 h-6 text-white" />
+              </div>
+            </header>
 
-          <div className="fixed inset-0 z-10 w-screen overflow-hidden">
-            <div className="flex min-h-full items-end justify-center md:items-center md:p-0">
-              <Transition.Child as={Fragment} enter="ease-out duration-400" enterFrom="opacity-0 translate-y-full" enterTo="opacity-100 translate-y-0" leave="ease-in duration-300" leaveFrom="opacity-100 translate-y-0" leaveTo="opacity-0 translate-y-full">
-                <Dialog.Panel className="relative flex w-full max-w-2xl transform text-left transition">
-                  <div className="relative flex w-full h-screen md:h-[90vh] md:rounded-2xl flex-col overflow-hidden bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 shadow-2xl">
-
-                    {/* Header */}
-                    <div className="px-4 py-3 flex justify-between items-center border-b border-gray-200 dark:border-gray-700 flex-shrink-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg">
-                      <div>
-                        <Dialog.Title as="h3" className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
-                          Manage Products
-                        </Dialog.Title>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">Inventory & Stock</p>
-                      </div>
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-800 rounded-xl flex items-center justify-center shadow-lg">
-                        <Archive className="w-6 h-6 text-white" />
-                      </div>
-                    </div>
-
-                    {/* Sticky Search & Filters */}
-                    <div className="flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 p-4">
-                      <div className="flex gap-2">
-                        <div className="relative flex-1">
-                          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
-                          <input
-                            type="text"
-                            placeholder="Search products..."
-                            value={searchQuery}
-                            onChange={e => setSearchQuery(e.target.value)}
-                            className="w-full bg-gray-100 dark:bg-gray-800 rounded-xl pl-10 pr-10 py-2.5 text-[15px] text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-500/50 focus:bg-white dark:focus:bg-gray-700 transition-all"
-                          />
-                          {searchQuery && (
-                            <button
-                              onClick={() => setSearchQuery('')}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-                            >
-                              <XMarkIcon className="w-4 h-4" />
-                            </button>
-                          )}
-                        </div>
-                        <button
-                          onClick={() => {
-                            setIsSelectMode(!isSelectMode);
-                            setSelectedProducts([]);
-                          }}
-                          className={`px-4 py-2 text-sm font-semibold rounded-xl transition-all active:scale-95 ${isSelectMode
-                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
-                            : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
-                            }`}>
-                          {isSelectMode ? 'Cancel' : 'Select'}
-                        </button>
-                      </div>
-                      <div className="mt-4 flex space-x-2 overflow-x-auto pb-1 scrollbar-hide">
-                        <FilterChip label="All" value="all" activeFilter={activeFilter} onClick={setActiveFilter} count={filterCounts.all} />
-                        <FilterChip label="Popular" value="popular" activeFilter={activeFilter} onClick={setActiveFilter} count={filterCounts.popular} />
-                        <FilterChip label="Limited" value="limited" activeFilter={activeFilter} onClick={setActiveFilter} count={filterCounts.limited} />
-                        <FilterChip label="Sold Out" value="soldout" activeFilter={activeFilter} onClick={setActiveFilter} count={filterCounts.soldout} />
-                      </div>
-                    </div>
-
-                    {/* Product List */}
-                    <div className="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-gray-900/50">
-                      {isSelectMode && (
-                        <div className="mb-2 px-2">
-                          <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-pointer">
-                            <input
-                              type="checkbox"
-                              onChange={handleSelectAll}
-                              checked={filteredProducts.length > 0 && selectedProducts.length === filteredProducts.length}
-                              ref={input => {
-                                if (input) {
-                                  const indeterminate = selectedProducts.length > 0 && selectedProducts.length < filteredProducts.length;
-                                  input.indeterminate = indeterminate;
-                                }
-                              }}
-                              className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                            />
-                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Select All</span>
-                          </label>
-                        </div>
-                      )}
-                      <div className="space-y-2">
-                        {visibleProducts.length > 0 ? (
-                          <>
-                            {visibleProducts.map(p => (
-                              <div key={p.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-                                <ProductRow
-                                  product={p}
-                                  categoryName={p.categoryId ? categoryMap[p.categoryId] : 'Uncategorized'}
-                                  onEdit={setEditingProduct}
-                                  onDeleteRequest={setProductToDelete}
-                                  isSelectMode={isSelectMode}
-                                  isSelected={selectedProducts.includes(p.id)}
-                                  onSelect={handleToggleSelection}
-                                />
-                              </div>
-                            ))}
-                            {visibleCount < filteredProducts.length && (
-                              <div ref={loadMoreRef} className="py-6 flex justify-center">
-                                <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          <div className="flex flex-col items-center justify-center py-16 text-center">
-                            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
-                              <MagnifyingGlassIcon className="w-8 h-8 text-gray-400" />
-                            </div>
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">No products found</h3>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Try adjusting your search or filters.</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Footer */}
-                    <div className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 z-20">
-                      {isSelectMode ? (
-                        <div className="flex justify-between items-center">
-                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                            {selectedProducts.length} selected
-                          </p>
-                          <button
-                            onClick={handleBulkDeleteRequest}
-                            disabled={selectedProducts.length === 0}
-                            className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg shadow-red-500/30 disabled:opacity-50 disabled:shadow-none active:scale-95"
-                          >
-                            Delete Selected
-                          </button>
-                        </div>
-                      ) : (
-                        <button
-                          onClick={handleClose}
-                          className="w-full bg-gradient-to-r from-blue-600 to-indigo-800 hover:from-blue-700 hover:to-indigo-900 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
-                        >
-                          Done
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </Dialog.Panel>
-              </Transition.Child>
+            {/* Sticky Search & Filters */}
+            <div className="flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 p-4">
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+                  <input
+                    type="text"
+                    placeholder="Search products..."
+                    value={searchQuery}
+                    onChange={e => setSearchQuery(e.target.value)}
+                    className="w-full bg-gray-100 dark:bg-gray-800 rounded-xl pl-10 pr-10 py-2.5 text-[15px] text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-500/50 focus:bg-white dark:focus:bg-gray-700 transition-all"
+                  />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    >
+                      <XMarkIcon className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+                <button
+                  onClick={() => {
+                    setIsSelectMode(!isSelectMode);
+                    setSelectedProducts([]);
+                  }}
+                  className={`px-4 py-2 text-sm font-semibold rounded-xl transition-all active:scale-95 ${isSelectMode
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    }`}>
+                  {isSelectMode ? 'Cancel' : 'Select'}
+                </button>
+              </div>
+              <div className="mt-4 flex space-x-2 overflow-x-auto pb-1 scrollbar-hide">
+                <FilterChip label="All" value="all" activeFilter={activeFilter} onClick={setActiveFilter} count={filterCounts.all} />
+                <FilterChip label="Popular" value="popular" activeFilter={activeFilter} onClick={setActiveFilter} count={filterCounts.popular} />
+                <FilterChip label="Limited" value="limited" activeFilter={activeFilter} onClick={setActiveFilter} count={filterCounts.limited} />
+                <FilterChip label="Sold Out" value="soldout" activeFilter={activeFilter} onClick={setActiveFilter} count={filterCounts.soldout} />
+              </div>
             </div>
-          </div>
-        </Dialog>
-      </Transition.Root>
+
+            {/* Product List */}
+            <main className="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-gray-900/50">
+              {isSelectMode && (
+                <div className="mb-2 px-2">
+                  <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                    <input
+                      type="checkbox"
+                      onChange={handleSelectAll}
+                      checked={filteredProducts.length > 0 && selectedProducts.length === filteredProducts.length}
+                      ref={input => {
+                        if (input) {
+                          const indeterminate = selectedProducts.length > 0 && selectedProducts.length < filteredProducts.length;
+                          input.indeterminate = indeterminate;
+                        }
+                      }}
+                      className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Select All</span>
+                  </label>
+                </div>
+              )}
+              <div className="space-y-2">
+                {visibleProducts.length > 0 ? (
+                  <>
+                    {visibleProducts.map(p => (
+                      <div key={p.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                        <ProductRow
+                          product={p}
+                          categoryName={p.categoryId ? categoryMap[p.categoryId] : 'Uncategorized'}
+                          onEdit={setEditingProduct}
+                          onDeleteRequest={setProductToDelete}
+                          isSelectMode={isSelectMode}
+                          isSelected={selectedProducts.includes(p.id)}
+                          onSelect={handleToggleSelection}
+                        />
+                      </div>
+                    ))}
+                    {visibleCount < filteredProducts.length && (
+                      <div ref={loadMoreRef} className="py-6 flex justify-center">
+                        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-16 text-center">
+                    <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                      <MagnifyingGlassIcon className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">No products found</h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Try adjusting your search or filters.</p>
+                  </div>
+                )}
+              </div>
+            </main>
+
+            {/* Footer */}
+            <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 z-20">
+              {isSelectMode ? (
+                <div className="flex justify-between items-center">
+                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                    {selectedProducts.length} selected
+                  </p>
+                  <button
+                    onClick={handleBulkDeleteRequest}
+                    disabled={selectedProducts.length === 0}
+                    className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg shadow-red-500/30 disabled:opacity-50 disabled:shadow-none active:scale-95"
+                  >
+                    Delete Selected
+                  </button>
+                </div>
+              ) : (
+                <motion.button
+                  onClick={handleClose}
+                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-800 hover:from-blue-700 hover:to-indigo-900 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+                  whileTap={{ scale: 0.98 }}
+                >
+                  Done
+                </motion.button>
+              )}
+            </footer>
+          </motion.div>
+        )}
+      </AnimatePresence>
       <EditProductPanel
         product={editingProduct}
         isOpen={!!editingProduct}
