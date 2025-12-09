@@ -1,5 +1,5 @@
 'use client';
-import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays } from 'lucide-react';
+import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays, CheckCircle2 } from 'lucide-react';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { useSpotlightContext } from '@/context/SpotlightContext';
@@ -418,41 +418,50 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         onAnimationComplete={() => onAnimationComplete?.()}
       >
         <style jsx>{`
-                .card-blob { position: absolute; top: -10px; right: -10px; width: 40px; height: 40px; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, transparent 70%); filter: blur(8px); animation: blobMove 4s infinite alternate ease-in-out; z-index: 0; }
+                .card-blob { position: absolute; top: -10px; right: -10px; width: 40px; height: 40px; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.2) 0%, transparent 70%); filter: blur(8px); animation: blobMove 4s infinite alternate ease-in-out; z-index: 0; will-change: transform; }
                 @keyframes blobMove { 0% { transform: scale(1) translateY(0); } 100% { transform: scale(1.05) translateY(3px); } }
-                .dashboard-card { min-width: 0; max-width: 100%; word-wrap: break-word; overflow: hidden; }
+                .dashboard-card { min-width: 0; max-width: 100%; word-wrap: break-word; overflow: hidden; transform: translateZ(0); }
                 .ai-text-gradient {
                     background: linear-gradient(90deg, 
                         #fbbf24, /* amber-400 */
+                        #84cc16, /* lime-500 */
                         #10b981, /* emerald-500 */
+                        #14b8a6, /* teal-500 */
+                        #06b6d4, /* cyan-500 */
                         #3b82f6, /* blue-500 */
+                        #6366f1, /* indigo-500 */
                         #8b5cf6, /* violet-500 */
                         #ec4899, /* pink-500 */
+                        #f43f5e, /* rose-500 */
                         #f97316, /* orange-500 */
-                        #14b8a6, /* teal-500 */
                         #fbbf24  /* amber-400 - loop */
                     );
-                    background-size: 800% 100%;
+                    background-size: 200% 100%;
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
                     color: transparent;
-                    animation: ai-gradient-flow 20s linear infinite;
+                    animation: ai-gradient-flow 8s linear infinite;
+                    will-change: background-position;
                 }
                 .ai-icon-glow {
-                    animation: ai-icon-glow-anim 20s linear infinite;
+                    animation: ai-icon-colors 8s linear infinite;
+                    will-change: stroke;
                 }
                 @keyframes ai-gradient-flow {
                     0% { background-position: 0% 50%; }
                     100% { background-position: 100% 50%; }
                 }
-                @keyframes ai-icon-glow-anim {
-                    0%, 100% { stroke: #fbbf24; filter: drop-shadow(0 0 8px #fbbf24); }
-                    14% { stroke: #10b981; filter: drop-shadow(0 0 8px #10b981); }
-                    28% { stroke: #3b82f6; filter: drop-shadow(0 0 8px #3b82f6); }
-                    42% { stroke: #8b5cf6; filter: drop-shadow(0 0 8px #8b5cf6); }
-                    56% { stroke: #ec4899; filter: drop-shadow(0 0 8px #ec4899); }
-                    70% { stroke: #f97316; filter: drop-shadow(0 0 8px #f97316); }
-                    84% { stroke: #14b8a6; filter: drop-shadow(0 0 8px #14b8a6); }
+                @keyframes ai-icon-colors {
+                    0%, 100% { stroke: #fbbf24; } /* Amber */
+                    10% { stroke: #84cc16; } /* Lime */
+                    20% { stroke: #10b981; } /* Emerald */
+                    30% { stroke: #14b8a6; } /* Teal */
+                    40% { stroke: #06b6d4; } /* Cyan */
+                    50% { stroke: #3b82f6; } /* Blue */
+                    60% { stroke: #6366f1; } /* Indigo */
+                    70% { stroke: #8b5cf6; } /* Violet */
+                    80% { stroke: #ec4899; } /* Pink */
+                    90% { stroke: #f43f5e; } /* Rose */
                 }
             `}</style>
 
@@ -557,6 +566,21 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             );
           }
         })}
+      </motion.div>
+
+      {/* End of Content Indicator */}
+      <motion.div
+        className="mt-8 mb-12 flex flex-col items-center justify-center text-gray-400 dark:text-gray-600"
+        initial={{ opacity: 0, y: 20, scale: 0.8 }}
+        whileInView={{ opacity: 1, y: 0, scale: 1 }}
+        viewport={{ once: false, margin: "0px 0px -50px 0px" }}
+        transition={{ type: "spring", stiffness: 200, damping: 15 }}
+      >
+        <div className="w-12 h-1 bg-gray-200 dark:bg-gray-800 rounded-full mb-4" />
+        <div className="flex items-center gap-2 text-sm font-medium">
+          <CheckCircle2 className="w-4 h-4" />
+          <span>You&apos;re all caught up</span>
+        </div>
       </motion.div>
 
       {/* === MODAL RENDERERS === */}
