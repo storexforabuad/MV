@@ -17,16 +17,15 @@ type SortKey = 'custom' | 'name' | 'views' | 'products';
 const SortOption: FC<{ label: string; value: SortKey; activeSort: SortKey; onClick: (value: SortKey) => void }> = ({ label, value, activeSort, onClick }) => (
     <button
         onClick={() => onClick(value)}
-        className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
-            activeSort === value ? 'bg-blue-600 text-white' : 'bg-input-background text-text-primary hover:bg-button-secondary-hover'
-        }`}
+        className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${activeSort === value ? 'bg-blue-600 text-white' : 'bg-input-background text-text-primary hover:bg-button-secondary-hover'
+            }`}
     >
         {label}
     </button>
 );
 
-const CategoryListItem: FC<{ 
-    category: Category; 
+const CategoryListItem: FC<{
+    category: Category;
     isEditing: boolean;
     onSave: (newName: string) => void;
     onCancel: () => void;
@@ -38,7 +37,7 @@ const CategoryListItem: FC<{
     if (isEditing) {
         return (
             <div className="flex items-center bg-blue-100 dark:bg-blue-900/30 p-3 rounded-lg shadow-sm mb-3 ring-2 ring-blue-500">
-                 <input
+                <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
@@ -66,7 +65,7 @@ const CategoryListItem: FC<{
                 </div>
             </div>
             <div className="relative">
-                 <Dropdown menuItems={[
+                <Dropdown menuItems={[
                     { label: 'Edit', icon: Edit, onClick: onEdit },
                     { label: 'Delete', icon: Trash2, onClick: onDelete, isDestructive: true },
                 ]} />
@@ -75,7 +74,7 @@ const CategoryListItem: FC<{
     );
 };
 
-const Dropdown: FC<{ menuItems: {label: string, icon: React.ElementType, onClick: () => void, isDestructive?: boolean}[] }> = ({ menuItems }) => {
+const Dropdown: FC<{ menuItems: { label: string, icon: React.ElementType, onClick: () => void, isDestructive?: boolean }[] }> = ({ menuItems }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
         <div>
@@ -83,21 +82,21 @@ const Dropdown: FC<{ menuItems: {label: string, icon: React.ElementType, onClick
                 <MoreVertical size={20} />
             </button>
             <AnimatePresence>
-            { isOpen && (
-                <motion.div 
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="absolute right-0 mt-2 w-40 bg-background-primary border border-border-color rounded-lg shadow-lg z-10">
-                    {menuItems.map(item => (
-                         <button key={item.label} onClick={() => { item.onClick(); setIsOpen(false); }} 
-                            className={`flex items-center w-full px-4 py-2 text-left text-sm ${item.isDestructive ? 'text-red-600' : 'text-text-primary'} hover:bg-background-secondary`}>
-                             <item.icon size={16} className="mr-2" />
-                            {item.label}
-                        </button>
-                    ))}
-                </motion.div>
-            )}
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        className="absolute right-0 mt-2 w-40 bg-background-primary border border-border-color rounded-lg shadow-lg z-10">
+                        {menuItems.map(item => (
+                            <button key={item.label} onClick={() => { item.onClick(); setIsOpen(false); }}
+                                className={`flex items-center w-full px-4 py-2 text-left text-sm ${item.isDestructive ? 'text-red-600' : 'text-text-primary'} hover:bg-background-secondary`}>
+                                <item.icon size={16} className="mr-2" />
+                                {item.label}
+                            </button>
+                        ))}
+                    </motion.div>
+                )}
             </AnimatePresence>
         </div>
     )
@@ -125,8 +124,8 @@ export const ManageCategoriesModal: FC<{ isOpen: boolean; onClose: () => void; c
     }, [categories, searchQuery, sortKey]);
 
     const handleAddNew = () => {
-      setIsAdding(true);
-      setEditingCategoryId('new-category');
+        setIsAdding(true);
+        setEditingCategoryId('new-category');
     }
 
     const handleSave = (id: string, newName: string) => {
@@ -160,10 +159,10 @@ export const ManageCategoriesModal: FC<{ isOpen: boolean; onClose: () => void; c
         <AnimatePresence>
             {isOpen && (
                 <motion.div
-                    initial={{ y: '100%' }}
-                    animate={{ y: 0 }}
-                    exit={{ y: '100%' }}
-                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                    initial={{ opacity: 0, y: '100vh' }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: '100vh' }}
+                    transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
                     className="fixed inset-0 bg-background-primary z-50 flex flex-col"
                 >
                     {/* Header */}
@@ -201,21 +200,21 @@ export const ManageCategoriesModal: FC<{ isOpen: boolean; onClose: () => void; c
 
                     {/* Category List */}
                     <main className="flex-grow p-4 overflow-y-auto">
-                        <> 
+                        <>
                             {isAdding && (
-                                <CategoryListItem 
-                                    category={{id: 'new-category', name: '', productCount: 0, totalViews: 0}}
+                                <CategoryListItem
+                                    category={{ id: 'new-category', name: '', productCount: 0, totalViews: 0 }}
                                     isEditing={true}
                                     onSave={(newName) => handleSave('new-category', newName)}
                                     onCancel={handleCancel}
-                                    onEdit={() => {}}
-                                    onDelete={() => {}}
+                                    onEdit={() => { }}
+                                    onDelete={() => { }}
                                 />
                             )}
                             {sortedAndFilteredCategories.length > 0 ? (
-                                sortedAndFilteredCategories.map(cat => <CategoryListItem 
-                                    key={cat.id} 
-                                    category={cat} 
+                                sortedAndFilteredCategories.map(cat => <CategoryListItem
+                                    key={cat.id}
+                                    category={cat}
                                     isEditing={editingCategoryId === cat.id}
                                     onEdit={() => setEditingCategoryId(cat.id)}
                                     onCancel={handleCancel}

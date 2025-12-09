@@ -1,9 +1,8 @@
 'use client';
 
 import { Fragment } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
 import { X, Megaphone, Instagram, Facebook, Twitter, MessageCircle, Link2, TrendingUp, Zap, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface AdvertisingModalProps {
     isOpen: boolean;
@@ -63,142 +62,122 @@ export function AdvertisingModal({ isOpen, onClose }: AdvertisingModalProps) {
     ];
 
     return (
-        <Transition.Root show={isOpen} as={Fragment}>
-            <Dialog as="div" className="relative z-50" onClose={onClose}>
-                <Transition.Child
-                    as={Fragment}
-                    enter="ease-out duration-300"
-                    enterFrom="opacity-0"
-                    enterTo="opacity-100"
-                    leave="ease-in duration-200"
-                    leaveFrom="opacity-100"
-                    leaveTo="opacity-0"
+        <AnimatePresence>
+            {isOpen && (
+                <motion.div
+                    initial={{ opacity: 0, y: '100vh' }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: '100vh' }}
+                    transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+                    className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-900 md:bg-transparent md:dark:bg-transparent md:justify-center md:items-center"
                 >
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" />
-                </Transition.Child>
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity hidden md:block" onClick={onClose} />
 
-                <div className="fixed inset-0 z-10 w-screen overflow-hidden">
-                    <div className="flex min-h-full items-end justify-center md:items-center md:p-0">
-                        <Transition.Child
-                            as={Fragment}
-                            enter="ease-out duration-400"
-                            enterFrom="opacity-0 translate-y-full"
-                            enterTo="opacity-100 translate-y-0"
-                            leave="ease-in duration-300"
-                            leaveFrom="opacity-100 translate-y-0"
-                            leaveTo="opacity-0 translate-y-full"
-                        >
-                            <Dialog.Panel className="relative flex w-full max-w-2xl transform text-left transition">
-                                {/* Full-screen modal */}
-                                <div className="relative flex w-full h-screen md:h-[90vh] md:rounded-2xl flex-col overflow-hidden bg-white dark:bg-gray-900 shadow-2xl">
+                    <div className="relative w-full h-full md:h-[90vh] md:max-w-2xl md:rounded-2xl flex flex-col overflow-hidden bg-white dark:bg-gray-900 shadow-2xl z-10">
+                        {/* Header with gradient */}
+                        <div className="relative px-4 py-6 md:py-8 bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 flex-shrink-0">
+                            <button
+                                onClick={onClose}
+                                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center transition-colors z-10"
+                                aria-label="Close"
+                            >
+                                <X className="w-5 h-5 text-white" />
+                            </button>
 
-                                    {/* Header with gradient */}
-                                    <div className="relative px-4 py-6 md:py-8 bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 flex-shrink-0">
-                                        <button
-                                            onClick={onClose}
-                                            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center transition-colors z-10"
-                                            aria-label="Close"
-                                        >
-                                            <X className="w-5 h-5 text-white" />
-                                        </button>
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="p-3 md:p-4 rounded-2xl bg-white/20 backdrop-blur-sm">
+                                    <Megaphone className="w-8 h-8 md:w-10 md:h-10 text-white" />
+                                </div>
+                                <div className="flex-1 pr-10">
+                                    <h2 className="text-2xl md:text-3xl font-bold text-white mb-1">
+                                        Advertise Your Business
+                                    </h2>
+                                    <p className="text-white/90 text-xs md:text-sm">
+                                        Boost sales with powerful advertising tools
+                                    </p>
+                                </div>
+                            </div>
 
-                                        <div className="flex items-center gap-3 mb-4">
-                                            <div className="p-3 md:p-4 rounded-2xl bg-white/20 backdrop-blur-sm">
-                                                <Megaphone className="w-8 h-8 md:w-10 md:h-10 text-white" />
-                                            </div>
-                                            <div className="flex-1 pr-10">
-                                                <Dialog.Title as="h2" className="text-2xl md:text-3xl font-bold text-white mb-1">
-                                                    Advertise Your Business
-                                                </Dialog.Title>
-                                                <p className="text-white/90 text-xs md:text-sm">
-                                                    Boost sales with powerful advertising tools
-                                                </p>
-                                            </div>
-                                        </div>
+                            {/* Coming Soon Badge */}
+                            <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30">
+                                <Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4 text-yellow-300" />
+                                <span className="text-xs md:text-sm font-semibold text-white">Coming Soon</span>
+                            </div>
+                        </div>
 
-                                        {/* Coming Soon Badge */}
-                                        <div className="inline-flex items-center gap-2 px-3 py-1.5 md:px-4 md:py-2 rounded-full bg-white/20 backdrop-blur-sm border border-white/30">
-                                            <Sparkles className="w-3.5 h-3.5 md:w-4 md:h-4 text-yellow-300" />
-                                            <span className="text-xs md:text-sm font-semibold text-white">Coming Soon</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Scrollable Content */}
-                                    <div className="flex-1 overflow-y-auto">
-                                        <div className="p-4 md:p-6 space-y-4 md:space-y-6">
-                                            {/* Introduction */}
-                                            <div className="p-4 md:p-5 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-100 dark:border-blue-900">
-                                                <div className="flex items-start gap-3">
-                                                    <Zap className="w-5 h-5 md:w-6 md:h-6 text-indigo-600 dark:text-indigo-400 flex-shrink-0 mt-0.5" />
-                                                    <div>
-                                                        <h3 className="text-base md:text-lg font-bold text-gray-900 dark:text-white mb-2">
-                                                            Supercharge Your Sales
-                                                        </h3>
-                                                        <p className="text-sm md:text-base text-gray-700 dark:text-gray-300 leading-relaxed">
-                                                            Soon, you'll be able to advertise your products and store link across all major social media platforms.
-                                                            Reach more customers, track engagement, and grow your business with integrated advertising tools
-                                                            designed specifically for (Biz+Con)™ vendors.
-                                                        </p>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Features Grid */}
-                                            <div>
-                                                <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-3 md:mb-4 px-1">
-                                                    What's Coming
-                                                </h3>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-                                                    {advertisingFeatures.map((feature, index) => (
-                                                        <motion.div
-                                                            key={feature.title}
-                                                            initial={{ opacity: 0, y: 20 }}
-                                                            animate={{ opacity: 1, y: 0 }}
-                                                            transition={{ delay: index * 0.1 }}
-                                                            className="group p-4 md:p-5 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300 hover:shadow-lg"
-                                                        >
-                                                            <div className="flex items-start gap-3 md:gap-4">
-                                                                <div className={`p-2.5 md:p-3 rounded-xl ${feature.iconBg} group-hover:scale-110 transition-transform flex-shrink-0`}>
-                                                                    <feature.icon className={`w-5 h-5 md:w-6 md:h-6 ${feature.iconColor}`} />
-                                                                </div>
-                                                                <div className="flex-1 min-w-0">
-                                                                    <h4 className="font-bold text-sm md:text-base text-gray-900 dark:text-white mb-1.5 md:mb-2">
-                                                                        {feature.title}
-                                                                    </h4>
-                                                                    <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                                                                        {feature.description}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </motion.div>
-                                                    ))}
-                                                </div>
-                                            </div>
-
-                                            {/* CTA Section */}
-                                            <div className="p-5 md:p-6 rounded-2xl bg-gradient-to-br from-purple-500 to-fuchsia-600 text-center">
-                                                <h3 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3">
-                                                    Get Ready to Grow
-                                                </h3>
-                                                <p className="text-sm md:text-base text-white/90 mb-4 md:mb-6 max-w-2xl mx-auto">
-                                                    We're working hard to bring you the best advertising tools. Stay tuned for updates!
-                                                </p>
-                                                <div className="inline-flex items-center gap-2 px-5 py-2.5 md:px-6 md:py-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30">
-                                                    <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-yellow-300 animate-pulse" />
-                                                    <span className="text-sm md:text-base font-semibold text-white">Launching Soon</span>
-                                                </div>
-                                            </div>
-
-                                            {/* Bottom spacing for mobile safe area */}
-                                            <div className="h-4 md:h-0" />
+                        {/* Scrollable Content */}
+                        <div className="flex-1 overflow-y-auto">
+                            <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+                                {/* Introduction */}
+                                <div className="p-4 md:p-5 rounded-2xl bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-100 dark:border-blue-900">
+                                    <div className="flex items-start gap-3">
+                                        <Zap className="w-5 h-5 md:w-6 md:h-6 text-indigo-600 dark:text-indigo-400 flex-shrink-0 mt-0.5" />
+                                        <div>
+                                            <h3 className="text-base md:text-lg font-bold text-gray-900 dark:text-white mb-2">
+                                                Supercharge Your Sales
+                                            </h3>
+                                            <p className="text-sm md:text-base text-gray-700 dark:text-gray-300 leading-relaxed">
+                                                Soon, you'll be able to advertise your products and store link across all major social media platforms.
+                                                Reach more customers, track engagement, and grow your business with integrated advertising tools
+                                                designed specifically for (Biz+Con)™ vendors.
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
-                            </Dialog.Panel>
-                        </Transition.Child>
+
+                                {/* Features Grid */}
+                                <div>
+                                    <h3 className="text-lg md:text-xl font-bold text-gray-900 dark:text-white mb-3 md:mb-4 px-1">
+                                        What's Coming
+                                    </h3>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                                        {advertisingFeatures.map((feature, index) => (
+                                            <motion.div
+                                                key={feature.title}
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ delay: index * 0.1 }}
+                                                className="group p-4 md:p-5 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-600 transition-all duration-300 hover:shadow-lg"
+                                            >
+                                                <div className="flex items-start gap-3 md:gap-4">
+                                                    <div className={`p-2.5 md:p-3 rounded-xl ${feature.iconBg} group-hover:scale-110 transition-transform flex-shrink-0`}>
+                                                        <feature.icon className={`w-5 h-5 md:w-6 md:h-6 ${feature.iconColor}`} />
+                                                    </div>
+                                                    <div className="flex-1 min-w-0">
+                                                        <h4 className="font-bold text-sm md:text-base text-gray-900 dark:text-white mb-1.5 md:mb-2">
+                                                            {feature.title}
+                                                        </h4>
+                                                        <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                                                            {feature.description}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                {/* CTA Section */}
+                                <div className="p-5 md:p-6 rounded-2xl bg-gradient-to-br from-purple-500 to-fuchsia-600 text-center">
+                                    <h3 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-3">
+                                        Get Ready to Grow
+                                    </h3>
+                                    <p className="text-sm md:text-base text-white/90 mb-4 md:mb-6 max-w-2xl mx-auto">
+                                        We're working hard to bring you the best advertising tools. Stay tuned for updates!
+                                    </p>
+                                    <div className="inline-flex items-center gap-2 px-5 py-2.5 md:px-6 md:py-3 rounded-full bg-white/20 backdrop-blur-sm border border-white/30">
+                                        <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-yellow-300 animate-pulse" />
+                                        <span className="text-sm md:text-base font-semibold text-white">Launching Soon</span>
+                                    </div>
+                                </div>
+
+                                {/* Bottom spacing for mobile safe area */}
+                                <div className="h-4 md:h-0" />
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </Dialog>
-        </Transition.Root>
+                </motion.div>
+            )}
+        </AnimatePresence>
     );
 }

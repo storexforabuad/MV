@@ -1,7 +1,7 @@
 'use client';
 import { useState, FC, FormEvent, useEffect, useCallback, useMemo } from 'react';
 import { X, Gift, LayoutDashboard, Loader2, ArrowLeft, Trophy } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { doc, onSnapshot, collection, query, orderBy, Timestamp } from 'firebase/firestore';
 import { db } from '@/lib/db';
 import AmbassadorProgressBar from '../ambassador/AmbassadorProgressBar';
@@ -187,8 +187,8 @@ export const AmbassadorHubModal: FC<AmbassadorHubModalProps> = ({ isOpen, onClos
     <button
       onClick={() => setActiveTab(tab)}
       className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 text-sm font-bold transition-colors duration-200 border-b-2 ${activeTab === tab
-          ? 'text-orange-500 border-orange-500'
-          : 'text-slate-500 border-transparent hover:text-orange-500 hover:border-orange-300'
+        ? 'text-orange-500 border-orange-500'
+        : 'text-slate-500 border-transparent hover:text-orange-500 hover:border-orange-300'
         }`}
     >
       <Icon className="w-5 h-5" />
@@ -199,65 +199,70 @@ export const AmbassadorHubModal: FC<AmbassadorHubModalProps> = ({ isOpen, onClos
   const storeName = viewingStoreId ? 'Store' : ''; // Basic name, can be fetched for more detail
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center animation-fade-in" onClick={onClose}>
-      <style jsx>{`
-          @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-          .animation-fade-in { animation: fade-in 0.2s ease-out; }
-        `}</style>
-      <div className="relative flex flex-col w-full h-full bg-slate-50 dark:bg-slate-950 shadow-2xl overflow-hidden" onClick={e => e.stopPropagation()}>
-        <header className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 dark:border-slate-700 flex-shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
-          <div>
-            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
-              Ambassador Hub
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Grow your network</p>
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: '100vh' }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: '100vh' }}
+          transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+          className="fixed inset-0 z-50 flex flex-col bg-slate-50 dark:bg-slate-950"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <header className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 dark:border-slate-700 flex-shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+                Ambassador Hub
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Grow your network</p>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg">
+              <Trophy className="w-6 h-6 text-white" />
+            </div>
+          </header>
+          <div className="flex flex-shrink-0 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <TabButton tab="dashboard" label="Dashboard" icon={LayoutDashboard} />
+            <TabButton tab="refer" label="Refer a Business" icon={Gift} />
           </div>
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg">
-            <Trophy className="w-6 h-6 text-white" />
+          <div className="flex-grow overflow-y-auto p-4 sm:p-6">
+            {activeTab === 'dashboard' ? (
+              <DashboardContent storeId={storeId} onReferralAdded={onReferralAdded} onViewDetailsClick={handleViewDetailsClick} />
+            ) : (
+              <ReferBusinessForm storeId={storeId} onReferralAdded={onReferralAdded} />
+            )}
           </div>
-        </header>
-        <div className="flex flex-shrink-0 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-          <TabButton tab="dashboard" label="Dashboard" icon={LayoutDashboard} />
-          <TabButton tab="refer" label="Refer a Business" icon={Gift} />
-        </div>
-        <div className="flex-grow overflow-y-auto p-4 sm:p-6">
-          {activeTab === 'dashboard' ? (
-            <DashboardContent storeId={storeId} onReferralAdded={onReferralAdded} onViewDetailsClick={handleViewDetailsClick} />
-          ) : (
-            <ReferBusinessForm storeId={storeId} onReferralAdded={onReferralAdded} />
+
+          <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+            <div className="relative max-w-3xl mx-auto">
+              <motion.button
+                onClick={onClose}
+                className="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+                whileTap={{ scale: 0.98 }}
+              >
+                Done
+              </motion.button>
+            </div>
+          </footer>
+
+          {/* Detailed Views Modal Layer */}
+          {viewingStoreId && (
+            <div className="absolute inset-0 z-10 bg-slate-50 dark:bg-slate-950 flex flex-col animation-fade-in">
+              <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800 flex-shrink-0 bg-white dark:bg-slate-900">
+                <button onClick={handleCloseDetails} className="flex items-center gap-2 p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Go back">
+                  <ArrowLeft className="w-5 h-5" />
+                  <span className="font-bold">Store Analytics</span>
+                </button>
+                <button onClick={onClose} className="p-2 rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors" aria-label="Close">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <div className="flex-grow overflow-y-auto p-4 sm:p-6">
+                <ViewsBreakdown storeId={viewingStoreId} />
+              </div>
+            </div>
           )}
-        </div>
-
-        <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
-          <div className="relative max-w-3xl mx-auto">
-            <motion.button
-              onClick={onClose}
-              className="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
-              whileTap={{ scale: 0.98 }}
-            >
-              Done
-            </motion.button>
-          </div>
-        </footer>
-
-        {/* Detailed Views Modal Layer */}
-        {viewingStoreId && (
-          <div className="absolute inset-0 z-10 bg-slate-50 dark:bg-slate-950 flex flex-col animation-fade-in">
-            <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-800 flex-shrink-0 bg-white dark:bg-slate-900">
-              <button onClick={handleCloseDetails} className="flex items-center gap-2 p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" aria-label="Go back">
-                <ArrowLeft className="w-5 h-5" />
-                <span className="font-bold">Store Analytics</span>
-              </button>
-              <button onClick={onClose} className="p-2 rounded-full text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors" aria-label="Close">
-                <X className="w-6 h-6" />
-              </button>
-            </div>
-            <div className="flex-grow overflow-y-auto p-4 sm:p-6">
-              <ViewsBreakdown storeId={viewingStoreId} />
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };

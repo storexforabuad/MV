@@ -2,7 +2,6 @@
 
 import { Fragment, useState, useEffect, useDeferredValue, useMemo, memo } from 'react';
 import { Send } from 'lucide-react';
-import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon, SparklesIcon, CubeIcon, PencilSquareIcon, CheckIcon, MagnifyingGlassIcon, LightBulbIcon, ArrowDownTrayIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { Product } from '@/types/product';
@@ -688,193 +687,164 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
     };
 
     return (
-        <Transition.Root show={isOpen} as={Fragment}>
-            <Dialog as="div" className="relative z-50" onClose={handleClose}>
-                <Transition.Child
-                    as={Fragment}
-                    enter="ease-out duration-300"
-                    enterFrom="opacity-0"
-                    enterTo="opacity-100"
-                    leave="ease-in duration-200"
-                    leaveFrom="opacity-100"
-                    leaveTo="opacity-0"
-                >
-                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" />
-                </Transition.Child>
+        <>
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0, y: '100vh' }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: '100vh' }}
+                        transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+                        className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-900 md:bg-transparent md:dark:bg-transparent md:justify-center md:items-center"
+                    >
+                        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity hidden md:block" onClick={handleClose} />
 
-                <div className="fixed inset-0 z-10 w-screen overflow-hidden">
-                    <div className="flex min-h-full items-end justify-center md:items-center md:p-0">
-                        <Transition.Child
-                            as={Fragment}
-                            enter="ease-out duration-400"
-                            enterFrom="opacity-0 translate-y-full"
-                            enterTo="opacity-100 translate-y-0"
-                            leave="ease-in duration-300"
-                            leaveFrom="opacity-100 translate-y-0"
-                            leaveTo="opacity-0 translate-y-full"
-                        >
-                            <Dialog.Panel className="relative flex w-full max-w-2xl transform text-left transition">
-                                {/* Full-screen modal with dark mode */}
-                                <div className="relative flex w-full h-screen md:h-[90vh] md:rounded-2xl flex-col overflow-hidden bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 shadow-2xl">
-                                    {/* iOS-style Header with blur */}
-                                    <div className="px-4 py-3 flex justify-between items-center border-b border-gray-200 dark:border-gray-700 flex-shrink-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg">
-                                        <div>
-                                            <Dialog.Title as="h3" className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
-                                                Social Posts
-                                            </Dialog.Title>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400">Share Content</p>
-                                        </div>
-                                        <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg">
-                                            <Send className="w-6 h-6 text-white" />
-                                        </div>
-                                    </div>
-
-                                    {/* iOS Segmented Control Tabs */}
-                                    <div className="px-4 py-3 flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-                                        <div className="bg-gray-100 dark:bg-gray-800 p-1 rounded-xl flex relative">
-                                            {/* Sliding background */}
-                                            <motion.div
-                                                className="absolute top-1 bottom-1 bg-white dark:bg-gray-700 rounded-lg shadow-sm"
-                                                initial={false}
-                                                animate={{
-                                                    left: currentTab === 'suggested' ? '0.25rem' : currentTab === 'all' ? 'calc(33.333% + 0.125rem)' : 'calc(66.666% + 0rem)',
-                                                    width: 'calc(33.333% - 0.25rem)',
-                                                }}
-                                                transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                                            />
-
-                                            {[
-                                                { id: 'suggested' as TabType, label: 'Suggested', icon: SparklesIcon },
-                                                { id: 'all' as TabType, label: 'All', icon: CubeIcon },
-                                                { id: 'creator' as TabType, label: 'Create', icon: PencilSquareIcon },
-                                            ].map(tab => {
-                                                const Icon = tab.icon;
-                                                const isActive = currentTab === tab.id;
-                                                return (
-                                                    <button
-                                                        key={tab.id}
-                                                        onClick={() => setCurrentTab(tab.id)}
-                                                        className={`flex-1 py-2 px-3 text-center font-semibold text-[13px] transition-all z-10 flex items-center justify-center gap-1.5 rounded-lg ${isActive ? 'text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
-                                                            }`}
-                                                    >
-                                                        <Icon className="w-4 h-4" />
-                                                        <span className="hidden sm:inline">{tab.label}</span>
-                                                        <span className="sm:hidden">{tab.id === 'suggested' ? 'Picks' : tab.label}</span>
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-
-                                    {/* Tab Content */}
-                                    <div className="flex-1 overflow-y-auto">
-                                        <AnimatePresence mode="wait">
-                                            <motion.div
-                                                key={currentTab}
-                                                initial={{ opacity: 0, x: 20 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                exit={{ opacity: 0, x: -20 }}
-                                                transition={{ duration: 0.2 }}
-                                                className="h-full"
-                                            >
-                                                {currentTab === 'suggested' && renderSuggestedTab()}
-                                                {currentTab === 'all' && renderAllProductsTab()}
-                                                {currentTab === 'creator' && renderPostCreatorTab()}
-                                            </motion.div>
-                                        </AnimatePresence>
-                                    </div>
-
-                                    {/* Footer */}
-                                    <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-gray-700">
-                                        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent dark:from-gray-900 dark:to-transparent pointer-events-none" />
-                                        <div className="relative max-w-3xl mx-auto">
-                                            <motion.button
-                                                onClick={handleClose}
-                                                className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
-                                                whileTap={{ scale: 0.98 }}
-                                            >
-                                                Done
-                                            </motion.button>
-                                        </div>
-                                    </footer>
+                        <div className="relative w-full h-full md:h-[90vh] md:max-w-2xl md:rounded-2xl flex flex-col overflow-hidden bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 shadow-2xl z-10">
+                            {/* iOS-style Header with blur */}
+                            <div className="px-4 py-3 flex justify-between items-center border-b border-gray-200 dark:border-gray-700 flex-shrink-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg">
+                                <div>
+                                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                        Social Posts
+                                    </h3>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">Share Content</p>
                                 </div>
-                            </Dialog.Panel>
-                        </Transition.Child>
-                    </div>
-                </div>
-
-                {/* Share Modals */}
-                <Transition show={activeShareModal !== 'none'} as={Fragment}>
-                    <Dialog as="div" className="relative z-[60]" onClose={() => setActiveShareModal('none')}>
-                        <Transition.Child
-                            as={Fragment}
-                            enter="ease-out duration-300"
-                            enterFrom="opacity-0"
-                            enterTo="opacity-100"
-                            leave="ease-in duration-200"
-                            leaveFrom="opacity-100"
-                            leaveTo="opacity-0"
-                        >
-                            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
-                        </Transition.Child>
-
-                        <div className="fixed inset-0 overflow-y-auto">
-                            <div className="flex min-h-full items-center justify-center p-4 text-center">
-                                <Transition.Child
-                                    as={Fragment}
-                                    enter="ease-out duration-300"
-                                    enterFrom="opacity-0 scale-95"
-                                    enterTo="opacity-100 scale-100"
-                                    leave="ease-in duration-200"
-                                    leaveFrom="opacity-100 scale-100"
-                                    leaveTo="opacity-0 scale-95"
-                                >
-                                    <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-gray-900 p-6 text-left align-middle shadow-xl transition-all border border-gray-200 dark:border-gray-700">
-                                        <Dialog.Title as="h3" className="text-lg font-bold leading-6 text-gray-900 dark:text-white mb-4">
-                                            {activeShareModal === 'link' ? 'Share Store Link' : 'Share with Caption'}
-                                        </Dialog.Title>
-
-                                        <div className="mt-2">
-                                            {activeShareModal === 'link' ? (
-                                                <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                                                    <p className="text-sm text-gray-600 dark:text-gray-300 break-all font-mono">
-                                                        {`https://tinyurl.com/bizcononline/${storeId}`}
-                                                    </p>
-                                                </div>
-                                            ) : (
-                                                <textarea
-                                                    value={shareMessage}
-                                                    onChange={(e) => setShareMessage(e.target.value)}
-                                                    rows={6}
-                                                    className="w-full bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
-                                                />
-                                            )}
-                                        </div>
-
-                                        <div className="mt-6 flex gap-3">
-                                            <button
-                                                type="button"
-                                                className="flex-1 justify-center rounded-xl border border-transparent bg-purple-100 dark:bg-purple-900/30 px-4 py-3 text-sm font-medium text-purple-900 dark:text-purple-100 hover:bg-purple-200 dark:hover:bg-purple-900/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 transition-all"
-                                                onClick={() => setActiveShareModal('none')}
-                                            >
-                                                Cancel
-                                            </button>
-                                            <button
-                                                type="button"
-                                                className="flex-1 justify-center rounded-xl border border-transparent bg-purple-600 px-4 py-3 text-sm font-bold text-white hover:bg-purple-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 transition-all shadow-lg shadow-purple-500/30"
-                                                onClick={() => handleCopyShare(activeShareModal === 'link' ? `https://tinyurl.com/bizcononline/${storeId}` : shareMessage)}
-                                            >
-                                                Copy
-                                            </button>
-                                        </div>
-                                    </Dialog.Panel>
-                                </Transition.Child>
+                                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg">
+                                    <Send className="w-6 h-6 text-white" />
+                                </div>
                             </div>
+
+                            {/* iOS Segmented Control Tabs */}
+                            <div className="px-4 py-3 flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                                <div className="bg-gray-100 dark:bg-gray-800 p-1 rounded-xl flex relative">
+                                    {/* Sliding background */}
+                                    <motion.div
+                                        className="absolute top-1 bottom-1 bg-white dark:bg-gray-700 rounded-lg shadow-sm"
+                                        initial={false}
+                                        animate={{
+                                            left: currentTab === 'suggested' ? '0.25rem' : currentTab === 'all' ? 'calc(33.333% + 0.125rem)' : 'calc(66.666% + 0rem)',
+                                            width: 'calc(33.333% - 0.25rem)',
+                                        }}
+                                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                                    />
+
+                                    {[
+                                        { id: 'suggested' as TabType, label: 'Suggested', icon: SparklesIcon },
+                                        { id: 'all' as TabType, label: 'All', icon: CubeIcon },
+                                        { id: 'creator' as TabType, label: 'Create', icon: PencilSquareIcon },
+                                    ].map(tab => {
+                                        const Icon = tab.icon;
+                                        const isActive = currentTab === tab.id;
+                                        return (
+                                            <button
+                                                key={tab.id}
+                                                onClick={() => setCurrentTab(tab.id)}
+                                                className={`flex-1 py-2 px-3 text-center font-semibold text-[13px] transition-all z-10 flex items-center justify-center gap-1.5 rounded-lg ${isActive ? 'text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                                                    }`}
+                                            >
+                                                <Icon className="w-4 h-4" />
+                                                <span className="hidden sm:inline">{tab.label}</span>
+                                                <span className="sm:hidden">{tab.id === 'suggested' ? 'Picks' : tab.label}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Tab Content */}
+                            <div className="flex-1 overflow-y-auto">
+                                <AnimatePresence mode="wait">
+                                    <motion.div
+                                        key={currentTab}
+                                        initial={{ opacity: 0, x: 20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: -20 }}
+                                        transition={{ duration: 0.2 }}
+                                        className="h-full"
+                                    >
+                                        {currentTab === 'suggested' && renderSuggestedTab()}
+                                        {currentTab === 'all' && renderAllProductsTab()}
+                                        {currentTab === 'creator' && renderPostCreatorTab()}
+                                    </motion.div>
+                                </AnimatePresence>
+                            </div>
+
+                            {/* Footer */}
+                            <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-gray-700">
+                                <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent dark:from-gray-900 dark:to-transparent pointer-events-none" />
+                                <div className="relative max-w-3xl mx-auto">
+                                    <motion.button
+                                        onClick={handleClose}
+                                        className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+                                        whileTap={{ scale: 0.98 }}
+                                    >
+                                        Done
+                                    </motion.button>
+                                </div>
+                            </footer>
                         </div>
-                    </Dialog>
-                </Transition>
-            </Dialog>
-        </Transition.Root>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Share Modals */}
+            <AnimatePresence>
+                {activeShareModal !== 'none' && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+                            onClick={() => setActiveShareModal('none')}
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white dark:bg-gray-900 p-6 text-left align-middle shadow-xl transition-all border border-gray-200 dark:border-gray-700 pointer-events-auto"
+                        >
+                            <h3 className="text-lg font-bold leading-6 text-gray-900 dark:text-white mb-4">
+                                {activeShareModal === 'link' ? 'Share Store Link' : 'Share with Caption'}
+                            </h3>
+
+                            <div className="mt-2">
+                                {activeShareModal === 'link' ? (
+                                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+                                        <p className="text-sm text-gray-600 dark:text-gray-300 break-all font-mono">
+                                            {`https://tinyurl.com/bizcononline/${storeId}`}
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <textarea
+                                        value={shareMessage}
+                                        onChange={(e) => setShareMessage(e.target.value)}
+                                        rows={6}
+                                        className="w-full bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                                    />
+                                )}
+                            </div>
+
+                            <div className="mt-6 flex gap-3">
+                                <button
+                                    type="button"
+                                    className="flex-1 justify-center rounded-xl border border-transparent bg-purple-100 dark:bg-purple-900/30 px-4 py-3 text-sm font-medium text-purple-900 dark:text-purple-100 hover:bg-purple-200 dark:hover:bg-purple-900/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 transition-all"
+                                    onClick={() => setActiveShareModal('none')}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    className="flex-1 justify-center rounded-xl border border-transparent bg-purple-600 px-4 py-3 text-sm font-bold text-white hover:bg-purple-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 transition-all shadow-lg shadow-purple-500/30"
+                                    onClick={() => handleCopyShare(activeShareModal === 'link' ? `https://tinyurl.com/bizcononline/${storeId}` : shareMessage)}
+                                >
+                                    Copy
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+        </>
     );
 };
 

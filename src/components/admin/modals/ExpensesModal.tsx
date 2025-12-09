@@ -40,20 +40,17 @@ export default function ExpensesModal({ isOpen, onClose, totalCommission, totalE
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center sm:p-6">
-          <motion.div
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
-            initial="hidden" animate="visible" exit="exit"
-            variants={backdropVariants}
-            onClick={onClose}
-            aria-hidden="true"
-          />
+        <motion.div
+          initial={{ opacity: 0, y: '100vh' }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: '100vh' }}
+          transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+          className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-900 md:bg-transparent md:justify-center md:items-center"
+        >
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm hidden md:block" onClick={onClose} />
 
-          <motion.div
-            className="relative w-full h-full sm:h-auto sm:max-h-[90vh] sm:max-w-md bg-white dark:bg-slate-900 sm:rounded-2xl shadow-2xl overflow-hidden flex flex-col"
-            initial="hidden" animate="visible" exit="exit"
-            variants={modalVariants}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          <div
+            className="relative w-full h-full md:h-auto md:max-h-[90vh] md:max-w-md bg-white dark:bg-slate-900 md:rounded-2xl shadow-2xl overflow-hidden flex flex-col z-10"
             onClick={(e) => e.stopPropagation()}
           >
             {/* --- Header --- */}
@@ -132,8 +129,8 @@ export default function ExpensesModal({ isOpen, onClose, totalCommission, totalE
                 Done
               </motion.button>
             </footer>
-          </motion.div>
-        </div>
+          </div>
+        </motion.div>
       )}
     </AnimatePresence>
   );
