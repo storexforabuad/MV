@@ -1,9 +1,9 @@
 'use client';
-import React, { useState, useMemo, Fragment, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, Fragment, useRef, useEffect, useCallback, useDeferredValue } from 'react';
 import { Dialog, Transition, Menu } from '@headlessui/react';
 import { XMarkIcon, MagnifyingGlassIcon, EllipsisVerticalIcon, EyeIcon } from '@heroicons/react/24/solid';
+import { Archive, Percent } from 'lucide-react';
 import Image from 'next/image';
-import { Percent } from 'lucide-react';
 import { Product } from '../../types/product';
 import { formatPrice } from '../../utils/price';
 import EditProductPanel from './EditProductPanel';
@@ -48,7 +48,7 @@ const ProductRow = React.memo(({
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   return (
-    <div className={`flex items-start gap-4 p-3 rounded-lg transition-colors ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-input-background'}`}>
+    <div className={`flex items-start gap-4 p-3 rounded-lg transition-colors ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}>
       {isSelectMode && (
         <div className="flex items-center justify-center h-16">
           <input
@@ -59,29 +59,36 @@ const ProductRow = React.memo(({
           />
         </div>
       )}
-      <Image src={product.images[0]} alt={product.name} width={64} height={64} className="w-16 h-16 object-cover rounded-lg flex-shrink-0 pointer-events-none" />
+      <div className="relative w-16 h-16 flex-shrink-0">
+        <Image
+          src={product.images[0]}
+          alt={product.name}
+          fill
+          className="object-cover rounded-lg pointer-events-none"
+        />
+      </div>
       <div className="flex-1 overflow-hidden">
-        <p className="font-semibold text-text-primary truncate">{product.name}</p>
-        <p className="text-sm text-text-secondary -mt-1">{categoryName}</p>
+        <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">{product.name}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400 -mt-0.5">{categoryName}</p>
 
         <div className="mt-2 flex items-baseline gap-2">
           {product.onPromo && product.originalPrice ? (
             <>
               <p className="text-lg font-bold text-blue-600">{formatPrice(product.price)}</p>
-              <p className="text-sm text-text-secondary line-through">{formatPrice(product.originalPrice)}</p>
+              <p className="text-sm text-gray-400 line-through">{formatPrice(product.originalPrice)}</p>
             </>
           ) : (
-            <p className="text-lg font-bold text-text-primary">{formatPrice(product.price)}</p>
+            <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{formatPrice(product.price)}</p>
           )}
         </div>
 
-        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-text-secondary">
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
           <div>
             {isGeneralProduct(product) && product.soldOut ?
-              <span className="px-2 py-0.5 text-xs font-medium text-red-700 bg-red-100 rounded-full">Sold Out</span> :
+              <span className="px-2 py-0.5 text-xs font-medium text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-400 rounded-full">Sold Out</span> :
               isGeneralProduct(product) && product.limitedStock ?
-                <span className="px-2 py-0.5 text-xs font-medium text-yellow-800 bg-yellow-100 rounded-full">Limited</span> :
-                <span className="px-2 py-0.5 text-xs font-medium text-green-700 bg-green-100 rounded-full">In Stock</span>
+                <span className="px-2 py-0.5 text-xs font-medium text-yellow-800 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400 rounded-full">Limited</span> :
+                <span className="px-2 py-0.5 text-xs font-medium text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400 rounded-full">In Stock</span>
             }
           </div>
 
@@ -105,13 +112,13 @@ const ProductRow = React.memo(({
                 calculateMenuPosition(menuButtonRef.current);
               }
             }}
-            className="p-2 rounded-full hover:bg-button-secondary-hover">
-            <EllipsisVerticalIcon className="w-5 h-5 text-text-secondary" />
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+            <EllipsisVerticalIcon className="w-5 h-5 text-gray-400" />
           </Menu.Button>
           <Transition as={Fragment} enter="transition ease-out duration-100" enterFrom="transform opacity-0 scale-95" enterTo="transform opacity-100 scale-100" leave="transition ease-in duration-75" leaveFrom="transform opacity-100 scale-100" leaveTo="transform opacity-0 scale-95">
             <Menu.Items
-              className={`absolute right-0 w-48 divide-y divide-border-color rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20 bg-card-background ${menuPosition === 'top' ? 'bottom-full origin-bottom mb-1' : 'origin-top mt-2'}`}>
-              <div className="px-1 py-1 "><Menu.Item>{({ active }) => (<button onClick={() => onEdit(product)} className={`${active ? 'bg-button-secondary-hover text-text-primary' : 'text-text-secondary'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Edit</button>)}</Menu.Item><Menu.Item>{({ active }) => (<button className={`${active ? 'bg-button-secondary-hover text-text-primary' : 'text-text-secondary'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Duplicate</button>)}</Menu.Item></div>
+              className={`absolute right-0 w-48 divide-y divide-gray-100 dark:divide-gray-700 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20 bg-white dark:bg-gray-800 ${menuPosition === 'top' ? 'bottom-full origin-bottom mb-1' : 'origin-top mt-2'}`}>
+              <div className="px-1 py-1 "><Menu.Item>{({ active }) => (<button onClick={() => onEdit(product)} className={`${active ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Edit</button>)}</Menu.Item><Menu.Item>{({ active }) => (<button className={`${active ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Duplicate</button>)}</Menu.Item></div>
               <div className="px-1 py-1"><Menu.Item>{({ active }) => (<button onClick={() => onDeleteRequest(product)} className={`${active ? 'bg-red-500 text-white' : 'text-red-500'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Delete</button>)}</Menu.Item></div>
             </Menu.Items>
           </Transition>
@@ -128,17 +135,15 @@ const FilterChip = ({ label, value, activeFilter, onClick, count }: { label: str
   return (
     <button
       onClick={() => onClick(value)}
-      className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-full transition-colors whitespace-nowrap ${isActive
-        ? 'bg-gray-900 text-white'
-        : 'bg-input-background text-text-primary hover:bg-button-secondary-hover'
+      className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-full transition-all whitespace-nowrap border ${isActive
+        ? 'bg-blue-600 border-blue-600 text-white shadow-md'
+        : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
         }`}
     >
       {label}
-      {isActive && (
-        <span className="bg-white/20 text-white text-xs font-bold flex items-center justify-center min-w-[24px] h-5 px-1.5 rounded-full">
-          {count}
-        </span>
-      )}
+      <span className={`text-xs font-bold flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}`}>
+        {count}
+      </span>
     </button>
   );
 };
@@ -148,6 +153,9 @@ const FilterChip = ({ label, value, activeFilter, onClick, count }: { label: str
 
 const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClose, products, setProducts, categories, onUpdateProduct, onDeleteProduct, onAddCategory }) => {
   const [searchQuery, setSearchQuery] = useState('');
+  // Defer the search query to prevent input lag
+  const deferredSearchQuery = useDeferredValue(searchQuery);
+
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [productToDelete, setProductToDelete] = useState<Product | null>(null);
@@ -176,13 +184,13 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
         if (activeFilter === 'soldout') return isGeneralProduct(p) && p.soldOut;
         return true;
       })
-      .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
-  }, [products, searchQuery, activeFilter]);
+      .filter(p => p.name.toLowerCase().includes(deferredSearchQuery.toLowerCase()));
+  }, [products, deferredSearchQuery, activeFilter]);
 
   // Reset visible count when filters change
   useEffect(() => {
     setVisibleCount(20);
-  }, [searchQuery, activeFilter, isOpen]);
+  }, [deferredSearchQuery, activeFilter, isOpen]);
 
   // Load more when scrolling to bottom
   useEffect(() => {
@@ -267,53 +275,74 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
   return (
     <>
       <Transition.Root show={isOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-40" onClose={handleClose}>
-          <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0"><div className="fixed inset-0 bg-black bg-opacity-75 backdrop-blur-sm transition-opacity" /></Transition.Child>
+        <Dialog as="div" className="relative z-50" onClose={handleClose}>
+          <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0"><div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" /></Transition.Child>
 
-          <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
-            <div className="flex min-h-full items-stretch justify-center text-center md:items-center md:px-2 lg:px-4">
-              <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-full md:translate-y-0 md:scale-95" enterTo="opacity-100 translate-y-0 md:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 md:scale-100" leaveTo="opacity-0 translate-y-full md:translate-y-0 md:scale-95">
-                <Dialog.Panel className="relative flex w-full max-w-2xl transform text-left text-base transition md:my-8">
-                  <div className="relative flex w-full flex-col overflow-hidden bg-card-background shadow-2xl h-screen md:h-[90vh] md:rounded-2xl">
+          <div className="fixed inset-0 z-10 w-screen overflow-hidden">
+            <div className="flex min-h-full items-end justify-center md:items-center md:p-0">
+              <Transition.Child as={Fragment} enter="ease-out duration-400" enterFrom="opacity-0 translate-y-full" enterTo="opacity-100 translate-y-0" leave="ease-in duration-300" leaveFrom="opacity-100 translate-y-0" leaveTo="opacity-0 translate-y-full">
+                <Dialog.Panel className="relative flex w-full max-w-2xl transform text-left transition">
+                  <div className="relative flex w-full h-screen md:h-[90vh] md:rounded-2xl flex-col overflow-hidden bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 shadow-2xl">
 
                     {/* Header */}
-                    <div className="p-4 flex justify-between items-center border-b border-border-color">
-                      <Dialog.Title as="h3" className="text-xl font-bold text-text-primary">Manage Products</Dialog.Title>
-                      <button onClick={handleClose} className="p-1 rounded-full hover:bg-button-secondary-hover transition"><XMarkIcon className="h-6 w-6 text-text-secondary" /></button>
+                    <div className="px-4 py-3 flex justify-between items-center border-b border-gray-200 dark:border-gray-700 flex-shrink-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg">
+                      <div>
+                        <Dialog.Title as="h3" className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
+                          Manage Products
+                        </Dialog.Title>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">Inventory & Stock</p>
+                      </div>
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-800 rounded-xl flex items-center justify-center shadow-lg">
+                        <Archive className="w-6 h-6 text-white" />
+                      </div>
                     </div>
 
                     {/* Sticky Search & Filters */}
-                    <div className="sticky top-0 z-10 bg-card-background/80 backdrop-blur-sm p-4 border-b border-border-color">
+                    <div className="flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 p-4">
                       <div className="flex gap-2">
                         <div className="relative flex-1">
-                          <MagnifyingGlassIcon className="pointer-events-none absolute top-3.5 left-4 h-5 w-5 text-text-secondary" />
-                          <input type="text" placeholder="Search products..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="block w-full rounded-lg border-2 border-input-border bg-input-background py-3 pl-11 pr-4 text-text-primary placeholder:text-text-secondary focus:border-blue-500 focus:ring-0 sm:text-sm" />
+                          <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+                          <input
+                            type="text"
+                            placeholder="Search products..."
+                            value={searchQuery}
+                            onChange={e => setSearchQuery(e.target.value)}
+                            className="w-full bg-gray-100 dark:bg-gray-800 rounded-xl pl-10 pr-10 py-2.5 text-[15px] text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-500/50 focus:bg-white dark:focus:bg-gray-700 transition-all"
+                          />
+                          {searchQuery && (
+                            <button
+                              onClick={() => setSearchQuery('')}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                            >
+                              <XMarkIcon className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
                         <button
                           onClick={() => {
                             setIsSelectMode(!isSelectMode);
                             setSelectedProducts([]);
                           }}
-                          className={`px-4 py-2 text-sm font-semibold rounded-lg transition-colors ${isSelectMode
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-input-background text-text-primary hover:bg-button-secondary-hover'
+                          className={`px-4 py-2 text-sm font-semibold rounded-xl transition-all active:scale-95 ${isSelectMode
+                            ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+                            : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
                             }`}>
-                          {isSelectMode ? 'Cancel' : 'Mark'}
+                          {isSelectMode ? 'Cancel' : 'Select'}
                         </button>
                       </div>
-                      <div className="mt-4 flex space-x-2 overflow-x-auto pb-2">
+                      <div className="mt-4 flex space-x-2 overflow-x-auto pb-1 scrollbar-hide">
                         <FilterChip label="All" value="all" activeFilter={activeFilter} onClick={setActiveFilter} count={filterCounts.all} />
                         <FilterChip label="Popular" value="popular" activeFilter={activeFilter} onClick={setActiveFilter} count={filterCounts.popular} />
-                        <FilterChip label="Limited Stock" value="limited" activeFilter={activeFilter} onClick={setActiveFilter} count={filterCounts.limited} />
+                        <FilterChip label="Limited" value="limited" activeFilter={activeFilter} onClick={setActiveFilter} count={filterCounts.limited} />
                         <FilterChip label="Sold Out" value="soldout" activeFilter={activeFilter} onClick={setActiveFilter} count={filterCounts.soldout} />
                       </div>
                     </div>
 
                     {/* Product List */}
-                    <div className="flex-1 overflow-y-auto p-2 pb-40">
+                    <div className="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-gray-900/50">
                       {isSelectMode && (
-                        <div className="p-2 pb-0">
-                          <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-input-background">
+                        <div className="mb-2 px-2">
+                          <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-pointer">
                             <input
                               type="checkbox"
                               onChange={handleSelectAll}
@@ -326,61 +355,67 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
                               }}
                               className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                             />
-                            <span className="text-sm font-medium text-text-primary">Select All</span>
+                            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Select All</span>
                           </label>
                         </div>
                       )}
-                      <div className="grid grid-cols-1 gap-1">
+                      <div className="space-y-2">
                         {visibleProducts.length > 0 ? (
                           <>
                             {visibleProducts.map(p => (
-                              <ProductRow
-                                key={p.id}
-                                product={p}
-                                categoryName={p.categoryId ? categoryMap[p.categoryId] : 'Uncategorized'}
-                                onEdit={setEditingProduct}
-                                onDeleteRequest={setProductToDelete}
-                                isSelectMode={isSelectMode}
-                                isSelected={selectedProducts.includes(p.id)}
-                                onSelect={handleToggleSelection}
-                              />
+                              <div key={p.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                                <ProductRow
+                                  product={p}
+                                  categoryName={p.categoryId ? categoryMap[p.categoryId] : 'Uncategorized'}
+                                  onEdit={setEditingProduct}
+                                  onDeleteRequest={setProductToDelete}
+                                  isSelectMode={isSelectMode}
+                                  isSelected={selectedProducts.includes(p.id)}
+                                  onSelect={handleToggleSelection}
+                                />
+                              </div>
                             ))}
                             {visibleCount < filteredProducts.length && (
-                              <div ref={loadMoreRef} className="py-4 text-center text-sm text-text-secondary">
-                                Loading more...
+                              <div ref={loadMoreRef} className="py-6 flex justify-center">
+                                <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
                               </div>
                             )}
                           </>
                         ) : (
-                          <div className="text-center py-16"><p className="font-semibold text-text-primary">No products found</p><p className="text-text-secondary mt-1">Try adjusting your search or filters.</p></div>
+                          <div className="flex flex-col items-center justify-center py-16 text-center">
+                            <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                              <MagnifyingGlassIcon className="w-8 h-8 text-gray-400" />
+                            </div>
+                            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">No products found</h3>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Try adjusting your search or filters.</p>
+                          </div>
                         )}
                       </div>
                     </div>
 
                     {/* Footer */}
-                    <div className="absolute bottom-0 left-0 right-0 z-20">
-                      <div className="bg-card-background p-4 border-t border-border-color">
-                        {isSelectMode ? (
-                          <div className="flex justify-between items-center">
-                            <p className="text-sm font-medium text-text-secondary">
-                              {selectedProducts.length} selected
-                            </p>
-                            <div className="flex gap-2">
-                              <button
-                                onClick={handleBulkDeleteRequest}
-                                disabled={selectedProducts.length === 0}
-                                className="bg-red-600 text-white font-semibold py-3 px-4 rounded-lg hover:bg-red-700 transition disabled:opacity-50"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </div>
-                        ) : (
-                          <button onClick={handleClose} className="w-full bg-gray-900 text-white font-semibold py-3 px-4 rounded-lg hover:bg-gray-800 transition">
-                            Done
+                    <div className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 z-20">
+                      {isSelectMode ? (
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                            {selectedProducts.length} selected
+                          </p>
+                          <button
+                            onClick={handleBulkDeleteRequest}
+                            disabled={selectedProducts.length === 0}
+                            className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-lg shadow-red-500/30 disabled:opacity-50 disabled:shadow-none active:scale-95"
+                          >
+                            Delete Selected
                           </button>
-                        )}
-                      </div>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={handleClose}
+                          className="w-full bg-gradient-to-r from-blue-600 to-indigo-800 hover:from-blue-700 hover:to-indigo-900 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+                        >
+                          Done
+                        </button>
+                      )}
                     </div>
                   </div>
                 </Dialog.Panel>

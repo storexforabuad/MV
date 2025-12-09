@@ -147,7 +147,7 @@ export const DeliveriesHubModal = ({ isOpen, onClose, storeId }: DeliveriesHubMo
                                 </h2>
                                 <p className="text-xs text-slate-500 dark:text-slate-400">Ready for delivery</p>
                             </div>
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lime-500 via-green-600 to-emerald-700 flex items-center justify-center shadow-lg">
                                 <Truck className="w-6 h-6 text-white" />
                             </div>
                         </header>
@@ -188,7 +188,7 @@ export const DeliveriesHubModal = ({ isOpen, onClose, storeId }: DeliveriesHubMo
                             <div className="relative max-w-5xl mx-auto">
                                 <motion.button
                                     onClick={onClose}
-                                    className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+                                    className="w-full bg-gradient-to-r from-lime-500 via-green-600 to-emerald-700 hover:from-lime-600 hover:via-green-700 hover:to-emerald-800 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
                                     whileTap={{ scale: 0.98 }}
                                 >
                                     Done
