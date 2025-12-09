@@ -320,7 +320,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                           </button>
                           <button
                             type="button"
-                            className="flex-1 inline-flex justify-center items-center rounded-lg border border-transparent bg-gray-900 py-2 px-4 text-sm font-semibold text-white shadow-sm hover:bg-gray-800 disabled:bg-gray-600 disabled:cursor-not-allowed"
+                            className="flex-1 inline-flex justify-center items-center rounded-lg border border-transparent bg-blue-600 py-2 px-4 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed"
                             onClick={handleSave}
                             disabled={isSaving}
                           >

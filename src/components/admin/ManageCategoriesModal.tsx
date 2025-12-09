@@ -2,6 +2,7 @@
 import React, { useState, useMemo, Fragment } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Tag } from 'lucide-react';
 import { XMarkIcon, MagnifyingGlassIcon, EllipsisVerticalIcon, EyeIcon, PlusIcon, CubeIcon } from '@heroicons/react/24/solid';
 import { Product } from '../../types/product';
 import { Category } from '../../types/category';
@@ -85,7 +86,7 @@ const CategoryRow = ({
 };
 
 const SortButton = ({ label, value, activeSort, onClick }: { label: string, value: SortType, activeSort: SortType, onClick: (sort: SortType) => void }) => (
-  <button onClick={() => onClick(value)} className={`flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-full transition-colors whitespace-nowrap ${activeSort === value ? 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
+  <button onClick={() => onClick(value)} className={`flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-full transition-colors whitespace-nowrap ${activeSort === value ? 'bg-orange-600 text-white shadow-md' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
     {label}
   </button>
 )
@@ -177,7 +178,7 @@ const ManageCategoriesModal: React.FC<ManageCategoriesModalProps> = ({ isOpen, o
                 <p className="text-xs text-slate-500 dark:text-slate-400">Organize your products</p>
               </div>
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg">
-                <CubeIcon className="w-6 h-6 text-white" />
+                <Tag className="w-6 h-6 text-white" />
               </div>
             </header>
 

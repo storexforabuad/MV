@@ -136,13 +136,13 @@ const FilterChip = ({ label, value, activeFilter, onClick, count }: { label: str
   return (
     <button
       onClick={() => onClick(value)}
-      className={`flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-full transition-all whitespace-nowrap border ${isActive
+      className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold rounded-full transition-all whitespace-nowrap border ${isActive
         ? 'bg-blue-600 border-blue-600 text-white shadow-md'
         : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
         }`}
     >
       {label}
-      <span className={`text-xs font-bold flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}`}>
+      <span className={`text-[10px] sm:text-xs font-bold flex items-center justify-center min-w-[16px] h-4 sm:min-w-[20px] sm:h-5 px-1 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}`}>
         {count}
       </span>
     </button>
@@ -364,7 +364,7 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
                 {visibleProducts.length > 0 ? (
                   <>
                     {visibleProducts.map(p => (
-                      <div key={p.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+                      <div key={p.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
                         <ProductRow
                           product={p}
                           categoryName={p.categoryId ? categoryMap[p.categoryId] : 'Uncategorized'}
