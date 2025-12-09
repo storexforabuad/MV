@@ -32,14 +32,14 @@ const EditableCategoryRow = ({ onSave, onCancel, categoryName = '' }: { onSave: 
   const [name, setName] = useState(categoryName);
 
   return (
-    <div className="flex items-center gap-2 p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
+    <div className="flex items-center gap-2 p-3 bg-orange-50 dark:bg-orange-900/10 rounded-lg">
       <input
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Enter category name"
-        className="flex-1 bg-transparent border-b border-blue-500 focus:ring-0 focus:outline-none text-gray-900 dark:text-gray-100" />
-      <button onClick={() => onSave(name)} className="px-3 py-1 text-sm font-semibold text-white bg-blue-600 rounded-md hover:bg-blue-700">Save</button>
+        className="flex-1 bg-transparent border-b border-orange-500 focus:ring-0 focus:outline-none text-gray-900 dark:text-gray-100" />
+      <button onClick={() => onSave(name)} className="px-3 py-1 text-sm font-semibold text-white bg-orange-600 rounded-md hover:bg-orange-700">Save</button>
       <button onClick={onCancel} className="px-3 py-1 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md">Cancel</button>
     </div>
   );
@@ -176,7 +176,7 @@ const ManageCategoriesModal: React.FC<ManageCategoriesModalProps> = ({ isOpen, o
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Manage Categories</h2>
                 <p className="text-xs text-slate-500 dark:text-slate-400">Organize your products</p>
               </div>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg">
                 <CubeIcon className="w-6 h-6 text-white" />
               </div>
             </header>
@@ -220,7 +220,7 @@ const ManageCategoriesModal: React.FC<ManageCategoriesModalProps> = ({ isOpen, o
             <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
               <motion.button
                 onClick={handleClose}
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+                className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
                 whileTap={{ scale: 0.98 }}
               >
                 Done
