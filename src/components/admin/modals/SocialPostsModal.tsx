@@ -3,7 +3,7 @@
 import { Fragment, useState, useEffect, useDeferredValue, useMemo, memo } from 'react';
 import { Send } from 'lucide-react';
 import { Dialog, Transition } from '@headlessui/react';
-import { XMarkIcon, SparklesIcon, CubeIcon, PencilSquareIcon, CheckIcon, MagnifyingGlassIcon, LightBulbIcon } from '@heroicons/react/24/outline';
+import { XMarkIcon, SparklesIcon, CubeIcon, PencilSquareIcon, CheckIcon, MagnifyingGlassIcon, LightBulbIcon, ArrowDownTrayIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { Product } from '@/types/product';
 import { Category } from '@/types/category';
@@ -286,13 +286,20 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
     const finalCaption = customCaption || generatedCaption;
 
     // Handle copy caption
-    const handleCopyCaption = async () => {
+    // Handle Ready to Post (Copy Caption + Download Image)
+    const handleReadyToPost = async () => {
         if (finalCaption && selectedProduct) {
+            // 1. Copy Caption
             navigator.clipboard.writeText(finalCaption);
             setCopiedRecently(true);
             toast.success('Caption copied!');
 
-            // Track the share for each selected platform
+            // 2. Download Image (if available)
+            if (selectedProduct.images[0]) {
+                handleDownloadImage();
+            }
+
+            // 3. Track Analytics
             const platformKeys: MetricsPlatform[] = selectedPlatforms.map(
                 p => p.toLowerCase() as MetricsPlatform
             );
@@ -301,7 +308,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                 await trackProductShare(storeId, selectedProduct.id, platform);
             }
 
-            // Refresh metrics after tracking
+            // 4. Refresh Metrics
             const productIds = products.map(p => p.id);
             const updatedMetrics = await getBatchProductMetrics(storeId, productIds);
             setMetricsMap(updatedMetrics);
@@ -655,47 +662,25 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                     </div>
                 </div>
 
-                {/* Action Buttons - Muted */}
-                <div className="p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 space-y-3 flex-shrink-0">
-                    <div className="grid grid-cols-2 gap-3">
-                        <motion.button
-                            onClick={handleCopyCaption}
-                            disabled={!finalCaption || selectedPlatforms.length === 0}
-                            className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
-                            whileTap={{ scale: 0.95 }}
-                        >
-                            {copiedRecently ? (
-                                <>
-                                    <CheckIcon className="w-5 h-5" />
-                                    <span>Copied!</span>
-                                </>
-                            ) : (
-                                <>
-                                    {/* <ClipboardDocumentIcon className="w-5 h-5" /> */}
-                                    <span>Copy Text</span>
-                                </>
-                            )}
-                        </motion.button>
-
-                        <motion.button
-                            onClick={handleDownloadImage}
-                            disabled={!selectedProduct?.images[0]}
-                            className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
-                            whileTap={{ scale: 0.95 }}
-                        >
-                            {/* <ArrowDownTrayIcon className="w-5 h-5" /> */}
-                            <span>Save Image</span>
-                        </motion.button>
-                    </div>
-
+                {/* Action Buttons - Consolidated */}
+                <div className="p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
                     <motion.button
-                        onClick={handleCopyCaption}
+                        onClick={handleReadyToPost}
                         disabled={!finalCaption || selectedPlatforms.length === 0}
                         className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-r from-purple-500 to-violet-600 dark:from-purple-600 dark:to-violet-700 text-white font-bold text-base hover:from-purple-600 hover:to-violet-700 dark:hover:from-purple-700 dark:hover:to-violet-800 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg"
                         whileTap={{ scale: 0.98 }}
                     >
-                        <SparklesIcon className="w-6 h-6" />
-                        <span>Ready to Post!</span>
+                        {copiedRecently ? (
+                            <>
+                                <CheckIcon className="w-6 h-6" />
+                                <span>Copied & Saved!</span>
+                            </>
+                        ) : (
+                            <>
+                                <SparklesIcon className="w-6 h-6" />
+                                <span>Ready to Post!</span>
+                            </>
+                        )}
                     </motion.button>
                 </div>
             </div>
