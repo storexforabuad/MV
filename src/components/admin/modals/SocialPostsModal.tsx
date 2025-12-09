@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState, useEffect } from 'react';
+import { Fragment, useState, useEffect, useDeferredValue, useMemo, memo } from 'react';
 import { Send } from 'lucide-react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon, SparklesIcon, CubeIcon, PencilSquareIcon, CheckIcon, MagnifyingGlassIcon, LightBulbIcon } from '@heroicons/react/24/outline';
@@ -14,6 +14,108 @@ import toast from 'react-hot-toast';
 import { trackProductShare, getBatchProductMetrics } from '@/lib/productMetrics';
 import { ProductMetrics, SocialPlatform as MetricsPlatform } from '@/types/productMetrics';
 import { detectPriceDrop } from '@/utils/priceUtils';
+import { useInView } from 'react-intersection-observer';
+
+// Memoized Product Card Component
+const ProductCardItem = memo(({
+    product,
+    scoreData,
+    metrics,
+    onSelect
+}: {
+    product: Product;
+    scoreData?: ProductScore;
+    metrics?: ProductMetrics;
+    onSelect: (product: Product) => void;
+}) => {
+    const lastSharedText = (() => {
+        if (!metrics || !metrics.lastSharedAt) return null;
+        const now = Date.now();
+        const lastSharedMs = metrics.lastSharedAt.toMillis();
+        const daysSince = Math.floor((now - lastSharedMs) / (1000 * 60 * 60 * 24));
+        if (daysSince === 0) return 'Shared today';
+        if (daysSince === 1) return 'Shared yesterday';
+        if (daysSince < 7) return `Shared ${daysSince} days ago`;
+        if (daysSince < 14) return `Shared ${Math.floor(daysSince / 7)} week ago`;
+        if (daysSince < 30) return `Shared ${Math.floor(daysSince / 7)} weeks ago`;
+        return `Shared ${Math.floor(daysSince / 30)} month${daysSince >= 60 ? 's' : ''} ago`;
+    })();
+
+    const priceDropInfo = detectPriceDrop(product);
+
+    return (
+        <motion.button
+            layoutId={`product-${product.id}`}
+            onClick={() => onSelect(product)}
+            className="group relative flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition-all text-left p-0 w-full"
+            whileHover={{ y: -4 }}
+            whileTap={{ scale: 0.98 }}
+        >
+            <div className="aspect-[3/4] relative overflow-hidden bg-gray-100 dark:bg-gray-700 w-full">
+                <Image
+                    src={product.images[0] || 'https://placehold.co/400'}
+                    alt={product.name}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    sizes="(max-width: 640px) 50vw, 33vw"
+                />
+                {scoreData && (
+                    <div className="absolute top-2 left-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-semibold shadow-sm flex items-center gap-1">
+                        <span>{scoreData.emoji}</span>
+                        <span className="capitalize text-gray-900 dark:text-gray-100">{scoreData.reason.replace('-', ' ')}</span>
+                    </div>
+                )}
+
+                {/* Last shared badge */}
+                {lastSharedText && (
+                    <div className="absolute top-9 left-2 bg-purple-100/90 dark:bg-purple-900/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-medium shadow-sm flex items-center gap-1">
+                        <span>📅</span>
+                        <span className="text-purple-900 dark:text-purple-100">
+                            {lastSharedText}
+                        </span>
+                    </div>
+                )}
+
+                {/* Price drop badge */}
+                {priceDropInfo && (
+                    <div className={`absolute bottom-2 right-2 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold shadow-lg flex items-center gap-1 ${priceDropInfo.urgency === 'high'
+                        ? 'bg-red-500/95 text-white animate-pulse'
+                        : priceDropInfo.urgency === 'medium'
+                            ? 'bg-orange-500/95 text-white'
+                            : 'bg-green-500/95 text-white'
+                        }`}>
+                        <span>{priceDropInfo.emoji}</span>
+                        <span>{priceDropInfo.badge}</span>
+                    </div>
+                )}
+            </div>
+
+            <div className="p-3 flex flex-col flex-1">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 mb-1.5 leading-tight">
+                    {product.name}
+                </h3>
+                <p className="text-lg font-bold text-purple-600 dark:text-purple-400 mb-2">
+                    ₦{product.price.toLocaleString()}
+                </p>
+
+                <div className="mt-auto flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                    <span className="flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+                        {product.views || 0} views
+                    </span>
+                    {/* Share count */}
+                    {metrics && metrics.totalShares > 0 && (
+                        <span className="flex items-center gap-1">
+                            <span>·</span>
+                            <span>📲 {metrics.totalShares}x</span>
+                        </span>
+                    )}
+                </div>
+            </div>
+        </motion.button>
+    );
+});
+ProductCardItem.displayName = 'ProductCardItem';
 
 interface SocialPostsModalProps {
     isOpen: boolean;
@@ -59,14 +161,35 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
     const [metricsMap, setMetricsMap] = useState<Map<string, ProductMetrics>>(new Map());
     const [isLoadingMetrics, setIsLoadingMetrics] = useState(true);
 
+    // Performance Optimizations
+    const [displayLimit, setDisplayLimit] = useState(20);
+    const deferredSearchTerm = useDeferredValue(searchTerm);
+    const { ref: loadMoreRef, inView } = useInView();
+
+    // Infinite Scroll Effect
+    useEffect(() => {
+        if (inView) {
+            setDisplayLimit(prev => prev + 20);
+        }
+    }, [inView]);
+
+    // Reset limit when search changes
+    useEffect(() => {
+        setDisplayLimit(20);
+    }, [deferredSearchTerm]);
+
     // Get ranked products for suggestions (with metrics)
     const rankedProducts = getRankedProducts(products, metricsMap);
     const suggestedProducts = rankedProducts.slice(0, 6); // Top 6 suggestions
 
-    // Filter products for "All" tab
-    const filteredProducts = products.filter(p =>
-        p.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    // Filter products for "All" tab (Memoized)
+    const filteredProducts = useMemo(() => {
+        return products.filter(p =>
+            p.name.toLowerCase().includes(deferredSearchTerm.toLowerCase())
+        );
+    }, [products, deferredSearchTerm]);
+
+    const visibleProducts = filteredProducts.slice(0, displayLimit);
 
     // Fetch metrics on mount
     useEffect(() => {
@@ -226,88 +349,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
         return `Shared ${Math.floor(daysSince / 30)} month${daysSince >= 60 ? 's' : ''} ago`;
     };
 
-    // Render Product Card
-    const renderProductCard = (product: Product, scoreData?: ProductScore) => {
-        const metrics = metricsMap.get(product.id);
-        const lastSharedText = getLastSharedText(metrics);
-        const priceDropInfo = detectPriceDrop(product);
 
-        return (
-            <motion.button
-                key={product.id}
-                layoutId={`product-${product.id}`}
-                onClick={() => {
-                    setSelectedProduct(product);
-                    setCurrentTab('creator');
-                }}
-                className="group relative flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition-all text-left p-0 w-full"
-                whileHover={{ y: -4 }}
-                whileTap={{ scale: 0.98 }}
-            >
-                <div className="aspect-[3/4] relative overflow-hidden bg-gray-100 dark:bg-gray-700 w-full">
-                    <Image
-                        src={product.images[0] || 'https://placehold.co/400'}
-                        alt={product.name}
-                        fill
-                        className="object-cover transition-transform duration-500 group-hover:scale-110"
-                        sizes="(max-width: 640px) 50vw, 33vw"
-                    />
-                    {scoreData && (
-                        <div className="absolute top-2 left-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-semibold shadow-sm flex items-center gap-1">
-                            <span>{scoreData.emoji}</span>
-                            <span className="capitalize text-gray-900 dark:text-gray-100">{scoreData.reason.replace('-', ' ')}</span>
-                        </div>
-                    )}
-
-                    {/* Last shared badge - positioned below trending badge */}
-                    {lastSharedText && (
-                        <div className="absolute top-9 left-2 bg-purple-100/90 dark:bg-purple-900/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-medium shadow-sm flex items-center gap-1">
-                            <span>📅</span>
-                            <span className="text-purple-900 dark:text-purple-100">
-                                {lastSharedText}
-                            </span>
-                        </div>
-                    )}
-
-                    {/* Price drop badge - positioned on bottom-right */}
-                    {priceDropInfo && (
-                        <div className={`absolute bottom-2 right-2 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-bold shadow-lg flex items-center gap-1 ${priceDropInfo.urgency === 'high'
-                            ? 'bg-red-500/95 text-white animate-pulse'
-                            : priceDropInfo.urgency === 'medium'
-                                ? 'bg-orange-500/95 text-white'
-                                : 'bg-green-500/95 text-white'
-                            }`}>
-                            <span>{priceDropInfo.emoji}</span>
-                            <span>{priceDropInfo.badge}</span>
-                        </div>
-                    )}
-                </div>
-
-                <div className="p-3 flex flex-col flex-1">
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 mb-1.5 leading-tight">
-                        {product.name}
-                    </h3>
-                    <p className="text-lg font-bold text-purple-600 dark:text-purple-400 mb-2">
-                        ₦{product.price.toLocaleString()}
-                    </p>
-
-                    <div className="mt-auto flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
-                        <span className="flex items-center gap-1">
-                            <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                            {product.views || 0} views
-                        </span>
-                        {/* Share count */}
-                        {metrics && metrics.totalShares > 0 && (
-                            <span className="flex items-center gap-1">
-                                <span>·</span>
-                                <span>📲 {metrics.totalShares}x</span>
-                            </span>
-                        )}
-                    </div>
-                </div>
-            </motion.button>
-        );
-    };
 
     // Render Suggested Tab
     const renderSuggestedTab = () => (
@@ -347,9 +389,18 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
 
             {suggestedProducts.length > 0 ? (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                    {suggestedProducts.map(scoreData =>
-                        renderProductCard(scoreData.product, scoreData)
-                    )}
+                    {suggestedProducts.map(scoreData => (
+                        <ProductCardItem
+                            key={scoreData.product.id}
+                            product={scoreData.product}
+                            scoreData={scoreData}
+                            metrics={metricsMap.get(scoreData.product.id)}
+                            onSelect={(p) => {
+                                setSelectedProduct(p);
+                                setCurrentTab('creator');
+                            }}
+                        />
+                    ))}
                 </div>
             ) : (
                 <div className="py-16 text-center">
@@ -374,15 +425,41 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                     placeholder="Search products"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full bg-gray-100 dark:bg-gray-800 rounded-xl pl-10 pr-4 py-2.5 text-[15px] text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600 focus:bg-white dark:focus:bg-gray-700 transition-all"
+                    className="w-full bg-gray-100 dark:bg-gray-800 rounded-xl pl-10 pr-10 py-2.5 text-[15px] text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600 focus:bg-white dark:focus:bg-gray-700 transition-all"
                 />
+                {searchTerm && (
+                    <button
+                        onClick={() => setSearchTerm('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    >
+                        <XMarkIcon className="w-4 h-4" />
+                    </button>
+                )}
             </div>
 
             {/* Product Grid */}
-            {filteredProducts.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                    {filteredProducts.map(product => renderProductCard(product))}
-                </div>
+            {visibleProducts.length > 0 ? (
+                <>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        {visibleProducts.map(product => (
+                            <ProductCardItem
+                                key={product.id}
+                                product={product}
+                                metrics={metricsMap.get(product.id)}
+                                onSelect={(p) => {
+                                    setSelectedProduct(p);
+                                    setCurrentTab('creator');
+                                }}
+                            />
+                        ))}
+                    </div>
+                    {/* Infinite Scroll Trigger */}
+                    {visibleProducts.length < filteredProducts.length && (
+                        <div ref={loadMoreRef} className="py-8 flex justify-center">
+                            <div className="w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                        </div>
+                    )}
+                </>
             ) : (
                 <div className="py-16 text-center">
                     <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
