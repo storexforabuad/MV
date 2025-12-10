@@ -60,15 +60,36 @@ const LoadingGrid = () => (
 
 const PRODUCTS_PAGE_SIZE = 24;
 
-export default function StorefrontPageClient({ storeId }: { storeId: string }) {
+export default function StorefrontPageClient({
+  storeId,
+  initialStoreMeta,
+  initialCategories,
+  initialProducts
+}: {
+  storeId: string;
+  initialStoreMeta?: any;
+  initialCategories?: { id: string; name: string }[];
+  initialProducts?: Product[];
+}) {
   const scrollDirection = useScrollDirection();
   const scrollRestoreState = useRef<NavigationState | null>(NavigationStore.getState());
 
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
-  const [storeName, setStoreName] = useState('');
+  const restoredCategory = scrollRestoreState.current?.category;
+  // If we are restoring a category that is NOT the default 'promo' (which initialProducts represents),
+  // we should ignore initialProducts to prevent showing the wrong list and triggering premature scroll restoration.
+  const isRestoringDifferentCategory = restoredCategory && restoredCategory !== 'promo';
+
+  const [products, setProducts] = useState<Product[]>(
+    isRestoringDifferentCategory ? [] : (initialProducts || [])
+  );
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>(initialCategories || []);
+  const [storeName, setStoreName] = useState(initialStoreMeta?.name || '');
   const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
+
+  // We are "initial loading" if we don't have products to show yet.
+  // This happens if we didn't get initialProducts OR if we are restoring a different category.
+  const [initialLoading, setInitialLoading] = useState(!initialProducts || !!isRestoringDifferentCategory);
+
   const [activeCategoryId, setActiveCategoryId] = useState(() => scrollRestoreState.current?.category || 'promo');
   const [lastVisible, setLastVisible] = useState<DocumentSnapshot | null>(null);
   const [hasMore, setHasMore] = useState(true);
@@ -78,7 +99,7 @@ export default function StorefrontPageClient({ storeId }: { storeId: string }) {
   const [isPending, startTransition] = useTransition();
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
-  const [storeMeta, setStoreMeta] = useState<any | null>(null);
+  const [storeMeta, setStoreMeta] = useState<any | null>(initialStoreMeta || null);
   const [highlightOrderId, setHighlightOrderId] = useState<string | null>(null);
   const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
   const { customer } = useCustomer();
@@ -154,12 +175,14 @@ export default function StorefrontPageClient({ storeId }: { storeId: string }) {
   const fetchProducts = useCallback(async (categoryId: string, pageNum = 1, lastDoc: DocumentSnapshot | null = null) => {
     if (!storeId) return;
     setLoading(true);
+    console.log(`[StorefrontPageClient] Fetching products for category: ${categoryId}, page: ${pageNum}`);
     try {
       const cacheKey = `store_${storeId}_products_${categoryId || 'all'}_page${pageNum}`;
       let fetchedProducts;
       const cached = ProductListCache.get(cacheKey);
 
       if (cached && Array.isArray(cached) && pageNum === 1) {
+        console.log(`[StorefrontPageClient] Using cached products for ${categoryId}`);
         fetchedProducts = cached;
       } else {
         switch (categoryId) {
@@ -189,7 +212,12 @@ export default function StorefrontPageClient({ storeId }: { storeId: string }) {
       }
 
       if (fetchedProducts) {
-        setProducts(prev => pageNum === 1 ? fetchedProducts : [...prev, ...fetchedProducts]);
+        setProducts(prev => {
+          const newProducts = pageNum === 1 ? fetchedProducts : [...prev, ...fetchedProducts];
+          // Deduplicate by ID
+          const uniqueProducts = Array.from(new Map(newProducts.map(p => [p.id, p])).values());
+          return uniqueProducts;
+        });
         setHasMore(fetchedProducts.length === PRODUCTS_PAGE_SIZE);
       }
 
@@ -203,6 +231,7 @@ export default function StorefrontPageClient({ storeId }: { storeId: string }) {
   }, [storeId, setIsConnectionError]);
 
   const handleCategorySelect = useCallback((categoryId: string) => {
+    console.log(`[StorefrontPageClient] Category selected: ${categoryId}`);
     scrollRestoreState.current = null;
     NavigationStore.clearState();
 
@@ -214,13 +243,23 @@ export default function StorefrontPageClient({ storeId }: { storeId: string }) {
     if (!storeId) return;
 
     const fetchInitialAndCategoryData = async () => {
-      if (initialLoading) {
+      // Only fetch meta/categories if we don't have them yet
+      if (!storeMeta) {
         const meta = await getStoreMeta(storeId);
         setStoreName(meta?.name || storeId);
         setStoreMeta(meta);
+      }
+
+      if (categories.length === 0) {
         const cats = await getCategories(storeId);
         setCategories(cats);
       }
+
+      // Always fetch products for the active category.
+      // If we initialized with initialProducts and activeCategoryId is 'promo', 
+      // fetchProducts will still run but we can optimize it or let it refresh.
+      // For now, let's let it refresh to ensure client-side consistency, 
+      // but we could skip if products.length > 0 && activeCategoryId === 'promo'.
       await fetchProducts(activeCategoryId, 1, null);
     };
 

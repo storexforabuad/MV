@@ -3,8 +3,8 @@ import { getStoreMetaAdmin } from '@/lib/db-admin';
 import StorefrontPageClient from './StorefrontPageClient';
 
 type PageProps = {
-  params: { storeId: string };
-  searchParams: { [key: string]: string | string[] | undefined };
+    params: { storeId: string };
+    searchParams: { [key: string]: string | string[] | undefined };
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -16,6 +16,27 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
 }
 
-export default function StorefrontPage({ params }: PageProps) {
-    return <StorefrontPageClient storeId={params.storeId} />;
+import {
+    getStoreMetaAdminCached,
+    getCategoriesAdminCached,
+    getPromoProductsAdmin
+} from '@/lib/db-admin';
+
+// ... imports
+
+export default async function StorefrontPage({ params }: PageProps) {
+    const [storeMeta, categories, promoProducts] = await Promise.all([
+        getStoreMetaAdminCached(params.storeId),
+        getCategoriesAdminCached(params.storeId),
+        getPromoProductsAdmin(params.storeId)
+    ]);
+
+    return (
+        <StorefrontPageClient
+            storeId={params.storeId}
+            initialStoreMeta={storeMeta}
+            initialCategories={categories}
+            initialProducts={promoProducts}
+        />
+    );
 }

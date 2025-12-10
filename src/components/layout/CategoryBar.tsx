@@ -1,5 +1,6 @@
 'use client';
 
+import { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
 type Category = {
@@ -17,17 +18,33 @@ interface CategoryBarProps {
 }
 
 export default function CategoryBar({ onCategorySelect, activeCategoryId, categories, onActiveCategoryClick, scrollDirection = 'up' }: CategoryBarProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
-  const handleCategoryClick = (categoryId: string, event: React.MouseEvent<HTMLButtonElement>) => {
-    const button = event.currentTarget;
-    const container = button.parentElement?.parentElement;
-    if (container) {
+  const scrollToCategory = (categoryId: string) => {
+    const button = buttonRefs.current.get(categoryId);
+    const container = containerRef.current;
+
+    if (button && container) {
       const containerWidth = container.offsetWidth;
       const buttonLeft = button.offsetLeft;
       const buttonWidth = button.offsetWidth;
       const scrollLeft = buttonLeft - (containerWidth / 2) + (buttonWidth / 2);
+
       container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
     }
+  };
+
+  useEffect(() => {
+    // Scroll to active category on mount and when it changes
+    if (activeCategoryId) {
+      // Small timeout to ensure layout is stable
+      setTimeout(() => scrollToCategory(activeCategoryId), 100);
+    }
+  }, [activeCategoryId]);
+
+  const handleCategoryClick = (categoryId: string) => {
+    scrollToCategory(categoryId);
 
     if (activeCategoryId === categoryId) {
       if (onActiveCategoryClick) onActiveCategoryClick();
@@ -54,9 +71,9 @@ export default function CategoryBar({ onCategorySelect, activeCategoryId, catego
     return colorMap[categoryName] || null;
   };
 
-  const CategoryButton = ({ category, onClick, isActive }: { 
-    category: Category; 
-    onClick: (e: React.MouseEvent<HTMLButtonElement>) => void; 
+  const CategoryButton = ({ category, onClick, isActive }: {
+    category: Category;
+    onClick: () => void;
     isActive: boolean;
   }) => {
     const specialColorStyle = getCategoryColor(category.name);
@@ -64,23 +81,27 @@ export default function CategoryBar({ onCategorySelect, activeCategoryId, catego
     const iconContainerStyle = isActive && specialColorStyle
       ? specialColorStyle
       : 'bg-[var(--button-secondary)]';
-      
+
     const iconTextStyle = isActive && specialColorStyle ? '' : 'text-text-primary';
 
     const labelTextStyle = isActive ? 'text-text-primary' : 'text-text-secondary';
 
     return (
       <motion.button
+        ref={(el) => {
+          if (el) buttonRefs.current.set(category.id, el);
+          else buttonRefs.current.delete(category.id);
+        }}
         onClick={onClick}
         className="flex flex-col items-center w-[72px] sm:w-[80px] flex-shrink-0"
         whileTap={{ scale: 0.95 }}
         transition={{ type: "spring", stiffness: 400, damping: 17 }}
       >
-        <motion.div 
+        <motion.div
           className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mb-1 sm:mb-2
             ${iconContainerStyle}
-            ${isActive 
-              ? 'ring-[4px] ring-[var(--button-primary)] ring-offset-2 ring-offset-[var(--background)] shadow-[var(--shadow-lg)]' 
+            ${isActive
+              ? 'ring-[4px] ring-[var(--button-primary)] ring-offset-2 ring-offset-[var(--background)] shadow-[var(--shadow-lg)]'
               : 'hover:ring-3 hover:ring-[var(--button-primary)] hover:ring-offset-1 hover:ring-offset-[var(--background)]'
             }
             transform transition-all duration-200 ease-out`}
@@ -90,7 +111,7 @@ export default function CategoryBar({ onCategorySelect, activeCategoryId, catego
         >
           <span className={`text-2xl sm:text-2xl ${iconTextStyle}`}>{getIconForCategory(category.name)}</span>
         </motion.div>
-        <motion.span 
+        <motion.span
           className={`text-xs font-medium truncate max-w-[80px] text-center ${labelTextStyle}`}
           animate={isActive ? { scale: [1, 1.05, 1] } : { scale: 1 }}
           transition={{ duration: 0.3, delay: 0.1 }}
@@ -110,17 +131,20 @@ export default function CategoryBar({ onCategorySelect, activeCategoryId, catego
   const vendorCategories = categories.filter(c => !systemCategories.some(sc => sc.name === c.name));
 
   return (
-    <div 
+    <div
       className="category-bar-container glassmorphic is-sticky"
       style={{ top: scrollDirection === 'up' ? 'var(--navbar-height)' : '0' }}
     >
-      <div className="overflow-x-auto scrollbar-hide px-4">
+      <div
+        ref={containerRef}
+        className="overflow-x-auto scrollbar-hide px-4"
+      >
         <div className="flex gap-3 py-3 min-w-min justify-center items-center">
           {systemCategories.map(category => (
-            <CategoryButton 
+            <CategoryButton
               key={category.id}
               category={category}
-              onClick={(e) => handleCategoryClick(category.id, e)} 
+              onClick={() => handleCategoryClick(category.id)}
               isActive={activeCategoryId === category.id}
             />
           ))}
@@ -133,7 +157,7 @@ export default function CategoryBar({ onCategorySelect, activeCategoryId, catego
             <CategoryButton
               key={category.id}
               category={category}
-              onClick={(e) => handleCategoryClick(category.id, e)}
+              onClick={() => handleCategoryClick(category.id)}
               isActive={activeCategoryId === category.id}
             />
           ))}

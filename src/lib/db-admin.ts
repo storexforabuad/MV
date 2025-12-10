@@ -2,6 +2,7 @@ import { adminDb } from './firebase-admin';
 import { StoreMeta } from '../types/store';
 import { Product } from '../types/product';
 import { WholesaleData } from './db';
+import { unstable_cache } from 'next/cache';
 
 // Helper to recursively transform Admin Firestore data (serializing timestamps)
 const sanitizeData = (data: any): any => {
@@ -101,5 +102,105 @@ export async function getReferralsAdmin(storeId: string): Promise<any[]> {
     return [];
   }
 }
+
+export const getStoreMetaAdminCached = unstable_cache(
+  async (storeId: string) => getStoreMetaAdmin(storeId),
+  ['store-meta'],
+  { revalidate: 300, tags: ['store-meta'] }
+);
+
+export const getCategoriesAdminCached = unstable_cache(
+  async (storeId: string) => getCategoriesAdmin(storeId),
+  ['store-categories'],
+  { revalidate: 300, tags: ['store-categories'] }
+);
+
+export const getPromoProductsAdmin = unstable_cache(
+  async (storeId: string, limitCount: number = 24) => {
+    if (!adminDb) return [];
+    try {
+      const productsRef = adminDb.collection('stores').doc(storeId).collection('products');
+      // Note: In a real app, you'd want a composite index for this query.
+      // For now, we'll fetch recent products and filter in memory if needed, 
+      // or rely on the fact that we're caching the result.
+      // Ideally: .where('onPromo', '==', true).orderBy('createdAt', 'desc').limit(limitCount)
+
+      const snapshot = await productsRef
+        .orderBy('createdAt', 'desc')
+        .limit(100) // Fetch more to filter in memory if index is missing
+        .get();
+
+      const products = snapshot.docs
+        .map(doc => {
+          const data = sanitizeData({ id: doc.id, ...doc.data() });
+          if (data.onPromo && data.promoPrice) {
+            data.originalPrice = data.price;
+            data.price = data.promoPrice;
+          }
+          return data as Product;
+        })
+        .filter(p => p.onPromo === true) // Filter for promo
+        .slice(0, limitCount);
+
+      return products;
+    } catch (error) {
+      console.error('Error fetching promo products admin:', error);
+      return [];
+    }
+  },
+  ['store-promo-products'],
+  { revalidate: 300, tags: ['store-products'] }
+);
+
+export const getPopularProductsAdmin = unstable_cache(
+  async (storeId: string, limitCount: number = 24) => {
+    if (!adminDb) return [];
+    try {
+      const productsRef = adminDb.collection('stores').doc(storeId).collection('products');
+      const snapshot = await productsRef.orderBy('views', 'desc').limit(limitCount).get();
+      return snapshot.docs.map(doc => {
+        const data = sanitizeData({ id: doc.id, ...doc.data() });
+        if (data.onPromo && data.promoPrice) {
+          data.originalPrice = data.price;
+          data.price = data.promoPrice;
+        }
+        return data as Product;
+      });
+    } catch (error) {
+      console.error('Error fetching popular products admin:', error);
+      return [];
+    }
+  },
+  ['store-popular-products'],
+  { revalidate: 300, tags: ['store-products'] }
+);
+
+export const getProductsByCategoryAdmin = unstable_cache(
+  async (storeId: string, categoryId: string, limitCount: number = 24) => {
+    if (!adminDb) return [];
+    try {
+      const productsRef = adminDb.collection('stores').doc(storeId).collection('products');
+      const snapshot = await productsRef
+        .where('categoryId', '==', categoryId)
+        .orderBy('createdAt', 'desc')
+        .limit(limitCount)
+        .get();
+
+      return snapshot.docs.map(doc => {
+        const data = sanitizeData({ id: doc.id, ...doc.data() });
+        if (data.onPromo && data.promoPrice) {
+          data.originalPrice = data.price;
+          data.price = data.promoPrice;
+        }
+        return data as Product;
+      });
+    } catch (error) {
+      console.error('Error fetching products by category admin:', error);
+      return [];
+    }
+  },
+  ['store-category-products'],
+  { revalidate: 300, tags: ['store-products'] }
+);
 
 export { adminDb };
