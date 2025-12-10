@@ -96,10 +96,10 @@ export default function VehicleCard({ product, storeId }: VehicleCardProps) {
                         <div className="absolute top-2 left-2 z-10 flex flex-col items-start gap-2">
                             <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
                                 <span className={`product-badge shadow-sm whitespace-nowrap px-2 py-1 rounded-md text-xs font-semibold ${product.vehicleDetails.condition === 'brand-new'
-                                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
-                                        : product.vehicleDetails.condition === 'foreign-used'
-                                            ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
-                                            : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                                    ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                                    : product.vehicleDetails.condition === 'foreign-used'
+                                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200'
+                                        : 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
                                     }`}>
                                     {product.vehicleDetails.condition === 'brand-new' ? 'Brand New' :
                                         product.vehicleDetails.condition === 'foreign-used' ? 'Foreign Used' : 'Nigerian Used'}
@@ -120,7 +120,7 @@ export default function VehicleCard({ product, storeId }: VehicleCardProps) {
                         draggable="false"
                         placeholder="blur"
                         blurDataURL={imgSrc}
-                        onLoadingComplete={() => setImageLoading(false)}
+                        onLoad={() => setImageLoading(false)}
                         onError={handleImageError}
                     />
                 </div>

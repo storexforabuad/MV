@@ -129,7 +129,7 @@ export default function ProductCard({ product, storeId, activeCategoryId }: Prod
             draggable="false"
             placeholder="blur"
             blurDataURL={imgSrc}
-            onLoadingComplete={() => setImageLoading(false)}
+            onLoad={() => setImageLoading(false)}
             onError={handleImageError}
           />
         </div>
