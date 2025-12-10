@@ -37,11 +37,12 @@ export default function CategoryBar({ onCategorySelect, activeCategoryId, catego
 
   useEffect(() => {
     // Scroll to active category on mount and when it changes
+    // Also re-run when categories change (e.g. loading from server) to ensure correct position
     if (activeCategoryId) {
-      // Small timeout to ensure layout is stable
-      setTimeout(() => scrollToCategory(activeCategoryId), 100);
+      // Increased timeout for mobile stability and to wait for layout
+      setTimeout(() => scrollToCategory(activeCategoryId), 200);
     }
-  }, [activeCategoryId]);
+  }, [activeCategoryId, categories.length]);
 
   const handleCategoryClick = (categoryId: string) => {
     scrollToCategory(categoryId);
@@ -129,7 +130,6 @@ export default function CategoryBar({ onCategorySelect, activeCategoryId, catego
   ];
 
   const vendorCategories = categories.filter(c => !systemCategories.some(sc => sc.name === c.name));
-
   return (
     <div
       className="category-bar-container glassmorphic is-sticky"
@@ -137,7 +137,7 @@ export default function CategoryBar({ onCategorySelect, activeCategoryId, catego
     >
       <div
         ref={containerRef}
-        className="overflow-x-auto scrollbar-hide px-4"
+        className="overflow-x-auto scrollbar-hide px-4 relative"
       >
         <div className="flex gap-3 py-3 min-w-min justify-center items-center">
           {systemCategories.map(category => (
