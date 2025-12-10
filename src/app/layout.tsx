@@ -45,22 +45,40 @@ export async function generateMetadata({ params }: { params: { storeId: string }
       title: "BizCon™ Network",
     },
     formatDetection: {
-    }) {
-    return (
-      <html lang="en" suppressHydrationWarning>
-        <body className={poppins.className}>
-          <ThemeProvider>
-            <CustomerProvider>
-              <CartProvider>
-                <ClientProviders>
-                  <ReferralHandlerWrapper />
-                  <Navbar />
-                  {children}
-                </ClientProviders>
-              </CartProvider>
-            </CustomerProvider>
-          </ThemeProvider>
-        </body>
-      </html>
-    )
-  }
+      telephone: false,
+    },
+  };
+}
+
+export const viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f8fafc' },
+    { media: '(prefers-color-scheme: dark)', color: '#020617' },
+  ],
+  maximumScale: 1,
+  userScalable: false,
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className={poppins.className}>
+        <ThemeProvider>
+          <CustomerProvider>
+            <CartProvider>
+              <ClientProviders>
+                <ReferralHandlerWrapper />
+                <Navbar />
+                {children}
+              </ClientProviders>
+            </CartProvider>
+          </CustomerProvider>
+        </ThemeProvider>
+      </body>
+    </html>
+  )
+}
