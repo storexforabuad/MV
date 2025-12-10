@@ -9,7 +9,7 @@ import { CustomerProvider } from '@/context/CustomerContext'
 import ReferralHandlerWrapper from '@/components/ReferralHandlerWrapper'
 import { getStoreMeta } from '@/lib/db'
 
-const poppins = Poppins({ 
+const poppins = Poppins({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700'],
   display: 'swap',
@@ -45,39 +45,22 @@ export async function generateMetadata({ params }: { params: { storeId: string }
       title: "BizCon™ Network",
     },
     formatDetection: {
-      telephone: false,
-    },
-  };
-}
-
-
-export const viewport = {
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f8fafc' },
-    { media: '(prefers-color-scheme: dark)', color: '#020617' },
-  ],
-}
-
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={poppins.className}>
-        <ThemeProvider>
-          <CustomerProvider>
-            <CartProvider>
-              <ClientProviders>
-                <ReferralHandlerWrapper />
-                <Navbar />
-                {children}
-              </ClientProviders>
-            </CartProvider>
-          </CustomerProvider>
-        </ThemeProvider>
-      </body>
-    </html>
-  )
-}
+    }) {
+    return (
+      <html lang="en" suppressHydrationWarning>
+        <body className={poppins.className}>
+          <ThemeProvider>
+            <CustomerProvider>
+              <CartProvider>
+                <ClientProviders>
+                  <ReferralHandlerWrapper />
+                  <Navbar />
+                  {children}
+                </ClientProviders>
+              </CartProvider>
+            </CustomerProvider>
+          </ThemeProvider>
+        </body>
+      </html>
+    )
+  }
