@@ -101,6 +101,35 @@ export interface LivestockProduct extends BaseProduct {
 }
 
 // ==========================================
+// FASHION PRODUCT (RTW)
+// ==========================================
+export interface FashionProduct extends BaseProduct {
+  productType: 'fashion';
+
+  // Variants
+  colors: {
+    name: string;
+    hex: string;
+    images: string[];
+  }[];
+  sizes: string[]; // "6", "8", "10", etc.
+  soldOutSizes?: string[]; // Subset of sizes that are unavailable
+
+  // Size Guide
+  sizeChart: {
+    type: 'nigerian-standard';
+  };
+
+  // Shared fields
+  categoryId?: string;
+  category?: string;
+
+  // Inventory Status
+  limitedStock?: boolean;
+  soldOut?: boolean; // Global sold out (all variants)
+}
+
+// ==========================================
 // MASTER UNION TYPE
 // ==========================================
-export type Product = GeneralProduct | VehicleProduct | LivestockProduct;
+export type Product = GeneralProduct | VehicleProduct | LivestockProduct | FashionProduct;

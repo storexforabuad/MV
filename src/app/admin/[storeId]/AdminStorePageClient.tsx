@@ -37,6 +37,8 @@ const OnboardingFlow = dynamic(() => import('../../../components/admin/onboardin
 const AddProductComposer = dynamic(() => import('../../../components/admin/AddProductComposer'), { ssr: false });
 const AddVehicleComposer = dynamic(() => import('../../../components/admin/AddVehicleComposer'), { ssr: false });
 const AddLivestockComposer = dynamic(() => import('../../../components/admin/AddLivestockComposer'), { ssr: false });
+const AddLivestockComposer = dynamic(() => import('../../../components/admin/AddLivestockComposer'), { ssr: false });
+const AddFashionComposer = dynamic(() => import('../../../components/admin/AddFashionComposer'), { ssr: false });
 const ManageProductsModal = dynamic(() => import('../../../components/admin/ManageProductsModal'), { ssr: false });
 const ManageCategoriesModal = dynamic(() => import('../../../components/admin/ManageCategoriesModal'), { ssr: false });
 const AdminOrdersModal = dynamic(() => import('../../../components/admin/modals/AdminOrdersModal').then(mod => mod.AdminOrdersModal), { ssr: false });
@@ -417,6 +419,24 @@ export default function AdminStorePageClient({
         />
       ) : storeMeta?.storeType === 'livestock' ? (
         <AddLivestockComposer
+          isOpen={isComposerOpen}
+          onClose={() => setIsComposerOpen(false)}
+          storeId={storeId}
+          categories={categories}
+          onProductAdded={() => fetchData()}
+          onAddCategory={handleAddCategory}
+        />
+      ) : storeMeta?.storeType === 'livestock' ? (
+        <AddLivestockComposer
+          isOpen={isComposerOpen}
+          onClose={() => setIsComposerOpen(false)}
+          storeId={storeId}
+          categories={categories}
+          onProductAdded={() => fetchData()}
+          onAddCategory={handleAddCategory}
+        />
+      ) : storeMeta?.storeType === 'fashion' ? (
+        <AddFashionComposer
           isOpen={isComposerOpen}
           onClose={() => setIsComposerOpen(false)}
           storeId={storeId}

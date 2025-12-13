@@ -34,7 +34,7 @@ export interface StoreMeta {
   country?: string;
 
   // Store Vertical
-  storeType?: 'general' | 'automotive' | 'livestock';
+  storeType?: 'general' | 'automotive' | 'livestock' | 'fashion';
 }
 
 export interface ProductCategory {

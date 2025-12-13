@@ -90,7 +90,25 @@ const ProductRow = React.memo(({
               isGeneralProduct(product) && product.limitedStock ?
                 <span className="px-2 py-0.5 text-xs font-medium text-yellow-800 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400 rounded-full">Limited</span> :
                 <span className="px-2 py-0.5 text-xs font-medium text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400 rounded-full">In Stock</span>
+                <span className="px-2 py-0.5 text-xs font-medium text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400 rounded-full">In Stock</span>
             }
+            {product.productType === 'fashion' && (
+              <div className="flex items-center gap-2 mt-1">
+                <div className="flex -space-x-1">
+                  {product.colors.slice(0, 3).map((color, i) => (
+                    <div key={i} className="w-4 h-4 rounded-full border border-white dark:border-gray-800" style={{ backgroundColor: color.hex }} title={color.name} />
+                  ))}
+                  {product.colors.length > 3 && (
+                    <div className="w-4 h-4 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[8px] font-bold border border-white dark:border-gray-800">+{product.colors.length - 3}</div>
+                  )}
+                </div>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  {product.sizes.length} sizes
+                  {product.soldOutSizes && product.soldOutSizes.length > 0 && ` (${product.sizes.length - product.soldOutSizes.length} avail)`}
+                </span>
+                {product.soldOut && <span className="px-2 py-0.5 text-xs font-medium text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-400 rounded-full">Sold Out</span>}
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-1">

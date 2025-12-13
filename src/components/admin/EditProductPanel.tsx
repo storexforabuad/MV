@@ -1,8 +1,8 @@
 'use client';
 import React, { useState, useEffect, Fragment, useMemo, ChangeEvent } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { XMarkIcon, ChevronRightIcon } from '@heroicons/react/24/solid';
-import { Product } from '../../types/product';
+import { XMarkIcon, ChevronRightIcon, PlusIcon, TrashIcon, PhotoIcon } from '@heroicons/react/24/solid';
+import { Product, FashionProduct } from '../../types/product';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatPrice } from '../../utils/price';
 import CategorySelectorModal from './modals/CategorySelectorModal';
@@ -26,6 +26,10 @@ interface ProductFormState extends Omit<Product, 'price' | 'originalPrice'> {
   // General product specific fields (optional for vehicle products)
   limitedStock?: boolean;
   soldOut?: boolean;
+  // Fashion specific
+  colors?: FashionProduct['colors'];
+  sizes?: string[];
+  soldOutSizes?: string[];
 }
 
 // A simple styled input
@@ -289,60 +293,135 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                               onChange={(e) => handleInputChange('averageWeight' as any, parseFloat(e.target.value) || 0)}
                             />
                           </div>
+                          </div>
                         )}
 
-                        <div className="space-y-1">
-                          <h3 className="text-sm font-medium text-text-secondary mb-2">Inventory Status</h3>
-                          <ModernSwitch
-                            label="Limited Stock"
-                            description="Mark item as having limited availability."
-                            checked={formState.limitedStock || false}
-                            onChange={(checked) => handleInputChange('limitedStock', checked)}
-                          />
-                          <ModernSwitch
-                            label="Sold Out"
-                            description="Mark item as completely unavailable."
-                            checked={formState.soldOut || false}
-                            onChange={(checked) => handleInputChange('soldOut', checked)}
-                          />
-                        </div>
+                      {formState.productType === 'fashion' && (
+                        <div className="space-y-6 border-t border-border-color pt-4">
+                          <h3 className="text-sm font-medium text-text-secondary">Fashion Details</h3>
 
+                          {/* SIZES */}
+                          <div>
+                            <label className="block text-sm font-medium text-text-secondary mb-2">Size Availability</label>
+                            <div className="grid grid-cols-3 gap-2">
+                              {(formState as any).sizes?.map((size: string) => {
+                                const isSoldOut = (formState as any).soldOutSizes?.includes(size);
+                                return (
+                                  <button
+                                    key={size}
+                                    type="button"
+                                    onClick={() => {
+                                      const currentSoldOut = (formState as any).soldOutSizes || [];
+                                      const newSoldOut = isSoldOut
+                                        ? currentSoldOut.filter((s: string) => s !== size)
+                                        : [...currentSoldOut, size];
+                                      handleInputChange('soldOutSizes' as any, newSoldOut);
+                                    }}
+                                    className={`px-3 py-2 rounded-lg text-sm font-medium border-2 transition-colors ${isSoldOut
+                                      ? 'border-red-200 bg-red-50 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400'
+                                      : 'border-green-200 bg-green-50 text-green-700 dark:bg-green-900/20 dark:border-green-800 dark:text-green-400'
+                                      }`}
+                                  >
+                                    {size} {isSoldOut ? '(Sold Out)' : '(Available)'}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          </div>
+
+                          {/* COLORS */}
+                          <div>
+                            <div className="flex justify-between items-center mb-2">
+                              <label className="block text-sm font-medium text-text-secondary">Colors</label>
+                              {/* Note: Full color editing (adding/removing/uploading) is complex for a modal. 
+                                    For now, we allow removing colors. Adding new colors with images is best done in the composer or a dedicated page. 
+                                    However, per requirements, we adding basic management here. */}
+                            </div>
+                            <div className="space-y-3">
+                              {(formState as any).colors?.map((color: any, index: number) => (
+                                <div key={index} className="flex items-center gap-3 p-3 bg-input-background rounded-lg border border-border-color">
+                                  <div className="w-10 h-10 rounded-full border border-border-color flex-shrink-0" style={{ backgroundColor: color.hex }}></div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-text-primary truncate">{color.name}</p>
+                                    <p className="text-xs text-text-secondary">{color.images.length} images</p>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (confirm('Are you sure you want to remove this color variant?')) {
+                                        const newColors = (formState as any).colors.filter((_: any, i: number) => i !== index);
+                                        handleInputChange('colors' as any, newColors);
+                                      }
+                                    }}
+                                    className="p-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full"
+                                  >
+                                    <TrashIcon className="w-5 h-5" />
+                                  </button>
+                                </div>
+                              ))}
+                              {((formState as any).colors?.length || 0) === 0 && (
+                                <p className="text-sm text-text-secondary italic">No colors added.</p>
+                              )}
+                            </div>
+                            <p className="text-xs text-text-secondary mt-2">
+                              To add new colors with images, please use the "Add Product" composer.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="space-y-1">
+                        <h3 className="text-sm font-medium text-text-secondary mb-2">Inventory Status</h3>
+                        <ModernSwitch
+                          label="Limited Stock"
+                          description="Mark item as having limited availability."
+                          checked={formState.limitedStock || false}
+                          onChange={(checked) => handleInputChange('limitedStock', checked)}
+                        />
+                        <ModernSwitch
+                          label="Sold Out"
+                          description="Mark item as completely unavailable."
+                          checked={formState.soldOut || false}
+                          onChange={(checked) => handleInputChange('soldOut', checked)}
+                        />
                       </div>
 
-                      <div className="flex-shrink-0 border-t border-border-color px-4 py-3 bg-background sticky bottom-0">
-                        <div className="flex gap-3">
-                          <button
-                            type="button"
-                            className="flex-1 inline-flex justify-center rounded-lg bg-input-background py-2 px-4 text-sm font-semibold text-text-primary shadow-sm hover:bg-button-secondary-hover"
-                            onClick={onClose}
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            type="button"
-                            className="flex-1 inline-flex justify-center items-center rounded-lg border border-transparent bg-blue-600 py-2 px-4 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed"
-                            onClick={handleSave}
-                            disabled={isSaving}
-                          >
-                            {isSaving ? (
-                              <>
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-3"></div>
-                                <span>Saving...</span>
-                              </>
-                            ) : (
-                              'Save Changes'
-                            )}
-                          </button>
-                        </div>
+                    </div>
+
+                    <div className="flex-shrink-0 border-t border-border-color px-4 py-3 bg-background sticky bottom-0">
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          className="flex-1 inline-flex justify-center rounded-lg bg-input-background py-2 px-4 text-sm font-semibold text-text-primary shadow-sm hover:bg-button-secondary-hover"
+                          onClick={onClose}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          type="button"
+                          className="flex-1 inline-flex justify-center items-center rounded-lg border border-transparent bg-blue-600 py-2 px-4 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-not-allowed"
+                          onClick={handleSave}
+                          disabled={isSaving}
+                        >
+                          {isSaving ? (
+                            <>
+                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-3"></div>
+                              <span>Saving...</span>
+                            </>
+                          ) : (
+                            'Save Changes'
+                          )}
+                        </button>
                       </div>
                     </div>
-                  </Dialog.Panel>
-                </Transition.Child>
-              </div>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
             </div>
           </div>
-        </Dialog>
-      </Transition.Root>
+        </div>
+      </Dialog>
+    </Transition.Root >
 
       <CategorySelectorModal
         isOpen={isCategorySelectorOpen}
