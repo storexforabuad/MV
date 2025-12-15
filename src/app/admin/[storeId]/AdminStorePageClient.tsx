@@ -351,14 +351,11 @@ export default function AdminStorePageClient({
                   isRefreshing={isRefreshing}
                   totalProducts={products.length}
                   totalCategories={categories.length}
-                  popularProducts={products.filter(p => p.views && p.views > 10).length}
-                  limitedStock={products.filter(p => isGeneralProduct(p) && p.limitedStock).length}
                   totalViews={products.reduce((sum, p) => sum + (p.views || 0), 0)}
                   debtors={0}
                   subscriptionStatus={"Active"}
                   referrals={referrals.length}
                   onReferralAdded={() => fetchData(true)}
-                  soldOut={products.filter(p => isGeneralProduct(p) && (p as import('../../../types/product').GeneralProduct).soldOut === true).length}
                   totalContacts={contacts.reduce((sum, region) => sum + (region.contacts?.length || 0), 0)}
                   storeId={storeId}
                   totalOrders={orders.length}

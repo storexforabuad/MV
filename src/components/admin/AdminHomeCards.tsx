@@ -5,12 +5,11 @@ import { motion, Variants } from 'framer-motion';
 import { useSpotlightContext } from '@/context/SpotlightContext';
 
 // Import modal components
-import PopularProductsModal from './modals/PopularProductsModal';
-import LimitedStockModal from './modals/LimitedStockModal';
+
 import TotalViewsModal from './modals/TotalViewsModal';
 import StoreLinkModal from './modals/StoreLinkModal';
 import { AmbassadorHubModal } from './modals/AmbassadorHubModal';
-import SoldOutModal from './modals/SoldOutModal';
+
 import TipsModal from './modals/TipsModal';
 import SpotlightTooltip from '../shared/SpotlightTooltip';
 import PostsComposerModal from './modals/PostsComposerModal';
@@ -38,12 +37,10 @@ interface AdminHomeCardsProps {
   contacts: WholesaleData[];
   totalProducts: number;
   totalCategories: number;
-  popularProducts: number;
-  limitedStock: number;
   totalViews: number;
   storeLink: string;
   referrals: number;
-  soldOut: number;
+ 
   storeId: string;
   totalOrders: number;
   uiVisible: boolean;

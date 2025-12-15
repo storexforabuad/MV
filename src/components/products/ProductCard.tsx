@@ -6,6 +6,13 @@ import { calculateDiscount, formatPrice } from '../../utils/price';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import { useProductDetailPrefetch } from '../../hooks/useProductDetailPrefetch';
 import NavigationStore from '@/lib/navigationStore';
+import {
+  isGeneralProduct,
+  isVehicleProduct,
+  isFashionProduct,
+  isLivestockProduct,
+} from '../../utils/productHelpers';
+
 
 const DEFAULT_IMAGES = {
   small: '/default_product_400x400.png',
@@ -43,7 +50,23 @@ export default function ProductCard({ product, storeId, activeCategoryId }: Prod
 
 
   const discount = calculateDiscount(product.price, product.originalPrice);
-  const isSoldOut = product.productType === 'general' ? product.soldOut : !product.available;
+    const isSoldOut = (() => {
+    if (isGeneralProduct(product)) {
+      return product.soldOut;
+    }
+    if (isFashionProduct(product)) {
+      return product.soldOut;
+    }
+    if (isVehicleProduct(product)) {
+      return !product.available;
+    }
+    if (isLivestockProduct(product)) {
+      return !product.inStock;
+    }
+    // Fallback for safety
+    
+    return false;
+  })();
   const isLimitedStock = product.productType === 'general' ? product.limitedStock : false;
 
   const handleImageError = () => {
