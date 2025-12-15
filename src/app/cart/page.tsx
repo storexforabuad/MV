@@ -71,12 +71,25 @@ export default function CartPage() {
     }
   }, [state.items]);
 
-  const handleUpdateQuantity = (id: string, quantity: number) => {
-    dispatch({ type: 'UPDATE_QUANTITY', payload: { id, quantity } });
+  const handleUpdateQuantity = (item: CartItemType, quantity: number) => {
+    if (quantity > 0) {
+      dispatch({ 
+        type: 'UPDATE_QUANTITY', 
+        payload: { id: item.id, selectedSize: item.selectedSize, selectedColor: item.selectedColor, quantity } 
+      });
+    } else {
+      dispatch({ 
+        type: 'REMOVE_ITEM', 
+        payload: { id: item.id, selectedSize: item.selectedSize, selectedColor: item.selectedColor } 
+      });
+    }
   };
 
-  const handleRemoveItem = (id: string) => {
-    dispatch({ type: 'REMOVE_ITEM', payload: id });
+  const handleRemoveItem = (item: CartItemType) => {
+    dispatch({ 
+      type: 'REMOVE_ITEM', 
+      payload: { id: item.id, selectedSize: item.selectedSize, selectedColor: item.selectedColor } 
+    });
   };
   
   const handleCheckout = (storeId: string) => {
@@ -91,7 +104,10 @@ export default function CartPage() {
   const handleOrderSuccess = (storeId: string) => {
     if (storeId) {
       groupedCart[storeId].forEach(item => {
-        dispatch({ type: 'REMOVE_ITEM', payload: item.id });
+        dispatch({ 
+          type: 'REMOVE_ITEM', 
+          payload: { id: item.id, selectedSize: item.selectedSize, selectedColor: item.selectedColor }
+        });
       });
     }
     setIsOrderModalOpen(false);
@@ -151,10 +167,10 @@ export default function CartPage() {
                 <div className="space-y-4">
                   {items.map(item => (
                     <CartItemComponent 
-                      key={item.id} 
+                      key={`${item.id}-${item.selectedSize || ''}-${item.selectedColor || ''}`}
                       item={item}
-                      onUpdateQuantity={handleUpdateQuantity}
-                      onRemove={handleRemoveItem}
+                      onUpdateQuantity={(quantity) => handleUpdateQuantity(item, Number(quantity))}
+                      onRemove={() => handleRemoveItem(item)}
                     />
                   ))}
                 </div>

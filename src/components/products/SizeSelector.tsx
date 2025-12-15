@@ -7,7 +7,8 @@ interface SizeSelectorProps {
     sizes: string[];
     selectedSize: string | undefined;
     onSizeSelect: (size: string) => void;
-    sizeCategory: 'baby-clothes' | 'kids-shoes' | 'adult-shoes';
+    sizeCategory?: 'baby-clothes' | 'kids-shoes' | 'adult-shoes'; // Made optional
+    disabledSizes?: string[]; // Added
     className?: string;
 }
 
@@ -28,41 +29,50 @@ export const SizeSelector: React.FC<SizeSelectorProps> = ({
     selectedSize,
     onSizeSelect,
     sizeCategory,
+    disabledSizes,
     className = '',
 }) => {
-    const categoryLabel = SIZE_CATEGORY_LABELS[sizeCategory] || 'Select Size';
-    const helperText = SIZE_CATEGORY_HELPERS[sizeCategory];
+    const helperText = sizeCategory ? SIZE_CATEGORY_HELPERS[sizeCategory] : 'Available sizes';
 
     return (
         <div className={`space-y-3 ${className}`}>
-            <div>
-                {/* Main heading removed as per user request */}
-                <p className="text-sm font-medium text-text-secondary">{helperText}</p>
-            </div>
+             <div>
+                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{helperText}</p>
+             </div>
 
             <div className="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 gap-2">
                 {sizes.map((size) => {
                     const isSelected = selectedSize === size;
+                    const isDisabled = disabledSizes?.includes(size);
 
                     return (
                         <motion.button
                             key={size}
                             onClick={() => onSizeSelect(size)}
-                            whileTap={{ scale: 0.95 }}
+                            disabled={isDisabled}
+                            whileTap={{ scale: isDisabled ? 1 : 0.95 }}
                             className={`
-                relative px-3 py-2.5 rounded-lg font-semibold text-sm
-                transition-all duration-200 border-2
-                ${isSelected
-                                    ? 'bg-green-600 border-green-600 text-white shadow-lg shadow-green-600/30'
-                                    : 'bg-input-background border-input-border text-text-primary hover:border-green-400 hover:bg-green-50 dark:hover:bg-green-900/20'
+                                relative px-3 py-2.5 rounded-lg font-semibold text-sm
+                                transition-all duration-200 border-2
+                                ${isSelected
+                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg'
+                                    : 'bg-gray-100 border-gray-200 text-gray-800 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-200'
                                 }
-              `}
+                                ${!isDisabled
+                                    ? 'hover:border-indigo-400 dark:hover:border-indigo-500'
+                                    : ''
+                                }
+                                ${isDisabled
+                                    ? 'bg-gray-100 dark:bg-gray-800 opacity-50 cursor-not-allowed line-through'
+                                    : ''
+                                }
+                            `}
                         >
                             {size}
-                            {isSelected && (
+                            {isSelected && !isDisabled && (
                                 <motion.div
-                                    layoutId="size-selector"
-                                    className="absolute inset-0 bg-green-600 rounded-lg -z-10"
+                                    layoutId="size-selector-active"
+                                    className="absolute inset-0 rounded-lg bg-indigo-600 -z-10"
                                     initial={false}
                                     transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                                 />

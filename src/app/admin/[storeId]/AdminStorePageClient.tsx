@@ -37,7 +37,6 @@ const OnboardingFlow = dynamic(() => import('../../../components/admin/onboardin
 const AddProductComposer = dynamic(() => import('../../../components/admin/AddProductComposer'), { ssr: false });
 const AddVehicleComposer = dynamic(() => import('../../../components/admin/AddVehicleComposer'), { ssr: false });
 const AddLivestockComposer = dynamic(() => import('../../../components/admin/AddLivestockComposer'), { ssr: false });
-const AddLivestockComposer = dynamic(() => import('../../../components/admin/AddLivestockComposer'), { ssr: false });
 const AddFashionComposer = dynamic(() => import('../../../components/admin/AddFashionComposer'), { ssr: false });
 const ManageProductsModal = dynamic(() => import('../../../components/admin/ManageProductsModal'), { ssr: false });
 const ManageCategoriesModal = dynamic(() => import('../../../components/admin/ManageCategoriesModal'), { ssr: false });
@@ -56,7 +55,6 @@ interface CommissionAnalyticsData {
   commissionHistory: CommissionEvent[];
 }
 
-// A new hook to fetch store orders
 // A new hook to fetch store orders
 const useStoreOrders = (storeId: string, initialOrders: StoreOrder[]) => {
   const [orders, setOrders] = useState<StoreOrder[]>(initialOrders);
@@ -182,22 +180,18 @@ export default function AdminStorePageClient({
       setReferrals(fetchedReferrals);
       setCommissionAnalytics(commissionData);
 
-      // Set real revenue (Revenue + Bonus)
       if (revenueData) {
         setRealTotalRevenue(revenueData.lifetimeRevenue + revenueData.lifetimeBonus);
       }
 
-      // Set deliveries count
       if (deliveryOrders) {
         setDeliveriesCount(deliveryOrders.length);
       }
 
-      // Fetch ambassadorTier from store document
       if (fetchedStoreMeta) {
         setAmbassadorTier((fetchedStoreMeta as any).ambassadorTier || 'bronze');
       }
 
-      // TODO: You might want a similar analytics action for referral bonuses
       refreshOrders();
 
       const hasCompletedOnboarding = localStorage.getItem('hasCompletedOnboarding') === 'true';
@@ -219,19 +213,16 @@ export default function AdminStorePageClient({
 
   useEffect(() => {
     if (!storeId) return;
-    // Only request notification permission on mount, data is already here!
     requestNotificationPermission(storeId);
 
-    // Initialize ambassador tier from props
     if (initialStoreMeta) {
       setAmbassadorTier((initialStoreMeta as any).ambassadorTier || 'bronze');
     }
 
-    // Initialize onboarding state
     const hasCompletedOnboarding = localStorage.getItem('hasCompletedOnboarding') === 'true';
     if (initialStoreMeta?.hasCompletedOnboarding || hasCompletedOnboarding) {
       setShowOnboarding(false);
-      if (!uiVisible) setUiVisible(true); // Only set if not already true
+      if (!uiVisible) setUiVisible(true);
     } else {
       setShowOnboarding(true);
       setUiVisible(false);
@@ -245,7 +236,6 @@ export default function AdminStorePageClient({
     if (searchParams && searchParams.get('open') === 'ambassador-hub') {
       setIsAmbassadorHubModalOpen(true);
     }
-    // Handle order deep linking
     if (searchParams && searchParams.get('open') === 'orders') {
       const orderId = searchParams.get('orderId');
       if (orderId) {
@@ -261,7 +251,7 @@ export default function AdminStorePageClient({
       await fetchData();
     } catch (error) {
       console.error("Failed to update product:", error);
-      throw error; // Re-throw the error to be caught by the caller
+      throw error;
     }
   };
 
@@ -277,11 +267,9 @@ export default function AdminStorePageClient({
   const handleAddCategory = async (name: string) => {
     try {
       const newCategory = await addCategory(storeId, name);
-      // Optimistically update the categories list immediately
       setCategories(prev => [...prev, newCategory]);
     } catch (error) {
       console.error("Failed to add category:", error);
-      // If failed, re-fetch to ensure consistency
       fetchData();
     }
   };
@@ -332,8 +320,6 @@ export default function AdminStorePageClient({
     }
   };
 
-
-
   if (loading || showOnboarding === null) return <AdminSkeleton />;
 
   if (isTransitioning) {
@@ -375,20 +361,20 @@ export default function AdminStorePageClient({
                   soldOut={products.filter(p => isGeneralProduct(p) && (p as import('../../../types/product').GeneralProduct).soldOut === true).length}
                   totalContacts={contacts.reduce((sum, region) => sum + (region.contacts?.length || 0), 0)}
                   storeId={storeId}
-                  totalOrders={orders.length} // Use live order count
+                  totalOrders={orders.length}
                   promoCaption={storeMeta?.promoCaption}
                   uiVisible={uiVisible}
                   storeName={storeMeta?.name}
-                  totalRevenue={realTotalRevenue} // Use the fetched real revenue
+                  totalRevenue={realTotalRevenue}
                   onAnimationComplete={handleAnimationComplete}
                   onOrdersCardClick={() => setIsOrdersModalOpen(true)}
                   openManageCategories={() => setIsManageCategoriesModalOpen(true)}
                   onProductsCardClick={() => setIsManageModalOpen(true)}
                   onAmbassadorCardClick={() => setIsAmbassadorHubModalOpen(true)}
-                  totalCommission={commissionAnalytics.totalCommission} // Corrected prop!
-                  totalReferralBonus={totalReferralBonus} // Using placeholder state
-                  totalExpenses={0} // Placeholder, as in original code
-                  deliveries={deliveriesCount} // Use the fetched deliveries count
+                  totalCommission={commissionAnalytics.totalCommission}
+                  totalReferralBonus={totalReferralBonus}
+                  totalExpenses={0}
+                  deliveries={deliveriesCount}
                   setIsModalOpen={setIsHomeCardModalOpen}
                   ambassadorTier={ambassadorTier}
                 />
@@ -426,15 +412,6 @@ export default function AdminStorePageClient({
           onProductAdded={() => fetchData()}
           onAddCategory={handleAddCategory}
         />
-      ) : storeMeta?.storeType === 'livestock' ? (
-        <AddLivestockComposer
-          isOpen={isComposerOpen}
-          onClose={() => setIsComposerOpen(false)}
-          storeId={storeId}
-          categories={categories}
-          onProductAdded={() => fetchData()}
-          onAddCategory={handleAddCategory}
-        />
       ) : storeMeta?.storeType === 'fashion' ? (
         <AddFashionComposer
           isOpen={isComposerOpen}
@@ -451,7 +428,7 @@ export default function AdminStorePageClient({
           storeId={storeId}
           categories={categories}
           onProductAdded={() => fetchData()}
-          onAddCategory={handleAddCategory} // ADD THIS LINE
+          onAddCategory={handleAddCategory}
         />
       )}
 

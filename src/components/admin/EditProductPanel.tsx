@@ -1,10 +1,9 @@
 'use client';
 import React, { useState, useEffect, Fragment, useMemo, ChangeEvent } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { XMarkIcon, ChevronRightIcon, PlusIcon, TrashIcon, PhotoIcon } from '@heroicons/react/24/solid';
+import { XMarkIcon, ChevronRightIcon, TrashIcon } from '@heroicons/react/24/solid';
 import { Product, FashionProduct } from '../../types/product';
 import { motion, AnimatePresence } from 'framer-motion';
-import { formatPrice } from '../../utils/price';
 import CategorySelectorModal from './modals/CategorySelectorModal';
 import ModernSwitch from '../common/ModernSwitch';
 import { ProductDetailCache } from '../../lib/productDetailCache';
@@ -19,30 +18,26 @@ interface EditProductPanelProps {
   onAddCategory: (name: string) => Promise<void>;
 }
 
-// Defines the shape of the form's state, which is clearer than the DB schema
 interface ProductFormState extends Omit<Product, 'price' | 'originalPrice'> {
   basePrice: number | null;
   promoPrice: number | null;
-  // General product specific fields (optional for vehicle products)
   limitedStock?: boolean;
   soldOut?: boolean;
-  // Fashion specific
   colors?: FashionProduct['colors'];
   sizes?: string[];
   soldOutSizes?: string[];
 }
 
-// A simple styled input
 const StyledInput: React.FC<{ id: string, label: string, value: string | number, onChange: (e: ChangeEvent<HTMLInputElement>) => void, type?: string, placeholder?: string }> = ({ id, label, value, onChange, type = 'text', placeholder = '' }) => (
   <div>
-    <label htmlFor={id} className="block text-sm font-medium text-text-secondary">{label}</label>
+    <label htmlFor={id} className="block text-sm font-medium text-gray-500 dark:text-gray-400">{label}</label>
     <input
       type={type}
       id={id}
       value={value}
       onChange={onChange}
       placeholder={placeholder}
-      className="mt-1 block w-full bg-input-background p-3 rounded-lg border-none text-text-primary placeholder:text-text-secondary focus:ring-2 focus:ring-blue-500"
+      className="mt-1 block w-full bg-gray-100 dark:bg-gray-800 p-3 rounded-lg border-transparent text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
     />
   </div>
 );
@@ -65,7 +60,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
         promoPrice = dbPrice;
       } else {
         basePrice = dbPrice;
-        promoPrice = null; // Use null for empty promo price
+        promoPrice = null;
       }
 
       setFormState({
@@ -93,8 +88,6 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
     if (!product || !formState || isSaving) return;
 
     const { basePrice, promoPrice, onPromo, ...restOfState } = formState;
-
-    // The final payload to be sent for saving.
     const payload: Partial<Product> = {
       ...restOfState,
       productType: formState.productType || 'general',
@@ -102,23 +95,19 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
     };
 
     if (onPromo) {
-      // For a promotion, both prices must be valid numbers, and the promo price must be lower.
       if (typeof promoPrice !== 'number' || typeof basePrice !== 'number' || promoPrice >= basePrice) {
         alert('Error: When a promotion is active, the promo price must be a valid number and less than the original price.');
-        console.error('Save Blocked: Invalid promotional pricing.', { basePrice, promoPrice });
         return;
       }
       payload.price = promoPrice;
       payload.originalPrice = basePrice;
     } else {
-      // If not on promo, only base price is needed and it must be a valid number.
       if (typeof basePrice !== 'number') {
         alert('Error: The product must have a valid price.');
-        console.error('Save Blocked: Missing or invalid base price.', { basePrice });
         return;
       }
       payload.price = basePrice;
-      payload.originalPrice = undefined; // Explicitly remove originalPrice if not on promo.
+      payload.originalPrice = undefined;
     }
 
     setIsSaving(true);
@@ -129,17 +118,10 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
       onClose();
     } catch (error) {
       console.error("Failed to save product changes:", error);
-      // Optionally, inform the user about the failure
     } finally {
       setIsSaving(false);
     }
   };
-
-  const commissionAmount = useMemo(() => {
-    if (!formState) return 0;
-    const price = formState.onPromo ? formState.promoPrice : formState.basePrice;
-    return ((price || 0) * (formState.commission || 0)) / 100;
-  }, [formState]);
 
   const currentCategoryName = useMemo(() => {
     const categoryId = formState?.categoryId;
@@ -162,12 +144,12 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
               <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10">
                 <Transition.Child as={Fragment} enter="transform transition ease-in-out duration-300" enterFrom="translate-x-full" enterTo="translate-x-0" leave="transform transition ease-in-out duration-200" leaveFrom="translate-x-0" leaveTo="translate-x-full">
                   <Dialog.Panel className="pointer-events-auto w-screen max-w-md">
-                    <div className="flex h-full flex-col overflow-y-scroll bg-background shadow-xl">
+                    <div className="flex h-full flex-col overflow-y-scroll bg-white dark:bg-gray-900 shadow-xl">
 
-                      <div className="p-4 bg-background sticky top-0 z-10 border-b border-border-color">
+                      <div className="p-4 bg-white dark:bg-gray-900 sticky top-0 z-10 border-b border-gray-200 dark:border-gray-700">
                         <div className="flex items-center justify-between">
-                          <Dialog.Title className="text-lg font-bold text-text-primary">Edit Product</Dialog.Title>
-                          <button type="button" className="rounded-full p-1 text-text-secondary hover:bg-button-secondary-hover" onClick={onClose}><span className="sr-only">Close panel</span><XMarkIcon className="h-6 w-6" aria-hidden="true" /></button>
+                          <Dialog.Title className="text-lg font-bold text-gray-900 dark:text-gray-100">Edit Product</Dialog.Title>
+                          <button type="button" className="rounded-full p-1 text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700" onClick={onClose}><span className="sr-only">Close panel</span><XMarkIcon className="h-6 w-6" aria-hidden="true" /></button>
                         </div>
                       </div>
 
@@ -181,10 +163,10 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                         />
 
                         <div>
-                          <h3 className="block text-sm font-medium text-text-secondary">Category</h3>
-                          <button onClick={() => setCategorySelectorOpen(true)} className="mt-1 flex justify-between items-center w-full bg-input-background p-3 rounded-lg text-left">
-                            <span className="text-text-primary">{currentCategoryName}</span>
-                            <ChevronRightIcon className="h-5 w-5 text-text-secondary" />
+                          <h3 className="block text-sm font-medium text-gray-500 dark:text-gray-400">Category</h3>
+                          <button onClick={() => setCategorySelectorOpen(true)} className="mt-1 flex justify-between items-center w-full bg-gray-100 dark:bg-gray-800 p-3 rounded-lg text-left">
+                            <span className="text-gray-900 dark:text-gray-100">{currentCategoryName}</span>
+                            <ChevronRightIcon className="h-5 w-5 text-gray-400" />
                           </button>
                         </div>
 
@@ -217,26 +199,22 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                             )}
                           </AnimatePresence>
                         </div>
-
-                        {/* Commission Slider Removed - Fixed 2.5% globally */}
-
+                        
                         {formState.productType === 'livestock' && (
-                          <div className="space-y-4 border-t border-border-color pt-4">
-                            <h3 className="text-sm font-medium text-text-secondary">Livestock Details</h3>
-
+                          <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Livestock Details</h3>
                             <StyledInput
                               id="species"
                               label="Species"
                               value={(formState as any).species ?? ''}
                               onChange={(e) => handleInputChange('species' as any, e.target.value)}
                             />
-
                             <div>
-                              <label className="block text-sm font-medium text-text-secondary mb-2">Life Stage</label>
+                              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Life Stage</label>
                               <select
                                 value={(formState as any).lifeStage ?? 'table-size'}
                                 onChange={(e) => handleInputChange('lifeStage' as any, e.target.value)}
-                                className="w-full p-3 bg-input-background rounded-lg border-none text-text-primary focus:ring-2 focus:ring-blue-500"
+                                className="w-full p-3 bg-gray-100 dark:bg-gray-800 rounded-lg border-transparent text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
                               >
                                 <option value="fingerling">Fingerling</option>
                                 <option value="juvenile">Juvenile</option>
@@ -244,33 +222,31 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                                 <option value="broodstock">Broodstock</option>
                               </select>
                             </div>
-
                             <div>
-                              <label className="block text-sm font-medium text-text-secondary mb-2">Water Type</label>
+                              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Water Type</label>
                               <select
                                 value={(formState as any).waterType ?? 'freshwater'}
                                 onChange={(e) => handleInputChange('waterType' as any, e.target.value)}
-                                className="w-full p-3 bg-input-background rounded-lg border-none text-text-primary focus:ring-2 focus:ring-blue-500"
+                                className="w-full p-3 bg-gray-100 dark:bg-gray-800 rounded-lg border-transparent text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
                               >
                                 <option value="freshwater">Freshwater</option>
                                 <option value="saltwater">Saltwater</option>
                               </select>
                             </div>
-
                             <div>
-                              <label className="block text-sm font-medium text-text-secondary mb-2">Pricing Unit</label>
+                              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Pricing Unit</label>
                               <div className="flex gap-4">
                                 <button
                                   type="button"
                                   onClick={() => handleInputChange('priceUnit' as any, 'kg')}
-                                  className={`flex-1 p-3 rounded-lg border-2 ${(formState as any).priceUnit === 'kg' ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-input-border'}`}
+                                  className={`flex-1 p-3 rounded-lg border-2 ${(formState as any).priceUnit === 'kg' ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700'}`}
                                 >
                                   Per Kg
                                 </button>
                                 <button
                                   type="button"
                                   onClick={() => handleInputChange('priceUnit' as any, 'piece')}
-                                  className={`flex-1 p-3 rounded-lg border-2 ${(formState as any).priceUnit === 'piece' ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-input-border'}`}
+                                  className={`flex-1 p-3 rounded-lg border-2 ${(formState as any).priceUnit === 'piece' ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20' : 'border-gray-200 dark:border-gray-700'}`}
                                 >
                                   Per Piece
                                 </button>
@@ -293,16 +269,13 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                               onChange={(e) => handleInputChange('averageWeight' as any, parseFloat(e.target.value) || 0)}
                             />
                           </div>
-                          </div>
                         )}
 
                       {formState.productType === 'fashion' && (
-                        <div className="space-y-6 border-t border-border-color pt-4">
-                          <h3 className="text-sm font-medium text-text-secondary">Fashion Details</h3>
-
-                          {/* SIZES */}
+                        <div className="space-y-6 border-t border-gray-200 dark:border-gray-700 pt-4">
+                          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Fashion Details</h3>
                           <div>
-                            <label className="block text-sm font-medium text-text-secondary mb-2">Size Availability</label>
+                            <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Size Availability</label>
                             <div className="grid grid-cols-3 gap-2">
                               {(formState as any).sizes?.map((size: string) => {
                                 const isSoldOut = (formState as any).soldOutSizes?.includes(size);
@@ -328,22 +301,17 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                               })}
                             </div>
                           </div>
-
-                          {/* COLORS */}
                           <div>
                             <div className="flex justify-between items-center mb-2">
-                              <label className="block text-sm font-medium text-text-secondary">Colors</label>
-                              {/* Note: Full color editing (adding/removing/uploading) is complex for a modal. 
-                                    For now, we allow removing colors. Adding new colors with images is best done in the composer or a dedicated page. 
-                                    However, per requirements, we adding basic management here. */}
+                              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400">Colors</label>
                             </div>
                             <div className="space-y-3">
                               {(formState as any).colors?.map((color: any, index: number) => (
-                                <div key={index} className="flex items-center gap-3 p-3 bg-input-background rounded-lg border border-border-color">
-                                  <div className="w-10 h-10 rounded-full border border-border-color flex-shrink-0" style={{ backgroundColor: color.hex }}></div>
+                                <div key={index} className="flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
+                                  <div className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700 flex-shrink-0" style={{ backgroundColor: color.hex }}></div>
                                   <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-text-primary truncate">{color.name}</p>
-                                    <p className="text-xs text-text-secondary">{color.images.length} images</p>
+                                    <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{color.name}</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">{color.images.length} images</p>
                                   </div>
                                   <button
                                     type="button"
@@ -360,10 +328,10 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                                 </div>
                               ))}
                               {((formState as any).colors?.length || 0) === 0 && (
-                                <p className="text-sm text-text-secondary italic">No colors added.</p>
+                                <p className="text-sm text-gray-500 dark:text-gray-400 italic">No colors added.</p>
                               )}
                             </div>
-                            <p className="text-xs text-text-secondary mt-2">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
                               To add new colors with images, please use the "Add Product" composer.
                             </p>
                           </div>
@@ -371,7 +339,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                       )}
 
                       <div className="space-y-1">
-                        <h3 className="text-sm font-medium text-text-secondary mb-2">Inventory Status</h3>
+                        <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Inventory Status</h3>
                         <ModernSwitch
                           label="Limited Stock"
                           description="Mark item as having limited availability."
@@ -388,11 +356,11 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
 
                     </div>
 
-                    <div className="flex-shrink-0 border-t border-border-color px-4 py-3 bg-background sticky bottom-0">
+                    <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-700 px-4 py-3 bg-white dark:bg-gray-900 sticky bottom-0">
                       <div className="flex gap-3">
                         <button
                           type="button"
-                          className="flex-1 inline-flex justify-center rounded-lg bg-input-background py-2 px-4 text-sm font-semibold text-text-primary shadow-sm hover:bg-button-secondary-hover"
+                          className="flex-1 inline-flex justify-center rounded-lg bg-gray-200 dark:bg-gray-700 py-2 px-4 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm hover:bg-gray-300 dark:hover:bg-gray-600"
                           onClick={onClose}
                         >
                           Cancel
@@ -415,13 +383,13 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                       </div>
                     </div>
                   </div>
-                </Dialog.Panel>
-              </Transition.Child>
+                  </Dialog.Panel>
+                </Transition.Child>
+              </div>
             </div>
           </div>
-        </div>
-      </Dialog>
-    </Transition.Root >
+        </Dialog>
+      </Transition.Root>
 
       <CategorySelectorModal
         isOpen={isCategorySelectorOpen}

@@ -32,9 +32,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
   useEffect(() => {
     if (isOpen && initialCustomer) {
       getCustomerDetails(initialCustomer.id).then(details => {
-        if (details) {
-          setCustomer(details);
-        }
+        if (details) setCustomer(details);
       });
     }
   }, [isOpen, initialCustomer]);
@@ -57,37 +55,42 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
       const storeMetaWithId = { ...storeMeta, id: storeId };
       const referrerId = localStorage.getItem('referrerId');
 
-      // FIX: Submit all cart items as a single order.
       await addOrder(cartItems, storeMetaWithId, customer, referrerId, false, deliveryMethod as 'home' | 'pickup');
 
       toast.success('Order placed! Redirecting to WhatsApp...');
 
       const itemsSummary = cartItems.map(item => {
         const productUrl = `https://tinyurl.com/bizcononline/${storeId}/products/${item.id}`;
-        const sizeText = item.selectedSize ? ` (Size: ${item.selectedSize})` : '';
-        const unitText = item.productType === 'livestock' ? ((item as any).priceUnit === 'kg' ? 'kg' : 'pcs') : '';
-        return `*${item.name}*${sizeText} (x${item.quantity}${unitText}) - ${formatPrice(item.price * item.quantity)}\n🔗 ${productUrl}`;
+        const colorText = item.selectedColor ? `🎨 *Color:* ${item.selectedColor}\n` : '';
+        const sizeText = item.selectedSize ? `📏 *Size:* ${item.selectedSize}\n` : '';
+        const unitText = item.productType === 'livestock' ? (item as any).priceUnit === 'kg' ? 'kg' : 'pcs' : '';
+        
+        return `*${item.name}*\n` +
+               `🔗 ${productUrl}\n` +
+               colorText +
+               sizeText +
+               `🔢 *Quantity:* ${item.quantity} ${unitText}\n` +
+               `*Subtotal:* ${formatPrice(item.price * item.quantity)}`;
       }).join('\n\n');
 
-      const message = `🛍️ *New Order Request*\n\n` +
+      const message = `🛍️ *New Cart Order*\n\n` +
         `Hello! I would like to order the following items:\n\n` +
         `${itemsSummary}\n\n` +
+        `--------------------\n` +
         `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n` +
         `${deliveryMethod === 'home' && customer.deliveryAddress ? `📍 *Address:* ${customer.deliveryAddress.street}\n` : ''}` +
-        `*Subtotal:* ${formatPrice(subtotal)}\n` +
-        `*Total (excluding delivery):* ${formatPrice(total)}\n\n` +
-        `Please provide delivery fee and payment details.\n\n` +
+        `*Grand Total (excl. delivery):* ${formatPrice(total)}\n\n` +
+        `Please confirm availability and provide payment details.\n\n` +
         `Thank you! 🙏`;
 
       const encodedMessage = encodeURIComponent(message);
       const whatsappUrl = `https://wa.me/${storeMeta.whatsapp.replace(/\D/g, '')}?text=${encodedMessage}`;
 
-      // Use window.location.href instead of window.open for better iOS compatibility
       window.location.href = whatsappUrl;
       dispatch({ type: 'CLEAR_CART' });
       onOrderSuccess();
     } catch (error) {
-      console.error("Error placing order or redirecting to WhatsApp:", error);
+      console.error("Error placing cart order or redirecting to WhatsApp:", error);
       toast.error('Failed to place order. Please try again.');
     } finally {
       setIsPlacingOrder(false);
@@ -107,29 +110,33 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
               <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
                 <div>
                   <div className="flex items-start justify-between">
-                    <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 dark:text-white">Order Summary</Dialog.Title>
+                    <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 dark:text-white">Cart Summary</Dialog.Title>
                     <button type="button" className="-m-2 p-2 text-gray-400 hover:text-gray-500" onClick={onClose}><XMarkIcon className="h-6 w-6" aria-hidden="true" /></button>
                   </div>
 
-                  <div className="mt-4 max-h-60 overflow-y-auto pr-2">
+                  <div className="mt-4 max-h-60 overflow-y-auto pr-2 divide-y divide-gray-200 dark:divide-gray-700">
                     {cartItems.map(item => (
-                      <div key={item.id + (item.selectedSize || '')} className="flex items-center space-x-4 py-2">
-                        <Image src={item.images[0]} alt={item.name} width={48} height={48} className="h-12 w-12 rounded-md object-cover" />
+                      <div key={item.id + (item.selectedColor || '') + (item.selectedSize || '')} className="flex items-center space-x-4 py-3">
+                        <Image src={item.images[0]} alt={item.name} width={48} height={48} className="h-12 w-12 rounded-md object-cover flex-shrink-0" />
                         <div className="flex-1">
-                          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200">{item.name}</h4>
-                          {item.selectedSize && (
-                            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 mt-1">
-                              Size: {item.selectedSize}
-                            </span>
-                          )}
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {formatPrice(item.price)} x {item.quantity}
-                            {item.productType === 'livestock' && (
-                              <span> {(item as any).priceUnit === 'kg' ? 'kg' : 'pcs'}</span>
+                          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200 truncate">{item.name}</h4>
+                          <div className="flex flex-wrap gap-2 mt-1">
+                            {item.selectedColor && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                Color: {item.selectedColor}
+                              </span>
                             )}
+                            {item.selectedSize && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                Size: {item.selectedSize}
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                            {formatPrice(item.price)} x {item.quantity}
                           </p>
                         </div>
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-200">{formatPrice(item.price * item.quantity)}</p>
+                        <p className="text-sm font-medium text-gray-900 dark:text-gray-200 ml-auto">{formatPrice(item.price * item.quantity)}</p>
                       </div>
                     ))}
                   </div>
@@ -168,8 +175,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                     {isPlacingOrder ? (
                       <>
                         <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4
-                          "></circle>
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
                         Ordering..

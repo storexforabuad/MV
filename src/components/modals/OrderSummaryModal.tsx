@@ -20,10 +20,11 @@ interface OrderSummaryModalProps {
   product: Product | null;
   storeMeta: StoreMeta | null;
   customer: Customer | null;
-  selectedSize?: string; // Added selectedSize prop
+  selectedSize?: string;
+  selectedColor?: string; // Added selectedColor prop
 }
 
-export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta, customer: initialCustomer, selectedSize }: OrderSummaryModalProps) {
+export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta, customer: initialCustomer, selectedSize, selectedColor }: OrderSummaryModalProps) {
   const [quantity, setQuantity] = useState(1);
   const [deliveryMethod, setDeliveryMethod] = useState('home');
   const [customer, setCustomer] = useState<Customer | null>(initialCustomer);
@@ -58,9 +59,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
       const storeMetaWithId = { ...storeMeta, id: storeId };
       const referrerId = localStorage.getItem('referrerId');
 
-      // FIX: The product needs to be in an array, and quantity must be part of the product object.
-      // Include selectedSize in the order object
-      const productToOrder = { ...product, quantity, selectedSize };
+      const productToOrder = { ...product, quantity, selectedSize, selectedColor };
       await addOrder([productToOrder], storeMetaWithId, customer, referrerId, false, deliveryMethod as 'home' | 'pickup');
 
       toast.success('Order placed! Redirecting to WhatsApp...');
@@ -70,8 +69,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
         `Hello! I would like to order this item:\n\n` +
         `*${product.name}*\n` +
         `🔗 *Product Link:* ${productUrl}\n` +
-        `🔗 *Product Link:* ${productUrl}\n` +
         `🔢 *Quantity:* ${quantity} ${product.productType === 'livestock' ? ((product as any).priceUnit === 'kg' ? 'kg' : 'pcs') : ''}\n` +
+        (selectedColor ? `🎨 *Color:* ${selectedColor}\n` : '') + // Add Color to WhatsApp message
         (selectedSize ? `📏 *Size:* ${selectedSize}\n` : '') + // Add Size to WhatsApp message
         `💰 *Price:* ${formatPrice(product.price)}\n` +
         `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n` +
@@ -83,7 +82,6 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
       const encodedMessage = encodeURIComponent(message);
       const whatsappUrl = `https://wa.me/${storeMeta.whatsapp.replace(/\D/g, '')}?text=${encodedMessage}`;
 
-      // Use window.location.href instead of window.open for better iOS compatibility
       window.location.href = whatsappUrl;
       onClose();
     } catch (error) {
@@ -118,11 +116,18 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                     <Image src={product.images[0]} alt={product.name} width={64} height={64} className="h-16 w-16 rounded-md object-cover" />
                     <div className="flex-1">
                       <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200">{product.name}</h4>
-                      {selectedSize && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 mt-1 mb-1">
-                          Size: {selectedSize}
-                        </span>
-                      )}
+                      <div className="mt-1 mb-1 flex flex-wrap gap-2">
+                        {selectedColor && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                            Color: {selectedColor}
+                          </span>
+                        )}
+                        {selectedSize && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                            Size: {selectedSize}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-gray-500 dark:text-gray-400">
                         {formatPrice(product.price)}
                         {product.productType === 'livestock' && (

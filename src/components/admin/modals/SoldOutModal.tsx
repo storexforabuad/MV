@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import Image from 'next/image';
 import { Product } from '../../../types/product';
 import Modal from '../../Modal';
+import { isGeneralProduct, isFashionProduct, isVehicleProduct, isLivestockProduct } from '../../../utils/productHelpers';
 
 interface SoldOutModalProps {
   soldOut: number;
@@ -23,11 +24,23 @@ const SoldOutModal: React.FC<SoldOutModalProps> = ({
 }) => {
   const productsArr = Array.isArray(products) ? products : [];
   const soldOutArr = productsArr.filter(p => {
-    if (p.productType === 'vehicle') {
+    if (isVehicleProduct(p)) {
       return !p.available;
     }
-    // General product
-    return p.soldOut === true || p.quantity === 0;
+    if (isFashionProduct(p)) {
+      return p.soldOut;
+    }
+    if (isGeneralProduct(p)) {
+      return p.soldOut || p.quantity === 0;
+    }
+    if (isLivestockProduct(p)) {
+      return !p.inStock;
+    }
+    // Fallback for any other product types
+    if ('soldOut' in p && typeof p.soldOut === 'boolean') {
+      return p.soldOut;
+    }
+    return false;
   });
   const isEmpty = productsArr.length === 0;
   const hasSoldOutItems = soldOutArr.length > 0;

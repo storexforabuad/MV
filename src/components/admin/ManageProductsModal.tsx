@@ -90,7 +90,6 @@ const ProductRow = React.memo(({
               isGeneralProduct(product) && product.limitedStock ?
                 <span className="px-2 py-0.5 text-xs font-medium text-yellow-800 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400 rounded-full">Limited</span> :
                 <span className="px-2 py-0.5 text-xs font-medium text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400 rounded-full">In Stock</span>
-                <span className="px-2 py-0.5 text-xs font-medium text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400 rounded-full">In Stock</span>
             }
             {product.productType === 'fashion' && (
               <div className="flex items-center gap-2 mt-1">
@@ -172,7 +171,6 @@ const FilterChip = ({ label, value, activeFilter, onClick, count }: { label: str
 
 const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClose, products, setProducts, categories, onUpdateProduct, onDeleteProduct, onAddCategory }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  // Defer the search query to prevent input lag
   const deferredSearchQuery = useDeferredValue(searchQuery);
 
   const [activeFilter, setActiveFilter] = useState<FilterType>('all');
@@ -182,7 +180,6 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [isBulkDeleteConfirmOpen, setIsBulkDeleteConfirmOpen] = useState(false);
 
-  // Progressive Loading State
   const [visibleCount, setVisibleCount] = useState(20);
   const { ref: loadMoreRef, inView } = useInView();
 
@@ -206,12 +203,10 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
       .filter(p => p.name.toLowerCase().includes(deferredSearchQuery.toLowerCase()));
   }, [products, deferredSearchQuery, activeFilter]);
 
-  // Reset visible count when filters change
   useEffect(() => {
     setVisibleCount(20);
   }, [deferredSearchQuery, activeFilter, isOpen]);
 
-  // Load more when scrolling to bottom
   useEffect(() => {
     if (inView && visibleCount < filteredProducts.length) {
       setVisibleCount(prev => Math.min(prev + 20, filteredProducts.length));
@@ -243,7 +238,7 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
     if (productToDelete) {
       onDeleteProduct(productToDelete.id);
       setProducts(prevProducts => prevProducts.filter(p => p.id !== productToDelete.id));
-      setProductToDelete(null); // Close the dialog
+      setProductToDelete(null);
     }
   }, [productToDelete, onDeleteProduct, setProducts]);
 
@@ -279,7 +274,6 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
   }, [selectedProducts, onDeleteProduct, setProducts]);
 
 
-  // Memoize categories lookup map for performance
   const categoryMap = useMemo(() => {
     return categories.reduce((acc, cat) => {
       acc[cat.id] = cat.name;
@@ -303,7 +297,6 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
             variants={modalVariants}
             transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
           >
-            {/* Header */}
             <header className="px-4 py-3 flex justify-between items-center border-b border-gray-200 dark:border-gray-700 flex-shrink-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg">
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
@@ -316,7 +309,6 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
               </div>
             </header>
 
-            {/* Sticky Search & Filters */}
             <div className="flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 p-4">
               <div className="flex gap-2">
                 <div className="relative flex-1">
@@ -357,7 +349,6 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
               </div>
             </div>
 
-            {/* Product List */}
             <main className="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-gray-900/50">
               {isSelectMode && (
                 <div className="mb-2 px-2">
@@ -412,7 +403,6 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
               </div>
             </main>
 
-            {/* Footer */}
             <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 z-20">
               {isSelectMode ? (
                 <div className="flex justify-between items-center">

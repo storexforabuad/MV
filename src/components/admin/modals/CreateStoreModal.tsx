@@ -157,8 +157,6 @@ export default function CreateStoreModal({
       await setDoc(storeRef, finalFormData);
 
       const batch = writeBatch(db);
-      // Only commit the categories the user has explicitly added.
-      // System categories like "Promo" and "New Arrivals" will be handled at the display layer.
       const allCategories = [...new Set(categories)];
 
       allCategories.forEach((categoryName) => {
@@ -228,7 +226,8 @@ export default function CreateStoreModal({
                     onChange={handleInputChange}
                     className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500"
                   >
-                    <option value="general">🛍️ General Store (Fashion, Retail, Food, etc.)</option>
+                    <option value="general">🛍️ General (Retail, Food, etc.)</option>
+                    <option value="fashion">👗 Fashion (Ready-to-Wear, Bespoke)</option>
                     <option value="automotive">🚗 Automotive (Car Dealership)</option>
                     <option value="livestock">🐟 Livestock (Fishery & Aquaculture)</option>
                   </select>

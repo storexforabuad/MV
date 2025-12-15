@@ -1,4 +1,4 @@
-import { Product, GeneralProduct, VehicleProduct } from '../types/product';
+import { Product, GeneralProduct, VehicleProduct, FashionProduct, LivestockProduct } from '../types/product';
 
 // Migration Helper for Legacy Products
 export function ensureProductType(product: any): Product {
@@ -16,4 +16,12 @@ export function isGeneralProduct(product: Product): product is GeneralProduct {
 
 export function isVehicleProduct(product: Product): product is VehicleProduct {
     return product.productType === 'vehicle';
+}
+
+export function isFashionProduct(product: Product): product is FashionProduct {
+    return product.productType === 'fashion';
+}
+
+export function isLivestockProduct(product: Product): product is LivestockProduct {
+    return product.productType === 'livestock';
 }
