@@ -67,7 +67,8 @@ const ProductCardItem = memo(({
 
                 {/* Last shared badge */}
                 {lastSharedText && (
-                    <div className="absolute top-9 left-2 bg-purple-100/90 dark:bg-purple-900/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-medium shadow-sm flex items-center gap-1">
+                   <div className={`absolute ${scoreData ? 'top-9' : 'top-2'} left-2 bg-purple-100/90 dark:bg-purple-900/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-medium shadow-sm flex items-center gap-1`}>
+
                         <span>📅</span>
                         <span className="text-purple-900 dark:text-purple-100">
                             {lastSharedText}
@@ -217,16 +218,19 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
     useEffect(() => {
         // Restore scroll position when returning to the 'all' tab
         if (currentTab === 'all' && scrollPositionRef.current !== null && scrollContainerRef.current) {
-            // We use a short timeout to ensure the content is rendered before we scroll
             setTimeout(() => {
                 if (scrollContainerRef.current) {
                     scrollContainerRef.current.scrollTop = scrollPositionRef.current!;
-                    // Reset after restoring to prevent incorrect scrolling later
                     scrollPositionRef.current = null;
                 }
-            }, 50); // A small delay like 50ms is usually enough
+            }, 50);
+        } 
+        // NEW: Reset scroll to top when switching to the creator tab
+        else if (currentTab === 'creator' && scrollContainerRef.current) {
+            scrollContainerRef.current.scrollTop = 0;
         }
     }, [currentTab]);
+    
     
 
     // Initialize share message
@@ -267,8 +271,9 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
         { name: 'Facebook', icon: '👍' },
         { name: 'Twitter', icon: '🐦' },
         { name: 'WhatsApp', icon: '💬' },
-        { name: 'LinkedIn', icon: '💼' },
+        { name: 'TikTok', icon: '🎵' },
     ];
+    
 
     // Toggle platform selection
     const togglePlatform = (platformName: SocialPlatform) => {
