@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState, useEffect, useDeferredValue, useMemo, memo } from 'react';
+import { Fragment, useState, useEffect, useDeferredValue, useMemo, memo, useRef } from 'react';
 import { Send } from 'lucide-react';
 import { XMarkIcon, SparklesIcon, CubeIcon, PencilSquareIcon, CheckIcon, MagnifyingGlassIcon, LightBulbIcon, ArrowDownTrayIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
@@ -44,7 +44,7 @@ const ProductCardItem = memo(({
 
     return (
         <motion.button
-            layoutId={`product-${product.id}`}
+            
             onClick={() => onSelect(product)}
             className="group relative flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition-all text-left p-0 w-full"
             whileHover={{ y: -4 }}
@@ -146,7 +146,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
     const [currentTab, setCurrentTab] = useState<TabType>('suggested');
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedPlatforms, setSelectedPlatforms] = useState<SocialPlatform[]>(['Instagram', 'Facebook']);
+    const [selectedPlatforms, setSelectedPlatforms] = useState<SocialPlatform[]>(['WhatsApp']);
     const [selectedTemplateId, setSelectedTemplateId] = useState('casual');
     const [customCaption, setCustomCaption] = useState('');
     const [isEditingCaption, setIsEditingCaption] = useState(false);
@@ -181,6 +181,10 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
     const rankedProducts = getRankedProducts(products, metricsMap);
     const suggestedProducts = rankedProducts.slice(0, 6); // Top 6 suggestions
 
+    const scrollContainerRef = useRef<HTMLDivElement>(null);
+    const scrollPositionRef = useRef<number | null>(null);
+    
+
     // Filter products for "All" tab (Memoized)
     const filteredProducts = useMemo(() => {
         return products.filter(p =>
@@ -209,6 +213,21 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
             loadMetrics();
         }
     }, [isOpen, products, storeId]);
+
+    useEffect(() => {
+        // Restore scroll position when returning to the 'all' tab
+        if (currentTab === 'all' && scrollPositionRef.current !== null && scrollContainerRef.current) {
+            // We use a short timeout to ensure the content is rendered before we scroll
+            setTimeout(() => {
+                if (scrollContainerRef.current) {
+                    scrollContainerRef.current.scrollTop = scrollPositionRef.current!;
+                    // Reset after restoring to prevent incorrect scrolling later
+                    scrollPositionRef.current = null;
+                }
+            }, 50); // A small delay like 50ms is usually enough
+        }
+    }, [currentTab]);
+    
 
     // Initialize share message
     useEffect(() => {
@@ -453,6 +472,9 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                 product={product}
                                 metrics={metricsMap.get(product.id)}
                                 onSelect={(p) => {
+                                    if (scrollContainerRef.current) {
+                                        scrollPositionRef.current = scrollContainerRef.current.scrollTop;
+                                    }
                                     setSelectedProduct(p);
                                     setCurrentTab('creator');
                                 }}
@@ -543,9 +565,10 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                         key={platform.name}
                                         onClick={() => togglePlatform(platform.name)}
                                         className={`px-4 py-2.5 rounded-full text-[15px] font-medium transition-all flex items-center gap-2 border-2 ${isSelected
-                                            ? 'border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white'
+                                            ? 'border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/20 text-purple-900 dark:text-purple-100'
                                             : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750'
                                             }`}
+                                        
                                         whileTap={{ scale: 0.95 }}
                                     >
                                         {isSelected && <CheckIcon className="w-4 h-4" />}
@@ -562,7 +585,8 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                         <label className="block text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wide">
                             Caption Style
                         </label>
-                        <div className="space-y-2">
+                        <div className="grid grid-cols-2 gap-2">
+
                             {captionTemplates.map(template => {
                                 const isSelected = selectedTemplateId === template.id;
                                 const icons = {
@@ -573,30 +597,34 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                 };
                                 return (
                                     <motion.button
-                                        key={template.id}
-                                        onClick={() => {
-                                            setSelectedTemplateId(template.id);
-                                            setCustomCaption('');
-                                        }}
-                                        className={`w-full p-4 rounded-xl text-left transition-all border-2 ${isSelected
-                                            ? 'border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/20 shadow-sm'
-                                            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750'
-                                            }`}
-                                        whileTap={{ scale: 0.98 }}
-                                    >
-                                        <div className="flex items-center gap-3">
-                                            <span className="text-2xl">{icons[template.id as keyof typeof icons]}</span>
-                                            <div className="flex-1">
-                                                <div className={`font-semibold text-[15px] ${isSelected ? 'text-purple-900 dark:text-purple-100' : 'text-gray-900 dark:text-gray-100'}`}>
-                                                    {template.name}
-                                                </div>
-                                                <div className={`text-xs mt-0.5 capitalize ${isSelected ? 'text-purple-700 dark:text-purple-300' : 'text-gray-500 dark:text-gray-400'}`}>
-                                                    {template.style} tone
-                                                </div>
+                                    key={template.id}
+                                    onClick={() => {
+                                        setSelectedTemplateId(template.id);
+                                        setCustomCaption('');
+                                    }}
+                                    // Added relative, h-28 for uniform height, and text-center
+                                    className={`relative w-full h-28 p-2 rounded-xl text-center transition-all border-2 ${isSelected
+                                        ? 'border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/20 shadow-sm'
+                                        : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750'
+                                    }`}
+                                    whileTap={{ scale: 0.98 }}
+                                >
+                                    {/* Stacks and centers the content vertically */}
+                                    <div className="flex flex-col h-full items-center justify-center">
+                                        <span className="text-2xl">{icons[template.id as keyof typeof icons]}</span>
+                                        <div className="mt-1.5">
+                                            <div className={`font-semibold text-[13px] leading-tight ${isSelected ? 'text-purple-900 dark:text-purple-100' : 'text-gray-900 dark:text-gray-100'}`}>
+                                                {template.name}
                                             </div>
-                                            {isSelected && <CheckIcon className="w-5 h-5 text-purple-600 dark:text-purple-400" />}
+                                            <div className={`text-xs mt-0.5 capitalize ${isSelected ? 'text-purple-700 dark:text-purple-300' : 'text-gray-500 dark:text-gray-400'}`}>
+                                                {template.style} tone
+                                            </div>
                                         </div>
-                                    </motion.button>
+                                    </div>
+                                    {/* Positions the checkmark in the top-right corner */}
+                                    {isSelected && <CheckIcon className="absolute top-2 right-2 w-4 h-4 text-purple-600 dark:text-purple-400" />}
+                                </motion.button>
+                                
                                 );
                             })}
                         </div>
@@ -662,26 +690,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                 </div>
 
                 {/* Action Buttons - Consolidated */}
-                <div className="p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
-                    <motion.button
-                        onClick={handleReadyToPost}
-                        disabled={!finalCaption || selectedPlatforms.length === 0}
-                        className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-r from-purple-500 to-violet-600 dark:from-purple-600 dark:to-violet-700 text-white font-bold text-base hover:from-purple-600 hover:to-violet-700 dark:hover:from-purple-700 dark:hover:to-violet-800 transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-lg"
-                        whileTap={{ scale: 0.98 }}
-                    >
-                        {copiedRecently ? (
-                            <>
-                                <CheckIcon className="w-6 h-6" />
-                                <span>Copied & Saved!</span>
-                            </>
-                        ) : (
-                            <>
-                                <SparklesIcon className="w-6 h-6" />
-                                <span>Ready to Post!</span>
-                            </>
-                        )}
-                    </motion.button>
-                </div>
+                
             </div>
         );
     };
@@ -751,36 +760,70 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                             </div>
 
                             {/* Tab Content */}
-                            <div className="flex-1 overflow-y-auto">
-                                <AnimatePresence mode="wait">
-                                    <motion.div
-                                        key={currentTab}
-                                        initial={{ opacity: 0, x: 20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        exit={{ opacity: 0, x: -20 }}
-                                        transition={{ duration: 0.2 }}
-                                        className="h-full"
-                                    >
-                                        {currentTab === 'suggested' && renderSuggestedTab()}
-                                        {currentTab === 'all' && renderAllProductsTab()}
-                                        {currentTab === 'creator' && renderPostCreatorTab()}
-                                    </motion.div>
-                                </AnimatePresence>
+                            <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
+                            <div className="h-full">
+    <div style={{ display: currentTab === 'suggested' ? 'block' : 'none' }}>
+        {renderSuggestedTab()}
+    </div>
+    <div style={{ display: currentTab === 'all' ? 'block' : 'none' }}>
+        {renderAllProductsTab()}
+    </div>
+    <div style={{ display: currentTab === 'creator' ? 'block' : 'none' }}>
+        {renderPostCreatorTab(selectedProduct, setSelectedProduct)}
+    </div>
+</div>
+
                             </div>
 
                             {/* Footer */}
-                            <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-gray-700">
-                                <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent dark:from-gray-900 dark:to-transparent pointer-events-none" />
-                                <div className="relative max-w-3xl mx-auto">
-                                    <motion.button
-                                        onClick={handleClose}
-                                        className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
-                                        whileTap={{ scale: 0.98 }}
-                                    >
-                                        Done
-                                    </motion.button>
-                                </div>
-                            </footer>
+                            {/* Footer */}
+<footer className="relative mt-auto flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+    <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent dark:from-gray-900 dark:to-transparent pointer-events-none" />
+    <div className="relative max-w-3xl mx-auto h-[56px] flex items-center justify-center"> {/* A fixed height container prevents layout jumps */}
+        <AnimatePresence mode="wait">
+            {currentTab === 'creator' ? (
+                // "Ready to Post!" button for the 'creator' tab
+                <motion.div
+                    key="creator-footer"
+                    className="w-full"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.2, ease: 'easeInOut' }}
+                >
+                    <button
+                        onClick={handleReadyToPost}
+                        disabled={!finalCaption || selectedPlatforms.length === 0}
+                        className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-gradient-to-r from-purple-500 to-violet-600 text-white font-bold text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg active:scale-[0.98]"
+                    >
+                        {copiedRecently ? (
+                            <><CheckIcon className="w-6 h-6" /><span>Copied & Saved!</span></>
+                        ) : (
+                            <><SparklesIcon className="w-6 h-6" /><span>Ready to Post!</span></>
+                        )}
+                    </button>
+                </motion.div>
+            ) : (
+                // "Done" button for other tabs
+                <motion.div
+                    key="default-footer"
+                    className="w-full"
+                    initial={{ opacity: 1, y: 0 }} // Starts visible
+                    exit={{ opacity: 0, y: 10 }}     // Slides down on exit
+                    transition={{ duration: 0.2, ease: 'easeInOut' }}
+                >
+                    <button
+                        onClick={handleClose}
+                        className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                        Done
+                    </button>
+                </motion.div>
+            )}
+        </AnimatePresence>
+    </div>
+</footer>
+
                         </div>
                     </motion.div>
                 )}

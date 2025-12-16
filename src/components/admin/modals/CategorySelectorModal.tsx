@@ -71,6 +71,7 @@ const CategorySelectorModal: React.FC<CategorySelectorProps> = ({
                         exit={{ y: '100%' }}
                         transition={{ type: 'spring', damping: 25, stiffness: 500 }}
                         className="relative bg-card-background rounded-t-3xl shadow-xl max-h-[70vh] flex flex-col z-10"
+                        onClick={(e) => e.stopPropagation()}
                     >
                         <div className="p-4 border-b border-border-color flex-shrink-0">
                             <h3 className="text-lg font-semibold text-center text-text-primary">

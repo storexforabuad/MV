@@ -502,21 +502,22 @@ const AddLivestockComposer: React.FC<AddLivestockComposerProps> = ({ isOpen, onC
                     )}
                   </div>
                 </div>
+                <CategorySelectorModal
+                  isOpen={isCategorySelectorOpen}
+                  onClose={() => setCategorySelectorOpen(false)}
+                  categories={categories}
+                  selectedCategoryId={batchProducts[activeProductIndex]?.categoryId}
+                  onSelect={(categoryId: string) => {
+                    handleProductChange(activeProductIndex, 'categoryId', categoryId);
+                    setCategorySelectorOpen(false);
+                  }}
+                  onAddCategory={onAddCategory}
+                />
               </Dialog.Panel>
             </Transition.Child>
           </div>
         </div>
-        <CategorySelectorModal
-          isOpen={isCategorySelectorOpen}
-          onClose={() => setCategorySelectorOpen(false)}
-          categories={categories}
-          selectedCategoryId={batchProducts[activeProductIndex]?.categoryId}
-          onSelect={(categoryId: string) => {
-            handleProductChange(activeProductIndex, 'categoryId', categoryId);
-            setCategorySelectorOpen(false);
-          }}
-          onAddCategory={onAddCategory}
-        />
+        
       </Dialog>
     </Transition.Root>
   );

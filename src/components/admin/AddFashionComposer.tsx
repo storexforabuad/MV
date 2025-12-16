@@ -582,6 +582,17 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                             )}
                                         </div>
                                     </div>
+                                    <CategorySelectorModal
+                                        isOpen={isCategorySelectorOpen}
+                                        onClose={() => setCategorySelectorOpen(false)}
+                                        categories={categories}
+                                        selectedCategoryId={productData.categoryId}
+                                        onSelect={(categoryId: string) => {
+                                            handleProductChange('categoryId', categoryId);
+                                            setCategorySelectorOpen(false);
+                                        }}
+                                        onAddCategory={onAddCategory}
+                                    />
                                 </Dialog.Panel>
                             </Transition.Child>
                         </div>
@@ -589,17 +600,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                 </Dialog>
             </Transition.Root>
     
-            <CategorySelectorModal
-                isOpen={isCategorySelectorOpen}
-                onClose={() => setCategorySelectorOpen(false)}
-                categories={categories}
-                selectedCategoryId={productData.categoryId}
-                onSelect={(categoryId: string) => {
-                    handleProductChange('categoryId', categoryId);
-                    setCategorySelectorOpen(false);
-                }}
-                onAddCategory={onAddCategory}
-            />
+            
         </>
     );
     

@@ -510,21 +510,21 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
                     )}
                   </div>
                 </div>
+                 <CategorySelectorModal
+                    isOpen={isCategorySelectorOpen}
+                    onClose={() => setCategorySelectorOpen(false)}
+                    categories={categories}
+                    selectedCategoryId={batchProducts[activeProductIndex]?.categoryId}
+                    onSelect={(categoryId: string) => {
+                        handleProductChange(activeProductIndex, 'categoryId', categoryId);
+                        setCategorySelectorOpen(false);
+                    }}
+                    onAddCategory={onAddCategory} // ADD THIS LINE
+                    />
               </Dialog.Panel>
             </Transition.Child>
           </div>
         </div>
-        <CategorySelectorModal
-          isOpen={isCategorySelectorOpen}
-          onClose={() => setCategorySelectorOpen(false)}
-          categories={categories}
-          selectedCategoryId={batchProducts[activeProductIndex]?.categoryId}
-          onSelect={(categoryId: string) => {
-            handleProductChange(activeProductIndex, 'categoryId', categoryId);
-            setCategorySelectorOpen(false);
-          }}
-          onAddCategory={onAddCategory} // ADD THIS LINE
-        />
       </Dialog>
     </Transition.Root>
   );
