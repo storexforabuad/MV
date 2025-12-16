@@ -127,7 +127,7 @@ interface SocialPostsModalProps {
 }
 
 type TabType = 'suggested' | 'all' | 'creator';
-type SocialPlatform = 'Instagram' | 'Facebook' | 'Twitter' | 'WhatsApp' | 'LinkedIn';
+type SocialPlatform = 'Instagram' | 'Facebook' | 'Twitter' | 'WhatsApp' | 'TikTok';
 
 const formatCategories = (categories: Category[] | undefined) => {
     if (!categories || categories.length === 0) return 'products';
@@ -774,7 +774,8 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
         {renderAllProductsTab()}
     </div>
     <div style={{ display: currentTab === 'creator' ? 'block' : 'none' }}>
-        {renderPostCreatorTab(selectedProduct, setSelectedProduct)}
+    {renderPostCreatorTab()}
+
     </div>
 </div>
 
