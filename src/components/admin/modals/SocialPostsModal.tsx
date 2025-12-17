@@ -44,7 +44,7 @@ const ProductCardItem = memo(({
 
     return (
         <motion.button
-            
+
             onClick={() => onSelect(product)}
             className="group relative flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition-all text-left p-0 w-full"
             whileHover={{ y: -4 }}
@@ -67,7 +67,7 @@ const ProductCardItem = memo(({
 
                 {/* Last shared badge */}
                 {lastSharedText && (
-                   <div className={`absolute ${scoreData ? 'top-9' : 'top-2'} left-2 bg-purple-100/90 dark:bg-purple-900/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-medium shadow-sm flex items-center gap-1`}>
+                    <div className={`absolute ${scoreData ? 'top-9' : 'top-2'} left-2 bg-purple-100/90 dark:bg-purple-900/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-medium shadow-sm flex items-center gap-1`}>
 
                         <span>📅</span>
                         <span className="text-purple-900 dark:text-purple-100">
@@ -143,6 +143,26 @@ const formatCategories = (categories: Category[] | undefined) => {
     return `${firstFive.join(', ')}, and more products`;
 };
 
+// localStorage utilities for confirmation preference
+const SKIP_CONFIRMATION_KEY = (storeId: string) => `socialPosts_skipConfirmation_${storeId}`;
+
+const getSkipConfirmationPreference = (storeId: string): boolean => {
+    try {
+        const saved = localStorage.getItem(SKIP_CONFIRMATION_KEY(storeId));
+        return saved === 'true';
+    } catch {
+        return false;
+    }
+};
+
+const setSkipConfirmationPreference = (storeId: string, value: boolean): void => {
+    try {
+        localStorage.setItem(SKIP_CONFIRMATION_KEY(storeId), String(value));
+    } catch (error) {
+        console.error('Failed to save confirmation preference:', error);
+    }
+};
+
 const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, storeId, storeName, products, categories }) => {
     const [currentTab, setCurrentTab] = useState<TabType>('suggested');
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
@@ -156,6 +176,12 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
     // Share Modal States
     const [activeShareModal, setActiveShareModal] = useState<'none' | 'link' | 'caption'>('none');
     const [shareMessage, setShareMessage] = useState('');
+
+    // Confirmation Modal States
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [skipConfirmation, setSkipConfirmation] = useState(false);
+    const [dontShowAgain, setDontShowAgain] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     // Product Metrics State
     const [metricsMap, setMetricsMap] = useState<Map<string, ProductMetrics>>(new Map());
@@ -184,7 +210,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
 
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const scrollPositionRef = useRef<number | null>(null);
-    
+
 
     // Filter products for "All" tab (Memoized)
     const filteredProducts = useMemo(() => {
@@ -194,6 +220,14 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
     }, [products, deferredSearchTerm]);
 
     const visibleProducts = filteredProducts.slice(0, displayLimit);
+
+    // Load skip confirmation preference on mount
+    useEffect(() => {
+        if (isOpen) {
+            const preference = getSkipConfirmationPreference(storeId);
+            setSkipConfirmation(preference);
+        }
+    }, [isOpen, storeId]);
 
     // Fetch metrics on mount
     useEffect(() => {
@@ -224,14 +258,14 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                     scrollPositionRef.current = null;
                 }
             }, 50);
-        } 
+        }
         // NEW: Reset scroll to top when switching to the creator tab
         else if (currentTab === 'creator' && scrollContainerRef.current) {
             scrollContainerRef.current.scrollTop = 0;
         }
     }, [currentTab]);
-    
-    
+
+
 
     // Initialize share message
     useEffect(() => {
@@ -262,6 +296,8 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
         setIsEditingCaption(false);
         setCopiedRecently(false);
         setActiveShareModal('none');
+        setShowConfirmModal(false);
+        setDontShowAgain(false);
         // shareMessage is reset by useEffect on categories change
     };
 
@@ -273,7 +309,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
         { name: 'WhatsApp', icon: '💬' },
         { name: 'TikTok', icon: '🎵' },
     ];
-    
+
 
     // Toggle platform selection
     const togglePlatform = (platformName: SocialPlatform) => {
@@ -308,36 +344,126 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
     // Final caption to display/use (custom or generated)
     const finalCaption = customCaption || generatedCaption;
 
-    // Handle copy caption
-    // Handle Ready to Post (Copy Caption + Download Image)
-    const handleReadyToPost = async () => {
+    // Execute the actual posting action
+    const executePost = async () => {
         if (finalCaption && selectedProduct) {
-            // 1. Copy Caption
-            navigator.clipboard.writeText(finalCaption);
-            setCopiedRecently(true);
-            toast.success('Caption copied!');
+            setIsProcessing(true);
 
-            // 2. Download Image (if available)
-            if (selectedProduct.images[0]) {
-                handleDownloadImage();
+            try {
+                // 1. Copy Caption
+                await navigator.clipboard.writeText(finalCaption);
+                setCopiedRecently(true);
+
+                // 2. Download Image (if available)
+                if (selectedProduct.images[0]) {
+                    await handleDownloadImage();
+                }
+
+                // 3. Track Analytics
+                const platformKeys: MetricsPlatform[] = selectedPlatforms.map(
+                    p => p.toLowerCase() as MetricsPlatform
+                );
+
+                for (const platform of platformKeys) {
+                    await trackProductShare(storeId, selectedProduct.id, platform);
+                }
+
+                // 4. Refresh Metrics
+                const productIds = products.map(p => p.id);
+                const updatedMetrics = await getBatchProductMetrics(storeId, productIds);
+                setMetricsMap(updatedMetrics);
+
+
+                // 5. Show consolidated success toast with custom styling
+                const platformText = selectedPlatforms.length === 1
+                    ? selectedPlatforms[0]
+                    : selectedPlatforms.length === 2
+                        ? selectedPlatforms.join(' and ')
+                        : `${selectedPlatforms.slice(0, -1).join(', ')}, and ${selectedPlatforms[selectedPlatforms.length - 1]}`;
+
+                toast.custom(
+                    (t) => (
+                        <motion.div
+                            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+                            animate={{ opacity: t.visible ? 1 : 0, y: t.visible ? 0 : 50, scale: t.visible ? 1 : 0.95 }}
+                            transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
+                            className="w-full max-w-md mx-auto"
+                        >
+                            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                                {/* Success Header */}
+                                <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-3 flex items-center gap-3">
+                                    <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0">
+                                        <CheckIcon className="w-5 h-5 text-white" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <h4 className="text-white font-bold text-base leading-tight">
+                                            Ready to Share!
+                                        </h4>
+                                        <p className="text-white/90 text-xs mt-0.5">
+                                            Caption copied & image downloaded
+                                        </p>
+                                    </div>
+                                    <button
+                                        onClick={() => toast.dismiss(t.id)}
+                                        className="text-white/80 hover:text-white transition-colors p-1"
+                                    >
+                                        <XMarkIcon className="w-5 h-5" />
+                                    </button>
+                                </div>
+
+                                {/* Content */}
+                                <div className="p-4">
+                                    <div className="flex items-start gap-3">
+                                        <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                                            <Send className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-gray-900 dark:text-gray-100 text-sm font-medium leading-relaxed">
+                                                You may now visit <span className="font-bold text-purple-600 dark:text-purple-400">{platformText}</span> and post your product.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    ),
+                    {
+                        duration: 5000,
+                        position: 'bottom-center',
+                    }
+                );
+
+                setTimeout(() => setCopiedRecently(false), 2000);
+            } finally {
+                setIsProcessing(false);
             }
-
-            // 3. Track Analytics
-            const platformKeys: MetricsPlatform[] = selectedPlatforms.map(
-                p => p.toLowerCase() as MetricsPlatform
-            );
-
-            for (const platform of platformKeys) {
-                await trackProductShare(storeId, selectedProduct.id, platform);
-            }
-
-            // 4. Refresh Metrics
-            const productIds = products.map(p => p.id);
-            const updatedMetrics = await getBatchProductMetrics(storeId, productIds);
-            setMetricsMap(updatedMetrics);
-
-            setTimeout(() => setCopiedRecently(false), 2000);
         }
+    };
+
+    // Handle Ready to Post - Check preference and show confirmation if needed
+    const handleReadyToPost = async () => {
+        if (skipConfirmation) {
+            // User has chosen to skip confirmation, execute immediately
+            await executePost();
+        } else {
+            // Show confirmation modal
+            setShowConfirmModal(true);
+        }
+    };
+
+    // Handle confirmation proceed
+    const handleConfirmProceed = async () => {
+        // Save preference if checkbox is checked
+        if (dontShowAgain) {
+            setSkipConfirmationPreference(storeId, true);
+            setSkipConfirmation(true);
+        }
+
+        // Execute posting action (modal stays open during processing)
+        await executePost();
+
+        // Close modal after actions complete
+        setShowConfirmModal(false);
     };
 
     // Handle download image
@@ -354,7 +480,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                 a.click();
                 document.body.removeChild(a);
                 window.URL.revokeObjectURL(url);
-                toast.success('Image downloaded!');
+                // Don't show individual toast here - will show consolidated toast
             } catch (error) {
                 console.error('Error downloading image:', error);
                 toast.error('Failed to download image.');
@@ -573,7 +699,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                             ? 'border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/20 text-purple-900 dark:text-purple-100'
                                             : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750'
                                             }`}
-                                        
+
                                         whileTap={{ scale: 0.95 }}
                                     >
                                         {isSelected && <CheckIcon className="w-4 h-4" />}
@@ -602,34 +728,34 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                 };
                                 return (
                                     <motion.button
-                                    key={template.id}
-                                    onClick={() => {
-                                        setSelectedTemplateId(template.id);
-                                        setCustomCaption('');
-                                    }}
-                                    // Added relative, h-28 for uniform height, and text-center
-                                    className={`relative w-full h-28 p-2 rounded-xl text-center transition-all border-2 ${isSelected
-                                        ? 'border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/20 shadow-sm'
-                                        : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750'
-                                    }`}
-                                    whileTap={{ scale: 0.98 }}
-                                >
-                                    {/* Stacks and centers the content vertically */}
-                                    <div className="flex flex-col h-full items-center justify-center">
-                                        <span className="text-2xl">{icons[template.id as keyof typeof icons]}</span>
-                                        <div className="mt-1.5">
-                                            <div className={`font-semibold text-[13px] leading-tight ${isSelected ? 'text-purple-900 dark:text-purple-100' : 'text-gray-900 dark:text-gray-100'}`}>
-                                                {template.name}
-                                            </div>
-                                            <div className={`text-xs mt-0.5 capitalize ${isSelected ? 'text-purple-700 dark:text-purple-300' : 'text-gray-500 dark:text-gray-400'}`}>
-                                                {template.style} tone
+                                        key={template.id}
+                                        onClick={() => {
+                                            setSelectedTemplateId(template.id);
+                                            setCustomCaption('');
+                                        }}
+                                        // Added relative, h-28 for uniform height, and text-center
+                                        className={`relative w-full h-28 p-2 rounded-xl text-center transition-all border-2 ${isSelected
+                                            ? 'border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/20 shadow-sm'
+                                            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750'
+                                            }`}
+                                        whileTap={{ scale: 0.98 }}
+                                    >
+                                        {/* Stacks and centers the content vertically */}
+                                        <div className="flex flex-col h-full items-center justify-center">
+                                            <span className="text-2xl">{icons[template.id as keyof typeof icons]}</span>
+                                            <div className="mt-1.5">
+                                                <div className={`font-semibold text-[13px] leading-tight ${isSelected ? 'text-purple-900 dark:text-purple-100' : 'text-gray-900 dark:text-gray-100'}`}>
+                                                    {template.name}
+                                                </div>
+                                                <div className={`text-xs mt-0.5 capitalize ${isSelected ? 'text-purple-700 dark:text-purple-300' : 'text-gray-500 dark:text-gray-400'}`}>
+                                                    {template.style} tone
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    {/* Positions the checkmark in the top-right corner */}
-                                    {isSelected && <CheckIcon className="absolute top-2 right-2 w-4 h-4 text-purple-600 dark:text-purple-400" />}
-                                </motion.button>
-                                
+                                        {/* Positions the checkmark in the top-right corner */}
+                                        {isSelected && <CheckIcon className="absolute top-2 right-2 w-4 h-4 text-purple-600 dark:text-purple-400" />}
+                                    </motion.button>
+
                                 );
                             })}
                         </div>
@@ -695,7 +821,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                 </div>
 
                 {/* Action Buttons - Consolidated */}
-                
+
             </div>
         );
     };
@@ -766,72 +892,302 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
 
                             {/* Tab Content */}
                             <div ref={scrollContainerRef} className="flex-1 overflow-y-auto">
-                            <div className="h-full">
-    <div style={{ display: currentTab === 'suggested' ? 'block' : 'none' }}>
-        {renderSuggestedTab()}
-    </div>
-    <div style={{ display: currentTab === 'all' ? 'block' : 'none' }}>
-        {renderAllProductsTab()}
-    </div>
-    <div style={{ display: currentTab === 'creator' ? 'block' : 'none' }}>
-    {renderPostCreatorTab()}
+                                <div className="h-full">
+                                    <div style={{ display: currentTab === 'suggested' ? 'block' : 'none' }}>
+                                        {renderSuggestedTab()}
+                                    </div>
+                                    <div style={{ display: currentTab === 'all' ? 'block' : 'none' }}>
+                                        {renderAllProductsTab()}
+                                    </div>
+                                    <div style={{ display: currentTab === 'creator' ? 'block' : 'none' }}>
+                                        {renderPostCreatorTab()}
 
-    </div>
-</div>
+                                    </div>
+                                </div>
 
                             </div>
 
                             {/* Footer */}
                             {/* Footer */}
-<footer className="relative mt-auto flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
-    <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent dark:from-gray-900 dark:to-transparent pointer-events-none" />
-    <div className="relative max-w-3xl mx-auto h-[56px] flex items-center justify-center"> {/* A fixed height container prevents layout jumps */}
-        <AnimatePresence mode="wait">
-            {currentTab === 'creator' ? (
-                // "Ready to Post!" button for the 'creator' tab
-                <motion.div
-                    key="creator-footer"
-                    className="w-full"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    transition={{ duration: 0.2, ease: 'easeInOut' }}
-                >
-                    <button
-                        onClick={handleReadyToPost}
-                        disabled={!finalCaption || selectedPlatforms.length === 0}
-                        className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-gradient-to-r from-purple-500 to-violet-600 text-white font-bold text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg active:scale-[0.98]"
-                    >
-                        {copiedRecently ? (
-                            <><CheckIcon className="w-6 h-6" /><span>Copied & Saved!</span></>
-                        ) : (
-                            <><SparklesIcon className="w-6 h-6" /><span>Ready to Post!</span></>
-                        )}
-                    </button>
-                </motion.div>
-            ) : (
-                // "Done" button for other tabs
-                <motion.div
-                    key="default-footer"
-                    className="w-full"
-                    initial={{ opacity: 1, y: 0 }} // Starts visible
-                    exit={{ opacity: 0, y: 10 }}     // Slides down on exit
-                    transition={{ duration: 0.2, ease: 'easeInOut' }}
-                >
-                    <button
-                        onClick={handleClose}
-                        className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
-                    >
-                        Done
-                    </button>
-                </motion.div>
-            )}
-        </AnimatePresence>
-    </div>
-</footer>
+                            <footer className="relative mt-auto flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+                                <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent dark:from-gray-900 dark:to-transparent pointer-events-none" />
+                                <div className="relative max-w-3xl mx-auto h-[56px] flex items-center justify-center"> {/* A fixed height container prevents layout jumps */}
+                                    <AnimatePresence mode="wait">
+                                        {currentTab === 'creator' ? (
+                                            // "Ready to Post!" button for the 'creator' tab
+                                            <motion.div
+                                                key="creator-footer"
+                                                className="w-full"
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: 10 }}
+                                                transition={{ duration: 0.2, ease: 'easeInOut' }}
+                                            >
+                                                <button
+                                                    onClick={handleReadyToPost}
+                                                    disabled={!finalCaption || selectedPlatforms.length === 0}
+                                                    className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-gradient-to-r from-purple-500 to-violet-600 text-white font-bold text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg active:scale-[0.98]"
+                                                >
+                                                    {copiedRecently ? (
+                                                        <><CheckIcon className="w-6 h-6" /><span>Copied & Saved!</span></>
+                                                    ) : (
+                                                        <><SparklesIcon className="w-6 h-6" /><span>Ready to Post!</span></>
+                                                    )}
+                                                </button>
+                                            </motion.div>
+                                        ) : (
+                                            // "Done" button for other tabs
+                                            <motion.div
+                                                key="default-footer"
+                                                className="w-full"
+                                                initial={{ opacity: 1, y: 0 }} // Starts visible
+                                                exit={{ opacity: 0, y: 10 }}     // Slides down on exit
+                                                transition={{ duration: 0.2, ease: 'easeInOut' }}
+                                            >
+                                                <button
+                                                    onClick={handleClose}
+                                                    className="w-full bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-700 hover:to-violet-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+                                                >
+                                                    Done
+                                                </button>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            </footer>
 
                         </div>
                     </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Confirmation Modal */}
+            <AnimatePresence>
+                {showConfirmModal && (
+                    <div className="fixed inset-0 z-[70] flex items-end md:items-center justify-center p-0 md:p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+                            onClick={() => setShowConfirmModal(false)}
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, y: '100%', scale: 1 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: '100%', scale: 1 }}
+                            transition={{
+                                duration: 0.3,
+                                ease: [0.25, 1, 0.5, 1],
+                                opacity: { duration: 0.2 }
+                            }}
+                            className="relative w-full md:max-w-md md:rounded-2xl rounded-t-3xl overflow-hidden bg-white dark:bg-gray-900 text-left shadow-2xl border-t md:border border-gray-200 dark:border-gray-700 pointer-events-auto"
+                        >
+                            {/* Modal Content */}
+                            <div className="p-6 md:p-8">
+                                {/* Icon */}
+                                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center shadow-lg">
+                                    <SparklesIcon className="w-8 h-8 text-white" />
+                                </div>
+
+                                {/* Title */}
+                                <h3 className="text-xl md:text-2xl font-bold text-center text-gray-900 dark:text-white mb-3">
+                                    Ready to Post?
+                                </h3>
+
+                                {/* Description */}
+                                <p className="text-sm text-center text-gray-600 dark:text-gray-300 mb-6">
+                                    This will:
+                                </p>
+
+                                {/* Action List */}
+                                <div className="space-y-3 mb-6">
+                                    <div className="flex items-start gap-3 bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mt-0.5">
+                                            <CheckIcon className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                Copy caption to clipboard
+                                            </p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                Ready to paste anywhere
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-3 bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mt-0.5">
+                                            <CheckIcon className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                Download product image
+                                            </p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                Saved to your device
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Checkbox */}
+                                <label className="flex items-center gap-3 cursor-pointer group mb-6 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                    <div className="relative flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={dontShowAgain}
+                                            onChange={(e) => setDontShowAgain(e.target.checked)}
+                                            className="w-5 h-5 rounded border-2 border-gray-300 dark:border-gray-600 text-purple-600 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 cursor-pointer transition-all"
+                                        />
+                                    </div>
+                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 select-none">
+                                        Don't show this again
+                                    </span>
+                                </label>
+
+                                {/* Action Buttons */}
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setShowConfirmModal(false)}
+                                        className="flex-1 px-6 py-3.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-[0.98] transition-all"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleConfirmProceed}
+                                        className="flex-1 px-6 py-3.5 rounded-xl bg-gradient-to-r from-purple-500 to-violet-600 text-white font-bold hover:from-purple-600 hover:to-violet-700 active:scale-[0.98] transition-all shadow-lg shadow-purple-500/30"
+                                    >
+                                        Proceed
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Bottom Safe Area for Mobile */}
+                            <div className="h-8 md:hidden bg-white dark:bg-gray-900" />
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Confirmation Modal */}
+            <AnimatePresence>
+                {showConfirmModal && (
+                    <div className="fixed inset-0 z-[70] flex items-end md:items-center justify-center p-0 md:p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            transition={{ duration: 0.3 }}
+                            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+                            onClick={() => !isProcessing && setShowConfirmModal(false)}
+                        />
+                        <motion.div
+                            initial={{ opacity: 0, y: '100%', scale: 1 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: '100%', scale: 1 }}
+                            transition={{
+                                duration: 0.3,
+                                ease: [0.25, 1, 0.5, 1],
+                                opacity: { duration: 0.2 }
+                            }}
+                            className="relative w-full md:max-w-md md:rounded-2xl rounded-t-3xl overflow-hidden bg-white dark:bg-gray-900 text-left shadow-2xl border-t md:border border-gray-200 dark:border-gray-700 pointer-events-auto"
+                        >
+                            {/* Modal Content */}
+                            <div className="p-6 md:p-8">
+                                {/* Icon */}
+                                <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center shadow-lg">
+                                    <SparklesIcon className="w-8 h-8 text-white" />
+                                </div>
+
+                                {/* Title */}
+                                <h3 className="text-xl md:text-2xl font-bold text-center text-gray-900 dark:text-white mb-3">
+                                    Ready to Post?
+                                </h3>
+
+                                {/* Description */}
+                                <p className="text-sm text-center text-gray-600 dark:text-gray-300 mb-6">
+                                    This will:
+                                </p>
+
+                                {/* Action List */}
+                                <div className="space-y-3 mb-6">
+                                    <div className="flex items-start gap-3 bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mt-0.5">
+                                            <CheckIcon className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                Copy caption to clipboard
+                                            </p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                Ready to paste anywhere
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex items-start gap-3 bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mt-0.5">
+                                            <CheckIcon className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                                Download product image
+                                            </p>
+                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                                Saved to your device
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Checkbox */}
+                                <label className="flex items-center gap-3 cursor-pointer group mb-6 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                    <div className="relative flex items-center">
+                                        <input
+                                            type="checkbox"
+                                            checked={dontShowAgain}
+                                            onChange={(e) => setDontShowAgain(e.target.checked)}
+                                            disabled={isProcessing}
+                                            className="w-5 h-5 rounded border-2 border-gray-300 dark:border-gray-600 text-purple-600 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                        />
+                                    </div>
+                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 select-none">
+                                        Don't show this again
+                                    </span>
+                                </label>
+
+                                {/* Action Buttons */}
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={() => setShowConfirmModal(false)}
+                                        disabled={isProcessing}
+                                        className="flex-1 px-6 py-3.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleConfirmProceed}
+                                        disabled={isProcessing}
+                                        className="flex-1 px-6 py-3.5 rounded-xl bg-gradient-to-r from-purple-500 to-violet-600 text-white font-bold hover:from-purple-600 hover:to-violet-700 active:scale-[0.98] transition-all shadow-lg shadow-purple-500/30 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                    >
+                                        {isProcessing ? (
+                                            <>
+                                                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                                <span>Processing...</span>
+                                            </>
+                                        ) : (
+                                            'Proceed'
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Bottom Safe Area for Mobile */}
+                            <div className="h-8 md:hidden bg-white dark:bg-gray-900" />
+                        </motion.div>
+                    </div>
                 )}
             </AnimatePresence>
 
