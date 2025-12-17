@@ -104,6 +104,10 @@ export default function StorefrontPageClient({
   const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
   const { customer } = useCustomer();
 
+  // Swipe gesture state
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const [isSwipeTransitioning, setIsSwipeTransitioning] = useState(false);
+
   // Handle deep linking
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -230,11 +234,41 @@ export default function StorefrontPageClient({
     }
   }, [storeId, setIsConnectionError]);
 
+  // Get all categories including special ones
+  const getAllCategories = useCallback(() => {
+    return [
+      { id: 'promo', name: 'Promo' },
+      { id: 'popular', name: 'Popular' },
+      { id: 'new-arrivals', name: 'New Arrivals' },
+      ...categories
+    ];
+  }, [categories]);
+
+  // Get next category (circular)
+  const getNextCategory = useCallback(() => {
+    const allCategories = getAllCategories();
+
+    setIsSwipeTransitioning(true);
+    setSwipeDirection(direction);
+
+    const newCategoryId = direction === 'left' ? getNextCategory() : getPreviousCategory();
+    handleCategorySelect(newCategoryId);
+
+    // Reset after animation
+    setTimeout(() => {
+      setSwipeDirection(null);
+      setIsSwipeTransitioning(false);
+    }, 300);
+  }, [isSwipeTransitioning, loading, getNextCategory, getPreviousCategory]);
+
   const handleCategorySelect = useCallback((categoryId: string) => {
     console.log(`[StorefrontPageClient] Category selected: ${categoryId}`);
     scrollRestoreState.current = null;
     NavigationStore.clearState();
 
+    // Clear products immediately and set loading to true to show skeletons
+    setProducts([]);
+    setLoading(true);
     setActiveCategoryId(categoryId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
@@ -346,6 +380,11 @@ export default function StorefrontPageClient({
                 setOrdersModalOpen={setIsOrdersModalOpen}
                 highlightOrderId={highlightOrderId}
                 onNotificationRequest={handleNotificationRequest}
+                onSwipeLeft={() => handleSwipe('left')}
+                onSwipeRight={() => handleSwipe('right')}
+                swipeDirection={swipeDirection}
+                isSwipeTransitioning={isSwipeTransitioning}
+                isLoading={loading}
               />
               {storeId && <BusinessCardModal open={aboutOpen} onClose={() => setAboutOpen(false)} storeMeta={storeMeta || undefined} />}
               {hasMore && (

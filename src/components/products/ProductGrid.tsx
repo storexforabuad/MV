@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Info, Phone, MessageCircle, Star, Clock, MapPin, Instagram, Gift } from 'lucide-react';
 import { Product } from '../../types/product';
-import { motion, LayoutGroup, AnimatePresence, Transition } from 'framer-motion';
+import { motion, LayoutGroup, AnimatePresence, Transition, PanInfo } from 'framer-motion';
 import Image from 'next/image';
 import { getStoreMeta } from '../../lib/db';
 import { StoreMeta } from '../../types/store';
@@ -13,6 +13,7 @@ import { useOrders } from '@/hooks/useOrders';
 import { OrdersModal } from '@/components/customer/modals/OrdersModal';
 import { ReferralsModal } from '@/components/customer/modals/ReferralsModal';
 import { ensureProductType } from '../../utils/productHelpers';
+import SkeletonLoader from '../SkeletonLoader';
 
 const VehicleCard = dynamic(() => import('./VehicleCard'), {
   loading: () => (
@@ -93,6 +94,11 @@ interface ProductGridProps {
   setOrdersModalOpen: (isOpen: boolean) => void;
   highlightOrderId?: string | null;
   onNotificationRequest?: () => Promise<{ success: boolean; error?: string }>;
+  onSwipeLeft?: () => void;
+  onSwipeRight?: () => void;
+  swipeDirection?: 'left' | 'right' | null;
+  isSwipeTransitioning?: boolean;
+  isLoading?: boolean;
 }
 
 const ProductGrid = memo(function ProductGrid({
@@ -105,13 +111,35 @@ const ProductGrid = memo(function ProductGrid({
   isOrdersModalOpen,
   setOrdersModalOpen,
   highlightOrderId,
-  onNotificationRequest
+  onNotificationRequest,
+  onSwipeLeft,
+  onSwipeRight,
+  swipeDirection,
+  isSwipeTransitioning,
+  isLoading
 }: ProductGridProps) {
   const router = useRouter();
   const { customer, promptLogin } = useCustomer();
   const { orders, addOrder } = useOrders(customer?.id ?? null, storeId || "");
   const [isSingleColumn, setIsSingleColumn] = useState(false);
   const [isReferralModalOpen, setReferralModalOpen] = useState(false);
+
+  // Handle swipe gesture detection
+  const handleDragEnd = (event: any, info: PanInfo) => {
+    const swipeThreshold = 30; // Reduced threshold for easier swipes
+    const swipeVelocity = 300; // Reduced velocity threshold
+
+    const { offset, velocity } = info;
+
+    // Swipe left (next category)
+    if (offset.x < -swipeThreshold || velocity.x < -swipeVelocity) {
+      onSwipeLeft?.();
+    }
+    // Swipe right (previous category)
+    else if (offset.x > swipeThreshold || velocity.x > swipeVelocity) {
+      onSwipeRight?.();
+    }
+  };
 
   const handleOrdersClick = () => {
     if (customer) {
@@ -192,14 +220,34 @@ const ProductGrid = memo(function ProductGrid({
 
       <motion.div
         ref={containerRef}
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.7} // Increased elasticity for better feel
+        dragMomentum={false}
+        onDragEnd={handleDragEnd}
+        style={{ touchAction: 'pan-y' }} // Prevent vertical scroll interference
+        animate={{
+          x: swipeDirection === 'left' ? -20 : swipeDirection === 'right' ? 20 : 0,
+          opacity: isSwipeTransitioning ? 0.7 : 1
+        }}
+        transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
         className={`mt-4 grid gap-3
             ${isSingleColumn ? 'grid-cols-1' : 'grid-cols-2'} 
             sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 
             px-3 sm:px-6 lg:px-8 bg-background`}
         layout
-        transition={transition}
       >
-        {sortedProducts.length === 0 ? (
+        {isLoading ? (
+          Array.from({ length: 6 }).map((_, index) => (
+            <motion.div
+              key={`skeleton-${index}`}
+              layout
+              transition={transition}
+            >
+              <SkeletonLoader />
+            </motion.div>
+          ))
+        ) : sortedProducts.length === 0 ? (
           <div className="col-span-full w-full">
             <EmptyCategory />
           </div>
