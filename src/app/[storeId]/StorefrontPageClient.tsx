@@ -247,19 +247,32 @@ export default function StorefrontPageClient({
   // Get next category (circular)
   const getNextCategory = useCallback(() => {
     const allCategories = getAllCategories();
+    // Use robust matching (string conversion + trim)
+    const currentIndex = allCategories.findIndex(c => String(c.id).trim() === String(activeCategoryId).trim());
 
-    setIsSwipeTransitioning(true);
-    setSwipeDirection(direction);
+    // If not found (shouldn't happen if activeCategoryId is valid), default to first category
+    if (currentIndex === -1) {
+      return allCategories[0].id;
+    }
 
-    const newCategoryId = direction === 'left' ? getNextCategory() : getPreviousCategory();
-    handleCategorySelect(newCategoryId);
+    const nextIndex = (currentIndex + 1) % allCategories.length;
+    return allCategories[nextIndex].id;
+  }, [getAllCategories, activeCategoryId]);
 
-    // Reset after animation
-    setTimeout(() => {
-      setSwipeDirection(null);
-      setIsSwipeTransitioning(false);
-    }, 300);
-  }, [isSwipeTransitioning, loading, getNextCategory, getPreviousCategory]);
+  // Get previous category (circular)
+  const getPreviousCategory = useCallback(() => {
+    const allCategories = getAllCategories();
+    // Use robust matching (string conversion + trim)
+    const currentIndex = allCategories.findIndex(c => String(c.id).trim() === String(activeCategoryId).trim());
+
+    // If not found, default to last category
+    if (currentIndex === -1) {
+      return allCategories[allCategories.length - 1].id;
+    }
+
+    const prevIndex = (currentIndex - 1 + allCategories.length) % allCategories.length;
+    return allCategories[prevIndex].id;
+  }, [getAllCategories, activeCategoryId]);
 
   const handleCategorySelect = useCallback((categoryId: string) => {
     console.log(`[StorefrontPageClient] Category selected: ${categoryId}`);
@@ -272,6 +285,23 @@ export default function StorefrontPageClient({
     setActiveCategoryId(categoryId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
+
+  // Handle swipe gesture
+  const handleSwipe = useCallback((direction: 'left' | 'right') => {
+    if (isSwipeTransitioning || loading) return; // Prevent rapid swipes and swipes during loading
+
+    setIsSwipeTransitioning(true);
+    setSwipeDirection(direction);
+
+    const newCategoryId = direction === 'left' ? getNextCategory() : getPreviousCategory();
+    handleCategorySelect(newCategoryId);
+
+    // Reset after animation
+    setTimeout(() => {
+      setSwipeDirection(null);
+      setIsSwipeTransitioning(false);
+    }, 300);
+  }, [isSwipeTransitioning, loading, getNextCategory, getPreviousCategory, handleCategorySelect]);
 
   useEffect(() => {
     if (!storeId) return;
