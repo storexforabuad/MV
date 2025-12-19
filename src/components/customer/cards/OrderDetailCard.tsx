@@ -141,7 +141,6 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted }: O
                 </div>
               );
             })}
-            })}
           </div>
 
           {order.orderNotes && (

@@ -41,14 +41,14 @@ export const useOrders = (customerId: string | null, storeId: string) => {
     fetchOrders();
   }, [fetchOrders]);
 
-  const addOrder = async (products: (Product | CartItem)[], storeMeta: StoreMeta, customerInfo: Customer, referralCode: string | null, bonusApplied: boolean = false, deliveryMethod: 'home' | 'pickup' = 'home') => {
+  const addOrder = async (products: (Product | CartItem)[], storeMeta: StoreMeta, customerInfo: Customer, referralCode: string | null, bonusApplied: boolean = false, deliveryMethod: 'home' | 'pickup' = 'home', orderNotes?: string) => {
     if (!customerId || !customerInfo) {
       throw new Error("User is not logged in.");
     }
 
     try {
       const productsToSend = products.map(p => ({ ...p, storeId: storeMeta.id })) as Product[];
-      const newOrder = await addOrderToFirestore(customerId, productsToSend, storeMeta, customerInfo, referralCode, bonusApplied, deliveryMethod);
+      const newOrder = await addOrderToFirestore(customerId, productsToSend, storeMeta, customerInfo, referralCode, bonusApplied, deliveryMethod, orderNotes);
       setOrders(prevOrders => [newOrder, ...prevOrders]);
     } catch (error) {
       console.error("Error in addOrder:", error);
