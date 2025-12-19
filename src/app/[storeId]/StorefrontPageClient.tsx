@@ -391,6 +391,26 @@ export default function StorefrontPageClient({
           storeName={storeName}
           onLoginClick={() => setIsLoginModalOpen(true)}
         />
+
+        {/* Store Closed Banner */}
+        {storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false && (
+          <div className="mx-4 mb-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-center gap-3 shadow-sm">
+            <div className="p-2 bg-red-100 dark:bg-red-900/40 rounded-full">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-red-600 dark:text-red-400">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-red-900 dark:text-red-200">Store is Currently Closed</h3>
+              <p className="text-xs text-red-700 dark:text-red-300 mt-0.5">
+                {storeMeta.openingHours
+                  ? `Opens ${storeMeta.openingHours.open} - ${storeMeta.openingHours.close}`
+                  : 'You can browse the menu, but ordering is disabled.'}
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="mt-3 sm:mt-4 px-2 sm:px-4 md:px-6 lg:px-8">
           {initialLoading || isPending ? (
             <LoadingGrid />

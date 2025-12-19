@@ -217,7 +217,10 @@ export default function CreateStoreModal({
                 <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-white">Business Info</h2>
                 <p className="text-sm text-center text-gray-500 dark:text-gray-400">Tell us about the business and where it&apos;s located</p>
                 <input name="name" value={formData.name} onChange={handleInputChange} placeholder="Business Name *" className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" required />
-                <input name="businessInstagram" value={formData.businessInstagram} onChange={handleInputChange} placeholder="Instagram (@username)" className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" />
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <input name="whatsapp" value={formData.whatsapp} onChange={handleInputChange} placeholder="Business WhatsApp (e.g. +234...)" className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" />
+                  <input name="businessInstagram" value={formData.businessInstagram} onChange={handleInputChange} placeholder="Instagram (@username)" className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" />
+                </div>
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300">🏢 What type of business is this?</label>
                   <select
@@ -230,6 +233,7 @@ export default function CreateStoreModal({
                     <option value="fashion">👗 Fashion (Ready-to-Wear, Bespoke)</option>
                     <option value="automotive">🚗 Automotive (Car Dealership)</option>
                     <option value="livestock">🐟 Livestock (Fishery & Aquaculture)</option>
+                    <option value="restaurant">🍔 Restaurant (Food & Drinks)</option>
                   </select>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     This determines the product fields and storefront design.

@@ -5,9 +5,10 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { StoreOrder, getReadyForDeliveryOrders } from '@/app/actions/orderActions';
 import Image from 'next/image';
-import { isGeneralProduct } from '@/utils/productHelpers';
+import { isGeneralProduct, isFoodBeverageProduct } from '@/utils/productHelpers';
 import { formatPrice } from '@/utils/price';
 import { ReceiptModal } from '../../modals/ReceiptModal';
+import { Product } from '@/types/product';
 
 interface DeliveriesHubModalProps {
     isOpen: boolean;
@@ -15,20 +16,54 @@ interface DeliveriesHubModalProps {
     storeId: string;
 }
 
-const OrderProductRow = ({ product }: { product: any }) => {
+const OrderProductRow = ({ product }: { product: Product }) => {
+    const image = product.images?.[0] || '/placeholder.png';
+    const isFood = isFoodBeverageProduct(product);
+
     return (
-        <div className="flex items-center gap-4 py-3">
-            <div className="aspect-square w-12 h-12 relative rounded-md overflow-hidden bg-slate-100 dark:bg-slate-700">
-                <Image src={product.images[0]} alt={product.name} layout="fill" objectFit="cover" />
+        <div className="flex items-start gap-3 py-2">
+            <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-gray-800">
+                <Image
+                    src={image}
+                    alt={product.name}
+                    fill
+                    className="object-cover"
+                />
             </div>
-            <div>
-                <p className="font-semibold text-sm text-slate-800 dark:text-slate-100">{product.name}</p>
-                {product.selectedSize && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 mt-0.5 mb-0.5">
-                        Size: {product.selectedSize}
+            <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{product.name}</p>
+                <div className="flex flex-wrap gap-1 mt-0.5">
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                        Qty: {isGeneralProduct(product) ? product.quantity : 1}
                     </span>
+                    {isFood && (
+                        <>
+                            {product.selectedSpiciness && (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400 border border-orange-100 dark:border-orange-800">
+                                    {product.selectedSpiciness === 'medium' && '🌶️ Med'}
+                                    {product.selectedSpiciness === 'hot' && '🔥 Hot'}
+                                    {product.selectedSpiciness === 'extra-hot' && '🤯 X-Hot'}
+                                    {product.selectedSpiciness === 'mild' && '😌 Mild'}
+                                </span>
+                            )}
+                            {product.temperature && (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-100 dark:border-blue-800">
+                                    {product.temperature === 'hot' ? '☕ Hot' : '❄️ Cold'}
+                                </span>
+                            )}
+                        </>
+                    )}
+                </div>
+                {isFood && product.specialInstructions && (
+                    <p className="text-xs text-orange-600 dark:text-orange-400 mt-1 italic">
+                        Note: "{product.specialInstructions}"
+                    </p>
                 )}
-                <p className="text-xs text-slate-500 dark:text-slate-400">Qty: {product.quantity}</p>
+            </div>
+            <div className="text-right">
+                <p className="text-sm font-medium text-slate-900 dark:text-white">
+                    {formatPrice(product.price * (isGeneralProduct(product) ? product.quantity : 1))}
+                </p>
             </div>
         </div>
     );
@@ -69,16 +104,19 @@ const DeliveryOrderCard = ({ order, onViewReceipt }: { order: StoreOrder, onView
                         <MapPin className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
                         <span className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{customerInfo.deliveryAddress.street}, {customerInfo.deliveryAddress.state}</span>
                     </div>
+                    {order.orderNotes && (
+                        <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-100 dark:border-yellow-800/30">
+                            <p className="text-xs font-medium text-yellow-800 dark:text-yellow-200">Order Note:</p>
+                            <p className="text-xs text-yellow-700 dark:text-yellow-300 italic">"{order.orderNotes}"</p>
+                        </div>
+                    )}
                 </div>
             </div>
 
             <div className="divide-y divide-slate-100 dark:divide-slate-700/50 px-5 py-2">
-                {products.filter(p => isGeneralProduct(p) && p.status === 'ready').map(p => {
-                    const product = p as import('@/types/product').GeneralProduct;
-                    return (
-                        <OrderProductRow key={product.id} product={product} />
-                    );
-                })}
+                {products.map(product => (
+                    <OrderProductRow key={product.id} product={product} />
+                ))}
             </div>
 
             <button

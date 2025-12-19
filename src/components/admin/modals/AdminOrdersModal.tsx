@@ -32,12 +32,34 @@ const OrderProductRow = ({ product }: { product: any }) => {
       </div>
       <div className="flex-grow">
         <p className="font-semibold text-slate-800 dark:text-slate-100">{product.name}</p>
-        {product.selectedSize && (
-          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300 mt-1 mb-1">
-            Size: {product.selectedSize}
-          </span>
+        <div className="flex flex-wrap gap-1 mt-1">
+          {product.selectedSize && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+              Size: {product.selectedSize}
+            </span>
+          )}
+          {product.selectedSpiciness && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-100 dark:border-red-800">
+              {product.selectedSpiciness === 'mild' && '😌 Mild'}
+              {product.selectedSpiciness === 'medium' && '🌶️ Medium'}
+              {product.selectedSpiciness === 'hot' && '🔥 Hot'}
+              {product.selectedSpiciness === 'extra-hot' && '🤯 Extra Hot'}
+            </span>
+          )}
+          {product.temperature && (
+            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-100 dark:border-blue-800">
+              {product.temperature === 'hot' && '☕ Hot'}
+              {product.temperature === 'cold' && '❄️ Cold'}
+              {product.temperature === 'room-temp' && '🌡️ Room'}
+            </span>
+          )}
+        </div>
+        {product.specialInstructions && (
+          <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-800 rounded text-xs text-yellow-800 dark:text-yellow-200">
+            <span className="font-semibold">Note:</span> {product.specialInstructions}
+          </div>
         )}
-        <p className="text-sm text-orange-500 dark:text-orange-400">{formatPrice(product.price)}</p>
+        <p className="text-sm text-orange-500 dark:text-orange-400 mt-1">{formatPrice(product.price)}</p>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Qty: {product.quantity || 1}</p>
       </div>
     </div>
@@ -51,8 +73,8 @@ const CustomerOrdersCard = ({ order, onMarkReady, isHighlighted }: { order: Stor
     <motion.div
       id={`order-${order.id}`}
       className={`bg-white dark:bg-slate-800/50 rounded-2xl shadow-sm border overflow-hidden transition-all duration-300 hover:shadow-md ${isHighlighted
-          ? 'border-blue-500 ring-2 ring-blue-500 shadow-lg shadow-blue-500/20'
-          : 'border-slate-100 dark:border-slate-700/50'
+        ? 'border-blue-500 ring-2 ring-blue-500 shadow-lg shadow-blue-500/20'
+        : 'border-slate-100 dark:border-slate-700/50'
         }`}
       animate={isHighlighted ? {
         scale: [1, 1.02, 1],

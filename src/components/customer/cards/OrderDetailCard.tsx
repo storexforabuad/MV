@@ -141,7 +141,15 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted }: O
                 </div>
               );
             })}
+            })}
           </div>
+
+          {order.orderNotes && (
+            <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-700">
+              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Special Instructions</p>
+              <p className="text-sm text-gray-700 dark:text-gray-300 italic">"{order.orderNotes}"</p>
+            </div>
+          )}
 
           <div className="mt-4 pt-4 border-t border-border-color flex justify-between items-center">
             <p className="font-semibold text-text-secondary">Total</p>

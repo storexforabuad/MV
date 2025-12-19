@@ -19,13 +19,13 @@ import CustomerLookupModal from '../../../../components/customer/CustomerLookupM
 import OrderSummaryModal from '../../../../components/modals/OrderSummaryModal';
 import toast from 'react-hot-toast';
 import VehicleDetailPage from '../../../../components/products/VehicleDetailPage';
-import { ensureProductType, isFashionProduct, isGeneralProduct, isVehicleProduct } from '../../../../utils/productHelpers';
+import { ensureProductType, isFashionProduct, isGeneralProduct, isVehicleProduct, isFoodBeverageProduct } from '../../../../utils/productHelpers';
 import SizeSelector from '../../../../components/products/SizeSelector';
 import { SizePreferencesCache } from '../../../../lib/sizePreferencesCache';
 import SizeGuideModal from '../../../../components/products/SizeGuideModal';
 
 const ProductDetailSkeleton = dynamic(() => import('../../../../components/ProductDetailSkeleton'), { ssr: false });
-const AnimatedViewCount = dynamic(() => import('../../../../components/AnimatedViewCount'), { 
+const AnimatedViewCount = dynamic(() => import('../../../../components/AnimatedViewCount'), {
   ssr: false,
   loading: () => <div className="w-16 h-6 bg-gray-200 rounded animate-pulse" />
 });
@@ -126,7 +126,7 @@ export default function ProductDetail() {
 
   const isInCart = useMemo(() => {
     if (!product) return false;
-    return state.items.some(item => 
+    return state.items.some(item =>
       item.id === product.id &&
       (!productIsFashion || (item.selectedColor === selectedColor?.name && item.selectedSize === selectedSize))
     );
@@ -177,19 +177,19 @@ export default function ProductDetail() {
     if (!product) return false;
 
     if (isVehicleProduct(product)) {
-        return product.available;
+      return product.available;
     }
 
     if (product.soldOut) {
-        return false;
+      return false;
     }
 
     if (isFashionProduct(product)) {
-        return !!selectedColor && !!selectedSize && !product.soldOutSizes?.includes(selectedSize);
+      return !!selectedColor && !!selectedSize && !product.soldOutSizes?.includes(selectedSize);
     }
 
     if (isGeneralProduct(product)) {
-        return !product.soldOut;
+      return !product.soldOut;
     }
 
     return true;
@@ -212,12 +212,47 @@ export default function ProductDetail() {
 
   return (
     <>
-      <Navbar storeName={storeMeta?.name || storeId || 'Store'} backButtonHref={`/${storeId}`} />
-      <CustomerLookupModal isOpen={isLoginModalOpen} onClose={() => { setIsLoginModalOpen(false); setShareIntent(false); }} onSuccess={() => { setIsLoginModalOpen(false); if (shareIntent) { toast.success("Logged in! Sharing with your referral link."); handleShare(true); setShareIntent(false); } else { toast.success("You can now place your order."); } }} />
-      {isOrderable && <OrderSummaryModal isOpen={isOrderModalOpen} onClose={() => setIsOrderModalOpen(false)} product={product} storeMeta={storeMeta} customer={customer} selectedSize={selectedSize} selectedColor={selectedColor?.name} />}
-      {productIsFashion && <SizeGuideModal isOpen={isSizeGuideOpen} onClose={() => setIsSizeGuideOpen(false)} selectedSize={selectedSize}/>}
+      <Navbar
+        storeName={storeMeta?.name || storeId || 'Store'}
+        backButtonHref={`/${storeId}`}
+      />
+      <CustomerLookupModal
+        isOpen={isLoginModalOpen}
+        onClose={() => {
+          setIsLoginModalOpen(false);
+          setShareIntent(false);
+        }}
+        onSuccess={() => {
+          setIsLoginModalOpen(false);
+          if (shareIntent) {
+            toast.success("Logged in! Sharing with your referral link.");
+            handleShare(true);
+            setShareIntent(false);
+          } else {
+            toast.success("You can now place your order.");
+          }
+        }}
+      />
+      {isOrderable && (
+        <OrderSummaryModal
+          isOpen={isOrderModalOpen}
+          onClose={() => setIsOrderModalOpen(false)}
+          product={product}
+          storeMeta={storeMeta}
+          customer={customer}
+          selectedSize={selectedSize}
+          selectedColor={selectedColor?.name}
+        />
+      )}
+      {productIsFashion && (
+        <SizeGuideModal
+          isOpen={isSizeGuideOpen}
+          onClose={() => setIsSizeGuideOpen(false)}
+          selectedSize={selectedSize}
+        />
+      )}
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8 pt-[calc(var(--navbar-height)+1rem)] lg:pt-[calc(var(--navbar-height)+2rem)]">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-32 pt-[calc(var(--navbar-height)+1rem)] lg:pt-[calc(var(--navbar-height)+2rem)]">
         <div className="flex flex-col lg:flex lg:flex-row gap-6 lg:gap-x-8">
           {/* Image Section */}
           <div className="flex-1 flex flex-col">
@@ -242,16 +277,16 @@ export default function ProductDetail() {
 
             {product.soldOut ? (
               <div className="w-full text-center p-6 md:p-8 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700/50 shadow-sm mt-4">
-                 <div className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/50">
-                   <PackageX className="w-8 h-8 text-red-600 dark:text-red-400" />
-                 </div>
-                 <h1 className="text-2xl sm:text-3xl font-bold card-text-gradient mb-2">Item Sold Out</h1>
-                 <p className="text-base text-gray-600 dark:text-gray-400 max-w-sm mx-auto mb-8">This product is currently unavailable. Check back later or explore other items!</p>
-                 <button onClick={() => router.push(`/${storeId}`)} className="group relative inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-medium shadow-lg transition-colors active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 bg-gray-900 text-white hover:bg-gray-800 focus:ring-gray-500 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-200 dark:focus:ring-gray-900 dark:focus:ring-offset-0">
-                   <Search className="w-5 h-5" />
-                   <span>Explore Store</span>
-                 </button>
-               </div>
+                <div className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/50">
+                  <PackageX className="w-8 h-8 text-red-600 dark:text-red-400" />
+                </div>
+                <h1 className="text-2xl sm:text-3xl font-bold card-text-gradient mb-2">Item Sold Out</h1>
+                <p className="text-base text-gray-600 dark:text-gray-400 max-w-sm mx-auto mb-8">This product is currently unavailable. Check back later or explore other items!</p>
+                <button onClick={() => router.push(`/${storeId}`)} className="group relative inline-flex items-center justify-center gap-2 px-8 py-4 rounded-full font-medium shadow-lg transition-colors active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-offset-2 bg-gray-900 text-white hover:bg-gray-800 focus:ring-gray-500 dark:bg-gray-50 dark:text-gray-900 dark:hover:bg-gray-200 dark:focus:ring-gray-900 dark:focus:ring-offset-0">
+                  <Search className="w-5 h-5" />
+                  <span>Explore Store</span>
+                </button>
+              </div>
             ) : (
               <>
                 <h1 className="text-2xl sm:text-3xl font-bold card-text-gradient mb-4">{product.name}</h1>
@@ -269,63 +304,146 @@ export default function ProductDetail() {
                 {/* FASHION PRODUCT UI */}
                 {productIsFashion && (
                   <div className='mb-6'>
-                     {/* Color Selector */}
-                     <div className="mb-4">
-                       <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Color: <span className="font-normal">{selectedColor?.name || 'Select a color'}</span></h3>
-                       <div className="flex flex-wrap gap-2">
-                         {(product as FashionProduct).colors.map((color) => (
-                           <button key={color.name} onClick={() => handleColorSelect(color)} className={`relative rounded-full h-8 w-8 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${selectedColor?.name === color.name ? 'ring-2 ring-offset-2 ring-indigo-500' : ''}`}>
-                             <span className="sr-only">{color.name}</span>
-                             <span style={{ backgroundColor: color.hex }} className="block h-full w-full rounded-full border border-black border-opacity-10"/>
-                           </button>
-                         ))}
-                       </div>
-                     </div>
+                    {/* Color Selector */}
+                    <div className="mb-4">
+                      <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Color: <span className="font-normal">{selectedColor?.name || 'Select a color'}</span></h3>
+                      <div className="flex flex-wrap gap-2">
+                        {(product as FashionProduct).colors.map((color) => (
+                          <button key={color.name} onClick={() => handleColorSelect(color)} className={`relative rounded-full h-8 w-8 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${selectedColor?.name === color.name ? 'ring-2 ring-offset-2 ring-indigo-500' : ''}`}>
+                            <span className="sr-only">{color.name}</span>
+                            <span style={{ backgroundColor: color.hex }} className="block h-full w-full rounded-full border border-black border-opacity-10" />
+                          </button>
+                        ))}
+                      </div>
+                    </div>
 
-                     {/* Size Selector */}
-                     <div className="mb-4">
-                        <div className="flex justify-between items-center mb-2">
-                           <h3 className="text-sm font-medium text-gray-900 dark:text-white">Size</h3>
-                           <button onClick={() => setIsSizeGuideOpen(true)} className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center gap-1">
-                             <Info size={16}/>
-                             <span>Size Guide</span>
-                           </button>
-                        </div>
-                       <SizeSelector selectedSize={selectedSize} onSizeSelect={setSelectedSize} sizes={(product as FashionProduct).sizes} disabledSizes={(product as FashionProduct).soldOutSizes} />
-                     </div>
+                    {/* Size Selector */}
+                    <div className="mb-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <h3 className="text-sm font-medium text-gray-900 dark:text-white">Size</h3>
+                        <button onClick={() => setIsSizeGuideOpen(true)} className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center gap-1">
+                          <Info size={16} />
+                          <span>Size Guide</span>
+                        </button>
+                      </div>
+                      <SizeSelector selectedSize={selectedSize} onSizeSelect={setSelectedSize} sizes={(product as FashionProduct).sizes} disabledSizes={(product as FashionProduct).soldOutSizes} />
+                    </div>
                   </div>
                 )}
 
                 {/* GENERAL PRODUCT UI */}
                 {isGeneralProduct(product) && product.sizeOption && product.availableSizes && (
-                    <div className="mb-6">
-                        <SizeSelector selectedSize={selectedSize} onSizeSelect={setSelectedSize} sizes={product.availableSizes} sizeCategory={product.sizeOption} />
-                    </div>
+                  <div className="mb-6">
+                    <SizeSelector selectedSize={selectedSize} onSizeSelect={setSelectedSize} sizes={product.availableSizes} sizeCategory={product.sizeOption} />
+                  </div>
                 )}
 
-                {product.description && <p className="text-gray-600 dark:text-gray-300 mb-8">{product.description}</p>}
+                {/* FOOD PRODUCT UI */}
+                {isFoodBeverageProduct(product) && (
+                  <div className="mb-8 space-y-6">
+                    {/* Category Banner */}
+                    {category && (
+                      <div className="inline-flex items-center px-3 py-1 rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 text-sm font-medium">
+                        🍽️ {category.name}
+                      </div>
+                    )}
+
+                    {/* Key Details Grid */}
+                    <div className="grid grid-cols-2 gap-4">
+                      {product.preparationTime && (
+                        <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700">
+                          <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-xl">
+                            ⏱️
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">Prep Time</p>
+                            <p className="font-semibold text-gray-900 dark:text-white">{product.preparationTime} mins</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {product.spiciness && (
+                        <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700">
+                          <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-xl">
+                            🌶️
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">Spiciness</p>
+                            <p className="font-semibold text-gray-900 dark:text-white capitalize">{product.spiciness}</p>
+                          </div>
+                        </div>
+                      )}
+
+                      {product.temperature && (
+                        <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700">
+                          <div className="w-10 h-10 rounded-full bg-cyan-100 dark:bg-cyan-900/30 flex items-center justify-center text-xl">
+                            {product.temperature === 'hot' ? '☕' : product.temperature === 'cold' ? '❄️' : '🌡️'}
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">Temp</p>
+                            <p className="font-semibold text-gray-900 dark:text-white capitalize">{product.temperature}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Dietary Badges */}
+                    <div className="flex flex-wrap gap-2">
+                      {product.isVegetarian && (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 text-sm font-medium border border-green-100 dark:border-green-800">
+                          🥗 Vegetarian
+                        </span>
+                      )}
+                      {product.isAlcoholic && (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 text-sm font-medium border border-purple-100 dark:border-purple-800">
+                          🍷 Contains Alcohol
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Ingredients */}
+                    {product.ingredients && product.ingredients.length > 0 && (
+                      <div className="space-y-3">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center gap-2">
+                          <span>🥬</span> Ingredients
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                          {product.ingredients.map((ing, i) => (
+                            <span key={i} className="px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-sm">
+                              {ing}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {product.description && !isFoodBeverageProduct(product) && <p className="text-gray-600 dark:text-gray-300 mb-8">{product.description}</p>}
 
                 {/* Action Buttons */}
-                <div className="flex flex-col gap-3 mt-auto">
-                  <div className="flex items-stretch gap-3">
-                    <button onClick={handlePlaceOrderClick} disabled={!isOrderable} className="group relative flex-grow inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full bg-green-600 text-white font-medium shadow-sm hover:bg-green-700 transition-colors active:scale-[0.98] disabled:bg-gray-400 disabled:cursor-not-allowed min-h-[56px] text-base">
-                      <ShoppingCart className="w-5 h-5" />
-                      <span>Place Order</span>
-                    </button>
-                    <button onClick={handleToggleCart} disabled={isTogglingCart || !isOrderable} className={`group relative flex-shrink-0 inline-flex items-center justify-center w-14 h-14 rounded-full font-medium transition-all duration-300 transform-gpu active:scale-[0.9] disabled:opacity-50 disabled:cursor-not-allowed ${isInCart ? 'bg-red-500/20 text-red-600' : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600'}`}>
-                      <Heart className={`w-6 h-6 transition-transform duration-200 ease-in-out ${isInCart ? 'fill-current' : ''}`} />
-                    </button>
-                  </div>
-                  <button onClick={handleShareClick} className="group relative w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full font-medium transition-colors shadow-sm min-h-[48px] text-base bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
-                    <Share2 className="w-5 h-5 mr-2" />
-                    <span>Share & Earn</span>
-                  </button>
-                </div>
+                <button onClick={handleShareClick} className="group relative w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full font-medium transition-colors shadow-sm min-h-[48px] text-base bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
+                  <Share2 className="w-5 h-5 mr-2" />
+                  <span>Share & Earn</span>
+                </button>
               </>
             )}
           </div>
         </div>
       </div>
+
+      {/* Sticky Action Buttons */}
+      {!product.soldOut && (
+        <div className="fixed bottom-0 left-0 right-0 p-3 sm:p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 flex gap-3 z-40 safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+          <button onClick={handlePlaceOrderClick} disabled={!isOrderable} className="group relative flex-grow inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-green-600 text-white font-bold shadow-lg hover:bg-green-700 transition-all active:scale-[0.98] disabled:bg-gray-400 disabled:cursor-not-allowed text-base">
+            <ShoppingCart className="w-5 h-5" />
+            <span>Place Order</span>
+          </button>
+          <button onClick={handleToggleCart} disabled={isTogglingCart || !isOrderable} className={`group relative flex-shrink-0 inline-flex items-center justify-center w-14 h-14 rounded-xl font-medium transition-all duration-300 transform-gpu active:scale-[0.9] disabled:opacity-50 disabled:cursor-not-allowed border border-gray-200 dark:border-gray-700 ${isInCart ? 'bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:border-red-800' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'}`}>
+            <Heart className={`w-6 h-6 transition-transform duration-200 ease-in-out ${isInCart ? 'fill-current scale-110' : ''}`} />
+          </button>
+        </div>
+      )}
     </>
   );
 }

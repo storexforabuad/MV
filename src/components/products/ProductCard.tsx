@@ -11,6 +11,7 @@ import {
   isVehicleProduct,
   isFashionProduct,
   isLivestockProduct,
+  isFoodBeverageProduct
 } from '../../utils/productHelpers';
 
 
@@ -50,7 +51,7 @@ export default function ProductCard({ product, storeId, activeCategoryId }: Prod
 
 
   const discount = calculateDiscount(product.price, product.originalPrice);
-    const isSoldOut = (() => {
+  const isSoldOut = (() => {
     if (isGeneralProduct(product)) {
       return product.soldOut;
     }
@@ -63,11 +64,14 @@ export default function ProductCard({ product, storeId, activeCategoryId }: Prod
     if (isLivestockProduct(product)) {
       return !product.inStock;
     }
+    if (isFoodBeverageProduct(product)) {
+      return !product.available;
+    }
     // Fallback for safety
-    
     return false;
   })();
-  const isLimitedStock = product.productType === 'general' ? product.limitedStock : false;
+
+  const isLimitedStock = isGeneralProduct(product) ? product.limitedStock : false;
 
   const handleImageError = () => {
     if (imgSrc !== DEFAULT_IMAGES.medium) {
@@ -170,12 +174,34 @@ export default function ProductCard({ product, storeId, activeCategoryId }: Prod
             )}
             <p className="text-lg font-bold text-text-primary card-text-gradient">
               {formatPrice(product.price)}
-              {product.productType === 'livestock' && (
+              {isLivestockProduct(product) && (
                 <span className="text-sm font-normal text-text-secondary">
                   /{product.priceUnit === 'kg' ? 'kg' : 'pc'}
                 </span>
               )}
             </p>
+            {isFoodBeverageProduct(product) && (
+              <div className="flex flex-wrap gap-1 mt-1">
+                {product.spiciness && product.spiciness !== 'mild' && (
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-100 dark:border-red-800">
+                    {product.spiciness === 'medium' && '🌶️ Med'}
+                    {product.spiciness === 'hot' && '🔥 Hot'}
+                    {product.spiciness === 'extra-hot' && '🤯 X-Hot'}
+                  </span>
+                )}
+                {product.temperature && (
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-100 dark:border-blue-800">
+                    {product.temperature === 'hot' && '☕ Hot'}
+                    {product.temperature === 'cold' && '❄️ Cold'}
+                  </span>
+                )}
+                {product.preparationTime && (
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
+                    ⏱️ {product.preparationTime}m
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>

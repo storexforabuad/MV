@@ -38,6 +38,7 @@ const AddProductComposer = dynamic(() => import('../../../components/admin/AddPr
 const AddVehicleComposer = dynamic(() => import('../../../components/admin/AddVehicleComposer'), { ssr: false });
 const AddLivestockComposer = dynamic(() => import('../../../components/admin/AddLivestockComposer'), { ssr: false });
 const AddFashionComposer = dynamic(() => import('../../../components/admin/AddFashionComposer'), { ssr: false });
+const AddMenuComposer = dynamic(() => import('../../../components/admin/AddMenuComposer'), { ssr: false });
 const ManageProductsModal = dynamic(() => import('../../../components/admin/ManageProductsModal'), { ssr: false });
 const ManageCategoriesModal = dynamic(() => import('../../../components/admin/ManageCategoriesModal'), { ssr: false });
 const AdminOrdersModal = dynamic(() => import('../../../components/admin/modals/AdminOrdersModal').then(mod => mod.AdminOrdersModal), { ssr: false });
@@ -334,7 +335,25 @@ export default function AdminStorePageClient({
 
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0 transition-colors">
-      {!isModalOpen && <AdminHeader onLogout={async () => { }} isRefreshing={false} />}
+      {!isModalOpen && (
+        <AdminHeader
+          onLogout={async () => { }}
+          isRefreshing={false}
+          storeMeta={storeMeta}
+          onToggleStoreStatus={async (isOpen: boolean) => {
+            if (!storeMeta) return;
+            try {
+              const { updateStore } = await import('../../../lib/db');
+              await updateStore(storeId, { isOpen });
+              setStoreMeta({ ...storeMeta, isOpen });
+              const { toast } = await import('react-hot-toast');
+              toast.success(isOpen ? 'Store is now OPEN' : 'Store is now CLOSED');
+            } catch (error) {
+              console.error("Failed to update store status:", error);
+            }
+          }}
+        />
+      )}
 
       {activeSection !== 'preview' ? (
         <main className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">
@@ -411,6 +430,15 @@ export default function AdminStorePageClient({
         />
       ) : storeMeta?.storeType === 'fashion' ? (
         <AddFashionComposer
+          isOpen={isComposerOpen}
+          onClose={() => setIsComposerOpen(false)}
+          storeId={storeId}
+          categories={categories}
+          onProductAdded={() => fetchData()}
+          onAddCategory={handleAddCategory}
+        />
+      ) : storeMeta?.storeType === 'restaurant' ? (
+        <AddMenuComposer
           isOpen={isComposerOpen}
           onClose={() => setIsComposerOpen(false)}
           storeId={storeId}

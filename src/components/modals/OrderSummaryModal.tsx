@@ -13,6 +13,14 @@ import { useOrders } from '@/hooks/useOrders';
 import toast from 'react-hot-toast';
 import { useParams } from 'next/navigation';
 import { getCustomerDetails } from '@/app/actions/customerActions';
+import { isFoodBeverageProduct } from '@/utils/productHelpers';
+
+const SPICINESS_LEVELS = [
+  { value: 'mild', label: '😌 Mild', color: 'bg-green-100 text-green-800 border-green-200' },
+  { value: 'medium', label: '🌶️ Medium', color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
+  { value: 'hot', label: '🔥 Hot', color: 'bg-orange-100 text-orange-800 border-orange-200' },
+  { value: 'extra-hot', label: '🤯 Extra Hot', color: 'bg-red-100 text-red-800 border-red-200' },
+];
 
 interface OrderSummaryModalProps {
   isOpen: boolean;
@@ -29,6 +37,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const [deliveryMethod, setDeliveryMethod] = useState('home');
   const [customer, setCustomer] = useState<Customer | null>(initialCustomer);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [selectedSpiciness, setSelectedSpiciness] = useState('medium');
+  const [specialInstructions, setSpecialInstructions] = useState('');
 
   const routeParams = useParams();
   const storeId = typeof routeParams?.storeId === 'string' ? routeParams.storeId : Array.isArray(routeParams?.storeId) ? routeParams.storeId[0] : undefined;
@@ -59,7 +69,14 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
       const storeMetaWithId = { ...storeMeta, id: storeId };
       const referrerId = localStorage.getItem('referrerId');
 
-      const productToOrder = { ...product, quantity, selectedSize, selectedColor };
+      const productToOrder = {
+        ...product,
+        quantity,
+        selectedSize,
+        selectedColor,
+        selectedSpiciness: isFoodBeverageProduct(product) ? selectedSpiciness : undefined,
+        specialInstructions: isFoodBeverageProduct(product) ? specialInstructions : undefined
+      };
       await addOrder([productToOrder], storeMetaWithId, customer, referrerId, false, deliveryMethod as 'home' | 'pickup');
 
       toast.success('Order placed! Redirecting to WhatsApp...');
@@ -72,6 +89,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
         `🔢 *Quantity:* ${quantity} ${product.productType === 'livestock' ? ((product as any).priceUnit === 'kg' ? 'kg' : 'pcs') : ''}\n` +
         (selectedColor ? `🎨 *Color:* ${selectedColor}\n` : '') + // Add Color to WhatsApp message
         (selectedSize ? `📏 *Size:* ${selectedSize}\n` : '') + // Add Size to WhatsApp message
+        (isFoodBeverageProduct(product) ? `🌶️ *Spiciness:* ${SPICINESS_LEVELS.find(s => s.value === selectedSpiciness)?.label}\n` : '') +
+        (isFoodBeverageProduct(product) && specialInstructions ? `📝 *Note:* ${specialInstructions}\n` : '') +
         `💰 *Price:* ${formatPrice(product.price)}\n` +
         `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n` +
         `${deliveryMethod === 'home' && customer.deliveryAddress ? `📍 *To:* ${customer.deliveryAddress.street}\n` : ''}` +
@@ -147,6 +166,48 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                     </div>
                   </div>
 
+                  {/* Food Options */}
+                  {isFoodBeverageProduct(product) && (
+                    <div className="mt-6 space-y-4">
+                      <div>
+                        <label className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-2 block">
+                          Spiciness Level
+                        </label>
+                        <div className="grid grid-cols-4 gap-2">
+                          {SPICINESS_LEVELS.map((level) => (
+                            <button
+                              key={level.value}
+                              onClick={() => setSelectedSpiciness(level.value)}
+                              className={`flex flex-col items-center justify-center p-2 rounded-lg border transition-all ${selectedSpiciness === level.value
+                                ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20 ring-1 ring-orange-500'
+                                : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
+                                }`}
+                            >
+                              <span className="text-xl mb-1">{level.label.split(' ')[0]}</span>
+                              <span className="text-[10px] font-medium text-center leading-tight dark:text-gray-300">
+                                {level.label.split(' ').slice(1).join(' ')}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div>
+                        <label htmlFor="special-instructions" className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-2 block">
+                          Special Instructions
+                        </label>
+                        <textarea
+                          id="special-instructions"
+                          rows={2}
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm"
+                          placeholder="E.g. No onions, extra sauce..."
+                          value={specialInstructions}
+                          onChange={(e) => setSpecialInstructions(e.target.value)}
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   {/* Delivery Method */}
                   <div className="mt-6">
                     <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200">Delivery Method</h4>
@@ -190,9 +251,11 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                 {/* Action Buttons */}
                 <div className="mt-5 sm:mt-6 grid grid-cols-2 gap-3">
                   <button type="button" className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600 px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm" onClick={onClose} disabled={isPlacingOrder}>Cancel</button>
-                  <button type="button" className="inline-flex w-full justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 sm:text-sm disabled:opacity-50" onClick={handlePlaceOrder} disabled={isPlacingOrder}>
+                  <button type="button" className="inline-flex w-full justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed" onClick={handlePlaceOrder} disabled={isPlacingOrder || (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false)}>
                     {isPlacingOrder ? (
                       <><Loader2 className="mr-2 h-5 w-5 animate-spin" />Ordering..</>
+                    ) : (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false) ? (
+                      'Store Closed'
                     ) : (
                       'Place Order'
                     )}

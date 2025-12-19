@@ -28,6 +28,7 @@ export interface Order {
     storeMeta: StoreMeta;
     orderDate: string; // ISO string
     orderStatus: 'processing' | 'partially-ready' | 'ready' | 'shipped';
+    orderNotes?: string;
 }
 
 // Type for the detailed order object returned to the ADMIN client.
@@ -61,6 +62,7 @@ interface FirestoreOrderData {
         deliveryAddress: DeliveryAddress;
     };
     referralApplied?: boolean;
+    orderNotes?: string;
 }
 
 /**
@@ -74,10 +76,16 @@ export const addOrderToFirestore = async (
     referralCode: string | null,
     bonusApplied: boolean = false,
     deliveryMethod: 'home' | 'pickup' = 'home',
+    orderNotes?: string
 ): Promise<Order> => {
     try {
         const storeId = storeMeta.id;
         if (!storeId) throw new Error("Store ID is missing.");
+
+        // Check if store is open (for restaurants)
+        if (storeMeta.storeType === 'restaurant' && storeMeta.isOpen === false) {
+            throw new Error("This store is currently closed.");
+        }
 
         const customerRef = doc(db, 'customers', customerId);
         const customerSnap = await getDoc(customerRef);
@@ -143,6 +151,7 @@ export const addOrderToFirestore = async (
                 deliveryAddress: customerData.deliveryAddress,
             },
             ...(referralWasApplied && { referralApplied: true }),
+            ...(orderNotes && { orderNotes }),
         };
 
         const customerOrderRef = doc(db, 'customers', customerId, 'orders', newOrderId);
@@ -345,6 +354,7 @@ const transformOrderData = (doc: any): StoreOrder => {
         orderStatus: data.orderStatus || 'processing',
         customerInfo: customerInfo,
         referralApplied: data.referralApplied || false,
+        orderNotes: data.orderNotes,
     };
 };
 

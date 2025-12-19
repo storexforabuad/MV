@@ -105,6 +105,17 @@ export async function createStore(store: { id: string; name: string; whatsapp?: 
   }
 }
 
+// Update store metadata
+export async function updateStore(storeId: string, data: Partial<StoreMeta>): Promise<void> {
+  try {
+    const storeRef = doc(db, 'stores', storeId);
+    await updateDoc(storeRef, data);
+  } catch (error) {
+    console.error('Error updating store:', error);
+    throw error;
+  }
+}
+
 // Get all stores
 export async function getStores(): Promise<StoreMeta[]> {
   try {

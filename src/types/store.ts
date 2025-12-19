@@ -34,7 +34,11 @@ export interface StoreMeta {
   country?: string;
 
   // Store Vertical
-  storeType?: 'general' | 'automotive' | 'livestock' | 'fashion';
+  storeType?: 'general' | 'automotive' | 'livestock' | 'fashion' | 'restaurant';
+
+  // Restaurant specific
+  isOpen?: boolean;
+  openingHours?: string;
 }
 
 export interface ProductCategory {

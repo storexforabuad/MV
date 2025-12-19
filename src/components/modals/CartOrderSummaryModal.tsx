@@ -25,6 +25,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
   const [deliveryMethod, setDeliveryMethod] = useState('home');
   const [customer, setCustomer] = useState<Customer | null>(initialCustomer);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [orderNotes, setOrderNotes] = useState('');
   const storeId = cartItems[0]?.storeId;
   const { addOrder } = useOrders(customer?.id || null, storeId || "");
   const { dispatch } = useCart();
@@ -55,7 +56,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
       const storeMetaWithId = { ...storeMeta, id: storeId };
       const referrerId = localStorage.getItem('referrerId');
 
-      await addOrder(cartItems, storeMetaWithId, customer, referrerId, false, deliveryMethod as 'home' | 'pickup');
+      await addOrder(cartItems, storeMetaWithId, customer, referrerId, false, deliveryMethod as 'home' | 'pickup', orderNotes);
 
       toast.success('Order placed! Redirecting to WhatsApp...');
 
@@ -64,13 +65,13 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
         const colorText = item.selectedColor ? `🎨 *Color:* ${item.selectedColor}\n` : '';
         const sizeText = item.selectedSize ? `📏 *Size:* ${item.selectedSize}\n` : '';
         const unitText = item.productType === 'livestock' ? (item as any).priceUnit === 'kg' ? 'kg' : 'pcs' : '';
-        
+
         return `*${item.name}*\n` +
-               `🔗 ${productUrl}\n` +
-               colorText +
-               sizeText +
-               `🔢 *Quantity:* ${item.quantity} ${unitText}\n` +
-               `*Subtotal:* ${formatPrice(item.price * item.quantity)}`;
+          `🔗 ${productUrl}\n` +
+          colorText +
+          sizeText +
+          `🔢 *Quantity:* ${item.quantity} ${unitText}\n` +
+          `*Subtotal:* ${formatPrice(item.price * item.quantity)}`;
       }).join('\n\n');
 
       const message = `🛍️ *New Cart Order*\n\n` +
@@ -79,6 +80,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
         `--------------------\n` +
         `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n` +
         `${deliveryMethod === 'home' && customer.deliveryAddress ? `📍 *Address:* ${customer.deliveryAddress.street}\n` : ''}` +
+        (orderNotes ? `📝 *Special Instructions:* ${orderNotes}\n` : '') +
         `*Grand Total (excl. delivery):* ${formatPrice(total)}\n\n` +
         `Please confirm availability and provide payment details.\n\n` +
         `Thank you! 🙏`;
@@ -141,6 +143,21 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                     ))}
                   </div>
 
+                  {/* Order Notes */}
+                  <div className="mt-6">
+                    <label htmlFor="order-notes" className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-2 block">
+                      Special Instructions (Optional)
+                    </label>
+                    <textarea
+                      id="order-notes"
+                      rows={2}
+                      className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm"
+                      placeholder="Any special requests for this order?"
+                      value={orderNotes}
+                      onChange={(e) => setOrderNotes(e.target.value)}
+                    />
+                  </div>
+
                   {/* Delivery Method & Payment Details */}
                   <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
                     <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200">Delivery Method</h4>
@@ -171,7 +188,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
 
                 <div className="mt-5 sm:mt-6 grid grid-cols-2 gap-3">
                   <button type="button" className="w-full rounded-md border border-gray-300 bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600 px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" onClick={onClose}>Cancel</button>
-                  <button type="button" className="w-full rounded-md border border-transparent bg-green-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:bg-green-400 disabled:cursor-not-allowed" onClick={handlePlaceOrder} disabled={isPlacingOrder || !storeId}>
+                  <button type="button" className="w-full rounded-md border border-transparent bg-green-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:bg-green-400 disabled:cursor-not-allowed" onClick={handlePlaceOrder} disabled={isPlacingOrder || !storeId || (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false)}>
                     {isPlacingOrder ? (
                       <>
                         <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -180,6 +197,8 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                         </svg>
                         Ordering..
                       </>
+                    ) : (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false) ? (
+                      'Store Closed'
                     ) : (
                       'Place Order'
                     )}

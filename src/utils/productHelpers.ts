@@ -25,3 +25,7 @@ export function isFashionProduct(product: Product): product is FashionProduct {
 export function isLivestockProduct(product: Product): product is LivestockProduct {
     return product.productType === 'livestock';
 }
+
+export function isFoodBeverageProduct(product: Product): product is import('../types/product').FoodBeverageProduct {
+    return product.productType === 'food';
+}
