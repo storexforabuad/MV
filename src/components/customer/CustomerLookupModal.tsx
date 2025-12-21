@@ -7,7 +7,7 @@ import { X, Loader, CheckCircle, MapPin, Search } from "lucide-react";
 import { findCustomerByPhone, findOrCreateCustomer } from "@/app/actions/customerActions";
 import { Customer, DeliveryAddress } from "@/types/customer";
 import toast from "react-hot-toast";
-import Confetti from 'react-confetti';
+import Confetti from '@/components/Confetti';
 import { useCustomer } from "@/context/CustomerContext";
 import { geography } from "@/config/geography";
 
@@ -226,13 +226,7 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
                 ) : (
                     <h2 className="text-3xl font-bold mt-4 text-slate-800 dark:text-white">You&apos;re all set!</h2>
                 )}
-                <Confetti
-                    width={400}
-                    height={300}
-                    recycle={false}
-                    numberOfPieces={200}
-                    gravity={0.1}
-                />
+                <Confetti active duration={700} particleCount={200} />
             </div>
         )
       default:
