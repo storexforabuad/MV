@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState, useRef } from 'react';
+import { useVendor } from '@/context/VendorContext';
 import { Heart, Moon, Sun, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { useCart } from '@/lib/cartContext';
 import { useTheme } from '@/lib/themeContext';
@@ -50,6 +51,8 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
   const singleClickTimerRef = useRef<number | null>(null);
   const TAP_TIMEOUT = 600; // ms
 
+  const { promptLogin } = useVendor();
+
   const handleTitleTap = () => {
     tapCountRef.current += 1;
 
@@ -67,12 +70,12 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
         singleClickTimerRef.current = null;
       }
       tapCountRef.current = 0;
-      // Navigate to admin if we have a storeId
+      // Open vendor lookup modal (client-side) if feature enabled
       if (storeId) {
-        console.log('[Navbar] Triple-tap detected, navigating to admin for', storeId);
-        router.push(`/admin/${encodeURIComponent(storeId)}`);
+        console.log('[Navbar] Triple-tap detected, opening vendor lookup for', storeId);
+        promptLogin(storeId);
       } else {
-        console.warn('[Navbar] Triple-tap: no storeId available');
+        console.warn('[Navbar] Triple-tap: no storeId available to lookup');
       }
     }
   };

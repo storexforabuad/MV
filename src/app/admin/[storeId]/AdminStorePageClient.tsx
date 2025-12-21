@@ -1,6 +1,9 @@
 'use client';
 
 import { useEffect, useState, useCallback, Suspense } from 'react';
+import { useRouter } from 'next/navigation';
+import { useVendor } from '@/context/VendorContext';
+import { verifyVendorByPhone } from '@/app/actions/vendorActions';
 import { useSearchParams } from 'next/navigation';
 import {
   getProducts,
@@ -152,6 +155,8 @@ export default function AdminStorePageClient({
   const [highlightOrderId, setHighlightOrderId] = useState<string | null>(null);
 
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const { vendor, setVendor } = useVendor();
   const { orders, refreshOrders } = useStoreOrders(storeId, initialOrders);
 
   useEffect(() => {
@@ -231,6 +236,28 @@ export default function AdminStorePageClient({
   }, [storeId, initialStoreMeta]);
 
   useEffect(() => {
+    // Validate vendor from localStorage/context on admin page load
+    (async () => {
+      if (!storeId) return;
+      // If no vendor present, redirect back
+      if (!vendor) {
+        router.push(`/${storeId}`);
+        return;
+      }
+      try {
+        const res = await verifyVendorByPhone(storeId, vendor.phone);
+        if (!res.success) {
+          // clear and redirect
+          setVendor(null);
+          router.push(`/${storeId}`);
+        }
+      } catch (err) {
+        console.error('Error validating vendor on admin load', err);
+        setVendor(null);
+        router.push(`/${storeId}`);
+      }
+    })();
+
     if (searchParams && searchParams.get('open') === 'posts') {
       setIsPostsModalOpen(true);
     }
