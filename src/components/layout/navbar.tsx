@@ -1,20 +1,20 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Heart, Moon, Sun, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { useCart } from '@/lib/cartContext';
 import { useTheme } from '@/lib/themeContext';
 import { usePathname, useRouter } from 'next/navigation';
 
 interface NavbarProps {
+  storeId?: string;
   storeName?: string;
   scrollDirection?: 'up' | 'down';
   backButtonHref?: string;
-  onTitleClick?: () => void;
 }
 
-export default function Navbar({ storeName, scrollDirection = 'up', backButtonHref, onTitleClick }: NavbarProps) {
+export default function Navbar({ storeId, storeName, scrollDirection = 'up', backButtonHref }: NavbarProps) {
   const { state } = useCart();
   const { theme, toggleTheme } = useTheme();
   const [isBouncing, setIsBouncing] = useState(false);
@@ -42,6 +42,38 @@ export default function Navbar({ storeName, scrollDirection = 'up', backButtonHr
   const handleBack = () => {
     if (showBackButton) {
       router.back();
+    }
+  };
+
+  // Triple-tap detection for vendor shortcut to admin
+  const tapCountRef = useRef(0);
+  const singleClickTimerRef = useRef<number | null>(null);
+  const TAP_TIMEOUT = 600; // ms
+
+  const handleTitleTap = () => {
+    tapCountRef.current += 1;
+
+    if (tapCountRef.current === 1) {
+      singleClickTimerRef.current = window.setTimeout(() => {
+        // single tap: intentionally do nothing (about modal removed)
+        tapCountRef.current = 0;
+        singleClickTimerRef.current = null;
+      }, TAP_TIMEOUT);
+    }
+
+    if (tapCountRef.current === 3) {
+      if (singleClickTimerRef.current) {
+        clearTimeout(singleClickTimerRef.current);
+        singleClickTimerRef.current = null;
+      }
+      tapCountRef.current = 0;
+      // Navigate to admin if we have a storeId
+      if (storeId) {
+        console.log('[Navbar] Triple-tap detected, navigating to admin for', storeId);
+        router.push(`/admin/${encodeURIComponent(storeId)}`);
+      } else {
+        console.warn('[Navbar] Triple-tap: no storeId available');
+      }
     }
   };
 
@@ -78,18 +110,12 @@ export default function Navbar({ storeName, scrollDirection = 'up', backButtonHr
             ) : storeName ? (
               <div className="flex items-center gap-2">
                 <ShoppingBag className="h-8 w-8 text-text-primary" />
-                {onTitleClick ? (
-                  <button
-                    onClick={onTitleClick}
-                    className="text-xl font-semibold flex items-center gap-2 premium-title-gradient hover:opacity-80 transition-opacity text-left"
-                  >
-                    {storeName}
-                  </button>
-                ) : (
-                  <span className="text-xl font-semibold flex items-center gap-2 premium-title-gradient">
-                    {storeName}
-                  </span>
-                )}
+                <button
+                  onClick={handleTitleTap}
+                  className="text-xl font-semibold flex items-center gap-2 premium-title-gradient hover:opacity-80 transition-opacity text-left"
+                >
+                  {storeName}
+                </button>
               </div>
             ) : (
               <Link href="/" className="flex items-center gap-2">

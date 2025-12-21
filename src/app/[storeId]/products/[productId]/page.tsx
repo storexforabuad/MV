@@ -213,6 +213,7 @@ export default function ProductDetail() {
   return (
     <>
       <Navbar
+        storeId={storeId}
         storeName={storeMeta?.name || storeId || 'Store'}
         backButtonHref={`/${storeId}`}
       />

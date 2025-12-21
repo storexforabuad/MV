@@ -369,9 +369,9 @@ export default function StorefrontPageClient({
   return (
     <div className="min-h-screen bg-background overscroll-none">
       <Navbar
+        storeId={storeId}
         storeName={storeName}
         scrollDirection={scrollDirection}
-        onTitleClick={() => setAboutOpen(true)}
       />
       <CategoryBar
         onCategorySelect={handleCategorySelect}
