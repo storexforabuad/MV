@@ -135,7 +135,34 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted }: O
                   </div>
                   <div className="flex-1">
                     <p className="font-semibold text-text-primary text-sm">{product.name}</p>
-                    <p className="text-xs text-text-secondary">Qty: {product.productType === 'general' ? product.quantity : 1}</p>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {((product as any).selectedSize) && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                          Size: {(product as any).selectedSize}
+                        </span>
+                      )}
+                      {((product as any).selectedSpiciness) && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-100 dark:border-red-800">
+                          {(product as any).selectedSpiciness === 'mild' && '😌 Mild'}
+                          {(product as any).selectedSpiciness === 'medium' && '🌶️ Medium'}
+                          {(product as any).selectedSpiciness === 'hot' && '🔥 Hot'}
+                          {(product as any).selectedSpiciness === 'extra-hot' && '🤯 Extra Hot'}
+                        </span>
+                      )}
+                      {((product as any).temperature) && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-100 dark:border-blue-800">
+                          {(product as any).temperature === 'hot' && '☕ Hot'}
+                          {(product as any).temperature === 'cold' && '❄️ Cold'}
+                          {(product as any).temperature === 'room-temp' && '🌡️ Room'}
+                        </span>
+                      )}
+                    </div>
+                    {((product as any).specialInstructions) && (
+                      <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-800 rounded text-xs text-yellow-800 dark:text-yellow-200">
+                        <span className="font-semibold">Note:</span> {(product as any).specialInstructions}
+                      </div>
+                    )}
+                    <p className="text-xs text-text-secondary mt-1">Qty: {product.productType === 'general' ? product.quantity : 1}</p>
                   </div>
                   <p className="font-semibold text-text-primary text-sm">{formatPrice(product.price * (product.productType === 'general' ? product.quantity : 1))}</p>
                 </div>
