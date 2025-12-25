@@ -114,9 +114,12 @@ export default function VendorLookupModal({ isOpen, onClose, storeId, onSuccess 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
       <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md p-6 relative">
-        <button onClick={handleClose} className="absolute top-3 right-3 p-2 rounded-full text-gray-500 hover:text-gray-800">
-          <X />
-        </button>
+        {step !== 'success' && (
+          <button onClick={handleClose} className="absolute top-3 right-3 p-2 rounded-full text-gray-500 hover:text-gray-800">
+            <X />
+          </button>
+        )}
+        {showConfetti && <Confetti active duration={DEFAULT_CONFETTI_DURATION} particleCount={60} />}
         {step === 'input' && (
           <div>
             <h3 className="text-2xl font-bold mb-2">Mama’s Secret Recipe</h3>

@@ -28,6 +28,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { Product } from '../types/product';
 import { StoreMeta } from '../types/store';
 import { ensureProductType, isGeneralProduct } from '../utils/productHelpers';
+import { stripUndefined } from '../utils/sanitize';
 
 // Re-export order actions from the new location
 export {
@@ -202,8 +203,9 @@ export async function addProduct(storeId: string, product: Omit<Product, 'id'>):
       productType: product.productType || 'general'
     };
 
+    const sanitized = stripUndefined(productWithType);
     const docRef = await addDoc(productsRef, {
-      ...productWithType,
+      ...sanitized,
       createdAt: serverTimestamp(),
       views: 0
     });
