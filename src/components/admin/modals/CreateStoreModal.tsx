@@ -77,6 +77,9 @@ export default function CreateStoreModal({
     country: "",
     state: "",
     storeType: "general",
+    bankAccountName: "",
+    bankAccountNumber: "",
+    bankName: "",
   });
   const [categories, setCategories] = useState<string[]>([]);
   const [customCategory, setCustomCategory] = useState("");
@@ -238,6 +241,12 @@ export default function CreateStoreModal({
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     This determines the product fields and storefront design.
                   </p>
+                </div>
+                <div className="mt-4 space-y-2">
+                  <h4 className="text-sm font-medium">Payout Account (optional)</h4>
+                  <input name="bankAccountName" value={(formData as any).bankAccountName || ''} onChange={handleInputChange} placeholder="Account Name" className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" />
+                  <input name="bankAccountNumber" value={(formData as any).bankAccountNumber || ''} onChange={handleInputChange} placeholder="Account Number" className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" />
+                  <input name="bankName" value={(formData as any).bankName || ''} onChange={handleInputChange} placeholder="Bank Name" className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" />
                 </div>
                 <div className="flex items-center gap-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
                   <label htmlFor="hasPhysicalShop" className="text-gray-700 dark:text-gray-300">Do you have a physical shop?</label>

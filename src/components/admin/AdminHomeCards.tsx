@@ -1,5 +1,5 @@
 'use client';
-import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays, CheckCircle2 } from 'lucide-react';
+import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays, CheckCircle2, Briefcase } from 'lucide-react';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { useSpotlightContext } from '@/context/SpotlightContext';
@@ -11,6 +11,7 @@ import StoreLinkModal from './modals/StoreLinkModal';
 import { AmbassadorHubModal } from './modals/AmbassadorHubModal';
 
 import TipsModal from './modals/TipsModal';
+import AccountModal from './modals/AccountModal';
 import SpotlightTooltip from '../shared/SpotlightTooltip';
 import PostsComposerModal from './modals/PostsComposerModal';
 import SocialPostsModal from './modals/SocialPostsModal';
@@ -28,7 +29,7 @@ import { CustomersListModal } from './CustomersListModal';
 import { Product } from '../../types/product';
 import { Category } from '../../types/category';
 import { WholesaleData } from '../../lib/db';
-import { getFirestore, collection, onSnapshot, query, where, Timestamp } from 'firebase/firestore';
+import { getFirestore, collection, onSnapshot, query, where, Timestamp, doc, getDoc } from 'firebase/firestore';
 import { app as firebaseApp } from '../../lib/firebase';
 
 interface AdminHomeCardsProps {
@@ -183,6 +184,15 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     glowClass: 'dark:shadow-orange-500/30 shadow-orange-500/50',
   },
   {
+    label: 'Account',
+    subtitle: 'Details',
+    icon: Briefcase,
+    gradient: 'bg-gradient-to-br from-indigo-500 to-purple-600',
+    text: 'text-white',
+    component: AccountModal,
+    glowClass: 'dark:shadow-indigo-500/30 shadow-indigo-500/50',
+  },
+  {
     label: 'Manage Products',
     valueKey: 'totalProducts',
     icon: Archive,
@@ -229,6 +239,9 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [isAdvertisingModalOpen, setIsAdvertisingModalOpen] = useState(false);
   const [isEventsModalOpen, setIsEventsModalOpen] = useState(false);
   const [showPostsNotification, setShowPostsNotification] = useState(false);
+  const [bankAccountName, setBankAccountName] = useState<string | null>(null);
+  const [bankAccountNumber, setBankAccountNumber] = useState<string | null>(null);
+  const [bankName, setBankName] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const { setIsModalOpen, onRefresh, uiVisible, onAnimationComplete, onOrdersCardClick, onProductsCardClick, storeId, onAmbassadorCardClick } = props;
 
@@ -256,6 +269,28 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     });
 
     return () => unsubscribe();
+  }, [storeId]);
+
+  // Fetch store bank details for Account card preview
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      if (!storeId) return;
+      try {
+        const db = getFirestore(firebaseApp);
+        const storeRef = doc(db, 'stores', storeId);
+        const snap = await getDoc(storeRef);
+        if (mounted && snap.exists()) {
+          const data = snap.data() as any;
+          setBankAccountName(data.bankAccountName || null);
+          setBankAccountNumber(data.bankAccountNumber || null);
+          setBankName(data.bankName || null);
+        }
+      } catch (err) {
+        console.error('Failed to load store bank details', err);
+      }
+    })();
+    return () => { mounted = false; };
   }, [storeId]);
 
   const ordersIndex = cardData.findIndex(card => card.label === 'Orders');
@@ -531,6 +566,29 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
               </motion.div>
             );
           } else {
+            // Special rendering for Account card to show bank preview + edit/add CTA
+            if (card.label === 'Account') {
+              return (
+                <motion.div key={`account-${idx}`} variants={itemVariants}>
+                  <button
+                    className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`}
+                    tabIndex={0}
+                    type="button"
+                    onClick={() => handleOpenModal(idx, card)}
+                  >
+                    <span className="card-blob" />
+                    <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white bg-opacity-20 mb-2 shadow">
+                      <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 drop-shadow" />
+                    </div>
+                    <div className="flex flex-col items-center min-w-0 z-10 w-full">
+                      <div className="text-lg sm:text-xl md:text-2xl font-bold drop-shadow">Account</div>
+                      <div className="text-xs sm:text-sm font-medium opacity-90 text-center leading-tight mt-1">Details</div>
+                    </div>
+                  </button>
+                </motion.div>
+              );
+            }
+
             return (
               <motion.div key={`${card.label}-${idx}`} variants={itemVariants}>
                 <button className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card)}>

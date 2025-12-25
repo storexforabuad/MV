@@ -156,7 +156,7 @@ export default function AdminStorePageClient({
 
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { vendor, setVendor } = useVendor();
+  const { vendor, setVendor, loading: vendorLoading } = useVendor();
   const { orders, refreshOrders } = useStoreOrders(storeId, initialOrders);
 
   useEffect(() => {
@@ -237,13 +237,17 @@ export default function AdminStorePageClient({
 
   useEffect(() => {
     // Validate vendor from localStorage/context on admin page load
+    // Wait for vendor initial loading to complete to avoid race where vendor is still being read from localStorage
     (async () => {
       if (!storeId) return;
-      // If no vendor present, redirect back
+      if (vendorLoading) return; // still initializing vendor from storage
+
+      // If no vendor present, redirect back to storefront
       if (!vendor) {
         router.push(`/${storeId}`);
         return;
       }
+
       try {
         const res = await verifyVendorByPhone(storeId, vendor.phone);
         if (!res.success) {
@@ -271,7 +275,7 @@ export default function AdminStorePageClient({
       }
       setIsOrdersModalOpen(true);
     }
-  }, [searchParams]);
+  }, [searchParams, vendor, vendorLoading]);
 
   const handleUpdateProduct = async (productId: string, updatedData: Partial<Product>) => {
     try {

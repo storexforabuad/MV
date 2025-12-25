@@ -39,6 +39,11 @@ export interface StoreMeta {
   // Restaurant specific
   isOpen?: boolean;
   openingHours?: string;
+  
+  // Payout account details
+  bankAccountName?: string;
+  bankAccountNumber?: string;
+  bankName?: string;
 }
 
 export interface ProductCategory {

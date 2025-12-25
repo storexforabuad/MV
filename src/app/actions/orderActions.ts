@@ -489,6 +489,12 @@ export const getRevenueAnalytics = async (storeId: string) => {
 
     } catch (error) {
         console.error("Error fetching revenue analytics:", error);
-        throw new Error("Failed to fetch revenue analytics.");
+        // Return safe defaults instead of throwing to avoid crashing server actions/pages
+        return {
+            lifetimeRevenue: 0,
+            lifetimeBonus: 0,
+            historicalData: [] as { date: string; totalRevenue: number; totalBonus?: number }[],
+            topEarningProducts: [] as { id: string; name: string; totalRevenue: number }[],
+        };
     }
 };
