@@ -47,36 +47,82 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
   };
 
   // Triple-tap detection for vendor shortcut to admin
-  const tapCountRef = useRef(0);
-  const singleClickTimerRef = useRef<number | null>(null);
-  const TAP_TIMEOUT = 600; // ms
-
   const { promptLogin } = useVendor();
 
-  const handleTitleTap = () => {
-    tapCountRef.current += 1;
+  // Visual tap state for color feedback
+  const [tapCount, setTapCount] = useState(0); // 0..3
+  const idleResetRef = useRef<number | null>(null);
+  const lastTapTsRef = useRef<number>(0);
 
-    if (tapCountRef.current === 1) {
-      singleClickTimerRef.current = window.setTimeout(() => {
-        // single tap: intentionally do nothing (about modal removed)
-        tapCountRef.current = 0;
-        singleClickTimerRef.current = null;
-      }, TAP_TIMEOUT);
+  const TAP_MIN_INTERVAL = 40; // ms, ignore faster taps
+  const TAP_IDLE_TIMEOUT = 1500; // ms to reset
+  const SUCCESS_HOLD = 250; // ms to hold green before triggering
+  const COLOR_TRANSITION_MS = 180; // ms
+
+  const [reducedMotion, setReducedMotion] = useState(false);
+  useEffect(() => {
+    if (typeof window !== 'undefined' && window.matchMedia) {
+      try {
+        setReducedMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+      } catch (e) {
+        setReducedMotion(false);
+      }
     }
+  }, []);
 
-    if (tapCountRef.current === 3) {
-      if (singleClickTimerRef.current) {
-        clearTimeout(singleClickTimerRef.current);
-        singleClickTimerRef.current = null;
+  const resetTaps = () => {
+    setTapCount(0);
+    if (idleResetRef.current) {
+      clearTimeout(idleResetRef.current);
+      idleResetRef.current = null;
+    }
+  };
+
+  const handleTitleTap = () => {
+    const now = Date.now();
+    if (now - lastTapTsRef.current < TAP_MIN_INTERVAL) return;
+    lastTapTsRef.current = now;
+
+    setTapCount((prev) => {
+      const next = Math.min(prev + 1, 3);
+
+      // schedule idle reset
+      if (idleResetRef.current) {
+        clearTimeout(idleResetRef.current);
+        idleResetRef.current = null;
       }
-      tapCountRef.current = 0;
-      // Open vendor lookup modal (client-side) if feature enabled
-      if (storeId) {
-        console.log('[Navbar] Triple-tap detected, opening vendor lookup for', storeId);
-        promptLogin(storeId);
-      } else {
-        console.warn('[Navbar] Triple-tap: no storeId available to lookup');
+      idleResetRef.current = window.setTimeout(() => resetTaps(), TAP_IDLE_TIMEOUT);
+
+      if (next === 3) {
+        // hold briefly on green, then trigger prompt
+        if (idleResetRef.current) {
+          clearTimeout(idleResetRef.current);
+          idleResetRef.current = null;
+        }
+        // stronger haptic on final tap
+        try {
+          if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+            // final tap: longer buzz pattern
+            (navigator as any).vibrate([30, 40, 30]);
+          }
+        } catch (e) {}
+        // keep green visible for SUCCESS_HOLD then trigger
+        setTimeout(() => {
+          if (storeId) promptLogin(storeId);
+          resetTaps();
+        }, reducedMotion ? 100 : SUCCESS_HOLD);
       }
+
+      return next;
+    });
+    // Haptic feedback on supported devices (subtle)
+    try {
+      if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+        // short vibration for tap
+        (navigator as any).vibrate(12);
+      }
+    } catch (e) {
+      // ignore vibration errors
     }
   };
 
@@ -115,10 +161,35 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
                 <ShoppingBag className="h-8 w-8 text-text-primary" />
                 <button
                   onClick={handleTitleTap}
+                  aria-label="Store title"
                   className="text-xl font-semibold flex items-center gap-2 premium-title-gradient hover:opacity-80 transition-opacity text-left"
+                  style={{
+                    // set a CSS variable for a reusable gradient, theme-aware
+                    ['--store-title-gradient' as any]: ((): string => {
+                      const light = theme === 'light';
+                      // default gradient mirrors card-text-gradient stops
+                      if (light) return 'linear-gradient(to right, #000000, #666666)';
+                      return 'linear-gradient(to right, #ffffff, #999999)';
+                    })(),
+                    // only set an explicit text color when tapped for feedback
+                    ...(tapCount > 0
+                      ? (() => {
+                          const light = theme === 'light';
+                          const tapColor = tapCount === 1 ? (light ? '#ef4444' : '#fca5a5') : tapCount === 2 ? (light ? '#d97706' : '#fbbf24') : (light ? '#10b981' : '#34d399');
+                          const glow = tapCount === 1 ? (light ? 'rgba(239,68,68,0.18)' : 'rgba(252,165,165,0.18)') : tapCount === 2 ? (light ? 'rgba(217,119,6,0.16)' : 'rgba(251,191,36,0.16)') : (light ? 'rgba(16,185,129,0.16)' : 'rgba(52,211,153,0.16)');
+                          return {
+                            color: tapColor,
+                            transition: reducedMotion ? 'none' : `color ${COLOR_TRANSITION_MS}ms ease-out, transform ${COLOR_TRANSITION_MS}ms ease-out, text-shadow ${COLOR_TRANSITION_MS}ms ease-out`,
+                            transform: reducedMotion ? 'none' : 'scale(1.03)',
+                            textShadow: `0 8px 20px ${glow}`,
+                          } as any;
+                        })()
+                      : { transition: reducedMotion ? 'none' : `color ${COLOR_TRANSITION_MS}ms ease-out, transform ${COLOR_TRANSITION_MS}ms ease-out, text-shadow ${COLOR_TRANSITION_MS}ms ease-out` }),
+                  }}
                 >
                   {storeName}
                 </button>
+                <span className="sr-only" aria-live="polite">{tapCount > 0 ? `Access activation: ${tapCount} of 3` : ''}</span>
               </div>
             ) : (
               <Link href="/" className="flex items-center gap-2">

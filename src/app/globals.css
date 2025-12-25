@@ -629,28 +629,29 @@ h1, h2, h3 {
 }
 
 .premium-title-gradient {
-  background: linear-gradient(to right, #000000, #666666);
+  /* Use a CSS variable for gradient so components can override at runtime */
+  background: var(--store-title-gradient, linear-gradient(to right, #000000, #666666));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 [data-theme='dark'] .premium-title-gradient {
-  background: linear-gradient(to right, #ffffff, #999999);
+  background: var(--store-title-gradient, linear-gradient(to right, #ffffff, #999999));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 .card-text-gradient {
-  background: linear-gradient(to right, #000000, #666666);
+  background: var(--store-title-gradient, linear-gradient(to right, #000000, #666666));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 [data-theme='dark'] .card-text-gradient {
-  background: linear-gradient(to right, #ffffff, #999999);
+  background: var(--store-title-gradient, linear-gradient(to right, #ffffff, #999999));
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;

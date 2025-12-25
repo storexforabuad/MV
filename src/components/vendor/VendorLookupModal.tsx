@@ -115,7 +115,7 @@ export default function VendorLookupModal({ isOpen, onClose, storeId, onSuccess 
     <div className="fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4">
       <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 20, opacity: 0 }} className="bg-white dark:bg-slate-900 rounded-2xl w-full max-w-md p-6 relative">
         {step !== 'success' && (
-          <button onClick={handleClose} className="absolute top-3 right-3 p-2 rounded-full text-gray-500 hover:text-gray-800">
+          <button onClick={handleClose} className="absolute top-3 right-3 p-2 rounded-full text-gray-500 hover:text-gray-800 dark:text-gray-300 dark:hover:text-gray-100">
             <X />
           </button>
         )}
@@ -123,13 +123,13 @@ export default function VendorLookupModal({ isOpen, onClose, storeId, onSuccess 
         {step === 'input' && (
           <div>
             <h3 className="text-2xl font-bold mb-2">Mama’s Secret Recipe</h3>
-            <p className="text-sm text-gray-500 mb-4">Whisper the special ingredient and the kitchen opens.</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">Whisper the special ingredient and the kitchen opens.</p>
             {attemptState.locked && (
-              <div className="mb-3 text-sm text-red-600">Pot on low — try again in {formatMs(attemptState.retryAfterMs)}.</div>
+              <div className="mb-3 text-sm text-red-600 dark:text-red-400">Pot on low — try again in {formatMs(attemptState.retryAfterMs)}.</div>
             )}
-            <div className="flex items-center bg-gray-100 rounded-xl p-3 mb-4">
-              <Search className="mr-3 text-gray-400" />
-              <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Name the ingredient" className="w-full bg-transparent outline-none" />
+            <div className="flex items-center bg-gray-100 dark:bg-slate-700 rounded-xl p-3 mb-4">
+              <Search className="mr-3 text-gray-400 dark:text-gray-300" />
+              <input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Name the ingredient" className="w-full bg-transparent outline-none text-slate-800 dark:text-slate-200" />
             </div>
             <button onClick={handleSubmit} disabled={isLoading || attemptState.locked} className="w-full bg-slate-800 text-white py-3 rounded-xl">
               {isLoading ? 'Stirring...' : 'Serve it'}
@@ -139,13 +139,13 @@ export default function VendorLookupModal({ isOpen, onClose, storeId, onSuccess 
         {step === 'lookup' && (
           <div className="flex flex-col items-center py-8">
             <Loader className="animate-spin text-indigo-600" size={48} />
-            <p className="mt-4 text-gray-600">Stirring the pot…</p>
+            <p className="mt-4 text-gray-600 dark:text-gray-300">Stirring the pot…</p>
           </div>
         )}
         {step === 'success' && (
           <div className="flex flex-col items-center py-8">
             <CheckCircle className="text-green-500" size={48} />
-            <p className="mt-4 text-gray-600">Smells perfect — come taste the food!</p>
+            <p className="mt-4 text-gray-600 dark:text-gray-300">Smells perfect — come taste the food!</p>
           </div>
         )}
       </motion.div>
