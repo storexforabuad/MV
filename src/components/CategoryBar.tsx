@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { collection, query, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, query, onSnapshot, orderBy, doc, getDoc } from 'firebase/firestore';
 import { db } from '../lib/db';
 import { ProductCategory } from '../types/store';
 
@@ -18,12 +18,27 @@ export default function CategoryBar({ storeId, selectedCategory, onSelectCategor
   const [vendorCategories, setVendorCategories] = useState<ProductCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [storeType, setStoreType] = useState<string | null>(null);
 
   useEffect(() => {
     if (!storeId) {
       setIsLoading(false);
       return;
     }
+
+    // fetch store metadata once to determine if we should show system categories
+    (async () => {
+      try {
+        const storeDoc = await getDoc(doc(db, `stores/${storeId}`));
+        if (storeDoc.exists()) {
+          const data = storeDoc.data() as any;
+          setStoreType(data?.storeType ?? null);
+        }
+      } catch (err) {
+        // non-fatal: if we can't read storeType we'll fall back to showing categories
+        console.error('Error fetching store metadata:', err);
+      }
+    })();
 
     const q = query(collection(db, `stores/${storeId}/categories`), orderBy("name"));
 
@@ -47,8 +62,13 @@ export default function CategoryBar({ storeId, selectedCategory, onSelectCategor
     return () => unsubscribe();
   }, [storeId]);
 
+  // Determine which system categories to show based on store type
+  const effectiveSystemCategories = storeType === 'restaurant'
+    ? SYSTEM_CATEGORIES.filter((c) => c !== 'New Arrivals')
+    : SYSTEM_CATEGORIES;
+
   // Combine system and vendor categories for display
-  const allCategories = [...SYSTEM_CATEGORIES, ...vendorCategories.map(c => c.name)];
+  const allCategories = [...effectiveSystemCategories, ...vendorCategories.map(c => c.name)];
 
   return (
     <div className="sticky top-[calc(var(--navbar-height,64px))] z-30 bg-white/80 dark:bg-black/80 backdrop-blur-sm shadow-sm">

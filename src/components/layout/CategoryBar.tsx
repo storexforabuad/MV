@@ -15,9 +15,10 @@ interface CategoryBarProps {
   categories: Category[];
   onActiveCategoryClick?: () => void;
   scrollDirection?: 'up' | 'down';
+  storeType?: string | null;
 }
 
-export default function CategoryBar({ onCategorySelect, activeCategoryId, categories, onActiveCategoryClick, scrollDirection = 'up' }: CategoryBarProps) {
+export default function CategoryBar({ onCategorySelect, activeCategoryId, categories, onActiveCategoryClick, scrollDirection = 'up', storeType }: CategoryBarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
@@ -123,11 +124,15 @@ export default function CategoryBar({ onCategorySelect, activeCategoryId, catego
     );
   }
 
-  const systemCategories: Category[] = [
+  const systemCategoriesAll: Category[] = [
     { id: 'promo', name: 'Promo' },
     { id: 'popular', name: 'Popular' },
     { id: 'new-arrivals', name: 'New Arrivals' },
   ];
+
+  const systemCategories = storeType === 'restaurant'
+    ? systemCategoriesAll.filter(c => c.name !== 'New Arrivals')
+    : systemCategoriesAll;
 
   const vendorCategories = categories.filter(c => !systemCategories.some(sc => sc.name === c.name));
   return (
