@@ -395,7 +395,7 @@ export default function ProductDetail() {
                           🥗 Vegetarian
                         </span>
                       )}
-                      {product.isAlcoholic && (
+                      {product.isAlcoholic && !(storeMeta?.storeType === 'restaurant' && (product as any).subtype === 'drink') && (
                         <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple-50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400 text-sm font-medium border border-purple-100 dark:border-purple-800">
                           🍷 Contains Alcohol
                         </span>
