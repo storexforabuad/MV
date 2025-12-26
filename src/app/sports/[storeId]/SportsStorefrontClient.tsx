@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import BookingSheet from '@/components/pitch/BookingSheet';
+import PitchCard from '@/components/pitch/PitchCard';
 
 interface Props {
   storeId: string;
@@ -46,19 +47,9 @@ export default function SportsStorefrontClient({ storeId, initialStoreMeta }: Pr
           <div className="p-6 bg-white rounded">No pitches yet. Vendors can add pitches from the admin.</div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {pitches.map((p) => (
-            <div key={p.id} className="p-4 border rounded bg-white">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold">{p.name}</h3>
-                  <p className="text-sm text-gray-600">₦{(p.pricePerSlot || 0).toFixed(0)} / slot</p>
-                </div>
-                <div>
-                  <button className="px-3 py-1 rounded bg-blue-600 text-white" onClick={() => setActivePitch(p)}>Book</button>
-                </div>
-              </div>
-            </div>
+            <PitchCard key={p.id} pitch={p} onBook={(pitch) => setActivePitch(pitch)} />
           ))}
         </div>
 
