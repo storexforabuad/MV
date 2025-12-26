@@ -1,6 +1,7 @@
 'use client';
 import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays, CheckCircle2, Briefcase } from 'lucide-react';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useVendor } from '@/context/VendorContext';
 import { motion, Variants } from 'framer-motion';
 import { useSpotlightContext } from '@/context/SpotlightContext';
 
@@ -14,11 +15,14 @@ import TipsModal from './modals/TipsModal';
 import AccountModal from './modals/AccountModal';
 import SpotlightTooltip from '../shared/SpotlightTooltip';
 import PostsComposerModal from './modals/PostsComposerModal';
+import AddPitchComposer from '../pitch/AddPitchComposer';
+import AdminBookingsModal from './modals/AdminBookingsModal';
 import SocialPostsModal from './modals/SocialPostsModal';
 import { BizconNetworkModal } from './modals/BizconNetworkModal';
 import { DeliveriesHubModal } from './modals/DeliveriesHubModal';
 import RevenueModal from './modals/RevenueModal';
 import CommissionModal from './modals/CommissionModal';
+import PayCommissionModal from './modals/PayCommissionModal';
 import ExpensesModal from './modals/ExpensesModal';
 import { AdvertisingModal } from './modals/AdvertisingModal';
 import { EventsModal } from './modals/EventsModal';
@@ -235,6 +239,9 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [isDeliveriesHubModalOpen, setIsDeliveriesHubModalOpen] = useState(false);
   const [isRevenueModalOpen, setIsRevenueModalOpen] = useState(false);
   const [isCommissionModalOpen, setIsCommissionModalOpen] = useState(false);
+  const [isPayCommissionOpen, setIsPayCommissionOpen] = useState(false);
+  const [isAddPitchOpen, setIsAddPitchOpen] = useState(false);
+  const [isBookingsOpen, setIsBookingsOpen] = useState(false);
   const [isExpensesModalOpen, setIsExpensesModalOpen] = useState(false);
   const [isAdvertisingModalOpen, setIsAdvertisingModalOpen] = useState(false);
   const [isEventsModalOpen, setIsEventsModalOpen] = useState(false);
@@ -244,6 +251,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [bankName, setBankName] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const { setIsModalOpen, onRefresh, uiVisible, onAnimationComplete, onOrdersCardClick, onProductsCardClick, storeId, onAmbassadorCardClick } = props;
+  const { vendor, promptLogin } = useVendor();
 
   useEffect(() => {
     if (!storeId) return;
@@ -440,6 +448,33 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         >
           <RefreshCw className={`mr-2 h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
           {refreshing ? 'Refreshing...' : 'Refresh'}
+        </button>
+        <button
+          onClick={() => {
+            if (!vendor || vendor.storeId !== storeId) return promptLogin(storeId);
+            setIsPayCommissionOpen(true);
+          }}
+          className="ml-2 col-span-2 sm:col-span-3 md:col-span-4 w-full bg-white dark:bg-gray-800 text-gray-800 dark:text-white font-medium py-3 px-4 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200"
+        >
+          {(!vendor || vendor.storeId !== storeId) ? 'Sign in to Pay' : 'Pay Commission'}
+        </button>
+        <button
+          onClick={() => {
+            if (!vendor || vendor.storeId !== storeId) return promptLogin(storeId);
+            setIsAddPitchOpen(true);
+          }}
+          className="ml-2 col-span-2 sm:col-span-3 md:col-span-4 w-full bg-white dark:bg-gray-800 text-gray-800 dark:text-white font-medium py-3 px-4 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200"
+        >
+          {(!vendor || vendor.storeId !== storeId) ? 'Sign in to Add Pitch' : 'Add Pitch'}
+        </button>
+        <button
+          onClick={() => {
+            if (!vendor || vendor.storeId !== storeId) return promptLogin(storeId);
+            setIsBookingsOpen(true);
+          }}
+          className="ml-2 col-span-2 sm:col-span-3 md:col-span-4 w-full bg-white dark:bg-gray-800 text-gray-800 dark:text-white font-medium py-3 px-4 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200"
+        >
+          {(!vendor || vendor.storeId !== storeId) ? 'Sign in to View' : 'Bookings'}
         </button>
       </div>
       <motion.div
@@ -659,6 +694,9 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
       {isRevenueModalOpen && (<RevenueModal isOpen={isRevenueModalOpen} onClose={handleCloseRevenueModal} storeId={storeId} />)}
 
       {isCommissionModalOpen && (<CommissionModal isOpen={isCommissionModalOpen} onClose={handleCloseCommissionModal} storeId={storeId} />)}
+      {isPayCommissionOpen && (<PayCommissionModal isOpen={isPayCommissionOpen} onClose={() => setIsPayCommissionOpen(false)} storeId={storeId} />)}
+      {isAddPitchOpen && (<AddPitchComposer isOpen={isAddPitchOpen} onClose={() => setIsAddPitchOpen(false)} storeId={storeId} />)}
+      {isBookingsOpen && (<AdminBookingsModal isOpen={isBookingsOpen} onClose={() => setIsBookingsOpen(false)} storeId={storeId} />)}
 
       {isExpensesModalOpen && (
         <ExpensesModal

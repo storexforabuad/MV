@@ -237,6 +237,8 @@ export default function CreateStoreModal({
                     <option value="automotive">🚗 Automotive (Car Dealership)</option>
                     <option value="livestock">🐟 Livestock (Fishery & Aquaculture)</option>
                     <option value="restaurant">🍔 Restaurant (Food & Drinks)</option>
+                    <option value="sports">⚽ Sports Arena / Pitch</option>
+                    <option value="sports-rental">🏟️ Sports Rental (Equipment)</option>
                   </select>
                   <p className="text-xs text-gray-500 dark:text-gray-400">
                     This determines the product fields and storefront design.

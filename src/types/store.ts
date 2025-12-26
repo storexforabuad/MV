@@ -34,7 +34,11 @@ export interface StoreMeta {
   country?: string;
 
   // Store Vertical
-  storeType?: 'general' | 'automotive' | 'livestock' | 'fashion' | 'restaurant';
+  storeType?: 'general' | 'automotive' | 'livestock' | 'fashion' | 'restaurant' | 'sports' | 'sports-rental';
+
+  // Timezone & payout tracking
+  timezone?: string;
+  lastPaidAt?: Timestamp;
 
   // Restaurant specific
   isOpen?: boolean;
