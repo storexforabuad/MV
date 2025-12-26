@@ -202,29 +202,58 @@ export default function BookingSheet({ storeId, pitchId, pricePerSlot = 0, slotD
       <CalendarStrip selectedDate={selectedDate} onSelectDate={setSelectedDate} />
 
       {/* Main Content - Slots Grid */}
-      <div className="flex-1 px-4 py-4 md:py-6">
-        <div className="md:grid md:grid-cols-3 md:gap-6">
-          <div className="md:col-span-2">
-            <div className="mb-4 md:mb-0">
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Available Slots</h3>
-              <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-3">
-                {slots.map((t) => {
-                  const lockId = `${pitchId}__${selectedDate}__${t.replace(':', '')}`;
-                  const lock = locks[lockId];
-                  let status: 'available' | 'held' | 'booked' | 'blocked' | 'event' = 'available';
-                  if (lock) {
-                    const s = lock.status as string | undefined;
-                    const expires = lock.holdExpiresAt as any;
-                    if (s === 'confirmed') status = 'booked';
-                    else if (s === 'held') {
-                      if (expires && typeof expires.toMillis === 'function' && expires.toMillis() > Date.now()) {
-                        status = 'held';
+      <div className="flex-1 px-4 py-4 md:py-6 flex flex-col">
+        <div className="md:grid md:grid-cols-3 md:gap-6 flex-1 flex flex-col">
+          <div className="md:col-span-2 flex flex-col min-h-0">
+            <div className="flex-1 flex flex-col min-h-0">
+              <div className="flex items-center justify-between mb-4 md:mb-0">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Available Slots</h3>
+                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">{selectedDate}</span>
+              </div>
+              <style>{`
+                .slots-scroll::-webkit-scrollbar {
+                  width: 6px;
+                }
+                .slots-scroll::-webkit-scrollbar-track {
+                  background: transparent;
+                }
+                .slots-scroll::-webkit-scrollbar-thumb {
+                  background: #d1d5db;
+                  border-radius: 3px;
+                  transition: background 0.3s ease;
+                }
+                .slots-scroll::-webkit-scrollbar-thumb:hover {
+                  background: #9ca3af;
+                }
+                .slots-scroll::-webkit-scrollbar-thumb:active {
+                  background: #6b7280;
+                }
+                /* Firefox */
+                .slots-scroll {
+                  scrollbar-color: #d1d5db transparent;
+                  scrollbar-width: thin;
+                }
+              `}</style>
+              <div className="slots-scroll overflow-y-auto pr-2 flex-1">
+                <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-3 pb-2">
+                  {slots.map((t) => {
+                    const lockId = `${pitchId}__${selectedDate}__${t.replace(':', '')}`;
+                    const lock = locks[lockId];
+                    let status: 'available' | 'held' | 'booked' | 'blocked' | 'event' = 'available';
+                    if (lock) {
+                      const s = lock.status as string | undefined;
+                      const expires = lock.holdExpiresAt as any;
+                      if (s === 'confirmed') status = 'booked';
+                      else if (s === 'held') {
+                        if (expires && typeof expires.toMillis === 'function' && expires.toMillis() > Date.now()) {
+                          status = 'held';
+                        }
                       }
                     }
-                  }
 
-                  return <SlotCard key={t} timeLabel={t} price={pricePerSlot} status={status} isSelected={selectedSlot === t} expiresAt={lock?.holdExpiresAt} onClick={() => handleSelectSlot(t)} />;
-                })}
+                    return <SlotCard key={t} timeLabel={t} price={pricePerSlot} status={status} isSelected={selectedSlot === t} expiresAt={lock?.holdExpiresAt} onClick={() => handleSelectSlot(t)} />;
+                  })}
+                </div>
               </div>
             </div>
           </div>
@@ -247,7 +276,7 @@ export default function BookingSheet({ storeId, pitchId, pricePerSlot = 0, slotD
       </div>
 
       {/* Mobile Floating Summary Card (Sticky Footer) */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 dark:border-gray-700 bg-gradient-to-t from-white to-white/95 dark:from-gray-900 dark:to-gray-900/95 backdrop-blur-xl shadow-2xl">
         <div className="px-4 py-3 max-w-2xl mx-auto">
           <BookingSummaryCard
             selectedDate={selectedDate}
@@ -265,7 +294,7 @@ export default function BookingSheet({ storeId, pitchId, pricePerSlot = 0, slotD
       </div>
 
       {/* Add padding to prevent content from being hidden behind sticky footer on mobile */}
-      <div className="md:hidden h-48" />
+      <div className="md:hidden h-52" />
 
       {showCustomerLookup && (
         <CustomerLookupModal isOpen={showCustomerLookup} onClose={() => setShowCustomerLookup(false)} onSuccess={(c: any) => { setCustomer(c); setShowCustomerLookup(false); }} />

@@ -59,11 +59,11 @@ export default function SlotCard({ timeLabel, price, status = 'available', isSel
       onClick={() => !disabled && onClick?.()}
       disabled={disabled}
       aria-pressed={!disabled}
-      className={`w-full p-3 rounded-xl border-2 flex flex-col items-start gap-1 font-medium transition-all ${cls} ${
+      className={`w-full p-3 rounded-xl border-2 flex flex-col items-start gap-1 font-medium transition-all ${
         isSelected && !disabled
-          ? 'ring-2 ring-emerald-500 ring-offset-2 dark:ring-offset-gray-950 shadow-lg'
+          ? 'ring-2 ring-teal-500 ring-offset-2 dark:ring-offset-gray-950 shadow-lg scale-105'
           : 'active:scale-95'
-      } ${disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+      } ${cls} ${disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
     >
       <div className="flex items-center justify-between w-full">
         <span className="text-lg font-bold">{timeLabel}</span>
@@ -77,7 +77,7 @@ export default function SlotCard({ timeLabel, price, status = 'available', isSel
         {status === 'event' && 'Event'}
       </div>
       {typeof price === 'number' && status === 'available' && (
-        <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-300 mt-1">₦{price.toFixed(0)}</span>
+        <span className="text-sm font-semibold text-teal-700 dark:text-teal-300 mt-1">₦{price.toFixed(0)}</span>
       )}
     </button>
   );

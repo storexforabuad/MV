@@ -28,8 +28,29 @@ export default function CalendarStrip({ startDate, selectedDate, onSelectDate }:
   const days = getWeekDays(base);
 
   return (
-    <div className="w-full overflow-x-auto">
-      <div className="flex gap-2 px-2 py-1">
+    <div className="w-full bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 border-b border-gray-200 dark:border-gray-800">
+      <style>{`
+        .calendar-scroll::-webkit-scrollbar {
+          height: 4px;
+        }
+        .calendar-scroll::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .calendar-scroll::-webkit-scrollbar-thumb {
+          background: #14b8a6;
+          border-radius: 2px;
+          transition: background 0.3s ease;
+        }
+        .calendar-scroll::-webkit-scrollbar-thumb:hover {
+          background: #0d9488;
+        }
+        /* Firefox */
+        .calendar-scroll {
+          scrollbar-color: #14b8a6 transparent;
+          scrollbar-width: thin;
+        }
+      `}</style>
+      <div className="calendar-scroll overflow-x-auto px-4 py-3 flex gap-2.5 scroll-smooth">
         {days.map((d) => {
           const iso = formatDateISO(d);
           const isSelected = selectedDate === iso;
@@ -39,10 +60,14 @@ export default function CalendarStrip({ startDate, selectedDate, onSelectDate }:
             <button
               key={iso}
               onClick={() => onSelectDate?.(iso)}
-              className={`min-w-[72px] flex flex-col items-center justify-center p-3 rounded-lg border ${isSelected ? 'bg-blue-600 text-white border-blue-600' : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border-gray-200 dark:border-slate-700'}`}
+              className={`min-w-[76px] flex flex-col items-center justify-center px-3 py-3 rounded-xl border-2 transition-all flex-shrink-0 ${
+                isSelected
+                  ? 'bg-gradient-to-br from-teal-500 to-cyan-500 text-white border-teal-600 shadow-lg shadow-teal-500/30 ring-2 ring-teal-300/50 dark:ring-teal-700/50'
+                  : 'bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm text-gray-800 dark:text-gray-200 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 hover:shadow-sm'
+              }`}
             >
-              <div className="text-xs opacity-80">{weekday}</div>
-              <div className="text-lg font-bold">{dayNum}</div>
+              <div className="text-xs font-medium opacity-75">{weekday}</div>
+              <div className="text-lg font-bold mt-1">{dayNum}</div>
             </button>
           );
         })}
