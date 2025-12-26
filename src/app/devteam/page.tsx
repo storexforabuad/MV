@@ -245,8 +245,17 @@ export default function DevteamPage() {
                 <span className="text-xs text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">{selectedStoreStats.id}</span>
               </div>
               <div className="flex gap-2 mb-4">
-                <a href={`/admin/${selectedStoreStats.id}`} target="_blank" rel="noopener noreferrer" className="px-3 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-semibold hover:bg-blue-100 transition">Admin Panel</a>
-                <a href={`/${selectedStoreStats.id}`} target="_blank" rel="noopener noreferrer" className="px-3 py-1 rounded-md bg-green-50 text-green-700 text-xs font-semibold hover:bg-green-100 transition">Live Store</a>
+                {(() => {
+                  const isSports = selectedStoreMeta && (selectedStoreMeta.storeType === 'sports' || selectedStoreMeta.storeType === 'pitchperfect' || selectedStoreMeta.storeType === 'pitch');
+                  const adminHref = isSports ? `/admin/sports/${selectedStoreStats.id}` : `/admin/${selectedStoreStats.id}`;
+                  const liveHref = isSports ? `/sports/${selectedStoreStats.id}` : `/${selectedStoreStats.id}`;
+                  return (
+                    <>
+                      <a href={adminHref} target="_blank" rel="noopener noreferrer" className="px-3 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-semibold hover:bg-blue-100 transition">Admin Panel</a>
+                      <a href={liveHref} target="_blank" rel="noopener noreferrer" className="px-3 py-1 rounded-md bg-green-50 text-green-700 text-xs font-semibold hover:bg-green-100 transition">Live Store</a>
+                    </>
+                  )
+                })()}
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-center">
                 <div className="p-2 bg-blue-50 dark:bg-blue-900/50 rounded-lg"><span className="font-bold text-blue-800 dark:text-blue-200">{selectedStoreStats.totalProducts}</span><p className="text-xs text-blue-600 dark:text-blue-300">Products</p></div>

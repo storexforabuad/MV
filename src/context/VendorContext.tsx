@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import VendorLookupModal from '@/components/vendor/VendorLookupModal';
+import { getStoreMeta } from '@/lib/db';
 import { useRouter } from 'next/navigation';
 
 interface Vendor {
@@ -52,13 +53,23 @@ export const VendorProvider = ({ children }: { children: ReactNode }) => {
     setIsLoginModalOpen(true);
   };
 
-  const handleLoginSuccess = (v: Vendor) => {
+  const handleLoginSuccess = async (v: Vendor) => {
     setVendor(v);
     setIsLoginModalOpen(false);
     if (pendingStoreId) {
-      const target = `/admin/${encodeURIComponent(pendingStoreId)}`;
-      setPendingStoreId(null);
-      router.push(target);
+      try {
+        const meta = await getStoreMeta(pendingStoreId);
+        let target = `/admin/${encodeURIComponent(pendingStoreId)}`;
+        if (meta && (meta.storeType === 'sports' || meta.storeType === 'pitchperfect' || meta.storeType === 'pitch')) {
+          // route sports stores to /admin/sports/{storeId}
+          target = `/admin/sports/${encodeURIComponent(pendingStoreId)}`;
+        }
+        setPendingStoreId(null);
+        router.push(target);
+      } catch (err) {
+        setPendingStoreId(null);
+        router.push(`/admin/${encodeURIComponent(pendingStoreId)}`);
+      }
     }
   };
 

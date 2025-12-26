@@ -2,9 +2,10 @@
 
 import { useState, ChangeEvent, FormEvent } from "react";
 import { useVendor } from '@/context/VendorContext';
-import { db, storage } from "../../lib/firebase";
+import { db } from "../../lib/firebase";
 import { collection, doc, setDoc, serverTimestamp } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { uploadImageToCloudinary } from '@/lib/cloudinaryClient';
+import { compressImage } from '@/utils/imageCompression';
 
 interface Props {
   storeId: string;
@@ -52,9 +53,8 @@ export default function AddPitchComposer({ storeId, isOpen, onClose }: Props) {
       const pitchRef = doc(pitchesRef);
       let imageUrl = "";
       if (imageFile) {
-        const storageRef = ref(storage, `stores/${storeId}/pitches/${Date.now()}_${imageFile.name}`);
-        await uploadBytes(storageRef, imageFile);
-        imageUrl = await getDownloadURL(storageRef);
+        const compressed = await compressImage(imageFile);
+        imageUrl = await uploadImageToCloudinary(compressed, storeId);
       }
 
       const payload = {

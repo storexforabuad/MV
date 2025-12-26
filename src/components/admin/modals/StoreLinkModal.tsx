@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Copy, Check, Lightbulb, Share2, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { Category } from '../../../types/category';
+import { getStoreMeta } from '@/lib/db';
 
 // --- PROPS INTERFACE ---
 interface StoreLinkModalProps {
@@ -44,14 +45,27 @@ const StoreLinkModal: React.FC<StoreLinkModalProps> = ({ isOpen, handleClose, st
     const [copyLinkState, setCopyLinkState] = useState(false);
 
     useEffect(() => {
-        if (storeLink) {
+        const build = async () => {
+            if (!storeLink) return;
             if (storeLink.startsWith('http')) {
                 setFullUrl(storeLink);
-            } else {
-                const storeId = storeLink.startsWith('/') ? storeLink.substring(1) : storeLink;
+                return;
+            }
+            const storeId = storeLink.startsWith('/') ? storeLink.substring(1) : storeLink;
+            try {
+                const meta = await getStoreMeta(storeId);
+                const origin = typeof window !== 'undefined' ? window.location.origin : 'https://tinyurl.com';
+                if (meta && (meta.storeType === 'sports' || meta.storeType === 'pitchperfect' || meta.storeType === 'pitch')) {
+                    setFullUrl(`${origin}/sports/${storeId}`);
+                } else {
+                    setFullUrl(`${origin}/${storeId}`);
+                }
+            } catch (err) {
+                // fallback to tinyurl pattern
                 setFullUrl(`https://tinyurl.com/bizcononline/${storeId}`);
             }
-        }
+        };
+        build();
     }, [storeLink]);
 
     const handleCopy = (text: string, type: 'message' | 'link') => {

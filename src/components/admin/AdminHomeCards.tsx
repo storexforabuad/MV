@@ -40,6 +40,7 @@ interface AdminHomeCardsProps {
   products: Product[];
   categories: Category[];
   contacts: WholesaleData[];
+  storeType?: string;
   totalProducts: number;
   totalCategories: number;
   totalViews: number;
@@ -449,33 +450,37 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           <RefreshCw className={`mr-2 h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
           {refreshing ? 'Refreshing...' : 'Refresh'}
         </button>
-        <button
-          onClick={() => {
-            if (!vendor || vendor.storeId !== storeId) return promptLogin(storeId);
-            setIsPayCommissionOpen(true);
-          }}
-          className="ml-2 col-span-2 sm:col-span-3 md:col-span-4 w-full bg-white dark:bg-gray-800 text-gray-800 dark:text-white font-medium py-3 px-4 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200"
-        >
-          {(!vendor || vendor.storeId !== storeId) ? 'Sign in to Pay' : 'Pay Commission'}
-        </button>
-        <button
-          onClick={() => {
-            if (!vendor || vendor.storeId !== storeId) return promptLogin(storeId);
-            setIsAddPitchOpen(true);
-          }}
-          className="ml-2 col-span-2 sm:col-span-3 md:col-span-4 w-full bg-white dark:bg-gray-800 text-gray-800 dark:text-white font-medium py-3 px-4 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200"
-        >
-          {(!vendor || vendor.storeId !== storeId) ? 'Sign in to Add Pitch' : 'Add Pitch'}
-        </button>
-        <button
-          onClick={() => {
-            if (!vendor || vendor.storeId !== storeId) return promptLogin(storeId);
-            setIsBookingsOpen(true);
-          }}
-          className="ml-2 col-span-2 sm:col-span-3 md:col-span-4 w-full bg-white dark:bg-gray-800 text-gray-800 dark:text-white font-medium py-3 px-4 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200"
-        >
-          {(!vendor || vendor.storeId !== storeId) ? 'Sign in to View' : 'Bookings'}
-        </button>
+        {props.storeType === 'sports' && (
+          <>
+            <button
+              onClick={() => {
+                if (!vendor || vendor.storeId !== storeId) return promptLogin(storeId);
+                setIsPayCommissionOpen(true);
+              }}
+              className="ml-2 col-span-2 sm:col-span-3 md:col-span-4 w-full bg-white dark:bg-gray-800 text-gray-800 dark:text-white font-medium py-3 px-4 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200"
+            >
+              {(!vendor || vendor.storeId !== storeId) ? 'Sign in to Pay' : 'Pay Commission'}
+            </button>
+            <button
+              onClick={() => {
+                if (!vendor || vendor.storeId !== storeId) return promptLogin(storeId);
+                setIsAddPitchOpen(true);
+              }}
+              className="ml-2 col-span-2 sm:col-span-3 md:col-span-4 w-full bg-white dark:bg-gray-800 text-gray-800 dark:text-white font-medium py-3 px-4 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200"
+            >
+              {(!vendor || vendor.storeId !== storeId) ? 'Sign in to Add Pitch' : 'Add Pitch'}
+            </button>
+            <button
+              onClick={() => {
+                if (!vendor || vendor.storeId !== storeId) return promptLogin(storeId);
+                setIsBookingsOpen(true);
+              }}
+              className="ml-2 col-span-2 sm:col-span-3 md:col-span-4 w-full bg-white dark:bg-gray-800 text-gray-800 dark:text-white font-medium py-3 px-4 rounded-2xl shadow-sm hover:shadow-md transition-all duration-200"
+            >
+              {(!vendor || vendor.storeId !== storeId) ? 'Sign in to View' : 'Bookings'}
+            </button>
+          </>
+        )}
       </div>
       <motion.div
         className="grid grid-cols-2 sm:grid-cols-3 md:col-span-4 gap-2 sm:gap-4"
@@ -694,9 +699,9 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
       {isRevenueModalOpen && (<RevenueModal isOpen={isRevenueModalOpen} onClose={handleCloseRevenueModal} storeId={storeId} />)}
 
       {isCommissionModalOpen && (<CommissionModal isOpen={isCommissionModalOpen} onClose={handleCloseCommissionModal} storeId={storeId} />)}
-      {isPayCommissionOpen && (<PayCommissionModal isOpen={isPayCommissionOpen} onClose={() => setIsPayCommissionOpen(false)} storeId={storeId} />)}
-      {isAddPitchOpen && (<AddPitchComposer isOpen={isAddPitchOpen} onClose={() => setIsAddPitchOpen(false)} storeId={storeId} />)}
-      {isBookingsOpen && (<AdminBookingsModal isOpen={isBookingsOpen} onClose={() => setIsBookingsOpen(false)} storeId={storeId} />)}
+      {props.storeType === 'sports' && isPayCommissionOpen && (<PayCommissionModal isOpen={isPayCommissionOpen} onClose={() => setIsPayCommissionOpen(false)} storeId={storeId} />)}
+      {props.storeType === 'sports' && isAddPitchOpen && (<AddPitchComposer isOpen={isAddPitchOpen} onClose={() => setIsAddPitchOpen(false)} storeId={storeId} />)}
+      {props.storeType === 'sports' && isBookingsOpen && (<AdminBookingsModal isOpen={isBookingsOpen} onClose={() => setIsBookingsOpen(false)} storeId={storeId} />)}
 
       {isExpensesModalOpen && (
         <ExpensesModal

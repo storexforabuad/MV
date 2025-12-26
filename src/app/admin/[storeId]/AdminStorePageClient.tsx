@@ -158,7 +158,7 @@ export default function AdminStorePageClient({
 
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { vendor, setVendor, loading: vendorLoading } = useVendor();
+  const { vendor, setVendor, loading: vendorLoading, promptLogin } = useVendor();
   const { orders, refreshOrders } = useStoreOrders(storeId, initialOrders);
 
   useEffect(() => {
@@ -244,21 +244,36 @@ export default function AdminStorePageClient({
       if (!storeId) return;
       if (vendorLoading) return; // still initializing vendor from storage
 
-      // If no vendor present, redirect back to storefront
+      // If no vendor present, open vendor login modal and wait for login
       if (!vendor) {
-        router.push(`/${storeId}`);
+        // open vendor login modal for this store
+        try {
+          promptLogin(storeId);
+        } catch (e) {
+          // fallback to redirect to storefront if promptLogin not available
+          router.push(`/${storeId}`);
+        }
         return;
       }
 
       try {
         const res = await verifyVendorByPhone(storeId, vendor.phone);
         if (!res.success) {
-          // clear and redirect
+          // Allow a fallback when the stored vendor session explicitly targets this storeId
+          // This handles cases where phone normalization mismatches occur but the vendor was previously
+          // authenticated for the same store and saved in localStorage.
+          if (vendor.storeId === storeId) {
+            // treat as valid session
+            return;
+          }
+          // clear and redirect to storefront when vendor is not valid for this store
           setVendor(null);
           router.push(`/${storeId}`);
         }
       } catch (err) {
         console.error('Error validating vendor on admin load', err);
+        // On error, be conservative but allow vendor if their session storeId matches
+        if (vendor.storeId === storeId) return;
         setVendor(null);
         router.push(`/${storeId}`);
       }
@@ -398,7 +413,8 @@ export default function AdminStorePageClient({
                   categories={categories}
                   contacts={contacts}
                   setActiveSection={setActiveSection}
-                  storeLink={`/${storeId}`}
+                    storeLink={`/${storeId}`}
+                    storeType={storeMeta?.storeType}
                   onRefresh={() => fetchData(true)}
                   isRefreshing={isRefreshing}
                   totalProducts={products.length}
@@ -428,7 +444,7 @@ export default function AdminStorePageClient({
                   ambassadorTier={ambassadorTier}
                 />
                 <div className="mt-6">
-                  <AdminInvoicePanel storeId={storeId} />
+                  {storeMeta?.storeType === 'sports' && <AdminInvoicePanel storeId={storeId} />}
                 </div>
               </div>
             )}

@@ -5,6 +5,8 @@ import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestor
 import { db } from '@/lib/firebase';
 import SlotCard from '@/components/pitch/SlotCard';
 import { confirmPayment } from '@/app/actions/bookingActions';
+import { submitCommissionPayment } from '@/app/actions/commissionPaymentActions';
+import { useVendor } from '@/context/VendorContext';
 import toast from 'react-hot-toast';
 
 interface Props {
@@ -15,6 +17,7 @@ interface Props {
 
 export default function AdminBookingsModal({ isOpen, onClose, storeId }: Props) {
   const [bookings, setBookings] = useState<any[]>([]);
+  const { vendor } = useVendor();
 
   useEffect(() => {
     if (!isOpen || !storeId) return;
@@ -32,6 +35,26 @@ export default function AdminBookingsModal({ isOpen, onClose, storeId }: Props) 
     try {
       await confirmPayment({ storeId, bookingId });
       toast.success('Payment confirmed');
+
+      // submit a commission payment record (lightweight) for accounting/reconciliation
+      try {
+        const booking = bookings.find(b => b.id === bookingId) as any;
+        const amount = (booking && (booking.totalAmount ?? booking.amount)) || 0;
+        await submitCommissionPayment({
+          storeId,
+          amount,
+          periodStart: booking?.date || new Date().toISOString().slice(0,10),
+          periodEnd: booking?.date || new Date().toISOString().slice(0,10),
+          accountNumber: (vendor && (vendor.accountNumber || '')) || '',
+          accountName: (vendor && (vendor.name || vendor.phone)) || '',
+          notes: `Commission for booking ${bookingId}`,
+          uploadedBy: vendor?.phone || undefined,
+        });
+        toast.success('Commission recorded');
+      } catch (err) {
+        console.error('Failed to submit commission payment', err);
+        toast.error('Commission record failed');
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Failed to confirm';
       toast.error(msg);

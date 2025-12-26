@@ -111,7 +111,8 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
         const customer = await findCustomerByPhone(formattedPhoneNumber);
         
         if (customer) {
-            setFoundCustomer(customer);
+            const normalized = { ...customer, phone: (customer as any).phone || (customer as any).phoneNumber } as Customer;
+            setFoundCustomer(normalized);
             setIsNewUser(false);
             setStep("WelcomeBack");
         } else {
@@ -129,20 +130,23 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
   };
 
   const handleAccountCreated = (newCustomer: Customer) => {
-      setFoundCustomer(newCustomer);
-      setCustomer(newCustomer);
+      const normalized = { ...newCustomer, phone: (newCustomer as any).phone || (newCustomer as any).phoneNumber } as Customer;
+      setFoundCustomer(normalized);
+      setCustomer(normalized);
       setStep("AllDone");
       setTimeout(() => {
-          onSuccess(newCustomer);
+          onSuccess(normalized);
       }, 5000);
   };
 
   const handleWelcomeBackContinue = () => {
       if(foundCustomer) {
-          setCustomer(foundCustomer);
+          const normalized = { ...foundCustomer, phone: (foundCustomer as any).phone || (foundCustomer as any).phoneNumber } as Customer;
+          setCustomer(normalized);
+          setFoundCustomer(normalized);
           setStep("AllDone");
           setTimeout(() => {
-              onSuccess(foundCustomer);
+              onSuccess(normalized);
           }, 2500);
       }
   }
