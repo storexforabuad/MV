@@ -234,7 +234,7 @@ export default function BookingSheet({ storeId, pitchId, pricePerSlot = 0, slotD
                   scrollbar-width: thin;
                 }
               `}</style>
-              <div className="slots-scroll overflow-y-auto pr-2 flex-1">
+              <div className="slots-scroll overflow-y-auto pr-2 flex-1 max-h-96">
                 <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-3 pb-2">
                   {slots.map((t) => {
                     const lockId = `${pitchId}__${selectedDate}__${t.replace(':', '')}`;

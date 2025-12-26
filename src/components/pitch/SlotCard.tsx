@@ -61,7 +61,7 @@ export default function SlotCard({ timeLabel, price, status = 'available', isSel
       aria-pressed={!disabled}
       className={`w-full p-3 rounded-xl border-2 flex flex-col items-start gap-1 font-medium transition-all ${
         isSelected && !disabled
-          ? 'ring-2 ring-teal-500 ring-offset-2 dark:ring-offset-gray-950 shadow-lg scale-105'
+          ? 'ring-2 ring-inset ring-teal-500 shadow-lg scale-95'
           : 'active:scale-95'
       } ${cls} ${disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
     >
