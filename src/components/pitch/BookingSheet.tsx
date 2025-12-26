@@ -8,6 +8,111 @@ import { createBooking } from '@/app/actions/bookingActions';
 import toast from 'react-hot-toast';
 import useSlotLocks from '../../hooks/useSlotLocks';
 
+// Booking Summary Card Component
+interface BookingSummaryCardProps {
+  selectedDate: string;
+  selectedSlot: string | null;
+  pricePerSlot: number;
+  customer: any;
+  onSelectCustomer: () => void;
+  onHoldSlot: () => void;
+  isHolding: boolean;
+  bookingResult: { bookingId?: string } | null;
+  lastError: string | null;
+  isMobile?: boolean;
+}
+
+function BookingSummaryCard({
+  selectedDate,
+  selectedSlot,
+  pricePerSlot,
+  customer,
+  onSelectCustomer,
+  onHoldSlot,
+  isHolding,
+  bookingResult,
+  lastError,
+  isMobile = false,
+}: BookingSummaryCardProps) {
+  return (
+    <div className={`${isMobile ? 'space-y-2' : 'space-y-4'}`}>
+      {/* Summary Details */}
+      <div className={`${isMobile ? 'flex justify-between items-center text-xs' : 'space-y-2'}`}>
+        {!isMobile && (
+          <>
+            <h4 className="text-base font-semibold text-gray-900 dark:text-white">Booking Summary</h4>
+            <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+              <p>Date: <span className="font-medium text-gray-900 dark:text-white">{selectedDate}</span></p>
+              <p>Slot: <span className="font-medium text-gray-900 dark:text-white">{selectedSlot || '—'}</span></p>
+              <p>Price: <span className="font-semibold text-teal-600 dark:text-teal-400">₦{pricePerSlot.toFixed(0)}</span></p>
+            </div>
+          </>
+        )}
+        {isMobile && (
+          <>
+            <div>
+              <p className="font-medium text-gray-900 dark:text-white">{selectedSlot || 'No slot'}</p>
+              <p className="text-gray-500 dark:text-gray-400">{selectedDate}</p>
+            </div>
+            <div className="text-right">
+              <p className="font-semibold text-teal-600 dark:text-teal-400">₦{pricePerSlot.toFixed(0)}</p>
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* Customer Section */}
+      {isMobile ? (
+        <button
+          onClick={onSelectCustomer}
+          className="w-full px-3 py-2.5 rounded-lg bg-gradient-to-r from-emerald-50 to-cyan-50 dark:from-emerald-900/30 dark:to-cyan-900/30 border border-emerald-200 dark:border-emerald-800 text-sm font-medium text-gray-900 dark:text-white hover:shadow-sm transition-shadow active:scale-95"
+        >
+          {customer ? `Customer: ${customer.name || customer.phone}` : '+ Select Customer'}
+        </button>
+      ) : (
+        <>
+          <button
+            onClick={onSelectCustomer}
+            className="w-full px-4 py-2.5 rounded-lg bg-gradient-to-r from-emerald-50 to-cyan-50 dark:from-emerald-900/20 dark:to-cyan-900/20 border border-emerald-200 dark:border-emerald-700 text-sm font-medium text-gray-900 dark:text-white hover:shadow-md transition-all active:scale-95"
+          >
+            {customer ? `✓ ${customer.name || customer.phone}` : '+ Select Customer'}
+          </button>
+        </>
+      )}
+
+      {/* Hold Slot Button */}
+      <button
+        disabled={!selectedSlot || isHolding}
+        onClick={onHoldSlot}
+        className={`w-full px-4 py-3 rounded-lg font-semibold text-white transition-all active:scale-95 ${
+          !selectedSlot || isHolding
+            ? 'bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-400 cursor-not-allowed'
+            : 'bg-gradient-to-r from-teal-500 to-cyan-500 hover:shadow-lg hover:shadow-teal-500/30 dark:hover:shadow-teal-900/50'
+        }`}
+      >
+        {isHolding ? 'Holding…' : 'Hold Slot'}
+      </button>
+
+      {/* Success State */}
+      {bookingResult?.bookingId && (
+        <div className="p-3 rounded-lg bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/20 dark:to-teal-900/20 border border-emerald-300 dark:border-emerald-700">
+          <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 mb-1">✓ Booking Held</p>
+          <p className="text-xs font-mono text-emerald-600 dark:text-emerald-400 mb-1">{bookingResult.bookingId}</p>
+          <p className="text-xs text-emerald-600 dark:text-emerald-400">Awaiting payment/confirmation</p>
+        </div>
+      )}
+
+      {/* Error State */}
+      {lastError && (
+        <div className="p-3 rounded-lg bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-300 dark:border-amber-700">
+          <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 mb-1">⚠ Error</p>
+          <p className="text-xs text-amber-600 dark:text-amber-400">{lastError}</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 interface BookingSheetProps {
   storeId: string;
   pitchId: string;
@@ -93,66 +198,74 @@ export default function BookingSheet({ storeId, pitchId, pricePerSlot = 0, slotD
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full flex flex-col min-h-screen bg-gray-50 dark:bg-gray-950">
       <CalendarStrip selectedDate={selectedDate} onSelectDate={setSelectedDate} />
 
-      <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="md:col-span-2 space-y-3">
-          <div className="grid grid-cols-2 gap-2">
-            {slots.map((t) => {
-              const lockId = `${pitchId}__${selectedDate}__${t.replace(':', '')}`;
-              const lock = locks[lockId];
-              let status: 'available' | 'held' | 'booked' | 'blocked' | 'event' = 'available';
-              if (lock) {
-                const s = lock.status as string | undefined;
-                const expires = lock.holdExpiresAt as any;
-                if (s === 'confirmed') status = 'booked';
-                else if (s === 'held') {
-                  if (expires && typeof expires.toMillis === 'function' && expires.toMillis() > Date.now()) {
-                    status = 'held';
+      {/* Main Content - Slots Grid */}
+      <div className="flex-1 px-4 py-4 md:py-6">
+        <div className="md:grid md:grid-cols-3 md:gap-6">
+          <div className="md:col-span-2">
+            <div className="mb-4 md:mb-0">
+              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Available Slots</h3>
+              <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-3">
+                {slots.map((t) => {
+                  const lockId = `${pitchId}__${selectedDate}__${t.replace(':', '')}`;
+                  const lock = locks[lockId];
+                  let status: 'available' | 'held' | 'booked' | 'blocked' | 'event' = 'available';
+                  if (lock) {
+                    const s = lock.status as string | undefined;
+                    const expires = lock.holdExpiresAt as any;
+                    if (s === 'confirmed') status = 'booked';
+                    else if (s === 'held') {
+                      if (expires && typeof expires.toMillis === 'function' && expires.toMillis() > Date.now()) {
+                        status = 'held';
+                      }
+                    }
                   }
-                }
-              }
 
-              return <SlotCard key={t} timeLabel={t} price={pricePerSlot} status={status} expiresAt={lock?.holdExpiresAt} onClick={() => handleSelectSlot(t)} />;
-            })}
+                  return <SlotCard key={t} timeLabel={t} price={pricePerSlot} status={status} isSelected={selectedSlot === t} expiresAt={lock?.holdExpiresAt} onClick={() => handleSelectSlot(t)} />;
+                })}
+              </div>
+            </div>
+          </div>
+
+          {/* Desktop Sidebar - Booking Summary */}
+          <div className="hidden md:block">
+            <BookingSummaryCard
+              selectedDate={selectedDate}
+              selectedSlot={selectedSlot}
+              pricePerSlot={pricePerSlot}
+              customer={customer}
+              onSelectCustomer={() => setShowCustomerLookup(true)}
+              onHoldSlot={handleHoldSlot}
+              isHolding={isHolding}
+              bookingResult={bookingResult}
+              lastError={lastError}
+            />
           </div>
         </div>
-
-        <aside className="p-4 border rounded-md bg-white dark:bg-gray-900">
-          <h4 className="font-semibold">Booking Summary</h4>
-          <p className="text-sm text-gray-600">Date: {selectedDate}</p>
-          <p className="text-sm text-gray-600">Slot: {selectedSlot || 'No slot selected'}</p>
-          <p className="text-sm text-gray-600">Price: ₦{pricePerSlot.toFixed(0)}</p>
-
-          <div className="mt-4">
-            <button onClick={() => setShowCustomerLookup(true)} className="w-full px-4 py-2 rounded bg-gray-200">Select Customer</button>
-          </div>
-
-          {customer && (
-            <div className="mt-2 text-sm">
-              <p>Customer: {customer.name || customer.phone}</p>
-            </div>
-          )}
-
-          <div className="mt-4 flex gap-2">
-            <button disabled={!selectedSlot || isHolding} onClick={handleHoldSlot} className="flex-1 px-4 py-2 rounded bg-blue-600 text-white disabled:opacity-50">
-              {isHolding ? 'Holding…' : 'Hold Slot'}
-            </button>
-          </div>
-
-          {bookingResult?.bookingId && (
-            <div className="mt-4 p-3 border rounded bg-green-50">
-              <p className="text-sm font-medium">Held booking: <span className="font-mono">{bookingResult.bookingId}</span></p>
-              <p className="text-xs text-gray-600">This booking is held for payment/confirmation. Ask the customer to complete payment or confirm via admin.</p>
-            </div>
-          )}
-
-          {lastError && (
-            <div className="mt-3 p-2 bg-red-50 text-red-700 rounded text-sm">{lastError}</div>
-          )}
-        </aside>
       </div>
+
+      {/* Mobile Floating Summary Card (Sticky Footer) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl">
+        <div className="px-4 py-3 max-w-2xl mx-auto">
+          <BookingSummaryCard
+            selectedDate={selectedDate}
+            selectedSlot={selectedSlot}
+            pricePerSlot={pricePerSlot}
+            customer={customer}
+            onSelectCustomer={() => setShowCustomerLookup(true)}
+            onHoldSlot={handleHoldSlot}
+            isHolding={isHolding}
+            bookingResult={bookingResult}
+            lastError={lastError}
+            isMobile={true}
+          />
+        </div>
+      </div>
+
+      {/* Add padding to prevent content from being hidden behind sticky footer on mobile */}
+      <div className="md:hidden h-48" />
 
       {showCustomerLookup && (
         <CustomerLookupModal isOpen={showCustomerLookup} onClose={() => setShowCustomerLookup(false)} onSuccess={(c: any) => { setCustomer(c); setShowCustomerLookup(false); }} />
