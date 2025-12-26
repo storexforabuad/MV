@@ -76,8 +76,16 @@ export default function SlotCard({ timeLabel, price, status = 'available', isSel
         {status === 'blocked' && 'Blocked'}
         {status === 'event' && 'Event'}
       </div>
-      {typeof price === 'number' && status === 'available' && (
-        <span className="text-sm font-semibold text-teal-700 dark:text-teal-300 mt-1">₦{price.toFixed(0)}</span>
+      {typeof price === 'number' && (
+        <span className={`text-sm font-semibold mt-1 ${
+          status === 'available' 
+            ? 'text-teal-700 dark:text-teal-300' 
+            : status === 'booked'
+            ? 'text-red-600 dark:text-red-400'
+            : status === 'held'
+            ? 'text-amber-700 dark:text-amber-300'
+            : 'text-gray-600 dark:text-gray-400'
+        }`}>₦{price.toFixed(0)}</span>
       )}
     </button>
   );

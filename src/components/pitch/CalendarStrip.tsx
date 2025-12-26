@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 
 interface CalendarStripProps {
   startDate?: Date; // defaults to today
@@ -27,6 +27,29 @@ export default function CalendarStrip({ startDate, selectedDate, onSelectDate }:
   const base = startDate ? new Date(startDate) : new Date();
   const days = getWeekDays(base);
 
+  const containerRef = useRef<HTMLDivElement>(null);
+  const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+
+  const scrollToDate = (dateISO: string) => {
+    const button = buttonRefs.current.get(dateISO);
+    const container = containerRef.current;
+
+    if (button && container) {
+      const containerWidth = container.offsetWidth;
+      const buttonLeft = button.offsetLeft;
+      const buttonWidth = button.offsetWidth;
+      const scrollLeft = buttonLeft - (containerWidth / 2) + (buttonWidth / 2);
+
+      container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+    }
+  };
+
+  useEffect(() => {
+    if (selectedDate) {
+      setTimeout(() => scrollToDate(selectedDate), 100);
+    }
+  }, [selectedDate]);
+
   return (
     <div className="w-full bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 border-b border-gray-200 dark:border-gray-800">
       <style>{`
@@ -50,7 +73,7 @@ export default function CalendarStrip({ startDate, selectedDate, onSelectDate }:
           scrollbar-width: thin;
         }
       `}</style>
-      <div className="calendar-scroll overflow-x-auto px-4 py-3 flex gap-2.5 scroll-smooth">
+      <div ref={containerRef} className="calendar-scroll overflow-x-auto px-4 py-3 flex gap-2.5 scroll-smooth">
         {days.map((d) => {
           const iso = formatDateISO(d);
           const isSelected = selectedDate === iso;
@@ -59,6 +82,10 @@ export default function CalendarStrip({ startDate, selectedDate, onSelectDate }:
           return (
             <button
               key={iso}
+              ref={(el) => {
+                if (el) buttonRefs.current.set(iso, el);
+                else buttonRefs.current.delete(iso);
+              }}
               onClick={() => onSelectDate?.(iso)}
               className={`min-w-[76px] flex flex-col items-center justify-center px-3 py-3 rounded-xl border-2 transition-all flex-shrink-0 ${
                 isSelected

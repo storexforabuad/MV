@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import CalendarStrip from './CalendarStrip';
 import SlotCard from './SlotCard';
 import CustomerLookupModal from '../customer/CustomerLookupModal';
@@ -152,9 +152,24 @@ export default function BookingSheet({ storeId, pitchId, pricePerSlot = 0, slotD
   const [bookingResult, setBookingResult] = useState<{ bookingId?: string } | null>(null);
   const [lastError, setLastError] = useState<string | null>(null);
 
+  const slotButtonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+
   const slots = generateSlotsForDay(selectedDate, availability, slotDurationMinutes);
 
   const { locks } = useSlotLocks(storeId, pitchId);
+
+  const scrollToSlot = (timeSlot: string) => {
+    const button = slotButtonRefs.current.get(timeSlot);
+    if (button) {
+      button.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
+  useEffect(() => {
+    if (selectedSlot) {
+      setTimeout(() => scrollToSlot(selectedSlot), 100);
+    }
+  }, [selectedSlot]);
 
   const handleSelectSlot = (time: string) => {
     setSelectedSlot(time);
@@ -251,7 +266,17 @@ export default function BookingSheet({ storeId, pitchId, pricePerSlot = 0, slotD
                       }
                     }
 
-                    return <SlotCard key={t} timeLabel={t} price={pricePerSlot} status={status} isSelected={selectedSlot === t} expiresAt={lock?.holdExpiresAt} onClick={() => handleSelectSlot(t)} />;
+                    return (
+                      <div
+                        key={t}
+                        ref={(el) => {
+                          if (el) slotButtonRefs.current.set(t, el.querySelector('button') as HTMLButtonElement);
+                          else slotButtonRefs.current.delete(t);
+                        }}
+                      >
+                        <SlotCard timeLabel={t} price={pricePerSlot} status={status} isSelected={selectedSlot === t} expiresAt={lock?.holdExpiresAt} onClick={() => handleSelectSlot(t)} />
+                      </div>
+                    );
                   })}
                 </div>
               </div>
