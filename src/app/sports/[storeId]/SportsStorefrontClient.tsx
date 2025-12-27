@@ -6,6 +6,11 @@ import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
 import { motion, AnimatePresence } from 'framer-motion';
 import BookingSheet from '@/components/pitch/BookingSheet';
 import PitchCard from '@/components/pitch/PitchCard';
+import HorizontalActionBar from '@/components/pitch/HorizontalActionBar';
+import BookingsModal from '@/components/pitch/BookingsModal';
+import FavouritesModal from '@/components/pitch/FavouritesModal';
+import EventsModal from '@/components/pitch/EventsModal';
+import ProfileModal from '@/components/pitch/ProfileModal';
 
 interface Props {
   storeId: string;
@@ -16,6 +21,7 @@ export default function SportsStorefrontClient({ storeId, initialStoreMeta }: Pr
   const [pitches, setPitches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activePitch, setActivePitch] = useState<any | null>(null);
+  const [activeModal, setActiveModal] = useState<'bookings' | 'favourites' | 'events' | 'profile' | null>(null);
 
   useEffect(() => {
     if (!storeId) return;
@@ -102,6 +108,15 @@ export default function SportsStorefrontClient({ storeId, initialStoreMeta }: Pr
             </>
           )}
         </AnimatePresence>
+
+        {/* Horizontal Action Bar */}
+        <HorizontalActionBar onOpenModal={setActiveModal} />
+
+        {/* Modals */}
+        <BookingsModal isOpen={activeModal === 'bookings'} onClose={() => setActiveModal(null)} />
+        <FavouritesModal isOpen={activeModal === 'favourites'} onClose={() => setActiveModal(null)} />
+        <EventsModal isOpen={activeModal === 'events'} onClose={() => setActiveModal(null)} />
+        <ProfileModal isOpen={activeModal === 'profile'} onClose={() => setActiveModal(null)} />
       </div>
     </div>
   );
