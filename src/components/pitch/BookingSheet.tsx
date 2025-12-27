@@ -35,13 +35,13 @@ function BookingSummaryCard({
   isMobile = false,
 }: BookingSummaryCardProps) {
   return (
-    <div className={`${isMobile ? 'space-y-2' : 'space-y-4'}`}>
+    <div className={`${isMobile ? 'space-y-1' : 'space-y-4'}`}>
       {/* Summary Details */}
       <div className={`${isMobile ? 'flex justify-between items-center text-xs' : 'space-y-2'}`}>
         {!isMobile && (
           <>
             <h4 className="text-base font-semibold text-gray-900 dark:text-white">Booking Summary</h4>
-            <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+            <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
               <p>Date: <span className="font-medium text-gray-900 dark:text-white">{selectedDate}</span></p>
               <p>Slot: <span className="font-medium text-gray-900 dark:text-white">{selectedSlot || '—'}</span></p>
               <p>Price: <span className="font-semibold text-teal-600 dark:text-teal-400">₦{pricePerSlot.toFixed(0)}</span></p>
@@ -60,25 +60,6 @@ function BookingSummaryCard({
           </>
         )}
       </div>
-
-      {/* Customer Section */}
-      {isMobile ? (
-        <button
-          onClick={onSelectCustomer}
-          className="w-full px-3 py-2.5 rounded-lg bg-gradient-to-r from-emerald-50 to-cyan-50 dark:from-emerald-900/30 dark:to-cyan-900/30 border border-emerald-200 dark:border-emerald-800 text-sm font-medium text-gray-900 dark:text-white hover:shadow-sm transition-shadow active:scale-95"
-        >
-          {customer ? `Customer: ${customer.name || customer.phone}` : '+ Select Customer'}
-        </button>
-      ) : (
-        <>
-          <button
-            onClick={onSelectCustomer}
-            className="w-full px-4 py-2.5 rounded-lg bg-gradient-to-r from-emerald-50 to-cyan-50 dark:from-emerald-900/20 dark:to-cyan-900/20 border border-emerald-200 dark:border-emerald-700 text-sm font-medium text-gray-900 dark:text-white hover:shadow-md transition-all active:scale-95"
-          >
-            {customer ? `✓ ${customer.name || customer.phone}` : '+ Select Customer'}
-          </button>
-        </>
-      )}
 
       {/* Hold Slot Button */}
       <button
@@ -177,14 +158,16 @@ export default function BookingSheet({ storeId, pitchId, pricePerSlot = 0, slotD
 
   const handleHoldSlot = async () => {
     if (!selectedSlot) return;
+
+    // If customer not selected, open lookup modal instead
+    if (!customer || !customer.phone) {
+      setShowCustomerLookup(true);
+      return;
+    }
+
     try {
       setIsHolding(true);
       setLastError(null);
-      if (!customer || !customer.phone) {
-        setIsHolding(false);
-        toast.error('Please select a customer first');
-        return;
-      }
 
       const res = await createBooking({
         storeId,
@@ -227,30 +210,15 @@ export default function BookingSheet({ storeId, pitchId, pricePerSlot = 0, slotD
               </div>
               <style>{`
                 .slots-scroll::-webkit-scrollbar {
-                  width: 6px;
-                }
-                .slots-scroll::-webkit-scrollbar-track {
-                  background: transparent;
-                }
-                .slots-scroll::-webkit-scrollbar-thumb {
-                  background: #d1d5db;
-                  border-radius: 3px;
-                  transition: background 0.3s ease;
-                }
-                .slots-scroll::-webkit-scrollbar-thumb:hover {
-                  background: #9ca3af;
-                }
-                .slots-scroll::-webkit-scrollbar-thumb:active {
-                  background: #6b7280;
+                  display: none;
                 }
                 /* Firefox */
                 .slots-scroll {
-                  scrollbar-color: #d1d5db transparent;
-                  scrollbar-width: thin;
+                  scrollbar-width: none;
                 }
               `}</style>
-              <div className="slots-scroll overflow-y-auto pr-2 flex-1 max-h-96">
-                <div className="grid grid-cols-2 gap-2 md:grid-cols-3 md:gap-3 pb-2">
+              <div className="slots-scroll overflow-y-auto pr-1 flex-1 max-h-96">
+                <div className="grid grid-cols-2 gap-1.5 md:grid-cols-3 md:gap-3 pb-0">
                   {slots.map((t) => {
                     const lockId = `${pitchId}__${selectedDate}__${t.replace(':', '')}`;
                     const lock = locks[lockId];
@@ -302,7 +270,7 @@ export default function BookingSheet({ storeId, pitchId, pricePerSlot = 0, slotD
 
       {/* Mobile Floating Summary Card (Sticky Footer) */}
       <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 dark:border-gray-700 bg-gradient-to-t from-white to-white/95 dark:from-gray-900 dark:to-gray-900/95 backdrop-blur-xl shadow-2xl">
-        <div className="px-4 py-3 max-w-2xl mx-auto">
+        <div className="px-4 py-2 max-w-2xl mx-auto">
           <BookingSummaryCard
             selectedDate={selectedDate}
             selectedSlot={selectedSlot}
@@ -319,7 +287,7 @@ export default function BookingSheet({ storeId, pitchId, pricePerSlot = 0, slotD
       </div>
 
       {/* Add padding to prevent content from being hidden behind sticky footer on mobile */}
-      <div className="md:hidden h-52" />
+      <div className="md:hidden h-36" />
 
       {showCustomerLookup && (
         <CustomerLookupModal isOpen={showCustomerLookup} onClose={() => setShowCustomerLookup(false)} onSuccess={(c: any) => { setCustomer(c); setShowCustomerLookup(false); }} />

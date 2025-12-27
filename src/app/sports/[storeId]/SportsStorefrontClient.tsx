@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, onSnapshot, query, orderBy } from 'firebase/firestore';
+import { motion, AnimatePresence } from 'framer-motion';
 import BookingSheet from '@/components/pitch/BookingSheet';
 import PitchCard from '@/components/pitch/PitchCard';
 
@@ -53,17 +54,54 @@ export default function SportsStorefrontClient({ storeId, initialStoreMeta }: Pr
           ))}
         </div>
 
-        {activePitch && (
-          <div className="fixed inset-0 z-50 flex items-start justify-center pt-20 bg-black/40">
-            <div className="w-full max-w-3xl bg-white rounded p-4">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-semibold">Book: {activePitch.name}</h4>
-                <button onClick={() => setActivePitch(null)} className="px-2 py-1">Close</button>
-              </div>
-              <BookingSheet storeId={storeId} pitchId={activePitch.id} pricePerSlot={activePitch.pricePerSlot || 0} slotDurationMinutes={activePitch.slotDurationMinutes || 60} availability={activePitch.availability || { start: '08:00', end: '22:00' }} />
-            </div>
-          </div>
-        )}
+        <AnimatePresence>
+          {activePitch && (
+            <>
+              {/* Overlay with fade animation */}
+              <motion.div
+                key="overlay"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                onClick={() => setActivePitch(null)}
+                className="fixed inset-0 z-50 bg-black/40"
+              />
+              
+              {/* Modal with slide-up and scale animation */}
+              <motion.div
+                key="modal"
+                initial={{ opacity: 0, y: 100, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 100, scale: 0.95 }}
+                transition={{ 
+                  type: 'spring',
+                  stiffness: 300,
+                  damping: 30,
+                  mass: 1,
+                  duration: 0.3
+                }}
+                className="fixed inset-0 z-50 flex items-start justify-center pt-20 pointer-events-none"
+              >
+                <motion.div 
+                  onClick={(e) => e.stopPropagation()}
+                  className="w-full max-w-3xl bg-white rounded p-4 pointer-events-auto"
+                >
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="font-semibold">Book: {activePitch.name}</h4>
+                    <button 
+                      onClick={() => setActivePitch(null)} 
+                      className="px-2 py-1 hover:bg-gray-100 rounded transition-colors"
+                    >
+                      Close
+                    </button>
+                  </div>
+                  <BookingSheet storeId={storeId} pitchId={activePitch.id} pricePerSlot={activePitch.pricePerSlot || 0} slotDurationMinutes={activePitch.slotDurationMinutes || 60} availability={activePitch.availability || { start: '08:00', end: '22:00' }} />
+                </motion.div>
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

@@ -54,23 +54,11 @@ export default function CalendarStrip({ startDate, selectedDate, onSelectDate }:
     <div className="w-full bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 border-b border-gray-200 dark:border-gray-800">
       <style>{`
         .calendar-scroll::-webkit-scrollbar {
-          height: 4px;
-        }
-        .calendar-scroll::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .calendar-scroll::-webkit-scrollbar-thumb {
-          background: #14b8a6;
-          border-radius: 2px;
-          transition: background 0.3s ease;
-        }
-        .calendar-scroll::-webkit-scrollbar-thumb:hover {
-          background: #0d9488;
+          display: none;
         }
         /* Firefox */
         .calendar-scroll {
-          scrollbar-color: #14b8a6 transparent;
-          scrollbar-width: thin;
+          scrollbar-width: none;
         }
       `}</style>
       <div ref={containerRef} className="calendar-scroll overflow-x-auto px-4 py-3 flex gap-2.5 scroll-smooth">
