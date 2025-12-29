@@ -498,3 +498,31 @@ export const getRevenueAnalytics = async (storeId: string) => {
         };
     }
 };
+
+/**
+ * Acknowledges ready order notifications by adding them to the customer's acknowledgedOrderIds array.
+ * @param customerId - The customer ID
+ * @param orderIds - Array of order IDs to acknowledge
+ */
+export async function acknowledgeOrders(customerId: string, orderIds: string[]): Promise<void> {
+    try {
+        const customerRef = doc(db, 'customers', customerId);
+        
+        // Get current acknowledged orders
+        const customerDoc = await getDoc(customerRef);
+        const currentAcknowledgedIds = customerDoc.data()?.acknowledgedOrderIds || [];
+        
+        // Merge with new ones, avoiding duplicates
+        const updatedAcknowledgedIds = Array.from(new Set([...currentAcknowledgedIds, ...orderIds]));
+        
+        // Update customer document
+        await updateDoc(customerRef, {
+            acknowledgedOrderIds: updatedAcknowledgedIds,
+        });
+        
+        console.log(`✅ Orders acknowledged for customer ${customerId}:`, orderIds);
+    } catch (error) {
+        console.error('Error acknowledging orders:', error);
+        throw error;
+    }
+}
