@@ -126,7 +126,7 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                     soldOut: template?.soldOut || false,
                     useAsTemplate: false,
                     subtype: template?.subtype || 'dish',
-                    preparationTime: template?.preparationTime || 15,
+                    preparationTime: template?.preparationTime || 0,
                     spiciness: template?.spiciness || 'mild',
                     temperature: template?.temperature || 'hot',
                     isAlcoholic: template?.isAlcoholic || false,

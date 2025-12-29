@@ -351,16 +351,28 @@ export default function ProductDetail() {
 
                     {/* Key Details Grid */}
                     <div className="grid grid-cols-2 gap-4">
-                      {product.preparationTime && (
-                        <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700">
-                          <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-xl">
-                            ⏱️
+                      {product.preparationTime !== undefined && (
+                        product.preparationTime === 0 ? (
+                          <div className="flex items-center gap-3 p-3 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-100 dark:border-green-800">
+                            <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-xl">
+                              ✅
+                            </div>
+                            <div>
+                              <p className="text-xs text-green-600 dark:text-green-400 font-medium uppercase tracking-wider">Availability</p>
+                              <p className="font-semibold text-green-700 dark:text-green-300">Ready</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">Prep Time</p>
-                            <p className="font-semibold text-gray-900 dark:text-white">{product.preparationTime} mins</p>
+                        ) : (
+                          <div className="flex items-center gap-3 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700">
+                            <div className="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-xl">
+                              ⏱️
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">Prep Time</p>
+                              <p className="font-semibold text-gray-900 dark:text-white">{product.preparationTime} mins</p>
+                            </div>
                           </div>
-                        </div>
+                        )
                       )}
 
                       {product.spiciness && (

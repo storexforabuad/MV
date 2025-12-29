@@ -195,10 +195,16 @@ export default function ProductCard({ product, storeId, activeCategoryId }: Prod
                     {product.temperature === 'cold' && '❄️ Cold'}
                   </span>
                 )}
-                {product.preparationTime && (
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
-                    ⏱️ {product.preparationTime}m
-                  </span>
+                {product.preparationTime !== undefined && (
+                  product.preparationTime === 0 ? (
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-100 dark:border-green-800">
+                      ✅ Ready
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
+                      ⏱️ {product.preparationTime}m
+                    </span>
+                  )
                 )}
               </div>
             )}
