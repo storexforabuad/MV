@@ -32,22 +32,22 @@ export default function FavouritesModal({ isOpen, onClose }: FavouritesModalProp
           animate="visible"
           exit="exit"
           variants={modalVariants}
-          transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
+          transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
         >
           {/* Header */}
-          <header className="flex-shrink-0 flex items-center justify-between w-full max-w-5xl mx-auto p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
+          <header className="flex-shrink-0 flex items-center justify-between w-full max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-6 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Favourites</h2>
               <p className="text-xs text-slate-500 dark:text-slate-400">{mockFavourites.length} saved pitches</p>
             </div>
-            <motion.div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center shadow-lg">
+            <motion.div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-pink-500 flex items-center justify-center shadow-lg flex-shrink-0">
               <Heart className="w-6 h-6 text-white fill-white" />
             </motion.div>
           </header>
 
           {/* Main Content */}
-          <main className="flex-grow w-full max-w-5xl mx-auto overflow-y-auto p-4 sm:p-6 scrollbar-hide">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <main className="flex-grow w-full max-w-5xl mx-auto overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 scrollbar-hide">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
               {mockFavourites.map((item, index) => (
                 <motion.div
                   key={item.id}
@@ -97,7 +97,7 @@ export default function FavouritesModal({ isOpen, onClose }: FavouritesModalProp
           </main>
 
           {/* Footer */}
-          <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-slate-700">
+          <footer className="relative mt-auto flex-shrink-0 px-4 sm:px-6 py-4 sm:py-5 border-t border-gray-200 dark:border-slate-700">
             <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent dark:from-slate-950 dark:to-transparent pointer-events-none" />
             <div className="relative max-w-5xl mx-auto">
               <motion.button

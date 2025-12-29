@@ -74,36 +74,33 @@ export default function SportsStorefrontClient({ storeId, initialStoreMeta }: Pr
                 className="fixed inset-0 z-50 bg-black/40"
               />
               
-              {/* Modal with slide-up and scale animation */}
+              {/* Fullscreen Modal */}
               <motion.div
                 key="modal"
-                initial={{ opacity: 0, y: 100, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 100, scale: 0.95 }}
-                transition={{ 
-                  type: 'spring',
-                  stiffness: 300,
-                  damping: 30,
-                  mass: 1,
-                  duration: 0.3
-                }}
-                className="fixed inset-0 z-50 flex items-start justify-center pt-20 pointer-events-none"
+                initial={{ opacity: 0, y: 100 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 100 }}
+                transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+                className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
               >
-                <motion.div 
-                  onClick={(e) => e.stopPropagation()}
-                  className="w-full max-w-3xl bg-white rounded p-4 pointer-events-auto"
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="font-semibold">Book: {activePitch.name}</h4>
-                    <button 
-                      onClick={() => setActivePitch(null)} 
-                      className="px-2 py-1 hover:bg-gray-100 rounded transition-colors"
-                    >
-                      Close
-                    </button>
+                {/* Header */}
+                <header className="flex-shrink-0 flex items-center justify-between w-full max-w-5xl mx-auto px-4 sm:px-6 py-4 sm:py-6 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
+                  <div>
+                    <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Book: {activePitch.name}</h2>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Select date and time</p>
                   </div>
+                  <motion.button
+                    onClick={() => setActivePitch(null)}
+                    className="px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors text-sm font-semibold flex-shrink-0"
+                  >
+                    Close
+                  </motion.button>
+                </header>
+
+                {/* Main Content */}
+                <main className="flex-grow w-full max-w-5xl mx-auto overflow-y-auto px-4 sm:px-6 py-4 sm:py-6 scrollbar-hide">
                   <BookingSheet storeId={storeId} pitchId={activePitch.id} pricePerSlot={activePitch.pricePerSlot || 0} slotDurationMinutes={activePitch.slotDurationMinutes || 60} availability={activePitch.availability || { start: '08:00', end: '22:00' }} />
-                </motion.div>
+                </main>
               </motion.div>
             </>
           )}

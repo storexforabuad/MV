@@ -196,18 +196,20 @@ export default function BookingSheet({ storeId, pitchId, pricePerSlot = 0, slotD
   };
 
   return (
-    <div className="w-full flex flex-col min-h-screen bg-gray-50 dark:bg-gray-950">
-      <CalendarStrip selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+    <div className="w-full flex flex-col h-screen bg-gray-50 dark:bg-gray-950">
+      <div className="sticky top-0 z-40 bg-white dark:bg-slate-950 border-b border-slate-200 dark:border-slate-800">
+        <CalendarStrip selectedDate={selectedDate} onSelectDate={setSelectedDate} />
+        <div className="px-4 py-3 flex items-center justify-between border-t border-slate-200 dark:border-slate-800">
+          <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Available Slots</h3>
+          <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">{selectedDate}</span>
+        </div>
+      </div>
 
       {/* Main Content - Slots Grid */}
-      <div className="flex-1 px-4 py-4 md:py-6 flex flex-col">
-        <div className="md:grid md:grid-cols-3 md:gap-6 flex-1 flex flex-col">
+      <div className="flex-1 px-4 py-4 md:py-6 flex flex-col overflow-hidden">
+        <div className="md:grid md:grid-cols-3 md:gap-6 flex-1 flex flex-col min-h-0">
           <div className="md:col-span-2 flex flex-col min-h-0">
             <div className="flex-1 flex flex-col min-h-0">
-              <div className="flex items-center justify-between mb-4 md:mb-0">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">Available Slots</h3>
-                <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">{selectedDate}</span>
-              </div>
               <style>{`
                 .slots-scroll::-webkit-scrollbar {
                   display: none;
@@ -217,7 +219,7 @@ export default function BookingSheet({ storeId, pitchId, pricePerSlot = 0, slotD
                   scrollbar-width: none;
                 }
               `}</style>
-              <div className="slots-scroll overflow-y-auto pr-1 flex-1 max-h-96">
+              <div className="slots-scroll overflow-y-auto pr-1 flex-1">
                 <div className="grid grid-cols-2 gap-1.5 md:grid-cols-3 md:gap-3 pb-0">
                   {slots.map((t) => {
                     const lockId = `${pitchId}__${selectedDate}__${t.replace(':', '')}`;
