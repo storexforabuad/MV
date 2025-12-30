@@ -399,6 +399,23 @@ h1, h2, h3 {
   transform: scale(1.01);
 }
 
+/* Ready Orders Modal helpers */
+.ready-modal-title {
+  font-size: clamp(1.125rem, 4.5vw, 1.75rem); /* ~18px -> 28px scaling */
+  line-height: 1.05;
+  word-break: break-word;
+}
+.ready-orders-modal__header {
+  /* Ensure header never grows beyond half the viewport and allow internal scroll if needed */
+  max-height: calc(var(--dvh, 1vh) * 50);
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+/* Utility to respect iOS notch if needed */
+.ready-orders-modal--safe-pt {
+  padding-top: calc(1rem + env(safe-area-inset-top, 0px));
+}
+
 /* Input Styles */
 .input {
   background-color: var(--input-background);
