@@ -2,7 +2,7 @@
 
 import { Fragment, useState, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { XMarkIcon, HomeIcon, BriefcaseIcon } from '@heroicons/react/24/outline';
+import { HomeIcon, BriefcaseIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import { CartItem, useCart } from '@/lib/cartContext';
 import { StoreMeta } from '@/types/store';
@@ -15,6 +15,8 @@ import { getCustomerDetails } from '@/app/actions/customerActions';
 import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
 import { saveModalState, getModalState, clearModalState } from '@/lib/paymentModalStorage';
 import PaymentFlowPage from './PaymentFlowPage';
+import ModalShell from './ModalShell';
+import OrderSummaryStrip from './OrderSummaryStrip';
 
 interface CartOrderSummaryModalProps {
   isOpen: boolean;
@@ -179,149 +181,147 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
         <div className="fixed inset-0 z-10 overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
             <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" enterTo="opacity-100 translate-y-0 sm:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 sm:scale-100" leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
-              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6">
-                {/* Close button */}
-                <button
-                  type="button"
-                  className="absolute right-4 top-4 -m-2 p-2 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
-                  onClick={onClose}
-                >
-                  <XMarkIcon className="h-6 w-6" aria-hidden="true" />
-                </button>
-
-                {/* Page 1: Cart Summary */}
-                {currentPage === 1 && (
-                  <div>
-                    <Dialog.Title as="h3" className="text-lg font-medium leading-6 text-gray-900 dark:text-white">
-                      Cart Summary
-                    </Dialog.Title>
-
-                    <div className="mt-4 max-h-60 overflow-y-auto pr-2 divide-y divide-gray-200 dark:divide-gray-700">
-                      {cartItems.map(item => (
-                        <div key={item.id + (item.selectedColor || '') + (item.selectedSize || '')} className="flex items-center space-x-4 py-3">
-                          <Image src={item.images[0]} alt={item.name} width={48} height={48} className="h-12 w-12 rounded-md object-cover flex-shrink-0" />
-                          <div className="flex-1">
-                            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200 truncate">{item.name}</h4>
-                            <div className="flex flex-wrap gap-2 mt-1">
-                              {item.selectedColor && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                                  Color: {item.selectedColor}
-                                </span>
-                              )}
-                              {item.selectedSize && (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                                  Size: {item.selectedSize}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                              {formatPrice(item.price)} x {item.quantity}
-                            </p>
-                          </div>
-                          <p className="text-sm font-medium text-gray-900 dark:text-gray-200 ml-auto">{formatPrice(item.price * item.quantity)}</p>
+              <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white dark:bg-gray-800 px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-xl sm:p-6">
+                <ModalShell
+                  title={currentPage === 1 ? 'Cart Summary' : 'Payment'}
+                  onClose={onClose}
+                  strip={currentPage === 2 ? (
+                    <OrderSummaryStrip total={total}>
+                      <div className="truncate text-sm font-medium">{cartItems.length} items</div>
+                    </OrderSummaryStrip>
+                  ) : undefined}
+                  footer={
+                    currentPage === 1 ? (
+                      <div>
+                        <button
+                          type="button"
+                          className="w-full rounded-md border border-transparent bg-green-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:bg-green-400 disabled:cursor-not-allowed"
+                          onClick={isPaymentFlowEnabled ? handleProceedToPayment : handlePlaceOrder}
+                          disabled={isPlacingOrder || !storeId || (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false)}
+                        >
+                          {isPlacingOrder ? (
+                            <>
+                              <Loader2 className="inline-block -ml-1 mr-3 h-5 w-5 animate-spin" />
+                              Processing...
+                            </>
+                          ) : (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false) ? (
+                            'Store Closed'
+                          ) : isPaymentFlowEnabled ? (
+                            'Proceed to Payment'
+                          ) : (
+                            'Place Order'
+                          )}
+                        </button>
+                      </div>
+                    ) : (
+                      currentPage === 2 && isPaymentFlowEnabled && (
+                        <div>
+                          <button
+                            type="button"
+                            className="w-full rounded-md border border-transparent bg-green-600 px-4 py-3 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:bg-green-400 disabled:cursor-not-allowed"
+                            onClick={handlePlaceOrder}
+                            disabled={isPlacingOrder || !uploadedEvidence}
+                          >
+                            {isPlacingOrder ? (
+                              <>
+                                <Loader2 className="inline-block -ml-1 mr-3 h-5 w-5 animate-spin" />
+                                Placing Order...
+                              </>
+                            ) : (
+                              'Complete Order'
+                            )}
+                          </button>
                         </div>
-                      ))}
-                    </div>
+                      )
+                    )
+                  }
+                >
+                  {/* Page 1: Cart Summary */}
+                  {currentPage === 1 && (
+                    <div>
+                      <div className="mt-4 max-h-60 overflow-y-auto pr-2 divide-y divide-gray-200 dark:divide-gray-700">
+                        {cartItems.map(item => (
+                          <div key={item.id + (item.selectedColor || '') + (item.selectedSize || '')} className="flex items-center space-x-4 py-3">
+                            <Image src={item.images[0]} alt={item.name} width={48} height={48} className="h-12 w-12 rounded-md object-cover flex-shrink-0" />
+                            <div className="flex-1">
+                              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200 truncate">{item.name}</h4>
+                              <div className="flex flex-wrap gap-2 mt-1">
+                                {item.selectedColor && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                    Color: {item.selectedColor}
+                                  </span>
+                                )}
+                                {item.selectedSize && (
+                                  <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                                    Size: {item.selectedSize}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                {formatPrice(item.price)} x {item.quantity}
+                              </p>
+                            </div>
+                            <p className="text-sm font-medium text-gray-900 dark:text-gray-200 ml-auto">{formatPrice(item.price * item.quantity)}</p>
+                          </div>
+                        ))}
+                      </div>
 
-                    {/* Order Notes */}
-                    <div className="mt-6">
-                      <label htmlFor="order-notes" className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-2 block">
-                        Special Instructions (Optional)
-                      </label>
-                      <textarea
-                        id="order-notes"
-                        rows={2}
-                        className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm"
-                        placeholder="Any special requests for this order?"
-                        value={orderNotes}
-                        onChange={(e) => setOrderNotes(e.target.value)}
+                      {/* Order Notes */}
+                      <div className="mt-6">
+                        <label htmlFor="order-notes" className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-2 block">
+                          Special Instructions (Optional)
+                        </label>
+                        <textarea
+                          id="order-notes"
+                          rows={2}
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white sm:text-sm"
+                          placeholder="Any special requests for this order?"
+                          value={orderNotes}
+                          onChange={(e) => setOrderNotes(e.target.value)}
+                        />
+                      </div>
+
+                      {/* Delivery Method */}
+                      <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200">Delivery Method</h4>
+                        <div className="mt-2 grid grid-cols-2 gap-4">
+                          <div onClick={() => setDeliveryMethod('home')} className={`flex cursor-pointer items-center rounded-lg border p-4 ${deliveryMethod === 'home' ? 'border-indigo-500 ring-1 ring-indigo-500' : 'border-gray-300 dark:border-gray-600'}`}>
+                            <HomeIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" /><span className="ml-3 text-sm font-medium dark:text-gray-300">Home Delivery</span>
+                          </div>
+                          <div onClick={() => setDeliveryMethod('pickup')} className={`flex cursor-pointer items-center rounded-lg border p-4 ${deliveryMethod === 'pickup' ? 'border-indigo-500 ring-1 ring-indigo-500' : 'border-gray-300 dark:border-gray-600'}`}>
+                            <BriefcaseIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" /><span className="ml-3 text-sm font-medium dark:text-gray-300">Pick Up</span>
+                          </div>
+                        </div>
+                        {deliveryMethod === 'home' && customer && customer.deliveryAddress && <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">To: {customer.name} - {customer.deliveryAddress.street}</p>}
+                      </div>
+
+                      <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
+                        <dl className="space-y-1 text-sm text-gray-500 dark:text-gray-400">
+                          <div className="flex justify-between"><dt>Subtotal</dt><dd className="font-medium text-gray-900 dark:text-gray-200">{formatPrice(subtotal)}</dd></div>
+                          {deliveryMethod === 'home' && (
+                            <div className="flex justify-between">
+                              <dt>Home delivery</dt>
+                              <dd className="font-medium text-gray-900 dark:text-gray-200">TBD by vendor</dd>
+                            </div>
+                          )}
+                          <div className="flex justify-between text-base font-medium text-gray-900 dark:text-white"><dt>Total</dt><dd>{formatPrice(total)}</dd></div>
+                        </dl>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Page 2: Payment Flow */}
+                  {currentPage === 2 && isPaymentFlowEnabled && storeMeta && (
+                    <div>
+                      <PaymentFlowPage
+                        storeMeta={storeMeta}
+                        onEvidenceUploaded={handleEvidenceUploaded}
+                        onBack={handleBackToSummary}
+                        uploadedEvidence={uploadedEvidence}
                       />
                     </div>
-
-                    {/* Delivery Method */}
-                    <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
-                      <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200">Delivery Method</h4>
-                      <div className="mt-2 grid grid-cols-2 gap-4">
-                        <div onClick={() => setDeliveryMethod('home')} className={`flex cursor-pointer items-center rounded-lg border p-4 ${deliveryMethod === 'home' ? 'border-indigo-500 ring-1 ring-indigo-500' : 'border-gray-300 dark:border-gray-600'}`}>
-                          <HomeIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" /><span className="ml-3 text-sm font-medium dark:text-gray-300">Home Delivery</span>
-                        </div>
-                        <div onClick={() => setDeliveryMethod('pickup')} className={`flex cursor-pointer items-center rounded-lg border p-4 ${deliveryMethod === 'pickup' ? 'border-indigo-500 ring-1 ring-indigo-500' : 'border-gray-300 dark:border-gray-600'}`}>
-                          <BriefcaseIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" /><span className="ml-3 text-sm font-medium dark:text-gray-300">Pick Up</span>
-                        </div>
-                      </div>
-                      {deliveryMethod === 'home' && customer && customer.deliveryAddress && <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">To: {customer.name} - {customer.deliveryAddress.street}</p>}
-                    </div>
-
-                    <div className="mt-6 border-t border-gray-200 dark:border-gray-700 pt-4">
-                      <dl className="space-y-1 text-sm text-gray-500 dark:text-gray-400">
-                        <div className="flex justify-between"><dt>Subtotal</dt><dd className="font-medium text-gray-900 dark:text-gray-200">{formatPrice(subtotal)}</dd></div>
-                        {deliveryMethod === 'home' && (
-                          <div className="flex justify-between">
-                            <dt>Home delivery</dt>
-                            <dd className="font-medium text-gray-900 dark:text-gray-200">TBD by vendor</dd>
-                          </div>
-                        )}
-                        <div className="flex justify-between text-base font-medium text-gray-900 dark:text-white"><dt>Total</dt><dd>{formatPrice(total)}</dd></div>
-                      </dl>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="mt-5 sm:mt-6 grid grid-cols-2 gap-3">
-                      <button type="button" className="w-full rounded-md border border-gray-300 bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600 px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" onClick={onClose} disabled={isPlacingOrder}>Cancel</button>
-                      <button
-                        type="button"
-                        className="w-full rounded-md border border-transparent bg-green-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:bg-green-400 disabled:cursor-not-allowed"
-                        onClick={isPaymentFlowEnabled ? handleProceedToPayment : handlePlaceOrder}
-                        disabled={isPlacingOrder || !storeId || (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false)}
-                      >
-                        {isPlacingOrder ? (
-                          <>
-                            <Loader2 className="inline-block -ml-1 mr-3 h-5 w-5 animate-spin" />
-                            Processing...
-                          </>
-                        ) : (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false) ? (
-                          'Store Closed'
-                        ) : isPaymentFlowEnabled ? (
-                          'Proceed to Payment'
-                        ) : (
-                          'Place Order'
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Page 2: Payment Flow */}
-                {currentPage === 2 && isPaymentFlowEnabled && storeMeta && (
-                  <div>
-                    <PaymentFlowPage
-                      storeMeta={storeMeta}
-                      onEvidenceUploaded={handleEvidenceUploaded}
-                      onBack={handleBackToSummary}
-                      uploadedEvidence={uploadedEvidence}
-                    />
-
-                    {/* Action Buttons */}
-                    <div className="mt-6 grid grid-cols-2 gap-3">
-                      <button type="button" className="w-full rounded-md border border-gray-300 bg-white dark:bg-gray-700 dark:text-white dark:border-gray-600 px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2" onClick={onClose} disabled={isPlacingOrder}>Cancel</button>
-                      <button
-                        type="button"
-                        className="w-full rounded-md border border-transparent bg-green-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:bg-green-400 disabled:cursor-not-allowed"
-                        onClick={handlePlaceOrder}
-                        disabled={isPlacingOrder || !uploadedEvidence}
-                      >
-                        {isPlacingOrder ? (
-                          <>
-                            <Loader2 className="inline-block -ml-1 mr-3 h-5 w-5 animate-spin" />
-                            Placing Order...
-                          </>
-                        ) : (
-                          'Complete Order'
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                )}
+                  )}
+                </ModalShell>
               </Dialog.Panel>
             </Transition.Child>
           </div>
