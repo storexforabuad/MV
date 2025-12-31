@@ -29,6 +29,11 @@ export interface Order {
     orderDate: string; // ISO string
     orderStatus: 'processing' | 'partially-ready' | 'ready' | 'shipped';
     orderNotes?: string;
+    // Payment-related fields (currently for restaurant orders only, expandable to other store types)
+    paymentEvidenceUrl?: string; // Cloudinary URL of payment proof - latest upload only
+    paymentStatus?: 'pending' | 'submitted'; // pending: no evidence yet, submitted: customer uploaded evidence
+    paymentEvidenceUploadedAt?: string; // ISO string - for TTL cleanup tracking (30 days)
+    paymentEvidenceFileName?: string; // Original filename for reference
 }
 
 // Type for the detailed order object returned to the ADMIN client.
@@ -63,6 +68,12 @@ interface FirestoreOrderData {
     };
     referralApplied?: boolean;
     orderNotes?: string;
+    // Payment-related fields (restaurant orders, expandable to other types)
+    paymentEvidenceUrl?: string;
+    paymentStatus?: 'pending' | 'submitted';
+    paymentEvidenceUploadedAt?: Timestamp;
+    paymentEvidenceFileName?: string;
+    ttl?: number; // Unix timestamp in seconds - Firestore TTL for auto-cleanup after 30 days
 }
 
 /**
@@ -76,7 +87,9 @@ export const addOrderToFirestore = async (
     referralCode: string | null,
     bonusApplied: boolean = false,
     deliveryMethod: 'home' | 'pickup' = 'home',
-    orderNotes?: string
+    orderNotes?: string,
+    paymentEvidenceUrl?: string,
+    paymentEvidenceFileName?: string
 ): Promise<Order> => {
     try {
         const storeId = storeMeta.id;
@@ -152,6 +165,17 @@ export const addOrderToFirestore = async (
             },
             ...(referralWasApplied && { referralApplied: true }),
             ...(orderNotes && { orderNotes }),
+            // Payment fields (for restaurant orders with payment evidence)
+            ...(paymentEvidenceUrl && {
+                paymentEvidenceUrl,
+                paymentStatus: 'submitted' as const,
+                paymentEvidenceUploadedAt: orderDate,
+                paymentEvidenceFileName,
+                ttl: Math.floor(orderDate.toMillis() / 1000) + 2592000, // 30 days in seconds
+            }),
+            ...(!paymentEvidenceUrl && storeMeta.storeType === 'restaurant' && {
+                paymentStatus: 'pending' as const,
+            }),
         };
 
         const customerOrderRef = doc(db, 'customers', customerId, 'orders', newOrderId);
@@ -180,6 +204,15 @@ export const addOrderToFirestore = async (
             storeMeta,
             orderDate: orderDate.toDate().toISOString(),
             orderStatus: 'processing',
+            ...(paymentEvidenceUrl && {
+                paymentEvidenceUrl,
+                paymentStatus: 'submitted' as const,
+                paymentEvidenceUploadedAt: orderDate.toDate().toISOString(),
+                paymentEvidenceFileName,
+            }),
+            ...(!paymentEvidenceUrl && storeMeta.storeType === 'restaurant' && {
+                paymentStatus: 'pending' as const,
+            }),
         };
 
     } catch (error) {
@@ -355,6 +388,15 @@ const transformOrderData = (doc: any): StoreOrder => {
         customerInfo: customerInfo,
         referralApplied: data.referralApplied || false,
         orderNotes: data.orderNotes,
+        // Payment fields - convert Timestamp if present
+        paymentEvidenceUrl: data.paymentEvidenceUrl,
+        paymentStatus: data.paymentStatus,
+        paymentEvidenceFileName: data.paymentEvidenceFileName,
+        paymentEvidenceUploadedAt: data.paymentEvidenceUploadedAt
+            ? typeof data.paymentEvidenceUploadedAt.toDate === 'function'
+                ? data.paymentEvidenceUploadedAt.toDate().toISOString()
+                : data.paymentEvidenceUploadedAt
+            : undefined,
     };
 };
 

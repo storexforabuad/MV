@@ -134,3 +134,40 @@ match /productMetrics/{metricId} {
 match /stockNotifications/{notificationId} {
   allow read, write, create, update, delete: if true;
 }
+
+// --- Payment Evidence TTL (Time-To-Live) Configuration ---
+// Orders collection documents include a `ttl` field (Unix timestamp in seconds)
+// that automatically expires payment evidence after 30 days.
+//
+// IMPORTANT: To enable automatic document deletion via TTL in Firestore:
+//
+// 1. Go to Firebase Console → Firestore Database → TTL Management
+// 2. Enable TTL for the `orders` collection if not already enabled
+// 3. Set the TTL field name to: `ttl`
+//
+// HOW IT WORKS:
+// - When a payment evidence is uploaded for a restaurant order, the backend sets:
+//   - paymentEvidenceUrl: <Cloudinary URL>
+//   - paymentStatus: 'submitted'
+//   - paymentEvidenceUploadedAt: <Timestamp>
+//   - ttl: <Current timestamp in seconds + 2,592,000 seconds (30 days)>
+//
+// - Firestore automatically deletes the entire document when the TTL timestamp is reached
+// - This ensures payment evidence is not stored indefinitely
+// - No Cloud Functions are required - TTL is a native Firestore feature
+//
+// PAYMENT FIELD STRUCTURE:
+// {
+//   paymentEvidenceUrl?: string; // Cloudinary URL of payment proof
+//   paymentStatus?: 'pending' | 'submitted'; // pending: no evidence, submitted: evidence uploaded
+//   paymentEvidenceUploadedAt?: Timestamp; // When evidence was uploaded
+//   paymentEvidenceFileName?: string; // Original filename for reference
+//   ttl?: number; // Unix timestamp in seconds - for automatic 30-day cleanup
+// }
+//
+// IMPORTANT NOTES:
+// - This feature is restaurant-specific for now but designed to be expandable to other store types
+// - The payment flow is only enabled for store type 'restaurant'
+// - Once TTL expires, the entire order document is deleted, including all order details
+// - Consider archiving important order data before TTL expiry if needed for records
+```

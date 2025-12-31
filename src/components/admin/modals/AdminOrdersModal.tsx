@@ -8,6 +8,7 @@ import { formatPrice } from '@/utils/price';
 import { useState, useTransition, useEffect } from 'react';
 import { toast } from 'react-hot-toast';
 import { MarkOrderReadyModal } from './MarkOrderReadyModal';
+import PaymentEvidenceViewer from './PaymentEvidenceViewer';
 
 interface AdminOrdersModalProps {
   isOpen: boolean;
@@ -121,6 +122,14 @@ const CustomerOrdersCard = ({ order, onMarkReady, isHighlighted }: { order: Stor
           <OrderProductRow key={product.id || index} product={product} />
         ))}
       </div>
+
+      {/* Payment Evidence Viewer - for restaurant orders with payment evidence */}
+      <PaymentEvidenceViewer
+        paymentEvidenceUrl={order.paymentEvidenceUrl}
+        paymentEvidenceFileName={order.paymentEvidenceFileName}
+        paymentEvidenceUploadedAt={order.paymentEvidenceUploadedAt}
+        paymentStatus={order.paymentStatus}
+      />
 
       <button
         onClick={() => onMarkReady(order)}
