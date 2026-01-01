@@ -413,15 +413,15 @@ export default function AdminStorePageClient({
                   categories={categories}
                   contacts={contacts}
                   setActiveSection={setActiveSection}
-                    storeLink={`/${storeId}`}
-                    storeType={storeMeta?.storeType}
+                  storeLink={`/${storeId}`}
+                  storeType={storeMeta?.storeType}
                   onRefresh={() => fetchData(true)}
                   isRefreshing={isRefreshing}
                   totalProducts={products.length}
                   totalCategories={categories.length}
                   totalViews={products.reduce((sum, p) => sum + (p.views || 0), 0)}
                   debtors={0}
-                  subscriptionStatus={"Active"}
+                  subscriptionStatus={storeMeta?.subscriptionStatus || 'trial'}
                   referrals={referrals.length}
                   onReferralAdded={() => fetchData(true)}
                   totalContacts={contacts.reduce((sum, region) => sum + (region.contacts?.length || 0), 0)}
@@ -430,6 +430,7 @@ export default function AdminStorePageClient({
                   promoCaption={storeMeta?.promoCaption}
                   uiVisible={uiVisible}
                   storeName={storeMeta?.name}
+                  ceoEmail={storeMeta?.ceoEmail}
                   totalRevenue={realTotalRevenue}
                   onAnimationComplete={handleAnimationComplete}
                   onOrdersCardClick={() => setIsOrdersModalOpen(true)}
