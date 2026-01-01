@@ -86,8 +86,6 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           storeName: storeName || 'Store',
           language: 'en', // Explicitly set language
         },
-        channels: ['card', 'bank', 'ussd', 'bank_transfer'],
-        label: storeName,
         onClose: () => {
           setSubscribing(false);
         },
