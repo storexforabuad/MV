@@ -13,6 +13,8 @@ import { ShoppingBag, ClipboardListIcon, PlusCircle, Save, RefreshCw, Trash2, XC
 import CreateStoreModal from '../../components/admin/modals/CreateStoreModal';
 import { motion } from 'framer-motion';
 import DevTeamReferrals from '../../components/devteam/DevTeamReferrals';
+import { DevTeamStoreCard } from '../../components/devteam/DevTeamStoreCard';
+import type { SubscriptionStatus } from '../../types/subscription';
 
 interface StoreStats {
   id: string;
@@ -36,6 +38,7 @@ export default function DevteamPage() {
   const [isResettingViews, setIsResettingViews] = useState(false); // State for reset views button
   const [isClearingStoreOrders, setIsClearingStoreOrders] = useState(false); // State for clear store orders
   const [isClearingAllOrders, setIsClearingAllOrders] = useState(false); // State for clear all orders
+  const [subscriptionFilter, setSubscriptionFilter] = useState<SubscriptionStatus | 'all'>('all'); // Subscription filter
 
   const fetchStores = useCallback(async () => {
     const data = await getStores();
@@ -217,6 +220,96 @@ export default function DevteamPage() {
               {isClearingAllOrders ? 'Clearing...' : '🚨 Clear ALL Orders'}
             </button>
           </div>
+
+          {/* Subscription Management Section */}
+          <section className="mb-8">
+            <div className="flex flex-col items-center mb-4">
+              <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Vendor Subscriptions</h2>
+              <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+                Monitor and manage subscription status for all vendors
+              </p>
+            </div>
+
+            {/* Filter Buttons */}
+            <div className="flex flex-wrap justify-center gap-2 mb-6">
+              <button
+                onClick={() => setSubscriptionFilter('all')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${subscriptionFilter === 'all'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700'
+                  }`}
+              >
+                All Stores ({stores.length})
+              </button>
+              <button
+                onClick={() => setSubscriptionFilter('trial')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${subscriptionFilter === 'trial'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700'
+                  }`}
+              >
+                🔵 Trial ({stores.filter(s => (s.subscriptionStatus || 'trial') === 'trial').length})
+              </button>
+              <button
+                onClick={() => setSubscriptionFilter('active')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${subscriptionFilter === 'active'
+                    ? 'bg-green-600 text-white shadow-md'
+                    : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700'
+                  }`}
+              >
+                🟢 Active ({stores.filter(s => s.subscriptionStatus === 'active').length})
+              </button>
+              <button
+                onClick={() => setSubscriptionFilter('past_due')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${subscriptionFilter === 'past_due'
+                    ? 'bg-yellow-600 text-white shadow-md'
+                    : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700'
+                  }`}
+              >
+                🟡 Past Due ({stores.filter(s => s.subscriptionStatus === 'past_due').length})
+              </button>
+              <button
+                onClick={() => setSubscriptionFilter('expired')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${subscriptionFilter === 'expired'
+                    ? 'bg-red-600 text-white shadow-md'
+                    : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700'
+                  }`}
+              >
+                🔴 Expired ({stores.filter(s => s.subscriptionStatus === 'expired').length})
+              </button>
+              <button
+                onClick={() => setSubscriptionFilter('cancelled')}
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${subscriptionFilter === 'cancelled'
+                    ? 'bg-gray-600 text-white shadow-md'
+                    : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700'
+                  }`}
+              >
+                ⚫ Cancelled ({stores.filter(s => s.subscriptionStatus === 'cancelled').length})
+              </button>
+            </div>
+
+            {/* Store Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {stores
+                .filter(store =>
+                  subscriptionFilter === 'all' ||
+                  (store.subscriptionStatus || 'trial') === subscriptionFilter
+                )
+                .map(store => (
+                  <DevTeamStoreCard
+                    key={store.id}
+                    storeId={store.id}
+                    storeName={store.name}
+                    logo={store.logo}
+                    subscriptionStatus={store.subscriptionStatus || 'trial'}
+                    subscriptionTrialEndsAt={store.subscriptionTrialEndsAt}
+                    subscriptionNextBillingDate={store.subscriptionNextBillingDate}
+                    ceoEmail={store.ceoEmail}
+                    ceoName={store.ceoName}
+                  />
+                ))}
+            </div>
+          </section>
 
           <section className="mb-6">
             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 text-center">Select a Store to Manage</label>

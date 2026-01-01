@@ -1,5 +1,5 @@
 'use client';
-import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays, CheckCircle2, Briefcase } from 'lucide-react';
+import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays, CheckCircle2, Briefcase, ShieldCheck } from 'lucide-react';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useVendor } from '@/context/VendorContext';
 import { motion, Variants } from 'framer-motion';
@@ -26,6 +26,7 @@ import PayCommissionModal from './modals/PayCommissionModal';
 import ExpensesModal from './modals/ExpensesModal';
 import { AdvertisingModal } from './modals/AdvertisingModal';
 import { EventsModal } from './modals/EventsModal';
+import SubscriptionModal from './modals/SubscriptionModal';
 
 // Import the customer components
 import { AdminCustomersCard } from './AdminCustomersCard';
@@ -46,7 +47,7 @@ interface AdminHomeCardsProps {
   totalViews: number;
   storeLink: string;
   referrals: number;
- 
+
   storeId: string;
   totalOrders: number;
   uiVisible: boolean;
@@ -71,6 +72,7 @@ interface AdminHomeCardsProps {
   storeName?: string;
   deliveries: number;
   ambassadorTier?: string;
+  ceoEmail?: string; // For subscription modal
 }
 
 const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferralBonus: number, handleClose: () => void }) => (
@@ -198,6 +200,15 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     glowClass: 'dark:shadow-indigo-500/30 shadow-indigo-500/50',
   },
   {
+    label: 'Subscription',
+    subtitle: 'Manage',
+    icon: ShieldCheck,
+    gradient: 'bg-gradient-to-br from-teal-500 via-emerald-600 to-green-700',
+    text: 'text-white',
+    component: SubscriptionModal,
+    glowClass: 'dark:shadow-teal-500/30 shadow-teal-500/50',
+  },
+  {
     label: 'Manage Products',
     valueKey: 'totalProducts',
     icon: Archive,
@@ -246,6 +257,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [isExpensesModalOpen, setIsExpensesModalOpen] = useState(false);
   const [isAdvertisingModalOpen, setIsAdvertisingModalOpen] = useState(false);
   const [isEventsModalOpen, setIsEventsModalOpen] = useState(false);
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [showPostsNotification, setShowPostsNotification] = useState(false);
   const [bankAccountName, setBankAccountName] = useState<string | null>(null);
   const [bankAccountNumber, setBankAccountNumber] = useState<string | null>(null);
@@ -318,7 +330,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   }
 
   useEffect(() => {
-    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen || isAdvertisingModalOpen || isEventsModalOpen;
+    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen || isAdvertisingModalOpen || isEventsModalOpen || isSubscriptionModalOpen;
     if (modalIsOpen) {
       window.history.pushState({ modalOpen: true }, '');
       const handlePopState = () => {
@@ -336,6 +348,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         setIsExpensesModalOpen(false);
         setIsAdvertisingModalOpen(false);
         setIsEventsModalOpen(false);
+        setIsSubscriptionModalOpen(false);
         if (setIsModalOpen) setIsModalOpen(false);
       };
       window.addEventListener('popstate', handlePopState);
@@ -346,7 +359,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         }
       };
     }
-  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, isAdvertisingModalOpen, isEventsModalOpen, setIsModalOpen]);
+  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, isAdvertisingModalOpen, isEventsModalOpen, isSubscriptionModalOpen, setIsModalOpen]);
 
   const handleOpenModal = (idx: number, card: typeof cardData[0]) => {
     const { label, subtitle } = card;
@@ -368,6 +381,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     else if (label === 'Expenses') setIsExpensesModalOpen(true);
     else if (label === 'Advert') setIsAdvertisingModalOpen(true);
     else if (label === 'Events') setIsEventsModalOpen(true);
+    else if (label === 'Subscription') setIsSubscriptionModalOpen(true);
     else setOpenModal(idx);
 
     if (props.setIsModalOpen && label !== 'Orders' && label !== 'Manage Products' && label !== 'Ambassador' && label !== 'Manage Categories') props.setIsModalOpen(true);
@@ -428,6 +442,11 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
   const handleCloseEventsModal = () => {
     setIsEventsModalOpen(false);
+    if (props.setIsModalOpen) props.setIsModalOpen(false);
+  }
+
+  const handleCloseSubscriptionModal = () => {
+    setIsSubscriptionModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
@@ -715,6 +734,15 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
       {isAdvertisingModalOpen && (<AdvertisingModal isOpen={isAdvertisingModalOpen} onClose={handleCloseAdvertisingModal} />)}
 
       {isEventsModalOpen && (<EventsModal isOpen={isEventsModalOpen} onClose={handleCloseEventsModal} />)}
+
+      {isSubscriptionModalOpen && (
+        <SubscriptionModal
+          handleClose={handleCloseSubscriptionModal}
+          storeId={storeId}
+          ceoEmail={props.ceoEmail}
+          storeName={props.storeName}
+        />
+      )}
 
       {openModal !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md" onClick={handleCloseModal}>

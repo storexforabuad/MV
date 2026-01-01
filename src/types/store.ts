@@ -48,6 +48,17 @@ export interface StoreMeta {
   bankAccountName?: string;
   bankAccountNumber?: string;
   bankName?: string;
+
+  // Subscription Management
+  subscriptionStatus?: 'trial' | 'active' | 'past_due' | 'cancelled' | 'expired';
+  subscriptionPlanCode?: string;     // Paystack plan code
+  subscriptionCode?: string;         // Paystack subscription code
+  paystackCustomerCode?: string;     // Paystack customer code for recurring billing
+  subscriptionStartDate?: Timestamp;
+  subscriptionNextBillingDate?: Timestamp;
+  subscriptionCancelledAt?: Timestamp;
+  subscriptionTrialEndsAt?: Timestamp;
+  subscriptionEmailToken?: string;   // Secure token for email management links
 }
 
 export interface ProductCategory {
