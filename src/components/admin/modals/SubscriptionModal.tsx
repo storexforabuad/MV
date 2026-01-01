@@ -3,7 +3,11 @@
 import { useState, useEffect } from 'react';
 import Modal from '../../Modal';
 import { ShieldCheck, X, Calendar, CreditCard, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
-import { getSubscriptionStatus, cancelSubscription } from '@/app/actions/subscriptionActions';
+import {
+  getSubscriptionStatus,
+  cancelSubscription,
+  verifySubscriptionPayment
+} from '@/app/actions/subscriptionActions';
 import { getStatusDisplay, SUBSCRIPTION_CONFIG, isTrialExpired } from '@/types/subscription';
 import type { SubscriptionStatus } from '@/types/subscription';
 
@@ -60,38 +64,53 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           storeName: storeName || 'Store',
         }),
       });
-
       const result = await response.json();
 
       if (!result.success) {
         throw new Error(result.error || 'Failed to create subscription');
       }
 
+      if (!result.data.planCode) {
+        throw new Error('Subscription plan configuration is missing. Please contact support.');
+      }
+
       // Initialize Paystack Inline payment
-      // @ts-ignore - PaystackPop is loaded from CDN
-      const handler = window.PaystackPop.setup({
+      const paystackConfig = {
         key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
-        email: ceoEmail,
-        amount: SUBSCRIPTION_CONFIG.MONTHLY_AMOUNT_KOBO,
-        currency: SUBSCRIPTION_CONFIG.CURRENCY,
+        email: result.data.email,
+        plan: result.data.planCode,
+        currency: 'NGN', // Explicitly set currency
         ref: `sub_${storeId}_${Date.now()}`,
         metadata: {
           storeId,
           storeName: storeName || 'Store',
-          subscriptionCode: result.data.subscriptionCode,
+          language: 'en', // Explicitly set language
         },
         channels: ['card', 'bank', 'ussd', 'bank_transfer'],
+        label: storeName,
         onClose: () => {
           setSubscribing(false);
         },
         callback: (response: any) => {
-          // Payment successful
-          console.log('Payment successful:', response);
-          loadSubscriptionData();
-          setSubscribing(false);
-          alert('Subscription activated successfully! 🎉');
+          // Payment successful - verify on backend
+          // Use an IIFE to handle the async verification
+          (async () => {
+            try {
+              await verifySubscriptionPayment(response.reference);
+              await loadSubscriptionData();
+              alert('Subscription activated successfully! 🎉');
+            } catch (error) {
+              console.error('Verification failed:', error);
+              alert('Payment successful but verification failed. Please contact support.');
+            } finally {
+              setSubscribing(false);
+            }
+          })();
         },
-      });
+      };
+
+      // @ts-ignore - PaystackPop is loaded from CDN
+      const handler = window.PaystackPop.setup(paystackConfig);
 
       handler.openIframe();
     } catch (error) {

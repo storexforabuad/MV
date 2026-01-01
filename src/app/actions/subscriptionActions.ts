@@ -232,3 +232,48 @@ export async function updateNextBillingDate(storeId: string, nextBillingDate: Da
         throw error;
     }
 }
+/**
+ * Verify subscription payment and activate
+ */
+export async function verifySubscriptionPayment(reference: string) {
+    try {
+        const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
+        if (!PAYSTACK_SECRET_KEY) throw new Error('Missing Paystack secret key');
+
+        // Verify transaction with Paystack
+        const response = await fetch(`https://api.paystack.co/transaction/verify/${reference}`, {
+            headers: {
+                Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+            },
+        });
+
+        const data = await response.json();
+
+        if (!data.status || data.data.status !== 'success') {
+            throw new Error('Transaction verification failed');
+        }
+
+        const { metadata, customer, plan, subscription_code, authorization } = data.data;
+        const storeId = metadata?.storeId;
+
+        if (!storeId) throw new Error('No store ID in transaction metadata');
+
+        // Calculate next billing date (1 month from now)
+        const nextBillingDate = new Date();
+        nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
+
+        // Activate subscription
+        await activateSubscription(
+            storeId,
+            subscription_code, // Paystack creates this automatically for plan payments
+            customer.customer_code,
+            plan.plan_code,
+            nextBillingDate
+        );
+
+        return { success: true };
+    } catch (error) {
+        console.error('Error verifying subscription payment:', error);
+        throw error;
+    }
+}

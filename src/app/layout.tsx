@@ -8,6 +8,7 @@ import ClientProviders from '../components/ClientProviders'
 import { CustomerProvider } from '@/context/CustomerContext'
 import ReferralHandlerWrapper from '@/components/ReferralHandlerWrapper'
 import { getStoreMeta } from '@/lib/db'
+import Script from 'next/script'
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -74,6 +75,7 @@ export default function RootLayout({
                 <ReferralHandlerWrapper />
                 <Navbar />
                 {children}
+                <Script src="https://js.paystack.co/v1/inline.js" strategy="lazyOnload" />
               </ClientProviders>
             </CartProvider>
           </CustomerProvider>

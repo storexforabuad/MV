@@ -73,58 +73,19 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Step 2: Create subscription
-        const subscriptionResponse = await fetch('https://api.paystack.co/subscription', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                customer: customerCode,
-                plan: PAYSTACK_PLAN_CODE,
-                metadata: {
-                    storeId,
-                    storeName: storeName || 'Unknown Store',
-                },
-            }),
-        });
-
-        const subscriptionData = await subscriptionResponse.json();
-
-        if (!subscriptionData.status) {
-            console.error('Paystack subscription creation failed:', subscriptionData);
-            return NextResponse.json(
-                { error: subscriptionData.message || 'Failed to create subscription' },
-                { status: 500 }
-            );
-        }
-
-        // Step 3: Calculate next billing date (1 month from now)
-        const nextBillingDate = new Date();
-        nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
-
-        // Step 4: Update Firestore with subscription data
-        await activateSubscription(
-            storeId,
-            subscriptionData.data.subscription_code,
-            customerCode,
-            PAYSTACK_PLAN_CODE,
-            nextBillingDate
-        );
+        // Step 2: Return necessary data for client-side initialization
+        // We do NOT create the subscription here. Paystack Inline will create it when the user pays with the plan code.
 
         return NextResponse.json({
             success: true,
             data: {
-                subscriptionCode: subscriptionData.data.subscription_code,
-                emailToken: subscriptionData.data.email_token,
                 customerCode,
-                nextBillingDate: nextBillingDate.toISOString(),
-                authorization: subscriptionData.data.authorization,
+                planCode: PAYSTACK_PLAN_CODE,
+                email,
             },
         });
     } catch (error) {
-        console.error('Error creating subscription:', error);
+        console.error('Error preparing subscription:', error);
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }
