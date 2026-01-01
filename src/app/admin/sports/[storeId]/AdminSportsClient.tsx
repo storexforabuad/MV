@@ -71,9 +71,9 @@ export default function AdminSportsClient({ storeMeta, storeId: propStoreId }: A
           products={[]}
           categories={[]}
           contacts={[]}
-          setActiveSection={() => {}}
+          setActiveSection={() => { }}
           storeLink={`/sports/${storeId}`}
-          onRefresh={() => {}}
+          onRefresh={() => { }}
           isRefreshing={false}
           totalProducts={0}
           totalCategories={0}
@@ -81,19 +81,19 @@ export default function AdminSportsClient({ storeMeta, storeId: propStoreId }: A
           debtors={0}
           subscriptionStatus={'Active'}
           referrals={0}
-          onReferralAdded={() => {}}
+          onReferralAdded={() => { }}
           totalContacts={0}
           storeId={storeId}
           storeType={storeMeta?.storeType}
           totalOrders={0}
           uiVisible={true}
-          storeName={vendor?.storeName || ''}
+          storeName={vendor?.name || ''}
           totalRevenue={0}
-          onAnimationComplete={() => {}}
-          onOrdersCardClick={() => {}}
-          openManageCategories={() => {}}
-          onProductsCardClick={() => {}}
-          onAmbassadorCardClick={() => {}}
+          onAnimationComplete={() => { }}
+          onOrdersCardClick={() => { }}
+          openManageCategories={() => { }}
+          onProductsCardClick={() => { }}
+          onAmbassadorCardClick={() => { }}
           totalCommission={0}
           totalReferralBonus={0}
           totalExpenses={0}

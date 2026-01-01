@@ -34,7 +34,7 @@ export interface StoreMeta {
   country?: string;
 
   // Store Vertical
-  storeType?: 'general' | 'automotive' | 'livestock' | 'fashion' | 'restaurant' | 'sports' | 'sports-rental';
+  storeType?: 'general' | 'automotive' | 'livestock' | 'fashion' | 'restaurant' | 'sports' | 'sports-rental' | 'pitchperfect' | 'pitch';
 
   // Timezone & payout tracking
   timezone?: string;
@@ -43,7 +43,7 @@ export interface StoreMeta {
   // Restaurant specific
   isOpen?: boolean;
   openingHours?: string;
-  
+
   // Payout account details
   bankAccountName?: string;
   bankAccountNumber?: string;

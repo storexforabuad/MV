@@ -12,6 +12,7 @@ interface PitchProps {
   surface?: string;
   capacity?: number;
   badges?: string[];
+  images?: string[];
 }
 
 interface Props {

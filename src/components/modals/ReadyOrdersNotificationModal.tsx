@@ -1,4 +1,4 @@
- 'use client';
+'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -50,7 +50,7 @@ export const ReadyOrdersNotificationModal: React.FC = () => {
     // push history state so back button closes modal first
     try {
       window.history.pushState({ readyOrdersModal: true }, '');
-    } catch (e) {}
+    } catch (e) { }
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -95,7 +95,7 @@ export const ReadyOrdersNotificationModal: React.FC = () => {
         if (window.history.state && (window.history.state as any).readyOrdersModal) {
           window.history.back();
         }
-      } catch (e) {}
+      } catch (e) { }
     };
   }, [isModalOpen, closeModal]);
 
@@ -147,7 +147,7 @@ export const ReadyOrdersNotificationModal: React.FC = () => {
           >
             {/* Header - Green Theme */}
             <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-4 sm:py-8 text-white flex-shrink-0 ready-orders-modal__header"
-                 style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))', maxHeight: 'calc(var(--dvh, 1vh) * 50)' }}>
+              style={{ paddingTop: 'calc(1rem + env(safe-area-inset-top, 0px))', maxHeight: 'calc(var(--dvh, 1vh) * 50)' }}>
               <div className="flex items-start justify-between mb-2 gap-3">
                 <div className="flex-1 min-w-0">
                   <h2 className="ready-modal-title text-2xl sm:text-3xl font-bold flex items-center gap-3 break-words">
@@ -171,24 +171,24 @@ export const ReadyOrdersNotificationModal: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="border-2 border-green-200 dark:border-green-900/30 rounded-2xl bg-green-50/50 dark:bg-green-900/10 p-4 hover:shadow-md transition-shadow"
               >
-                  {/* Order Header */}
-                  <div className="flex items-center justify-between mb-3 pb-3 border-b border-green-200 dark:border-green-900/30">
-                    <div>
-                      <p className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">Order</p>
-                      <p className="text-lg font-bold text-gray-900 dark:text-white">
-                        #{currentOrder.orderId?.slice(-6) || 'N/A'}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-green-600 dark:text-green-400">
-                        {formatPrice(
-                          (currentOrder.products || []).reduce((sum, p: any) => sum + (p.price * (p.quantity || 1)), 0)
-                        )}
-                      </p>
-                    </div>
+                {/* Order Header */}
+                <div className="flex items-center justify-between mb-3 pb-3 border-b border-green-200 dark:border-green-900/30">
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 font-medium uppercase tracking-wider">Order</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">
+                      #{currentOrder.orderId?.slice(-6) || 'N/A'}
+                    </p>
                   </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {formatPrice(
+                        (currentOrder.products || []).reduce((sum, p: any) => sum + (p.price * (p.quantity || 1)), 0)
+                      )}
+                    </p>
+                  </div>
+                </div>
 
-                  {/* Items */}
+                {/* Items */}
                 <div className="space-y-2 mb-4">
                   {(currentOrder.products || []).map((product: any, pidx) => (
                     <div key={pidx} className="flex items-start gap-3">
@@ -215,34 +215,34 @@ export const ReadyOrdersNotificationModal: React.FC = () => {
                   ))}
                 </div>
 
-                  {/* Delivery Info */}
-                  <div className="flex items-center gap-3 text-sm">
-                    <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
-                      {currentOrder.deliveryMethod === 'pickup' ? (
-                        <>
-                          <Package className="w-4 h-4 text-green-600" />
-                          <span>Ready for Pickup</span>
-                        </>
-                      ) : (
-                        <>
-                          <MapPin className="w-4 h-4 text-green-600" />
-                          <span>For Delivery</span>
-                        </>
-                      )}
-                    </div>
-                      <span className="text-xs text-gray-400">
-                        {currentOrder.orderDate
-                          ? (() => {
-                              const date = currentOrder.orderDate instanceof Object && 'toDate' in currentOrder.orderDate 
-                                ? (currentOrder.orderDate as any).toDate() 
-                                : new Date(currentOrder.orderDate as any);
-                              return date.toLocaleDateString();
-                            })()
-                          : 'Date N/A'}
-                      </span>
+                {/* Delivery Info */}
+                <div className="flex items-center gap-3 text-sm">
+                  <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+                    {currentOrder.deliveryMethod === 'pickup' ? (
+                      <>
+                        <Package className="w-4 h-4 text-green-600" />
+                        <span>Ready for Pickup</span>
+                      </>
+                    ) : (
+                      <>
+                        <MapPin className="w-4 h-4 text-green-600" />
+                        <span>For Delivery</span>
+                      </>
+                    )}
                   </div>
-                  </motion.div>
-              </div>
+                  <span className="text-xs text-gray-400">
+                    {currentOrder.orderDate
+                      ? (() => {
+                        const date = currentOrder.orderDate instanceof Object && 'toDate' in currentOrder.orderDate
+                          ? (currentOrder.orderDate as any).toDate()
+                          : new Date(currentOrder.orderDate as any);
+                        return date.toLocaleDateString();
+                      })()
+                      : 'Date N/A'}
+                  </span>
+                </div>
+              </motion.div>
+            </div>
 
             {/* Footer - Sticky Action */}
             <div ref={footerRef} className="border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 sm:px-6 py-4 flex-shrink-0" style={{ position: 'sticky', bottom: 'env(safe-area-inset-bottom, 0px)' }}>
@@ -280,5 +280,6 @@ export const ReadyOrdersNotificationModal: React.FC = () => {
     </AnimatePresence>
   );
 
-  return createPortal(portalContent, typeof document !== 'undefined' ? document.body : document.createElement('div'));
+  if (typeof document === 'undefined') return null;
+  return createPortal(portalContent, document.body);
 };

@@ -43,9 +43,9 @@ export default function AdminBookingsModal({ isOpen, onClose, storeId }: Props) 
         await submitCommissionPayment({
           storeId,
           amount,
-          periodStart: booking?.date || new Date().toISOString().slice(0,10),
-          periodEnd: booking?.date || new Date().toISOString().slice(0,10),
-          accountNumber: (vendor && (vendor.accountNumber || '')) || '',
+          periodStart: booking?.date || new Date().toISOString().slice(0, 10),
+          periodEnd: booking?.date || new Date().toISOString().slice(0, 10),
+          accountNumber: '',
           accountName: (vendor && (vendor.name || vendor.phone)) || '',
           notes: `Commission for booking ${bookingId}`,
           uploadedBy: vendor?.phone || undefined,
