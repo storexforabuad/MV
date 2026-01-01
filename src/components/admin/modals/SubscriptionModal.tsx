@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Modal from '../../Modal';
-import { ShieldCheck, X, Calendar, CreditCard, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ShieldCheck, X, Calendar, CreditCard, AlertCircle, CheckCircle2, Loader2, Zap, Clock, ChevronRight } from 'lucide-react';
 import {
   getSubscriptionStatus,
   cancelSubscription,
@@ -18,12 +18,12 @@ interface SubscriptionModalProps {
   storeName?: string;
 }
 
-const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
+export default function SubscriptionModal({
   handleClose,
   storeId,
   ceoEmail,
   storeName
-}) => {
+}: SubscriptionModalProps) {
   const [loading, setLoading] = useState(true);
   const [subscriptionData, setSubscriptionData] = useState<any>(null);
   const [cancelling, setCancelling] = useState(false);
@@ -31,6 +31,12 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
   useEffect(() => {
     loadSubscriptionData();
+
+    // Lock body scroll when modal is open
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
   }, [storeId]);
 
   const loadSubscriptionData = async () => {
@@ -64,6 +70,7 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           storeName: storeName || 'Store',
         }),
       });
+
       const result = await response.json();
 
       if (!result.success) {
@@ -79,12 +86,12 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
         email: result.data.email,
         plan: result.data.planCode,
-        currency: 'NGN', // Explicitly set currency
+        currency: 'NGN',
         ref: `sub_${storeId}_${Date.now()}`,
         metadata: {
           storeId,
           storeName: storeName || 'Store',
-          language: 'en', // Explicitly set language
+          language: 'en',
         },
         onClose: () => {
           setSubscribing(false);
@@ -138,16 +145,6 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     }
   };
 
-  if (loading) {
-    return (
-      <Modal open={true} onClose={handleClose}>
-        <div className="flex items-center justify-center p-12">
-          <Loader2 className="w-8 h-8 animate-spin text-teal-500" />
-        </div>
-      </Modal>
-    );
-  }
-
   const status: SubscriptionStatus = subscriptionData?.status || 'trial';
   const statusDisplay = getStatusDisplay(status);
   const trialEndsAt = subscriptionData?.trialEndsAt?.toDate();
@@ -165,194 +162,172 @@ const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   const trialDaysRemaining = getDaysRemaining(trialEndsAt);
   const graceDaysRemaining = status === 'past_due' ? getDaysRemaining(nextBillingDate) : 0;
 
+  const modalVariants = { hidden: { opacity: 0, y: '100%' }, visible: { opacity: 1, y: 0 }, exit: { opacity: 0, y: '100%' } };
+
   return (
-    <Modal open={true} onClose={handleClose}>
-      <button
-        onClick={handleClose}
-        className="absolute top-3 right-3 z-10 text-text-secondary hover:text-text-primary bg-white/80 dark:bg-slate-700/80 rounded-full p-1.5 shadow"
-        aria-label="Close"
+    <AnimatePresence>
+      <motion.div
+        className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
+        initial="hidden" animate="visible" exit="exit"
+        variants={modalVariants}
+        transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
       >
-        <X className="w-5 h-5" />
-      </button>
-
-      <div className="w-full flex flex-col items-center">
-        {/* Header Icon */}
-        <div
-          className={`flex items-center justify-center w-14 h-14 rounded-2xl mb-4 border ${status === 'active'
-            ? 'bg-green-500/10 border-green-500/20'
-            : status === 'trial'
-              ? 'bg-blue-500/10 border-blue-500/20'
-              : status === 'past_due'
-                ? 'bg-yellow-500/10 border-yellow-500/20'
-                : 'bg-red-500/10 border-red-500/20'
-            }`}
-        >
-          <ShieldCheck
-            className={`w-7 h-7 ${status === 'active'
-              ? 'text-green-500'
-              : status === 'trial'
-                ? 'text-blue-500'
-                : status === 'past_due'
-                  ? 'text-yellow-500'
-                  : 'text-red-500'
-              }`}
-          />
-        </div>
-
-        {/* Title */}
-        <h2 className="text-xl font-bold text-text-primary">Subscription</h2>
-
-        {/* Status Badge */}
-        <div
-          className={`text-4xl font-bold my-1 ${status === 'active'
-            ? 'text-green-500'
-            : status === 'trial'
-              ? 'text-blue-500'
-              : status === 'past_due'
-                ? 'text-yellow-500'
-                : 'text-red-500'
-            }`}
-        >
-          {statusDisplay.icon} {statusDisplay.label}
-        </div>
-
-        {/* Description */}
-        <p className="text-sm text-text-secondary mb-6 text-center">
-          {status === 'trial' && !trialExpired && `${trialDaysRemaining} days remaining in your free trial`}
-          {status === 'trial' && trialExpired && 'Your free trial has ended. Subscribe to continue.'}
-          {status === 'active' && 'Your subscription is active'}
-          {status === 'past_due' && `Payment failed. ${graceDaysRemaining} days of grace period remaining.`}
-          {status === 'cancelled' && 'Your subscription has been cancelled'}
-          {status === 'expired' && 'Your subscription has expired'}
-        </p>
-
-        {/* Subscription Details */}
-        <div className="w-full text-left p-4 rounded-lg bg-background-alt border border-border-color space-y-2 mb-4">
-          <div className="flex justify-between items-center text-sm">
-            <span className="text-text-secondary">Monthly Fee:</span>
-            <span className="font-semibold text-text-primary">
-              ₦{SUBSCRIPTION_CONFIG.MONTHLY_AMOUNT.toLocaleString()}
-            </span>
+        {/* --- Header --- */}
+        <header className="flex-shrink-0 flex items-center justify-between w-full max-w-5xl mx-auto p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
+              Subscription
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400">Manage your plan & billing</p>
           </div>
-
-          {status === 'trial' && (
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-text-secondary">Trial Ends:</span>
-              <span className="font-semibold text-text-primary">
-                {trialEndsAt?.toLocaleDateString('en-NG', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                })}
-              </span>
-            </div>
-          )}
-
-          {(status === 'active' || status === 'past_due') && nextBillingDate && (
-            <div className="flex justify-between items-center text-sm">
-              <span className="text-text-secondary">Next Billing:</span>
-              <span className="font-semibold text-text-primary">
-                {nextBillingDate.toLocaleDateString('en-NG', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                })}
-              </span>
-            </div>
-          )}
-
-          {status === 'past_due' && (
-            <div className="pt-2 border-t border-border-color">
-              <div className="flex items-start gap-2 text-xs text-yellow-600 dark:text-yellow-400">
-                <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span>
-                  Your payment failed. Please update your payment method before the grace period ends to avoid service interruption.
-                </span>
-              </div>
-            </div>
-          )}
-
-          {status === 'active' && (
-            <div className="pt-2 border-t border-border-color">
-              <div className="flex items-start gap-2 text-xs text-green-600 dark:text-green-400">
-                <CheckCircle2 className="w-4 h-4 mt-0.5 flex-shrink-0" />
-                <span>Your subscription will automatically renew each month.</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Action Buttons */}
-        <div className="w-full space-y-2">
-          {(status === 'trial' || status === 'expired' || status === 'cancelled') && (
-            <button
-              onClick={handleSubscribe}
-              disabled={subscribing}
-              className="w-full px-4 py-2.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {subscribing ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <CreditCard className="w-4 h-4" />
-                  Subscribe Now
-                </>
-              )}
-            </button>
-          )}
-
-          {status === 'past_due' && (
-            <button
-              onClick={handleSubscribe}
-              disabled={subscribing}
-              className="w-full px-4 py-2.5 rounded-lg bg-yellow-600 hover:bg-yellow-700 text-white font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {subscribing ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Processing...
-                </>
-              ) : (
-                <>
-                  <CreditCard className="w-4 h-4" />
-                  Update Payment Method
-                </>
-              )}
-            </button>
-          )}
-
-          {status === 'active' && (
-            <button
-              onClick={handleCancelSubscription}
-              disabled={cancelling}
-              className="w-full px-4 py-2.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {cancelling ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Cancelling...
-                </>
-              ) : (
-                'Cancel Subscription'
-              )}
-            </button>
-          )}
-        </div>
-
-        {/* Payment Methods Info */}
-        {(status === 'trial' || status === 'expired' || status === 'cancelled' || status === 'past_due') && (
-          <div className="mt-4 pt-4 border-t border-border-color w-full">
-            <p className="text-xs text-text-secondary text-center">
-              We accept: Card • Bank Transfer • USSD
-            </p>
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg ${status === 'active' ? 'bg-gradient-to-br from-green-500 to-emerald-600' :
+              status === 'trial' ? 'bg-gradient-to-br from-blue-500 to-indigo-600' :
+                status === 'past_due' ? 'bg-gradient-to-br from-yellow-500 to-amber-600' :
+                  'bg-gradient-to-br from-red-500 to-rose-600'
+            }`}>
+            <ShieldCheck className="w-6 h-6 text-white" />
           </div>
-        )}
-      </div>
-    </Modal>
+        </header>
+
+        {/* --- Main Scrollable Content --- */}
+        <main className="flex-grow w-full max-w-5xl mx-auto overflow-y-auto p-4 sm:p-6 scrollbar-hide">
+          {loading ? (
+            <div className="flex items-center justify-center h-full min-h-[400px]">
+              <Loader2 className="w-10 h-10 animate-spin text-teal-500" />
+            </div>
+          ) : (
+            <div className="space-y-6">
+
+              {/* Status Banner */}
+              <div className={`p-6 rounded-2xl shadow-sm border ${status === 'active' ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' :
+                  status === 'trial' ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' :
+                    status === 'past_due' ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' :
+                      'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                }`}>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      {statusDisplay.icon}
+                      <span className={`font-bold uppercase tracking-wider text-sm ${status === 'active' ? 'text-green-700 dark:text-green-400' :
+                          status === 'trial' ? 'text-blue-700 dark:text-blue-400' :
+                            status === 'past_due' ? 'text-yellow-700 dark:text-yellow-400' :
+                              'text-red-700 dark:text-red-400'
+                        }`}>
+                        Current Status
+                      </span>
+                    </div>
+                    <h3 className="text-3xl font-bold text-slate-900 dark:text-white">
+                      {statusDisplay.label}
+                    </h3>
+                    <p className="text-slate-600 dark:text-slate-300 mt-2">
+                      {status === 'trial' && !trialExpired && `${trialDaysRemaining} days remaining in your free trial`}
+                      {status === 'trial' && trialExpired && 'Your free trial has ended. Subscribe to continue.'}
+                      {status === 'active' && 'Your subscription is active and auto-renews.'}
+                      {status === 'past_due' && `Payment failed. ${graceDaysRemaining} days of grace period remaining.`}
+                      {status === 'cancelled' && 'Your subscription has been cancelled.'}
+                      {status === 'expired' && 'Your subscription has expired.'}
+                    </p>
+                  </div>
+
+                  {/* Action for Banner */}
+                  {(status === 'trial' || status === 'expired' || status === 'cancelled' || status === 'past_due') && (
+                    <button
+                      onClick={handleSubscribe}
+                      disabled={subscribing}
+                      className="whitespace-nowrap px-6 py-3 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                      {subscribing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Zap className="w-4 h-4 fill-current" />}
+                      {status === 'past_due' ? 'Retry Payment' : 'Subscribe Now'}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Details Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-slate-50 dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800">
+                  <div className="flex items-center gap-3 mb-2 text-slate-500 dark:text-slate-400">
+                    <CreditCard className="w-5 h-5" />
+                    <span className="text-sm font-medium">Monthly Plan</span>
+                  </div>
+                  <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                    ₦{SUBSCRIPTION_CONFIG.MONTHLY_AMOUNT.toLocaleString()}
+                    <span className="text-sm font-normal text-slate-500 dark:text-slate-400 ml-1">/ month</span>
+                  </p>
+                </div>
+
+                <div className="bg-slate-50 dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800">
+                  <div className="flex items-center gap-3 mb-2 text-slate-500 dark:text-slate-400">
+                    <Calendar className="w-5 h-5" />
+                    <span className="text-sm font-medium">
+                      {status === 'trial' ? 'Trial Ends' : 'Next Billing'}
+                    </span>
+                  </div>
+                  <p className="text-2xl font-bold text-slate-900 dark:text-white">
+                    {status === 'trial'
+                      ? trialEndsAt?.toLocaleDateString('en-NG', { month: 'short', day: 'numeric', year: 'numeric' })
+                      : nextBillingDate?.toLocaleDateString('en-NG', { month: 'short', day: 'numeric', year: 'numeric' }) || 'N/A'
+                    }
+                  </p>
+                </div>
+              </div>
+
+              {/* Features List */}
+              <div className="bg-white dark:bg-slate-900/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <h4 className="font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                  <CheckCircle2 className="w-5 h-5 text-green-500" />
+                  Included in your plan
+                </h4>
+                <ul className="space-y-3">
+                  {[
+                    'Unlimited Product Uploads',
+                    'Advanced Analytics Dashboard',
+                    'Priority Support',
+                    'Verified Vendor Badge',
+                    'Custom Store Link'
+                  ].map((feature, i) => (
+                    <li key={i} className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Cancel Subscription Area */}
+              {status === 'active' && (
+                <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800">
+                  <button
+                    onClick={handleCancelSubscription}
+                    disabled={cancelling}
+                    className="text-red-500 hover:text-red-600 text-sm font-medium flex items-center gap-2 transition-colors disabled:opacity-50"
+                  >
+                    {cancelling ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
+                    Cancel Subscription
+                  </button>
+                  <p className="text-xs text-slate-400 mt-2">
+                    Cancelling will stop future billing. You will retain access until the end of your current billing period.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+        </main>
+
+        {/* --- Footer --- */}
+        <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-slate-700">
+          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent dark:from-slate-950 dark:to-transparent pointer-events-none" />
+          <div className="relative max-w-5xl mx-auto">
+            <motion.button
+              onClick={handleClose}
+              className="w-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-900 dark:text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-sm hover:shadow-md transform hover:scale-[1.01] active:scale-[0.98]"
+              whileTap={{ scale: 0.98 }}
+            >
+              Close
+            </motion.button>
+          </div>
+        </footer>
+      </motion.div>
+    </AnimatePresence>
   );
-};
-
-export default SubscriptionModal;
+}
