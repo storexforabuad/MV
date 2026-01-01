@@ -20,9 +20,13 @@ export async function POST(request: NextRequest) {
         const PAYSTACK_PLAN_CODE = process.env.PAYSTACK_PLAN_CODE;
 
         if (!PAYSTACK_SECRET_KEY || !PAYSTACK_PLAN_CODE) {
-            console.error('Missing Paystack environment variables');
+            const missing = [];
+            if (!PAYSTACK_SECRET_KEY) missing.push('PAYSTACK_SECRET_KEY');
+            if (!PAYSTACK_PLAN_CODE) missing.push('PAYSTACK_PLAN_CODE');
+
+            console.error('Missing Paystack environment variables:', missing.join(', '));
             return NextResponse.json(
-                { error: 'Server configuration error' },
+                { error: `Server configuration error: Missing ${missing.join(', ')}` },
                 { status: 500 }
             );
         }
