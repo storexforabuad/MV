@@ -413,13 +413,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                               'Complete Order'
                             )}
                           </button>
-                          <button
-                            type="button"
-                            className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-6 py-3 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
-                            onClick={onClose}
-                          >
-                            Cancel
-                          </button>
+
                         </div>
                       )
                     )}

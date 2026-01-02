@@ -148,10 +148,10 @@ export default function PaymentFlowPage({
                   <div className="flex-1 font-mono font-bold text-xl text-gray-900 dark:text-white tracking-wider">{bankAccountNumber}</div>
                   <button
                     onClick={handleCopyAccountNumber}
-                    className={`p-2 rounded-lg transition-all ${copiedAccountNumber ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600 hover:bg-green-50 hover:text-green-600'}`}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${copiedAccountNumber ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600 hover:bg-green-50 hover:text-green-600'}`}
                     title="Copy account number"
                   >
-                    {copiedAccountNumber ? <Check size={20} /> : <Copy size={20} />}
+                    {copiedAccountNumber ? 'Copied' : 'Copy'}
                   </button>
                 </div>
               </div>
