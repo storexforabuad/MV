@@ -92,18 +92,6 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     label: '(Biz+Con)™',
     subtitle: 'Network',
     icon: Globe,
-    gradient: 'bg-gray-700',
-    text: 'text-white',
-    component: null,
-    glowClass: 'dark:shadow-slate-600/30 shadow-slate-600/50',
-    isAiCard: true,
-  },
-  {
-    label: 'Tips',
-    subtitle: 'Quick Guide',
-    icon: Lightbulb,
-    gradient: 'bg-gradient-to-br from-amber-400 to-yellow-500',
-    text: 'text-white',
     component: TipsModal,
     glowClass: 'dark:shadow-yellow-500/30 shadow-yellow-500/50',
   },
@@ -236,6 +224,22 @@ const formatCurrencyForCard = (amount: number) => {
     return `₦${(amount / 1000).toFixed(0)}K`;
   }
   return `₦${amount.toFixed(0)}`;
+};
+
+import { sendVendorNotification } from '@/app/actions/sendVendorNotification';
+
+const handleTestNotification = async (storeId: string) => {
+  if (!confirm('Send test notification?')) return;
+  try {
+    const result = await sendVendorNotification(storeId, 'TEST-ORDER-123', 'Test Customer');
+    if (result.success) {
+      alert('Test notification sent! Check your other device.');
+    } else {
+      alert(`Failed: ${result.error}`);
+    }
+  } catch (error: any) {
+    alert(`Error: ${error.message}`);
+  }
 };
 
 export default function AdminHomeCards(props: AdminHomeCardsProps) {
@@ -456,7 +460,14 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
   return (
     <section className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 overflow-x-hidden">
-      <div className="mb-4">
+      <div className="mb-4 flex items-center gap-2">
+        <button
+          onClick={() => handleTestNotification(storeId)}
+          className="p-3 bg-purple-100 text-purple-600 rounded-2xl hover:bg-purple-200 transition-colors shadow-sm"
+          title="Test Notification"
+        >
+          <Send className="w-5 h-5" />
+        </button>
         <button
           onClick={async () => {
             setRefreshing(true);
@@ -464,7 +475,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             setRefreshing(false);
           }}
           disabled={refreshing}
-          className="col-span-2 sm:col-span-3 md:col-span-4 w-full bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white font-bold py-3 px-4 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center dark:hover:shadow-lg dark:hover:shadow-blue-700/30"
+          className="flex-1 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white font-bold py-3 px-4 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center dark:hover:shadow-lg dark:hover:shadow-blue-700/30"
         >
           <RefreshCw className={`mr-2 h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
           {refreshing ? 'Refreshing...' : 'Refresh'}
@@ -743,20 +754,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           storeName={props.storeName}
         />
       )}
-
-      {openModal !== null && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-md" onClick={handleCloseModal}>
-          <motion.div initial="hidden" animate="visible" exit="exit" variants={modalVariants} className="relative w-full max-w-sm sm:max-w-md md:max-w-lg mx-2 sm:mx-auto bg-white dark:bg-slate-900 rounded-2xl border border-gray-200 dark:border-slate-800 shadow-2xl flex flex-col items-center" onClick={e => e.stopPropagation()}>
-            {(() => {
-              const card = cardsToRender[openModal];
-              if (!card || !card.component || ['Views', 'Share', 'Content'].includes(card.label)) return null;
-              const ModalComponent = card.component;
-              const modalProps = { ...props, handleClose: handleCloseModal };
-              return <ModalComponent {...modalProps} />;
-            })()}
-          </motion.div>
-        </div>
-      )}
     </section>
   );
 }
+

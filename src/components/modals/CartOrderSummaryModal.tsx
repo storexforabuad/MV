@@ -14,6 +14,7 @@ import toast from 'react-hot-toast';
 import { getCustomerDetails } from '@/app/actions/customerActions';
 import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
 import { saveModalState, getModalState, clearModalState } from '@/lib/paymentModalStorage';
+import { requestCustomerNotificationPermission } from '@/lib/requestCustomerNotifications';
 import PaymentFlowPage from './PaymentFlowPage';
 import ModalShell from './ModalShell';
 import OrderSummaryStrip from './OrderSummaryStrip';
@@ -34,11 +35,11 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [orderNotes, setOrderNotes] = useState('');
   const [uploadedEvidence, setUploadedEvidence] = useState<{ url: string; fileName: string } | undefined>();
-  
+
   const storeId = cartItems[0]?.storeId;
   const { addOrder } = useOrders(customer?.id || null, storeId || "");
   const { dispatch } = useCart();
-  
+
   const isPaymentFlowEnabled = shouldUsePaymentFlow(storeMeta?.storeType);
 
   useEffect(() => {
@@ -107,6 +108,14 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
           uploadedEvidence?.url,
           uploadedEvidence?.fileName
         );
+
+        // Request notification permission immediately after order placement
+        if (customer?.id) {
+          requestCustomerNotificationPermission(customer.id).catch(err =>
+            console.error('Failed to request notification permission:', err)
+          );
+        }
+
         toast.success('Order placed! Vendor will review your payment and confirm shortly.');
         clearModalState(storeId);
         dispatch({ type: 'CLEAR_CART' });
@@ -115,6 +124,14 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
       } else {
         // For non-payment flow stores, use WhatsApp
         await addOrder(cartItems, storeMetaWithId, customer, referrerId, false, deliveryMethod as 'home' | 'pickup', orderNotes);
+
+        // Request notification permission immediately after order placement
+        if (customer?.id) {
+          requestCustomerNotificationPermission(customer.id).catch(err =>
+            console.error('Failed to request notification permission:', err)
+          );
+        }
+
         toast.success('Order placed! Redirecting to WhatsApp...');
 
         const itemsSummary = cartItems.map(item => {

@@ -16,6 +16,7 @@ import { getCustomerDetails } from '@/app/actions/customerActions';
 import { isFoodBeverageProduct } from '@/utils/productHelpers';
 import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
 import { saveModalState, getModalState, clearModalState } from '@/lib/paymentModalStorage';
+import { requestCustomerNotificationPermission } from '@/lib/requestCustomerNotifications';
 import PaymentFlowPage from './PaymentFlowPage';
 import ModalShell from './ModalShell';
 import OrderSummaryStrip from './OrderSummaryStrip';
@@ -132,12 +133,28 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
           uploadedEvidence?.url,
           uploadedEvidence?.fileName
         );
+
+        // Request notification permission immediately after order placement
+        if (customer?.id) {
+          requestCustomerNotificationPermission(customer.id).catch(err =>
+            console.error('Failed to request notification permission:', err)
+          );
+        }
+
         toast.success('Order placed! Vendor will review your payment and confirm shortly.');
         clearModalState(storeId);
         onClose();
       } else {
         // For non-payment flow stores, use WhatsApp
         await addOrder([productToOrder], storeMetaWithId, customer, referrerId, false, deliveryMethod as 'home' | 'pickup');
+
+        // Request notification permission immediately after order placement
+        if (customer?.id) {
+          requestCustomerNotificationPermission(customer.id).catch(err =>
+            console.error('Failed to request notification permission:', err)
+          );
+        }
+
         toast.success('Order placed! Redirecting to WhatsApp...');
 
         const productUrl = `https://tinyurl.com/bizcononline/${storeId}/products/${product.id}`;
@@ -298,7 +315,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                   className={`flex flex-col items-center justify-center p-2 rounded-lg border transition-all ${selectedSpiciness === level.value
                                     ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20 ring-1 ring-orange-500'
                                     : 'border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800'
-                                  }`}
+                                    }`}
                                 >
                                   <span className="text-xl mb-1">{level.label.split(' ')[0]}</span>
                                   <span className="text-[10px] font-medium text-center leading-tight dark:text-gray-300">
