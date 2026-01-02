@@ -17,33 +17,59 @@ export default function AdminNotificationListener({ storeId }: { storeId: string
     useEffect(() => {
         console.log('[AdminListener] Mounted for store:', storeId);
         if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-            try {
-                const messaging = getMessaging(app);
-                const unsubscribe = onMessage(messaging, (payload) => {
-                    console.log('[AdminListener] Message received:', payload);
-
-                    if (payload.data?.type === 'new_order') {
-                        const { orderId, storeId: msgStoreId } = payload.data;
-                        console.log(`[AdminListener] Comparing storeId: ${storeId} with msgStoreId: ${msgStoreId}`);
-                        const customerName = payload.notification?.body?.split(' placed')[0] || 'A customer';
-
-                        // Only show if it matches the current store context
-                        if (msgStoreId === storeId) {
-                            console.log('[AdminListener] Match found! Opening modal.');
-                            setNotificationData({
-                                orderId,
-                                customerName
-                            });
-                            setIsOpen(true);
-                        } else {
-                            console.log('[AdminListener] Store ID mismatch.');
-                        }
+            const setupNotifications = async () => {
+                try {
+                    // Request permission
+                    const permission = await Notification.requestPermission();
+                    if (permission !== 'granted') {
+                        console.log('[AdminListener] Permission denied');
+                        return;
                     }
-                });
-                return () => unsubscribe();
-            } catch (error) {
-                console.error('[AdminListener] Error setting up listener:', error);
-            }
+
+                    const messaging = getMessaging(app);
+
+                    // Get Token
+                    const token = await getToken(messaging, {
+                        vapidKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+                    });
+
+                    if (token) {
+                        console.log('[AdminListener] Got FCM token:', token);
+                        // Save token to store
+                        const { getFirestore, doc, updateDoc, arrayUnion } = await import('firebase/firestore');
+                        const db = getFirestore(app);
+                        const storeRef = doc(db, 'stores', storeId);
+                        await updateDoc(storeRef, {
+                            adminTokens: arrayUnion(token)
+                        });
+                        console.log('[AdminListener] Token saved to store');
+                    }
+
+                    // Listen for messages
+                    const unsubscribe = onMessage(messaging, (payload) => {
+                        console.log('[AdminListener] Message received:', payload);
+
+                        if (payload.data?.type === 'new_order') {
+                            const { orderId, storeId: msgStoreId } = payload.data;
+                            const customerName = payload.notification?.body?.split(' placed')[0] || 'A customer';
+
+                            // Only show if it matches the current store context
+                            if (msgStoreId === storeId) {
+                                setNotificationData({
+                                    orderId,
+                                    customerName
+                                });
+                                setIsOpen(true);
+                            }
+                        }
+                    });
+                    return () => unsubscribe();
+                } catch (error) {
+                    console.error('[AdminListener] Error setting up listener:', error);
+                }
+            };
+
+            setupNotifications();
         }
     }, [storeId]);
 
