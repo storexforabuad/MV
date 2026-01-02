@@ -145,10 +145,20 @@ export default function SubscriptionModal({
     }
   };
 
+  // Safe date conversion helper
+  const safeToDate = (val: any): Date | undefined => {
+    if (!val) return undefined;
+    if (val instanceof Date) return val;
+    if (typeof val.toDate === 'function') return val.toDate();
+    if (val.seconds) return new Date(val.seconds * 1000);
+    if (typeof val === 'string') return new Date(val);
+    return undefined;
+  };
+
   const status: SubscriptionStatus = subscriptionData?.status || 'trial';
   const statusDisplay = getStatusDisplay(status);
-  const trialEndsAt = subscriptionData?.trialEndsAt?.toDate();
-  const nextBillingDate = subscriptionData?.nextBillingDate?.toDate();
+  const trialEndsAt = safeToDate(subscriptionData?.trialEndsAt);
+  const nextBillingDate = safeToDate(subscriptionData?.nextBillingDate);
   const trialExpired = trialEndsAt && isTrialExpired(trialEndsAt);
 
   // Calculate days remaining
@@ -181,9 +191,9 @@ export default function SubscriptionModal({
             <p className="text-xs text-slate-500 dark:text-slate-400">Manage your plan & billing</p>
           </div>
           <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg ${status === 'active' ? 'bg-gradient-to-br from-green-500 to-emerald-600' :
-              status === 'trial' ? 'bg-gradient-to-br from-blue-500 to-indigo-600' :
-                status === 'past_due' ? 'bg-gradient-to-br from-yellow-500 to-amber-600' :
-                  'bg-gradient-to-br from-red-500 to-rose-600'
+            status === 'trial' ? 'bg-gradient-to-br from-blue-500 to-indigo-600' :
+              status === 'past_due' ? 'bg-gradient-to-br from-yellow-500 to-amber-600' :
+                'bg-gradient-to-br from-red-500 to-rose-600'
             }`}>
             <ShieldCheck className="w-6 h-6 text-white" />
           </div>
@@ -200,18 +210,18 @@ export default function SubscriptionModal({
 
               {/* Status Banner */}
               <div className={`p-6 rounded-2xl shadow-sm border ${status === 'active' ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' :
-                  status === 'trial' ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' :
-                    status === 'past_due' ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' :
-                      'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
+                status === 'trial' ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' :
+                  status === 'past_due' ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800' :
+                    'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
                 }`}>
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <div className="flex items-center gap-2 mb-2">
                       {statusDisplay.icon}
                       <span className={`font-bold uppercase tracking-wider text-sm ${status === 'active' ? 'text-green-700 dark:text-green-400' :
-                          status === 'trial' ? 'text-blue-700 dark:text-blue-400' :
-                            status === 'past_due' ? 'text-yellow-700 dark:text-yellow-400' :
-                              'text-red-700 dark:text-red-400'
+                        status === 'trial' ? 'text-blue-700 dark:text-blue-400' :
+                          status === 'past_due' ? 'text-yellow-700 dark:text-yellow-400' :
+                            'text-red-700 dark:text-red-400'
                         }`}>
                         Current Status
                       </span>
