@@ -34,11 +34,21 @@ export function DevTeamStoreCard({
     const status = subscriptionStatus || 'trial';
     const statusDisplay = getStatusDisplay(status);
 
+    // Safe date conversion helper
+    const safeToDate = (val: any): Date | undefined => {
+        if (!val) return undefined;
+        if (val instanceof Date) return val;
+        if (typeof val.toDate === 'function') return val.toDate();
+        if (val.seconds) return new Date(val.seconds * 1000);
+        if (typeof val === 'string') return new Date(val);
+        return undefined;
+    };
+
     // Calculate days remaining
-    const getDaysRemaining = (date: Timestamp | undefined) => {
-        if (!date) return 0;
+    const getDaysRemaining = (date: any) => {
+        const targetDate = safeToDate(date);
+        if (!targetDate) return 0;
         const now = new Date();
-        const targetDate = date.toDate();
         const diff = targetDate.getTime() - now.getTime();
         return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
     };
@@ -116,12 +126,12 @@ export function DevTeamStoreCard({
             <div className="mb-3">
                 <div
                     className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${status === 'active'
-                            ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
-                            : status === 'trial'
-                                ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
-                                : status === 'past_due'
-                                    ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
-                                    : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                        : status === 'trial'
+                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                            : status === 'past_due'
+                                ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                                : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
                         }`}
                 >
                     <span>{statusDisplay.icon}</span>
@@ -143,11 +153,11 @@ export function DevTeamStoreCard({
                         <span>Trial expired</span>
                     </div>
                 )}
-                {(status === 'active' || status === 'past_due') && subscriptionNextBillingDate && (
+                {(status === 'active' || status === 'past_due') && safeToDate(subscriptionNextBillingDate) && (
                     <div className="flex items-center gap-1.5">
                         <CheckCircle2 className="w-4 h-4" />
                         <span>
-                            Next billing: {subscriptionNextBillingDate.toDate().toLocaleDateString('en-NG', {
+                            Next billing: {safeToDate(subscriptionNextBillingDate)?.toLocaleDateString('en-NG', {
                                 month: 'short',
                                 day: 'numeric',
                                 year: 'numeric',
@@ -198,8 +208,8 @@ export function DevTeamStoreCard({
                         onClick={handleActivate}
                         disabled={isUpdating || status === 'active'}
                         className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${status === 'active'
-                                ? 'bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                                : 'bg-green-600 hover:bg-green-700 text-white'
+                            ? 'bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                            : 'bg-green-600 hover:bg-green-700 text-white'
                             }`}
                     >
                         {isUpdating ? 'Updating...' : 'Activate'}
@@ -209,8 +219,8 @@ export function DevTeamStoreCard({
                         onClick={handleSuspend}
                         disabled={isUpdating || status === 'expired'}
                         className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${status === 'expired'
-                                ? 'bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                                : 'bg-red-600 hover:bg-red-700 text-white'
+                            ? 'bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                            : 'bg-red-600 hover:bg-red-700 text-white'
                             }`}
                     >
                         {isUpdating ? 'Updating...' : 'Suspend'}
