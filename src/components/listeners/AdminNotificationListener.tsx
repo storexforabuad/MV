@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getMessaging, onMessage } from 'firebase/messaging';
+import { getMessaging, onMessage, getToken } from 'firebase/messaging';
 import { app } from '@/lib/firebase';
 import { NewOrderModal } from '@/components/admin/modals/NewOrderModal';
 
