@@ -201,11 +201,19 @@ export async function devTeamOverrideSubscription(
     try {
         const storeRef = doc(db, 'stores', storeId);
 
-        await updateDoc(storeRef, {
+        const updateData: any = {
             subscriptionStatus: status,
             subscriptionOverrideReason: reason || 'Manual override by devteam',
             subscriptionOverrideAt: serverTimestamp(),
-        });
+        };
+
+        if (status === 'active') {
+            const nextBilling = new Date();
+            nextBilling.setDate(nextBilling.getDate() + 30);
+            updateData.subscriptionNextBillingDate = Timestamp.fromDate(nextBilling);
+        }
+
+        await updateDoc(storeRef, updateData);
 
         return { success: true };
     } catch (error) {
