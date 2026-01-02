@@ -29,7 +29,7 @@ export default function ModalShell({ title, onClose, children, footer, strip }: 
         </Dialog.Title>
       )}
 
-      <div className="mt-4 max-h-[80vh] overflow-y-auto pr-2">{children}</div>
+      <div className="mt-4 max-h-[90vh] overflow-y-auto">{children}</div>
 
       {strip && (
         <div className="mt-4 sticky bottom-16 z-10">{strip}</div>
