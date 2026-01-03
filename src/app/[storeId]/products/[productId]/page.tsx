@@ -5,7 +5,7 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { useParams, useRouter } from 'next/navigation';
 import { getProductById, incrementProductViews, getStoreMeta, getCategories } from '../../../../lib/db';
-import { Heart, ShoppingCart, Share2, PackageX, Search, Info } from 'lucide-react';
+import { Heart, ShoppingCart, Share2, PackageX, Search, Info, Gift } from 'lucide-react';
 import { useCart } from '../../../../lib/cartContext';
 import { Product, FashionProduct, FoodBeverageProduct } from '../../../../types/product';
 import { Category } from '../../../../types/category';
@@ -440,10 +440,28 @@ export default function ProductDetail() {
                 {product.description && !isFoodBeverageProduct(product) && <p className="text-gray-600 dark:text-gray-300 mb-8">{product.description}</p>}
 
                 {/* Action Buttons */}
-                <button onClick={handleShareClick} className="group relative w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-full font-medium transition-colors shadow-sm min-h-[48px] text-base bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">
-                  <Share2 className="w-5 h-5 mr-2" />
-                  <span>Share & Earn</span>
-                </button>
+                <div className="mt-8">
+                  <div className={`relative overflow-hidden bg-slate-100 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-700/50 p-4 rounded-2xl shadow-sm flex items-center justify-between group cursor-pointer transition-all hover:shadow-md active:scale-[0.99]
+                    before:absolute before:inset-0 before:-translate-x-full 
+                    before:animate-[shimmer_3s_infinite] 
+                    before:bg-gradient-to-r before:from-transparent 
+                    dark:before:via-slate-800/50 before:via-slate-200/50 before:to-transparent`}
+                    onClick={handleShareClick}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-xl">
+                        <Gift className="text-indigo-600 dark:text-indigo-400" size={20} />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Share & Earn Commission!</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">Get bonuses for every successful referral</p>
+                      </div>
+                    </div>
+                    <div className="bg-slate-800 dark:bg-slate-200 text-white dark:text-slate-900 font-bold py-2 px-5 rounded-full text-xs shadow-lg group-hover:opacity-90 transition-all whitespace-nowrap">
+                      Share
+                    </div>
+                  </div>
+                </div>
               </>
             )}
           </div>
