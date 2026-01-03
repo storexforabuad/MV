@@ -7,7 +7,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { getProductById, incrementProductViews, getStoreMeta, getCategories } from '../../../../lib/db';
 import { Heart, ShoppingCart, Share2, PackageX, Search, Info } from 'lucide-react';
 import { useCart } from '../../../../lib/cartContext';
-import { Product, FashionProduct, FoodBeverageProduct  } from '../../../../types/product';
+import { Product, FashionProduct, FoodBeverageProduct } from '../../../../types/product';
 import { Category } from '../../../../types/category';
 import { StoreMeta } from '../../../../types/store';
 import { calculateDiscount, formatPrice } from '../../../../utils/price';
@@ -20,6 +20,7 @@ import OrderSummaryModal from '../../../../components/modals/OrderSummaryModal';
 import toast from 'react-hot-toast';
 import VehicleDetailPage from '../../../../components/products/VehicleDetailPage';
 import { ensureProductType, isFashionProduct, isGeneralProduct, isVehicleProduct, isFoodBeverageProduct } from '../../../../utils/productHelpers';
+import { shouldUsePaymentFlow } from '../../../../utils/storeHelpers';
 import SizeSelector from '../../../../components/products/SizeSelector';
 import { SizePreferencesCache } from '../../../../lib/sizePreferencesCache';
 import SizeGuideModal from '../../../../components/products/SizeGuideModal';
@@ -450,7 +451,7 @@ export default function ProductDetail() {
         <div className="fixed bottom-0 left-0 right-0 p-3 sm:p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 flex gap-3 z-40 safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
           <button onClick={handlePlaceOrderClick} disabled={!isOrderable} className="group relative flex-grow inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-green-600 text-white font-bold shadow-lg hover:bg-green-700 transition-all active:scale-[0.98] disabled:bg-gray-400 disabled:cursor-not-allowed text-base">
             <ShoppingCart className="w-5 h-5" />
-            <span>Place Order</span>
+            <span>{shouldUsePaymentFlow(storeMeta?.storeType) ? 'Proceed to Payment' : 'Place Order'}</span>
           </button>
           <button onClick={handleToggleCart} disabled={isTogglingCart || !isOrderable} className={`group relative flex-shrink-0 inline-flex items-center justify-center w-14 h-14 rounded-xl font-medium transition-all duration-300 transform-gpu active:scale-[0.9] disabled:opacity-50 disabled:cursor-not-allowed border border-gray-200 dark:border-gray-700 ${isInCart ? 'bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:border-red-800' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'}`}>
             <Heart className={`w-6 h-6 transition-transform duration-200 ease-in-out ${isInCart ? 'fill-current scale-110' : ''}`} />

@@ -52,7 +52,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const storeId = typeof routeParams?.storeId === 'string' ? routeParams.storeId : Array.isArray(routeParams?.storeId) ? routeParams.storeId[0] : undefined;
   const { addOrder } = useOrders(customer?.id || null, storeId!);
 
-  const isPaymentFlowEnabled = shouldUsePaymentFlow(storeMeta?.storeType);
+  const isPaymentFlowEnabled = shouldUsePaymentFlow(storeMeta?.storeType) || storeMeta?.storeType === 'general';
 
   useEffect(() => {
     if (isOpen) {
@@ -221,11 +221,11 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                   </h3>
                   <button
                     type="button"
-                    className="rounded-md bg-white dark:bg-slate-950 text-gray-400 hover:text-gray-500 focus:outline-none"
+                    className="rounded-full bg-gray-100 dark:bg-gray-800 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-colors shadow-sm"
                     onClick={onClose}
                   >
                     <span className="sr-only">Close</span>
-                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor" aria-hidden="true">
+                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" aria-hidden="true">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>

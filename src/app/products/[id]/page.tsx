@@ -13,6 +13,7 @@ import { ViewHistoryCache } from '@/lib/viewHistoryCache';
 import { ProductDetailCache } from '../../../lib/productDetailCache';
 import Navbar from '../../../components/layout/navbar';
 import { isGeneralProduct } from '../../../utils/productHelpers';
+import toast from 'react-hot-toast';
 
 
 // Dynamic imports
@@ -87,18 +88,12 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
     return <div className="p-4">Product not found</div>;
   }
 
-  const createWhatsAppMessage = () => {
-    const message =
-      `🛍️ *New Order Request*\\n\\n` +
-      `Hello! I would like to order this item:\\n\\n` +
-      `*${product.name}*\\n` +
-      `• Price: ${formatPrice(product.price)}\\n` +
-      `• Product Link: ${window.location.href}\\n\\n` +
-      `Thank you! 🙏`;
-
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappLink = `https://wa.me/+2349021067212?text=${encodedMessage}`;
-    window.open(whatsappLink, '_blank');
+  const handleOrderNow = () => {
+    if (storeId) {
+      window.location.href = `/${storeId}/products/${product.id}`;
+    } else {
+      toast.error('Store information missing. Please visit the store directly.');
+    }
   };
 
   const handleAddToCart = () => {
@@ -296,8 +291,8 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                 {/* Action Buttons */}
                 <div className="flex flex-col gap-3">
                   <button
-                    onClick={createWhatsAppMessage}
-                    className="group relative w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-[980px] bg-[var(--button-success)] text-white font-medium shadow-sm hover:shadow-md transition-all duration-300 hover:bg-[var(--button-success-hover)] transform-gpu active:scale-[0.98] cursor-default disabled:opacity-75 disabled:cursor-not-allowed product-detail-button-success min-h-[48px] text-base"
+                    onClick={handleOrderNow}
+                    className="group relative w-full inline-flex items-center justify-center gap-2 px-6 py-4 rounded-[980px] bg-[var(--button-primary)] text-white font-medium shadow-sm hover:shadow-md transition-all duration-300 hover:bg-[var(--button-primary-hover)] transform-gpu active:scale-[0.98] cursor-default disabled:opacity-75 disabled:cursor-not-allowed product-detail-button-primary min-h-[48px] text-base"
                     style={{ minHeight: '48px', fontSize: '1rem' }}
                     tabIndex={0}
                     aria-label="Order Now"
