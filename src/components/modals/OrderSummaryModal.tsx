@@ -46,6 +46,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const [specialInstructions, setSpecialInstructions] = useState('');
   const [uploadedEvidence, setUploadedEvidence] = useState<{ url: string; fileName: string } | undefined>();
   const [imageLoading, setImageLoading] = useState(true);
+  const [showLeaveAppConfirmation, setShowLeaveAppConfirmation] = useState(false);
   const hasPushedState = useRef(false);
 
   const routeParams = useParams();
@@ -66,6 +67,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
       setSelectedSpiciness('medium');
       setSpecialInstructions('');
       setUploadedEvidence(undefined);
+      setShowLeaveAppConfirmation(false);
 
       // Restore modal state from localStorage if payment flow is enabled
       if (isPaymentFlowEnabled && storeId) {
@@ -233,240 +235,305 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   };
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={onClose}>
-        <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-          <div className="fixed inset-0 bg-black bg-opacity-75 transition-opacity" />
-        </Transition.Child>
+    <>
+      <Transition.Root show={isOpen} as={Fragment}>
+        <Dialog as="div" className="relative z-50" onClose={onClose}>
+          <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
+            <div className="fixed inset-0 bg-black bg-opacity-75 transition-opacity" />
+          </Transition.Child>
 
-        <div className="fixed inset-0 z-10 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-0 text-center">
-            <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
-              <Dialog.Panel className="fixed inset-0 w-full h-full max-w-none transform overflow-hidden bg-white dark:bg-slate-950 text-left align-middle shadow-xl transition-all flex flex-col">
+          <div className="fixed inset-0 z-10 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-0 text-center">
+              <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
+                <Dialog.Panel className="fixed inset-0 w-full h-full max-w-none transform overflow-hidden bg-white dark:bg-slate-950 text-left align-middle shadow-xl transition-all flex flex-col">
 
-                {/* Header */}
-                <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 sm:px-6 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-950">
-                  <h3 className="text-lg font-semibold leading-6 text-gray-900 dark:text-white">
-                    {currentPage === 1 ? 'Order Summary' : 'Payment'}
-                  </h3>
-                  <button
-                    type="button"
-                    className="flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-colors shadow-sm"
-                    onClick={onClose}
-                  >
-                    <span className="sr-only">Close</span>
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" aria-hidden="true">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
+                  {/* Header */}
+                  <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 sm:px-6 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-950">
+                    <h3 className="text-lg font-semibold leading-6 text-gray-900 dark:text-white">
+                      {currentPage === 1 ? 'Order Summary' : 'Payment'}
+                    </h3>
+                    <button
+                      type="button"
+                      className="flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-colors shadow-sm"
+                      onClick={onClose}
+                    >
+                      <span className="sr-only">Close</span>
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" aria-hidden="true">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
 
-                {/* Main Content */}
-                <div className="flex-grow overflow-y-auto p-4 sm:p-6">
-                  <div className="max-w-3xl mx-auto w-full">
-                    {currentPage === 1 && (
-                      <div className="pt-4 sm:pt-8">
-                        {/* Product Details */}
-                        <div className="flex items-center space-x-4">
-                          <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-50 dark:bg-gray-900 shadow-sm">
-                            {imageLoading && (
-                              <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800">
-                                <div className="w-full h-full bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 animate-shimmer bg-[length:200%_100%]" />
-                              </div>
-                            )}
-                            <Image
-                              src={product.images[0]}
-                              alt={product.name}
-                              width={80}
-                              height={80}
-                              className={`h-20 w-20 object-cover transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
-                              onLoadingComplete={() => setImageLoading(false)}
-                            />
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="text-base font-semibold text-gray-900 dark:text-white">{product.name}</h4>
-                            <div className="mt-1 mb-2 flex flex-wrap gap-2">
-                              {selectedColor && (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700">
-                                  Color: {selectedColor}
-                                </span>
+                  {/* Main Content */}
+                  <div className="flex-grow overflow-y-auto p-4 sm:p-6">
+                    <div className="max-w-3xl mx-auto w-full">
+                      {currentPage === 1 && (
+                        <div className="pt-4 sm:pt-8">
+                          {/* Product Details */}
+                          <div className="flex items-center space-x-4">
+                            <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-50 dark:bg-gray-900 shadow-sm">
+                              {imageLoading && (
+                                <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800">
+                                  <div className="w-full h-full bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 animate-shimmer bg-[length:200%_100%]" />
+                                </div>
                               )}
-                              {selectedSize && (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700">
-                                  Size: {selectedSize}
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                              {formatPrice(product.price)}
-                              {product.productType === 'livestock' && (
-                                <span>/{(product as any).priceUnit === 'kg' ? 'kg' : 'pc'}</span>
-                              )}
-                            </p>
-                          </div>
-                          <div className="flex flex-col items-center gap-1 bg-gray-50 dark:bg-gray-900 p-2 rounded-lg border border-gray-100 dark:border-gray-800">
-                            <span className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold">
-                              {product.productType === 'livestock' && (product as any).priceUnit === 'kg' ? 'Kilos' : 'Quantity'}
-                            </span>
-                            <div className="flex items-center gap-3">
-                              <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Minus size={18} /></button>
-                              <span className="text-lg font-bold text-gray-900 dark:text-white min-w-[1.5rem] text-center">{quantity}</span>
-                              <button onClick={() => setQuantity(q => q + 1)} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Plus size={18} /></button>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Food Options */}
-                        {isFoodBeverageProduct(product) && (
-                          <div className="mt-8 space-y-6">
-                            <div>
-                              <label className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3 block">
-                                Spiciness Level
-                              </label>
-                              <div className="grid grid-cols-4 gap-3">
-                                {SPICINESS_LEVELS.map((level) => (
-                                  <button
-                                    key={level.value}
-                                    onClick={() => setSelectedSpiciness(level.value)}
-                                    className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all duration-200 ${selectedSpiciness === level.value
-                                      ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20 ring-2 ring-orange-500 ring-opacity-50 shadow-sm'
-                                      : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900'
-                                      }`}
-                                  >
-                                    <span className="text-2xl mb-1">{level.label.split(' ')[0]}</span>
-                                    <span className="text-xs font-medium text-center leading-tight dark:text-gray-300">
-                                      {level.label.split(' ').slice(1).join(' ')}
-                                    </span>
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-
-                            <div>
-                              <label htmlFor="special-instructions" className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-2 block">
-                                Special Instructions
-                              </label>
-                              <textarea
-                                id="special-instructions"
-                                rows={3}
-                                className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white sm:text-sm p-3"
-                                placeholder="E.g. No onions, extra sauce..."
-                                value={specialInstructions}
-                                onChange={(e) => setSpecialInstructions(e.target.value)}
+                              <Image
+                                src={product.images[0]}
+                                alt={product.name}
+                                width={80}
+                                height={80}
+                                className={`h-20 w-20 object-cover transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                                onLoadingComplete={() => setImageLoading(false)}
                               />
                             </div>
+                            <div className="flex-1">
+                              <h4 className="text-base font-semibold text-gray-900 dark:text-white">{product.name}</h4>
+                              <div className="mt-1 mb-2 flex flex-wrap gap-2">
+                                {selectedColor && (
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700">
+                                    Color: {selectedColor}
+                                  </span>
+                                )}
+                                {selectedSize && (
+                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700">
+                                    Size: {selectedSize}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                                {formatPrice(product.price)}
+                                {product.productType === 'livestock' && (
+                                  <span>/{(product as any).priceUnit === 'kg' ? 'kg' : 'pc'}</span>
+                                )}
+                              </p>
+                            </div>
+                            <div className="flex flex-col items-center gap-1 bg-gray-50 dark:bg-gray-900 p-2 rounded-lg border border-gray-100 dark:border-gray-800">
+                              <span className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold">
+                                {product.productType === 'livestock' && (product as any).priceUnit === 'kg' ? 'Kilos' : 'Quantity'}
+                              </span>
+                              <div className="flex items-center gap-3">
+                                <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Minus size={18} /></button>
+                                <span className="text-lg font-bold text-gray-900 dark:text-white min-w-[1.5rem] text-center">{quantity}</span>
+                                <button onClick={() => setQuantity(q => q + 1)} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Plus size={18} /></button>
+                              </div>
+                            </div>
                           </div>
-                        )}
 
-                        {/* Delivery Method */}
-                        <div className="mt-8">
-                          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3">Delivery Method</h4>
-                          <div className="grid grid-cols-2 gap-4">
-                            <div onClick={() => setDeliveryMethod('home')} className={`flex cursor-pointer items-center rounded-xl border p-4 transition-all duration-200 ${deliveryMethod === 'home' ? 'border-green-500 bg-green-50 dark:bg-green-900/10 ring-1 ring-green-500' : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900'}`}>
-                              <div className={`p-2 rounded-full mr-3 ${deliveryMethod === 'home' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'}`}>
-                                <HomeIcon className="h-5 w-5" />
+                          {/* Food Options */}
+                          {isFoodBeverageProduct(product) && (
+                            <div className="mt-8 space-y-6">
+                              <div>
+                                <label className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3 block">
+                                  Spiciness Level
+                                </label>
+                                <div className="grid grid-cols-4 gap-3">
+                                  {SPICINESS_LEVELS.map((level) => (
+                                    <button
+                                      key={level.value}
+                                      onClick={() => setSelectedSpiciness(level.value)}
+                                      className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all duration-200 ${selectedSpiciness === level.value
+                                        ? 'border-orange-500 bg-orange-50 dark:bg-orange-900/20 ring-2 ring-orange-500 ring-opacity-50 shadow-sm'
+                                        : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900'
+                                        }`}
+                                    >
+                                      <span className="text-2xl mb-1">{level.label.split(' ')[0]}</span>
+                                      <span className="text-xs font-medium text-center leading-tight dark:text-gray-300">
+                                        {level.label.split(' ').slice(1).join(' ')}
+                                      </span>
+                                    </button>
+                                  ))}
+                                </div>
                               </div>
-                              <span className="text-sm font-medium dark:text-gray-200">Home Delivery</span>
-                            </div>
-                            <div onClick={() => setDeliveryMethod('pickup')} className={`flex cursor-pointer items-center rounded-xl border p-4 transition-all duration-200 ${deliveryMethod === 'pickup' ? 'border-green-500 bg-green-50 dark:bg-green-900/10 ring-1 ring-green-500' : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900'}`}>
-                              <div className={`p-2 rounded-full mr-3 ${deliveryMethod === 'pickup' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'}`}>
-                                <BriefcaseIcon className="h-5 w-5" />
+
+                              <div>
+                                <label htmlFor="special-instructions" className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-2 block">
+                                  Special Instructions
+                                </label>
+                                <textarea
+                                  id="special-instructions"
+                                  rows={3}
+                                  className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white sm:text-sm p-3"
+                                  placeholder="E.g. No onions, extra sauce..."
+                                  value={specialInstructions}
+                                  onChange={(e) => setSpecialInstructions(e.target.value)}
+                                />
                               </div>
-                              <span className="text-sm font-medium dark:text-gray-200">Pick Up</span>
-                            </div>
-                          </div>
-                          {deliveryMethod === 'home' && customer && customer.deliveryAddress && (
-                            <div className="mt-3 flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 p-3 rounded-lg">
-                              <span className="font-medium flex-shrink-0">Delivering to:</span>
-                              <span>{customer.deliveryAddress.street}</span>
                             </div>
                           )}
-                        </div>
 
-                        {/* Payment Details */}
-                        <div className="mt-8 border-t border-gray-200 dark:border-gray-800 pt-6">
-                          <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-4">Payment Summary</h4>
-                          <dl className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
-                            <div className="flex justify-between">
-                              <dt>Item price</dt>
-                              <dd className="font-medium text-gray-900 dark:text-gray-200">{formatPrice(product.price * quantity)}</dd>
+                          {/* Delivery Method */}
+                          <div className="mt-8">
+                            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3">Delivery Method</h4>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div onClick={() => setDeliveryMethod('home')} className={`flex cursor-pointer items-center rounded-xl border p-4 transition-all duration-200 ${deliveryMethod === 'home' ? 'border-green-500 bg-green-50 dark:bg-green-900/10 ring-1 ring-green-500' : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900'}`}>
+                                <div className={`p-2 rounded-full mr-3 ${deliveryMethod === 'home' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'}`}>
+                                  <HomeIcon className="h-5 w-5" />
+                                </div>
+                                <span className="text-sm font-medium dark:text-gray-200">Home Delivery</span>
+                              </div>
+                              <div onClick={() => setDeliveryMethod('pickup')} className={`flex cursor-pointer items-center rounded-xl border p-4 transition-all duration-200 ${deliveryMethod === 'pickup' ? 'border-green-500 bg-green-50 dark:bg-green-900/10 ring-1 ring-green-500' : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900'}`}>
+                                <div className={`p-2 rounded-full mr-3 ${deliveryMethod === 'pickup' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'}`}>
+                                  <BriefcaseIcon className="h-5 w-5" />
+                                </div>
+                                <span className="text-sm font-medium dark:text-gray-200">Pick Up</span>
+                              </div>
                             </div>
-                            {deliveryMethod === 'home' && (
-                              <div className="flex justify-between">
-                                <dt>Home delivery</dt>
-                                <dd className="font-medium text-gray-900 dark:text-gray-200">TBD by vendor</dd>
+                            {deliveryMethod === 'home' && customer && customer.deliveryAddress && (
+                              <div className="mt-3 flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 p-3 rounded-lg">
+                                <span className="font-medium flex-shrink-0">Delivering to:</span>
+                                <span>{customer.deliveryAddress.street}</span>
                               </div>
                             )}
-                            <div className="flex justify-between items-center pt-3 border-t border-gray-100 dark:border-gray-800">
-                              <dt className="text-base font-bold text-gray-900 dark:text-white">Total</dt>
-                              <dd className="text-xl font-bold text-green-600 dark:text-green-400">{formatPrice(total)}</dd>
-                            </div>
-                          </dl>
+                          </div>
+
+                          {/* Payment Details */}
+                          <div className="mt-8 border-t border-gray-200 dark:border-gray-800 pt-6">
+                            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-4">Payment Summary</h4>
+                            <dl className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
+                              <div className="flex justify-between">
+                                <dt>Item price</dt>
+                                <dd className="font-medium text-gray-900 dark:text-gray-200">{formatPrice(product.price * quantity)}</dd>
+                              </div>
+                              {deliveryMethod === 'home' && (
+                                <div className="flex justify-between">
+                                  <dt>Home delivery</dt>
+                                  <dd className="font-medium text-gray-900 dark:text-gray-200">TBD by vendor</dd>
+                                </div>
+                              )}
+                              <div className="flex justify-between items-center pt-3 border-t border-gray-100 dark:border-gray-800">
+                                <dt className="text-base font-bold text-gray-900 dark:text-white">Total</dt>
+                                <dd className="text-xl font-bold text-green-600 dark:text-green-400">{formatPrice(total)}</dd>
+                              </div>
+                            </dl>
+                          </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {/* Page 2 content */}
-                    {currentPage === 2 && isPaymentFlowEnabled && storeMeta && (
-                      <div className="h-full">
-                        <PaymentFlowPage
-                          storeMeta={storeMeta}
-                          onEvidenceUploaded={handleEvidenceUploaded}
-                          onBack={handleBackToSummary}
-                          uploadedEvidence={uploadedEvidence}
-                          total={total}
-                        />
-                      </div>
-                    )}
+                      {/* Page 2 content */}
+                      {currentPage === 2 && isPaymentFlowEnabled && storeMeta && (
+                        <div className="h-full">
+                          <PaymentFlowPage
+                            storeMeta={storeMeta}
+                            onEvidenceUploaded={handleEvidenceUploaded}
+                            onBack={handleBackToSummary}
+                            uploadedEvidence={uploadedEvidence}
+                            total={total}
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                {/* Footer */}
-                <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-950 p-4 sm:px-6">
-                  <div className="max-w-3xl mx-auto w-full">
-                    {currentPage === 1 ? (
-                      <button
-                        type="button"
-                        className="w-full rounded-xl border border-transparent bg-green-600 px-6 py-4 text-base font-bold text-white shadow-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                        onClick={isPaymentFlowEnabled ? handleProceedToPayment : handlePlaceOrder}
-                        disabled={isPlacingOrder || (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false)}
-                      >
-                        {isPlacingOrder ? (
-                          <span className="flex items-center justify-center gap-2"><Loader2 className="h-5 w-5 animate-spin" />Processing...</span>
-                        ) : (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false) ? (
-                          'Store Closed'
-                        ) : isPaymentFlowEnabled ? (
-                          'Proceed to Payment'
-                        ) : (
-                          'Place Order'
-                        )}
-                      </button>
-                    ) : (
-                      currentPage === 2 && isPaymentFlowEnabled && (
-                        <div className="flex flex-col gap-3">
-                          <button
-                            type="button"
-                            className="w-full rounded-xl border border-transparent bg-green-600 px-6 py-4 text-base font-bold text-white shadow-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                            onClick={handlePlaceOrder}
-                            disabled={isPlacingOrder || !uploadedEvidence}
-                          >
-                            {isPlacingOrder ? (
-                              <span className="flex items-center justify-center gap-2"><Loader2 className="h-5 w-5 animate-spin" />Placing Order...</span>
+                  {/* Footer */}
+                  <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-950 p-4 sm:px-6">
+                    <div className="max-w-3xl mx-auto w-full">
+                      {currentPage === 1 ? (
+                        <button
+                          type="button"
+                          className="w-full rounded-xl border border-transparent bg-green-600 px-6 py-4 text-base font-bold text-white shadow-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                          onClick={isPaymentFlowEnabled ? handleProceedToPayment : handlePlaceOrder}
+                          disabled={isPlacingOrder || (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false)}
+                        >
+                          {isPlacingOrder ? (
+                            <span className="flex items-center justify-center gap-2"><Loader2 className="h-5 w-5 animate-spin" />Processing...</span>
+                          ) : (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false) ? (
+                            'Store Closed'
+                          ) : isPaymentFlowEnabled ? (
+                            'Proceed to Payment'
+                          ) : (
+                            'Place Order'
+                          )}
+                        </button>
+                      ) : (
+                        currentPage === 2 && isPaymentFlowEnabled && (
+                          <div className="flex flex-col gap-3">
+                            {uploadedEvidence ? (
+                              <button
+                                type="button"
+                                className="w-full rounded-xl border border-transparent bg-green-600 px-6 py-4 text-base font-bold text-white shadow-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                                onClick={handlePlaceOrder}
+                                disabled={isPlacingOrder}
+                              >
+                                {isPlacingOrder ? (
+                                  <span className="flex items-center justify-center gap-2"><Loader2 className="h-5 w-5 animate-spin" />Placing Order...</span>
+                                ) : (
+                                  'Complete Order'
+                                )}
+                              </button>
                             ) : (
-                              'Complete Order'
+                              <button
+                                type="button"
+                                className="w-full rounded-xl border border-transparent bg-gray-900 dark:bg-white px-6 py-4 text-base font-bold text-white dark:text-gray-900 shadow-lg hover:bg-gray-800 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all transform active:scale-[0.98]"
+                                onClick={() => setShowLeaveAppConfirmation(true)}
+                              >
+                                Leave App to Pay
+                              </button>
                             )}
-                          </button>
-                        </div>
-                      )
-                    )}
+                          </div>
+                        )
+                      )}
+                    </div>
                   </div>
-                </div>
 
-              </Dialog.Panel>
-            </Transition.Child>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
           </div>
-        </div>
-      </Dialog>
-    </Transition.Root>
+        </Dialog>
+      </Transition.Root>
+
+      {/* Leave App Confirmation Dialog */}
+      <Transition.Root show={showLeaveAppConfirmation} as={Fragment}>
+        <Dialog as="div" className="relative z-[60]" onClose={() => setShowLeaveAppConfirmation(false)}>
+          <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
+            <div className="fixed inset-0 bg-black bg-opacity-75 transition-opacity" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 z-10 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+              <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95" enterTo="opacity-100 translate-y-0 sm:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 sm:scale-100" leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+                <Dialog.Panel className="relative transform overflow-hidden rounded-2xl bg-white dark:bg-gray-900 px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-sm sm:p-6">
+                  <div>
+                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30">
+                      <svg className="h-6 w-6 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
+                      </svg>
+                    </div>
+                    <div className="mt-3 text-center sm:mt-5">
+                      <Dialog.Title as="h3" className="text-lg font-semibold leading-6 text-gray-900 dark:text-white">
+                        Switching Apps
+                      </Dialog.Title>
+                      <div className="mt-2">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                          You are about to leave the store to make your payment.
+                          <br /><br />
+                          <span className="font-bold text-gray-900 dark:text-white">Important:</span> Please keep this tab open. Once you've made the payment, come back here to upload your receipt and complete the order.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="mt-5 sm:mt-6 flex flex-col gap-3">
+                    <button
+                      type="button"
+                      className="inline-flex w-full justify-center rounded-xl bg-blue-600 px-3 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 transition-colors"
+                      onClick={() => setShowLeaveAppConfirmation(false)}
+                    >
+                      Proceed to Pay
+                    </button>
+                    <button
+                      type="button"
+                      className="inline-flex w-full justify-center rounded-xl bg-gray-100 dark:bg-gray-800 px-3 py-3 text-sm font-semibold text-gray-900 dark:text-white shadow-sm hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
+                      onClick={() => setShowLeaveAppConfirmation(false)}
+                    >
+                      Stay Here
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition.Root>
+    </>
   );
 }
