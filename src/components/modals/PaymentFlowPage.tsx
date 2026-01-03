@@ -227,7 +227,7 @@ export default function PaymentFlowPage({
                 )}
               </div>
               <div className="text-sm font-medium text-gray-900 dark:text-white mb-1">
-                {isUploading ? 'Uploading...' : 'Click to upload receipt'}
+                {isUploading ? 'Uploading...' : 'Tap to upload receipt'}
               </div>
               <div className="text-xs text-gray-500 dark:text-gray-400">
                 Supports JPG, PNG

@@ -221,7 +221,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                   </h3>
                   <button
                     type="button"
-                    className="rounded-full bg-gray-100 dark:bg-gray-800 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-colors shadow-sm"
+                    className="flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-colors shadow-sm"
                     onClick={onClose}
                   >
                     <span className="sr-only">Close</span>
@@ -263,7 +263,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           </div>
                           <div className="flex flex-col items-center gap-1 bg-gray-50 dark:bg-gray-900 p-2 rounded-lg border border-gray-100 dark:border-gray-800">
                             <span className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold">
-                              {product.productType === 'livestock' && (product as any).priceUnit === 'kg' ? 'Kilos' : 'Qty'}
+                              {product.productType === 'livestock' && (product as any).priceUnit === 'kg' ? 'Kilos' : 'Quantity'}
                             </span>
                             <div className="flex items-center gap-3">
                               <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Minus size={18} /></button>

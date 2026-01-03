@@ -207,7 +207,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                   </h3>
                   <button
                     type="button"
-                    className="rounded-full bg-gray-100 dark:bg-gray-800 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-colors shadow-sm"
+                    className="flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-colors shadow-sm"
                     onClick={onClose}
                   >
                     <span className="sr-only">Close</span>
