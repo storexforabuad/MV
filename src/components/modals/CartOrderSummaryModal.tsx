@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState, useEffect } from 'react';
+import { Fragment, useState, useEffect, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { HomeIcon, BriefcaseIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
@@ -16,8 +16,6 @@ import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
 import { saveModalState, getModalState, clearModalState } from '@/lib/paymentModalStorage';
 import { requestCustomerNotificationPermission } from '@/lib/requestCustomerNotifications';
 import PaymentFlowPage from './PaymentFlowPage';
-import ModalShell from './ModalShell';
-import OrderSummaryStrip from './OrderSummaryStrip';
 
 interface CartOrderSummaryModalProps {
   isOpen: boolean;
@@ -35,6 +33,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
   const [orderNotes, setOrderNotes] = useState('');
   const [uploadedEvidence, setUploadedEvidence] = useState<{ url: string; fileName: string } | undefined>();
+  const hasPushedState = useRef(false);
 
   const storeId = cartItems[0]?.storeId;
   const { addOrder } = useOrders(customer?.id || null, storeId || "");
@@ -42,8 +41,11 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
 
   const isPaymentFlowEnabled = shouldUsePaymentFlow(storeMeta?.storeType) || storeMeta?.storeType === 'general';
 
+  const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
+  const total = subtotal;
+
   useEffect(() => {
-    if (isOpen && initialCustomer) {
+    if (isOpen) {
       setCurrentPage(1);
       setDeliveryMethod('home');
       setOrderNotes('');
@@ -63,28 +65,40 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
         }
       }
 
-      getCustomerDetails(initialCustomer.id).then(details => {
-        if (details) setCustomer(details);
-      });
+      if (initialCustomer) {
+        getCustomerDetails(initialCustomer.id).then(details => {
+          if (details) {
+            setCustomer(details);
+          }
+        });
+      }
 
-      // Push state to handle back button
-      window.history.pushState({ modal: 'cart-summary' }, '');
+      // Push state to handle back button only once
+      if (!hasPushedState.current) {
+        window.history.pushState({ modal: 'cart-order-summary' }, '');
+        hasPushedState.current = true;
+      }
 
-      const handlePopState = () => {
-        onClose();
+      const handlePopState = (event: PopStateEvent) => {
+        if (hasPushedState.current) {
+          hasPushedState.current = false;
+          onClose();
+        }
       };
 
       window.addEventListener('popstate', handlePopState);
       return () => {
         window.removeEventListener('popstate', handlePopState);
+        // If modal is closed via X button, we need to clean up the history state
+        if (hasPushedState.current) {
+          hasPushedState.current = false;
+          if (window.history.state?.modal === 'cart-order-summary') {
+            window.history.back();
+          }
+        }
       };
     }
   }, [isOpen, initialCustomer, isPaymentFlowEnabled, storeId, onClose]);
-
-  if (cartItems.length === 0) return null;
-
-  const subtotal = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const total = subtotal;
 
   const handleEvidenceUploaded = (evidenceUrl: string, fileName: string) => {
     setUploadedEvidence({ url: evidenceUrl, fileName });
@@ -96,7 +110,6 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
   const handlePlaceOrder = async () => {
     if (!storeMeta || !customer || !storeId) return;
 
-    // For payment flow, evidence is required; for WhatsApp, it's not
     if (isPaymentFlowEnabled && !uploadedEvidence) {
       toast.error('Please upload payment evidence first');
       return;
@@ -107,7 +120,6 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
       const storeMetaWithId = { ...storeMeta, id: storeId };
       const referrerId = localStorage.getItem('referrerId');
 
-      // For payment flow (restaurant), pass evidence URL
       if (isPaymentFlowEnabled) {
         await addOrder(
           cartItems,
@@ -121,7 +133,6 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
           uploadedEvidence?.fileName
         );
 
-        // Request notification permission immediately after order placement
         if (customer?.id) {
           requestCustomerNotificationPermission(customer.id).catch(err =>
             console.error('Failed to request notification permission:', err)
@@ -134,10 +145,8 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
         onOrderSuccess();
         onClose();
       } else {
-        // For non-payment flow stores, use WhatsApp
         await addOrder(cartItems, storeMetaWithId, customer, referrerId, false, deliveryMethod as 'home' | 'pickup', orderNotes);
 
-        // Request notification permission immediately after order placement
         if (customer?.id) {
           requestCustomerNotificationPermission(customer.id).catch(err =>
             console.error('Failed to request notification permission:', err)
@@ -220,13 +229,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                   <button
                     type="button"
                     className="flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-colors shadow-sm"
-                    onClick={() => {
-                      if (window.history.state?.modal === 'cart-summary') {
-                        window.history.back();
-                      } else {
-                        onClose();
-                      }
-                    }}
+                    onClick={onClose}
                   >
                     <span className="sr-only">Close</span>
                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" aria-hidden="true">
@@ -381,7 +384,6 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                               'Complete Order'
                             )}
                           </button>
-
                         </div>
                       )
                     )}

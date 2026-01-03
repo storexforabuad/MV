@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useState, useEffect } from 'react';
+import { Fragment, useState, useEffect, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { HomeIcon, BriefcaseIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
@@ -18,8 +18,6 @@ import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
 import { saveModalState, getModalState, clearModalState } from '@/lib/paymentModalStorage';
 import { requestCustomerNotificationPermission } from '@/lib/requestCustomerNotifications';
 import PaymentFlowPage from './PaymentFlowPage';
-import ModalShell from './ModalShell';
-import OrderSummaryStrip from './OrderSummaryStrip';
 
 const SPICINESS_LEVELS = [
   { value: 'mild', label: '😌 Mild', color: 'bg-green-100 text-green-800 border-green-200' },
@@ -35,7 +33,7 @@ interface OrderSummaryModalProps {
   storeMeta: StoreMeta | null;
   customer: Customer | null;
   selectedSize?: string;
-  selectedColor?: string; // Added selectedColor prop
+  selectedColor?: string;
 }
 
 export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta, customer: initialCustomer, selectedSize, selectedColor }: OrderSummaryModalProps) {
@@ -48,6 +46,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const [specialInstructions, setSpecialInstructions] = useState('');
   const [uploadedEvidence, setUploadedEvidence] = useState<{ url: string; fileName: string } | undefined>();
   const [imageLoading, setImageLoading] = useState(true);
+  const hasPushedState = useRef(false);
 
   const routeParams = useParams();
   const storeId = typeof routeParams?.storeId === 'string' ? routeParams.storeId : Array.isArray(routeParams?.storeId) ? routeParams.storeId[0] : undefined;
@@ -85,16 +84,29 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
         });
       }
 
-      // Push state to handle back button
-      window.history.pushState({ modal: 'order-summary' }, '');
+      // Push state to handle back button only once
+      if (!hasPushedState.current) {
+        window.history.pushState({ modal: 'order-summary' }, '');
+        hasPushedState.current = true;
+      }
 
-      const handlePopState = () => {
-        onClose();
+      const handlePopState = (event: PopStateEvent) => {
+        if (hasPushedState.current) {
+          hasPushedState.current = false;
+          onClose();
+        }
       };
 
       window.addEventListener('popstate', handlePopState);
       return () => {
         window.removeEventListener('popstate', handlePopState);
+        // If modal is closed via X button, we need to clean up the history state
+        if (hasPushedState.current) {
+          hasPushedState.current = false;
+          if (window.history.state?.modal === 'order-summary') {
+            window.history.back();
+          }
+        }
       };
     }
   }, [isOpen, initialCustomer, isPaymentFlowEnabled, storeId, onClose]);
@@ -113,7 +125,6 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const handlePlaceOrder = async () => {
     if (!product || !storeId || !storeMeta || !customer) return;
 
-    // For payment flow, evidence is required; for WhatsApp, it's not
     if (isPaymentFlowEnabled && !uploadedEvidence) {
       toast.error('Please upload payment evidence first');
       return;
@@ -133,7 +144,6 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
         specialInstructions: isFoodBeverageProduct(product) ? specialInstructions : undefined
       };
 
-      // For payment flow (restaurant), pass evidence URL
       if (isPaymentFlowEnabled) {
         await addOrder(
           [productToOrder],
@@ -147,7 +157,6 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
           uploadedEvidence?.fileName
         );
 
-        // Request notification permission immediately after order placement
         if (customer?.id) {
           requestCustomerNotificationPermission(customer.id).catch(err =>
             console.error('Failed to request notification permission:', err)
@@ -158,10 +167,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
         clearModalState(storeId);
         onClose();
       } else {
-        // For non-payment flow stores, use WhatsApp
         await addOrder([productToOrder], storeMetaWithId, customer, referrerId, false, deliveryMethod as 'home' | 'pickup');
 
-        // Request notification permission immediately after order placement
         if (customer?.id) {
           requestCustomerNotificationPermission(customer.id).catch(err =>
             console.error('Failed to request notification permission:', err)
@@ -235,13 +242,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                   <button
                     type="button"
                     className="flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-colors shadow-sm"
-                    onClick={() => {
-                      if (window.history.state?.modal === 'order-summary') {
-                        window.history.back();
-                      } else {
-                        onClose();
-                      }
-                    }}
+                    onClick={onClose}
                   >
                     <span className="sr-only">Close</span>
                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" aria-hidden="true">
@@ -253,7 +254,6 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                 {/* Main Content */}
                 <div className="flex-grow overflow-y-auto p-4 sm:p-6">
                   <div className="max-w-3xl mx-auto w-full">
-                    {/* Page 1 content */}
                     {currentPage === 1 && (
                       <div className="pt-4 sm:pt-8">
                         {/* Product Details */}
@@ -446,7 +446,6 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                               'Complete Order'
                             )}
                           </button>
-
                         </div>
                       )
                     )}
