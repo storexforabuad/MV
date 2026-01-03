@@ -54,6 +54,11 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
   const isPaymentFlowEnabled = shouldUsePaymentFlow(storeMeta?.storeType) || storeMeta?.storeType === 'general';
 
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
   useEffect(() => {
     if (isOpen) {
       setQuantity(1);
@@ -83,33 +88,38 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
           }
         });
       }
-
-      // Push state to handle back button only once
-      if (!hasPushedState.current) {
-        window.history.pushState({ modal: 'order-summary' }, '');
-        hasPushedState.current = true;
-      }
-
-      const handlePopState = (event: PopStateEvent) => {
-        if (hasPushedState.current) {
-          hasPushedState.current = false;
-          onClose();
-        }
-      };
-
-      window.addEventListener('popstate', handlePopState);
-      return () => {
-        window.removeEventListener('popstate', handlePopState);
-        // If modal is closed via X button, we need to clean up the history state
-        if (hasPushedState.current) {
-          hasPushedState.current = false;
-          if (window.history.state?.modal === 'order-summary') {
-            window.history.back();
-          }
-        }
-      };
     }
-  }, [isOpen, initialCustomer, isPaymentFlowEnabled, storeId, onClose]);
+  }, [isOpen, initialCustomer, isPaymentFlowEnabled, storeId]);
+
+  // Dedicated history management effect
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Push state to handle back button only once
+    if (!hasPushedState.current) {
+      window.history.pushState({ modal: 'order-summary' }, '');
+      hasPushedState.current = true;
+    }
+
+    const handlePopState = (event: PopStateEvent) => {
+      if (hasPushedState.current) {
+        hasPushedState.current = false;
+        onCloseRef.current();
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      // If modal is closed via X button, we need to clean up the history state
+      if (hasPushedState.current) {
+        hasPushedState.current = false;
+        if (window.history.state?.modal === 'order-summary') {
+          window.history.back();
+        }
+      }
+    };
+  }, [isOpen]);
 
   if (!product) return null;
 

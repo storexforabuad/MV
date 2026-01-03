@@ -44,6 +44,11 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const total = subtotal;
 
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
   useEffect(() => {
     if (isOpen) {
       setCurrentPage(1);
@@ -72,33 +77,38 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
           }
         });
       }
-
-      // Push state to handle back button only once
-      if (!hasPushedState.current) {
-        window.history.pushState({ modal: 'cart-order-summary' }, '');
-        hasPushedState.current = true;
-      }
-
-      const handlePopState = (event: PopStateEvent) => {
-        if (hasPushedState.current) {
-          hasPushedState.current = false;
-          onClose();
-        }
-      };
-
-      window.addEventListener('popstate', handlePopState);
-      return () => {
-        window.removeEventListener('popstate', handlePopState);
-        // If modal is closed via X button, we need to clean up the history state
-        if (hasPushedState.current) {
-          hasPushedState.current = false;
-          if (window.history.state?.modal === 'cart-order-summary') {
-            window.history.back();
-          }
-        }
-      };
     }
-  }, [isOpen, initialCustomer, isPaymentFlowEnabled, storeId, onClose]);
+  }, [isOpen, initialCustomer, isPaymentFlowEnabled, storeId]);
+
+  // Dedicated history management effect
+  useEffect(() => {
+    if (!isOpen) return;
+
+    // Push state to handle back button only once
+    if (!hasPushedState.current) {
+      window.history.pushState({ modal: 'cart-order-summary' }, '');
+      hasPushedState.current = true;
+    }
+
+    const handlePopState = (event: PopStateEvent) => {
+      if (hasPushedState.current) {
+        hasPushedState.current = false;
+        onCloseRef.current();
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      // If modal is closed via X button, we need to clean up the history state
+      if (hasPushedState.current) {
+        hasPushedState.current = false;
+        if (window.history.state?.modal === 'cart-order-summary') {
+          window.history.back();
+        }
+      }
+    };
+  }, [isOpen]);
 
   const handleEvidenceUploaded = (evidenceUrl: string, fileName: string) => {
     setUploadedEvidence({ url: evidenceUrl, fileName });
