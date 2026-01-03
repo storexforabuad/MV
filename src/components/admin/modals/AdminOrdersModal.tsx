@@ -1,29 +1,108 @@
 'use client';
 
+import React, { useState, useEffect, useTransition } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-<span className="text-sm text-slate-600 dark:text-slate-300 font-medium">{customerInfo.phoneNumber}</span>
-            </div >
-  <div className="flex items-start gap-3">
-    <MapPin className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
-    <span className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{customerInfo.deliveryAddress.street}, {customerInfo.deliveryAddress.state}</span>
-  </div>
-          </div >
-        </div >
+import { ShoppingCart, MapPin, CheckCircle, Phone, MessageCircle, User, Package } from 'lucide-react';
+import { StoreOrder, updateOrderStatus } from '@/app/actions/orderActions';
+import { formatPrice } from '@/utils/price';
+import { Naira } from '@/components/common/Naira';
+import toast from 'react-hot-toast';
+import { formatWhatsAppNumber } from '@/utils/phoneUtils';
+import PaymentEvidenceViewer from './PaymentEvidenceViewer';
+import { MarkOrderReadyModal } from './MarkOrderReadyModal';
+
+interface AdminOrdersModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  orders: StoreOrder[];
+  onOrderUpdated: () => void;
+  storeId: string;
+  highlightOrderId?: string | null;
+}
+
+const OrderProductRow = ({ product }: { product: any }) => {
+  return (
+    <div className="flex items-center justify-between py-3">
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+          <Package className="w-5 h-5 text-slate-400" />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-slate-900 dark:text-white">{product.name}</p>
+          <p className="text-xs text-slate-500 dark:text-slate-400">Qty: {product.quantity}</p>
+        </div>
+      </div>
+      <p className="text-sm font-bold text-slate-900 dark:text-white">
+        <Naira />{product.price.toLocaleString()}
+      </p>
+    </div>
+  );
+};
+
+const CustomerOrdersCard = ({ order, onMarkReady, isHighlighted }: { order: StoreOrder, onMarkReady: (order: StoreOrder) => void, isHighlighted?: boolean }) => {
+  const { customerInfo, products } = order;
+  const whatsappUrl = `https://wa.me/${formatWhatsAppNumber(customerInfo.phoneNumber)}`;
+
+  return (
+    <motion.div
+      id={`order-${order.id}`}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={`bg-white dark:bg-slate-900 rounded-2xl border ${isHighlighted ? 'border-orange-500 ring-1 ring-orange-500' : 'border-slate-200 dark:border-slate-800'} overflow-hidden shadow-sm`}
+    >
+      <div className="p-5 border-b border-slate-100 dark:border-slate-800/50">
+        <div className="flex justify-between items-start mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
+              <User className="w-5 h-5 text-slate-500" />
+            </div>
+            <div>
+              <h4 className="font-bold text-slate-900 dark:text-white">{customerInfo.name}</h4>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Order #{order.id.slice(-6).toUpperCase()}</p>
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <a
+              href={`tel:${customerInfo.phoneNumber}`}
+              className="p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+            >
+              <Phone className="w-4 h-4" />
+            </a>
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
+            >
+              <MessageCircle className="w-4 h-4" />
+            </a>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex items-start gap-3">
+            <MapPin className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
+            <span className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              {customerInfo.deliveryAddress.street}, {customerInfo.deliveryAddress.state}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="divide-y divide-slate-100 dark:divide-slate-700/50 px-5 py-2">
+        {products.map((product: any, index: number) => (
+          <OrderProductRow key={product.id || index} product={product} />
+        ))}
+      </div>
+
+      {order.paymentEvidenceUrl && (
+        <PaymentEvidenceViewer
+          paymentEvidenceUrl={order.paymentEvidenceUrl}
+          paymentEvidenceFileName={order.paymentEvidenceFileName}
+          paymentEvidenceUploadedAt={order.paymentEvidenceUploadedAt}
+          paymentStatus={order.paymentStatus}
+        />
       )}
-
-<div className="divide-y divide-slate-100 dark:divide-slate-700/50 px-5 py-2">
-  {products.map((product: any, index: number) => (
-    <OrderProductRow key={product.id || index} product={product} />
-  ))}
-</div>
-
-{/* Payment Evidence Viewer - for restaurant orders with payment evidence */ }
-      <PaymentEvidenceViewer
-        paymentEvidenceUrl={order.paymentEvidenceUrl}
-        paymentEvidenceFileName={order.paymentEvidenceFileName}
-        paymentEvidenceUploadedAt={order.paymentEvidenceUploadedAt}
-        paymentStatus={order.paymentStatus}
-      />
 
       <button
         onClick={() => onMarkReady(order)}
@@ -36,7 +115,7 @@ import { motion, AnimatePresence } from 'framer-motion';
         <CheckCircle className="w-5 h-5" />
         <span>{order.orderStatus === 'ready' ? 'Shipped' : 'Mark as Ready'}</span>
       </button>
-    </motion.div >
+    </motion.div>
   );
 };
 
