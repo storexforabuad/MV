@@ -5,6 +5,7 @@ import { Fragment, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { X, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 
 interface StoreInquiryModalProps {
   isOpen: boolean;
@@ -23,22 +24,22 @@ const StoreInquiryModal = ({ isOpen, onClose }: StoreInquiryModalProps) => {
     }
 
     setIsSubmitting(true);
-    
+
     const phoneNumber = "2348119772223";
     const message = encodeURIComponent(
       `Hello! I'm interested in getting an online store like the one I saw. My business name is: "${businessName}".`
     );
-    
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
-    
+
+    const whatsappUrl = `https://wa.me/${formatWhatsAppNumber(phoneNumber)}?text=${message}`;
+
     window.open(whatsappUrl, '_blank');
 
     toast.success("Redirecting to WhatsApp...");
-    
+
     setTimeout(() => {
-        setIsSubmitting(false);
-        onClose();
-        setBusinessName('');
+      setIsSubmitting(false);
+      onClose();
+      setBusinessName('');
     }, 1000);
   };
 
@@ -78,7 +79,7 @@ const StoreInquiryModal = ({ isOpen, onClose }: StoreInquiryModalProps) => {
                       <X size={24} className="text-slate-600 dark:text-slate-300" />
                     </button>
                   </div>
-                  
+
                   <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
                     For just <span className="font-bold text-indigo-600 dark:text-indigo-400">₦5,000</span>, you can get a beautiful online store just like this one to grow your business.
                   </p>
@@ -92,9 +93,9 @@ const StoreInquiryModal = ({ isOpen, onClose }: StoreInquiryModalProps) => {
                       className="w-full px-4 py-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-shadow"
                       required
                     />
-                    <button 
-                      type="submit" 
-                      disabled={isSubmitting} 
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
                       className="w-full bg-slate-800 text-white py-3 rounded-lg hover:bg-slate-700 transition-colors disabled:bg-slate-500 flex items-center justify-center gap-2"
                     >
                       {isSubmitting ? 'Redirecting...' : 'Send Inquiry'}

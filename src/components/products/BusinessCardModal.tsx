@@ -4,6 +4,7 @@ import { Phone, MessageCircle, Star, Clock, MapPin, Instagram, X } from 'lucide-
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { StoreMeta } from '../../types/store';
+import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 
 
 export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean; onClose: () => void; storeMeta?: StoreMeta }) {
@@ -142,7 +143,7 @@ export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean;
                   <span className="text-sm">Call</span>
                 </motion.a>
                 <motion.a
-                  href={`https://wa.me/${storeMeta.whatsapp?.replace(/\D/g, '')}`}
+                  href={`https://wa.me/${formatWhatsAppNumber(storeMeta.whatsapp)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl shadow-lg"

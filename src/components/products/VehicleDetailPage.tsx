@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 import { isVehicleProduct } from '../../utils/productHelpers';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCustomer } from '@/context/CustomerContext';
+import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 
 interface VehicleDetailPageProps {
     product: Product;
@@ -109,7 +110,7 @@ Details:
 
 Please share more details.`;
 
-        const whatsappUrl = `https://wa.me/${storeMeta.whatsapp}?text=${encodeURIComponent(message)}`;
+        const whatsappUrl = `https://wa.me/${formatWhatsAppNumber(storeMeta.whatsapp)}?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
     };
 
@@ -122,7 +123,7 @@ Preferred date: ___
 Preferred time: Morning / Afternoon / Evening
 
 Looking forward to viewing!`;
-        const whatsappUrl = `https://wa.me/${storeMeta.whatsapp}?text=${encodeURIComponent(message)}`;
+        const whatsappUrl = `https://wa.me/${formatWhatsAppNumber(storeMeta.whatsapp)}?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
     };
 

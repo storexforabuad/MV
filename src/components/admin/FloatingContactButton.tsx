@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { PhoneIcon, ChatBubbleLeftIcon, XMarkIcon } from '@heroicons/react/24/solid';
+import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 
 const FloatingContactButton = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -12,7 +13,7 @@ const FloatingContactButton = () => {
   };
 
   const handleChat = () => {
-    window.location.href = `https://wa.me/${phoneNumber}`;
+    window.location.href = `https://wa.me/${formatWhatsAppNumber(phoneNumber)}`;
   };
 
   return (

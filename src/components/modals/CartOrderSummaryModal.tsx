@@ -16,6 +16,7 @@ import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
 import { saveModalState, getModalState, clearModalState } from '@/lib/paymentModalStorage';
 import { requestCustomerNotificationPermission } from '@/lib/requestCustomerNotifications';
 import PaymentFlowPage from './PaymentFlowPage';
+import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 
 interface CartOrderSummaryModalProps {
   isOpen: boolean;
@@ -193,11 +194,15 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
           `Thank you! 🙏`;
 
         const encodedMessage = encodeURIComponent(message);
-        const whatsappUrl = `https://wa.me/${storeMeta.whatsapp.replace(/\D/g, '')}?text=${encodedMessage}`;
+        const whatsappUrl = `https://wa.me/${formatWhatsAppNumber(storeMeta.whatsapp)}?text=${encodedMessage}`;
 
-        window.location.href = whatsappUrl;
-        dispatch({ type: 'CLEAR_CART' });
-        onOrderSuccess();
+        window.open(whatsappUrl, '_blank');
+
+        // Small delay to ensure the redirect is triggered before closing/clearing
+        setTimeout(() => {
+          dispatch({ type: 'CLEAR_CART' });
+          onOrderSuccess();
+        }, 500);
       }
     } catch (error) {
       console.error("Error placing cart order:", error);

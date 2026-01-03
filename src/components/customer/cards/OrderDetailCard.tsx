@@ -12,6 +12,7 @@ import { useCustomer } from '@/context/CustomerContext';
 import { StoreMeta } from '@/types/store';
 import { Product } from '@/types/product';
 import { Customer } from '@/types/customer';
+import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 
 interface OrderDetailCardProps {
   order: Order;
@@ -56,12 +57,11 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted }: O
       // FIX: Use the backward-compatible 'products' array.
       await addOrder(products, storeMeta, customer, null, false);
 
-      const sanitizedWhatsappNumber = storeMeta.whatsapp.replace(/\D/g, '');
       const productDetails = products.map(p => `* ${p.name} (Qty: ${p.productType === 'general' ? p.quantity : 1})`).join('\n');
 
       const message = `*Reorder Request*\n\nI would like to reorder the following items:\n${productDetails}`;
 
-      const whatsappUrl = `https://wa.me/${sanitizedWhatsappNumber}?text=${encodeURIComponent(message)}`;
+      const whatsappUrl = `https://wa.me/${formatWhatsAppNumber(storeMeta.whatsapp)}?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
       toast.success('Reorder placed successfully!');
 

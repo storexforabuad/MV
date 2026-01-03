@@ -4,6 +4,7 @@ import { StoreCustomer } from "@/app/actions/customerActions";
 import { format, parseISO } from 'date-fns';
 import { Naira } from "@/components/common/Naira";
 import { Phone, MessageCircle, User } from 'lucide-react';
+import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 
 interface CustomerDetailCardProps {
     customer: StoreCustomer;
@@ -42,7 +43,7 @@ export const CustomerDetailCard: React.FC<CustomerDetailCardProps> = ({ customer
                         <a href={`tel:${customer.phoneNumber}`} className="flex items-center justify-center w-10 h-10 rounded-full bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 transition-colors">
                             <Phone className="w-5 h-5" />
                         </a>
-                        <a href={`https://wa.me/${customer.phoneNumber.replace('+', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-10 h-10 rounded-full bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 transition-colors">
+                        <a href={`https://wa.me/${formatWhatsAppNumber(customer.phoneNumber)}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-10 h-10 rounded-full bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 transition-colors">
                             <MessageCircle className="w-5 h-5" />
                         </a>
                     </div>

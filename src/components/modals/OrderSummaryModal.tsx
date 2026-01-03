@@ -18,6 +18,7 @@ import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
 import { saveModalState, getModalState, clearModalState } from '@/lib/paymentModalStorage';
 import { requestCustomerNotificationPermission } from '@/lib/requestCustomerNotifications';
 import PaymentFlowPage from './PaymentFlowPage';
+import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 
 const SPICINESS_LEVELS = [
   { value: 'mild', label: '😌 Mild', color: 'bg-green-100 text-green-800 border-green-200' },
@@ -207,10 +208,14 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
           `Thank you! 🙏`;
 
         const encodedMessage = encodeURIComponent(message);
-        const whatsappUrl = `https://wa.me/${storeMeta.whatsapp.replace(/\D/g, '')}?text=${encodedMessage}`;
+        const whatsappUrl = `https://wa.me/${formatWhatsAppNumber(storeMeta.whatsapp)}?text=${encodedMessage}`;
 
-        window.location.href = whatsappUrl;
-        onClose();
+        window.open(whatsappUrl, '_blank');
+
+        // Small delay to ensure the redirect is triggered before closing the modal
+        setTimeout(() => {
+          onClose();
+        }, 500);
       }
     } catch (error) {
       console.error("Error placing order:", error);

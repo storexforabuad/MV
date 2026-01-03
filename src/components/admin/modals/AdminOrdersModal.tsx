@@ -1,129 +1,23 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingCart, User, MapPin, Phone, CheckCircle, MessageCircle } from 'lucide-react';
-import Image from 'next/image';
-import { StoreOrder, updateOrderStatus } from '@/app/actions/orderActions';
-import { formatPrice } from '@/utils/price';
-import { useState, useTransition, useEffect } from 'react';
-import { toast } from 'react-hot-toast';
-import { MarkOrderReadyModal } from './MarkOrderReadyModal';
-import PaymentEvidenceViewer from './PaymentEvidenceViewer';
-
-interface AdminOrdersModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  orders: StoreOrder[];
-  onOrderUpdated: () => void;
-  storeId: string;
-  highlightOrderId?: string | null;
-}
-
-const OrderProductRow = ({ product }: { product: any }) => {
-  const imageUrl = product.images && product.images.length > 0 ? product.images[0] : product.image;
-
-  return (
-    <div className="flex items-start gap-4 py-3">
-      <div className="flex-shrink-0">
-        <div className="aspect-square w-16 h-16 relative rounded-md overflow-hidden bg-slate-100 dark:bg-slate-700">
-          {imageUrl && (
-            <Image src={imageUrl} alt={product.name} layout="fill" objectFit="cover" />
-          )}
-        </div>
-      </div>
-      <div className="flex-grow">
-        <p className="font-semibold text-slate-800 dark:text-slate-100">{product.name}</p>
-        <div className="flex flex-wrap gap-1 mt-1">
-          {product.selectedSize && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-              Size: {product.selectedSize}
-            </span>
-          )}
-          {product.selectedSpiciness && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-100 dark:border-red-800">
-              {product.selectedSpiciness === 'mild' && '😌 Mild'}
-              {product.selectedSpiciness === 'medium' && '🌶️ Medium'}
-              {product.selectedSpiciness === 'hot' && '🔥 Hot'}
-              {product.selectedSpiciness === 'extra-hot' && '🤯 Extra Hot'}
-            </span>
-          )}
-          {product.temperature && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-100 dark:border-blue-800">
-              {product.temperature === 'hot' && '☕ Hot'}
-              {product.temperature === 'cold' && '❄️ Cold'}
-              {product.temperature === 'room-temp' && '🌡️ Room'}
-            </span>
-          )}
-        </div>
-        {product.specialInstructions && (
-          <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-800 rounded text-xs text-yellow-800 dark:text-yellow-200">
-            <span className="font-semibold">Note:</span> {product.specialInstructions}
-          </div>
-        )}
-        <p className="text-sm text-orange-500 dark:text-orange-400 mt-1">{formatPrice(product.price)}</p>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Qty: {product.quantity || 1}</p>
-      </div>
-    </div>
-  );
-};
-
-const CustomerOrdersCard = ({ order, onMarkReady, isHighlighted }: { order: StoreOrder, onMarkReady: (order: StoreOrder) => void, isHighlighted?: boolean }) => {
-  const { customerInfo, products } = order;
-
-  return (
-    <motion.div
-      id={`order-${order.id}`}
-      className={`bg-white dark:bg-slate-800/50 rounded-2xl shadow-sm border overflow-hidden transition-all duration-300 hover:shadow-md ${isHighlighted
-        ? 'border-blue-500 ring-2 ring-blue-500 shadow-lg shadow-blue-500/20'
-        : 'border-slate-100 dark:border-slate-700/50'
-        }`}
-      animate={isHighlighted ? {
-        scale: [1, 1.02, 1],
-      } : {}}
-      transition={{ duration: 0.5, repeat: 3 }}
-    >
-      {customerInfo && (
-        <div className="p-5 bg-white dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-700/50">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center">
-                <User className="w-5 h-5 text-slate-500 dark:text-slate-400" />
-              </div>
-              <div>
-                <h4 className="font-bold text-base text-slate-800 dark:text-slate-100">{customerInfo.name}</h4>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Customer</p>
-              </div>
-            </div>
-            <div className="flex gap-2">
-              <a href={`tel:${customerInfo.phoneNumber}`} className="flex items-center justify-center w-10 h-10 rounded-full bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 transition-colors">
-                <Phone className="w-5 h-5" />
-              </a>
-              <a href={`https://wa.me/${customerInfo.phoneNumber.replace('+', '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-10 h-10 rounded-full bg-green-50 text-green-600 hover:bg-green-100 dark:bg-green-900/20 dark:text-green-400 transition-colors">
-                <MessageCircle className="w-5 h-5" />
-              </a>
-            </div>
-          </div>
-
-          <div className="space-y-3 pl-1">
-            <div className="flex items-start gap-3">
-              <Phone className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
-              <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">{customerInfo.phoneNumber}</span>
-            </div>
-            <div className="flex items-start gap-3">
-              <MapPin className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
-              <span className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{customerInfo.deliveryAddress.street}, {customerInfo.deliveryAddress.state}</span>
-            </div>
-          </div>
-        </div>
+<span className="text-sm text-slate-600 dark:text-slate-300 font-medium">{customerInfo.phoneNumber}</span>
+            </div >
+  <div className="flex items-start gap-3">
+    <MapPin className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
+    <span className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">{customerInfo.deliveryAddress.street}, {customerInfo.deliveryAddress.state}</span>
+  </div>
+          </div >
+        </div >
       )}
 
-      <div className="divide-y divide-slate-100 dark:divide-slate-700/50 px-5 py-2">
-        {products.map((product: any, index: number) => (
-          <OrderProductRow key={product.id || index} product={product} />
-        ))}
-      </div>
+<div className="divide-y divide-slate-100 dark:divide-slate-700/50 px-5 py-2">
+  {products.map((product: any, index: number) => (
+    <OrderProductRow key={product.id || index} product={product} />
+  ))}
+</div>
 
-      {/* Payment Evidence Viewer - for restaurant orders with payment evidence */}
+{/* Payment Evidence Viewer - for restaurant orders with payment evidence */ }
       <PaymentEvidenceViewer
         paymentEvidenceUrl={order.paymentEvidenceUrl}
         paymentEvidenceFileName={order.paymentEvidenceFileName}
@@ -142,7 +36,7 @@ const CustomerOrdersCard = ({ order, onMarkReady, isHighlighted }: { order: Stor
         <CheckCircle className="w-5 h-5" />
         <span>{order.orderStatus === 'ready' ? 'Shipped' : 'Mark as Ready'}</span>
       </button>
-    </motion.div>
+    </motion.div >
   );
 };
 

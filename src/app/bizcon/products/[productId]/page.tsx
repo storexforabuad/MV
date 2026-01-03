@@ -12,6 +12,7 @@ import { useCustomer } from '../../../../context/CustomerContext';
 import { Product } from '../../../../types/product';
 import { StoreMeta } from '../../../../types/store';
 import { calculateDiscount, formatPrice } from '../../../../utils/price';
+import { formatWhatsAppNumber } from '../../../../utils/phoneUtils';
 import { ViewHistoryCache } from '../../../../lib/viewHistoryCache';
 import { ProductDetailCache } from '../../../../lib/productDetailCache';
 import Navbar from '../../../../components/layout/navbar';
@@ -115,7 +116,7 @@ export default function ProductDetail() {
       `Thank you! 🙏`;
 
     const encodedMessage = encodeURIComponent(message);
-    const whatsappLink = `https://wa.me/${storeMeta.whatsapp.replace(/\D/g, '')}?text=${encodedMessage}`;
+    const whatsappLink = `https://wa.me/${formatWhatsAppNumber(storeMeta.whatsapp)}?text=${encodedMessage}`;
     window.open(whatsappLink, '_blank');
   };
 

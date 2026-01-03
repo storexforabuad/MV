@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { HelpCircle, MessageSquare, Phone, X } from 'lucide-react';
 import { businessConfig } from '@/config/business';
+import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 
 interface FloatingActionButtonProps {
   isModalOpen?: boolean;
@@ -27,7 +28,7 @@ const FloatingActionButton: React.FC<FloatingActionButtonProps> = ({ isModalOpen
     setIsOpen(!isOpen);
   };
 
-  const whatsAppNumber = businessConfig.contact.whatsapp.replace('+', '');
+  const whatsAppNumber = formatWhatsAppNumber(businessConfig.contact.whatsapp);
   const contactLink = `https://wa.me/${whatsAppNumber}?text=${encodeURIComponent("Hello, I need help with my store.")}`;
   const featureRequestLink = `https://wa.me/${whatsAppNumber}?text=${encodeURIComponent("Hi! I'd like to request a new feature for my store.")}`;
   const callLink = `tel:${businessConfig.contact.support}`;
