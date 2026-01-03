@@ -66,8 +66,20 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
       getCustomerDetails(initialCustomer.id).then(details => {
         if (details) setCustomer(details);
       });
+
+      // Push state to handle back button
+      window.history.pushState({ modal: 'cart-summary' }, '');
+
+      const handlePopState = () => {
+        onClose();
+      };
+
+      window.addEventListener('popstate', handlePopState);
+      return () => {
+        window.removeEventListener('popstate', handlePopState);
+      };
     }
-  }, [isOpen, initialCustomer, isPaymentFlowEnabled, storeId]);
+  }, [isOpen, initialCustomer, isPaymentFlowEnabled, storeId, onClose]);
 
   if (cartItems.length === 0) return null;
 
@@ -208,7 +220,13 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                   <button
                     type="button"
                     className="flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-colors shadow-sm"
-                    onClick={onClose}
+                    onClick={() => {
+                      if (window.history.state?.modal === 'cart-summary') {
+                        window.history.back();
+                      } else {
+                        onClose();
+                      }
+                    }}
                   >
                     <span className="sr-only">Close</span>
                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" aria-hidden="true">
@@ -222,11 +240,14 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                   <div className="max-w-3xl mx-auto w-full">
                     {/* Page 1: Cart Summary */}
                     {currentPage === 1 && (
-                      <div>
+                      <div className="pt-4 sm:pt-8">
                         <div className="space-y-4">
                           {cartItems.map(item => (
                             <div key={item.id + (item.selectedColor || '') + (item.selectedSize || '')} className="flex items-center space-x-4 p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
-                              <Image src={item.images[0]} alt={item.name} width={64} height={64} className="h-16 w-16 rounded-lg object-cover flex-shrink-0" />
+                              <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+                                <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 animate-shimmer bg-[length:200%_100%]" />
+                                <Image src={item.images[0]} alt={item.name} width={64} height={64} className="h-16 w-16 object-cover relative z-10" />
+                              </div>
                               <div className="flex-1 min-w-0">
                                 <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate">{item.name}</h4>
                                 <div className="flex flex-wrap gap-2 mt-1.5">

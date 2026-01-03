@@ -47,6 +47,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const [selectedSpiciness, setSelectedSpiciness] = useState('medium');
   const [specialInstructions, setSpecialInstructions] = useState('');
   const [uploadedEvidence, setUploadedEvidence] = useState<{ url: string; fileName: string } | undefined>();
+  const [imageLoading, setImageLoading] = useState(true);
 
   const routeParams = useParams();
   const storeId = typeof routeParams?.storeId === 'string' ? routeParams.storeId : Array.isArray(routeParams?.storeId) ? routeParams.storeId[0] : undefined;
@@ -83,8 +84,20 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
           }
         });
       }
+
+      // Push state to handle back button
+      window.history.pushState({ modal: 'order-summary' }, '');
+
+      const handlePopState = () => {
+        onClose();
+      };
+
+      window.addEventListener('popstate', handlePopState);
+      return () => {
+        window.removeEventListener('popstate', handlePopState);
+      };
     }
-  }, [isOpen, initialCustomer, isPaymentFlowEnabled, storeId]);
+  }, [isOpen, initialCustomer, isPaymentFlowEnabled, storeId, onClose]);
 
   if (!product) return null;
 
@@ -222,7 +235,13 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                   <button
                     type="button"
                     className="flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-colors shadow-sm"
-                    onClick={onClose}
+                    onClick={() => {
+                      if (window.history.state?.modal === 'order-summary') {
+                        window.history.back();
+                      } else {
+                        onClose();
+                      }
+                    }}
                   >
                     <span className="sr-only">Close</span>
                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" aria-hidden="true">
@@ -236,10 +255,24 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                   <div className="max-w-3xl mx-auto w-full">
                     {/* Page 1 content */}
                     {currentPage === 1 && (
-                      <div>
+                      <div className="pt-4 sm:pt-8">
                         {/* Product Details */}
                         <div className="flex items-center space-x-4">
-                          <Image src={product.images[0]} alt={product.name} width={80} height={80} className="h-20 w-20 rounded-lg object-cover shadow-sm" />
+                          <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-50 dark:bg-gray-900 shadow-sm">
+                            {imageLoading && (
+                              <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800">
+                                <div className="w-full h-full bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 animate-shimmer bg-[length:200%_100%]" />
+                              </div>
+                            )}
+                            <Image
+                              src={product.images[0]}
+                              alt={product.name}
+                              width={80}
+                              height={80}
+                              className={`h-20 w-20 object-cover transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                              onLoadingComplete={() => setImageLoading(false)}
+                            />
+                          </div>
                           <div className="flex-1">
                             <h4 className="text-base font-semibold text-gray-900 dark:text-white">{product.name}</h4>
                             <div className="mt-1 mb-2 flex flex-wrap gap-2">

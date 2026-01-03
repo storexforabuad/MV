@@ -260,11 +260,8 @@ export default function ProductDetail() {
           <div className="flex-1 flex flex-col">
             <div className="relative overflow-hidden rounded-2xl bg-gray-50 shadow-lg dark:shadow-xl dark:shadow-white/10">
               {imageLoading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+                <div className="absolute inset-0 bg-gray-50 dark:bg-gray-900">
                   <div className="w-full h-full bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 animate-shimmer bg-[length:200%_100%]" />
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
-                  </div>
                 </div>
               )}
               <Image src={currentImages[selectedImage] || '/public/default_product_1200x1200.png'} alt={product.name} width={600} height={600} className={`w-full h-auto object-contain transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`} priority onLoadingComplete={() => setImageLoading(false)} />
