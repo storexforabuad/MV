@@ -92,6 +92,8 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     label: '(Biz+Con)™',
     subtitle: 'Network',
     icon: Globe,
+    gradient: 'bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-600',
+    text: 'text-white',
     component: TipsModal,
     glowClass: 'dark:shadow-yellow-500/30 shadow-yellow-500/50',
   },
