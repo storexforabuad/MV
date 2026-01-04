@@ -34,6 +34,7 @@ import { Naira } from '@/components/common/Naira';
 import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc, query, where } from 'firebase/firestore';
 import { app as firebaseApp } from '@/lib/firebase';
 import Link from 'next/link';
+import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 
 interface Milestone {
     id: string;
@@ -157,6 +158,7 @@ export default function RoadmapDashboard() {
     const [manualBoost, setManualBoost] = useState(0);
     const [loading, setLoading] = useState(true);
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+    const { isInstallAvailable, handleInstall } = useInstallPrompt();
 
     const db = getFirestore(firebaseApp);
 
@@ -264,6 +266,17 @@ export default function RoadmapDashboard() {
                             </Link>
                             <span className="text-[8px] font-bold text-slate-400 uppercase mt-1 hidden sm:block">Strategy</span>
                         </div>
+                        {isInstallAvailable && (
+                            <div className="flex flex-col items-center">
+                                <button
+                                    onClick={handleInstall}
+                                    className="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-xl hover:bg-purple-200 dark:hover:bg-purple-900/50 transition-all active:scale-95 border border-purple-200 dark:border-purple-800"
+                                >
+                                    <Smartphone className="w-5 h-5 sm:w-6 h-6 text-purple-600 dark:text-purple-400" />
+                                </button>
+                                <span className="text-[8px] font-bold text-slate-400 uppercase mt-1 hidden sm:block">Install</span>
+                            </div>
+                        )}
                     </div>
                 </div>
             </header>

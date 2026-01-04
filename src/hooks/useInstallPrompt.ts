@@ -75,5 +75,5 @@ export function useInstallPrompt() {
 
   }, [deferredPrompt]);
 
-  return { showPrompt, handleInstall, handleDismiss };
+  return { showPrompt, handleInstall, handleDismiss, isInstallAvailable: !!deferredPrompt };
 }
