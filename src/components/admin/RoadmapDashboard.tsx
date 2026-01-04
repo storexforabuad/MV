@@ -198,24 +198,30 @@ export default function RoadmapDashboard() {
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24">
             {/* --- Header --- */}
             <header className="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 p-4 sm:p-6">
-                <div className="max-w-5xl mx-auto flex items-center justify-between">
-                    <div>
-                        <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+                <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
+                    <div className="min-w-0 flex-1">
+                        <h1 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent truncate">
                             2026 Scaling Roadmap
                         </h1>
-                        <p className="text-sm text-slate-500 dark:text-slate-400">Path to 10,000 Vendors</p>
+                        <p className="text-[10px] sm:text-sm text-slate-500 dark:text-slate-400 font-medium">Path to 10,000 Vendors</p>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <button
-                            onClick={notificationsEnabled ? sendTestNotification : requestNotificationPermission}
-                            className={`p-2 rounded-xl transition-colors ${notificationsEnabled ? 'bg-green-100 dark:bg-green-900/30 text-green-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}
-                            title={notificationsEnabled ? "Send Test Notification" : "Enable Notifications"}
-                        >
-                            {notificationsEnabled ? <Bell className="w-6 h-6" /> : <BellOff className="w-6 h-6" />}
-                        </button>
-                        <Link href="/devteam/roadmap/strategy" className="bg-indigo-100 dark:bg-indigo-900/30 p-2 rounded-xl hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors">
-                            <Settings2 className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
-                        </Link>
+                    <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                        <div className="flex flex-col items-center">
+                            <button
+                                onClick={notificationsEnabled ? sendTestNotification : requestNotificationPermission}
+                                className={`p-2 rounded-xl transition-all active:scale-95 ${notificationsEnabled ? 'bg-green-100 dark:bg-green-900/30 text-green-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}
+                                title={notificationsEnabled ? "Send Test Notification" : "Enable Milestone Alerts"}
+                            >
+                                {notificationsEnabled ? <Bell className="w-5 h-5 sm:w-6 h-6" /> : <BellOff className="w-5 h-5 sm:w-6 h-6" />}
+                            </button>
+                            <span className="text-[8px] font-bold text-slate-400 uppercase mt-1 hidden sm:block">Alerts</span>
+                        </div>
+                        <div className="flex flex-col items-center">
+                            <Link href="/devteam/roadmap/strategy" className="bg-indigo-100 dark:bg-indigo-900/30 p-2 rounded-xl hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-all active:scale-95">
+                                <Settings2 className="w-5 h-5 sm:w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                            </Link>
+                            <span className="text-[8px] font-bold text-slate-400 uppercase mt-1 hidden sm:block">Strategy</span>
+                        </div>
                     </div>
                 </div>
             </header>
