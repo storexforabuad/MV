@@ -146,26 +146,26 @@ export default function StrategyPage() {
                     <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
                         <div className="space-y-4">
                             <h3 className="font-bold text-sm flex items-center gap-2">
-                                <Instagram className="w-4 h-4 text-pink-500" /> Instagram Outreach Template
+                                <Instagram className="w-4 h-4 text-pink-500" /> Instagram Outreach Template (Pre-built Store)
                             </h3>
                             <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 relative">
                                 <p className="text-sm text-slate-700 dark:text-slate-300 italic leading-relaxed">
-                                    "Hi [Vendor Name]! 🥘 I saw your amazing food posts. I built a tool specifically for food vendors in [City] to handle orders and payments automatically so you don't lose track of customers in DMs. It creates a beautiful digital menu for your WhatsApp bio. Can I set up a free 14-day trial for you?"
+                                    "Hi [Vendor Name]! 🥘 I'm a huge fan of your food. I actually took the liberty of setting up a **demo digital menu** for you with some of your best dishes: [Link]. It handles WhatsApp orders and payments automatically. If you like it, you can claim it and start using it today! What do you think?"
                                 </p>
                                 <div className="absolute -top-2 -right-2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-lg">
-                                    COPY THIS
+                                    HIGH CONVERSION
                                 </div>
                             </div>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div className="p-4 bg-purple-50 dark:bg-purple-900/10 rounded-2xl border border-purple-100 dark:border-purple-900/20">
+                                <p className="font-bold text-xs text-purple-700 dark:text-purple-400 mb-1 uppercase">The "Claim Your Store" Tactic</p>
+                                <p className="text-sm text-slate-600 dark:text-slate-400">Instead of asking for permission, show them the result. Spend 5 mins adding 3 of their top products. It makes the value immediate and undeniable.</p>
+                            </div>
                             <div className="p-4 bg-orange-50 dark:bg-orange-900/10 rounded-2xl border border-orange-100 dark:border-orange-900/20">
                                 <p className="font-bold text-xs text-orange-700 dark:text-orange-400 mb-1 uppercase">The "Lunch Hour" Tactic</p>
                                 <p className="text-sm text-slate-600 dark:text-slate-400">Send DMs between 10:00 AM - 11:30 AM when vendors are preparing for the lunch rush and feeling the "DM stress."</p>
-                            </div>
-                            <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-900/20">
-                                <p className="font-bold text-xs text-blue-700 dark:text-blue-400 mb-1 uppercase">Digital Menu Focus</p>
-                                <p className="text-sm text-slate-600 dark:text-slate-400">Emphasize that they can stop typing "Price?" and "Available?" 100 times a day by using the automated catalog.</p>
                             </div>
                         </div>
                     </div>
