@@ -1,5 +1,5 @@
 'use client';
-import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays, CheckCircle2, Briefcase, ShieldCheck, Map } from 'lucide-react';
+import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays, CheckCircle2, Briefcase, ShieldCheck } from 'lucide-react';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useVendor } from '@/context/VendorContext';
 import { motion, Variants } from 'framer-motion';
@@ -215,15 +215,6 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     component: SubscriptionModal,
     glowClass: 'dark:shadow-teal-500/30 shadow-teal-500/50',
   },
-  {
-    label: 'Roadmap',
-    subtitle: '2026 Goal',
-    icon: Map,
-    gradient: 'bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600',
-    text: 'text-white',
-    component: null,
-    glowClass: 'dark:shadow-indigo-500/30 shadow-indigo-500/50',
-  },
 ];
 
 const formatCurrencyForCard = (amount: number) => {
@@ -400,10 +391,6 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     else if (label === 'Events') setIsEventsModalOpen(true);
     else if (label === 'Subscription') setIsSubscriptionModalOpen(true);
     else if (label === 'Account') setIsAccountModalOpen(true);
-    else if (label === 'Roadmap') {
-      window.location.href = `/admin/roadmap`;
-      return;
-    }
     else setOpenModal(idx);
 
     if (props.setIsModalOpen && label !== 'Orders' && label !== 'Manage Products' && label !== 'Ambassador' && label !== 'Manage Categories') props.setIsModalOpen(true);
