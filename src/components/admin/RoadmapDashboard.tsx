@@ -14,9 +14,19 @@ import {
     ChevronRight,
     ArrowUpRight,
     Award,
-    ShieldCheck
+    ShieldCheck,
+    Settings2,
+    X,
+    Plus,
+    Minus,
+    Info,
+    Bell,
+    BellOff
 } from 'lucide-react';
 import { Naira } from '@/components/common/Naira';
+import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc } from 'firebase/firestore';
+import { app as firebaseApp } from '@/lib/firebase';
+import Link from 'next/link';
 
 interface Milestone {
     id: string;
@@ -99,11 +109,87 @@ const milestones: Milestone[] = [
 
 export default function RoadmapDashboard() {
     const [activeMilestone, setActiveMilestone] = useState<string>('pilot');
-    const [currentVendors] = useState(1); // Real data would come from Firestore
-    const [currentMRR] = useState(5000);
+    const [currentVendors, setCurrentVendors] = useState(0);
+    const [currentMRR, setCurrentMRR] = useState(0);
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+    const [manualBoost, setManualBoost] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+    const db = getFirestore(firebaseApp);
+
+    useEffect(() => {
+        // Check if notifications are already enabled
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+            setNotificationsEnabled(Notification.permission === 'granted');
+        }
+
+        const storesRef = collection(db, 'stores');
+        const unsubscribe = onSnapshot(storesRef, (snapshot) => {
+            const realCount = snapshot.size;
+
+            const configRef = doc(db, 'admin', 'roadmap');
+            getDoc(configRef).then((docSnap) => {
+                const boost = docSnap.exists() ? (docSnap.data().manualBoost || 0) : 0;
+                setManualBoost(boost);
+                setCurrentVendors(realCount + boost);
+                setCurrentMRR((realCount + boost) * 5000);
+                setLoading(false);
+            });
+        });
+
+        return () => unsubscribe();
+    }, [db]);
+
+    const requestNotificationPermission = async () => {
+        if (typeof window === 'undefined' || !('Notification' in window)) {
+            alert('This browser does not support desktop notification');
+            return;
+        }
+
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            setNotificationsEnabled(true);
+            alert('Notifications enabled! You will receive alerts for major milestones.');
+        }
+    };
+
+    const sendTestNotification = async () => {
+        if (!notificationsEnabled) {
+            alert('Please enable notifications first.');
+            return;
+        }
+
+        if (typeof window !== 'undefined' && 'Notification' in window) {
+            new Notification('2026 Roadmap', {
+                body: 'Test notification successful! You are on your way to 10,000 vendors.',
+                icon: '/icon-192x192.png'
+            });
+        }
+    };
+
+    const handleUpdateBoost = async (newBoost: number) => {
+        try {
+            const configRef = doc(db, 'admin', 'roadmap');
+            await setDoc(configRef, { manualBoost: newBoost }, { merge: true });
+            setManualBoost(newBoost);
+            setIsUpdateModalOpen(false);
+        } catch (error) {
+            console.error("Error updating boost:", error);
+            alert("Failed to update progress.");
+        }
+    };
 
     const totalTargetVendors = 10000;
     const progressPercentage = (currentVendors / totalTargetVendors) * 100;
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500"></div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24">
@@ -116,8 +202,17 @@ export default function RoadmapDashboard() {
                         </h1>
                         <p className="text-sm text-slate-500 dark:text-slate-400">Path to 10,000 Vendors</p>
                     </div>
-                    <div className="bg-indigo-100 dark:bg-indigo-900/30 p-2 rounded-xl">
-                        <TrendingUp className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={notificationsEnabled ? sendTestNotification : requestNotificationPermission}
+                            className={`p-2 rounded-xl transition-colors ${notificationsEnabled ? 'bg-green-100 dark:bg-green-900/30 text-green-600' : 'bg-slate-100 dark:bg-slate-800 text-slate-400'}`}
+                            title={notificationsEnabled ? "Send Test Notification" : "Enable Notifications"}
+                        >
+                            {notificationsEnabled ? <Bell className="w-6 h-6" /> : <BellOff className="w-6 h-6" />}
+                        </button>
+                        <Link href="/devteam/roadmap/strategy" className="bg-indigo-100 dark:bg-indigo-900/30 p-2 rounded-xl hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition-colors">
+                            <Settings2 className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                        </Link>
                     </div>
                 </div>
             </header>
@@ -171,16 +266,16 @@ export default function RoadmapDashboard() {
                                 layoutId={milestone.id}
                                 onClick={() => setActiveMilestone(milestone.id)}
                                 className={`relative overflow-hidden rounded-2xl border transition-all duration-300 cursor-pointer ${activeMilestone === milestone.id
-                                        ? 'bg-white dark:bg-slate-900 border-indigo-500 shadow-lg ring-1 ring-indigo-500/20'
-                                        : 'bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                                    ? 'bg-white dark:bg-slate-900 border-indigo-500 shadow-lg ring-1 ring-indigo-500/20'
+                                    : 'bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
                                     }`}
                             >
                                 <div className="p-5">
                                     <div className="flex items-start justify-between gap-4">
                                         <div className="flex items-center gap-4">
                                             <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-inner ${milestone.status === 'completed' ? 'bg-green-100 dark:bg-green-900/30 text-green-600' :
-                                                    milestone.status === 'current' ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600' :
-                                                        'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                                                milestone.status === 'current' ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600' :
+                                                    'bg-slate-100 dark:bg-slate-800 text-slate-400'
                                                 }`}>
                                                 <milestone.icon className="w-6 h-6" />
                                             </div>
@@ -275,12 +370,83 @@ export default function RoadmapDashboard() {
             {/* --- Bottom Action Bar --- */}
             <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-t border-slate-200 dark:border-slate-800 z-40">
                 <div className="max-w-5xl mx-auto">
-                    <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-500/25 transition-all active:scale-[0.98] flex items-center justify-center gap-2">
+                    <button
+                        onClick={() => setIsUpdateModalOpen(true)}
+                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-500/25 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                    >
                         <ShieldCheck className="w-5 h-5" />
                         Update Progress
                     </button>
                 </div>
             </div>
+
+            {/* --- Update Progress Modal --- */}
+            <AnimatePresence>
+                {isUpdateModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsUpdateModalOpen(false)}
+                            className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
+                        />
+                        <motion.div
+                            initial={{ y: 100, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            exit={{ y: 100, opacity: 0 }}
+                            className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl overflow-hidden"
+                        >
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-xl font-bold">Update Progress</h3>
+                                <button onClick={() => setIsUpdateModalOpen(false)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            <div className="space-y-6">
+                                <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl border border-indigo-100 dark:border-indigo-900/30">
+                                    <div className="flex items-start gap-3">
+                                        <Info className="w-5 h-5 text-indigo-500 mt-0.5" />
+                                        <p className="text-sm text-indigo-700 dark:text-indigo-300">
+                                            Use "Manual Boost" to include vendors who are currently onboarding offline or via WhatsApp but not yet registered on the platform.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <label className="text-sm font-bold text-slate-500 uppercase tracking-wider">Manual Vendor Boost</label>
+                                    <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800 p-2 rounded-2xl border border-slate-200 dark:border-slate-700">
+                                        <button
+                                            onClick={() => setManualBoost(Math.max(0, manualBoost - 1))}
+                                            className="w-12 h-12 flex items-center justify-center bg-white dark:bg-slate-700 rounded-xl shadow-sm hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
+                                        >
+                                            <Minus className="w-5 h-5" />
+                                        </button>
+                                        <span className="text-2xl font-black">{manualBoost}</span>
+                                        <button
+                                            onClick={() => setManualBoost(manualBoost + 1)}
+                                            className="w-12 h-12 flex items-center justify-center bg-white dark:bg-slate-700 rounded-xl shadow-sm hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
+                                        >
+                                            <Plus className="w-5 h-5" />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="pt-4">
+                                    <button
+                                        onClick={() => handleUpdateBoost(manualBoost)}
+                                        className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-2xl shadow-lg shadow-indigo-500/25 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+                                    >
+                                        <CheckCircle2 className="w-5 h-5" />
+                                        Save Changes
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
