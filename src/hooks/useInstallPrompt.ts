@@ -25,6 +25,7 @@ export function useInstallPrompt() {
   const params = useParams();
   const storeId = typeof params?.storeId === 'string' ? params.storeId : '';
   const isOnStoreHomepage = pathname === `/${storeId}`;
+  const isOnRoadmap = pathname === '/devteam/roadmap';
 
   // 1. Effect for capturing the browser event. Runs only once.
   useEffect(() => {
@@ -44,7 +45,7 @@ export function useInstallPrompt() {
   // 2. Effect for deciding WHEN to show the prompt.
   // This runs when the event is captured, or when the user navigates.
   useEffect(() => {
-    if (deferredPrompt && isOnStoreHomepage) {
+    if (deferredPrompt && (isOnStoreHomepage || isOnRoadmap)) {
       const lastPrompted = localStorage.getItem(PWA_PROMPT_LAST_SHOWN_KEY);
       const now = new Date().getTime();
 
@@ -65,7 +66,7 @@ export function useInstallPrompt() {
 
   const handleInstall = useCallback(() => {
     if (!deferredPrompt) return;
-    
+
     deferredPrompt.prompt();
     deferredPrompt.userChoice.then((choiceResult) => {
       console.log(`PWA install prompt outcome: ${choiceResult.outcome}`);

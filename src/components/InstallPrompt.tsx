@@ -10,6 +10,7 @@ export default function InstallPrompt() {
   const { showPrompt, handleInstall, handleDismiss } = useInstallPrompt();
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith('/admin') || pathname === '/signin';
+  const isRoadmap = pathname === '/devteam/roadmap';
   const params = useParams();
   const storeId = typeof params?.storeId === 'string' ? params.storeId : Array.isArray(params?.storeId) ? params.storeId[0] : '';
   const [storeName, setStoreName] = useState('');
@@ -27,7 +28,7 @@ export default function InstallPrompt() {
     fetchStoreName();
   }, [storeId]);
 
-  if (!showPrompt || !storeId) return null;
+  if (!showPrompt || (!storeId && !isRoadmap)) return null;
 
   return (
     <>
@@ -36,7 +37,7 @@ export default function InstallPrompt() {
       {/* Modal */}
       <div className="fixed inset-x-0 bottom-8 flex items-end justify-center z-[1010] px-2 sm:px-0">
         <div className="bg-card-background rounded-lg shadow-[var(--shadow-lg)] p-4 w-full max-w-md border border-border-color relative mx-auto">
-          <button 
+          <button
             onClick={handleDismiss}
             className="absolute top-2 right-2 text-text-secondary hover:text-text-primary transition-colors"
           >
@@ -44,15 +45,24 @@ export default function InstallPrompt() {
           </button>
           <div className="flex flex-col items-start">
             <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-              <span className="text-xl">📱</span>{' '}
-              {isAdmin ? 'Install Control Center ' : `Get ${storeName} App`}
+              <span className="text-xl">
+                {isRoadmap ? '🗺️' : '📱'}
+              </span>{' '}
+              {isRoadmap ? 'Install Scaling Roadmap' : isAdmin ? 'Install Control Center ' : `Get ${storeName} App`}
             </h3>
             <p className="mt-2 text-sm text-text-secondary space-y-2 leading-relaxed">
-              {isAdmin ? (
+              {isRoadmap ? (
+                <>
+                  <span className="flex items-center gap-2"><span>🚀</span> Track your path to 10,000 vendors</span>
+                  <span className="flex items-center gap-2"><span>📅</span> Access your daily scaling routine</span>
+                  <span className="flex items-center gap-2"><span>📈</span> Monitor growth metrics in real-time</span>
+                  <span className="flex items-center gap-2"><span>🛠️</span> Access the marketing playbook anywhere</span>
+                </>
+              ) : isAdmin ? (
                 <>
                   <span className="flex items-center gap-2"><span>🛒</span> See all your orders at a glance</span>
                   <span className="flex items-center gap-2"><span>👀</span> Track store views and top products</span>
-                  
+
                   <span className="flex items-center gap-2"><span>📈</span> Watch your store grow in real time</span>
                   <span className="flex items-center gap-2"><span>🗂️</span> Manage everything—all in one place</span>
                 </>
