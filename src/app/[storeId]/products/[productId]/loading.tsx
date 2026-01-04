@@ -1,7 +1,7 @@
 'use client';
 
-import ProductDetailSkeleton from '../../../../components/ProductDetailSkeleton';
-import Navbar from '../../../../components/layout/navbar';
+import ProductDetailSkeleton from '@/components/ProductDetailSkeleton';
+import Navbar from '@/components/layout/navbar';
 import { useParams } from 'next/navigation';
 
 export default function Loading() {

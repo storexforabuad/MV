@@ -4,34 +4,34 @@ import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { useParams, useRouter } from 'next/navigation';
-import { getProductById, incrementProductViews, getStoreMeta, getCategories } from '../../../../lib/db';
+import { getProductById, incrementProductViews, getStoreMeta, getCategories } from '@/lib/db';
 import { Heart, ShoppingCart, Share2, PackageX, Search, Info, Gift } from 'lucide-react';
-import { useCart } from '../../../../lib/cartContext';
-import { Product, FashionProduct, FoodBeverageProduct } from '../../../../types/product';
-import { Category } from '../../../../types/category';
-import { StoreMeta } from '../../../../types/store';
-import { calculateDiscount, formatPrice } from '../../../../utils/price';
-import { ViewHistoryCache } from '../../../../lib/viewHistoryCache';
-import { ProductDetailCache } from '../../../../lib/productDetailCache';
-import Navbar from '../../../../components/layout/navbar';
-import { useCustomer } from '../../../../context/CustomerContext';
-import CustomerLookupModal from '../../../../components/customer/CustomerLookupModal';
-import OrderSummaryModal from '../../../../components/modals/OrderSummaryModal';
+import { useCart } from '@/lib/cartContext';
+import { Product, FashionProduct, FoodBeverageProduct } from '@/types/product';
+import { Category } from '@/types/category';
+import { StoreMeta } from '@/types/store';
+import { calculateDiscount, formatPrice } from '@/utils/price';
+import { ViewHistoryCache } from '@/lib/viewHistoryCache';
+import { ProductDetailCache } from '@/lib/productDetailCache';
+import Navbar from '@/components/layout/navbar';
+import { useCustomer } from '@/context/CustomerContext';
+import CustomerLookupModal from '@/components/customer/CustomerLookupModal';
+import OrderSummaryModal from '@/components/modals/OrderSummaryModal';
 import toast from 'react-hot-toast';
-import VehicleDetailPage from '../../../../components/products/VehicleDetailPage';
-import { ensureProductType, isFashionProduct, isGeneralProduct, isVehicleProduct, isFoodBeverageProduct } from '../../../../utils/productHelpers';
-import { shouldUsePaymentFlow } from '../../../../utils/storeHelpers';
-import SizeSelector from '../../../../components/products/SizeSelector';
-import { SizePreferencesCache } from '../../../../lib/sizePreferencesCache';
-import SizeGuideModal from '../../../../components/products/SizeGuideModal';
+import VehicleDetailPage from '@/components/products/VehicleDetailPage';
+import { ensureProductType, isFashionProduct, isGeneralProduct, isVehicleProduct, isFoodBeverageProduct } from '@/utils/productHelpers';
+import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
+import SizeSelector from '@/components/products/SizeSelector';
+import { SizePreferencesCache } from '@/lib/sizePreferencesCache';
+import SizeGuideModal from '@/components/products/SizeGuideModal';
 
-const ProductDetailSkeleton = dynamic(() => import('../../../../components/ProductDetailSkeleton'), { ssr: false });
-const AnimatedViewCount = dynamic(() => import('../../../../components/AnimatedViewCount'), {
+const ProductDetailSkeleton = dynamic(() => import('@/components/ProductDetailSkeleton'), { ssr: false });
+const AnimatedViewCount = dynamic(() => import('@/components/AnimatedViewCount'), {
   ssr: false,
   loading: () => <div className="w-16 h-6 bg-gray-200 rounded animate-pulse" />
 });
 
-export default function ProductDetail() {
+export default function ProductDetail({ params }: { params: { storeId: string; productId: string } }) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [product, setProduct] = useState<Product | null>(null);
   const [category, setCategory] = useState<Category | null>(null);
@@ -53,9 +53,7 @@ export default function ProductDetail() {
   const discount = product ? calculateDiscount(product.price, product.originalPrice) : null;
 
   const router = useRouter();
-  const routeParams = useParams();
-  const storeId = typeof routeParams?.storeId === 'string' ? routeParams.storeId : Array.isArray(routeParams?.storeId) ? routeParams.storeId[0] : undefined;
-  const productId = typeof routeParams?.productId === 'string' ? routeParams.productId : Array.isArray(routeParams?.productId) ? routeParams.productId[0] : undefined;
+  const { storeId, productId } = params;
 
   const productIsFashion = product ? isFashionProduct(product) : false;
 

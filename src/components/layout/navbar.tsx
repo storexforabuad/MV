@@ -105,7 +105,7 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
             // final tap: longer buzz pattern
             (navigator as any).vibrate([30, 40, 30]);
           }
-        } catch (e) {}
+        } catch (e) { }
         // keep green visible for SUCCESS_HOLD then trigger
         setTimeout(() => {
           if (storeId) promptLogin(storeId);
@@ -164,26 +164,19 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
                   aria-label="Store title"
                   className="text-xl font-semibold flex items-center gap-2 premium-title-gradient hover:opacity-80 transition-opacity text-left"
                   style={{
-                    // set a CSS variable for a reusable gradient, theme-aware
-                    ['--store-title-gradient' as any]: ((): string => {
-                      const light = theme === 'light';
-                      // default gradient mirrors card-text-gradient stops
-                      if (light) return 'linear-gradient(to right, #000000, #666666)';
-                      return 'linear-gradient(to right, #ffffff, #999999)';
-                    })(),
                     // only set an explicit text color when tapped for feedback
                     ...(tapCount > 0
                       ? (() => {
-                          const light = theme === 'light';
-                          const tapColor = tapCount === 1 ? (light ? '#ef4444' : '#fca5a5') : tapCount === 2 ? (light ? '#d97706' : '#fbbf24') : (light ? '#10b981' : '#34d399');
-                          const glow = tapCount === 1 ? (light ? 'rgba(239,68,68,0.18)' : 'rgba(252,165,165,0.18)') : tapCount === 2 ? (light ? 'rgba(217,119,6,0.16)' : 'rgba(251,191,36,0.16)') : (light ? 'rgba(16,185,129,0.16)' : 'rgba(52,211,153,0.16)');
-                          return {
-                            color: tapColor,
-                            transition: reducedMotion ? 'none' : `color ${COLOR_TRANSITION_MS}ms ease-out, transform ${COLOR_TRANSITION_MS}ms ease-out, text-shadow ${COLOR_TRANSITION_MS}ms ease-out`,
-                            transform: reducedMotion ? 'none' : 'scale(1.03)',
-                            textShadow: `0 8px 20px ${glow}`,
-                          } as any;
-                        })()
+                        const light = theme === 'light';
+                        const tapColor = tapCount === 1 ? (light ? '#ef4444' : '#fca5a5') : tapCount === 2 ? (light ? '#d97706' : '#fbbf24') : (light ? '#10b981' : '#34d399');
+                        const glow = tapCount === 1 ? (light ? 'rgba(239,68,68,0.18)' : 'rgba(252,165,165,0.18)') : tapCount === 2 ? (light ? 'rgba(217,119,6,0.16)' : 'rgba(251,191,36,0.16)') : (light ? 'rgba(16,185,129,0.16)' : 'rgba(52,211,153,0.16)');
+                        return {
+                          color: tapColor,
+                          transition: reducedMotion ? 'none' : `color ${COLOR_TRANSITION_MS}ms ease-out, transform ${COLOR_TRANSITION_MS}ms ease-out, text-shadow ${COLOR_TRANSITION_MS}ms ease-out`,
+                          transform: reducedMotion ? 'none' : 'scale(1.03)',
+                          textShadow: `0 8px 20px ${glow}`,
+                        } as any;
+                      })()
                       : { transition: reducedMotion ? 'none' : `color ${COLOR_TRANSITION_MS}ms ease-out, transform ${COLOR_TRANSITION_MS}ms ease-out, text-shadow ${COLOR_TRANSITION_MS}ms ease-out` }),
                   }}
                 >

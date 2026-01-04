@@ -4,29 +4,29 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { useParams } from 'next/navigation';
-import { getProductById, incrementProductViews } from '../../../lib/db';
+import { getProductById, incrementProductViews } from '@/lib/db';
 import { CirclePlus, ShoppingCart, Clock, Check } from 'lucide-react';
-import { useCart } from '../../../lib/cartContext';
-import { Product } from '../../../types/product';
-import { calculateDiscount, formatPrice } from '../../../utils/price';
+import { useCart } from '@/lib/cartContext';
+import { Product } from '@/types/product';
+import { calculateDiscount, formatPrice } from '@/utils/price';
 import { ViewHistoryCache } from '@/lib/viewHistoryCache';
-import { ProductDetailCache } from '../../../lib/productDetailCache';
-import Navbar from '../../../components/layout/navbar';
-import { isGeneralProduct } from '../../../utils/productHelpers';
+import { ProductDetailCache } from '@/lib/productDetailCache';
+import Navbar from '@/components/layout/navbar';
+import { isGeneralProduct } from '@/utils/productHelpers';
 import toast from 'react-hot-toast';
 
 
 // Dynamic imports
-const ProductDetailSkeleton = dynamic(() => import('../../../components/ProductDetailSkeleton'), {
+const ProductDetailSkeleton = dynamic(() => import('@/components/ProductDetailSkeleton'), {
   ssr: false
 });
 
-const AnimatedViewCount = dynamic(() => import('../../../components/AnimatedViewCount'), {
+const AnimatedViewCount = dynamic(() => import('@/components/AnimatedViewCount'), {
   ssr: false,
   loading: () => <div className="w-16 h-6 bg-gray-200 rounded animate-pulse" />
 });
 
-export default function ProductDetail({ params }: { params: Promise<{ id: string }> }) {
+export default function ProductDetail({ params }: { params: { id: string } }) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,7 +45,7 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
     let isMounted = true;
     async function fetchProduct() {
       try {
-        const { id } = await params;
+        const { id } = params;
         let fetchedProduct: Product | undefined = ProductDetailCache.get(id);
         // Defensive: If storeId is missing, show error and skip fetch
         if (!storeId) {
@@ -213,8 +213,8 @@ export default function ProductDetail({ params }: { params: Promise<{ id: string
                   </span>
                 )}
                 {isGeneralProduct(product) && (
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border border-gray-200 ${getCategoryColor((product as import('../../../types/product').GeneralProduct).category).background} ${getCategoryColor((product as import('../../../types/product').GeneralProduct).category).text}`}>
-                    {(product as import('../../../types/product').GeneralProduct).category}
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border border-gray-200 ${getCategoryColor((product as import('@/types/product').GeneralProduct).category).background} ${getCategoryColor((product as import('@/types/product').GeneralProduct).category).text}`}>
+                    {(product as import('@/types/product').GeneralProduct).category}
                   </span>
                 )}
               </div>

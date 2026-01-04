@@ -4,30 +4,30 @@ import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { useParams, useSearchParams } from 'next/navigation';
-import { getProductById, getStoreMeta } from '../../../../lib/db';
+import { getProductById, getStoreMeta } from '@/lib/db';
 import { CirclePlus, ShoppingCart, Clock, Check } from 'lucide-react';
-import { useCart } from '../../../../lib/cartContext';
-import { useOrders } from '../../../../hooks/useOrders';
-import { useCustomer } from '../../../../context/CustomerContext';
-import { Product } from '../../../../types/product';
-import { StoreMeta } from '../../../../types/store';
-import { calculateDiscount, formatPrice } from '../../../../utils/price';
-import { formatWhatsAppNumber } from '../../../../utils/phoneUtils';
-import { ViewHistoryCache } from '../../../../lib/viewHistoryCache';
-import { ProductDetailCache } from '../../../../lib/productDetailCache';
-import Navbar from '../../../../components/layout/navbar';
+import { useCart } from '@/lib/cartContext';
+import { useOrders } from '@/hooks/useOrders';
+import { useCustomer } from '@/context/CustomerContext';
+import { Product } from '@/types/product';
+import { StoreMeta } from '@/types/store';
+import { calculateDiscount, formatPrice } from '@/utils/price';
+import { formatWhatsAppNumber } from '@/utils/phoneUtils';
+import { ViewHistoryCache } from '@/lib/viewHistoryCache';
+import { ProductDetailCache } from '@/lib/productDetailCache';
+import Navbar from '@/components/layout/navbar';
 
 // Dynamic imports
-const ProductDetailSkeleton = dynamic(() => import('../../../../components/ProductDetailSkeleton'), {
+const ProductDetailSkeleton = dynamic(() => import('@/components/ProductDetailSkeleton'), {
   ssr: false
 });
 
-const AnimatedViewCount = dynamic(() => import('../../../../components/AnimatedViewCount'), {
+const AnimatedViewCount = dynamic(() => import('@/components/AnimatedViewCount'), {
   ssr: false,
   loading: () => <div className="w-16 h-6 bg-gray-200 rounded animate-pulse" />
 });
 
-export default function ProductDetail() {
+export default function ProductDetail({ params }: { params: { productId: string } }) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,8 +45,7 @@ export default function ProductDetail() {
 
   const discount = product ? calculateDiscount(product.price, product.originalPrice) : null;
 
-  const routeParams = useParams();
-  const productId = typeof routeParams?.productId === 'string' ? routeParams.productId : Array.isArray(routeParams?.productId) ? routeParams.productId[0] : undefined;
+  const { productId } = params;
 
   useEffect(() => {
     let isMounted = true;
