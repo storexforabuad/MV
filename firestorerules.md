@@ -1,10 +1,9 @@
 rules_version = '2';
 service cloud.firestore {
 match /databases/{database}/documents {
-
 // WARNING: These rules are for development and are INSECURE.
-// They allow anyone to read and write to your database.
-// You MUST secure these rules before deploying to production.
+// They allow wide reads and writes to your database to keep the dev workflow fast.
+// Remove the permissive fallbacks and tighten rules before production.
 
 // --- Helper Function for Product Validation ---
 function isValidProduct(product) {
@@ -27,7 +26,14 @@ function isValidWhatsappSchedule(schedule) {
          (schedule.imageUrl == null || schedule.imageUrl is string);
 }
 
-// --- Collection Group Read Rules ---
+// --- Helper Function for Payment Evidence TTL ---
+// Auto-deletes payment evidence after 30 days (2592000 seconds)
+function isPaymentEvidenceExpired() {
+  return resource.data.ttl != null && 
+         request.time.toMillis() >= resource.data.ttl;
+}
+
+// --- Collection Group Read Rules (public reads) ---
 match /{path=**}/products/{productId} {
   allow read: if true;
 }
@@ -41,30 +47,26 @@ match /{path=**}/whatsappSchedules/{scheduleId} {
   allow read: if true;
 }
 
-
 // --- Customer Data Rules ---
 match /customers/{userId} {
+  // Dev: open read/write so customer lookup & create work from client
   allow read, write: if true;
 
-  // MODIFIED BLOCK START
   match /orders/{orderId} {
-    // Keeps reads and creates open for development, as before.
+    // Keep reads and creates open for development.
     allow read, create: if true;
-    
-    // Allows an update if:
-    // 1. It's an authenticated store owner updating ONLY the status field of an order from their store.
-    // OR
-    // 2. Fallback to `true` to keep other update operations working during development.
+
+    // Allow store owner to update ONLY the 'status' field (dev-friendly), but keep a permissive fallback for other updates.
+    // Also allow updating payment-related fields (paymentEvidenceUrl, paymentStatus, paymentEvidenceFileName)
     allow update: if (request.auth != null &&
                     exists(/databases/$(database)/documents/stores/$(request.auth.uid)) &&
                     get(/databases/$(database)/documents/customers/$(userId)/orders/$(orderId)).data.storeMeta.id == request.auth.uid &&
-                    request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']))
-                 || true; // IMPORTANT: This `|| true` keeps your app working like before for other updates.
-                 
-    // Keeps deletes open for development
+                    request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'paymentEvidenceUrl', 'paymentStatus', 'paymentEvidenceFileName', 'paymentEvidenceUploadedAt', 'ttl']))
+                 || true;
+
+    // Deletes open for development
     allow delete: if true;
   }
-  // MODIFIED BLOCK END
 
   match /referrals/{referralId} {
     allow read, write: if true;
@@ -80,36 +82,100 @@ match /customers/{userId} {
 
 // --- Store Data Rules ---
 match /stores/{storeId} {
+  // Keep store read/write open during development.
   allow read, write: if true;
 
   match /orders/{orderId} {
     allow read, write: if true;
   }
+
   match /products/{productId} {
     allow read, create, update, delete: if true;
   }
+
   match /posts/{postId} {
     allow read, write: if true;
   }
+
   match /categories/{categoryId} {
     allow read, write: if true;
   }
+
   match /wholesale/{wholesaleId} {
     allow read, write: if true;
   }
+
   match /contacts/{contactId} {
     allow read, write: if true;
   }
+
   match /referrals/{referralId} {
     allow read, write: if true;
   }
-  
+
   match /whatsappSchedules/{scheduleId} {
-    allow read, write: if true; 
+    allow read, write: if true;
   }
-  
+
   match /dailyMetrics/{metricId} {
     allow read, write: if true;
+  }
+
+  // --- Sports / Pitching Additions (dev-friendly) ---
+  // Pitches for a store
+  match /pitches/{pitchId} {
+    allow read: if true;
+    // Allow create/update/delete during development.
+    allow create, update, delete: if true;
+  }
+
+  // Slot locks (deterministic lock documents) used by booking transactions
+  // lockId format: "{pitchId}__{YYYY-MM-DD}__{HHmm}"
+  match /slotLocks/{lockId} {
+    allow read: if true;
+
+    // For development: allow create/update/delete — production should restrict these
+    allow create: if true;
+    allow update: if true;
+    allow delete: if true;
+  }
+
+  // Bookings under a store
+  match /bookings/{bookingId} {
+    allow read: if true;
+
+    // Allow create from clients during development (createBooking transaction uses client SDK)
+    allow create: if true;
+
+    // Updates: allow owner or customer in dev — tighten in prod
+    allow update: if true;
+
+    allow delete: if true;
+  }
+
+  // Events and participants
+  match /events/{eventId} {
+    allow read: if true;
+    allow create, update, delete: if true;
+
+    match /participants/{participantId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if true;
+      allow delete: if true;
+    }
+  }
+
+  // Commission payment submissions (owners upload proof)
+  match /commissionPayments/{paymentId} {
+    allow read: if true;
+
+    // Owners can submit commission payment records during development
+    allow create: if true;
+
+    // For development, allow update/delete — in production require Bizcon admin for ack/reject
+    allow update: if true;
+    allow delete: if true;
   }
 }
 
@@ -118,15 +184,13 @@ match /stores/{storeId} {
 match /productMetrics/{metricId} {
   // Anyone can read metrics (public product data)
   allow read: if true;
-  
-  // Only the store owner can create/update their product metrics
-  // For development, also allow open writes like other collections
+
+  // For development, keep writes open
   allow create, update: if (request.auth != null &&
                             exists(/databases/$(database)/documents/stores/$(request.auth.uid)) &&
                             request.resource.data.storeId == request.auth.uid)
-                        || true; // Keeps it open for development
-  
-  // Deletes open for development                      
+                        || true;
+
   allow delete: if true;
 }
 
@@ -135,39 +199,54 @@ match /stockNotifications/{notificationId} {
   allow read, write, create, update, delete: if true;
 }
 
-// --- Payment Evidence TTL (Time-To-Live) Configuration ---
-// Orders collection documents include a `ttl` field (Unix timestamp in seconds)
-// that automatically expires payment evidence after 30 days.
-//
-// IMPORTANT: To enable automatic document deletion via TTL in Firestore:
-//
-// 1. Go to Firebase Console → Firestore Database → TTL Management
-// 2. Enable TTL for the `orders` collection if not already enabled
-// 3. Set the TTL field name to: `ttl`
-//
-// HOW IT WORKS:
-// - When a payment evidence is uploaded for a restaurant order, the backend sets:
-//   - paymentEvidenceUrl: <Cloudinary URL>
-//   - paymentStatus: 'submitted'
-//   - paymentEvidenceUploadedAt: <Timestamp>
-//   - ttl: <Current timestamp in seconds + 2,592,000 seconds (30 days)>
-//
-// - Firestore automatically deletes the entire document when the TTL timestamp is reached
-// - This ensures payment evidence is not stored indefinitely
-// - No Cloud Functions are required - TTL is a native Firestore feature
-//
-// PAYMENT FIELD STRUCTURE:
-// {
-//   paymentEvidenceUrl?: string; // Cloudinary URL of payment proof
-//   paymentStatus?: 'pending' | 'submitted'; // pending: no evidence, submitted: evidence uploaded
-//   paymentEvidenceUploadedAt?: Timestamp; // When evidence was uploaded
-//   paymentEvidenceFileName?: string; // Original filename for reference
-//   ttl?: number; // Unix timestamp in seconds - for automatic 30-day cleanup
-// }
-//
-// IMPORTANT NOTES:
-// - This feature is restaurant-specific for now but designed to be expandable to other store types
-// - The payment flow is only enabled for store type 'restaurant'
-// - Once TTL expires, the entire order document is deleted, including all order details
-// - Consider archiving important order data before TTL expiry if needed for records
-```
+// --- TTL (Time-To-Live) Policy for Payment Evidence ---
+// Firestore automatically deletes documents with a ttl field when the current time exceeds that field's value.
+// For restaurant orders with payment evidence:
+// - ttl is set to: current_server_timestamp + 2592000 seconds (30 days)
+// - Firestore automatically deletes these orders after 30 days
+// - No Cloud Functions or manual cleanup needed
+// 
+// Implementation in code:
+// When adding payment evidence to an order, set:
+// ttl: serverTimestamp() + 2592000 (in milliseconds)
+// 
+// Note: TTL documents are deleted within 24-48 hours of expiration.
+
+// --- Production Guidance (replace dev permissive rules below when ready) ---
+/*
+match /stores/{storeId} {
+  allow read: if true;
+  allow create: if request.auth != null;
+  allow update, delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
+
+  match /pitches/{pitchId} {
+    allow read: if true;
+    allow create: if request.auth != null && request.auth.uid == resource.data.ownerId;
+    allow update, delete: if request.auth != null && resource.data.ownerId == request.auth.uid;
+  }
+
+  match /slotLocks/{lockId} {
+    allow read: if true;
+    // Only allow transactions from authenticated users; consider using a server-side service account for final authority
+    allow create: if request.auth != null;
+    allow update, delete: if request.auth != null && (request.auth.uid == resource.data.ownerId || request.auth.token.bizcon == true);
+  }
+
+  match /bookings/{bookingId} {
+    allow read: if true;
+    allow create: if request.auth != null;
+    // Only owner or the booking owner (customer) can update certain fields; server-side verification recommended
+    allow update: if request.auth != null && (request.auth.uid == resource.data.customerId || request.auth.token.bizcon == true || request.auth.uid == resource.data.storeOwnerId);
+    allow delete: if request.auth != null && request.auth.token.bizcon == true;
+  }
+
+  match /commissionPayments/{paymentId} {
+    allow read: if true;
+    allow create: if request.auth != null && request.auth.uid == request.resource.data.uploadedBy;
+    allow update: if request.auth != null && (request.auth.token.bizcon == true || request.auth.uid == request.resource.data.uploadedBy);
+    allow delete: if request.auth != null && request.auth.token.bizcon == true;
+  }
+}
+*/
+}
+}

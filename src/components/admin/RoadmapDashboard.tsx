@@ -24,7 +24,7 @@ import {
     BellOff
 } from 'lucide-react';
 import { Naira } from '@/components/common/Naira';
-import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc } from 'firebase/firestore';
+import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc, query, where } from 'firebase/firestore';
 import { app as firebaseApp } from '@/lib/firebase';
 import Link from 'next/link';
 
@@ -124,16 +124,19 @@ export default function RoadmapDashboard() {
             setNotificationsEnabled(Notification.permission === 'granted');
         }
 
+        // 1. Fetch only paying stores (subscriptionStatus == 'active')
         const storesRef = collection(db, 'stores');
-        const unsubscribe = onSnapshot(storesRef, (snapshot) => {
-            const realCount = snapshot.size;
+        const payingQuery = query(storesRef, where('subscriptionStatus', '==', 'active'));
+
+        const unsubscribe = onSnapshot(payingQuery, (snapshot) => {
+            const realPayingCount = snapshot.size;
 
             const configRef = doc(db, 'admin', 'roadmap');
             getDoc(configRef).then((docSnap) => {
                 const boost = docSnap.exists() ? (docSnap.data().manualBoost || 0) : 0;
                 setManualBoost(boost);
-                setCurrentVendors(realCount + boost);
-                setCurrentMRR((realCount + boost) * 5000);
+                setCurrentVendors(realPayingCount + boost);
+                setCurrentMRR((realPayingCount + boost) * 5000);
                 setLoading(false);
             });
         });
@@ -231,11 +234,11 @@ export default function RoadmapDashboard() {
 
                     <div className="grid grid-cols-2 gap-4 mb-8">
                         <div className="space-y-1">
-                            <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">Current Vendors</p>
+                            <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">Paying Vendors</p>
                             <p className="text-3xl font-black text-slate-900 dark:text-white">{currentVendors.toLocaleString()}</p>
                         </div>
                         <div className="space-y-1 text-right">
-                            <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">Current MRR</p>
+                            <p className="text-xs text-slate-500 uppercase tracking-wider font-bold">Paying MRR</p>
                             <p className="text-3xl font-black text-slate-900 dark:text-white flex items-center justify-end">
                                 <Naira />{currentMRR.toLocaleString()}
                             </p>
@@ -409,7 +412,7 @@ export default function RoadmapDashboard() {
                                     <div className="flex items-start gap-3">
                                         <Info className="w-5 h-5 text-indigo-500 mt-0.5" />
                                         <p className="text-sm text-indigo-700 dark:text-indigo-300">
-                                            Use "Manual Boost" to include vendors who are currently onboarding offline or via WhatsApp but not yet registered on the platform.
+                                            Use "Manual Boost" to include paying vendors who are currently onboarding offline or via WhatsApp but not yet registered on the platform.
                                         </p>
                                     </div>
                                 </div>
