@@ -17,7 +17,8 @@ import {
     X,
     Info,
     CheckCircle2,
-    ShieldCheck
+    ShieldCheck,
+    Store
 } from 'lucide-react';
 import Link from 'next/link';
 import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc, query, where } from 'firebase/firestore';
@@ -30,8 +31,9 @@ import OverviewTab from './OverviewTab';
 import StrategyTab from './StrategyTab';
 import TeamTab from './TeamTab';
 import AnalyticsTab from './AnalyticsTab';
+import VendorsTab from './VendorsTab';
 
-type TabType = 'overview' | 'strategy' | 'team' | 'analytics';
+type TabType = 'overview' | 'strategy' | 'team' | 'analytics' | 'vendors';
 
 export default function GrowthPortal() {
     const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -87,6 +89,7 @@ export default function GrowthPortal() {
         { id: 'strategy', label: 'Strategy', icon: Target },
         { id: 'team', label: 'Team', icon: Users },
         { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+        { id: 'vendors', label: 'Vendors', icon: Store },
     ];
 
     if (loading) {
@@ -108,7 +111,7 @@ export default function GrowthPortal() {
             <header className="sticky top-0 z-40 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 p-4 sm:p-6">
                 <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                        <Link href="/admin" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
+                        <Link href="/devteam" className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl transition-colors">
                             <ChevronLeft className="w-5 h-5" />
                         </Link>
                         <div className="min-w-0">
@@ -180,6 +183,7 @@ export default function GrowthPortal() {
                         {activeTab === 'strategy' && <StrategyTab />}
                         {activeTab === 'team' && <TeamTab />}
                         {activeTab === 'analytics' && <AnalyticsTab currentVendors={currentVendors} currentMRR={currentMRR} />}
+                        {activeTab === 'vendors' && <VendorsTab />}
                     </motion.div>
                 </AnimatePresence>
             </main>
