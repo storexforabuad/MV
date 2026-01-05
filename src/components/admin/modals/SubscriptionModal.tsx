@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShieldCheck, X, Calendar, CreditCard, AlertCircle, CheckCircle2, Loader2, Zap, Clock, ChevronRight } from 'lucide-react';
+import { ShieldCheck, X, Calendar, CreditCard, AlertCircle, CheckCircle2, Loader2, Zap, Clock, ChevronRight, AlertTriangle, XCircle } from 'lucide-react';
 import {
   getSubscriptionStatus,
   cancelSubscription,
@@ -172,6 +172,19 @@ export default function SubscriptionModal({
   const trialDaysRemaining = getDaysRemaining(trialEndsAt);
   const graceDaysRemaining = status === 'past_due' ? getDaysRemaining(nextBillingDate) : 0;
 
+  // Get dynamic status icon
+  const getStatusIcon = (s: SubscriptionStatus) => {
+    switch (s) {
+      case 'active': return CheckCircle2;
+      case 'trial': return Clock;
+      case 'past_due': return AlertTriangle;
+      case 'expired': return AlertCircle;
+      case 'cancelled': return XCircle;
+      default: return Clock;
+    }
+  };
+  const StatusIcon = getStatusIcon(status);
+
   const modalVariants = { hidden: { opacity: 0, y: '100%' }, visible: { opacity: 1, y: 0 }, exit: { opacity: 0, y: '100%' } };
 
   return (
@@ -193,11 +206,20 @@ export default function SubscriptionModal({
           <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg ${status === 'active' ? 'bg-gradient-to-br from-green-500 to-emerald-600' :
             status === 'trial' ? 'bg-gradient-to-br from-blue-500 to-indigo-600' :
               status === 'past_due' ? 'bg-gradient-to-br from-yellow-500 to-amber-600' :
-                'bg-gradient-to-br from-red-500 to-rose-600'
+                status === 'expired' ? 'bg-gradient-to-br from-red-500 to-rose-600' :
+                  'bg-gradient-to-br from-gray-500 to-slate-600'
             }`}>
-            <ShieldCheck className="w-6 h-6 text-white" />
+            <StatusIcon className="w-6 h-6 text-white" />
           </div>
         </header>
+
+        {/* Status Indicator Strip */}
+        <div className={`h-1.5 w-full ${status === 'active' ? 'bg-gradient-to-r from-green-400 to-emerald-500' :
+          status === 'trial' ? 'bg-gradient-to-r from-blue-400 to-indigo-500' :
+            status === 'past_due' ? 'bg-gradient-to-r from-yellow-400 to-amber-500' :
+              status === 'expired' ? 'bg-gradient-to-r from-red-400 to-rose-500' :
+                'bg-gradient-to-r from-gray-400 to-slate-500'
+          }`} />
 
         {/* --- Main Scrollable Content --- */}
         <main className="flex-grow w-full max-w-5xl mx-auto overflow-y-auto p-4 sm:p-6 scrollbar-hide">
@@ -217,11 +239,17 @@ export default function SubscriptionModal({
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
                     <div className="flex items-center gap-2 mb-2">
-                      {statusDisplay.icon}
+                      <StatusIcon className={`w-5 h-5 ${status === 'active' ? 'text-green-600 dark:text-green-400' :
+                        status === 'trial' ? 'text-blue-600 dark:text-blue-400' :
+                          status === 'past_due' ? 'text-yellow-600 dark:text-yellow-400' :
+                            status === 'expired' ? 'text-red-600 dark:text-red-400' :
+                              'text-gray-600 dark:text-gray-400'
+                        }`} />
                       <span className={`font-bold uppercase tracking-wider text-sm ${status === 'active' ? 'text-green-700 dark:text-green-400' :
                         status === 'trial' ? 'text-blue-700 dark:text-blue-400' :
                           status === 'past_due' ? 'text-yellow-700 dark:text-yellow-400' :
-                            'text-red-700 dark:text-red-400'
+                            status === 'expired' ? 'text-red-700 dark:text-red-400' :
+                              'text-gray-700 dark:text-gray-400'
                         }`}>
                         Current Status
                       </span>

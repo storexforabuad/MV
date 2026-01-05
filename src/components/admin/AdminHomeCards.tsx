@@ -1,5 +1,5 @@
 'use client';
-import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays, CheckCircle2, Briefcase, ShieldCheck } from 'lucide-react';
+import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays, CheckCircle2, Briefcase, ShieldCheck, Clock, AlertCircle } from 'lucide-react';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useVendor } from '@/context/VendorContext';
 import { motion, Variants } from 'framer-motion';
@@ -226,6 +226,40 @@ const formatCurrencyForCard = (amount: number) => {
     return `₦${(amount / 1000).toFixed(0)}K`;
   }
   return `₦${amount.toFixed(0)}`;
+};
+
+// Subscription status helper functions
+const getSubscriptionGradient = (status: string) => {
+  switch (status) {
+    case 'active': return 'bg-gradient-to-br from-green-400 via-emerald-500 to-green-600';
+    case 'trial': return 'bg-gradient-to-br from-blue-400 via-blue-500 to-indigo-600';
+    case 'past_due': return 'bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-600';
+    case 'expired': return 'bg-gradient-to-br from-red-400 via-red-500 to-rose-600';
+    case 'cancelled': return 'bg-gradient-to-br from-gray-400 via-slate-500 to-gray-600';
+    default: return 'bg-gradient-to-br from-blue-400 via-blue-500 to-indigo-600';
+  }
+};
+
+const getSubscriptionGlow = (status: string) => {
+  switch (status) {
+    case 'active': return 'dark:shadow-green-500/30 shadow-green-500/50';
+    case 'trial': return 'dark:shadow-blue-500/30 shadow-blue-500/50';
+    case 'past_due': return 'dark:shadow-yellow-500/30 shadow-yellow-500/50';
+    case 'expired': return 'dark:shadow-red-500/30 shadow-red-500/50';
+    case 'cancelled': return 'dark:shadow-gray-500/30 shadow-gray-500/50';
+    default: return 'dark:shadow-blue-500/30 shadow-blue-500/50';
+  }
+};
+
+const getSubscriptionIcon = (status: string) => {
+  switch (status) {
+    case 'active': return CheckCircle2;
+    case 'trial': return Clock;
+    case 'past_due': return AlertTriangle;
+    case 'expired': return AlertCircle;
+    case 'cancelled': return XCircle;
+    default: return Clock;
+  }
 };
 
 import { sendVendorNotification } from '@/app/actions/sendVendorNotification';
@@ -603,6 +637,34 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                     <div className="text-xs sm:text-sm font-medium opacity-90 text-center px-1 leading-tight">
                       Ambassador
                     </div>
+                  </div>
+                </button>
+              </motion.div>
+            );
+          }
+
+          // Dynamic Subscription card with status-based color and icon
+          if (card.label === 'Subscription') {
+            const status = props.subscriptionStatus || 'trial';
+            const SubscriptionIcon = getSubscriptionIcon(status);
+            const gradient = getSubscriptionGradient(status);
+            const glowClass = getSubscriptionGlow(status);
+
+            return (
+              <motion.div key={`subscription-${idx}`} variants={itemVariants}>
+                <button
+                  className={`dashboard-card relative flex flex-row items-center justify-center rounded-2xl p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${gradient} text-white ${glowClass} w-full h-full min-h-[7rem]`}
+                  tabIndex={0}
+                  type="button"
+                  onClick={() => handleOpenModal(idx, card)}
+                >
+                  <span className="card-blob" />
+                  <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white bg-opacity-20 shadow">
+                    <SubscriptionIcon className="w-5 h-5 sm:w-6 sm:h-6 drop-shadow" />
+                  </div>
+                  <div className="flex flex-col items-center ml-3 min-w-0 z-10">
+                    <div className="text-base sm:text-lg font-bold drop-shadow">Subscription</div>
+                    <div className="text-xs sm:text-sm font-medium opacity-90 text-center leading-tight">Manage</div>
                   </div>
                 </button>
               </motion.div>
