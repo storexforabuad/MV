@@ -172,12 +172,10 @@ export default function RoadmapDashboard() {
     const db = getFirestore(firebaseApp);
 
     useEffect(() => {
-        // Check if notifications are already enabled
         if (typeof window !== 'undefined' && 'Notification' in window) {
             setNotificationsEnabled(Notification.permission === 'granted');
         }
 
-        // 1. Fetch only paying stores (subscriptionStatus == 'active')
         const storesRef = collection(db, 'stores');
         const payingQuery = query(storesRef, where('subscriptionStatus', '==', 'active'));
 
@@ -376,86 +374,6 @@ export default function RoadmapDashboard() {
                                 ))}
                             </div>
                         )}
-                    </div>
-                </section>
-
-                {/* --- Milestones Timeline --- */}
-                <section className="space-y-4">
-                    <h2 className="text-xl font-bold px-2">Milestones</h2>
-                    <div className="space-y-4">
-                        {milestones.map((milestone, index) => (
-                            <motion.div
-                                key={milestone.id}
-                                layoutId={milestone.id}
-                                onClick={() => setActiveMilestone(milestone.id)}
-                                className={`relative overflow-hidden rounded-2xl border transition-all duration-300 cursor-pointer ${activeMilestone === milestone.id
-                                    ? 'bg-white dark:bg-slate-900 border-indigo-500 shadow-lg ring-1 ring-indigo-500/20'
-                                    : 'bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
-                                    }`}
-                            >
-                                <div className="p-5">
-                                    <div className="flex items-start justify-between gap-4">
-                                        <div className="flex items-center gap-4">
-                                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-inner ${milestone.status === 'completed' ? 'bg-green-100 dark:bg-green-900/30 text-green-600' :
-                                                milestone.status === 'current' ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600' :
-                                                    'bg-slate-100 dark:bg-slate-800 text-slate-400'
-                                                }`}>
-                                                <milestone.icon className="w-6 h-6" />
-                                            </div>
-                                            <div>
-                                                <h3 className="font-bold text-slate-900 dark:text-white">{milestone.title}</h3>
-                                                <p className="text-xs text-slate-500">{milestone.targetDate} • {milestone.targetVendors.toLocaleString()} Vendors</p>
-                                            </div>
-                                        </div>
-                                        {milestone.status === 'completed' ? (
-                                            <CheckCircle2 className="w-5 h-5 text-green-500" />
-                                        ) : milestone.status === 'current' ? (
-                                            <div className="flex h-2 w-2 relative">
-                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
-                                                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
-                                            </div>
-                                        ) : null}
-                                    </div>
-
-                                    <AnimatePresence>
-                                        {activeMilestone === milestone.id && (
-                                            <motion.div
-                                                initial={{ height: 0, opacity: 0 }}
-                                                animate={{ height: 'auto', opacity: 1 }}
-                                                exit={{ height: 0, opacity: 0 }}
-                                                transition={{ duration: 0.3 }}
-                                                className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800"
-                                            >
-                                                <p className="text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
-                                                    {milestone.description}
-                                                </p>
-
-                                                <div className="space-y-3">
-                                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Key Tasks</p>
-                                                    {milestone.tasks.map((task, i) => (
-                                                        <div key={i} className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-200">
-                                                            <Circle className="w-4 h-4 text-slate-300 dark:text-slate-600" />
-                                                            {task}
-                                                        </div>
-                                                    ))}
-                                                </div>
-
-                                                <div className="mt-8 grid grid-cols-2 gap-3">
-                                                    <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
-                                                        <p className="text-[10px] text-slate-400 uppercase font-bold">Target MRR</p>
-                                                        <p className="text-lg font-bold flex items-center"><Naira />{milestone.targetMRR.toLocaleString()}</p>
-                                                    </div>
-                                                    <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
-                                                        <p className="text-[10px] text-slate-400 uppercase font-bold">Target Vendors</p>
-                                                        <p className="text-lg font-bold">{milestone.targetVendors.toLocaleString()}</p>
-                                                    </div>
-                                                </div>
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
-                                </div>
-                            </motion.div>
-                        ))}
                     </div>
                 </section>
 
@@ -725,6 +643,86 @@ export default function RoadmapDashboard() {
                             )}
                         </motion.div>
                     </AnimatePresence>
+                </section>
+
+                {/* --- Milestones Timeline --- */}
+                <section className="space-y-4">
+                    <h2 className="text-xl font-bold px-2">Milestones</h2>
+                    <div className="space-y-4">
+                        {milestones.map((milestone, index) => (
+                            <motion.div
+                                key={milestone.id}
+                                layoutId={milestone.id}
+                                onClick={() => setActiveMilestone(milestone.id)}
+                                className={`relative overflow-hidden rounded-2xl border transition-all duration-300 cursor-pointer ${activeMilestone === milestone.id
+                                    ? 'bg-white dark:bg-slate-900 border-indigo-500 shadow-lg ring-1 ring-indigo-500/20'
+                                    : 'bg-white/50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                                    }`}
+                            >
+                                <div className="p-5">
+                                    <div className="flex items-start justify-between gap-4">
+                                        <div className="flex items-center gap-4">
+                                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-inner ${milestone.status === 'completed' ? 'bg-green-100 dark:bg-green-900/30 text-green-600' :
+                                                milestone.status === 'current' ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600' :
+                                                    'bg-slate-100 dark:bg-slate-800 text-slate-400'
+                                                }`}>
+                                                <milestone.icon className="w-6 h-6" />
+                                            </div>
+                                            <div>
+                                                <h3 className="font-bold text-slate-900 dark:text-white">{milestone.title}</h3>
+                                                <p className="text-xs text-slate-500">{milestone.targetDate} • {milestone.targetVendors.toLocaleString()} Vendors</p>
+                                            </div>
+                                        </div>
+                                        {milestone.status === 'completed' ? (
+                                            <CheckCircle2 className="w-5 h-5 text-green-500" />
+                                        ) : milestone.status === 'current' ? (
+                                            <div className="flex h-2 w-2 relative">
+                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                                                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                                            </div>
+                                        ) : null}
+                                    </div>
+
+                                    <AnimatePresence>
+                                        {activeMilestone === milestone.id && (
+                                            <motion.div
+                                                initial={{ height: 0, opacity: 0 }}
+                                                animate={{ height: 'auto', opacity: 1 }}
+                                                exit={{ height: 0, opacity: 0 }}
+                                                transition={{ duration: 0.3 }}
+                                                className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800"
+                                            >
+                                                <p className="text-sm text-slate-600 dark:text-slate-300 mb-6 leading-relaxed">
+                                                    {milestone.description}
+                                                </p>
+
+                                                <div className="space-y-3">
+                                                    <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Key Tasks</p>
+                                                    {milestone.tasks.map((task, i) => (
+                                                        <div key={i} className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-200">
+                                                            <Circle className="w-4 h-4 text-slate-300 dark:text-slate-600" />
+                                                            {task}
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                <div className="mt-8 grid grid-cols-2 gap-3">
+                                                    <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                                                        <p className="text-[10px] text-slate-400 uppercase font-bold">Target MRR</p>
+                                                        <p className="text-lg font-bold flex items-center"><Naira />{milestone.targetMRR.toLocaleString()}</p>
+                                                    </div>
+                                                    <div className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                                                        <p className="text-[10px] text-slate-400 uppercase font-bold">Target Vendors</p>
+                                                        <p className="text-lg font-bold">{milestone.targetVendors.toLocaleString()}</p>
+                                                    </div>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
                 </section>
 
                 {/* --- Hiring & Ops --- */}
