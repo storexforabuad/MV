@@ -36,13 +36,15 @@ import {
     Coins,
     Compass,
     Map,
-    TrendingDown
+    TrendingDown,
+    Home
 } from 'lucide-react';
 import { Naira } from '@/components/common/Naira';
 import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc, query, where } from 'firebase/firestore';
 import { app as firebaseApp } from '@/lib/firebase';
 import Link from 'next/link';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
+import NigeriaMap from '@/components/admin/NigeriaMap';
 
 interface Milestone {
     id: string;
@@ -377,6 +379,14 @@ export default function RoadmapDashboard() {
                     </div>
                 </section>
 
+                {/* --- Regional Expansion Heatmap --- */}
+                <section className="space-y-4">
+                    <h2 className="text-xl font-bold px-2 flex items-center gap-2">
+                        <Globe className="w-5 h-5 text-indigo-500" /> Regional Expansion
+                    </h2>
+                    <NigeriaMap />
+                </section>
+
                 {/* --- Strategic Analysis --- */}
                 <section className="space-y-6">
                     <div className="flex items-center justify-between px-2">
@@ -510,10 +520,12 @@ export default function RoadmapDashboard() {
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-3">
-                                            <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
-                                                <p className="text-[10px] text-slate-400 uppercase font-bold mb-1">Local Pilot</p>
+                                            <div className="p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border border-yellow-100 dark:border-yellow-900/30">
+                                                <p className="text-[10px] text-yellow-600 dark:text-yellow-400 uppercase font-bold mb-1 flex items-center gap-1">
+                                                    <Home className="w-3 h-3" /> Home Base
+                                                </p>
                                                 <p className="text-xs font-bold">Bauchi City</p>
-                                                <p className="text-[10px] text-slate-500">Mama Puts near ATBU</p>
+                                                <p className="text-[10px] text-slate-500">Physical Lab @ ATBU</p>
                                             </div>
                                             <div className="p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                                                 <p className="text-[10px] text-slate-400 uppercase font-bold mb-1">Remote Pilot</p>

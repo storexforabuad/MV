@@ -13,7 +13,8 @@ import {
     MapPin,
     Utensils,
     Instagram,
-    MessageSquare
+    MessageSquare,
+    Home
 } from 'lucide-react';
 import Link from 'next/link';
 import { Naira } from '@/components/common/Naira';
@@ -55,7 +56,7 @@ const marketingPlaybook = [
     },
     {
         channel: 'Field Agents (Kano/Bauchi)',
-        tactic: 'Physical visits to major markets (Kantin Kwari, Wunti) for on-the-spot setup.',
+        tactic: 'Physical visits to major markets (Kantin Kwari, Wunti, ATBU) for on-the-spot setup.',
         impact: 'High Trust'
     }
 ];
@@ -167,6 +168,31 @@ export default function StrategyPage() {
                                 <p className="font-bold text-xs text-orange-700 dark:text-orange-400 mb-1 uppercase">The "Lunch Hour" Tactic</p>
                                 <p className="text-sm text-slate-600 dark:text-slate-400">Send DMs between 10:00 AM - 11:30 AM when vendors are preparing for the lunch rush and feeling the "DM stress."</p>
                             </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* --- Bauchi Home Base Strategy --- */}
+                <section className="space-y-4">
+                    <h2 className="text-lg font-bold flex items-center gap-2 px-2">
+                        <Home className="w-5 h-5 text-yellow-500" /> Bauchi Home Base Strategy
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/10 dark:to-orange-900/10 rounded-2xl p-5 border border-yellow-100 dark:border-yellow-900/20 shadow-sm">
+                            <h3 className="font-bold text-sm mb-2 flex items-center gap-2 text-yellow-700 dark:text-yellow-400">
+                                <MapPin className="w-4 h-4" /> ATBU & Federal Poly Hub
+                            </h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                                Use student areas as a "Physical Lab." Walk into snack shops and "Mama Puts" near campuses. Offer them a free digital menu in exchange for feedback.
+                            </p>
+                        </div>
+                        <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/10 dark:to-blue-900/10 rounded-2xl p-5 border border-indigo-100 dark:border-indigo-900/20 shadow-sm">
+                            <h3 className="font-bold text-sm mb-2 flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
+                                <TrendingUp className="w-4 h-4" /> Yankari Tourism Pilot
+                            </h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                                Target vendors serving tourists near Yankari Game Reserve. Digital menus solve the "price transparency" issue for visitors.
+                            </p>
                         </div>
                     </div>
                 </section>
