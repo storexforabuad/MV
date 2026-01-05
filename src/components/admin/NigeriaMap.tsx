@@ -1,7 +1,7 @@
 'use client';
 
 import { motion, AnimatePresence } from 'framer-motion';
-import { MapPin, Home, Info, TrendingUp, Target, Users } from 'lucide-react';
+import { MapPin, Home, Info, TrendingUp, Target, Users, X } from 'lucide-react';
 import { useState } from 'react';
 
 interface Region {
@@ -116,14 +116,14 @@ export default function NigeriaMap() {
                 >
                     {/* Pulse Effect */}
                     <span className={`absolute inset-0 rounded-full animate-ping opacity-20 ${region.id === 'bauchi' ? 'bg-yellow-400' :
-                            region.status === 'active' ? 'bg-green-400' :
-                                region.status === 'targeted' ? 'bg-indigo-400' : 'bg-slate-400'
+                        region.status === 'active' ? 'bg-green-400' :
+                            region.status === 'targeted' ? 'bg-indigo-400' : 'bg-slate-400'
                         }`} />
 
                     <div className={`relative p-2 rounded-full border-2 transition-all duration-300 group-hover:scale-125 ${region.id === 'bauchi' ? 'bg-yellow-500/20 border-yellow-500 text-yellow-500 shadow-[0_0_15px_rgba(234,179,8,0.5)]' :
-                            region.status === 'active' ? 'bg-green-500/20 border-green-500 text-green-500' :
-                                region.status === 'targeted' ? 'bg-indigo-500/20 border-indigo-500 text-indigo-500' :
-                                    'bg-slate-800 border-slate-600 text-slate-400'
+                        region.status === 'active' ? 'bg-green-500/20 border-green-500 text-green-500' :
+                            region.status === 'targeted' ? 'bg-indigo-500/20 border-indigo-500 text-indigo-500' :
+                                'bg-slate-800 border-slate-600 text-slate-400'
                         }`}>
                         {region.id === 'bauchi' ? <Home className="w-4 h-4" /> : <MapPin className="w-4 h-4" />}
                     </div>
@@ -136,18 +136,18 @@ export default function NigeriaMap() {
             ))}
 
             {/* --- Legend --- */}
-            <div className="absolute bottom-4 left-4 flex flex-col gap-2 bg-slate-900/80 backdrop-blur-md p-3 rounded-2xl border border-slate-800">
+            <div className="absolute top-4 left-4 flex flex-col gap-2 bg-slate-900/60 backdrop-blur-md p-3 rounded-2xl border border-slate-800 z-20">
                 <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-yellow-500" />
-                    <span className="text-[10px] font-bold text-slate-300 uppercase">Home Base (Bauchi)</span>
+                    <span className="text-[8px] font-bold text-slate-300 uppercase">Home Base</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-green-500" />
-                    <span className="text-[10px] font-bold text-slate-300 uppercase">Active Pilot</span>
+                    <span className="text-[8px] font-bold text-slate-300 uppercase">Active Pilot</span>
                 </div>
                 <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-indigo-500" />
-                    <span className="text-[10px] font-bold text-slate-300 uppercase">Targeted City</span>
+                    <span className="text-[8px] font-bold text-slate-300 uppercase">Targeted</span>
                 </div>
             </div>
 
@@ -155,22 +155,22 @@ export default function NigeriaMap() {
             <AnimatePresence>
                 {selectedRegion && (
                     <motion.div
-                        initial={{ opacity: 0, x: 100 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 100 }}
-                        className="absolute top-4 right-4 bottom-4 w-64 bg-slate-900/95 backdrop-blur-xl border border-slate-800 rounded-2xl p-5 shadow-2xl z-20 flex flex-col"
+                        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                        className="absolute inset-x-4 bottom-4 sm:inset-auto sm:top-4 sm:right-4 sm:bottom-4 sm:w-64 bg-slate-900/95 backdrop-blur-xl border border-slate-800 rounded-2xl p-5 shadow-2xl z-30 flex flex-col"
                     >
                         <button
                             onClick={() => setSelectedRegion(null)}
                             className="absolute top-2 right-2 p-2 hover:bg-slate-800 rounded-full transition-colors"
                         >
-                            <Info className="w-4 h-4 text-slate-500" />
+                            <X className="w-4 h-4 text-slate-500" />
                         </button>
 
                         <div className="flex items-center gap-3 mb-4">
                             <div className={`p-2 rounded-xl ${selectedRegion.id === 'bauchi' ? 'bg-yellow-500/20 text-yellow-500' :
-                                    selectedRegion.status === 'active' ? 'bg-green-500/20 text-green-500' :
-                                        'bg-indigo-500/20 text-indigo-500'
+                                selectedRegion.status === 'active' ? 'bg-green-500/20 text-green-500' :
+                                    'bg-indigo-500/20 text-indigo-500'
                                 }`}>
                                 {selectedRegion.id === 'bauchi' ? <Home className="w-5 h-5" /> : <MapPin className="w-5 h-5" />}
                             </div>
@@ -215,8 +215,8 @@ export default function NigeriaMap() {
             </AnimatePresence>
 
             {/* --- Background Text --- */}
-            <div className="absolute top-4 left-4 pointer-events-none">
-                <h2 className="text-2xl font-black text-white/10 uppercase tracking-tighter">Regional Expansion</h2>
+            <div className="absolute bottom-4 right-4 pointer-events-none">
+                <h2 className="text-xl font-black text-white/5 uppercase tracking-tighter">Regional Expansion</h2>
             </div>
         </div>
     );

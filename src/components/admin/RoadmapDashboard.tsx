@@ -249,6 +249,15 @@ export default function RoadmapDashboard() {
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950 pb-24">
+            <style jsx global>{`
+                .no-scrollbar::-webkit-scrollbar {
+                    display: none;
+                }
+                .no-scrollbar {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                }
+            `}</style>
             {/* --- Header --- */}
             <header className="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border-b border-slate-200 dark:border-slate-800 p-4 sm:p-6">
                 <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
