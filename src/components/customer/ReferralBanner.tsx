@@ -55,7 +55,7 @@ const ReferralBanner = ({ storeId, storeName, onLoginClick }: ReferralBannerProp
     <div className="flex justify-between items-center w-full gap-3 sm:gap-4">
       <div className="flex items-center gap-2 sm:gap-3">
         <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-amber-400/10 flex items-center justify-center border border-amber-400/20 flex-shrink-0">
-          <Sparkles className="text-amber-400" size={16} className="sm:w-5 sm:h-5" />
+          <Sparkles className="text-amber-400 w-4 h-4 sm:w-5 sm:h-5" />
         </div>
         <div className="min-w-0">
           <p className="text-[10px] sm:text-xs text-indigo-200/60 font-medium uppercase tracking-wider truncate">Join & Earn</p>
