@@ -1,6 +1,6 @@
 'use client';
 import { FC, useEffect, useState } from 'react';
-import { doc, onSnapshot, collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { doc, onSnapshot, collection, query, orderBy, limit, getDocs, Timestamp } from 'firebase/firestore';
 import { db, getCategories } from '@/lib/db';
 import { Naira } from '@/components/common/Naira';
 import { Eye, Loader2, ServerCrash, Share2, ShieldCheck, Zap } from 'lucide-react';
@@ -21,6 +21,7 @@ interface ReferralCardProps {
 interface StoreData {
   totalViews?: number;
   subscriptionStatus?: SubscriptionStatus;
+  nextBillingDate?: Timestamp;
 }
 
 interface Category {
@@ -82,6 +83,7 @@ const ReferralCard: FC<ReferralCardProps> = ({ referral, ambassadorTier, onViewD
         setStoreData({
           totalViews: data.totalViews || 0,
           subscriptionStatus: data.subscriptionStatus || 'trial',
+          nextBillingDate: data.nextBillingDate,
         });
       } else {
         setError('Referred store data not found.');
@@ -136,6 +138,23 @@ const ReferralCard: FC<ReferralCardProps> = ({ referral, ambassadorTier, onViewD
   const viewsLast7Days = dailyMetrics.reduce((acc, curr) => acc + curr.views, 0);
   const statusInfo = storeData?.subscriptionStatus ? getStatusDisplay(storeData.subscriptionStatus) : null;
 
+  // Calculate urgency
+  let urgencyColor = 'border-slate-200 dark:border-slate-700/80';
+  let daysUntilDue = null;
+
+  if (storeData?.nextBillingDate) {
+    const now = new Date();
+    const dueDate = storeData.nextBillingDate.toDate();
+    const diffTime = dueDate.getTime() - now.getTime();
+    daysUntilDue = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (daysUntilDue <= 2) {
+      urgencyColor = 'border-red-500 shadow-red-500/20';
+    } else if (daysUntilDue <= 7) {
+      urgencyColor = 'border-yellow-500 shadow-yellow-500/20';
+    }
+  }
+
   if (referral.status === 'pending') {
     return (
       <div className="bg-white dark:bg-slate-800/80 p-4 rounded-2xl shadow border border-slate-200 dark:border-slate-700/80">
@@ -167,14 +186,21 @@ const ReferralCard: FC<ReferralCardProps> = ({ referral, ambassadorTier, onViewD
   }
 
   return (
-    <div className="bg-white dark:bg-slate-800/80 p-4 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700/80 w-full flex flex-col">
+    <div className={`bg-white dark:bg-slate-800/80 p-4 rounded-2xl shadow-lg border w-full flex flex-col transition-all duration-300 ${urgencyColor}`}>
       <div className="flex justify-between items-start mb-4">
-        <p className="font-bold text-lg text-slate-800 dark:text-slate-100 text-left">{referral.businessName}</p>
+        <div>
+          <p className="font-bold text-lg text-slate-800 dark:text-slate-100 text-left">{referral.businessName}</p>
+          {daysUntilDue !== null && daysUntilDue <= 7 && (
+            <p className={`text-xs font-bold mt-1 ${daysUntilDue <= 2 ? 'text-red-500' : 'text-yellow-600'}`}>
+              {daysUntilDue <= 0 ? 'Due Today!' : `Due in ${daysUntilDue} days`}
+            </p>
+          )}
+        </div>
         {statusInfo && (
           <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${statusInfo.color === 'green' ? 'bg-green-500/10 text-green-600 border-green-500/20' :
-              statusInfo.color === 'blue' ? 'bg-blue-500/10 text-blue-600 border-blue-500/20' :
-                statusInfo.color === 'yellow' ? 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20' :
-                  'bg-red-500/10 text-red-600 border-red-500/20'
+            statusInfo.color === 'blue' ? 'bg-blue-500/10 text-blue-600 border-blue-500/20' :
+              statusInfo.color === 'yellow' ? 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20' :
+                'bg-red-500/10 text-red-600 border-red-500/20'
             }`}>
             <span className="w-1.5 h-1.5 rounded-full bg-current" />
             {statusInfo.label}
