@@ -1,5 +1,5 @@
 'use client';
-import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays, CheckCircle2, Briefcase, ShieldCheck, Clock, AlertCircle } from 'lucide-react';
+import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays, CheckCircle2, Briefcase, ShieldCheck, Clock, AlertCircle, ExternalLink } from 'lucide-react';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useVendor } from '@/context/VendorContext';
 import { motion, Variants } from 'framer-motion';
@@ -504,6 +504,37 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
   return (
     <section className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 overflow-x-hidden">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="mb-4"
+      >
+        <button
+          onClick={() => window.open(props.storeLink, '_blank')}
+          className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-bold py-4 px-5 rounded-2xl shadow-sm hover:shadow-md transition-all flex items-center gap-4 group relative overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+
+          <div className="relative flex-shrink-0">
+            <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <Globe className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full animate-pulse" />
+          </div>
+
+          <div className="flex flex-col items-start text-left min-w-0">
+            <span className="text-base font-bold tracking-tight truncate w-full">View Storefront</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate w-full">See your shop live on the web</span>
+          </div>
+
+          <div className="ml-auto flex items-center gap-2 flex-shrink-0">
+            <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/50 transition-colors">
+              <ExternalLink className="w-5 h-5 text-slate-400 group-hover:text-indigo-500" />
+            </div>
+          </div>
+        </button>
+      </motion.div>
+
       <div className="mb-4 flex items-center gap-2">
         <button
           onClick={async () => {
