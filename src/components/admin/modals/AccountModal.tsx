@@ -5,7 +5,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/db';
 import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Briefcase, Loader2, Building2, User, MapPin, CreditCard, X, ChevronRight, Store } from 'lucide-react';
+import { Briefcase, Loader2, User, MapPin, CreditCard, Store, ChevronRight, X } from 'lucide-react';
 import { StoreMeta } from '@/types/store';
 
 interface AccountModalProps {
@@ -23,6 +23,7 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
 
   // Form State
   const [formData, setFormData] = useState<Partial<StoreMeta>>({});
+  const [initialData, setInitialData] = useState<Partial<StoreMeta>>({});
 
   useEffect(() => {
     if (!storeId || !isOpen) return;
@@ -33,7 +34,9 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
         const ref = doc(db, 'stores', storeId);
         const snap = await getDoc(ref);
         if (snap.exists() && mounted) {
-          setFormData(snap.data() as StoreMeta);
+          const data = snap.data() as StoreMeta;
+          setFormData(data);
+          setInitialData(data);
         }
       } catch (err) {
         console.error('Failed to load account info', err);
@@ -59,6 +62,7 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
       }, {} as any);
 
       await updateDoc(ref, dataToUpdate);
+      setInitialData(formData); // Update initial data after successful save
       toast.success('Account details saved successfully');
       handleClose();
     } catch (err) {
@@ -72,6 +76,9 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
   const updateField = (field: keyof StoreMeta, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
+
+  // Check if form is dirty (has changes)
+  const isDirty = JSON.stringify(formData) !== JSON.stringify(initialData);
 
   const modalVariants = { hidden: { opacity: 0, y: '100%' }, visible: { opacity: 1, y: 0 }, exit: { opacity: 0, y: '100%' } };
 
@@ -97,29 +104,44 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
             <aside className="w-full sm:w-64 bg-slate-50 dark:bg-slate-900/50 border-b sm:border-b-0 sm:border-r border-slate-200 dark:border-slate-800 flex-shrink-0 flex flex-col">
               <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
                 <div>
-                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">Settings</h2>
-                  <p className="text-xs text-slate-500">Manage store profile</p>
+                  <h2 className="text-lg font-bold text-slate-900 dark:text-white">Account Details</h2>
+                  <p className="text-xs text-slate-500">Manage Account Details</p>
                 </div>
-                <button onClick={handleClose} className="sm:hidden p-2 rounded-full hover:bg-slate-200 dark:hover:bg-slate-800 transition-colors">
-                  <X className="w-5 h-5" />
-                </button>
+                <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+                  <Briefcase className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                </div>
               </div>
 
               <nav className="flex-grow overflow-x-auto sm:overflow-y-auto flex sm:flex-col p-2 sm:p-4 gap-2 scrollbar-hide">
-                {sections.map(section => (
-                  <button
-                    key={section.id}
-                    onClick={() => setActiveSection(section.id)}
-                    className={`flex items-center gap-3 p-3 rounded-xl text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 sm:w-full ${activeSection === section.id
-                        ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700'
-                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200'
-                      }`}
-                  >
-                    <section.icon className={`w-5 h-5 ${activeSection === section.id ? 'text-indigo-500' : 'text-slate-400'}`} />
-                    {section.label}
-                    {activeSection === section.id && <ChevronRight className="w-4 h-4 ml-auto hidden sm:block opacity-50" />}
-                  </button>
-                ))}
+                {sections.map(section => {
+                  const isActive = activeSection === section.id;
+                  return (
+                    <button
+                      key={section.id}
+                      onClick={() => setActiveSection(section.id)}
+                      className={`flex items-center justify-center sm:justify-start gap-2 p-3 rounded-xl text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 sm:w-full ${isActive
+                          ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700'
+                          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200'
+                        }`}
+                    >
+                      <section.icon className={`w-5 h-5 ${isActive ? 'text-indigo-500' : 'text-slate-400'}`} />
+                      <AnimatePresence mode="wait">
+                        {isActive && (
+                          <motion.span
+                            initial={{ width: 0, opacity: 0 }}
+                            animate={{ width: 'auto', opacity: 1 }}
+                            exit={{ width: 0, opacity: 0 }}
+                            className="overflow-hidden whitespace-nowrap sm:hidden"
+                          >
+                            {section.label}
+                          </motion.span>
+                        )}
+                      </AnimatePresence>
+                      {/* Always show label on desktop sidebar */}
+                      <span className="hidden sm:inline-block">{section.label}</span>
+                    </button>
+                  );
+                })}
               </nav>
             </aside>
 
@@ -367,8 +389,8 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
                 </button>
                 <button
                   onClick={handleSave}
-                  disabled={loading || fetching}
-                  className="flex-[2] sm:flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+                  disabled={loading || fetching || !isDirty}
+                  className="flex-[2] sm:flex-1 bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-3.5 px-6 rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
                   {loading ? 'Saving...' : 'Save Changes'}
