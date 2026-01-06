@@ -49,6 +49,7 @@ const ManageCategoriesModal = dynamic(() => import('../../../components/admin/Ma
 const AdminOrdersModal = dynamic(() => import('../../../components/admin/modals/AdminOrdersModal').then(mod => mod.AdminOrdersModal), { ssr: false });
 const AmbassadorHubModal = dynamic(() => import('../../../components/admin/modals/AmbassadorHubModal').then(mod => mod.AmbassadorHubModal), { ssr: false });
 const PostsComposerModal = dynamic(() => import('../../../components/admin/modals/PostsComposerModal'), { ssr: false });
+const LogoutConfirmationModal = dynamic(() => import('../../../components/admin/modals/LogoutConfirmationModal'), { ssr: false });
 
 interface Referral {
   id: string;
@@ -140,6 +141,7 @@ export default function AdminStorePageClient({
   const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
   const [isPostsModalOpen, setIsPostsModalOpen] = useState(false);
   const [isAmbassadorHubModalOpen, setIsAmbassadorHubModalOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isPreviewLoading, setIsPreviewLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState<boolean | null>(
@@ -382,9 +384,13 @@ export default function AdminStorePageClient({
     return <OnboardingFlow onComplete={handleOnboardingComplete} storeName={storeMeta?.name || ''} />;
   }
 
-  const isModalOpen = isComposerOpen || isManageModalOpen || isManageCategoriesModalOpen || isOrdersModalOpen || isPostsModalOpen || isAmbassadorHubModalOpen || isHomeCardModalOpen;
+  const isModalOpen = isComposerOpen || isManageModalOpen || isManageCategoriesModalOpen || isOrdersModalOpen || isPostsModalOpen || isAmbassadorHubModalOpen || isHomeCardModalOpen || isLogoutModalOpen;
 
   const handleLogout = async () => {
+    setIsLogoutModalOpen(true);
+  };
+
+  const confirmLogout = async () => {
     setVendor(null);
     router.push(`/${storeId}`);
   };
@@ -554,6 +560,12 @@ export default function AdminStorePageClient({
         contacts={contacts}
         products={products}
         storeName={storeMeta?.name}
+      />
+
+      <LogoutConfirmationModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={confirmLogout}
       />
 
       <div className={`transition-opacity duration-500 ${uiVisible ? 'opacity-100' : 'opacity-0'}`}>
