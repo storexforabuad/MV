@@ -3,7 +3,7 @@
 
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { X, Copy, Share2 } from 'lucide-react';
+import { X, Copy, Share2, Sparkles } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 // It's good practice to have a dedicated component for icons.
