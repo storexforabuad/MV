@@ -384,11 +384,16 @@ export default function AdminStorePageClient({
 
   const isModalOpen = isComposerOpen || isManageModalOpen || isManageCategoriesModalOpen || isOrdersModalOpen || isPostsModalOpen || isAmbassadorHubModalOpen || isHomeCardModalOpen;
 
+  const handleLogout = async () => {
+    setVendor(null);
+    router.push(`/${storeId}`);
+  };
+
   return (
     <div className="min-h-screen bg-background pb-16 md:pb-0 transition-colors">
       {!isModalOpen && (
         <AdminHeader
-          onLogout={async () => { }}
+          onLogout={handleLogout}
           isRefreshing={false}
           storeMeta={storeMeta}
         />
