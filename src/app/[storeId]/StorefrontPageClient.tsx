@@ -26,6 +26,7 @@ import { useCustomer } from '@/context/CustomerContext';
 import { getMessaging, onMessage } from 'firebase/messaging';
 import { app } from '@/lib/firebase';
 import toast from 'react-hot-toast';
+import RamadanCountdown from '@/components/customer/RamadanCountdown';
 
 const ProductGrid = dynamic(
   () => import('../../components/products/ProductGrid'),
@@ -392,6 +393,8 @@ export default function StorefrontPageClient({
           storeName={storeName}
           onLoginClick={() => setIsLoginModalOpen(true)}
         />
+
+        <RamadanCountdown />
 
         {/* Store Closed Banner */}
         {storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false && (
