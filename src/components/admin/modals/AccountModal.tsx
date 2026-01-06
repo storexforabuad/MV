@@ -7,6 +7,7 @@ import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Briefcase, Loader2, User, MapPin, CreditCard, Store, ChevronRight, X } from 'lucide-react';
 import { StoreMeta } from '@/types/store';
+import { geography } from '../../../config/geography';
 
 interface AccountModalProps {
   isOpen: boolean;
@@ -77,6 +78,11 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newCountry = e.target.value;
+    setFormData(prev => ({ ...prev, country: newCountry, state: '' }));
+  };
+
   // Check if form is dirty (has changes)
   const isDirty = JSON.stringify(formData) !== JSON.stringify(initialData);
 
@@ -88,6 +94,8 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
     { id: 'address', label: 'Physical Address', icon: MapPin },
     { id: 'bank', label: 'Bank Account', icon: CreditCard },
   ];
+
+  const selectedCountry = geography.find(c => c.name === formData.country);
 
   return (
     <AnimatePresence>
@@ -120,8 +128,8 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
                       key={section.id}
                       onClick={() => setActiveSection(section.id)}
                       className={`flex items-center justify-center sm:justify-start gap-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 sm:w-full ${isActive
-                          ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 px-3 py-2 sm:p-3'
-                          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200 p-2 sm:p-3'
+                        ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 px-3 py-2 sm:p-3'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200 p-2 sm:p-3'
                         }`}
                     >
                       <section.icon className={`w-5 h-5 ${isActive ? 'text-indigo-500' : 'text-slate-400'}`} />
@@ -312,22 +320,27 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                               <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">State</label>
-                                <input
-                                  value={formData.state || ''}
-                                  onChange={e => updateField('state', e.target.value)}
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Country</label>
+                                <select
+                                  value={formData.country || ''}
+                                  onChange={handleCountryChange}
                                   className="w-full p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                                  placeholder="e.g. Abuja"
-                                />
+                                >
+                                  <option value="">Select your country</option>
+                                  {geography.map(c => <option key={c.name} value={c.name}>{c.flag} {c.name}</option>)}
+                                </select>
                               </div>
                               <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Country</label>
-                                <input
-                                  value={formData.country || ''}
-                                  onChange={e => updateField('country', e.target.value)}
-                                  className="w-full p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                                  placeholder="e.g. Nigeria"
-                                />
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">State</label>
+                                <select
+                                  value={formData.state || ''}
+                                  onChange={e => updateField('state', e.target.value)}
+                                  className="w-full p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                  disabled={!formData.country}
+                                >
+                                  <option value="">Select state/province</option>
+                                  {selectedCountry?.states.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
+                                </select>
                               </div>
                             </div>
                           </div>
