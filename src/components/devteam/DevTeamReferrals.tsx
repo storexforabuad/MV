@@ -7,6 +7,10 @@ import { ActivationModal } from './modals/ActivationModal';
 interface Referral {
   id: string;
   businessName: string;
+  businessNumber?: string;
+  businessCategory?: string;
+  businessLocation?: string;
+  referralNote?: string;
   status: 'pending' | 'activated';
   referrerStoreId: string; // ID of the store that made the referral
   refereeStoreId?: string; // ID of the new store created from the referral
@@ -70,11 +74,10 @@ const DevTeamReferrals: React.FC = () => {
   const TabButton = ({ tab, label }: { tab: 'pending' | 'activated', label: string }) => (
     <button
       onClick={() => setActiveTab(tab)}
-      className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${
-        activeTab === tab
+      className={`px-4 py-2 text-sm font-semibold rounded-md transition-colors ${activeTab === tab
           ? 'bg-orange-500 text-white'
           : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600'
-      }`}
+        }`}
     >
       {label}
     </button>
@@ -119,11 +122,11 @@ const DevTeamReferrals: React.FC = () => {
               </div>
               <div className="text-right flex-shrink-0 ml-4">
                 {ref.status === 'pending' ? (
-                  <button 
+                  <button
                     onClick={() => handleOpenModal(ref)}
                     className="px-4 py-2 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition-colors text-sm flex items-center shadow-md hover:shadow-lg"
                   >
-                    <CheckCircle className="w-4 h-4 mr-1.5"/>
+                    <CheckCircle className="w-4 h-4 mr-1.5" />
                     Activate
                   </button>
                 ) : (
@@ -138,11 +141,11 @@ const DevTeamReferrals: React.FC = () => {
       )}
 
       {selectedReferral && (
-        <ActivationModal 
-            isOpen={isModalOpen}
-            onClose={handleCloseModal}
-            referral={selectedReferral}
-            onActivationSuccess={handleActivationSuccess}
+        <ActivationModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          referral={selectedReferral}
+          onActivationSuccess={handleActivationSuccess}
         />
       )}
     </div>

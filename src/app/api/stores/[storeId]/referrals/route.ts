@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, getDocs, Timestamp } from 'firebase/firestore';
+import { collection, addDoc, getDocs, Timestamp, query, orderBy } from 'firebase/firestore';
 
 // POST new referral for a store
 export async function POST(
-  req: NextRequest, 
+  req: NextRequest,
   context: { params: Promise<{ storeId: string }> }
 ) {
   const { storeId } = await context.params;
@@ -13,7 +13,7 @@ export async function POST(
   }
 
   try {
-    const { businessName, businessNumber } = await req.json();
+    const { businessName, businessNumber, businessCategory, businessLocation, referralNote } = await req.json();
 
     if (!businessName || !businessNumber) {
       return NextResponse.json({ error: 'Business name and number are required' }, { status: 400 });
@@ -22,6 +22,10 @@ export async function POST(
     const referralData = {
       businessName,
       businessNumber,
+      businessCategory: businessCategory || '',
+      businessLocation: businessLocation || '',
+      referralNote: referralNote || '',
+      status: 'pending',
       createdAt: Timestamp.now(),
     };
 
@@ -37,7 +41,7 @@ export async function POST(
 
 // GET all referrals for a store
 export async function GET(
-  req: NextRequest, 
+  req: NextRequest,
   context: { params: Promise<{ storeId: string }> }
 ) {
   const { storeId } = await context.params;
@@ -47,7 +51,8 @@ export async function GET(
 
   try {
     const referralsCollectionRef = collection(db, 'stores', storeId, 'referrals');
-    const querySnapshot = await getDocs(referralsCollectionRef);
+    const q = query(referralsCollectionRef, orderBy('createdAt', 'desc'));
+    const querySnapshot = await getDocs(q);
 
     const referrals = querySnapshot.docs.map(doc => {
       const data = doc.data();
@@ -59,6 +64,11 @@ export async function GET(
         id: doc.id,
         businessName: data.businessName,
         businessNumber: data.businessNumber,
+        businessCategory: data.businessCategory || '',
+        businessLocation: data.businessLocation || '',
+        referralNote: data.referralNote || '',
+        status: data.status || 'pending',
+        refereeStoreId: data.refereeStoreId || null,
         createdAt: createdAt,
       };
     });

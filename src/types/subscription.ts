@@ -124,8 +124,10 @@ export interface PaystackWebhookEvent {
 
 // Subscription constants
 export const SUBSCRIPTION_CONFIG = {
+    ORIGINAL_MONTHLY_AMOUNT: 10000, // ₦10,000
     MONTHLY_AMOUNT: 5000, // ₦5,000
     MONTHLY_AMOUNT_KOBO: 500000, // 5000 * 100 kobo
+    DISCOUNT_PERCENTAGE: 50,
     TRIAL_DAYS: 14,
     GRACE_PERIOD_DAYS: 2,
     CURRENCY: 'NGN',

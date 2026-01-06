@@ -817,6 +817,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           storeId={storeId}
           ceoEmail={props.ceoEmail}
           storeName={props.storeName}
+          onOpenAmbassadorHub={onAmbassadorCardClick}
         />
       )}
 

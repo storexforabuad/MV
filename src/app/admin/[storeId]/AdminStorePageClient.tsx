@@ -54,6 +54,9 @@ interface Referral {
   id: string;
   businessName: string;
   businessNumber: string;
+  businessCategory?: string;
+  businessLocation?: string;
+  referralNote?: string;
 }
 
 interface CommissionAnalyticsData {
@@ -388,18 +391,6 @@ export default function AdminStorePageClient({
           onLogout={async () => { }}
           isRefreshing={false}
           storeMeta={storeMeta}
-          onToggleStoreStatus={async (isOpen: boolean) => {
-            if (!storeMeta) return;
-            try {
-              const { updateStore } = await import('../../../lib/db');
-              await updateStore(storeId, { isOpen });
-              setStoreMeta({ ...storeMeta, isOpen });
-              const { toast } = await import('react-hot-toast');
-              toast.success(isOpen ? 'Store is now OPEN' : 'Store is now CLOSED');
-            } catch (error) {
-              console.error("Failed to update store status:", error);
-            }
-          }}
         />
       )}
 

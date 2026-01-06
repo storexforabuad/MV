@@ -8,6 +8,10 @@ interface Referral {
   id: string;
   status: 'pending' | 'activated';
   businessName: string;
+  businessNumber?: string;
+  businessCategory?: string;
+  businessLocation?: string;
+  referralNote?: string;
   referrerStoreId: string; // The ID of the store that made the referral
   refereeStoreId?: string;
   activatedAt?: Date;
@@ -36,6 +40,10 @@ export async function GET() {
           referrerStoreId: referrerStoreId,
           status: data.status || 'pending',
           businessName: data.businessName,
+          businessNumber: data.businessNumber,
+          businessCategory: data.businessCategory,
+          businessLocation: data.businessLocation,
+          referralNote: data.referralNote,
           refereeStoreId: data.refereeStoreId,
           // Convert Firestore Timestamps to JS Date objects for the API response
           activatedAt: data.activatedAt?.toDate(),
@@ -63,5 +71,5 @@ export async function GET() {
 
 // To prevent other methods from being used
 export async function POST() {
-    return NextResponse.json({ message: 'Method Not Allowed' }, { status: 405 });
+  return NextResponse.json({ message: 'Method Not Allowed' }, { status: 405 });
 }

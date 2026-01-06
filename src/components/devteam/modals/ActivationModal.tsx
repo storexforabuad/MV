@@ -8,6 +8,10 @@ interface ActivationModalProps {
   referral: {
     id: string;
     businessName: string;
+    businessNumber?: string;
+    businessCategory?: string;
+    businessLocation?: string;
+    referralNote?: string;
     referrerStoreId: string; // Correct property for the referrer's store ID
   };
   onActivationSuccess: () => void;
@@ -60,8 +64,8 @@ export const ActivationModal: FC<ActivationModalProps> = ({ isOpen, onClose, ref
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={onClose}>
-      <div 
-        className="relative w-full max-w-lg mx-4 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-8" 
+      <div
+        className="relative w-full max-w-lg mx-4 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 p-8"
         onClick={e => e.stopPropagation()}
       >
         <button
@@ -74,7 +78,35 @@ export const ActivationModal: FC<ActivationModalProps> = ({ isOpen, onClose, ref
 
         <h2 className="text-2xl font-bold text-slate-800 dark:text-white">Activate Referral</h2>
         <p className="text-slate-500 dark:text-slate-400 mt-2">Activate the referral for <span className="font-semibold text-slate-600 dark:text-slate-300">{referral.businessName}</span>.</p>
-        
+
+        {/* Business Details Section */}
+        <div className="mt-6 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 space-y-3">
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <p className="text-slate-500 dark:text-slate-400">Category</p>
+              <p className="font-semibold text-slate-700 dark:text-slate-200">{referral.businessCategory || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-slate-500 dark:text-slate-400">Location</p>
+              <p className="font-semibold text-slate-700 dark:text-slate-200">{referral.businessLocation || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-slate-500 dark:text-slate-400">Phone</p>
+              <p className="font-semibold text-slate-700 dark:text-slate-200">{referral.businessNumber || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="text-slate-500 dark:text-slate-400">Referrer</p>
+              <p className="font-mono text-xs bg-slate-200 dark:bg-slate-700 px-1.5 py-0.5 rounded inline-block">{referral.referrerStoreId}</p>
+            </div>
+          </div>
+          {referral.referralNote && (
+            <div className="pt-2 border-t border-slate-200 dark:border-slate-700">
+              <p className="text-slate-500 dark:text-slate-400 text-xs mb-1">Referral Note</p>
+              <p className="text-sm text-slate-600 dark:text-slate-300 italic">"{referral.referralNote}"</p>
+            </div>
+          )}
+        </div>
+
         <form onSubmit={handleSubmit} className="mt-6">
           <div>
             <label htmlFor="newRefereeStoreId" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
@@ -99,7 +131,7 @@ export const ActivationModal: FC<ActivationModalProps> = ({ isOpen, onClose, ref
               disabled={isSubmitting}
               className="w-full flex justify-center items-center px-6 py-3 rounded-lg bg-orange-500 text-white font-bold text-base transition-all duration-200 hover:bg-orange-600 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {isSubmitting && <Loader2 className="mr-2 h-5 w-5 animate-spin" />} 
+              {isSubmitting && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
               {isSubmitting ? 'Activating...' : 'Confirm & Activate'}
             </button>
           </div>

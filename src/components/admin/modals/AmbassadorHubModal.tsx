@@ -12,9 +12,24 @@ import ViewsBreakdown from '@/components/common/ViewsBreakdown';
 const ReferBusinessForm = ({ storeId, onReferralAdded }: { storeId: string; onReferralAdded: () => void; }) => {
   const [businessName, setBusinessName] = useState('');
   const [businessNumber, setBusinessNumber] = useState('');
+  const [businessCategory, setBusinessCategory] = useState('');
+  const [businessLocation, setBusinessLocation] = useState('');
+  const [referralNote, setReferralNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  const categories = [
+    'Fashion',
+    'Electronics',
+    'Food & Drinks',
+    'Beauty & Personal Care',
+    'Home & Living',
+    'Services',
+    'Automotive',
+    'Livestock',
+    'Others'
+  ];
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -31,7 +46,13 @@ const ReferBusinessForm = ({ storeId, onReferralAdded }: { storeId: string; onRe
       const response = await fetch(`/api/stores/${storeId}/referrals`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ businessName, businessNumber }),
+        body: JSON.stringify({
+          businessName,
+          businessNumber,
+          businessCategory,
+          businessLocation,
+          referralNote
+        }),
       });
 
       if (!response.ok) {
@@ -41,6 +62,9 @@ const ReferBusinessForm = ({ storeId, onReferralAdded }: { storeId: string; onRe
 
       setBusinessName('');
       setBusinessNumber('');
+      setBusinessCategory('');
+      setBusinessLocation('');
+      setReferralNote('');
       onReferralAdded();
       setSuccessMessage('Referral submitted successfully! Thank you.');
       setTimeout(() => setSuccessMessage(null), 4000);
@@ -55,7 +79,7 @@ const ReferBusinessForm = ({ storeId, onReferralAdded }: { storeId: string; onRe
   return (
     <div className="max-w-xl mx-auto bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-lg border border-slate-200 dark:border-slate-700">
       <h3 className="text-2xl font-bold text-center text-slate-800 dark:text-white">Refer a Business</h3>
-      <p className="text-sm text-center text-slate-500 dark:text-slate-400 mt-2 mb-6">Know a great business? Refer them to Bizcon and earn rewards when they succeed.</p>
+      <p className="text-sm text-center text-slate-500 dark:text-slate-400 mt-2 mb-6">Know a great business? Refer them to Bizpro and help them grow while securing your 50% discount.</p>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -65,6 +89,21 @@ const ReferBusinessForm = ({ storeId, onReferralAdded }: { storeId: string; onRe
         <div>
           <label htmlFor="businessNumber" className="text-sm font-medium text-slate-700 dark:text-slate-300">Business Number</label>
           <input id="businessNumber" type="text" value={businessNumber} onChange={(e) => setBusinessNumber(e.target.value)} placeholder="e.g., 08012345678" className="mt-1 w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition" disabled={isSubmitting} />
+        </div>
+        <div>
+          <label htmlFor="businessCategory" className="text-sm font-medium text-slate-700 dark:text-slate-300">Business Category</label>
+          <select id="businessCategory" value={businessCategory} onChange={(e) => setBusinessCategory(e.target.value)} className="mt-1 w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition" disabled={isSubmitting}>
+            <option value="">Select a category</option>
+            {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="businessLocation" className="text-sm font-medium text-slate-700 dark:text-slate-300">Business Location</label>
+          <input id="businessLocation" type="text" value={businessLocation} onChange={(e) => setBusinessLocation(e.target.value)} placeholder="e.g., Lagos, Nigeria" className="mt-1 w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition" disabled={isSubmitting} />
+        </div>
+        <div>
+          <label htmlFor="referralNote" className="text-sm font-medium text-slate-700 dark:text-slate-300">Referral Note (Optional)</label>
+          <textarea id="referralNote" value={referralNote} onChange={(e) => setReferralNote(e.target.value)} placeholder="Tell us more about this business..." className="mt-1 w-full px-4 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 bg-white dark:bg-slate-900 text-slate-900 dark:text-white transition min-h-[100px]" disabled={isSubmitting} />
         </div>
         <button type="submit" disabled={isSubmitting} className="w-full flex justify-center items-center px-4 py-3 rounded-lg bg-orange-500 text-white font-bold transition-all duration-200 hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed">
           {isSubmitting && <Loader2 className="mr-2 h-5 w-5 animate-spin" />}
@@ -81,6 +120,10 @@ interface Referral {
   id: string;
   status: 'pending' | 'activated';
   businessName: string;
+  businessNumber?: string;
+  businessCategory?: string;
+  businessLocation?: string;
+  referralNote?: string;
   refereeStoreId?: string;
   activatedAt?: Timestamp;
   createdAt?: Timestamp;
@@ -128,6 +171,13 @@ const DashboardContent = ({ storeId, onReferralAdded, onViewDetailsClick }: { st
 
   return (
     <div className="space-y-6">
+      <div className="bg-orange-500/10 dark:bg-orange-500/20 p-6 rounded-2xl border border-orange-200 dark:border-orange-800/50">
+        <h3 className="text-lg font-bold text-orange-700 dark:text-orange-400 mb-2">Ongoing 50% Discount</h3>
+        <p className="text-sm text-slate-600 dark:text-slate-300">
+          As a Bizpro Ambassador, you enjoy a 50% discount on your monthly subscription.
+          Refer new businesses to keep this benefit active and help our community grow!
+        </p>
+      </div>
       <AmbassadorProgressBar
         ambassadorTier={storeData.ambassadorTier}
         activeReferrals={storeData.activeReferrals}
@@ -214,7 +264,7 @@ export const AmbassadorHubModal: FC<AmbassadorHubModalProps> = ({ isOpen, onClos
               <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
                 Ambassador Hub
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Grow your network</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Secure your 50% subscription discount</p>
             </div>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg">
               <Trophy className="w-6 h-6 text-white" />
