@@ -83,14 +83,14 @@ export default function RamadanCountdown() {
                     <div className="space-y-1">
                         <div className="flex items-center justify-center gap-2 mb-1">
                             <div className="h-[1px] w-8 bg-amber-400/30" />
-                            <span className="text-[10px] sm:text-xs font-black text-amber-400 uppercase tracking-[0.3em]">Upcoming Event</span>
+                            <span className="text-[10px] sm:text-xs font-black text-amber-400 uppercase tracking-[0.3em]">The Holy Month</span>
                             <div className="h-[1px] w-8 bg-amber-400/30" />
                         </div>
                         <h3 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-tight">
-                            Ramadan Trade Fair <span className="text-amber-400">2026</span>
+                            RAMADAN  <span className="text-amber-400">2026.</span>
                         </h3>
                         <p className="text-[11px] sm:text-sm text-indigo-100/70 font-medium tracking-wide max-w-[280px] sm:max-w-md mx-auto">
-                            Fashion & Food Pop-up • Networking • Special Fairs
+                            A Month of Blessing, Reflection, and Community
                         </p>
                     </div>
 
