@@ -112,16 +112,16 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
                 </div>
               </div>
 
-              <nav className="flex-grow overflow-x-auto sm:overflow-y-auto flex sm:flex-col p-2 sm:p-4 gap-2 scrollbar-hide">
+              <nav className="flex-grow overflow-x-auto sm:overflow-y-auto flex sm:flex-col p-2 sm:p-4 gap-1 sm:gap-2 scrollbar-hide">
                 {sections.map(section => {
                   const isActive = activeSection === section.id;
                   return (
                     <button
                       key={section.id}
                       onClick={() => setActiveSection(section.id)}
-                      className={`flex items-center justify-center sm:justify-start gap-2 p-3 rounded-xl text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 sm:w-full ${isActive
-                          ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700'
-                          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200'
+                      className={`flex items-center justify-center sm:justify-start gap-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 sm:w-full ${isActive
+                          ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 px-3 py-2 sm:p-3'
+                          : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200 p-2 sm:p-3'
                         }`}
                     >
                       <section.icon className={`w-5 h-5 ${isActive ? 'text-indigo-500' : 'text-slate-400'}`} />
