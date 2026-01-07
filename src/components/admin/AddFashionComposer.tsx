@@ -21,7 +21,9 @@ import {
     ImagePlus,
     Loader2,
     AlertCircle,
-    Scissors
+    Scissors,
+    Ruler,
+    Info
 } from 'lucide-react';
 
 // --- TYPES ---
@@ -133,6 +135,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
     });
 
     const [isCategorySelectorOpen, setCategorySelectorOpen] = useState(false);
+    const [isSizeGuideOpen, setSizeGuideOpen] = useState(false);
     const [uploadProgress, setUploadProgress] = useState<UploadProgress[]>([]);
     const [isUploading, setIsUploading] = useState(false);
     const [activeColorId, setActiveColorId] = useState<string | null>(null);
@@ -146,6 +149,13 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
         }
         return () => { document.body.style.overflow = 'auto'; };
     }, [isOpen]);
+
+    // Initialize first color if none exists when entering step 1
+    useEffect(() => {
+        if (currentStep === 1 && productData.colors.length === 0) {
+            addColor();
+        }
+    }, [currentStep]);
 
     const resetState = () => {
         setCurrentStep(0);
@@ -194,11 +204,13 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
     };
 
     const removeColor = (id: string) => {
-        setProductData(prev => ({
-            ...prev,
-            colors: prev.colors.filter(c => c.id !== id)
-        }));
-        if (activeColorId === id) setActiveColorId(null);
+        const newColors = productData.colors.filter(c => c.id !== id);
+        setProductData(prev => ({ ...prev, colors: newColors }));
+
+        // If we removed the active color, switch to another one or null
+        if (activeColorId === id) {
+            setActiveColorId(newColors.length > 0 ? newColors[0].id : null);
+        }
     };
 
     const handleColorImageUpload = (e: ChangeEvent<HTMLInputElement>, colorId: string) => {
@@ -345,112 +357,150 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                 );
 
             case 1: // Variants (Colors & Sizes)
+                const activeColor = productData.colors.find(c => c.id === activeColorId);
+
                 return (
                     <MotionDiv key={1} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
 
-                        {/* COLORS SECTION */}
+                        {/* COLORS TABS */}
                         <div className="space-y-4">
                             <div className="flex justify-between items-center">
                                 <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
                                     <div className="w-8 h-8 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
                                         <div className="w-4 h-4 rounded-full bg-pink-500"></div>
                                     </div>
-                                    Colors & Images
+                                    Colors
                                 </h3>
-                                <button onClick={addColor} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-semibold hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors">
-                                    <Plus className="w-4 h-4" /> Add Color
+                            </div>
+
+                            {/* Tab List */}
+                            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                                {productData.colors.map((color) => (
+                                    <button
+                                        key={color.id}
+                                        onClick={() => setActiveColorId(color.id)}
+                                        className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-full border transition-all ${activeColorId === color.id
+                                                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white shadow-md'
+                                                : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+                                            }`}
+                                    >
+                                        <div className="w-4 h-4 rounded-full border border-white/20" style={{ backgroundColor: color.hex }}></div>
+                                        <span className="text-sm font-medium whitespace-nowrap max-w-[80px] truncate">{color.name || 'New Color'}</span>
+                                    </button>
+                                ))}
+                                <button
+                                    onClick={addColor}
+                                    className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800 hover:bg-blue-100 transition-colors"
+                                >
+                                    <Plus className="w-5 h-5" />
                                 </button>
                             </div>
 
-                            <div className="space-y-4">
-                                {productData.colors.map((color, index) => (
-                                    <div key={color.id} className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
-                                        <div className="flex justify-between items-start mb-4">
-                                            <div className="flex-1 space-y-3">
+                            {/* Active Color Editor */}
+                            <AnimatePresence mode="wait">
+                                {activeColor ? (
+                                    <motion.div
+                                        key={activeColor.id}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700"
+                                    >
+                                        <div className="flex justify-between items-start mb-6">
+                                            <div className="flex-1 space-y-4">
                                                 <div className="flex gap-3 items-center">
-                                                    <div className="w-10 h-10 rounded-full border-2 border-white dark:border-slate-600 shadow-sm" style={{ backgroundColor: color.hex }}></div>
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Color Name (e.g. Royal Blue)"
-                                                        value={color.name}
-                                                        onChange={(e) => updateColor(color.id, 'name', e.target.value)}
-                                                        className="bg-transparent border-b border-slate-300 dark:border-slate-600 focus:border-blue-600 outline-none text-slate-900 dark:text-slate-100 font-medium w-full pb-1"
-                                                    />
+                                                    <div className="w-12 h-12 rounded-full border-4 border-white dark:border-slate-600 shadow-sm flex-shrink-0 transition-colors duration-300" style={{ backgroundColor: activeColor.hex }}></div>
+                                                    <div className="flex-1">
+                                                        <label className="text-xs text-slate-500 font-medium ml-1">Color Name</label>
+                                                        <input
+                                                            type="text"
+                                                            placeholder="e.g. Royal Blue"
+                                                            value={activeColor.name}
+                                                            onChange={(e) => updateColor(activeColor.id, 'name', e.target.value)}
+                                                            className="bg-transparent border-b border-slate-300 dark:border-slate-600 focus:border-blue-600 outline-none text-slate-900 dark:text-slate-100 font-semibold text-lg w-full pb-1"
+                                                        />
+                                                    </div>
                                                 </div>
 
-                                                {/* Preset Colors */}
+                                                {/* Compact Palette */}
                                                 <div className="flex flex-wrap gap-2">
                                                     {PRESET_COLORS.map(preset => (
                                                         <button
                                                             key={preset.hex}
                                                             onClick={() => {
-                                                                updateColor(color.id, 'hex', preset.hex);
-                                                                if (!color.name) updateColor(color.id, 'name', preset.name);
+                                                                updateColor(activeColor.id, 'hex', preset.hex);
+                                                                updateColor(activeColor.id, 'name', preset.name);
                                                             }}
-                                                            className="w-6 h-6 rounded-full border border-slate-200 dark:border-slate-600 hover:scale-110 transition-transform shadow-sm"
+                                                            className={`w-8 h-8 rounded-full border-2 transition-transform ${activeColor.hex === preset.hex ? 'border-blue-500 scale-110' : 'border-transparent hover:scale-105'}`}
                                                             style={{ backgroundColor: preset.hex }}
                                                             title={preset.name}
                                                         />
                                                     ))}
-                                                    <div className="relative w-6 h-6 rounded-full overflow-hidden border border-slate-200 dark:border-slate-600">
+                                                    <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-600">
                                                         <input
                                                             type="color"
-                                                            value={color.hex}
-                                                            onChange={(e) => updateColor(color.id, 'hex', e.target.value)}
-                                                            className="absolute -top-2 -left-2 w-10 h-10 p-0 border-0 cursor-pointer"
+                                                            value={activeColor.hex}
+                                                            onChange={(e) => updateColor(activeColor.id, 'hex', e.target.value)}
+                                                            className="absolute -top-2 -left-2 w-12 h-12 p-0 border-0 cursor-pointer"
                                                         />
                                                     </div>
                                                 </div>
                                             </div>
-                                            <button onClick={() => removeColor(color.id)} className="text-slate-400 hover:text-red-500 p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors">
-                                                <Trash2 className="w-5 h-5" />
-                                            </button>
+                                            {productData.colors.length > 1 && (
+                                                <button onClick={() => removeColor(activeColor.id)} className="text-slate-400 hover:text-red-500 p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors">
+                                                    <Trash2 className="w-5 h-5" />
+                                                </button>
+                                            )}
                                         </div>
 
-                                        {/* Image Upload for this Color */}
-                                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                                            {color.images.map((file, imgIdx) => (
-                                                <div key={imgIdx} className="relative aspect-[3/4] rounded-lg overflow-hidden group shadow-sm">
-                                                    <Image src={URL.createObjectURL(file)} alt="Preview" fill className="object-cover" />
-                                                    <button
-                                                        onClick={() => removeColorImage(color.id, imgIdx)}
-                                                        className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
-                                                    >
-                                                        <X className="w-3 h-3" />
-                                                    </button>
-                                                </div>
-                                            ))}
-                                            <label className="aspect-[3/4] flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors group">
-                                                <ImagePlus className="w-6 h-6 text-slate-400 group-hover:text-blue-500 transition-colors" />
-                                                <span className="text-xs text-slate-500 mt-2 font-medium">Add Image</span>
-                                                <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleColorImageUpload(e, color.id)} />
-                                            </label>
+                                        {/* Image Upload for Active Color */}
+                                        <div>
+                                            <label className="text-xs text-slate-500 font-medium mb-2 block">Images for {activeColor.name || 'this color'}</label>
+                                            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                                                {activeColor.images.map((file, imgIdx) => (
+                                                    <div key={imgIdx} className="relative aspect-[3/4] rounded-lg overflow-hidden group shadow-sm bg-slate-200 dark:bg-slate-700">
+                                                        <Image src={URL.createObjectURL(file)} alt="Preview" fill className="object-cover" />
+                                                        <button
+                                                            onClick={() => removeColorImage(activeColor.id, imgIdx)}
+                                                            className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
+                                                        >
+                                                            <X className="w-3 h-3" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                                <label className="aspect-[3/4] flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors group bg-white dark:bg-slate-900">
+                                                    <ImagePlus className="w-6 h-6 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                                                    <span className="text-xs text-slate-500 mt-2 font-medium">Add</span>
+                                                    <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleColorImageUpload(e, activeColor.id)} />
+                                                </label>
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
-                                {productData.colors.length === 0 && (
-                                    <div className="text-center py-12 px-4 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700">
-                                        <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
-                                            <Shirt className="w-6 h-6 text-slate-400" />
-                                        </div>
-                                        <p className="text-slate-600 dark:text-slate-400 font-medium">No colors added yet</p>
-                                        <p className="text-sm text-slate-500 dark:text-slate-500 mb-4">Add a color variant to start uploading images</p>
-                                        <button onClick={addColor} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors">
-                                            <Plus className="w-4 h-4" /> Add First Color
-                                        </button>
+                                    </motion.div>
+                                ) : (
+                                    <div className="text-center py-12 text-slate-500">
+                                        Select a color to edit or add a new one.
                                     </div>
                                 )}
-                            </div>
+                            </AnimatePresence>
                         </div>
 
                         {/* SIZES SECTION */}
                         <div className="space-y-4 pt-6 border-t border-slate-200 dark:border-slate-700">
-                            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                                    <Scissors className="w-4 h-4 text-purple-500" />
-                                </div>
-                                Available Sizes
-                            </h3>
+                            <div className="flex justify-between items-center">
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                                        <Scissors className="w-4 h-4 text-purple-500" />
+                                    </div>
+                                    Sizes
+                                </h3>
+                                <button
+                                    onClick={() => setSizeGuideOpen(true)}
+                                    className="text-xs font-medium text-blue-600 dark:text-blue-400 flex items-center gap-1 hover:underline"
+                                >
+                                    <Ruler className="w-3 h-3" /> Size Guide
+                                </button>
+                            </div>
+
                             <div className="flex flex-wrap gap-2">
                                 {NIGERIAN_SIZE_CHART.map((sizeItem) => {
                                     const isSelected = productData.sizes.includes(sizeItem.size);
@@ -623,9 +673,6 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                     {/* --- Header --- */}
                     <header className="flex-shrink-0 flex items-center justify-between w-full max-w-5xl mx-auto p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg z-10 sticky top-0">
                         <div className="flex items-center gap-4">
-                            <button onClick={handleClose} className="p-2 -ml-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                                <X className="w-6 h-6 text-slate-500 dark:text-slate-400" />
-                            </button>
                             <div>
                                 <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">
                                     {currentStep === 4 ? 'Uploading...' : currentStep === 5 ? 'Success' : 'Add Fashion Product'}
@@ -664,13 +711,13 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                         <div className="absolute bottom-full left-0 right-0 h-12 bg-gradient-to-t from-white dark:from-slate-950 to-transparent pointer-events-none" />
                         <div className="max-w-5xl mx-auto flex gap-4">
                             {currentStep === 0 && (
-                                <button onClick={handleClose} className="w-full py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-semibold hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
+                                <button onClick={handleClose} className="flex-1 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-semibold hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
                                     Cancel
                                 </button>
                             )}
 
                             {currentStep > 0 && currentStep < 4 && (
-                                <button onClick={() => setCurrentStep(s => s - 1)} className="px-6 py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-2">
+                                <button onClick={() => setCurrentStep(s => s - 1)} className="flex-1 py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-2">
                                     <ChevronLeft className="w-5 h-5" /> Back
                                 </button>
                             )}
@@ -711,6 +758,48 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                         }}
                         onAddCategory={onAddCategory}
                     />
+
+                    {/* Size Guide Modal */}
+                    <AnimatePresence>
+                        {isSizeGuideOpen && (
+                            <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                                <motion.div
+                                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                                    className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+                                    onClick={() => setSizeGuideOpen(false)}
+                                />
+                                <motion.div
+                                    initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+                                    className="relative bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-sm shadow-2xl"
+                                >
+                                    <div className="flex justify-between items-center mb-4">
+                                        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Size Guide (UK/NG)</h3>
+                                        <button onClick={() => setSizeGuideOpen(false)} className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+                                            <X className="w-5 h-5 text-slate-500" />
+                                        </button>
+                                    </div>
+                                    <div className="space-y-3">
+                                        <div className="grid grid-cols-3 gap-2 text-sm font-medium text-slate-500 border-b border-slate-200 dark:border-slate-700 pb-2">
+                                            <span>Size</span>
+                                            <span>Bust</span>
+                                            <span>Waist</span>
+                                        </div>
+                                        {NIGERIAN_SIZE_CHART.map((item) => (
+                                            <div key={item.size} className="grid grid-cols-3 gap-2 text-sm text-slate-900 dark:text-slate-100">
+                                                <span className="font-bold">UK {item.size}</span>
+                                                <span>{item.bust}"</span>
+                                                <span>{item.waist}"</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="mt-6 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-xs text-blue-700 dark:text-blue-300 flex gap-2">
+                                        <Info className="w-4 h-4 flex-shrink-0" />
+                                        <p>Measurements are in inches. This is a standard guide, actual fit may vary by style.</p>
+                                    </div>
+                                </motion.div>
+                            </div>
+                        )}
+                    </AnimatePresence>
                 </motion.div>
             )}
         </AnimatePresence>
