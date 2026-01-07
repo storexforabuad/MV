@@ -14,7 +14,7 @@ export function shouldUsePaymentFlow(storeType: string | undefined): boolean {
   if (!storeType) return false;
 
   // Store types that use the new payment flow
-  const paymentFlowStoreTypes = ['restaurant', 'general'];
+  const paymentFlowStoreTypes = ['general'];
 
   return paymentFlowStoreTypes.includes(storeType);
 }
