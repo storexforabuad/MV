@@ -523,6 +523,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           type="button"
                           className="w-full bg-[#25D366] hover:bg-[#20bd5b] text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-green-500/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50"
                           onClick={() => {
+                            if (!storeMeta) return;
                             const encodedMessage = encodeURIComponent(whatsappMessage);
                             const whatsappUrl = `https://wa.me/${formatWhatsAppNumber(storeMeta.whatsapp)}?text=${encodedMessage}`;
                             window.open(whatsappUrl, '_blank');
