@@ -214,12 +214,14 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
     };
 
     const handleColorImageUpload = (e: ChangeEvent<HTMLInputElement>, colorId: string) => {
-        if (e.target.files) {
-            const newFiles = Array.from(e.target.files);
+        if (e.target.files && e.target.files[0]) {
+            const newFile = e.target.files[0];
             setProductData(prev => ({
                 ...prev,
-                colors: prev.colors.map(c => c.id === colorId ? { ...c, images: [...c.images, ...newFiles] } : c)
+                colors: prev.colors.map(c => c.id === colorId ? { ...c, images: [newFile] } : c)
             }));
+            // Reset input value to allow re-selecting the same file if needed
+            e.target.value = '';
         }
     };
 
@@ -380,8 +382,8 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                         key={color.id}
                                         onClick={() => setActiveColorId(color.id)}
                                         className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-full border transition-all ${activeColorId === color.id
-                                                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white shadow-md'
-                                                : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+                                            ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white shadow-md'
+                                            : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
                                             }`}
                                     >
                                         <div className="w-4 h-4 rounded-full border border-white/20" style={{ backgroundColor: color.hex }}></div>
@@ -455,24 +457,30 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
 
                                         {/* Image Upload for Active Color */}
                                         <div>
-                                            <label className="text-xs text-slate-500 font-medium mb-2 block">Images for {activeColor.name || 'this color'}</label>
-                                            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                                                {activeColor.images.map((file, imgIdx) => (
-                                                    <div key={imgIdx} className="relative aspect-[3/4] rounded-lg overflow-hidden group shadow-sm bg-slate-200 dark:bg-slate-700">
-                                                        <Image src={URL.createObjectURL(file)} alt="Preview" fill className="object-cover" />
+                                            <label className="text-xs text-slate-500 font-medium mb-2 block">Image for {activeColor.name || 'this color'}</label>
+                                            <div className="flex gap-3">
+                                                {activeColor.images.length > 0 ? (
+                                                    <div className="relative aspect-[3/4] w-32 rounded-lg overflow-hidden group shadow-sm bg-slate-200 dark:bg-slate-700">
+                                                        <Image src={URL.createObjectURL(activeColor.images[0])} alt="Preview" fill className="object-cover" />
                                                         <button
-                                                            onClick={() => removeColorImage(activeColor.id, imgIdx)}
-                                                            className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
+                                                            onClick={() => removeColorImage(activeColor.id, 0)}
+                                                            className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm z-10"
                                                         >
                                                             <X className="w-3 h-3" />
                                                         </button>
+                                                        <label className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                                                            <ImagePlus className="w-5 h-5 text-white mb-1" />
+                                                            <span className="text-[10px] text-white font-bold uppercase tracking-wider">Change</span>
+                                                            <input type="file" accept="image/*" className="hidden" onChange={(e) => handleColorImageUpload(e, activeColor.id)} />
+                                                        </label>
                                                     </div>
-                                                ))}
-                                                <label className="aspect-[3/4] flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors group bg-white dark:bg-slate-900">
-                                                    <ImagePlus className="w-6 h-6 text-slate-400 group-hover:text-blue-500 transition-colors" />
-                                                    <span className="text-xs text-slate-500 mt-2 font-medium">Add</span>
-                                                    <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleColorImageUpload(e, activeColor.id)} />
-                                                </label>
+                                                ) : (
+                                                    <label className="aspect-[3/4] w-32 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors group bg-white dark:bg-slate-900">
+                                                        <ImagePlus className="w-6 h-6 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                                                        <span className="text-xs text-slate-500 mt-2 font-medium">Add Image</span>
+                                                        <input type="file" accept="image/*" className="hidden" onChange={(e) => handleColorImageUpload(e, activeColor.id)} />
+                                                    </label>
+                                                )}
                                             </div>
                                         </div>
                                     </motion.div>

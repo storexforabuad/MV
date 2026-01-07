@@ -132,6 +132,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
   }, [product, state.items, selectedSize, selectedColor, productIsFashion]);
 
   const handleColorSelect = (color: FashionProduct['colors'][0]) => {
+    if (selectedColor?.name === color.name) return; // Don't reload if same color
     setSelectedColor(color);
     setSelectedImage(0); // Reset to first image of the new color
     setImageLoading(true);
@@ -262,7 +263,16 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                   <div className="w-full h-full bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 animate-shimmer bg-[length:200%_100%]" />
                 </div>
               )}
-              <Image src={currentImages[selectedImage] || '/public/default_product_1200x1200.png'} alt={product.name} width={600} height={600} className={`w-full h-auto object-contain transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`} priority onLoadingComplete={() => setImageLoading(false)} />
+              <Image
+                key={`${currentImages[selectedImage]}-${selectedImage}`}
+                src={currentImages[selectedImage] || '/public/default_product_1200x1200.png'}
+                alt={product.name}
+                width={600}
+                height={600}
+                className={`w-full h-auto object-contain transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                priority
+                onLoadingComplete={() => setImageLoading(false)}
+              />
             </div>
             {currentImages.length > 1 && (
               <div className="mt-2 grid grid-cols-4 gap-2">
