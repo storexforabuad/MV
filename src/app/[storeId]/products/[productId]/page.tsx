@@ -131,11 +131,53 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
     );
   }, [product, state.items, selectedSize, selectedColor, productIsFashion]);
 
+  const allImages = useMemo(() => {
+    if (!product) return [];
+    const baseImages = product.images || [];
+    if (!isFashionProduct(product)) return baseImages;
+
+    const images = [...baseImages];
+    product.colors.forEach(color => {
+      color.images.forEach(img => {
+        if (!images.includes(img)) {
+          images.push(img);
+        }
+      });
+    });
+    return images;
+  }, [product]);
+
   const handleColorSelect = (color: FashionProduct['colors'][0]) => {
     if (selectedColor?.name === color.name) return; // Don't reload if same color
     setSelectedColor(color);
-    setSelectedImage(0); // Reset to first image of the new color
+
+    // Find the first image of this color in allImages and select it
+    if (color.images.length > 0) {
+      const firstImageIndex = allImages.indexOf(color.images[0]);
+      if (firstImageIndex !== -1) {
+        setSelectedImage(firstImageIndex);
+        setImageLoading(true);
+      }
+    }
+  };
+
+  const handleImageSelect = (index: number) => {
+    if (selectedImage === index) return;
+
     setImageLoading(true);
+    setSelectedImage(index);
+
+    if (productIsFashion && product) {
+      const selectedImageUrl = allImages[index];
+      // Find which color this image belongs to
+      const associatedColor = (product as FashionProduct).colors.find(color =>
+        color.images.includes(selectedImageUrl)
+      );
+
+      if (associatedColor) {
+        setSelectedColor(associatedColor);
+      }
+    }
   };
 
   const handlePlaceOrderClick = () => {
@@ -194,13 +236,6 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
 
     return true;
   }, [product, selectedColor, selectedSize]);
-
-  const currentImages = useMemo(() => {
-    if (productIsFashion && selectedColor && selectedColor.images.length > 0) {
-      return selectedColor.images;
-    }
-    return product?.images || [];
-  }, [product, productIsFashion, selectedColor]);
 
 
   if (isLoading) return <ProductDetailSkeleton />;
@@ -264,8 +299,8 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                 </div>
               )}
               <Image
-                key={`${currentImages[selectedImage]}-${selectedImage}`}
-                src={currentImages[selectedImage] || '/public/default_product_1200x1200.png'}
+                key={`${allImages[selectedImage]}-${selectedImage}`}
+                src={allImages[selectedImage] || '/public/default_product_1200x1200.png'}
                 alt={product.name}
                 width={600}
                 height={600}
@@ -274,11 +309,25 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                 onLoadingComplete={() => setImageLoading(false)}
               />
             </div>
-            {currentImages.length > 1 && (
-              <div className="mt-2 grid grid-cols-4 gap-2">
-                {currentImages.map((image, index) => (
-                  <button key={index} onClick={() => { setImageLoading(true); setSelectedImage(index); }} className={`relative overflow-hidden rounded-lg min-w-[56px] min-h-[56px] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 transition-shadow duration-150 ${selectedImage === index ? 'ring-2 ring-offset-2 ring-green-500' : 'hover:opacity-75'}`}>
-                    <Image src={image} alt={`${product.name} ${index + 1}`} fill sizes="(max-width: 640px) 25vw, 100px" className="object-cover" />
+            {allImages.length > 1 && (
+              <div className="mt-4 -mx-4 px-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory flex gap-3 pt-2 pb-4">
+                {allImages.map((image, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleImageSelect(index)}
+                    className={`relative flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden snap-start focus:outline-none transition-all duration-200 
+                      ${selectedImage === index
+                        ? 'ring-2 ring-green-500 ring-offset-2 dark:ring-offset-gray-900 scale-105 shadow-md'
+                        : 'opacity-60 hover:opacity-100'
+                      }`}
+                  >
+                    <Image
+                      src={image}
+                      alt={`${product.name} ${index + 1}`}
+                      fill
+                      sizes="(max-width: 640px) 80px, 100px"
+                      className="object-cover"
+                    />
                   </button>
                 ))}
               </div>
