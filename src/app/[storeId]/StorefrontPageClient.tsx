@@ -387,14 +387,15 @@ export default function StorefrontPageClient({
         onClose={() => setIsLoginModalOpen(false)}
         onSuccess={() => setIsLoginModalOpen(false)}
       />
-      <div className="pt-44 pb-safe-area-inset-bottom">
+      <div className="pt-52 pb-safe-area-inset-bottom">
+        <div className="mt-2">
+          <RamadanCountdown />
+        </div>
         <ReferralBanner
           storeId={storeId}
           storeName={storeName}
           onLoginClick={() => setIsLoginModalOpen(true)}
         />
-
-        <RamadanCountdown />
 
         {/* Store Closed Banner */}
         {storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false && (
