@@ -9,7 +9,7 @@ import { StoreMeta } from '@/types/store';
 import { Customer } from '@/types/customer';
 import { formatPrice } from '@/utils/price';
 import { useOrders } from '@/hooks/useOrders';
-import { Loader2 } from 'lucide-react';
+import { Loader2, MessageSquare, ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getCustomerDetails } from '@/app/actions/customerActions';
 import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
@@ -17,6 +17,8 @@ import { saveModalState, getModalState, clearModalState } from '@/lib/paymentMod
 import { requestCustomerNotificationPermission } from '@/lib/requestCustomerNotifications';
 import PaymentFlowPage from './PaymentFlowPage';
 import { formatWhatsAppNumber } from '@/utils/phoneUtils';
+import { shouldShowWhatsAppPreview } from '@/utils/storeHelpers';
+import WhatsAppPreviewPage from './WhatsAppPreviewPage';
 
 interface CartOrderSummaryModalProps {
   isOpen: boolean;
@@ -35,7 +37,9 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
   const [orderNotes, setOrderNotes] = useState('');
   const [uploadedEvidence, setUploadedEvidence] = useState<{ url: string; fileName: string } | undefined>();
   const [showLeaveAppConfirmation, setShowLeaveAppConfirmation] = useState(false);
+  const [whatsappMessage, setWhatsappMessage] = useState('');
   const hasPushedState = useRef(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const storeId = cartItems[0]?.storeId;
   const { addOrder } = useOrders(customer?.id || null, storeId || "");
@@ -112,6 +116,13 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
       }
     };
   }, [isOpen]);
+
+  // Reset scroll position when page changes
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentPage]);
 
   const handleEvidenceUploaded = (evidenceUrl: string, fileName: string) => {
     setUploadedEvidence({ url: evidenceUrl, fileName });
@@ -196,13 +207,17 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
         const encodedMessage = encodeURIComponent(message);
         const whatsappUrl = `https://wa.me/${formatWhatsAppNumber(storeMeta.whatsapp)}?text=${encodedMessage}`;
 
-        window.open(whatsappUrl, '_blank');
-
-        // Small delay to ensure the redirect is triggered before closing/clearing
-        setTimeout(() => {
-          dispatch({ type: 'CLEAR_CART' });
-          onOrderSuccess();
-        }, 500);
+        if (shouldShowWhatsAppPreview(storeMeta.storeType)) {
+          setWhatsappMessage(message);
+          setCurrentPage(2);
+        } else {
+          window.open(whatsappUrl, '_blank');
+          // Small delay to ensure the redirect is triggered before closing/clearing
+          setTimeout(() => {
+            dispatch({ type: 'CLEAR_CART' });
+            onOrderSuccess();
+          }, 500);
+        }
       }
     } catch (error) {
       console.error("Error placing cart order:", error);
@@ -242,7 +257,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                   {/* Header */}
                   <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 sm:px-6 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-950">
                     <h3 className="text-lg font-semibold leading-6 text-gray-900 dark:text-white">
-                      {currentPage === 1 ? 'Cart Summary' : 'Payment'}
+                      {currentPage === 1 ? 'Cart Summary' : (isPaymentFlowEnabled ? 'Payment' : 'WhatsApp Preview')}
                     </h3>
                     <button
                       type="button"
@@ -257,7 +272,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                   </div>
 
                   {/* Main Content */}
-                  <div className="flex-grow overflow-y-auto p-4 sm:p-6">
+                  <div ref={scrollContainerRef} className="flex-grow overflow-y-auto p-4 sm:p-6">
                     <div className="max-w-3xl mx-auto w-full">
                       {/* Page 1: Cart Summary */}
                       {currentPage === 1 && (
@@ -364,6 +379,26 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                           />
                         </div>
                       )}
+
+                      {currentPage === 2 && !isPaymentFlowEnabled && storeMeta && (
+                        <div className="h-full">
+                          <WhatsAppPreviewPage
+                            message={whatsappMessage}
+                            onConfirm={() => {
+                              const encodedMessage = encodeURIComponent(whatsappMessage);
+                              const whatsappUrl = `https://wa.me/${formatWhatsAppNumber(storeMeta.whatsapp)}?text=${encodedMessage}`;
+                              window.open(whatsappUrl, '_blank');
+                              setTimeout(() => {
+                                dispatch({ type: 'CLEAR_CART' });
+                                onOrderSuccess();
+                                onClose();
+                              }, 500);
+                            }}
+                            onBack={handleBackToSummary}
+                            isPlacingOrder={isPlacingOrder}
+                          />
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -387,34 +422,58 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                             'Place Order'
                           )}
                         </button>
-                      ) : (
-                        currentPage === 2 && isPaymentFlowEnabled && (
-                          <div className="flex flex-col gap-3">
-                            {uploadedEvidence ? (
-                              <button
-                                type="button"
-                                className="w-full rounded-xl border border-transparent bg-green-600 px-6 py-4 text-base font-bold text-white shadow-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                                onClick={handlePlaceOrder}
-                                disabled={isPlacingOrder}
-                              >
-                                {isPlacingOrder ? (
-                                  <span className="flex items-center justify-center gap-2"><Loader2 className="h-5 w-5 animate-spin" />Placing Order...</span>
-                                ) : (
-                                  'Complete Order'
-                                )}
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                className="w-full rounded-xl border border-transparent bg-gray-900 dark:bg-white px-6 py-4 text-base font-bold text-white dark:text-gray-900 shadow-lg hover:bg-gray-800 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all transform active:scale-[0.98]"
-                                onClick={() => setShowLeaveAppConfirmation(true)}
-                              >
-                                Leave App to Pay
-                              </button>
-                            )}
-                          </div>
-                        )
-                      )}
+                      ) : currentPage === 2 && isPaymentFlowEnabled ? (
+                        <div className="flex flex-col gap-3">
+                          {uploadedEvidence ? (
+                            <button
+                              type="button"
+                              className="w-full rounded-xl border border-transparent bg-green-600 px-6 py-4 text-base font-bold text-white shadow-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                              onClick={handlePlaceOrder}
+                              disabled={isPlacingOrder}
+                            >
+                              {isPlacingOrder ? (
+                                <span className="flex items-center justify-center gap-2"><Loader2 className="h-5 w-5 animate-spin" />Placing Order...</span>
+                              ) : (
+                                'Complete Order'
+                              )}
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="w-full rounded-xl border border-transparent bg-gray-900 dark:bg-white px-6 py-4 text-base font-bold text-white dark:text-gray-900 shadow-lg hover:bg-gray-800 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all transform active:scale-[0.98]"
+                              onClick={() => setShowLeaveAppConfirmation(true)}
+                            >
+                              Leave App to Pay
+                            </button>
+                          )}
+                        </div>
+                      ) : currentPage === 2 && !isPaymentFlowEnabled ? (
+                        <button
+                          type="button"
+                          className="w-full bg-[#25D366] hover:bg-[#20bd5b] text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-green-500/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50"
+                          onClick={() => {
+                            const encodedMessage = encodeURIComponent(whatsappMessage);
+                            const whatsappUrl = `https://wa.me/${formatWhatsAppNumber(storeMeta.whatsapp)}?text=${encodedMessage}`;
+                            window.open(whatsappUrl, '_blank');
+                            setTimeout(() => {
+                              dispatch({ type: 'CLEAR_CART' });
+                              onOrderSuccess();
+                              onClose();
+                            }, 500);
+                          }}
+                          disabled={isPlacingOrder}
+                        >
+                          {isPlacingOrder ? (
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                          ) : (
+                            <>
+                              <MessageSquare size={20} />
+                              <span>Open WhatsApp</span>
+                              <ExternalLink size={16} className="opacity-70" />
+                            </>
+                          )}
+                        </button>
+                      ) : null}
                     </div>
                   </div>
 

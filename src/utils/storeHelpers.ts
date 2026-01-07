@@ -20,9 +20,21 @@ export function shouldUsePaymentFlow(storeType: string | undefined): boolean {
 }
 
 /**
- * Generates a unique localStorage key for storing modal state by store ID.
- * Used to persist modal state (current page, uploaded evidence) across app minimization.
+ * Determines if a store type should show the WhatsApp message preview page.
  * 
+ * @param storeType - The type of store
+ * @returns true if the store should show the preview
+ */
+export function shouldShowWhatsAppPreview(storeType: string | undefined): boolean {
+  if (!storeType) return false;
+
+  // Show preview only for fashion and restaurant as per user request
+  const previewStoreTypes = ['fashion', 'restaurant'];
+
+  return previewStoreTypes.includes(storeType);
+}
+
+/**
  * @param storeId - The ID of the store
  * @returns localStorage key string
  */
