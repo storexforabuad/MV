@@ -123,14 +123,6 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
     getStoreMeta(storeId).then(meta => setStoreMeta(meta as StoreMeta | null));
   }, [storeId]);
 
-  const isInCart = useMemo(() => {
-    if (!product) return false;
-    return state.items.some(item =>
-      item.id === product.id &&
-      (!productIsFashion || (item.selectedColor === selectedColor?.name && item.selectedSize === selectedSize))
-    );
-  }, [product, state.items, selectedSize, selectedColor, productIsFashion]);
-
   const allImages = useMemo(() => {
     if (!product) return [];
     const baseImages = product.images || [];
@@ -147,6 +139,29 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
     return images;
   }, [product]);
 
+  // Initialize selected color on load
+  useEffect(() => {
+    if (productIsFashion && product && allImages.length > 0 && !selectedColor) {
+      const firstImageUrl = allImages[0];
+      const initialColor = (product as FashionProduct).colors.find(c =>
+        c.images.includes(firstImageUrl)
+      );
+      if (initialColor) {
+        setSelectedColor(initialColor);
+      } else if ((product as FashionProduct).colors.length > 0) {
+        setSelectedColor((product as FashionProduct).colors[0]);
+      }
+    }
+  }, [product, productIsFashion, allImages, selectedColor]);
+
+  const isInCart = useMemo(() => {
+    if (!product) return false;
+    return state.items.some(item =>
+      item.id === product.id &&
+      (!productIsFashion || (item.selectedColor === selectedColor?.name && item.selectedSize === selectedSize))
+    );
+  }, [product, state.items, selectedSize, selectedColor, productIsFashion]);
+
   const handleColorSelect = (color: FashionProduct['colors'][0]) => {
     if (selectedColor?.name === color.name) return; // Don't reload if same color
     setSelectedColor(color);
@@ -155,8 +170,13 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
     if (color.images.length > 0) {
       const firstImageIndex = allImages.indexOf(color.images[0]);
       if (firstImageIndex !== -1) {
-        setSelectedImage(firstImageIndex);
-        setImageLoading(true);
+        if (selectedImage !== firstImageIndex) {
+          setSelectedImage(firstImageIndex);
+          setImageLoading(true);
+        } else {
+          // Image is already selected, no need to show loading
+          setImageLoading(false);
+        }
       }
     }
   };
