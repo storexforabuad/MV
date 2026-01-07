@@ -277,7 +277,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
             {currentImages.length > 1 && (
               <div className="mt-2 grid grid-cols-4 gap-2">
                 {currentImages.map((image, index) => (
-                  <button key={index} onClick={() => { setImageLoading(true); setSelectedImage(index); }} className={`relative overflow-hidden rounded-lg min-w-[56px] min-h-[56px] focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 transition-shadow duration-150 ${selectedImage === index ? 'ring-2 ring-offset-2 ring-indigo-500' : 'hover:opacity-75'}`}>
+                  <button key={index} onClick={() => { setImageLoading(true); setSelectedImage(index); }} className={`relative overflow-hidden rounded-lg min-w-[56px] min-h-[56px] focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500 transition-shadow duration-150 ${selectedImage === index ? 'ring-2 ring-offset-2 ring-green-500' : 'hover:opacity-75'}`}>
                     <Image src={image} alt={`${product.name} ${index + 1}`} fill sizes="(max-width: 640px) 25vw, 100px" className="object-cover" />
                   </button>
                 ))}
@@ -323,7 +323,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                       <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Color: <span className="font-normal">{selectedColor?.name || 'Select a color'}</span></h3>
                       <div className="flex flex-wrap gap-2">
                         {(product as FashionProduct).colors.map((color) => (
-                          <button key={color.name} onClick={() => handleColorSelect(color)} className={`relative rounded-full h-8 w-8 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 ${selectedColor?.name === color.name ? 'ring-2 ring-offset-2 ring-indigo-500' : ''}`}>
+                          <button key={color.name} onClick={() => handleColorSelect(color)} className={`relative rounded-full h-8 w-8 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ${selectedColor?.name === color.name ? 'ring-2 ring-offset-2 ring-green-500' : ''}`}>
                             <span className="sr-only">{color.name}</span>
                             <span style={{ backgroundColor: color.hex }} className="block h-full w-full rounded-full border border-black border-opacity-10" />
                           </button>
@@ -335,7 +335,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                     <div className="mb-4">
                       <div className="flex justify-between items-center mb-2">
                         <h3 className="text-sm font-medium text-gray-900 dark:text-white">Size</h3>
-                        <button onClick={() => setIsSizeGuideOpen(true)} className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300 flex items-center gap-1">
+                        <button onClick={() => setIsSizeGuideOpen(true)} className="text-sm font-medium text-green-600 hover:text-green-500 dark:text-green-400 dark:hover:text-green-300 flex items-center gap-1">
                           <Info size={16} />
                           <span>Size Guide</span>
                         </button>
@@ -457,8 +457,8 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                     onClick={handleShareClick}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-xl">
-                        <Gift className="text-indigo-600 dark:text-indigo-400" size={20} />
+                      <div className="w-10 h-10 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-xl">
+                        <Gift className="text-green-600 dark:text-green-400" size={20} />
                       </div>
                       <div>
                         <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Share & Earn Commission!</p>
