@@ -38,6 +38,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
   const [uploadedEvidence, setUploadedEvidence] = useState<{ url: string; fileName: string } | undefined>();
   const [showLeaveAppConfirmation, setShowLeaveAppConfirmation] = useState(false);
   const [whatsappMessage, setWhatsappMessage] = useState('');
+  const [hasPlacedOrder, setHasPlacedOrder] = useState(false);
   const hasPushedState = useRef(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -62,6 +63,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
       setOrderNotes('');
       setUploadedEvidence(undefined);
       setShowLeaveAppConfirmation(false);
+      setHasPlacedOrder(false);
 
       // Restore modal state from localStorage if payment flow is enabled
       if (isPaymentFlowEnabled && storeId) {
@@ -124,6 +126,11 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
     }
   }, [currentPage]);
 
+  // Reset hasPlacedOrder if any order details change
+  useEffect(() => {
+    setHasPlacedOrder(false);
+  }, [deliveryMethod, orderNotes, cartItems]);
+
   const handleEvidenceUploaded = (evidenceUrl: string, fileName: string) => {
     setUploadedEvidence({ url: evidenceUrl, fileName });
     if (storeId) {
@@ -136,6 +143,11 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
 
     if (isPaymentFlowEnabled && !uploadedEvidence) {
       toast.error('Please upload payment evidence first');
+      return;
+    }
+
+    if (hasPlacedOrder && !isPaymentFlowEnabled) {
+      setCurrentPage(2);
       return;
     }
 
@@ -209,6 +221,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
 
         if (shouldShowWhatsAppPreview(storeMeta.storeType)) {
           setWhatsappMessage(message);
+          setHasPlacedOrder(true);
           setCurrentPage(2);
         } else {
           window.open(whatsappUrl, '_blank');

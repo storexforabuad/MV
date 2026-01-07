@@ -51,6 +51,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const [imageLoading, setImageLoading] = useState(true);
   const [showLeaveAppConfirmation, setShowLeaveAppConfirmation] = useState(false);
   const [whatsappMessage, setWhatsappMessage] = useState('');
+  const [hasPlacedOrder, setHasPlacedOrder] = useState(false);
   const hasPushedState = useRef(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -73,6 +74,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
       setSpecialInstructions('');
       setUploadedEvidence(undefined);
       setShowLeaveAppConfirmation(false);
+      setHasPlacedOrder(false);
 
       // Restore modal state from localStorage if payment flow is enabled
       if (isPaymentFlowEnabled && storeId) {
@@ -135,6 +137,11 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
     }
   }, [currentPage]);
 
+  // Reset hasPlacedOrder if any order details change
+  useEffect(() => {
+    setHasPlacedOrder(false);
+  }, [quantity, deliveryMethod, selectedSpiciness, specialInstructions, selectedSize, selectedColor, product?.id]);
+
   if (!product) return null;
 
   const total = product.price * quantity;
@@ -151,6 +158,11 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
     if (isPaymentFlowEnabled && !uploadedEvidence) {
       toast.error('Please upload payment evidence first');
+      return;
+    }
+
+    if (hasPlacedOrder && !isPaymentFlowEnabled) {
+      setCurrentPage(2);
       return;
     }
 
@@ -223,6 +235,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
         if (shouldShowWhatsAppPreview(storeMeta.storeType)) {
           setWhatsappMessage(message);
+          setHasPlacedOrder(true);
           setCurrentPage(2);
         } else {
           window.open(whatsappUrl, '_blank');
