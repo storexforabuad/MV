@@ -1,8 +1,5 @@
 'use client';
-import React, { useState, useRef, Fragment, ChangeEvent } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
-import { XMarkIcon, PhotoIcon, ChevronLeftIcon, ChevronRightIcon, CheckCircleIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/solid';
-import { ArrowPathIcon } from '@heroicons/react/24/outline';
+import React, { useState, useRef, Fragment, ChangeEvent, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
@@ -12,8 +9,20 @@ import { uploadImageToCloudinary } from '../../lib/cloudinaryClient';
 import { compressImage } from '../../utils/imageCompression';
 import { formatPrice } from '../../utils/price';
 import CategorySelectorModal from './modals/CategorySelectorModal';
-import ProductUploadTips from './ProductUploadTips';
 import { NIGERIAN_SIZE_CHART } from '../../utils/sizeUtils';
+import {
+    X,
+    Shirt,
+    ChevronLeft,
+    ChevronRight,
+    CheckCircle2,
+    Plus,
+    Trash2,
+    ImagePlus,
+    Loader2,
+    AlertCircle,
+    Scissors
+} from 'lucide-react';
 
 // --- TYPES ---
 type UploadStatus = 'idle' | 'compressing' | 'uploading' | 'success' | 'error';
@@ -63,15 +72,15 @@ interface AddFashionComposerProps {
 // --- HELPER COMPONENTS ---
 
 const ModernToggle: React.FC<{ checked: boolean; onChange: (checked: boolean) => void; label: string; description?: string }> = ({ checked, onChange, label, description }) => (
-    <label className="flex items-center cursor-pointer justify-between w-full py-2">
+    <label className="flex items-center cursor-pointer justify-between w-full py-3 px-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
         <div className="flex flex-col">
-            <span className="text-base font-medium text-gray-900 dark:text-gray-100">{label}</span>
-            {description && <span className="text-sm text-gray-600 dark:text-gray-400">{description}</span>}
+            <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">{label}</span>
+            {description && <span className="text-xs text-slate-500 dark:text-slate-400">{description}</span>}
         </div>
         <div className="relative">
             <input type="checkbox" className="sr-only" checked={checked} onChange={(e) => onChange(e.target.checked)} />
-            <div className={`block w-14 h-8 rounded-full transition-colors ${checked ? 'bg-blue-600' : 'bg-gray-100 dark:bg-gray-800'}`}></div>
-            <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${checked ? 'translate-x-6' : ''}`}></div>
+            <div className={`block w-12 h-7 rounded-full transition-colors ${checked ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-600'}`}></div>
+            <div className={`dot absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform ${checked ? 'translate-x-5' : ''}`}></div>
         </div>
     </label>
 );
@@ -83,9 +92,9 @@ const FloatingLabelInput: React.FC<{ label: string, value: string | number, onCh
             value={value}
             onChange={onChange}
             placeholder={placeholder}
-            className="block w-full px-4 py-3 text-base text-gray-900 dark:text-gray-100 bg-gray-100 dark:bg-gray-800 rounded-lg border-2 border-gray-300 dark:border-gray-600 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+            className="block w-full px-4 py-3.5 text-base text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 peer transition-all"
         />
-        <label className="absolute text-base text-gray-600 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-gray-100 dark:bg-gray-800 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-3">
+        <label className="absolute text-sm text-slate-500 dark:text-slate-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-slate-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-3">
             {label}
         </label>
     </div>
@@ -94,22 +103,22 @@ const FloatingLabelInput: React.FC<{ label: string, value: string | number, onCh
 const PRESET_COLORS = [
     { name: 'Black', hex: '#000000' },
     { name: 'White', hex: '#FFFFFF' },
-    { name: 'Red', hex: '#FF0000' },
-    { name: 'Blue', hex: '#0000FF' },
-    { name: 'Green', hex: '#008000' },
-    { name: 'Yellow', hex: '#FFFF00' },
-    { name: 'Purple', hex: '#800080' },
-    { name: 'Pink', hex: '#FFC0CB' },
-    { name: 'Orange', hex: '#FFA500' },
-    { name: 'Grey', hex: '#808080' },
-    { name: 'Brown', hex: '#A52A2A' },
-    { name: 'Navy', hex: '#000080' },
+    { name: 'Red', hex: '#EF4444' },
+    { name: 'Blue', hex: '#3B82F6' },
+    { name: 'Green', hex: '#22C55E' },
+    { name: 'Yellow', hex: '#EAB308' },
+    { name: 'Purple', hex: '#A855F7' },
+    { name: 'Pink', hex: '#EC4899' },
+    { name: 'Orange', hex: '#F97316' },
+    { name: 'Grey', hex: '#6B7280' },
+    { name: 'Brown', hex: '#78350F' },
+    { name: 'Navy', hex: '#1E3A8A' },
 ];
 
 // --- MAIN COMPOSER COMPONENT ---
 
 const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose, storeId, categories, onProductAdded, onAddCategory }) => {
-    const [currentStep, setCurrentStep] = useState(0); // 0: Details, 1: Variants (Colors/Sizes), 2: Pricing, 3: Review, 4: Uploading, 5: Summary
+    const [currentStep, setCurrentStep] = useState(0); // 0: Details, 1: Variants, 2: Pricing, 3: Review, 4: Uploading, 5: Summary
     const [productData, setProductData] = useState<BatchFashionProduct>({
         id: Date.now().toString(),
         name: '',
@@ -126,8 +135,17 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
     const [isCategorySelectorOpen, setCategorySelectorOpen] = useState(false);
     const [uploadProgress, setUploadProgress] = useState<UploadProgress[]>([]);
     const [isUploading, setIsUploading] = useState(false);
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const [activeColorId, setActiveColorId] = useState<string | null>(null);
+
+    // Lock body scroll when open
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
+        return () => { document.body.style.overflow = 'auto'; };
+    }, [isOpen]);
 
     const resetState = () => {
         setCurrentStep(0);
@@ -262,7 +280,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                 };
             }));
 
-            // Flatten all images for the main product image array (first image of each color, then the rest)
+            // Flatten all images for the main product image array
             const allImages = uploadedColors.flatMap(c => c.images);
 
             const productBase = {
@@ -273,7 +291,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                 price: productData.isPromo ? productData.promoPrice! : productData.price,
                 images: allImages,
                 views: 0,
-                createdAt: { toMillis: () => Date.now() } as any, // Placeholder, DB handles this
+                createdAt: { toMillis: () => Date.now() } as any,
                 commission: productData.commission,
                 onPromo: productData.isPromo,
                 productType: 'fashion' as const,
@@ -281,17 +299,16 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                 category: categories.find(c => c.id === productData.categoryId)?.name || '',
                 colors: uploadedColors,
                 sizes: productData.sizes,
-                soldOutSizes: [], // Initially none sold out
+                soldOutSizes: [],
                 sizeChart: { type: 'nigerian-standard' as const },
                 limitedStock: productData.limitedStock,
                 soldOut: productData.soldOut,
             };
-            
+
             const productToAdd: FashionProduct = {
                 ...productBase,
                 ...(productData.isPromo && { originalPrice: productData.price }),
             };
-            
 
             await addProduct(storeId, productToAdd);
 
@@ -315,40 +332,49 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
             case 0: // Details
                 const categoryName = categories.find(c => c.id === productData.categoryId)?.name || 'Select a category';
                 return (
-                    <MotionDiv key={0} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="p-4 sm:p-6 space-y-6">
+                    <MotionDiv key={0} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
                         <FloatingLabelInput label="Product Name" value={productData.name} onChange={(e) => handleProductChange('name', e.target.value)} />
-                        <button onClick={() => setCategorySelectorOpen(true)} className="w-full text-left p-4 bg-gray-100 dark:bg-gray-800 rounded-lg border-2 border-gray-300 dark:border-gray-600">
-                            <span className={productData.categoryId ? 'text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400'}>{categoryName}</span>
+                        <button onClick={() => setCategorySelectorOpen(true)} className="w-full text-left p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-500 transition-colors group">
+                            <span className="block text-xs text-slate-500 dark:text-slate-400 mb-1">Category</span>
+                            <div className="flex justify-between items-center">
+                                <span className={`text-base font-medium ${productData.categoryId ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400'}`}>{categoryName}</span>
+                                <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                            </div>
                         </button>
                     </MotionDiv>
                 );
 
             case 1: // Variants (Colors & Sizes)
                 return (
-                    <MotionDiv key={1} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="p-4 sm:p-6 space-y-8">
+                    <MotionDiv key={1} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-8">
 
                         {/* COLORS SECTION */}
                         <div className="space-y-4">
                             <div className="flex justify-between items-center">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Colors</h3>
-                                <button onClick={addColor} className="flex items-center gap-1 text-sm font-medium text-blue-600 hover:text-blue-700">
-                                    <PlusIcon className="w-4 h-4" /> Add Color
+                                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-pink-100 dark:bg-pink-900/30 flex items-center justify-center">
+                                        <div className="w-4 h-4 rounded-full bg-pink-500"></div>
+                                    </div>
+                                    Colors & Images
+                                </h3>
+                                <button onClick={addColor} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 text-sm font-semibold hover:bg-blue-100 dark:hover:bg-blue-900/50 transition-colors">
+                                    <Plus className="w-4 h-4" /> Add Color
                                 </button>
                             </div>
 
                             <div className="space-y-4">
                                 {productData.colors.map((color, index) => (
-                                    <div key={color.id} className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
+                                    <div key={color.id} className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-200 dark:border-slate-700">
                                         <div className="flex justify-between items-start mb-4">
                                             <div className="flex-1 space-y-3">
-                                                <div className="flex gap-2 items-center">
-                                                    <div className="w-8 h-8 rounded-full border border-gray-200 dark:border-gray-700" style={{ backgroundColor: color.hex }}></div>
+                                                <div className="flex gap-3 items-center">
+                                                    <div className="w-10 h-10 rounded-full border-2 border-white dark:border-slate-600 shadow-sm" style={{ backgroundColor: color.hex }}></div>
                                                     <input
                                                         type="text"
-                                                        placeholder="Color Name"
+                                                        placeholder="Color Name (e.g. Royal Blue)"
                                                         value={color.name}
                                                         onChange={(e) => updateColor(color.id, 'name', e.target.value)}
-                                                        className="bg-transparent border-b border-gray-200 dark:border-gray-700 focus:border-blue-600 outline-none text-gray-900 dark:text-gray-100 w-full"
+                                                        className="bg-transparent border-b border-slate-300 dark:border-slate-600 focus:border-blue-600 outline-none text-slate-900 dark:text-slate-100 font-medium w-full pb-1"
                                                     />
                                                 </div>
 
@@ -361,74 +387,90 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                                                 updateColor(color.id, 'hex', preset.hex);
                                                                 if (!color.name) updateColor(color.id, 'name', preset.name);
                                                             }}
-                                                            className="w-6 h-6 rounded-full border border-gray-200 dark:border-gray-700 hover:scale-110 transition-transform"
+                                                            className="w-6 h-6 rounded-full border border-slate-200 dark:border-slate-600 hover:scale-110 transition-transform shadow-sm"
                                                             style={{ backgroundColor: preset.hex }}
                                                             title={preset.name}
                                                         />
                                                     ))}
-                                                    <input
-                                                        type="color"
-                                                        value={color.hex}
-                                                        onChange={(e) => updateColor(color.id, 'hex', e.target.value)}
-                                                        className="w-6 h-6 p-0 border-0 rounded-full overflow-hidden cursor-pointer"
-                                                    />
+                                                    <div className="relative w-6 h-6 rounded-full overflow-hidden border border-slate-200 dark:border-slate-600">
+                                                        <input
+                                                            type="color"
+                                                            value={color.hex}
+                                                            onChange={(e) => updateColor(color.id, 'hex', e.target.value)}
+                                                            className="absolute -top-2 -left-2 w-10 h-10 p-0 border-0 cursor-pointer"
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <button onClick={() => removeColor(color.id)} className="text-red-500 hover:text-red-700 p-1">
-                                                <TrashIcon className="w-5 h-5" />
+                                            <button onClick={() => removeColor(color.id)} className="text-slate-400 hover:text-red-500 p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors">
+                                                <Trash2 className="w-5 h-5" />
                                             </button>
                                         </div>
 
                                         {/* Image Upload for this Color */}
-                                        <div className="grid grid-cols-3 gap-2">
+                                        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
                                             {color.images.map((file, imgIdx) => (
-                                                <div key={imgIdx} className="relative aspect-square rounded-md overflow-hidden group">
+                                                <div key={imgIdx} className="relative aspect-[3/4] rounded-lg overflow-hidden group shadow-sm">
                                                     <Image src={URL.createObjectURL(file)} alt="Preview" fill className="object-cover" />
                                                     <button
                                                         onClick={() => removeColorImage(color.id, imgIdx)}
-                                                        className="absolute top-1 right-1 bg-black/50 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                        className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm"
                                                     >
-                                                        <XMarkIcon className="w-3 h-3" />
+                                                        <X className="w-3 h-3" />
                                                     </button>
                                                 </div>
                                             ))}
-                                            <label className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-md cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                                                <PhotoIcon className="w-6 h-6 text-gray-600 dark:text-gray-400" />
-                                                <span className="text-xs text-gray-600 dark:text-gray-400 mt-1">Add</span>
+                                            <label className="aspect-[3/4] flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors group">
+                                                <ImagePlus className="w-6 h-6 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                                                <span className="text-xs text-slate-500 mt-2 font-medium">Add Image</span>
                                                 <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleColorImageUpload(e, color.id)} />
                                             </label>
                                         </div>
                                     </div>
                                 ))}
                                 {productData.colors.length === 0 && (
-                                    <div className="text-center py-8 text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800/50 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
-                                        No colors added yet. Click "Add Color" to start.
+                                    <div className="text-center py-12 px-4 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700">
+                                        <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                                            <Shirt className="w-6 h-6 text-slate-400" />
+                                        </div>
+                                        <p className="text-slate-600 dark:text-slate-400 font-medium">No colors added yet</p>
+                                        <p className="text-sm text-slate-500 dark:text-slate-500 mb-4">Add a color variant to start uploading images</p>
+                                        <button onClick={addColor} className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors">
+                                            <Plus className="w-4 h-4" /> Add First Color
+                                        </button>
                                     </div>
                                 )}
                             </div>
                         </div>
 
                         {/* SIZES SECTION */}
-                        <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Sizes (Nigerian Standard)</h3>
-                            <div className="flex flex-wrap gap-3">
+                        <div className="space-y-4 pt-6 border-t border-slate-200 dark:border-slate-700">
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                                    <Scissors className="w-4 h-4 text-purple-500" />
+                                </div>
+                                Available Sizes
+                            </h3>
+                            <div className="flex flex-wrap gap-2">
                                 {NIGERIAN_SIZE_CHART.map((sizeItem) => {
                                     const isSelected = productData.sizes.includes(sizeItem.size);
                                     return (
                                         <button
                                             key={sizeItem.size}
                                             onClick={() => toggleSize(sizeItem.size)}
-                                            className={`px-4 py-2 rounded-full border transition-all ${isSelected
-                                                    ? 'bg-blue-600 text-white border-blue-600'
-                                                    : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 border-gray-300 dark:border-gray-600 hover:border-blue-400'
+                                            className={`min-w-[3rem] h-10 px-3 rounded-lg border font-medium transition-all ${isSelected
+                                                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white shadow-md transform scale-105'
+                                                : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500'
                                                 }`}
                                         >
-                                            Size {sizeItem.size}
+                                            {sizeItem.size}
                                         </button>
                                     );
                                 })}
                             </div>
-                            <p className="text-xs text-gray-600 dark:text-gray-400">Select all sizes available for this product.</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                <AlertCircle className="w-3 h-3" /> Standard Nigerian sizing
+                            </p>
                         </div>
 
                     </MotionDiv>
@@ -437,64 +479,108 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
             case 2: // Pricing
                 const commissionAmount = (productData.isPromo ? productData.promoPrice || 0 : productData.price || 0) * (productData.commission / 100);
                 return (
-                    <MotionDiv key={2} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="p-4 sm:p-6 space-y-6">
-                        <FloatingLabelInput label="Price" type="number" value={productData.price} onChange={(e) => handleProductChange('price', parseFloat(e.target.value) || 0)} />
-                        <ModernToggle label="Add Promo Price ?" checked={productData.isPromo} onChange={checked => handleProductChange('isPromo', checked)} />
-                        <AnimatePresence>
-                            {productData.isPromo && (
-                                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
-                                    <FloatingLabelInput label="Promo Price" type="number" value={productData.promoPrice || ''} onChange={(e) => handleProductChange('promoPrice', parseFloat(e.target.value) || 0)} />
-                                </motion.div>
-                            )}
-                        </AnimatePresence>
+                    <MotionDiv key={2} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
+                        <FloatingLabelInput label="Price (₦)" type="number" value={productData.price} onChange={(e) => handleProductChange('price', parseFloat(e.target.value) || 0)} />
 
-                        <div>
-                            <label className="block text-sm font-medium text-gray-600 dark:text-gray-400">Commission (Fixed)</label>
-                            <div className="mt-2 bg-gray-100 dark:bg-gray-800 p-4 rounded-lg flex justify-between items-center">
-                                <span className="text-gray-900 dark:text-gray-100 font-medium">2.5% Platform Fee</span>
-                                <span className="font-bold text-gray-900 dark:text-gray-100">{formatPrice(commissionAmount)}</span>
-                            </div>
+                        <div className="space-y-4">
+                            <ModernToggle label="Run a Promotion?" description="Set a discounted price for this item" checked={productData.isPromo} onChange={checked => handleProductChange('isPromo', checked)} />
+                            <AnimatePresence>
+                                {productData.isPromo && (
+                                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                                        <FloatingLabelInput label="Promo Price (₦)" type="number" value={productData.promoPrice || ''} onChange={(e) => handleProductChange('promoPrice', parseFloat(e.target.value) || 0)} />
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
 
-                        <div className="space-y-2 pt-4 border-t border-gray-200 dark:border-gray-700">
-                            <ModernToggle label="Mark as Limited Stock" checked={productData.limitedStock} onChange={checked => handleProductChange('limitedStock', checked)} />
-                            <ModernToggle label="Mark as Sold Out" checked={productData.soldOut} onChange={checked => handleProductChange('soldOut', checked)} />
+                        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800/50 flex justify-between items-center">
+                            <div>
+                                <span className="block text-sm font-semibold text-blue-900 dark:text-blue-100">Platform Fee (2.5%)</span>
+                                <span className="text-xs text-blue-600 dark:text-blue-300">Automatically deducted</span>
+                            </div>
+                            <span className="font-bold text-blue-900 dark:text-blue-100">{formatPrice(commissionAmount)}</span>
+                        </div>
+
+                        <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <ModernToggle label="Limited Stock" description="Show 'Low Stock' badge to customers" checked={productData.limitedStock} onChange={checked => handleProductChange('limitedStock', checked)} />
+                            <ModernToggle label="Sold Out" description="Mark as currently unavailable" checked={productData.soldOut} onChange={checked => handleProductChange('soldOut', checked)} />
                         </div>
                     </MotionDiv>
                 );
 
             case 3: // Review
-                // Simple review screen
                 return (
-                    <MotionDiv key={3} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 sm:p-6 space-y-4">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-gray-100">Review Product</h3>
-                        <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-lg space-y-2">
-                            <p><span className="text-gray-600 dark:text-gray-400">Name:</span> <span className="text-gray-900 dark:text-gray-100 font-medium">{productData.name}</span></p>
-                            <p><span className="text-gray-600 dark:text-gray-400">Price:</span> <span className="text-gray-900 dark:text-gray-100 font-medium">{formatPrice(productData.price)}</span></p>
-                            <p><span className="text-gray-600 dark:text-gray-400">Category:</span> <span className="text-gray-900 dark:text-gray-100 font-medium">{categories.find(c => c.id === productData.categoryId)?.name}</span></p>
-                            <p><span className="text-gray-600 dark:text-gray-400">Colors:</span> <span className="text-gray-900 dark:text-gray-100 font-medium">{productData.colors.map(c => c.name).join(', ')}</span></p>
-                            <p><span className="text-gray-600 dark:text-gray-400">Sizes:</span> <span className="text-gray-900 dark:text-gray-100 font-medium">{productData.sizes.join(', ')}</span></p>
+                    <MotionDiv key={3} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                        <div className="text-center">
+                            <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">Review Product</h3>
+                            <p className="text-slate-500 dark:text-slate-400">Double check everything before uploading</p>
                         </div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 text-center">Ready to upload? This might take a moment depending on image sizes.</p>
+
+                        <div className="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 space-y-4">
+                            <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-700">
+                                <span className="text-slate-500 dark:text-slate-400">Name</span>
+                                <span className="font-semibold text-slate-900 dark:text-slate-100 text-right">{productData.name}</span>
+                            </div>
+                            <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-700">
+                                <span className="text-slate-500 dark:text-slate-400">Price</span>
+                                <div className="text-right">
+                                    {productData.isPromo ? (
+                                        <>
+                                            <span className="block font-semibold text-red-500">{formatPrice(productData.promoPrice!)}</span>
+                                            <span className="text-xs text-slate-400 line-through">{formatPrice(productData.price)}</span>
+                                        </>
+                                    ) : (
+                                        <span className="font-semibold text-slate-900 dark:text-slate-100">{formatPrice(productData.price)}</span>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="flex justify-between py-2 border-b border-slate-200 dark:border-slate-700">
+                                <span className="text-slate-500 dark:text-slate-400">Category</span>
+                                <span className="font-semibold text-slate-900 dark:text-slate-100">{categories.find(c => c.id === productData.categoryId)?.name}</span>
+                            </div>
+                            <div className="py-2">
+                                <span className="block text-slate-500 dark:text-slate-400 mb-2">Variants</span>
+                                <div className="flex flex-wrap gap-2">
+                                    {productData.colors.map(c => (
+                                        <span key={c.id} className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-xs font-medium">
+                                            <span className="w-2 h-2 rounded-full" style={{ backgroundColor: c.hex }}></span>
+                                            {c.name} ({c.images.length} imgs)
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="py-2">
+                                <span className="block text-slate-500 dark:text-slate-400 mb-2">Sizes</span>
+                                <div className="flex flex-wrap gap-1">
+                                    {productData.sizes.map(s => (
+                                        <span key={s} className="px-2 py-1 rounded bg-slate-200 dark:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-300">{s}</span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
                     </MotionDiv>
                 );
 
             case 4: // Uploading
                 return (
-                    <MotionDiv key={4} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 sm:p-6">
-                        <h3 className="text-xl font-semibold text-center text-gray-900 dark:text-gray-100 mb-4">Uploading Product...</h3>
-                        <div className="space-y-3 max-h-80 overflow-y-auto">
+                    <MotionDiv key={4} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+                        <div className="text-center py-8">
+                            <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
+                            <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">Uploading Product...</h3>
+                            <p className="text-slate-500 dark:text-slate-400">Please wait while we compress and upload your images.</p>
+                        </div>
+                        <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
                             {uploadProgress.map(p => (
-                                <div key={p.id} className="flex items-center gap-4 p-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
-                                    <div className="flex-1">
-                                        <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">{p.fileName}</p>
-                                        <p className="text-sm text-gray-600 dark:text-gray-400">{p.statusText}</p>
+                                <div key={p.id} className="flex items-center gap-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                                    <div className="flex-1 min-w-0">
+                                        <p className="font-medium text-slate-900 dark:text-slate-100 truncate text-sm">{p.fileName}</p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400">{p.statusText}</p>
                                     </div>
-                                    <div>
-                                        {p.status === 'uploading' && <ArrowPathIcon className="w-6 h-6 text-blue-500 animate-spin" />}
-                                        {p.status === 'compressing' && <ArrowPathIcon className="w-6 h-6 text-yellow-500 animate-spin" />}
-                                        {p.status === 'success' && <CheckCircleIcon className="w-6 h-6 text-green-500" />}
-                                        {p.status === 'error' && <XMarkIcon className="w-6 h-6 text-red-500" />}
+                                    <div className="flex-shrink-0">
+                                        {p.status === 'uploading' && <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />}
+                                        {p.status === 'compressing' && <Loader2 className="w-5 h-5 text-amber-500 animate-spin" />}
+                                        {p.status === 'success' && <CheckCircle2 className="w-5 h-5 text-green-500" />}
+                                        {p.status === 'error' && <AlertCircle className="w-5 h-5 text-red-500" />}
                                     </div>
                                 </div>
                             ))}
@@ -506,11 +592,15 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                 const successes = uploadProgress.filter(p => p.status === 'success').length;
                 const failures = uploadProgress.filter(p => p.status === 'error').length;
                 return (
-                    <MotionDiv key={5} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="p-6 text-center">
-                        <CheckCircleIcon className="w-20 h-20 text-green-500 mx-auto mb-4" />
-                        <h3 className="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-2">Upload Complete!</h3>
-                        <p className="text-lg text-gray-600 dark:text-gray-400">Product added successfully.</p>
-                        {failures > 0 && <p className="text-lg text-red-500">{failures} images failed to upload.</p>}
+                    <MotionDiv key={5} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center justify-center py-12 text-center">
+                        <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-6">
+                            <CheckCircle2 className="w-10 h-10 text-green-600 dark:text-green-400" />
+                        </div>
+                        <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">Upload Complete!</h3>
+                        <p className="text-slate-600 dark:text-slate-400 max-w-xs mx-auto">
+                            Your product has been successfully added to the store.
+                        </p>
+                        {failures > 0 && <p className="text-sm text-red-500 mt-4">{failures} images failed to upload.</p>}
                     </MotionDiv>
                 );
 
@@ -519,91 +609,112 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
     }
 
     const STEPS = [{ name: 'Details' }, { name: 'Variants' }, { name: 'Pricing' }, { name: 'Review' }];
+    const modalVariants = { hidden: { opacity: 0, y: '100%' }, visible: { opacity: 1, y: 0 }, exit: { opacity: 0, y: '100%' } };
 
     return (
-        <>
-            <Transition.Root show={isOpen} as={Fragment}>
-                <Dialog as="div" className="relative z-40" onClose={handleClose}>
-                    <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-                        <div className="fixed inset-0 bg-black bg-opacity-75 backdrop-blur-sm transition-opacity" />
-                    </Transition.Child>
-    
-                    <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
-                        <div className="flex min-h-full items-stretch justify-center text-center md:items-center md:px-2 lg:px-4">
-                            <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-full md:translate-y-0 md:scale-95" enterTo="opacity-100 translate-y-0 md:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 md:scale-100" leaveTo="opacity-0 translate-y-full md:translate-y-0 md:scale-95">
-                                <Dialog.Panel className="relative flex w-full max-w-lg transform text-left text-base transition md:my-8">
-                                    <div className="relative flex w-full flex-col overflow-hidden md:rounded-2xl bg-white dark:bg-slate-900 shadow-2xl">
-                                        <div className="p-4 sm:p-6 flex justify-between items-center border-b border-gray-200 dark:border-gray-700">
-                                            <Dialog.Title as="h3" className="text-xl font-bold text-gray-900 dark:text-gray-100">
-                                                {currentStep === 4 ? 'Uploading...' : currentStep === 5 ? 'Summary' : 'Add Fashion Product'}
-                                            </Dialog.Title>
-                                            <button onClick={handleClose} className="p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition">
-                                                <XMarkIcon className="h-6 w-6 text-gray-600 dark:text-gray-400" />
-                                            </button>
-                                        </div>
-    
-                                        {currentStep < 4 && (
-                                            <div className="w-full bg-gray-100 dark:bg-gray-800 h-1.5">
-                                                <motion.div
-                                                    className="bg-blue-600 h-1.5"
-                                                    initial={{ width: '0%' }}
-                                                    animate={{ width: `${(currentStep / (STEPS.length - 1)) * 100}%` }}
-                                                    transition={{ ease: "easeInOut", duration: 0.5 }}
-                                                />
-                                            </div>
-                                        )}
-    
-                                        <div className="flex-1">
-                                            <AnimatePresence mode="wait">
-                                                {renderStepContent()}
-                                            </AnimatePresence>
-                                        </div>
-    
-                                        <div className="p-4 sm:p-6 flex justify-between sm:justify-end gap-4 border-t border-gray-200 dark:border-gray-700">
-                                            {currentStep === 0 && (
-                                                <button onClick={handleClose} className="w-full rounded-lg border border-gray-300 dark:border-gray-600 bg-gray-200 dark:bg-gray-700 py-2 px-4 text-sm font-semibold text-gray-900 dark:text-gray-100 shadow-sm hover:bg-gray-300 dark:hover:bg-gray-600">Cancel</button>
-                                            )}
-                                            {currentStep > 0 && currentStep < 4 && (
-                                                <button onClick={() => setCurrentStep(s => s - 1)} className="px-6 py-3 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition">Back</button>
-                                            )}
-                                            {currentStep < 3 && (
-                                                <button onClick={() => setCurrentStep(s => s + 1)} className="flex-1 sm:flex-none px-6 py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">Next</button>
-                                            )}
-                                            {currentStep === 3 && (
-                                                <button onClick={handleSubmit} className="flex-1 sm:flex-none px-6 py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition" disabled={isUploading}>
-                                                    Upload Product
-                                                </button>
-                                            )}
-                                            {currentStep === 5 && (
-                                                <>
-                                                    <button onClick={handleClose} className="px-6 py-3 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-semibold hover:bg-gray-300 dark:hover:bg-gray-600 transition">Done</button>
-                                                    <button onClick={resetState} className="flex-1 sm:flex-none px-6 py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">Add Another</button>
-                                                </>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <CategorySelectorModal
-                                        isOpen={isCategorySelectorOpen}
-                                        onClose={() => setCategorySelectorOpen(false)}
-                                        categories={categories}
-                                        selectedCategoryId={productData.categoryId}
-                                        onSelect={(categoryId: string) => {
-                                            handleProductChange('categoryId', categoryId);
-                                            setCategorySelectorOpen(false);
-                                        }}
-                                        onAddCategory={onAddCategory}
-                                    />
-                                </Dialog.Panel>
-                            </Transition.Child>
+        <AnimatePresence>
+            {isOpen && (
+                <motion.div
+                    className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
+                    initial="hidden" animate="visible" exit="exit"
+                    variants={modalVariants}
+                    transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+                >
+                    {/* --- Header --- */}
+                    <header className="flex-shrink-0 flex items-center justify-between w-full max-w-5xl mx-auto p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg z-10 sticky top-0">
+                        <div className="flex items-center gap-4">
+                            <button onClick={handleClose} className="p-2 -ml-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                                <X className="w-6 h-6 text-slate-500 dark:text-slate-400" />
+                            </button>
+                            <div>
+                                <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">
+                                    {currentStep === 4 ? 'Uploading...' : currentStep === 5 ? 'Success' : 'Add Fashion Product'}
+                                </h2>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">
+                                    Step {Math.min(currentStep + 1, 4)} of 4
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                </Dialog>
-            </Transition.Root>
-    
-            
-        </>
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center shadow-lg">
+                            <Shirt className="w-6 h-6 text-white" />
+                        </div>
+                    </header>
+
+                    {/* --- Progress Bar --- */}
+                    {currentStep < 4 && (
+                        <div className="w-full bg-slate-100 dark:bg-slate-800 h-1">
+                            <motion.div
+                                className="bg-gradient-to-r from-pink-500 to-purple-600 h-1"
+                                initial={{ width: '0%' }}
+                                animate={{ width: `${((currentStep + 1) / STEPS.length) * 100}%` }}
+                                transition={{ ease: "easeInOut", duration: 0.5 }}
+                            />
+                        </div>
+                    )}
+
+                    {/* --- Main Scrollable Content --- */}
+                    <main className="flex-grow w-full max-w-5xl mx-auto overflow-y-auto p-4 sm:p-6 scrollbar-hide">
+                        <AnimatePresence mode="wait">
+                            {renderStepContent()}
+                        </AnimatePresence>
+                    </main>
+
+                    {/* --- Footer --- */}
+                    <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 z-10">
+                        <div className="absolute bottom-full left-0 right-0 h-12 bg-gradient-to-t from-white dark:from-slate-950 to-transparent pointer-events-none" />
+                        <div className="max-w-5xl mx-auto flex gap-4">
+                            {currentStep === 0 && (
+                                <button onClick={handleClose} className="w-full py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-semibold hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
+                                    Cancel
+                                </button>
+                            )}
+
+                            {currentStep > 0 && currentStep < 4 && (
+                                <button onClick={() => setCurrentStep(s => s - 1)} className="px-6 py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center gap-2">
+                                    <ChevronLeft className="w-5 h-5" /> Back
+                                </button>
+                            )}
+
+                            {currentStep < 3 && (
+                                <button onClick={() => setCurrentStep(s => s + 1)} className="flex-1 py-3.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg">
+                                    Next <ChevronRight className="w-5 h-5" />
+                                </button>
+                            )}
+
+                            {currentStep === 3 && (
+                                <button onClick={handleSubmit} disabled={isUploading} className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold hover:from-pink-700 hover:to-purple-700 transition-all shadow-lg flex items-center justify-center gap-2">
+                                    {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Upload Product'}
+                                </button>
+                            )}
+
+                            {currentStep === 5 && (
+                                <>
+                                    <button onClick={handleClose} className="flex-1 py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                                        Close
+                                    </button>
+                                    <button onClick={resetState} className="flex-1 py-3.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold hover:opacity-90 transition-opacity shadow-lg">
+                                        Add Another
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </footer>
+
+                    <CategorySelectorModal
+                        isOpen={isCategorySelectorOpen}
+                        onClose={() => setCategorySelectorOpen(false)}
+                        categories={categories}
+                        selectedCategoryId={productData.categoryId}
+                        onSelect={(categoryId: string) => {
+                            handleProductChange('categoryId', categoryId);
+                            setCategorySelectorOpen(false);
+                        }}
+                        onAddCategory={onAddCategory}
+                    />
+                </motion.div>
+            )}
+        </AnimatePresence>
     );
-    
 };
 
 export default AddFashionComposer;
