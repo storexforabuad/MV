@@ -82,16 +82,25 @@ const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferral
     <p className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500">
       ₦{totalReferralBonus.toFixed(2)}
     </p>
-    <p className="text-sm text-text-secondary mt-2">This is 100% of the Bizcon Network Commission paid out as bonuses to referrers.</p>
+    <p className="text-sm text-text-secondary mt-2">This is 100% of the Bizpro App Commission paid out as bonuses to referrers.</p>
     <button onClick={handleClose} className="mt-6 bg-blue-500 text-white font-bold py-2 px-4 rounded-lg">Close</button>
   </div>
 );
 
 const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.ElementType | null, glowClass: string, isAiCard?: boolean }[] = [
   {
-    label: '(Biz+Con)™',
-    subtitle: 'Network',
+    label: '(Biz+Pro)™',
+    subtitle: 'App',
     icon: Globe,
+    gradient: 'bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800',
+    text: 'text-white',
+    component: null,
+    glowClass: 'dark:shadow-blue-500/30 shadow-blue-500/50',
+  },
+  {
+    label: 'Tips',
+    subtitle: 'Dashboard',
+    icon: Lightbulb,
     gradient: 'bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-600',
     text: 'text-white',
     component: TipsModal,
@@ -405,7 +414,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
   const handleOpenModal = (idx: number, card: typeof cardData[0]) => {
     const { label, subtitle } = card;
-    if (label === '(Biz+Con)™') setIsBizconNetworkModalOpen(true);
+    if (label === '(Biz+Pro)™') setIsBizconNetworkModalOpen(true);
     else if (label === 'Tips') setIsTipsModalOpen(true);
     else if (label === 'Views') setIsViewsModalOpen(true);
     else if (label === 'Share') {
@@ -523,7 +532,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           </div>
 
           <div className="flex flex-col items-start text-left min-w-0">
-            <span className="text-base font-bold tracking-tight truncate w-full">View Storefront</span>
+            <span className="text-base font-bold tracking-tight truncate w-full">View Onlinestore</span>
             <span className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate w-full">See your shop live on the web</span>
           </div>
 
@@ -711,7 +720,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           }
 
           const Icon = card.icon;
-          const isHorizontal = card.label === 'Share' || card.label === 'Tips' || card.label === 'Content' || card.label === '(Biz+Con)™' || card.label === 'Advert' || card.label === 'Account' || card.label === 'Subscription';
+          const isHorizontal = card.label === 'Share' || card.label === 'Tips' || card.label === 'Content' || card.label === '(Biz+Pro)™' || card.label === 'Advert' || card.label === 'Account' || card.label === 'Subscription';
           const isTipsCard = card.label === 'Tips';
           const isPostsCard = card.label === 'Content';
           const spotlightClasses = spotlightStep === 'tips' && isTipsCard ? 'relative z-50 pointer-events-auto' : '';
