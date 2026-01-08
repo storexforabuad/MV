@@ -1,188 +1,187 @@
+'use client';
 
-import { useEffect } from 'react';
-import { Phone, MessageCircle, Star, Clock, MapPin, Instagram, X } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Fragment, useRef } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
+import { Phone, MessageCircle, Star, Clock, MapPin, Instagram, X, Navigation } from 'lucide-react';
 import Image from 'next/image';
 import { StoreMeta } from '../../types/store';
 import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 
-
 export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean; onClose: () => void; storeMeta?: StoreMeta }) {
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
+  if (!storeMeta) return null;
 
-    const handlePopState = () => {
-      onClose();
-    };
+  const fullAddress = [
+    storeMeta.shopNumber,
+    storeMeta.plazaBuildingName,
+    storeMeta.streetAddress,
+    storeMeta.state,
+    storeMeta.country
+  ].filter(Boolean).join(', ');
 
-    window.history.pushState({ modalOpen: true }, '');
-    window.addEventListener('popstate', handlePopState);
-
-    return () => {
-      window.removeEventListener('popstate', handlePopState);
-      if (window.history.state?.modalOpen) {
-        window.history.back();
-      }
-    };
-  }, [open, onClose]);
-
-  if (!storeMeta) {
-    return (
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            onClick={onClose}
-          >
-            <motion.div
-              className="relative w-full max-w-sm mx-auto rounded-2xl overflow-hidden shadow-2xl bg-background flex flex-col items-center justify-center h-64"
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-              onClick={e => e.stopPropagation()}
-            >
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-white"></div>
-              <p className="mt-4 text-slate-500 dark:text-slate-400">Loading Business Info...</p>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    );
-  }
-
-  const fullAddress = [storeMeta.shopNumber, storeMeta.plazaBuildingName, storeMeta.streetAddress, storeMeta.state, storeMeta.country].filter(Boolean).join(', ');
+  const handleGetDirections = () => {
+    if (fullAddress) {
+      const encodedAddress = encodeURIComponent(fullAddress);
+      window.open(`https://www.google.com/maps/search/?api=1&query=${encodedAddress}`, '_blank');
+    }
+  };
 
   return (
-    <AnimatePresence>
-      {open && (
-        <motion.div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          onClick={onClose}
-        >
-          <motion.div
-            className="relative w-full max-w-md bg-[var(--modal-background)] rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden border border-slate-200/50 dark:border-slate-700/50 dark:shadow-[0_0_80px_rgba(0,0,0,0.5),0_0_1px_1px_rgba(255,255,255,0.05)]"
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.95, opacity: 0 }}
-            transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-            onClick={e => e.stopPropagation()}
-          >
-            {/* Close Button - X Icon */}
-            <motion.button
-              onClick={onClose}
-              className="absolute top-4 right-4 z-10 p-2 rounded-full bg-slate-200/90 dark:bg-slate-700/90 backdrop-blur-sm hover:bg-slate-300 dark:hover:bg-slate-600 transition-colors duration-200 shadow-lg dark:shadow-[0_0_12px_rgba(255,255,255,0.1)]"
-              whileHover={{ scale: 1.1, rotate: 90 }}
-              whileTap={{ scale: 0.9 }}
-              aria-label="Close modal"
-            >
-              <X className="w-5 h-5 text-slate-700 dark:text-slate-200" />
-            </motion.button>
+    <Transition.Root show={open} as={Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={onClose}>
+        <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
+          <div className="fixed inset-0 bg-black bg-opacity-75 transition-opacity" />
+        </Transition.Child>
 
-            <div className="flex-grow overflow-y-auto px-6 pt-6 pb-6">
-              <div className="text-center mb-6">
-                {storeMeta.ceoImage && (
-                  <Image
-                    src={storeMeta.ceoImage}
-                    alt={storeMeta.ceoName || 'CEO'}
-                    width={80}
-                    height={80}
-                    className="w-20 h-20 rounded-full object-cover shadow-lg border-4 border-[var(--modal-background)] mx-auto mb-3"
-                  />
-                )}
-                <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 card-text-gradient">{storeMeta.name}</h2>
-                {storeMeta.ceoName && (
-                  <p className="text-base text-slate-600 dark:text-slate-300 mt-1">Led by {storeMeta.ceoName}</p>
-                )}
-                {storeMeta.businessDescription && (
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mt-3 max-w-sm mx-auto">{storeMeta.businessDescription}</p>
-                )}
-                <div className="flex items-center justify-center gap-1 mt-3">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
-                  ))}
+        <div className="fixed inset-0 z-10 overflow-y-auto">
+          <div className="flex min-h-full items-end justify-center p-0 text-center sm:items-center sm:p-4">
+            <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95" enterTo="opacity-100 translate-y-0 sm:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 sm:scale-100" leaveTo="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95">
+              <Dialog.Panel className="relative w-full transform overflow-hidden rounded-t-[2rem] bg-white dark:bg-slate-950 text-left align-middle shadow-2xl transition-all flex flex-col max-h-[92vh] sm:max-w-2xl sm:rounded-2xl sm:max-h-[85vh]">
+
+                {/* Handle Bar for Mobile */}
+                <div className="flex-shrink-0 pt-3 pb-1 flex justify-center sm:hidden">
+                  <div className="w-12 h-1.5 rounded-full bg-gray-300 dark:bg-gray-700" />
                 </div>
-              </div>
 
-              <div className="space-y-3">
-                {storeMeta.hasPhysicalShop && fullAddress && (
-                  <div className="flex items-start gap-4 p-4 bg-slate-50/50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80 rounded-xl shadow-sm dark:shadow-inner">
-                    <MapPin className="w-5 h-5 text-slate-500 dark:text-slate-400 flex-shrink-0 mt-1" />
-                    <span className="text-sm text-slate-700 dark:text-slate-300">{fullAddress}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-4 p-4 bg-slate-50/50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80 rounded-xl shadow-sm dark:shadow-inner">
-                  <Clock className="w-5 h-5 text-slate-500 dark:text-slate-400 flex-shrink-0" />
-                  <span className="text-sm text-slate-700 dark:text-slate-300 font-medium">Open 24/7</span>
+                {/* Header */}
+                <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-slate-950">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                    About Store
+                  </h2>
+                  <button
+                    type="button"
+                    className="flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-colors shadow-sm"
+                    onClick={onClose}
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
                 </div>
-                {storeMeta.businessInstagram && (
-                  <div className="flex items-center gap-4 p-4 bg-slate-50/50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80 rounded-xl shadow-sm dark:shadow-inner">
-                    <Instagram className="w-5 h-5 text-slate-500 dark:text-slate-400 flex-shrink-0" />
-                    <span className="text-sm text-slate-700 dark:text-slate-300">{storeMeta.businessInstagram}</span>
+
+                {/* Main Content */}
+                <div ref={scrollContainerRef} className="flex-grow overflow-y-auto p-6">
+                  <div className="max-w-3xl mx-auto w-full">
+                    <div className="text-center mb-8">
+                      {storeMeta.ceoImage && (
+                        <div className="relative inline-block">
+                          <Image
+                            src={storeMeta.ceoImage}
+                            alt={storeMeta.ceoName || 'CEO'}
+                            width={100}
+                            height={100}
+                            className="w-24 h-24 rounded-full object-cover shadow-xl border-4 border-white dark:border-slate-800 mx-auto mb-4"
+                          />
+                          <div className="absolute -bottom-1 -right-1 bg-green-500 w-6 h-6 rounded-full border-4 border-white dark:border-slate-800" />
+                        </div>
+                      )}
+                      <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                        {storeMeta.name}
+                      </h3>
+                      {storeMeta.ceoName && (
+                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-widest">
+                          Led by {storeMeta.ceoName}
+                        </p>
+                      )}
+                      {storeMeta.businessDescription && (
+                        <p className="text-base text-gray-600 dark:text-gray-300 mt-4 leading-relaxed max-w-sm mx-auto">
+                          {storeMeta.businessDescription}
+                        </p>
+                      )}
+                      <div className="flex items-center justify-center gap-1 mt-4">
+                        {[...Array(5)].map((_, i) => (
+                          <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-4">
+                      {storeMeta.hasPhysicalShop && fullAddress && (
+                        <div className="group bg-gray-50 dark:bg-gray-900/50 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 transition-all hover:border-blue-200 dark:hover:border-blue-900">
+                          <div className="flex items-start gap-4">
+                            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
+                              <MapPin className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Store Location</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white leading-relaxed">
+                                {fullAddress}
+                              </p>
+                              <button
+                                onClick={handleGetDirections}
+                                className="mt-3 flex items-center gap-2 text-sm font-bold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+                              >
+                                <Navigation size={16} />
+                                <span>Get Directions</span>
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="bg-gray-50 dark:bg-gray-900/50 p-5 rounded-2xl border border-gray-100 dark:border-gray-800">
+                          <div className="flex items-center gap-4">
+                            <div className="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-xl">
+                              <Clock className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                            </div>
+                            <div>
+                              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Opening Hours</p>
+                              <p className="text-sm font-bold text-gray-900 dark:text-white">Open 24/7</p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {storeMeta.businessInstagram && (
+                          <div className="bg-gray-50 dark:bg-gray-900/50 p-5 rounded-2xl border border-gray-100 dark:border-gray-800">
+                            <div className="flex items-center gap-4">
+                              <div className="p-3 bg-pink-100 dark:bg-pink-900/30 rounded-xl">
+                                <Instagram className="w-6 h-6 text-pink-600 dark:text-pink-400" />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Instagram</p>
+                                <p className="text-sm font-bold text-gray-900 dark:text-white truncate">@{storeMeta.businessInstagram.replace('@', '')}</p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="mt-8 text-center">
+                      <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">
+                        Powered by <span className="text-indigo-600 dark:text-indigo-400">(Biz+Con)™</span> Network
+                      </p>
+                    </div>
                   </div>
-                )}
-              </div>
+                </div>
 
-              <div className="grid grid-cols-2 gap-3 mt-6">
-                <motion.a
-                  href={`tel:${storeMeta.whatsapp?.replace(/\s/g, '')}`}
-                  className="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700/70 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold py-3 rounded-xl border border-slate-200 dark:border-slate-600/50 shadow-sm"
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  <Phone className="w-4 h-4" />
-                  <span className="text-sm">Call</span>
-                </motion.a>
-                <motion.a
-                  href={`https://wa.me/${formatWhatsAppNumber(storeMeta.whatsapp)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-3 rounded-xl shadow-lg"
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span className="text-sm">WhatsApp</span>
-                </motion.a>
-              </div>
+                {/* Footer Actions */}
+                <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-950 p-4 sm:px-6">
+                  <div className="max-w-3xl mx-auto w-full grid grid-cols-2 gap-4">
+                    <a
+                      href={`tel:${storeMeta.whatsapp?.replace(/\s/g, '')}`}
+                      className="flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-bold py-4 px-6 rounded-xl transition-all active:scale-[0.98]"
+                    >
+                      <Phone size={20} />
+                      <span>Call</span>
+                    </a>
+                    <a
+                      href={`https://wa.me/${formatWhatsAppNumber(storeMeta.whatsapp)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5b] text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-green-500/20 transition-all active:scale-[0.98]"
+                    >
+                      <MessageCircle size={20} />
+                      <span>WhatsApp</span>
+                    </a>
+                  </div>
+                </div>
 
-              <div className="text-center text-xs text-slate-500 dark:text-slate-400 mt-6">
-                <style jsx>{`
-                  .ai-text-gradient {
-                    background: linear-gradient(90deg, #fde047, #22d3ee, #a855f7, #ec4899, #4ade80, #f97316, #fde047);
-                    background-size: 400% 100%;
-                    background-clip: text;
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;
-                    color: transparent;
-                    will-change: background-position;
-                    -webkit-animation: ai-gradient-flow 10s linear infinite;
-                    animation: ai-gradient-flow 10s linear infinite;
-                  }
-                  @-webkit-keyframes ai-gradient-flow {
-                    0% { background-position: 0% 50%; }
-                    100% { background-position: 100% 50%; }
-                  }
-                  @keyframes ai-gradient-flow {
-                    0% { background-position: 0% 50%; }
-                    100% { background-position: 100% 50%; }
-                  }
-                `}</style>
-                in partnership with <strong className="ai-text-gradient">(Biz+Con)™ </strong>Network
-              </div>
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition.Root>
   );
 }
