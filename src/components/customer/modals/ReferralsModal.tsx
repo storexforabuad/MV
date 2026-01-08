@@ -100,8 +100,8 @@ const ReferralsModal: React.FC<ReferralsModalProps> = ({ isOpen, onClose, storeI
                 </div>
 
                 {/* Main Content */}
-                <div ref={scrollContainerRef} className="flex-grow overflow-y-auto p-4 sm:p-6">
-                  <div className="max-w-3xl mx-auto w-full">
+                <div ref={scrollContainerRef} className="flex-grow overflow-y-auto">
+                  <div className="max-w-3xl mx-auto w-full px-4 sm:px-6 py-4 sm:py-6">
                     {!customer ? (
                       <div className="flex flex-col items-center justify-center py-20 text-center">
                         <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-6">
@@ -116,8 +116,8 @@ const ReferralsModal: React.FC<ReferralsModalProps> = ({ isOpen, onClose, storeI
                       <div className="space-y-8">
                         {/* KPIs */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <div className="bg-indigo-50 dark:bg-indigo-900/20 p-6 rounded-2xl border border-indigo-100 dark:border-indigo-800">
-                            <p className="text-sm text-indigo-600 dark:text-indigo-400 flex items-center gap-2 mb-1">
+                          <div className="bg-purple-50 dark:bg-purple-900/20 p-6 rounded-2xl border border-purple-100 dark:border-purple-800">
+                            <p className="text-sm text-purple-600 dark:text-purple-400 flex items-center gap-2 mb-1">
                               <Sparkles className="w-4 h-4" /> Total Earned
                             </p>
                             <p className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -137,7 +137,7 @@ const ReferralsModal: React.FC<ReferralsModalProps> = ({ isOpen, onClose, storeI
                         {/* Share Section */}
                         <div className="bg-gray-50 dark:bg-gray-900/50 p-6 rounded-2xl border border-gray-100 dark:border-gray-800">
                           <div className="flex items-center gap-2 mb-4">
-                            <Share2 className="w-5 h-5 text-indigo-500" />
+                            <Share2 className="w-5 h-5 text-purple-500" />
                             <h4 className="font-semibold text-gray-900 dark:text-white">Share Your Link</h4>
                           </div>
                           <div className="flex flex-col sm:flex-row gap-3">
@@ -146,7 +146,7 @@ const ReferralsModal: React.FC<ReferralsModalProps> = ({ isOpen, onClose, storeI
                             </div>
                             <button
                               onClick={handleCopyLink}
-                              className="flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md active:scale-95"
+                              className="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-xl transition-all shadow-md active:scale-95"
                             >
                               {copied ? <CheckCircle className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
                               <span>{copied ? 'Copied' : 'Copy'}</span>
@@ -161,13 +161,13 @@ const ReferralsModal: React.FC<ReferralsModalProps> = ({ isOpen, onClose, storeI
                           </h3>
                           {isLoading ? (
                             <div className="flex items-center justify-center py-12">
-                              <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+                              <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
                             </div>
                           ) : referrals.length > 0 ? (
                             <div className="space-y-6">
                               {sortedDateKeys.map((dateKey) => (
                                 <div key={dateKey}>
-                                  <h4 className="font-bold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 sticky top-0 bg-white/80 dark:bg-background/80 backdrop-blur-sm py-2 z-10">
+                                  <h4 className="font-bold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 sticky top-0 bg-white/95 dark:bg-modal-background/95 backdrop-blur-md py-3 z-10 -mx-4 sm:-mx-6 px-4 sm:px-6 border-b border-gray-100/50 dark:border-gray-800/50">
                                     {formatDateGroup(dateKey)}
                                   </h4>
                                   <div className="space-y-3">
@@ -206,18 +206,6 @@ const ReferralsModal: React.FC<ReferralsModalProps> = ({ isOpen, onClose, storeI
                   </div>
                 </div>
 
-                {/* Footer */}
-                <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-modal-background p-4 sm:px-6">
-                  <div className="max-w-3xl mx-auto w-full">
-                    <button
-                      type="button"
-                      className="w-full rounded-xl border border-transparent bg-indigo-600 px-6 py-4 text-base font-bold text-white shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-all transform active:scale-[0.98]"
-                      onClick={onClose}
-                    >
-                      Done
-                    </button>
-                  </div>
-                </div>
 
               </Dialog.Panel>
             </Transition.Child>
