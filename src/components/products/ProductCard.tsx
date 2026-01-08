@@ -104,7 +104,7 @@ export default function ProductCard({ product, storeId, activeCategoryId }: Prod
           group-hover:shadow-[0_16px_24px_-8px_rgba(0,0,0,0.12),0_4px_12px_-4px_rgba(0,0,0,0.08)] dark:group-hover:shadow-xl dark:group-hover:shadow-white/15
           group-hover:translate-y-[-4px]
           active:scale-[0.97] active:ring-4 active:ring-blue-500/40 dark:active:ring-sky-400/40 active:ring-offset-2 active:ring-offset-white dark:active:ring-offset-gray-900
-          bg-white dark:bg-gray-900"
+          bg-white dark:bg-card-background"
           style={{
             transform: 'translate3d(0,0,0)',
             perspective: '1000px',

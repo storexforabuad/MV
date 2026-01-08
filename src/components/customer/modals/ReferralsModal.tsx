@@ -75,7 +75,7 @@ const ReferralsModal: React.FC<ReferralsModalProps> = ({ isOpen, onClose, storeI
         <div className="fixed inset-0 z-10 overflow-y-auto">
           <div className="flex min-h-full items-end justify-center p-0 text-center sm:items-center sm:p-4">
             <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95" enterTo="opacity-100 translate-y-0 sm:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 sm:scale-100" leaveTo="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95">
-              <Dialog.Panel className="relative w-full transform overflow-hidden rounded-t-[2rem] bg-white dark:bg-slate-950 text-left align-middle shadow-2xl transition-all flex flex-col max-h-[92vh] sm:max-w-2xl sm:rounded-2xl sm:max-h-[85vh]">
+              <Dialog.Panel className="relative w-full transform overflow-hidden rounded-t-[2rem] bg-white dark:bg-modal-background text-left align-middle shadow-2xl transition-all flex flex-col max-h-[92vh] sm:max-w-2xl sm:rounded-2xl sm:max-h-[85vh]">
 
                 {/* Handle Bar for Mobile */}
                 <div className="flex-shrink-0 pt-3 pb-1 flex justify-center sm:hidden">
@@ -83,7 +83,7 @@ const ReferralsModal: React.FC<ReferralsModalProps> = ({ isOpen, onClose, storeI
                 </div>
 
                 {/* Header */}
-                <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-slate-950">
+                <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-modal-background">
                   <div>
                     <h2 className="text-xl font-bold text-gray-900 dark:text-white">
                       Referral Bonuses
@@ -167,7 +167,7 @@ const ReferralsModal: React.FC<ReferralsModalProps> = ({ isOpen, onClose, storeI
                             <div className="space-y-6">
                               {sortedDateKeys.map((dateKey) => (
                                 <div key={dateKey}>
-                                  <h4 className="font-bold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm py-2 z-10">
+                                  <h4 className="font-bold text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3 sticky top-0 bg-white/80 dark:bg-background/80 backdrop-blur-sm py-2 z-10">
                                     {formatDateGroup(dateKey)}
                                   </h4>
                                   <div className="space-y-3">
@@ -207,7 +207,7 @@ const ReferralsModal: React.FC<ReferralsModalProps> = ({ isOpen, onClose, storeI
                 </div>
 
                 {/* Footer */}
-                <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-950 p-4 sm:px-6">
+                <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-modal-background p-4 sm:px-6">
                   <div className="max-w-3xl mx-auto w-full">
                     <button
                       type="button"

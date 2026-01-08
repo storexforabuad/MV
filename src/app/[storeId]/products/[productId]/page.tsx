@@ -533,7 +533,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
 
       {/* Sticky Action Buttons */}
       {!product.soldOut && (
-        <div className="fixed bottom-0 left-0 right-0 p-3 sm:p-4 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 flex gap-3 z-40 safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
+        <div className="fixed bottom-0 left-0 right-0 p-3 sm:p-4 bg-white dark:bg-background border-t border-gray-200 dark:border-gray-800 flex gap-3 z-40 safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
           <button onClick={handlePlaceOrderClick} disabled={!isOrderable} className="group relative flex-grow inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-green-600 text-white font-bold shadow-lg hover:bg-green-700 transition-all active:scale-[0.98] disabled:bg-gray-400 disabled:cursor-not-allowed text-base">
             <ShoppingCart className="w-5 h-5" />
             <span>{shouldUsePaymentFlow(storeMeta?.storeType) ? 'Proceed to Payment' : 'Place Order'}</span>

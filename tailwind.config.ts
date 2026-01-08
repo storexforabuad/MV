@@ -21,6 +21,7 @@ export default {
         'input-background': "var(--input-background)",
         'input-border': "var(--input-border)",
         'button-secondary': "var(--button-secondary)",
+        'modal-background': "var(--modal-background)",
       },
       animation: {
         pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
@@ -37,11 +38,11 @@ export default {
           '50%': { transform: 'scale(1.1)' },
         },
         fadeIn: {
-          '0%': { 
+          '0%': {
             opacity: '0',
             transform: 'translateY(10px)'
           },
-          '100%': { 
+          '100%': {
             opacity: '1',
             transform: 'translateY(0)'
           },
