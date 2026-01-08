@@ -276,12 +276,17 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
           </Transition.Child>
 
           <div className="fixed inset-0 z-10 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-0 text-center">
-              <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 scale-95" enterTo="opacity-100 scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 scale-100" leaveTo="opacity-0 scale-95">
-                <Dialog.Panel className="fixed inset-0 w-full h-full max-w-none transform overflow-hidden bg-white dark:bg-slate-950 text-left align-middle shadow-xl transition-all flex flex-col">
+            <div className="flex min-h-full items-end justify-center p-0 text-center sm:items-center sm:p-4">
+              <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95" enterTo="opacity-100 translate-y-0 sm:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 sm:scale-100" leaveTo="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95">
+                <Dialog.Panel className="relative w-full transform overflow-hidden rounded-t-[2rem] bg-white dark:bg-slate-950 text-left align-middle shadow-2xl transition-all flex flex-col max-h-[92vh] sm:max-w-2xl sm:rounded-2xl sm:max-h-[85vh]">
+
+                  {/* Handle Bar for Mobile */}
+                  <div className="flex-shrink-0 pt-3 pb-1 flex justify-center sm:hidden">
+                    <div className="w-12 h-1.5 rounded-full bg-gray-300 dark:bg-gray-700" />
+                  </div>
 
                   {/* Header */}
-                  <div className="flex-shrink-0 flex items-center justify-between px-4 py-3 sm:px-6 border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-950">
+                  <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-slate-950">
                     <h3 className="text-lg font-semibold leading-6 text-gray-900 dark:text-white">
                       {currentPage === 1 ? 'Order Summary' : (isPaymentFlowEnabled ? 'Payment' : 'WhatsApp Preview')}
                     </h3>
