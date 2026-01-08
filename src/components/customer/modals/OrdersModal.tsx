@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useMemo, useEffect } from 'react';
-import { motion, AnimatePresence, Variants } from 'framer-motion';
+import React, { useMemo, useEffect, Fragment, useRef } from 'react';
+import { Dialog, Transition } from '@headlessui/react';
 import { ShoppingCart, Package, X } from 'lucide-react';
 import { Order } from '../../../hooks/useOrders';
 import { OrderDetailCard } from '../cards/OrderDetailCard';
@@ -36,28 +36,6 @@ const formatDateGroup = (dateStr: string) => {
   });
 };
 
-const containerVariants: Variants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.5,
-      ease: "easeOut",
-    },
-  },
-};
-
 const OrdersModal: React.FC<OrdersModalProps> = ({
   isOpen,
   onClose,
@@ -68,33 +46,17 @@ const OrdersModal: React.FC<OrdersModalProps> = ({
   onNotificationRequest
 }) => {
   const [hasRequestedNotifications, setHasRequestedNotifications] = React.useState(false);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose();
-    };
-
-    if (isOpen) {
-      document.addEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'hidden';
-
-      if (orders.length > 0 && !hasRequestedNotifications && onNotificationRequest) {
-        if (Notification.permission === 'default' || Notification.permission === 'granted') {
-          onNotificationRequest().then(() => {
-            setHasRequestedNotifications(true);
-          });
-        }
+    if (isOpen && orders.length > 0 && !hasRequestedNotifications && onNotificationRequest) {
+      if (Notification.permission === 'default' || Notification.permission === 'granted') {
+        onNotificationRequest().then(() => {
+          setHasRequestedNotifications(true);
+        });
       }
-    } else {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'auto';
     }
-
-    return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'auto';
-    };
-  }, [isOpen, onClose, orders.length, hasRequestedNotifications, onNotificationRequest]);
+  }, [isOpen, orders.length, hasRequestedNotifications, onNotificationRequest]);
 
   useEffect(() => {
     if (highlightOrderId && isOpen) {
@@ -119,96 +81,99 @@ const OrdersModal: React.FC<OrdersModalProps> = ({
     return Object.keys(groupedOrders).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
   }, [groupedOrders]);
 
-  const modalVariants = {
-    hidden: { opacity: 0, y: '100%' },
-    visible: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: '100%' }
-  };
-
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
-          initial="hidden"
-          animate="visible"
-          exit="exit"
-          variants={modalVariants}
-          transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
-        >
-          {/* --- Header --- */}
-          <header className="flex-shrink-0 flex items-center justify-between w-full max-w-5xl mx-auto p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
-                My Orders
-              </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Track your purchases</p>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
-              <ShoppingCart className="w-6 h-6 text-white" />
-            </div>
-          </header>
+    <Transition.Root show={isOpen} as={Fragment}>
+      <Dialog as="div" className="relative z-50" onClose={onClose}>
+        <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
+          <div className="fixed inset-0 bg-black bg-opacity-75 transition-opacity" />
+        </Transition.Child>
 
-          {/* --- Main Scrollable Content --- */}
-          <main className="flex-grow w-full max-w-5xl mx-auto overflow-y-auto p-4 sm:p-6 scrollbar-hide">
-            {orders && orders.length > 0 ? (
-              <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                className="space-y-8"
-              >
-                {sortedDateKeys.map((dateKey) => (
-                  <div key={dateKey}>
-                    <h3 className="font-bold text-lg text-slate-600 dark:text-slate-300 mb-4 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm py-2 z-10">
-                      {formatDateGroup(dateKey)}
-                    </h3>
-                    <div className="grid grid-cols-1 gap-4">
-                      {groupedOrders[dateKey].map(order => (
-                        <motion.div
-                          key={order.id}
-                          variants={itemVariants}
-                          id={`customer-order-${order.id}`}
-                        >
-                          <OrderDetailCard
-                            order={order}
-                            addOrder={addOrder}
-                            storeMeta={storeMeta}
-                            isHighlighted={highlightOrderId === order.id}
-                          />
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </motion.div>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full text-center text-slate-500 dark:text-slate-400 min-h-[400px]">
-                <div className="w-20 h-20 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-6">
-                  <Package className="w-10 h-10 text-slate-400" />
+        <div className="fixed inset-0 z-10 overflow-y-auto">
+          <div className="flex min-h-full items-end justify-center p-0 text-center sm:items-center sm:p-4">
+            <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95" enterTo="opacity-100 translate-y-0 sm:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 sm:scale-100" leaveTo="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95">
+              <Dialog.Panel className="relative w-full transform overflow-hidden rounded-t-[2rem] bg-white dark:bg-slate-950 text-left align-middle shadow-2xl transition-all flex flex-col max-h-[92vh] sm:max-w-2xl sm:rounded-2xl sm:max-h-[85vh]">
+
+                {/* Handle Bar for Mobile */}
+                <div className="flex-shrink-0 pt-3 pb-1 flex justify-center sm:hidden">
+                  <div className="w-12 h-1.5 rounded-full bg-gray-300 dark:bg-gray-700" />
                 </div>
-                <h3 className="text-xl font-semibold text-slate-900 dark:text-white">No Orders Yet</h3>
-                <p className="max-w-xs mt-2">When you buy something, your orders will show up here.</p>
-              </div>
-            )}
-          </main>
 
-          {/* --- Footer --- */}
-          <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-slate-800">
-            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent dark:from-slate-950 dark:to-transparent pointer-events-none" />
-            <div className="relative max-w-5xl mx-auto">
-              <motion.button
-                onClick={onClose}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
-                whileTap={{ scale: 0.98 }}
-              >
-                Done
-              </motion.button>
-            </div>
-          </footer>
-        </motion.div>
-      )}
-    </AnimatePresence>
+                {/* Header */}
+                <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-slate-950">
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                      My Orders
+                    </h2>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Track your purchases</p>
+                  </div>
+                  <button
+                    type="button"
+                    className="flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 focus:outline-none transition-colors shadow-sm"
+                    onClick={onClose}
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+
+                {/* Main Content */}
+                <div ref={scrollContainerRef} className="flex-grow overflow-y-auto p-4 sm:p-6">
+                  <div className="max-w-3xl mx-auto w-full">
+                    {orders && orders.length > 0 ? (
+                      <div className="space-y-8">
+                        {sortedDateKeys.map((dateKey) => (
+                          <div key={dateKey}>
+                            <h3 className="font-bold text-sm uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-4 sticky top-0 bg-white/80 dark:bg-slate-950/80 backdrop-blur-sm py-2 z-10">
+                              {formatDateGroup(dateKey)}
+                            </h3>
+                            <div className="grid grid-cols-1 gap-4">
+                              {groupedOrders[dateKey].map(order => (
+                                <div
+                                  key={order.id}
+                                  id={`customer-order-${order.id}`}
+                                >
+                                  <OrderDetailCard
+                                    order={order}
+                                    addOrder={addOrder}
+                                    storeMeta={storeMeta}
+                                    isHighlighted={highlightOrderId === order.id}
+                                  />
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center py-20 text-center">
+                        <div className="w-20 h-20 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-6">
+                          <Package className="w-10 h-10 text-gray-400" />
+                        </div>
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">No Orders Yet</h3>
+                        <p className="max-w-xs mt-2 text-gray-500 dark:text-gray-400">When you buy something, your orders will show up here.</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Footer */}
+                <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-slate-950 p-4 sm:px-6">
+                  <div className="max-w-3xl mx-auto w-full">
+                    <button
+                      type="button"
+                      className="w-full rounded-xl border border-transparent bg-green-600 px-6 py-4 text-base font-bold text-white shadow-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all transform active:scale-[0.98]"
+                      onClick={onClose}
+                    >
+                      Done
+                    </button>
+                  </div>
+                </div>
+
+              </Dialog.Panel>
+            </Transition.Child>
+          </div>
+        </div>
+      </Dialog>
+    </Transition.Root>
   );
 };
 
