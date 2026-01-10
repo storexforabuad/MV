@@ -128,7 +128,6 @@ const TierCard = ({
             <span className={`text-3xl sm:text-4xl font-black tracking-tighter ${isProMax ? 'text-amber-400' : 'text-white'}`}>
               ₦{details.price.toLocaleString()}
             </span>
-            <span className={`text-xs sm:text-sm font-medium ${isProMax ? 'text-amber-500/60' : 'text-white/60'}`}>/{details.period}</span>
           </div>
           <p className={`text-[10px] sm:text-xs font-medium mt-2 leading-relaxed max-w-[240px] ${isProMax ? 'text-amber-100/60' : 'text-white/60'}`}>
             {details.description}
