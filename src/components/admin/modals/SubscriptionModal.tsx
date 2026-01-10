@@ -27,6 +27,7 @@ const TierCard = ({
   isSelected,
   onSelect,
   onSubscribe,
+  isLoading,
   disabled
 }: {
   tier: SubscriptionTier,
@@ -34,6 +35,7 @@ const TierCard = ({
   isSelected: boolean,
   onSelect: () => void,
   onSubscribe: () => void,
+  isLoading: boolean,
   disabled: boolean
 }) => {
   const isPro = tier === 'pro';
@@ -47,8 +49,8 @@ const TierCard = ({
         whileTap={{ scale: 0.99 }}
         onClick={!disabled ? onSelect : undefined}
         className={`relative p-6 rounded-[2rem] border-2 transition-all cursor-pointer overflow-hidden ${isSelected
-            ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500 shadow-xl'
-            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'
+          ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500 shadow-xl'
+          : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'
           } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <div className="flex items-center justify-between mb-4">
@@ -67,11 +69,13 @@ const TierCard = ({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            if (!disabled) onSubscribe();
+            if (!disabled && !isLoading) onSubscribe();
           }}
-          className={`w-full py-3 rounded-xl font-black transition-all ${isSelected ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}
+          disabled={isLoading}
+          className={`w-full py-3 rounded-xl font-black transition-all flex items-center justify-center gap-2 ${isSelected ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}
         >
-          {isSelected ? 'Subscribe Now' : 'Select Plan'}
+          {isLoading && isSelected ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+          {isSelected ? (isLoading ? 'Initializing...' : 'Subscribe Now') : 'Select Plan'}
         </button>
       </motion.div>
     );
@@ -83,8 +87,8 @@ const TierCard = ({
       whileTap={{ scale: 0.98 }}
       onClick={!disabled ? onSelect : undefined}
       className={`relative aspect-[16/9] sm:aspect-[21/9] rounded-[2rem] overflow-hidden border-2 transition-all cursor-pointer group ${isSelected
-          ? isProMax ? 'border-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.3)]' : 'border-white/40 shadow-2xl scale-[1.02]'
-          : isProMax ? 'border-amber-500/30 hover:border-amber-500/60' : 'border-white/5 hover:border-white/20'
+        ? isProMax ? 'border-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.3)]' : 'border-white/40 shadow-2xl scale-[1.02]'
+        : isProMax ? 'border-amber-500/30 hover:border-amber-500/60' : 'border-white/5 hover:border-white/20'
         } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
     >
       {/* Background Image */}
@@ -134,17 +138,19 @@ const TierCard = ({
         <button
           onClick={(e) => {
             e.stopPropagation();
-            if (!disabled) {
+            if (!disabled && !isLoading) {
               if (isSelected) onSubscribe();
               else onSelect();
             }
           }}
-          className={`w-full py-3 rounded-xl font-black text-xs sm:text-sm transition-all backdrop-blur-md border ${isSelected
-              ? isProMax ? 'bg-amber-500 text-black border-amber-500' : 'bg-white text-black border-white'
-              : isProMax ? 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20' : 'bg-white/10 text-white border-white/20 hover:bg-white/20'
+          disabled={isLoading}
+          className={`w-full py-3 rounded-xl font-black text-xs sm:text-sm transition-all backdrop-blur-md border flex items-center justify-center gap-2 ${isSelected
+            ? isProMax ? 'bg-amber-500 text-black border-amber-500' : 'bg-white text-black border-white'
+            : isProMax ? 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20' : 'bg-white/10 text-white border-white/20 hover:bg-white/20'
             }`}
         >
-          {isSelected ? 'Subscribe Now' : 'Select Plan'}
+          {isLoading && isSelected ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+          {isSelected ? (isLoading ? 'Initializing...' : 'Subscribe Now') : 'Select Plan'}
         </button>
       </div>
     </motion.div>
@@ -438,6 +444,7 @@ export default function SubscriptionModal({
                       isSelected={true}
                       onSelect={() => { }}
                       onSubscribe={handleSubscribe}
+                      isLoading={subscribing}
                       disabled={status === 'active'}
                     />
                   ) : (
@@ -448,6 +455,7 @@ export default function SubscriptionModal({
                         isSelected={selectedTier === 'basic'}
                         onSelect={() => setSelectedTier('basic')}
                         onSubscribe={handleSubscribe}
+                        isLoading={subscribing && selectedTier === 'basic'}
                         disabled={status === 'active'}
                       />
                       <TierCard
@@ -456,6 +464,7 @@ export default function SubscriptionModal({
                         isSelected={selectedTier === 'pro'}
                         onSelect={() => setSelectedTier('pro')}
                         onSubscribe={handleSubscribe}
+                        isLoading={subscribing && selectedTier === 'pro'}
                         disabled={status === 'active'}
                       />
                       <TierCard
@@ -464,6 +473,7 @@ export default function SubscriptionModal({
                         isSelected={selectedTier === 'promax'}
                         onSelect={() => setSelectedTier('promax')}
                         onSubscribe={handleSubscribe}
+                        isLoading={subscribing && selectedTier === 'promax'}
                         disabled={status === 'active'}
                       />
                     </>
