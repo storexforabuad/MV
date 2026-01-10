@@ -25,7 +25,7 @@ const tipsData: Record<TabType, Tip[]> = {
       iconColor: 'text-sky-500',
       iconBg: 'bg-sky-100 dark:bg-sky-900/30',
       title: 'Navigate Like a Pro',
-      description: 'Use the bottom navigationxs tabs to quickly switch between Home(Overview), Store(Preview), Products(Upload), and Categories. Each section gives you powerful tools to manage your business.',
+      description: 'Use the bottom navigations tabs to quickly switch between Home(Overview), Store(Preview), Products(Upload), and Categories. Each section gives you powerful tools to manage your business.',
     },
     {
       icon: BarChart2,
