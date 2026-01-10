@@ -263,12 +263,19 @@ export async function verifySubscriptionPayment(reference: string) {
 
         const { metadata, customer, plan, subscription_code, authorization } = data.data;
         const storeId = metadata?.storeId;
+        const tier = metadata?.tier || 'general';
 
         if (!storeId) throw new Error('No store ID in transaction metadata');
 
-        // Calculate next billing date (1 month from now)
+        // Calculate next billing date
         const nextBillingDate = new Date();
-        nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
+        if (tier === 'basic' || tier === 'pro' || tier === 'promax') {
+            // Weekly billing
+            nextBillingDate.setDate(nextBillingDate.getDate() + 7);
+        } else {
+            // Monthly billing
+            nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
+        }
 
         // Activate subscription
         await activateSubscription(

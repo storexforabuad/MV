@@ -7,7 +7,7 @@ import { activateSubscription } from '@/app/actions/subscriptionActions';
  */
 export async function POST(request: NextRequest) {
     try {
-        const { storeId, email, storeName } = await request.json();
+        const { storeId, email, storeName, tier } = await request.json();
 
         if (!storeId || !email) {
             return NextResponse.json(
@@ -17,12 +17,18 @@ export async function POST(request: NextRequest) {
         }
 
         const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
-        const PAYSTACK_PLAN_CODE = process.env.PAYSTACK_PLAN_CODE;
 
-        if (!PAYSTACK_SECRET_KEY || !PAYSTACK_PLAN_CODE) {
+        // Map tier to environment variable
+        let planCode = '';
+        if (tier === 'basic') planCode = process.env.PAYSTACK_BASIC_PLAN_CODE || '';
+        else if (tier === 'pro') planCode = process.env.PAYSTACK_PRO_PLAN_CODE || '';
+        else if (tier === 'promax') planCode = process.env.PAYSTACK_PROMAX_PLAN_CODE || '';
+        else planCode = process.env.PAYSTACK_PLAN_CODE || ''; // Default/General
+
+        if (!PAYSTACK_SECRET_KEY || !planCode) {
             const missing = [];
             if (!PAYSTACK_SECRET_KEY) missing.push('PAYSTACK_SECRET_KEY');
-            if (!PAYSTACK_PLAN_CODE) missing.push('PAYSTACK_PLAN_CODE');
+            if (!planCode) missing.push(`PAYSTACK_${(tier || 'general').toUpperCase()}_PLAN_CODE`);
 
             console.error('Missing Paystack environment variables:', missing.join(', '));
             return NextResponse.json(
@@ -35,56 +41,45 @@ export async function POST(request: NextRequest) {
         const customerResponse = await fetch('https://api.paystack.co/customer', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
+                Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
                 email,
                 first_name: storeName || 'Store',
-                last_name: 'Owner',
                 metadata: {
                     storeId,
+                    tier,
                 },
             }),
         });
 
         const customerData = await customerResponse.json();
-
-        // If customer already exists, that's fine
         let customerCode = '';
+
         if (customerData.status) {
             customerCode = customerData.data.customer_code;
-        } else if (customerData.message?.includes('already')) {
-            // Customer exists, fetch their code
-            const existingCustomerResponse = await fetch(
-                `https://api.paystack.co/customer/${encodeURIComponent(email)}`,
-                {
-                    headers: {
-                        'Authorization': `Bearer ${PAYSTACK_SECRET_KEY}`,
-                    },
-                }
-            );
-            const existingCustomerData = await existingCustomerResponse.json();
+        } else {
+            // If customer already exists, fetch their details
+            const getCustomerResponse = await fetch(`https://api.paystack.co/customer/${email}`, {
+                headers: {
+                    Authorization: `Bearer ${PAYSTACK_SECRET_KEY}`,
+                },
+            });
+            const existingCustomerData = await getCustomerResponse.json();
             if (existingCustomerData.status) {
                 customerCode = existingCustomerData.data.customer_code;
+            } else {
+                throw new Error(customerData.message || 'Failed to create or retrieve Paystack customer');
             }
         }
 
-        if (!customerCode) {
-            return NextResponse.json(
-                { error: 'Failed to create or retrieve customer' },
-                { status: 500 }
-            );
-        }
-
         // Step 2: Return necessary data for client-side initialization
-        // We do NOT create the subscription here. Paystack Inline will create it when the user pays with the plan code.
-
         return NextResponse.json({
             success: true,
             data: {
                 customerCode,
-                planCode: PAYSTACK_PLAN_CODE,
+                planCode,
                 email,
             },
         });
