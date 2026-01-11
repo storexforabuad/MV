@@ -107,43 +107,30 @@ const TierCard = ({
       {/* Overlay Gradient */}
       <div className={`absolute inset-0 ${isProMax ? 'bg-gradient-to-t from-black/90 via-black/40 to-transparent' : 'bg-gradient-to-t from-black/80 via-black/20 to-transparent'}`} />
 
-      {/* Popular Ribbon */}
-      {isPro && (
-        <div className="absolute top-0 right-6">
-          <div className="relative">
-            <div className="bg-gradient-to-b from-amber-300 to-amber-600 text-black text-[9px] font-black px-3 py-1.5 rounded-b-lg shadow-2xl uppercase tracking-widest">
-              Most Popular
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Content Overlay */}
-      <div className="absolute inset-0 p-5 sm:p-8 flex flex-col justify-end">
-        <div className="mb-4">
-          <div className="flex items-center gap-2 mb-1">
-            <h4 className={`text-lg sm:text-xl font-black tracking-tight ${isProMax ? 'text-amber-50' : 'text-white'}`}>
-              {details.name}
-            </h4>
-            {isSelected && <CheckCircle2 className={`w-4 h-4 ${isProMax ? 'text-amber-400' : 'text-white'}`} />}
-          </div>
+      <div className="absolute inset-0 p-4 sm:p-6 flex flex-col justify-end">
+        {/* Top Section: Name */}
+        <div className="flex items-center gap-2 mb-auto">
+          <h4 className={`text-xl sm:text-2xl font-black tracking-tight drop-shadow-md ${isProMax ? 'text-amber-50' : 'text-white'}`}>
+            {details.name}
+          </h4>
+          {isSelected && <CheckCircle2 className={`w-5 h-5 drop-shadow-md ${isProMax ? 'text-amber-400' : 'text-white'}`} />}
+        </div>
+
+        {/* Bottom Section: Price & Description */}
+        <div>
           <div className="flex items-baseline gap-2">
             <div className="flex flex-col">
-              <span className={`text-[10px] font-bold line-through opacity-50 ${isProMax ? 'decoration-amber-500' : 'decoration-white'}`}>
+              <span className={`text-sm font-bold line-through drop-shadow-sm ${isProMax ? 'text-amber-200/80 decoration-amber-400' : 'text-white/80 decoration-white/60'}`}>
                 ₦{(details.price * 2).toLocaleString()}
               </span>
-              <span className={`text-3xl sm:text-4xl font-black tracking-tighter ${isProMax ? 'text-amber-400' : 'text-white'}`}>
+              <span className={`text-3xl sm:text-4xl font-black tracking-tighter drop-shadow-xl ${isProMax ? 'text-amber-400' : 'text-white'}`}>
                 ₦{details.price.toLocaleString()}
               </span>
             </div>
-            {!isProMax && (
-              <div className="bg-white/10 backdrop-blur-md border border-white/20 px-2 py-0.5 rounded-full flex items-center gap-1">
-                <Sparkles className="w-2.5 h-2.5 text-amber-400" />
-                <span className="text-[8px] font-black text-white uppercase tracking-tighter">Ambassador Price</span>
-              </div>
-            )}
           </div>
-          <p className={`text-[10px] sm:text-xs font-medium mt-2 leading-relaxed max-w-[240px] ${isProMax ? 'text-amber-100/60' : 'text-white/60'}`}>
+          <p className={`text-[10px] sm:text-xs font-medium mt-1 leading-snug max-w-[280px] drop-shadow-md ${isProMax ? 'text-amber-100/80' : 'text-white/80'}`}>
             {details.description}
           </p>
         </div>
@@ -434,45 +421,46 @@ export default function SubscriptionModal({
                 </div>
               )}
 
+              {/* Ambassador Discount Section (Moved to Top) */}
+              {!isLegacyStore && (
+                <div className="mx-1 p-5 rounded-[2rem] bg-gradient-to-br from-indigo-600/10 via-slate-900/5 to-amber-500/10 border border-indigo-500/20 flex items-center justify-between shadow-xl backdrop-blur-sm">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600 to-amber-500 flex items-center justify-center shadow-2xl">
+                      <Sparkles className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h5 className="text-base font-black text-slate-900 dark:text-white tracking-tight">Ambassador Discount</h5>
+                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Exclusive 50% savings applied</p>
+                    </div>
+                  </div>
+                  <div className="relative w-14 h-7 bg-indigo-600 rounded-full p-1 cursor-not-allowed shadow-inner">
+                    <motion.div
+                      initial={false}
+                      animate={{ x: 28 }}
+                      className="w-5 h-5 bg-white rounded-full shadow-lg flex items-center justify-center"
+                    >
+                      <div className="w-2 h-2 bg-indigo-600 rounded-full" />
+                    </motion.div>
+                  </div>
+                </div>
+              )}
+
               {/* Plan Selection Section */}
-              <div className="space-y-6">
+              <div className="space-y-8">
                 <div className="flex items-center justify-between px-1">
-                  <h4 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
+                  <h4 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                     {isLegacyStore ? 'Your Plan' : 'Choose Your Plan'}
                   </h4>
                   {!isLegacyStore && (
                     <div className="flex items-center gap-3">
-                      <div className="bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700">
-                        <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                      <div className="bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-full border border-slate-200 dark:border-slate-800 shadow-sm">
+                        <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                           Weekly Billing
                         </span>
                       </div>
                     </div>
                   )}
                 </div>
-
-                {!isLegacyStore && (
-                  <div className="mx-1 p-4 rounded-2xl bg-gradient-to-r from-indigo-600/10 to-amber-500/10 border border-indigo-500/20 flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-amber-500 flex items-center justify-center shadow-lg">
-                        <Sparkles className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <h5 className="text-sm font-black text-slate-900 dark:text-white">Ambassador Discount</h5>
-                        <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400">Exclusive 50% savings applied</p>
-                      </div>
-                    </div>
-                    <div className="relative w-12 h-6 bg-indigo-600 rounded-full p-1 cursor-not-allowed shadow-inner">
-                      <motion.div
-                        initial={false}
-                        animate={{ x: 24 }}
-                        className="w-4 h-4 bg-white rounded-full shadow-md flex items-center justify-center"
-                      >
-                        <div className="w-1.5 h-1.5 bg-indigo-600 rounded-full" />
-                      </motion.div>
-                    </div>
-                  </div>
-                )}
 
                 <div className="grid grid-cols-1 gap-6">
                   {isLegacyStore ? (

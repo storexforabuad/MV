@@ -145,7 +145,7 @@ export const SUBSCRIPTION_CONFIG = {
 
 export const TIER_DETAILS = {
     basic: {
-        name: 'Basic',
+        name: 'Lite',
         price: 500,
         period: 'week',
         description: 'Perfect for new and small vendors just starting their digital journey.',
@@ -170,11 +170,10 @@ export const TIER_DETAILS = {
         textColor: 'text-white',
         iconColor: 'text-indigo-400',
         buttonClass: 'bg-indigo-500/20 hover:bg-indigo-500/30 text-indigo-100 border border-indigo-400/30',
-        isPopular: true,
         image: '/images/subscriptions/pro_tier.png'
     },
     promax: {
-        name: 'Pro Max',
+        name: 'Max',
         price: 3500,
         period: 'week',
         description: 'The ultimate choice for wholesalers and big brands with high volume.',
