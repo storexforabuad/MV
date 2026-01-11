@@ -15,10 +15,6 @@ const ProductUploadTips = () => {
       icon: <DollarSign size={20} className="text-yellow-500" />,
       text: "Price your items competitively.",
     },
-    {
-      icon: <Info size={20} className="text-purple-500" />,
-      text: "Higher commission lead to higher referalls",
-    },
   ];
 
   return (
@@ -28,7 +24,7 @@ const ProductUploadTips = () => {
         {tips.map((tip, index) => (
           <li key={index} className="flex items-start text-xs text-gray-600 dark:text-gray-400">
             <div className="flex-shrink-0 w-5 h-5 flex items-center justify-center mr-2">
-                {tip.icon}
+              {tip.icon}
             </div>
             <span className="flex-1">{tip.text}</span>
           </li>

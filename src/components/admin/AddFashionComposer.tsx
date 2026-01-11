@@ -551,14 +551,6 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                             </AnimatePresence>
                         </div>
 
-                        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800/50 flex justify-between items-center">
-                            <div>
-                                <span className="block text-sm font-semibold text-blue-900 dark:text-blue-100">Platform Fee (2.5%)</span>
-                                <span className="text-xs text-blue-600 dark:text-blue-300">Automatically deducted</span>
-                            </div>
-                            <span className="font-bold text-blue-900 dark:text-blue-100">{formatPrice(commissionAmount)}</span>
-                        </div>
-
                         <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-700">
                             <ModernToggle label="Limited Stock" description="Show 'Low Stock' badge to customers" checked={productData.limitedStock} onChange={checked => handleProductChange('limitedStock', checked)} />
                             <ModernToggle label="Sold Out" description="Mark as currently unavailable" checked={productData.soldOut} onChange={checked => handleProductChange('soldOut', checked)} />

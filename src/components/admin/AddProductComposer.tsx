@@ -137,7 +137,7 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
           price: template?.price || 0,
           isPromo: template?.isPromo || false,
           promoPrice: template?.promoPrice,
-          commission: template?.commission || 10,
+          commission: template?.commission || 2.5, // Fixed commission
           categoryId: template?.categoryId || '',
           limitedStock: template?.limitedStock || false,
           soldOut: template?.soldOut || false,
@@ -299,7 +299,6 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
       case 2: // Pricing Step
       case 3: // Inventory Step
         if (!activeProduct) return null;
-        const commissionAmount = (activeProduct.isPromo ? activeProduct.promoPrice || 0 : activeProduct.price || 0) * (activeProduct.commission / 100);
         const categoryName = categories.find(c => c.id === activeProduct.categoryId)?.name || 'Select a category';
 
         return (
@@ -351,13 +350,6 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
                     </motion.div>
                   )}
                 </AnimatePresence>
-                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800/50 flex justify-between items-center">
-                  <div>
-                    <span className="block text-sm font-semibold text-blue-900 dark:text-blue-100">Commission ({activeProduct.commission}%)</span>
-                    <span className="text-xs text-blue-600 dark:text-blue-300">Automatically deducted</span>
-                  </div>
-                  <span className="font-bold text-blue-900 dark:text-blue-100">{formatPrice(commissionAmount)}</span>
-                </div>
               </motion.div>
             )}
             {currentStep === 3 && (
@@ -390,30 +382,57 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="space-y-3 pt-2"
+                      className="space-y-4 pt-2"
                     >
                       <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">Select Size Category:</p>
                       <div className="grid grid-cols-1 gap-2">
                         {(['baby-clothes', 'kids-shoes', 'adult-shoes'] as const).map(option => (
-                          <button
-                            key={option}
-                            onClick={() => {
-                              handleProductChange(activeProductIndex, {
-                                sizeOption: option,
-                                availableSizes: getSizesForOption(option)
-                              });
-                            }}
-                            className={`p-3 rounded-xl border text-left transition-all ${activeProduct.sizeOption === option
-                              ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20'
-                              : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-blue-400'
-                              }`}
-                          >
-                            <div className="font-semibold text-slate-900 dark:text-slate-100">
-                              {option === 'baby-clothes' && 'Baby Clothes (3m - 24m)'}
-                              {option === 'kids-shoes' && 'Kids Shoes (20 - 35)'}
-                              {option === 'adult-shoes' && 'Adult Shoes (36 - 42)'}
-                            </div>
-                          </button>
+                          <div key={option} className="space-y-2">
+                            <button
+                              onClick={() => {
+                                handleProductChange(activeProductIndex, {
+                                  sizeOption: option,
+                                  availableSizes: getSizesForOption(option)
+                                });
+                              }}
+                              className={`w-full p-3 rounded-xl border text-left transition-all ${activeProduct.sizeOption === option
+                                ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20'
+                                : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-blue-400'
+                                }`}
+                            >
+                              <div className="font-semibold text-slate-900 dark:text-slate-100">
+                                {option === 'baby-clothes' && 'Baby Clothes (3m - 24m)'}
+                                {option === 'kids-shoes' && 'Kids Shoes (20 - 35)'}
+                                {option === 'adult-shoes' && 'Adult Shoes (36 - 42)'}
+                              </div>
+                            </button>
+
+                            {activeProduct.sizeOption === option && (
+                              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 p-2 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+                                {getSizesForOption(option).map(size => {
+                                  const isSelected = activeProduct.availableSizes?.includes(size);
+                                  return (
+                                    <button
+                                      key={size}
+                                      onClick={() => {
+                                        const currentSizes = activeProduct.availableSizes || [];
+                                        const newSizes = isSelected
+                                          ? currentSizes.filter(s => s !== size)
+                                          : [...currentSizes, size];
+                                        handleProductChange(activeProductIndex, 'availableSizes', newSizes);
+                                      }}
+                                      className={`py-2 px-1 rounded-lg text-xs font-bold border-2 transition-all ${isSelected
+                                          ? 'bg-blue-600 border-blue-600 text-white shadow-md'
+                                          : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'
+                                        }`}
+                                    >
+                                      {size}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            )}
+                          </div>
                         ))}
                       </div>
                     </motion.div>
@@ -522,7 +541,7 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
           {/* --- Footer --- */}
           <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 z-10">
             <div className="absolute bottom-full left-0 right-0 h-12 bg-gradient-to-t from-white dark:from-slate-950 to-transparent pointer-events-none" />
-            <div className="max-w-5xl mx-auto flex gap-4">
+            <div className="max-w-5xl mx-auto flex items-center gap-3">
               {currentStep === 0 && (
                 <button onClick={handleClose} className="flex-1 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-semibold hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
                   Cancel
@@ -530,8 +549,8 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
               )}
 
               {currentStep > 0 && currentStep < 4 && (
-                <button onClick={() => setCurrentStep(s => s - 1)} className="flex-1 py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-2">
-                  <ChevronLeft className="w-5 h-5" /> Back
+                <button onClick={() => setCurrentStep(s => s - 1)} className="w-24 sm:flex-1 py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-1 text-sm">
+                  <ChevronLeft className="w-4 h-4" /> Back
                 </button>
               )}
 
