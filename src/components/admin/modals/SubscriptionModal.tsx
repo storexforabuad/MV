@@ -28,7 +28,8 @@ const TierCard = ({
   onSelect,
   onSubscribe,
   isLoading,
-  disabled
+  disabled,
+  actionType
 }: {
   tier: SubscriptionTier,
   details: any,
@@ -36,7 +37,8 @@ const TierCard = ({
   onSelect: () => void,
   onSubscribe: () => void,
   isLoading: boolean,
-  disabled: boolean
+  disabled: boolean,
+  actionType?: 'upgrade' | 'downgrade' | 'select'
 }) => {
   const isPro = tier === 'pro';
   const isProMax = tier === 'promax';
@@ -139,18 +141,28 @@ const TierCard = ({
           onClick={(e) => {
             e.stopPropagation();
             if (!disabled && !isLoading) {
-              if (isSelected) onSubscribe();
+              if (isSelected || actionType === 'upgrade' || actionType === 'downgrade') onSubscribe();
               else onSelect();
             }
           }}
           disabled={isLoading}
-          className={`w-full py-3 rounded-xl font-black text-xs sm:text-sm transition-all backdrop-blur-md border flex items-center justify-center gap-2 ${isSelected
-            ? isProMax ? 'bg-amber-500 text-black border-amber-500' : 'bg-white text-black border-white'
-            : isProMax ? 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20' : 'bg-white/10 text-white border-white/20 hover:bg-white/20'
+          className={`w-full py-3 rounded-xl font-black text-xs sm:text-sm transition-all backdrop-blur-md border flex items-center justify-center gap-2 ${actionType === 'upgrade'
+            ? 'bg-green-500 text-white border-green-500 hover:bg-green-600'
+            : actionType === 'downgrade'
+              ? 'bg-white/10 text-white border-white/30 hover:bg-white/20'
+              : isSelected
+                ? isProMax ? 'bg-amber-500 text-black border-amber-500' : 'bg-white text-black border-white'
+                : isProMax ? 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20' : 'bg-white/10 text-white border-white/20 hover:bg-white/20'
             }`}
         >
           {isLoading && isSelected ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-          {isSelected ? (isLoading ? 'Initializing...' : 'Subscribe Now') : 'Select Plan'}
+          {actionType === 'upgrade'
+            ? 'Upgrade'
+            : actionType === 'downgrade'
+              ? 'Downgrade'
+              : isSelected
+                ? (isLoading ? 'Initializing...' : 'Subscribe Now')
+                : 'Select Plan'}
         </button>
       </div>
     </motion.div>
@@ -392,7 +404,7 @@ export default function SubscriptionModal({
                               'text-red-600 dark:text-red-400'
                           }`} />
                         <span className="font-bold uppercase tracking-wider text-[9px] opacity-60">
-                          {status === 'active' ? `Active Plan: ${selectedTier.toUpperCase()}` : 'Current Status'}
+                          {status === 'active' ? `Active Plan: ${subscriptionData?.tier?.toUpperCase() || selectedTier.toUpperCase()}` : 'Current Status'}
                         </span>
                       </div>
                       <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
@@ -418,11 +430,26 @@ export default function SubscriptionModal({
                       </button>
                     )}
                   </div>
+                  {/* Inline Billing Info for Active Subscribers */}
+                  {status === 'active' && (
+                    <div className="mt-4 pt-4 border-t border-green-200/50 dark:border-green-800/50 grid grid-cols-2 gap-4">
+                      <div>
+                        <span className="text-[10px] font-black uppercase tracking-widest opacity-50">Next Billing</span>
+                        <p className="text-sm font-black text-slate-900 dark:text-white">
+                          {nextBillingDate?.toLocaleDateString('en-NG', { month: 'short', day: 'numeric', year: 'numeric' }) || 'N/A'}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-black uppercase tracking-widest opacity-50">Payment</span>
+                        <p className="text-sm font-black text-slate-900 dark:text-white">Paystack</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* Ambassador Discount Section (Moved to Top) */}
-              {!isLegacyStore && (
+              {/* Ambassador Discount Section - Hide for active subscribers */}
+              {!isLegacyStore && status !== 'active' && (
                 <div className="mx-1 p-5 rounded-[2rem] bg-gradient-to-br from-indigo-600/10 via-slate-900/5 to-amber-500/10 border border-indigo-500/20 flex items-center justify-between shadow-xl backdrop-blur-sm">
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600 to-amber-500 flex items-center justify-center shadow-2xl">
@@ -449,7 +476,7 @@ export default function SubscriptionModal({
               <div className="space-y-8">
                 <div className="flex items-center justify-between px-1">
                   <h4 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                    {isLegacyStore ? 'Your Plan' : 'Choose Your Plan'}
+                    {isLegacyStore ? 'Your Plan' : status === 'active' ? 'Change Your Plan' : 'Choose Your Plan'}
                   </h4>
                   {!isLegacyStore && (
                     <div className="flex items-center gap-3">
@@ -472,43 +499,42 @@ export default function SubscriptionModal({
                       onSubscribe={handleSubscribe}
                       isLoading={subscribing}
                       disabled={status === 'active'}
+                      actionType="select"
                     />
                   ) : (
                     <>
-                      <TierCard
-                        tier="basic"
-                        details={TIER_DETAILS.basic}
-                        isSelected={selectedTier === 'basic'}
-                        onSelect={() => setSelectedTier('basic')}
-                        onSubscribe={handleSubscribe}
-                        isLoading={subscribing && selectedTier === 'basic'}
-                        disabled={status === 'active'}
-                      />
-                      <TierCard
-                        tier="pro"
-                        details={TIER_DETAILS.pro}
-                        isSelected={selectedTier === 'pro'}
-                        onSelect={() => setSelectedTier('pro')}
-                        onSubscribe={handleSubscribe}
-                        isLoading={subscribing && selectedTier === 'pro'}
-                        disabled={status === 'active'}
-                      />
-                      <TierCard
-                        tier="promax"
-                        details={TIER_DETAILS.promax}
-                        isSelected={selectedTier === 'promax'}
-                        onSelect={() => setSelectedTier('promax')}
-                        onSubscribe={handleSubscribe}
-                        isLoading={subscribing && selectedTier === 'promax'}
-                        disabled={status === 'active'}
-                      />
+                      {(['basic', 'pro', 'promax'] as const)
+                        .filter(t => status !== 'active' || t !== subscriptionData?.tier)
+                        .map(tierKey => {
+                          const tierPrices = { basic: 500, pro: 1000, promax: 3500 };
+                          const activeTierPrice = subscriptionData?.tier ? tierPrices[subscriptionData.tier as keyof typeof tierPrices] : 0;
+                          const cardAction = status !== 'active'
+                            ? 'select'
+                            : tierPrices[tierKey] > activeTierPrice
+                              ? 'upgrade'
+                              : 'downgrade';
+
+                          return (
+                            <TierCard
+                              key={tierKey}
+                              tier={tierKey}
+                              details={TIER_DETAILS[tierKey]}
+                              isSelected={selectedTier === tierKey}
+                              onSelect={() => setSelectedTier(tierKey)}
+                              onSubscribe={handleSubscribe}
+                              isLoading={subscribing && selectedTier === tierKey}
+                              disabled={false}
+                              actionType={cardAction}
+                            />
+                          );
+                        })}
                     </>
                   )}
                 </div>
               </div>
 
-              {/* Billing Details - Only show if general store or active subscription */}
-              {showBillingDetails && (
+              {/* Billing Details - Only show for legacy/trial stores, not active (active show in status banner) */}
+              {showBillingDetails && status !== 'active' && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="p-6 rounded-3xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm">
                     <div className="flex items-center gap-2 mb-2 opacity-40">

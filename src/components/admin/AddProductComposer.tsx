@@ -1,8 +1,5 @@
 'use client';
-import React, { useState, useRef, Fragment, ChangeEvent } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
-import { XMarkIcon, PhotoIcon, ChevronLeftIcon, ChevronRightIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
-import { ArrowPathIcon } from '@heroicons/react/24/outline';
+import React, { useState, useRef, Fragment, ChangeEvent, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
@@ -14,6 +11,16 @@ import { formatPrice } from '../../utils/price';
 import CategorySelectorModal from './modals/CategorySelectorModal';
 import ProductUploadTips from './ProductUploadTips';
 import { SizeOption, getSizesForOption } from '../../utils/sizeOptions';
+import {
+  X,
+  Package,
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle2,
+  Loader2,
+  AlertCircle,
+  ImagePlus
+} from 'lucide-react';
 
 
 // --- TYPES ---
@@ -39,8 +46,8 @@ interface BatchProduct {
   soldOut: boolean;
   useAsTemplate: boolean;
 
-  sizeOption?: SizeOption;          // ← ADD THIS
-  availableSizes?: string[];        // ← ADD THIS
+  sizeOption?: SizeOption;
+  availableSizes?: string[];
 }
 interface AddProductComposerProps {
   isOpen: boolean;
@@ -48,18 +55,21 @@ interface AddProductComposerProps {
   storeId: string;
   categories: { id: string; name: string }[];
   onProductAdded: () => void;
-  onAddCategory: (name: string) => Promise<void>; // ADD THIS LINE
+  onAddCategory: (name: string) => Promise<void>;
 }
 
 // --- HELPER COMPONENTS ---
 
-const ModernToggle: React.FC<{ checked: boolean; onChange: (checked: boolean) => void; label: string; }> = ({ checked, onChange, label }) => (
-  <label className="flex items-center cursor-pointer justify-between w-full py-2">
-    <span className="text-base font-medium text-text-primary">{label}</span>
+const ModernToggle: React.FC<{ checked: boolean; onChange: (checked: boolean) => void; label: string; description?: string }> = ({ checked, onChange, label, description }) => (
+  <label className="flex items-center cursor-pointer justify-between w-full py-3 px-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+    <div className="flex flex-col">
+      <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">{label}</span>
+      {description && <span className="text-xs text-slate-500 dark:text-slate-400">{description}</span>}
+    </div>
     <div className="relative">
       <input type="checkbox" className="sr-only" checked={checked} onChange={(e) => onChange(e.target.checked)} />
-      <div className={`block w-14 h-8 rounded-full transition-colors ${checked ? 'bg-blue-600' : 'bg-input-background'}`}></div>
-      <div className={`dot absolute left-1 top-1 bg-white w-6 h-6 rounded-full transition-transform ${checked ? 'translate-x-6' : ''}`}></div>
+      <div className={`block w-12 h-7 rounded-full transition-colors ${checked ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-600'}`}></div>
+      <div className={`dot absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform ${checked ? 'translate-x-5' : ''}`}></div>
     </div>
   </label>
 );
@@ -71,9 +81,9 @@ const FloatingLabelInput: React.FC<{ label: string, value: string | number, onCh
       value={value}
       onChange={onChange}
       placeholder={placeholder}
-      className="block w-full px-4 py-3 text-base text-text-primary bg-input-background rounded-lg border-2 border-input-border appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+      className="block w-full px-4 py-3.5 text-base text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 peer transition-all"
     />
-    <label className="absolute text-base text-text-secondary duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-input-background px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-3">
+    <label className="absolute text-sm text-slate-500 dark:text-slate-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-slate-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-3">
       {label}
     </label>
   </div>
@@ -90,6 +100,16 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [template, setTemplate] = useState<Partial<BatchProduct> | null>(null);
+
+  // Lock body scroll when open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => { document.body.style.overflow = 'auto'; };
+  }, [isOpen]);
 
   const resetState = () => {
     setCurrentStep(0);
@@ -156,8 +176,8 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
           categoryId: templateProduct.categoryId,
           limitedStock: templateProduct.limitedStock,
           soldOut: templateProduct.soldOut,
-          sizeOption: templateProduct.sizeOption,           // ← ADD THIS
-          availableSizes: templateProduct.availableSizes,   // ← ADD THIS
+          sizeOption: templateProduct.sizeOption,
+          availableSizes: templateProduct.availableSizes,
         };
       });
     };
@@ -230,8 +250,8 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
           storeId: storeId,
           views: 0,
           quantity: 1,
-          sizeOption: productData.sizeOption,           // ← ADD THIS
-          availableSizes: productData.availableSizes,   // ← ADD THIS
+          sizeOption: productData.sizeOption,
+          availableSizes: productData.availableSizes,
         };
 
         if (productData.isPromo) {
@@ -262,12 +282,14 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
     switch (currentStep) {
       case 0: // Initial Upload Step
         return (
-          <MotionDiv key={0} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="p-4 sm:p-6">
+          <MotionDiv key={0} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
             <input type="file" accept="image/*" multiple onChange={handleFileChange} ref={fileInputRef} className="hidden" />
-            <div onClick={() => fileInputRef.current?.click()} className="cursor-pointer w-full flex flex-col items-center justify-center py-16 px-6 rounded-2xl bg-input-background/50 border-2 border-dashed border-input-border text-text-secondary hover:bg-input-background transition-colors duration-300">
-              <PhotoIcon className="w-16 h-16 mb-4 text-gray-400" />
-              <span className="font-semibold text-xl text-text-primary">Tap to upload pictures</span>
-              <span className="text-base text-text-secondary mt-1">Add one or more images to get started</span>
+            <div onClick={() => fileInputRef.current?.click()} className="cursor-pointer w-full flex flex-col items-center justify-center py-20 px-6 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border-2 border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-300 group">
+              <div className="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mb-4 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 transition-colors">
+                <ImagePlus className="w-8 h-8 text-slate-400 group-hover:text-blue-500 transition-colors" />
+              </div>
+              <span className="font-semibold text-lg text-slate-900 dark:text-slate-100">Tap to upload pictures</span>
+              <span className="text-sm text-slate-500 dark:text-slate-400 mt-1">Add one or more images to get started</span>
             </div>
             <ProductUploadTips />
           </MotionDiv>
@@ -281,8 +303,8 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
         const categoryName = categories.find(c => c.id === activeProduct.categoryId)?.name || 'Select a category';
 
         return (
-          <MotionDiv key={1} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-            <div className="relative w-full h-64 sm:h-80">
+          <MotionDiv key={1} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+            <div className="relative w-full aspect-[4/3] rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800">
               <AnimatePresence>
                 <motion.div
                   key={activeProduct.id}
@@ -292,135 +314,137 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
                   exit={{ opacity: 0, x: -100 }}
                   transition={{ ease: 'easeInOut' }}
                 >
-                  <Image src={URL.createObjectURL(activeProduct.file)} alt="Product Preview" fill className="object-cover rounded-t-lg" />
+                  <Image src={URL.createObjectURL(activeProduct.file)} alt="Product Preview" fill className="object-cover" />
                 </motion.div>
               </AnimatePresence>
               {batchProducts.length > 1 && (
                 <>
-                  <button onClick={() => setActiveProductIndex(p => (p - 1 + batchProducts.length) % batchProducts.length)} className="absolute top-1/2 left-2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full backdrop-blur-sm"><ChevronLeftIcon className="w-6 h-6" /></button>
-                  <button onClick={() => setActiveProductIndex(p => (p + 1) % batchProducts.length)} className="absolute top-1/2 right-2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full backdrop-blur-sm"><ChevronRightIcon className="w-6 h-6" /></button>
+                  <button onClick={() => setActiveProductIndex(p => (p - 1 + batchProducts.length) % batchProducts.length)} className="absolute top-1/2 left-2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full backdrop-blur-sm hover:bg-black/70 transition-colors"><ChevronLeft className="w-5 h-5" /></button>
+                  <button onClick={() => setActiveProductIndex(p => (p + 1) % batchProducts.length)} className="absolute top-1/2 right-2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full backdrop-blur-sm hover:bg-black/70 transition-colors"><ChevronRight className="w-5 h-5" /></button>
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-black/60 text-white px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-sm">
+                    {activeProductIndex + 1} / {batchProducts.length}
+                  </div>
                 </>
               )}
             </div>
-            <div className="p-4 sm:p-6 space-y-6">
-              {currentStep === 1 && (
-                <motion.div key="details" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-                  <FloatingLabelInput label="Product Name" value={activeProduct.name} onChange={(e: ChangeEvent<HTMLInputElement>) => handleProductChange(activeProductIndex, 'name', e.target.value)} />
-                  <button onClick={() => setCategorySelectorOpen(true)} className="w-full text-left p-4 bg-input-background rounded-lg border-2 border-input-border">
-                    <span className={activeProduct.categoryId ? 'text-text-primary' : 'text-text-secondary'}>{categoryName}</span>
-                  </button>
-                </motion.div>
-              )}
-              {currentStep === 2 && (
-                <motion.div key="pricing" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-                  <FloatingLabelInput label="Price" type="number" value={activeProduct.price} onChange={(e: ChangeEvent<HTMLInputElement>) => handleProductChange(activeProductIndex, 'price', parseFloat(e.target.value) || 0)} />
-                  <ModernToggle label="Add Promo Price ?" checked={activeProduct.isPromo} onChange={checked => handleProductChange(activeProductIndex, 'isPromo', checked)} />
-                  <AnimatePresence>
-                    {activeProduct.isPromo && (
-                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
-                        <FloatingLabelInput label="Promo Price" type="number" value={activeProduct.promoPrice || ''} onChange={(e: ChangeEvent<HTMLInputElement>) => handleProductChange(activeProductIndex, 'promoPrice', parseFloat(e.target.value) || 0)} />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                  <div>
-                    <label className="block text-sm font-medium text-text-secondary">Commission+Referral Bonus</label>
-                    <div className="mt-2 bg-input-background p-4 rounded-lg">
-                      <div className="flex justify-center items-center text-sm font-medium text-text-primary mb-2">
-                        <span>{activeProduct.commission}%</span>
-                        <span className="text-text-secondary mx-2">-</span>
-                        <span className="font-bold">{formatPrice(commissionAmount)}</span>
-                      </div>
-                      <input type="range" min="2" max="12" value={activeProduct.commission} onChange={e => handleProductChange(activeProductIndex, 'commission', parseInt(e.target.value))} className="w-full h-2.5 bg-gradient-to-r from-red-500 via-yellow-500 to-green-500 rounded-lg appearance-none cursor-pointer glass-slider" />
 
-                    </div>
+            {currentStep === 1 && (
+              <motion.div key="details" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+                <FloatingLabelInput label="Product Name" value={activeProduct.name} onChange={(e: ChangeEvent<HTMLInputElement>) => handleProductChange(activeProductIndex, 'name', e.target.value)} />
+                <button onClick={() => setCategorySelectorOpen(true)} className="w-full text-left p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-500 transition-colors group">
+                  <span className="block text-xs text-slate-500 dark:text-slate-400 mb-1">Category</span>
+                  <div className="flex justify-between items-center">
+                    <span className={`text-base font-medium ${activeProduct.categoryId ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400'}`}>{categoryName}</span>
+                    <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
                   </div>
-                </motion.div>
-              )}
-              {currentStep === 3 && (
-                <motion.div key="inventory" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
-                  <ModernToggle label="Batch Upload Mode" checked={activeProduct.useAsTemplate} onChange={checked => handleProductChange(activeProductIndex, 'useAsTemplate', checked)} />
-                  <ModernToggle label="Mark as Limited Stock" checked={activeProduct.limitedStock} onChange={checked => handleProductChange(activeProductIndex, 'limitedStock', checked)} />
-                  <ModernToggle label="Mark as Sold Out" checked={activeProduct.soldOut} onChange={checked => handleProductChange(activeProductIndex, 'soldOut', checked)} />
-                  <ModernToggle
-                    label="Add Size Options"
-                    checked={!!activeProduct.sizeOption}
-                    onChange={checked => {
-                      if (checked) {
-                        // Enable - set default to baby-clothes
-                        handleProductChange(activeProductIndex, {
-                          sizeOption: 'baby-clothes',
-                          availableSizes: getSizesForOption('baby-clothes')
-                        });
-                      } else {
-                        // Disable - clear the fields
-                        handleProductChange(activeProductIndex, {
-                          sizeOption: undefined,
-                          availableSizes: undefined
-                        });
-                      }
-                    }}
-                  />
+                </button>
+              </motion.div>
+            )}
+            {currentStep === 2 && (
+              <motion.div key="pricing" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
+                <FloatingLabelInput label="Price (₦)" type="number" value={activeProduct.price} onChange={(e: ChangeEvent<HTMLInputElement>) => handleProductChange(activeProductIndex, 'price', parseFloat(e.target.value) || 0)} />
+                <ModernToggle label="Run a Promotion?" description="Set a discounted price for this item" checked={activeProduct.isPromo} onChange={checked => handleProductChange(activeProductIndex, 'isPromo', checked)} />
+                <AnimatePresence>
+                  {activeProduct.isPromo && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                      <FloatingLabelInput label="Promo Price (₦)" type="number" value={activeProduct.promoPrice || ''} onChange={(e: ChangeEvent<HTMLInputElement>) => handleProductChange(activeProductIndex, 'promoPrice', parseFloat(e.target.value) || 0)} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800/50 flex justify-between items-center">
+                  <div>
+                    <span className="block text-sm font-semibold text-blue-900 dark:text-blue-100">Commission ({activeProduct.commission}%)</span>
+                    <span className="text-xs text-blue-600 dark:text-blue-300">Automatically deducted</span>
+                  </div>
+                  <span className="font-bold text-blue-900 dark:text-blue-100">{formatPrice(commissionAmount)}</span>
+                </div>
+              </motion.div>
+            )}
+            {currentStep === 3 && (
+              <motion.div key="inventory" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+                <ModernToggle label="Batch Upload Mode" description="Apply settings to all images" checked={activeProduct.useAsTemplate} onChange={checked => handleProductChange(activeProductIndex, 'useAsTemplate', checked)} />
+                <ModernToggle label="Limited Stock" description="Show 'Low Stock' badge to customers" checked={activeProduct.limitedStock} onChange={checked => handleProductChange(activeProductIndex, 'limitedStock', checked)} />
+                <ModernToggle label="Sold Out" description="Mark as currently unavailable" checked={activeProduct.soldOut} onChange={checked => handleProductChange(activeProductIndex, 'soldOut', checked)} />
+                <ModernToggle
+                  label="Add Size Options"
+                  description="Enable size selection for customers"
+                  checked={!!activeProduct.sizeOption}
+                  onChange={checked => {
+                    if (checked) {
+                      handleProductChange(activeProductIndex, {
+                        sizeOption: 'baby-clothes',
+                        availableSizes: getSizesForOption('baby-clothes')
+                      });
+                    } else {
+                      handleProductChange(activeProductIndex, {
+                        sizeOption: undefined,
+                        availableSizes: undefined
+                      });
+                    }
+                  }}
+                />
 
-                  <AnimatePresence>
-                    {activeProduct.sizeOption !== undefined && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                        className="space-y-2 pt-2"
-                      >
-
-                        <p className="text-sm font-medium text-text-secondary">Select Size Category:</p>
-                        <div className="grid grid-cols-1 gap-2">
-                          {(['baby-clothes', 'kids-shoes', 'adult-shoes'] as const).map(option => (
-                            <button
-                              key={option}
-                              onClick={() => {
-                                handleProductChange(activeProductIndex, {
-                                  sizeOption: option,
-                                  availableSizes: getSizesForOption(option)
-                                });
-                              }}
-                              className={`p-3 rounded-lg border-2 text-left transition-all ${activeProduct.sizeOption === option
-                                ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20'
-                                : 'border-input-border bg-input-background hover:border-blue-400'
-                                }`}
-                            >
-                              <div className="font-semibold text-text-primary">
-                                {option === 'baby-clothes' && 'Baby Clothes (3m - 24m)'}
-                                {option === 'kids-shoes' && 'Kids Shoes (20 - 35)'}
-                                {option === 'adult-shoes' && 'Adult Shoes (36 - 42)'}
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                  {/* ↑↑↑ END OF NEW BLOCK ↑↑↑ */}
-                </motion.div>
-              )
-              }
-            </div >
+                <AnimatePresence>
+                  {activeProduct.sizeOption !== undefined && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="space-y-3 pt-2"
+                    >
+                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-2">Select Size Category:</p>
+                      <div className="grid grid-cols-1 gap-2">
+                        {(['baby-clothes', 'kids-shoes', 'adult-shoes'] as const).map(option => (
+                          <button
+                            key={option}
+                            onClick={() => {
+                              handleProductChange(activeProductIndex, {
+                                sizeOption: option,
+                                availableSizes: getSizesForOption(option)
+                              });
+                            }}
+                            className={`p-3 rounded-xl border text-left transition-all ${activeProduct.sizeOption === option
+                              ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20'
+                              : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:border-blue-400'
+                              }`}
+                          >
+                            <div className="font-semibold text-slate-900 dark:text-slate-100">
+                              {option === 'baby-clothes' && 'Baby Clothes (3m - 24m)'}
+                              {option === 'kids-shoes' && 'Kids Shoes (20 - 35)'}
+                              {option === 'adult-shoes' && 'Adult Shoes (36 - 42)'}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            )
+            }
           </MotionDiv >
         );
       case 4: // Uploading
         return (
-          <MotionDiv key={4} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 sm:p-6">
-            <h3 className="text-xl font-semibold text-center text-text-primary mb-4">Uploading Products...</h3>
-            <div className="space-y-3 max-h-80 overflow-y-auto">
+          <MotionDiv key={4} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
+            <div className="text-center py-8">
+              <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">Uploading Products...</h3>
+              <p className="text-slate-500 dark:text-slate-400">Please wait while we compress and upload your images.</p>
+            </div>
+            <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
               {uploadProgress.map(p => (
-                <div key={p.id} className="flex items-center gap-4 p-2 bg-input-background rounded-lg">
-                  <Image src={p.imageUrl || URL.createObjectURL(batchProducts.find(prod => prod.id === p.id)!.file)} alt={p.fileName} width={48} height={48} className="w-12 h-12 object-cover rounded-md" />
-                  <div className="flex-1">
-                    <p className="font-semibold text-text-primary truncate">{p.fileName}</p>
-                    <p className="text-sm text-text-secondary">{p.statusText}</p>
+                <div key={p.id} className="flex items-center gap-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                  <Image src={p.imageUrl || URL.createObjectURL(batchProducts.find(prod => prod.id === p.id)!.file)} alt={p.fileName} width={48} height={48} className="w-12 h-12 object-cover rounded-lg" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-slate-900 dark:text-slate-100 truncate text-sm">{p.fileName}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{p.statusText}</p>
                   </div>
-                  <div>
-                    {p.status === 'uploading' && <ArrowPathIcon className="w-6 h-6 text-blue-500 animate-spin" />}
-                    {p.status === 'compressing' && <ArrowPathIcon className="w-6 h-6 text-yellow-500 animate-spin" />}
-                    {p.status === 'success' && <CheckCircleIcon className="w-6 h-6 text-green-500" />}
-                    {p.status === 'error' && <XMarkIcon className="w-6 h-6 text-red-500" />}
+                  <div className="flex-shrink-0">
+                    {p.status === 'uploading' && <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />}
+                    {p.status === 'compressing' && <Loader2 className="w-5 h-5 text-amber-500 animate-spin" />}
+                    {p.status === 'success' && <CheckCircle2 className="w-5 h-5 text-green-500" />}
+                    {p.status === 'error' && <AlertCircle className="w-5 h-5 text-red-500" />}
                   </div>
                 </div>
               ))}
@@ -431,11 +455,15 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
         const successes = uploadProgress.filter(p => p.status === 'success').length;
         const failures = uploadProgress.filter(p => p.status === 'error').length;
         return (
-          <MotionDiv key={5} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="p-6 text-center">
-            <CheckCircleIcon className="w-20 h-20 text-green-500 mx-auto mb-4" />
-            <h3 className="text-2xl font-bold text-text-primary mb-2">Upload Complete!</h3>
-            <p className="text-lg text-text-secondary">{successes} product(s) added successfully.</p>
-            {failures > 0 && <p className="text-lg text-red-500">{failures} product(s) failed to upload.</p>}
+          <MotionDiv key={5} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center justify-center py-12 text-center">
+            <div className="w-20 h-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-6">
+              <CheckCircle2 className="w-10 h-10 text-green-600 dark:text-green-400" />
+            </div>
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">Upload Complete!</h3>
+            <p className="text-slate-600 dark:text-slate-400 max-w-xs mx-auto">
+              {successes} product(s) have been successfully added to the store.
+            </p>
+            {failures > 0 && <p className="text-sm text-red-500 mt-4">{failures} product(s) failed to upload.</p>}
           </MotionDiv>
         );
 
@@ -444,89 +472,108 @@ const AddProductComposer: React.FC<AddProductComposerProps> = ({ isOpen, onClose
   }
 
   const STEPS = [{ name: 'Upload' }, { name: 'Details' }, { name: 'Pricing' }, { name: 'Stock' }];
+  const modalVariants = { hidden: { opacity: 0, y: '100%' }, visible: { opacity: 1, y: 0 }, exit: { opacity: 0, y: '100%' } };
 
   return (
-    <Transition.Root show={isOpen} as={Fragment}>
-      <Dialog as="div" className="relative z-40" onClose={handleClose}>
-        {/* --- Overlay --- */}
-        <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
-          <div className="fixed inset-0 bg-black bg-opacity-75 backdrop-blur-sm transition-opacity" />
-        </Transition.Child>
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
+          initial="hidden" animate="visible" exit="exit"
+          variants={modalVariants}
+          transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+        >
+          {/* --- Header --- */}
+          <header className="flex-shrink-0 flex items-center justify-between w-full max-w-5xl mx-auto p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-lg z-10 sticky top-0">
+            <div className="flex items-center gap-4">
+              <div>
+                <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">
+                  {currentStep === 4 ? 'Uploading...' : currentStep === 5 ? 'Success' : 'Add New Product'}
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Step {Math.min(currentStep + 1, 4)} of 4
+                </p>
+              </div>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center shadow-lg">
+              <Package className="w-6 h-6 text-white" />
+            </div>
+          </header>
 
-        {/* --- Modal Content --- */}
-        <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
-          <div className="flex min-h-full items-stretch justify-center text-center md:items-center md:px-2 lg:px-4">
-            <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-full md:translate-y-0 md:scale-95" enterTo="opacity-100 translate-y-0 md:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 md:scale-100" leaveTo="opacity-0 translate-y-full md:translate-y-0 md:scale-95">
-              <Dialog.Panel className="relative flex w-full max-w-lg transform text-left text-base transition md:my-8">
-                <div className="relative flex w-full flex-col overflow-hidden  md:rounded-2xl bg-white dark:bg-slate-900 shadow-2xl">
-                  <div className="p-4 sm:p-6 flex justify-between items-center border-b border-border-color">
-                    <Dialog.Title as="h3" className="text-xl font-bold text-text-primary">
-                      {currentStep === 4 ? 'Uploading...' : currentStep === 5 ? 'Summary' : 'Add New Product'}
-                    </Dialog.Title>
-                    <button onClick={handleClose} className="p-1 rounded-full hover:bg-button-secondary transition">
-                      <XMarkIcon className="h-6 w-6 text-text-secondary" />
-                    </button>
-                  </div>
+          {/* --- Progress Bar --- */}
+          {currentStep < 4 && (
+            <div className="w-full bg-slate-100 dark:bg-slate-800 h-1">
+              <motion.div
+                className="bg-gradient-to-r from-pink-500 to-purple-600 h-1"
+                initial={{ width: '0%' }}
+                animate={{ width: `${((currentStep + 1) / STEPS.length) * 100}%` }}
+                transition={{ ease: "easeInOut", duration: 0.5 }}
+              />
+            </div>
+          )}
 
-                  {/* Progress Bar */}
-                  {currentStep > 0 && currentStep < 4 && (
-                    <div className="w-full bg-input-background h-1.5">
-                      <motion.div
-                        className="bg-blue-600 h-1.5"
-                        initial={{ width: '0%' }}
-                        animate={{ width: `${(currentStep / (STEPS.length - 1)) * 100}%` }}
-                        transition={{ ease: "easeInOut", duration: 0.5 }}
-                      />
-                    </div>
-                  )}
+          {/* --- Main Scrollable Content --- */}
+          <main className="flex-grow w-full max-w-5xl mx-auto overflow-y-auto p-4 sm:p-6 scrollbar-hide">
+            <AnimatePresence mode="wait">
+              {renderStepContent()}
+            </AnimatePresence>
+          </main>
 
-                  <div className="flex-1">
-                    <AnimatePresence mode="wait">
-                      {renderStepContent()}
-                    </AnimatePresence>
-                  </div>
+          {/* --- Footer --- */}
+          <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 z-10">
+            <div className="absolute bottom-full left-0 right-0 h-12 bg-gradient-to-t from-white dark:from-slate-950 to-transparent pointer-events-none" />
+            <div className="max-w-5xl mx-auto flex gap-4">
+              {currentStep === 0 && (
+                <button onClick={handleClose} className="flex-1 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-semibold hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
+                  Cancel
+                </button>
+              )}
 
-                  {/* Navigation */}
-                  <div className="p-4 sm:p-6 flex justify-between sm:justify-end gap-4 border-t border-border-color">
-                    {currentStep === 0 && ( // New Cancel Button for initial step
-                      <button onClick={handleClose} className="w-full rounded-lg border border-border-color bg-button-secondary py-2 px-4 text-sm font-semibold text-text-primary shadow-sm hover:bg-button-secondary-hover focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">Cancel</button>
-                    )}
-                    {currentStep > 0 && currentStep < 4 && (
-                      <button onClick={() => setCurrentStep(s => s - 1)} className="px-6 py-3 rounded-lg bg-button-secondary text-text-primary font-semibold hover:bg-button-secondary-hover transition">Back</button>
-                    )}
-                    {currentStep > 0 && currentStep < 3 && (
-                      <button onClick={() => setCurrentStep(s => s + 1)} className="flex-1 sm:flex-none px-6 py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">Next</button>
-                    )}
-                    {currentStep === 3 && (
-                      <button onClick={handleSubmit} className="flex-1 sm:flex-none px-6 py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition" disabled={isUploading}>
-                        {isUploading ? 'Please Wait...' : `Upload ${batchProducts.length} Product(s)`}
-                      </button>
-                    )}
-                    {currentStep === 5 && (
-                      <>
-                        <button onClick={handleClose} className="px-6 py-3 rounded-lg bg-button-secondary text-text-primary font-semibold hover:bg-button-secondary-hover transition">Done</button>
-                        <button onClick={resetState} className="flex-1 sm:flex-none px-6 py-3 rounded-lg bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">Add More</button>
-                      </>
-                    )}
-                  </div>
-                </div>
-                 <CategorySelectorModal
-                    isOpen={isCategorySelectorOpen}
-                    onClose={() => setCategorySelectorOpen(false)}
-                    categories={categories}
-                    selectedCategoryId={batchProducts[activeProductIndex]?.categoryId}
-                    onSelect={(categoryId: string) => {
-                        handleProductChange(activeProductIndex, 'categoryId', categoryId);
-                        setCategorySelectorOpen(false);
-                    }}
-                    onAddCategory={onAddCategory} // ADD THIS LINE
-                    />
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
-        </div>
-      </Dialog>
-    </Transition.Root>
+              {currentStep > 0 && currentStep < 4 && (
+                <button onClick={() => setCurrentStep(s => s - 1)} className="flex-1 py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-2">
+                  <ChevronLeft className="w-5 h-5" /> Back
+                </button>
+              )}
+
+              {currentStep > 0 && currentStep < 3 && (
+                <button onClick={() => setCurrentStep(s => s + 1)} className="flex-1 py-3.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg">
+                  Next <ChevronRight className="w-5 h-5" />
+                </button>
+              )}
+
+              {currentStep === 3 && (
+                <button onClick={handleSubmit} disabled={isUploading} className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-pink-600 to-purple-600 text-white font-bold hover:from-pink-700 hover:to-purple-700 transition-all shadow-lg flex items-center justify-center gap-2">
+                  {isUploading ? <Loader2 className="w-5 h-5 animate-spin" /> : `Upload ${batchProducts.length} Product(s)`}
+                </button>
+              )}
+
+              {currentStep === 5 && (
+                <>
+                  <button onClick={handleClose} className="flex-1 py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">
+                    Close
+                  </button>
+                  <button onClick={resetState} className="flex-1 py-3.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold hover:opacity-90 transition-opacity shadow-lg">
+                    Add Another
+                  </button>
+                </>
+              )}
+            </div>
+          </footer>
+
+          <CategorySelectorModal
+            isOpen={isCategorySelectorOpen}
+            onClose={() => setCategorySelectorOpen(false)}
+            categories={categories}
+            selectedCategoryId={batchProducts[activeProductIndex]?.categoryId}
+            onSelect={(categoryId: string) => {
+              handleProductChange(activeProductIndex, 'categoryId', categoryId);
+              setCategorySelectorOpen(false);
+            }}
+            onAddCategory={onAddCategory}
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
