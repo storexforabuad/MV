@@ -196,6 +196,7 @@ export async function expireSubscription(storeId: string) {
 export async function devTeamOverrideSubscription(
     storeId: string,
     status: SubscriptionStatus,
+    tier: SubscriptionTier = 'general',
     reason?: string
 ) {
     try {
@@ -209,8 +210,12 @@ export async function devTeamOverrideSubscription(
 
         if (status === 'active') {
             const nextBilling = new Date();
-            nextBilling.setDate(nextBilling.getDate() + 30);
+            // Weekly for new tiers, monthly for general
+            const isWeekly = ['basic', 'pro', 'promax'].includes(tier);
+            nextBilling.setDate(nextBilling.getDate() + (isWeekly ? 7 : 30));
+
             updateData.subscriptionNextBillingDate = Timestamp.fromDate(nextBilling);
+            updateData.subscriptionTier = tier;
         }
 
         await updateDoc(storeRef, updateData);
