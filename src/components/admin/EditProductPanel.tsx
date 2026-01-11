@@ -117,14 +117,14 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
 
     // Ensure sizes are synced
     if (formState.productType === 'fashion') {
-      payload.sizes = formState.sizes;
-      payload.soldOutSizes = formState.soldOutSizes;
+      (payload as any).sizes = formState.sizes;
+      (payload as any).soldOutSizes = formState.soldOutSizes;
     } else {
-      payload.availableSizes = formState.availableSizes;
-      payload.sizeOption = formState.sizeOption;
+      (payload as any).availableSizes = formState.availableSizes;
+      (payload as any).sizeOption = formState.sizeOption;
       // Also support soldOutSizes for general products if they have sizeOption
       if (formState.sizeOption) {
-        payload.soldOutSizes = formState.soldOutSizes;
+        (payload as any).soldOutSizes = formState.soldOutSizes;
       }
     }
 
