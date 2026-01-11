@@ -2,7 +2,7 @@
 
 import { db } from '@/lib/firebase';
 import { doc, getDoc, updateDoc, Timestamp, serverTimestamp } from 'firebase/firestore';
-import { SubscriptionStatus, calculateTrialEndDate, calculateGracePeriodEndDate } from '@/types/subscription';
+import { SubscriptionStatus, SubscriptionTier, calculateTrialEndDate, calculateGracePeriodEndDate } from '@/types/subscription';
 
 /**
  * Get subscription status for a store
@@ -83,7 +83,8 @@ export async function activateSubscription(
     subscriptionCode: string,
     customerCode: string,
     planCode: string,
-    nextBillingDate: Date
+    nextBillingDate: Date,
+    tier: SubscriptionTier = 'general'
 ) {
     try {
         const storeRef = doc(db, 'stores', storeId);
@@ -95,6 +96,7 @@ export async function activateSubscription(
             subscriptionPlanCode: planCode,
             subscriptionNextBillingDate: Timestamp.fromDate(nextBillingDate),
             subscriptionStartDate: serverTimestamp(),
+            subscriptionTier: tier,
         });
 
         return { success: true };
@@ -289,7 +291,8 @@ export async function verifySubscriptionPayment(reference: string) {
             subscription_code, // Paystack creates this automatically for plan payments
             customer.customer_code,
             plan.plan_code,
-            nextBillingDate
+            nextBillingDate,
+            tier as SubscriptionTier
         );
 
         return { success: true };

@@ -189,6 +189,8 @@ export default function SubscriptionModal({
   const [cancelling, setCancelling] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
   const [selectedTier, setSelectedTier] = useState<SubscriptionTier>('pro');
+  const [showPlanChangeConfirm, setShowPlanChangeConfirm] = useState(false);
+  const [pendingPlanChange, setPendingPlanChange] = useState<{ tier: SubscriptionTier; action: 'upgrade' | 'downgrade' } | null>(null);
 
   useEffect(() => {
     loadSubscriptionData();
@@ -306,6 +308,25 @@ export default function SubscriptionModal({
     }
   };
 
+  // Handle plan change (upgrade/downgrade) confirmation
+  const handlePlanChangeRequest = (tier: SubscriptionTier, action: 'upgrade' | 'downgrade') => {
+    setPendingPlanChange({ tier, action });
+    setShowPlanChangeConfirm(true);
+  };
+
+  const confirmPlanChange = () => {
+    if (!pendingPlanChange) return;
+    setSelectedTier(pendingPlanChange.tier);
+    setShowPlanChangeConfirm(false);
+    setPendingPlanChange(null);
+    setTimeout(() => handleSubscribe(), 50);
+  };
+
+  const cancelPlanChange = () => {
+    setShowPlanChangeConfirm(false);
+    setPendingPlanChange(null);
+  };
+
   const safeToDate = (val: any): Date | undefined => {
     if (!val) return undefined;
     if (val instanceof Date) return val;
@@ -411,7 +432,9 @@ export default function SubscriptionModal({
                               'text-red-600 dark:text-red-400'
                           }`} />
                         <span className="font-bold uppercase tracking-wider text-[9px] opacity-60">
-                          {status === 'active' ? `Active Plan: ${subscriptionData?.tier?.toUpperCase() || selectedTier.toUpperCase()}` : 'Current Status'}
+                          {status === 'active'
+                            ? `Active Plan: ${subscriptionData?.tier ? TIER_DETAILS[subscriptionData.tier as keyof typeof TIER_DETAILS]?.name.toUpperCase() : 'ACTIVE'}`
+                            : 'Current Status'}
                         </span>
                       </div>
                       <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
@@ -528,7 +551,14 @@ export default function SubscriptionModal({
                               details={TIER_DETAILS[tierKey]}
                               isSelected={selectedTier === tierKey}
                               onSelect={() => setSelectedTier(tierKey)}
-                              onSubscribe={handleSubscribe}
+                              onSubscribe={() => {
+                                if (status === 'active' && (cardAction === 'upgrade' || cardAction === 'downgrade')) {
+                                  handlePlanChangeRequest(tierKey, cardAction);
+                                } else {
+                                  setSelectedTier(tierKey);
+                                  setTimeout(() => handleSubscribe(), 50);
+                                }
+                              }}
                               isLoading={subscribing && selectedTier === tierKey}
                               disabled={false}
                               actionType={cardAction}
@@ -630,6 +660,58 @@ export default function SubscriptionModal({
           </div>
         </footer>
       </motion.div>
+
+      {/* Plan Change Confirmation Modal */}
+      <AnimatePresence>
+        {showPlanChangeConfirm && pendingPlanChange && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={cancelPlanChange}
+              className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800"
+            >
+              <div className="p-6 sm:p-8">
+                <div className="flex items-center justify-center w-16 h-16 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 mb-6 mx-auto">
+                  <AlertCircle size={32} />
+                </div>
+
+                <h3 className="text-2xl font-black text-center text-slate-900 dark:text-white mb-2 tracking-tight">
+                  Confirm {pendingPlanChange.action === 'upgrade' ? 'Upgrade' : 'Downgrade'}
+                </h3>
+
+                <p className="text-slate-600 dark:text-slate-400 text-center text-sm mb-8 leading-relaxed">
+                  You are about to change your plan to <span className="font-bold text-slate-900 dark:text-white">{TIER_DETAILS[pendingPlanChange.tier as keyof typeof TIER_DETAILS]?.name.toUpperCase()}</span>.
+                  <br /><br />
+                  <span className="text-indigo-600 dark:text-indigo-400 font-bold">Important:</span> To complete this change, you will need to pay for the new plan. Your current subscription will be replaced by this new one immediately upon successful payment.
+                </p>
+
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={confirmPlanChange}
+                    className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black rounded-2xl transition-all shadow-lg shadow-indigo-500/20 active:scale-[0.98]"
+                  >
+                    Confirm & Proceed to Payment
+                  </button>
+                  <button
+                    onClick={cancelPlanChange}
+                    className="w-full py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-2xl transition-all active:scale-[0.98]"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </AnimatePresence>
   );
 }
