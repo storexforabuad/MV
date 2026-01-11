@@ -78,7 +78,7 @@ export function DevTeamStoreCard({
 
         setIsUpdating(true);
         try {
-            await devTeamOverrideSubscription(storeId, 'expired', 'Manually suspended by devteam');
+            await devTeamOverrideSubscription(storeId, 'expired', undefined, 'Manually suspended by devteam');
             alert('Subscription suspended successfully!');
             window.location.reload();
         } catch (error) {

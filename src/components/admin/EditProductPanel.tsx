@@ -80,7 +80,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
     }
   }, [isOpen, product]);
 
-  const handleInputChange = (field: keyof ProductFormState, value: string | number | boolean | null) => {
+  const handleInputChange = (field: keyof ProductFormState, value: any) => {
     setFormState(prev => ({ ...prev, [field]: value }));
   };
 
