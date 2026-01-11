@@ -59,8 +59,11 @@ const TierCard = ({
             <Star className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
           </div>
         </div>
-        <div className="flex items-baseline gap-1 mb-4">
-          <span className="text-3xl font-black text-slate-900 dark:text-white">₦{details.price.toLocaleString()}</span>
+        <div className="flex items-baseline gap-2 mb-4">
+          <div className="flex flex-col">
+            <span className="text-[10px] font-bold text-slate-400 line-through decoration-emerald-500/50">₦{(details.price * 2).toLocaleString()}</span>
+            <span className="text-3xl font-black text-slate-900 dark:text-white">₦{details.price.toLocaleString()}</span>
+          </div>
           <span className="text-sm font-medium text-slate-500">/{details.period}</span>
         </div>
         <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
@@ -124,10 +127,21 @@ const TierCard = ({
             </h4>
             {isSelected && <CheckCircle2 className={`w-4 h-4 ${isProMax ? 'text-amber-400' : 'text-white'}`} />}
           </div>
-          <div className="flex items-baseline gap-1">
-            <span className={`text-3xl sm:text-4xl font-black tracking-tighter ${isProMax ? 'text-amber-400' : 'text-white'}`}>
-              ₦{details.price.toLocaleString()}
-            </span>
+          <div className="flex items-baseline gap-2">
+            <div className="flex flex-col">
+              <span className={`text-[10px] font-bold line-through opacity-50 ${isProMax ? 'decoration-amber-500' : 'decoration-white'}`}>
+                ₦{(details.price * 2).toLocaleString()}
+              </span>
+              <span className={`text-3xl sm:text-4xl font-black tracking-tighter ${isProMax ? 'text-amber-400' : 'text-white'}`}>
+                ₦{details.price.toLocaleString()}
+              </span>
+            </div>
+            {!isProMax && (
+              <div className="bg-white/10 backdrop-blur-md border border-white/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <Sparkles className="w-2.5 h-2.5 text-amber-400" />
+                <span className="text-[8px] font-black text-white uppercase tracking-tighter">Ambassador Price</span>
+              </div>
+            )}
           </div>
           <p className={`text-[10px] sm:text-xs font-medium mt-2 leading-relaxed max-w-[240px] ${isProMax ? 'text-amber-100/60' : 'text-white/60'}`}>
             {details.description}
@@ -325,11 +339,11 @@ export default function SubscriptionModal({
 
   const modalVariants = { hidden: { opacity: 0, y: '100%' }, visible: { opacity: 1, y: 0 }, exit: { opacity: 0, y: '100%' } };
 
-  const isGeneralStore = storeType === 'general';
+  const isLegacyStore = !storeType;
 
   // Hide trial banner and billing details for new tiers if they haven't subscribed yet
-  const showStatusBanner = isGeneralStore || status === 'active' || status === 'past_due';
-  const showBillingDetails = isGeneralStore || status === 'active';
+  const showStatusBanner = isLegacyStore || status === 'active' || status === 'past_due';
+  const showBillingDetails = isLegacyStore || status === 'active';
 
   return (
     <AnimatePresence>
@@ -344,7 +358,7 @@ export default function SubscriptionModal({
           <div>
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
               Subscription
-              {!isGeneralStore && <Sparkles className="w-5 h-5 text-amber-500 animate-pulse" />}
+              {!isLegacyStore && <Sparkles className="w-5 h-5 text-amber-500 animate-pulse" />}
             </h2>
             <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Manage your plan & billing</p>
           </div>
@@ -424,19 +438,44 @@ export default function SubscriptionModal({
               <div className="space-y-6">
                 <div className="flex items-center justify-between px-1">
                   <h4 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">
-                    {isGeneralStore ? 'Your Plan' : 'Choose Your Plan'}
+                    {isLegacyStore ? 'Your Plan' : 'Choose Your Plan'}
                   </h4>
-                  {!isGeneralStore && (
-                    <div className="bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700">
-                      <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                        Weekly Billing
-                      </span>
+                  {!isLegacyStore && (
+                    <div className="flex items-center gap-3">
+                      <div className="bg-slate-100 dark:bg-slate-800 px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700">
+                        <span className="text-[9px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                          Weekly Billing
+                        </span>
+                      </div>
                     </div>
                   )}
                 </div>
 
+                {!isLegacyStore && (
+                  <div className="mx-1 p-4 rounded-2xl bg-gradient-to-r from-indigo-600/10 to-amber-500/10 border border-indigo-500/20 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-amber-500 flex items-center justify-center shadow-lg">
+                        <Sparkles className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h5 className="text-sm font-black text-slate-900 dark:text-white">Ambassador Discount</h5>
+                        <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400">Exclusive 50% savings applied</p>
+                      </div>
+                    </div>
+                    <div className="relative w-12 h-6 bg-indigo-600 rounded-full p-1 cursor-not-allowed shadow-inner">
+                      <motion.div
+                        initial={false}
+                        animate={{ x: 24 }}
+                        className="w-4 h-4 bg-white rounded-full shadow-md flex items-center justify-center"
+                      >
+                        <div className="w-1.5 h-1.5 bg-indigo-600 rounded-full" />
+                      </motion.div>
+                    </div>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-1 gap-6">
-                  {isGeneralStore ? (
+                  {isLegacyStore ? (
                     <TierCard
                       tier="general"
                       details={TIER_DETAILS.general}
