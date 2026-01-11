@@ -24,6 +24,7 @@ export async function getSubscriptionStatus(storeId: string) {
             subscriptionCode: data.subscriptionCode,
             paystackCustomerCode: data.paystackCustomerCode,
             planCode: data.subscriptionPlanCode,
+            tier: data.subscriptionTier,
         };
     } catch (error) {
         console.error('Error getting subscription status:', error);

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Store, ExternalLink, ShieldCheck, AlertCircle, CheckCircle2, Clock } from 'lucide-react';
-import { getStatusDisplay, isTrialExpired } from '@/types/subscription';
+import { getStatusDisplay, isTrialExpired, SubscriptionTier } from '@/types/subscription';
 import type { SubscriptionStatus } from '@/types/subscription';
 import { devTeamOverrideSubscription } from '@/app/actions/subscriptionActions';
 import { Timestamp } from 'firebase/firestore';
@@ -30,6 +30,7 @@ export function DevTeamStoreCard({
     ceoName,
 }: DevTeamStoreCardProps) {
     const [isUpdating, setIsUpdating] = useState(false);
+    const [selectedTier, setSelectedTier] = useState<SubscriptionTier>('pro');
 
     const status = subscriptionStatus || 'trial';
     const statusDisplay = getStatusDisplay(status);
@@ -61,8 +62,8 @@ export function DevTeamStoreCard({
 
         setIsUpdating(true);
         try {
-            await devTeamOverrideSubscription(storeId, 'active', 'Manually activated by devteam');
-            alert('Subscription activated successfully!');
+            await devTeamOverrideSubscription(storeId, 'active', selectedTier, 'Manually activated by devteam');
+            alert(`Subscription activated successfully as ${selectedTier.toUpperCase()}!`);
             window.location.reload();
         } catch (error) {
             console.error('Error activating subscription:', error);
@@ -203,28 +204,42 @@ export function DevTeamStoreCard({
             {/* Manual Override Controls */}
             <div className="mt-3 pt-3 border-t border-gray-200 dark:border-slate-700">
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Manual Override:</p>
-                <div className="grid grid-cols-2 gap-2">
-                    <button
-                        onClick={handleActivate}
+                <div className="flex flex-col gap-2">
+                    <select
+                        value={selectedTier}
+                        onChange={(e) => setSelectedTier(e.target.value as SubscriptionTier)}
                         disabled={isUpdating || status === 'active'}
-                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${status === 'active'
-                            ? 'bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                            : 'bg-green-600 hover:bg-green-700 text-white'
-                            }`}
+                        className="w-full px-3 py-1.5 text-xs bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
                     >
-                        {isUpdating ? 'Updating...' : 'Activate'}
-                    </button>
+                        <option value="basic">Lite (₦500/wk)</option>
+                        <option value="pro">Pro (₦1,000/wk)</option>
+                        <option value="promax">Max (₦3,500/wk)</option>
+                        <option value="general">General (₦5,000/mo)</option>
+                    </select>
 
-                    <button
-                        onClick={handleSuspend}
-                        disabled={isUpdating || status === 'expired'}
-                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${status === 'expired'
-                            ? 'bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
-                            : 'bg-red-600 hover:bg-red-700 text-white'
-                            }`}
-                    >
-                        {isUpdating ? 'Updating...' : 'Suspend'}
-                    </button>
+                    <div className="grid grid-cols-2 gap-2">
+                        <button
+                            onClick={handleActivate}
+                            disabled={isUpdating || status === 'active'}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${status === 'active'
+                                ? 'bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                                : 'bg-green-600 hover:bg-green-700 text-white'
+                                }`}
+                        >
+                            {isUpdating ? 'Updating...' : 'Activate'}
+                        </button>
+
+                        <button
+                            onClick={handleSuspend}
+                            disabled={isUpdating || status === 'expired'}
+                            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${status === 'expired'
+                                ? 'bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                                : 'bg-red-600 hover:bg-red-700 text-white'
+                                }`}
+                        >
+                            {isUpdating ? 'Updating...' : 'Suspend'}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
