@@ -141,8 +141,15 @@ const TierCard = ({
           onClick={(e) => {
             e.stopPropagation();
             if (!disabled && !isLoading) {
-              if (isSelected || actionType === 'upgrade' || actionType === 'downgrade') onSubscribe();
-              else onSelect();
+              // For upgrade/downgrade, first select this tier, then subscribe
+              if (actionType === 'upgrade' || actionType === 'downgrade') {
+                onSelect(); // Sets selectedTier to this card's tier
+                setTimeout(() => onSubscribe(), 50); // Delay to ensure state updates
+              } else if (isSelected) {
+                onSubscribe();
+              } else {
+                onSelect();
+              }
             }
           }}
           disabled={isLoading}
@@ -155,11 +162,11 @@ const TierCard = ({
                 : isProMax ? 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20' : 'bg-white/10 text-white border-white/20 hover:bg-white/20'
             }`}
         >
-          {isLoading && isSelected ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+          {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
           {actionType === 'upgrade'
-            ? 'Upgrade'
+            ? (isLoading ? 'Upgrading...' : 'Upgrade')
             : actionType === 'downgrade'
-              ? 'Downgrade'
+              ? (isLoading ? 'Downgrading...' : 'Downgrade')
               : isSelected
                 ? (isLoading ? 'Initializing...' : 'Subscribe Now')
                 : 'Select Plan'}
