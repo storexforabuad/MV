@@ -46,7 +46,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
   const { addOrder } = useOrders(customer?.id || null, storeId || "");
   const { dispatch } = useCart();
 
-  const isPaymentFlowEnabled = shouldUsePaymentFlow(storeMeta?.storeType) || storeMeta?.storeType === 'general';
+  const isPaymentFlowEnabled = shouldUsePaymentFlow(storeMeta?.storeType);
 
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const total = subtotal;

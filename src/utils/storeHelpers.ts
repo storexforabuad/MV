@@ -11,7 +11,7 @@
  * @returns true if the store should use the payment flow, false otherwise
  */
 export function shouldUsePaymentFlow(storeType: string | undefined): boolean {
-  if (!storeType) return false;
+  if (!storeType) return true;
 
   // Store types that use the new payment flow
   const paymentFlowStoreTypes = ['general'];

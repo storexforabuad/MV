@@ -59,7 +59,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const storeId = typeof routeParams?.storeId === 'string' ? routeParams.storeId : Array.isArray(routeParams?.storeId) ? routeParams.storeId[0] : undefined;
   const { addOrder } = useOrders(customer?.id || null, storeId!);
 
-  const isPaymentFlowEnabled = shouldUsePaymentFlow(storeMeta?.storeType) || storeMeta?.storeType === 'general';
+  const isPaymentFlowEnabled = shouldUsePaymentFlow(storeMeta?.storeType);
 
   const onCloseRef = useRef(onClose);
   useEffect(() => {
