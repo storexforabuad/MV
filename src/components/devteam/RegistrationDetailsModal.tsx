@@ -26,6 +26,7 @@ interface Registration {
     createdAt: any;
     country?: string;
     state?: string;
+    referralCode?: string;
 }
 
 interface RegistrationDetailsModalProps {
@@ -217,6 +218,14 @@ export default function RegistrationDetailsModal({
                                                 {registration.id}
                                             </span>
                                         </div>
+                                        {registration.referralCode && (
+                                            <div className="col-span-2 pt-2 border-t border-slate-100 dark:border-slate-800 mt-2">
+                                                <span className="text-slate-500 dark:text-slate-400 block mb-1">Applied Discount Code</span>
+                                                <span className="font-mono text-sm font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 px-3 py-1.5 rounded-lg border border-emerald-100 dark:border-emerald-800/50 inline-block">
+                                                    {registration.referralCode}
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

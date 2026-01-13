@@ -128,14 +128,14 @@ export interface PaystackWebhookEvent {
 
 // Subscription constants
 export const SUBSCRIPTION_CONFIG = {
-    ORIGINAL_MONTHLY_AMOUNT: 10000, // ₦10,000
-    MONTHLY_AMOUNT: 5000, // ₦5,000 (General)
-    MONTHLY_AMOUNT_KOBO: 500000, // 5000 * 100 kobo
+    ORIGINAL_MONTHLY_AMOUNT: 20000, // ₦20,000
+    MONTHLY_AMOUNT: 10000, // ₦10,000 (General)
+    MONTHLY_AMOUNT_KOBO: 1000000, // 10000 * 100 kobo
 
     // Weekly Tiers
-    BASIC_WEEKLY_AMOUNT: 500,
-    PRO_WEEKLY_AMOUNT: 1000,
-    PROMAX_WEEKLY_AMOUNT: 3500,
+    BASIC_WEEKLY_AMOUNT: 1000,
+    PRO_WEEKLY_AMOUNT: 2000,
+    PROMAX_WEEKLY_AMOUNT: 7000,
 
     DISCOUNT_PERCENTAGE: 50,
     TRIAL_DAYS: 14, // Maintained for General store
@@ -146,7 +146,7 @@ export const SUBSCRIPTION_CONFIG = {
 export const TIER_DETAILS = {
     basic: {
         name: 'Lite',
-        price: 500,
+        price: 1000,
         period: 'week',
         description: 'Perfect for new and small vendors just starting their business empire.',
         productLimit: 100,
@@ -161,7 +161,7 @@ export const TIER_DETAILS = {
     },
     pro: {
         name: 'Pro',
-        price: 1000,
+        price: 2000,
         period: 'week',
         description: 'Ideal for growing businesses looking to scale and reach more customers.',
         productLimit: 500,
@@ -176,7 +176,7 @@ export const TIER_DETAILS = {
     },
     promax: {
         name: 'Max',
-        price: 3500,
+        price: 7000,
         period: 'week',
         description: 'The ultimate choice for wholesalers and big brands with high volume.',
         productLimit: 2000,
@@ -191,7 +191,7 @@ export const TIER_DETAILS = {
     },
     general: {
         name: 'General',
-        price: 5000,
+        price: 10000,
         period: 'month',
         description: 'Full access with monthly billing and 14-day free trial.',
         productLimit: 'Unlimited',

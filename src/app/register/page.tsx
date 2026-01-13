@@ -8,7 +8,7 @@ import {
     CheckCircle2, ChevronRight, ChevronLeft, Loader2,
     Sparkles, CreditCard, Upload, Store, ShoppingBag,
     UtensilsCrossed, Shirt, Car, Fish, Globe, Laptop,
-    PartyPopper, GraduationCap
+    PartyPopper, GraduationCap, Bot, Tag
 } from 'lucide-react';
 import { db, storage } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -43,6 +43,7 @@ interface RegistrationData {
     businessDescription: string;
     country: string;
     state: string;
+    referralCode?: string;
 
     // Store Config
     storeType: StoreType;
@@ -135,6 +136,30 @@ const StepIndicator = ({ currentStep, totalSteps }: { currentStep: number; total
     </div>
 );
 
+const PriceDisplay = ({ price, originalPrice }: { price: number; originalPrice: number }) => {
+    return (
+        <div className="flex flex-col items-end">
+            <AnimatePresence mode="wait">
+                <motion.span
+                    key={price}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="text-2xl font-black text-white"
+                >
+                    ₦{price.toLocaleString()}
+                </motion.span>
+            </AnimatePresence>
+            {price < originalPrice && (
+                <span className="text-xs text-slate-500 line-through">
+                    ₦{originalPrice.toLocaleString()}
+                </span>
+            )}
+            <span className="text-xs text-slate-500 block">/week</span>
+        </div>
+    );
+};
+
 export default function RegisterPage() {
     const [step, setStep] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
@@ -160,7 +185,8 @@ export default function RegisterPage() {
         country: 'Nigeria',
         state: '',
         storeType: 'general',
-        subscriptionTier: 'pro'
+        subscriptionTier: 'pro',
+        referralCode: ''
     });
 
     const handleInputChange = (field: keyof RegistrationData, value: any) => {
@@ -228,6 +254,7 @@ export default function RegisterPage() {
                             amountPaid: tierDetails.price,
                             paymentReference: response.reference,
                             status: 'pending',
+                            referralCode: formData.referralCode || null,
                             createdAt: serverTimestamp()
                         });
 
@@ -387,11 +414,35 @@ export default function RegisterPage() {
                 <p className="text-slate-400 text-sm">Choose the perfect plan to grow your business.</p>
             </div>
 
+            {/* Discount Code Input */}
+            <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Tag className="h-5 w-5 text-slate-500" />
+                </div>
+                <input
+                    type="text"
+                    placeholder="Have a discount code?"
+                    value={formData.referralCode}
+                    onChange={(e) => handleInputChange('referralCode', e.target.value)}
+                    className="w-full pl-10 pr-4 py-3 bg-slate-900/50 border border-slate-800 rounded-xl text-white placeholder:text-slate-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none text-sm"
+                />
+                {formData.referralCode && (
+                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                        <span className="text-xs font-bold text-emerald-500 animate-pulse">50% OFF APPLIED!</span>
+                    </div>
+                )}
+            </div>
+
             <div className="space-y-4">
                 {(['basic', 'pro', 'promax'] as const).map((tier) => {
                     const details = TIER_DETAILS[tier as keyof typeof TIER_DETAILS];
                     const isSelected = formData.subscriptionTier === tier;
                     const isProMax = tier === 'promax';
+                    const isPro = tier === 'pro';
+
+                    // Discount Logic
+                    const hasDiscount = !!formData.referralCode;
+                    const currentPrice = hasDiscount ? details.price / 2 : details.price;
 
                     return (
                         <div
@@ -409,17 +460,22 @@ export default function RegisterPage() {
                                     </h3>
                                     <p className="text-xs text-slate-400 mt-1">{details.description}</p>
                                 </div>
-                                <div className="text-right">
-                                    <span className="text-2xl font-black text-white">₦{details.price.toLocaleString()}</span>
-                                    <span className="text-xs text-slate-500 block">/week</span>
-                                </div>
+                                <PriceDisplay price={currentPrice} originalPrice={details.price} />
                             </div>
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                                 <div className={`px-3 py-1 rounded-full text-[10px] font-bold ${isProMax ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-800 text-slate-300'
                                     }`}>
                                     {typeof details.productLimit === 'number' ? `${details.productLimit} Products` : details.productLimit}
                                 </div>
+
+                                {(isPro || isProMax) && (
+                                    <div className={`px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 ${isProMax ? 'bg-amber-500/20 text-amber-400' : 'bg-indigo-500/20 text-indigo-400'
+                                        }`}>
+                                        <Bot className="w-3 h-3" />
+                                        A.I Assistant
+                                    </div>
+                                )}
                             </div>
 
                             {isSelected && (
