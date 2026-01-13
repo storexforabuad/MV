@@ -8,7 +8,8 @@ import {
     CheckCircle2, ChevronRight, ChevronLeft, Loader2,
     Sparkles, CreditCard, Upload, Store, ShoppingBag,
     UtensilsCrossed, Shirt, Car, Fish, Globe, Laptop,
-    PartyPopper, GraduationCap, Bot, Tag
+    PartyPopper, GraduationCap, Bot, Tag, ArrowRight,
+    MessageCircle, Smartphone
 } from 'lucide-react';
 import { db, storage } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -298,8 +299,13 @@ export default function RegisterPage() {
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
             className="text-center space-y-6"
         >
-            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-emerald-500 to-green-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-green-500/20 mb-8">
-                <Sparkles className="w-12 h-12 text-white" />
+            <div className="w-24 h-24 mx-auto bg-emerald-500/10 rounded-3xl flex items-center justify-center shadow-2xl shadow-emerald-500/20 mb-8 relative overflow-hidden">
+                <Image
+                    src="/bizz-app-logo.jpg"
+                    alt="Bizz App Logo"
+                    fill
+                    className="object-cover"
+                />
             </div>
             <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight">
                 Join the Future<br />of Commerce
@@ -309,9 +315,26 @@ export default function RegisterPage() {
                 <br />
                 <span className="text-emerald-400 font-bold">Bizz App™</span> - Your Business, All in One App.
             </p>
+
+            {/* Partner Badges */}
+            <div className="space-y-3 pt-6">
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">In partnership with</p>
+                <div className="flex flex-nowrap justify-center items-center gap-2 px-2">
+                    <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[10px] bg-slate-900/40 px-3 py-2 rounded-xl border border-slate-800/50 backdrop-blur-sm shadow-lg whitespace-nowrap">
+                        <CreditCard className="w-3.5 h-3.5 text-emerald-500" /> Paystack
+                    </div>
+                    <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[10px] bg-slate-900/40 px-3 py-2 rounded-xl border border-slate-800/50 backdrop-blur-sm shadow-lg whitespace-nowrap">
+                        <Smartphone className="w-3.5 h-3.5 text-emerald-500" /> OPay
+                    </div>
+                    <div className="flex items-center gap-1.5 text-slate-400 font-bold text-[10px] bg-slate-900/40 px-3 py-2 rounded-xl border border-slate-800/50 backdrop-blur-sm shadow-lg whitespace-nowrap">
+                        <MessageCircle className="w-3.5 h-3.5 text-emerald-500" /> WhatsApp
+                    </div>
+                </div>
+            </div>
+
             <button
                 onClick={() => setStep(2)}
-                className="w-full py-4 bg-white text-slate-900 rounded-2xl font-black text-lg hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-white/10 mt-8"
+                className="w-full py-4 bg-white text-slate-900 rounded-2xl font-black text-lg hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-white/10 mt-6"
             >
                 Get Started
             </button>
@@ -464,9 +487,10 @@ export default function RegisterPage() {
 
             <button
                 onClick={() => setStep(4)}
-                className="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold mt-4 hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-500/20"
+                className="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold mt-4 hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
             >
                 Continue
+                <ArrowRight className="w-5 h-5" />
             </button>
         </motion.div>
     );
@@ -605,6 +629,7 @@ export default function RegisterPage() {
                     <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
                     <>
+                        <CreditCard className="w-5 h-5" />
                         Pay & Register
                     </>
                 )}
@@ -649,8 +674,13 @@ export default function RegisterPage() {
                 {/* Header */}
                 <header className="flex-none flex justify-between items-center p-6 relative z-20">
                     <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/20">
-                            <span className="font-black text-white text-lg">B</span>
+                        <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/10 relative overflow-hidden">
+                            <Image
+                                src="/bizz-app-logo.jpg"
+                                alt="Bizz App Logo"
+                                fill
+                                className="object-cover"
+                            />
                         </div>
                         <span className="font-bold text-xl tracking-tight">Bizz App™</span>
                     </div>
@@ -711,8 +741,7 @@ export default function RegisterPage() {
                             </div>
                             <h3 className="text-2xl font-bold text-center text-white mb-2">One Last Thing!</h3>
                             <p className="text-slate-400 text-center text-sm mb-8">
-                                Where should we send your receipt and login details?
-                            </p>
+                                Please enter your email address to receive important alerts.                            </p>
 
                             <div className="space-y-4">
                                 <div>
@@ -734,9 +763,10 @@ export default function RegisterPage() {
 
                                 <button
                                     onClick={handleEmailSubmit}
-                                    className="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-500/20"
+                                    className="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
                                 >
                                     Continue to Payment
+                                    <ArrowRight className="w-5 h-5" />
                                 </button>
                             </div>
                         </motion.div>
