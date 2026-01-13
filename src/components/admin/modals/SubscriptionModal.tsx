@@ -91,7 +91,7 @@ const TierCard = ({
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={!disabled ? onSelect : undefined}
-      className={`relative aspect-[16/9] sm:aspect-[21/9] rounded-[2rem] overflow-hidden border-2 transition-all cursor-pointer group ${isSelected
+      className={`relative h-[280px] sm:h-[320px] w-full rounded-[2.5rem] overflow-hidden border-2 transition-all cursor-pointer group ${isSelected
         ? isProMax ? 'border-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.3)]' : 'border-white/40 shadow-2xl scale-[1.02]'
         : isProMax ? 'border-amber-500/30 hover:border-amber-500/60' : 'border-white/5 hover:border-white/20'
         } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
@@ -113,23 +113,23 @@ const TierCard = ({
       {/* Content Overlay */}
       <div className="absolute inset-0 p-4 sm:p-6 flex flex-col justify-end">
         {/* Top Section: Name */}
-        <div className="flex items-center gap-2 mb-auto">
-          <h4 className={`text-xl sm:text-2xl font-black tracking-tight drop-shadow-md ${isProMax ? 'text-amber-50' : 'text-white'}`}>
+        <div className="flex items-center gap-2 mb-auto pt-2">
+          <h4 className={`text-3xl sm:text-4xl font-black tracking-tight drop-shadow-md ${isProMax ? 'text-amber-50' : 'text-white'}`}>
             {details.name}
           </h4>
           {isSelected && <CheckCircle2 className={`w-5 h-5 drop-shadow-md ${isProMax ? 'text-amber-400' : 'text-white'}`} />}
         </div>
 
         {/* Product Limit Badge */}
-        <div className="mb-auto mt-2">
-          <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg backdrop-blur-md border ${isProMax
-              ? 'bg-amber-500/20 border-amber-500/30 text-amber-100'
-              : isPro
-                ? 'bg-indigo-500/20 border-indigo-400/30 text-indigo-100'
-                : 'bg-white/10 border-white/20 text-white/90'
+        <div className="mb-auto mt-4">
+          <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl backdrop-blur-md border ${isProMax
+            ? 'bg-amber-500/20 border-amber-500/30 text-amber-100'
+            : isPro
+              ? 'bg-indigo-500/20 border-indigo-400/30 text-indigo-100'
+              : 'bg-white/10 border-white/20 text-white/90'
             }`}>
-            <Package className="w-3 h-3" />
-            <span className="text-[10px] font-bold">
+            <Package className="w-4 h-4" />
+            <span className="text-xs font-bold">
               Up to {typeof details.productLimit === 'number' ? details.productLimit.toLocaleString() : details.productLimit} Products
             </span>
           </div>
@@ -137,17 +137,17 @@ const TierCard = ({
 
         {/* Bottom Section: Price & Description */}
         <div>
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-baseline gap-2 mb-1">
             <div className="flex flex-col">
-              <span className={`text-sm font-bold line-through drop-shadow-sm ${isProMax ? 'text-amber-200/80 decoration-amber-400' : 'text-white/80 decoration-white/60'}`}>
+              <span className={`text-base font-bold line-through drop-shadow-sm ${isProMax ? 'text-amber-200/80 decoration-amber-400' : 'text-white/80 decoration-white/60'}`}>
                 ₦{(details.price * 2).toLocaleString()}
               </span>
-              <span className={`text-3xl sm:text-4xl font-black tracking-tighter drop-shadow-xl ${isProMax ? 'text-amber-400' : 'text-white'}`}>
+              <span className={`text-4xl sm:text-5xl font-black tracking-tighter drop-shadow-xl ${isProMax ? 'text-amber-400' : 'text-white'}`}>
                 ₦{details.price.toLocaleString()}
               </span>
             </div>
           </div>
-          <p className={`text-[10px] sm:text-xs font-medium mt-1 leading-snug max-w-[280px] drop-shadow-md ${isProMax ? 'text-amber-100/80' : 'text-white/80'}`}>
+          <p className={`text-xs sm:text-sm font-medium mt-2 leading-relaxed max-w-[320px] drop-shadow-md ${isProMax ? 'text-amber-100/80' : 'text-white/80'}`}>
             {details.description}
           </p>
         </div>
