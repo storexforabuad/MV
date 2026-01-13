@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { ShieldCheck, X, Calendar, CreditCard, AlertCircle, CheckCircle2, Loader2, Zap, Clock, ChevronRight, AlertTriangle, XCircle, Trophy, Gift, Star, Sparkles } from 'lucide-react';
+import { ShieldCheck, X, Calendar, CreditCard, AlertCircle, CheckCircle2, Loader2, Zap, Clock, ChevronRight, AlertTriangle, XCircle, Trophy, Gift, Star, Sparkles, Package } from 'lucide-react';
 import {
   getSubscriptionStatus,
   cancelSubscription,
@@ -118,6 +118,21 @@ const TierCard = ({
             {details.name}
           </h4>
           {isSelected && <CheckCircle2 className={`w-5 h-5 drop-shadow-md ${isProMax ? 'text-amber-400' : 'text-white'}`} />}
+        </div>
+
+        {/* Product Limit Badge */}
+        <div className="mb-auto mt-2">
+          <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg backdrop-blur-md border ${isProMax
+              ? 'bg-amber-500/20 border-amber-500/30 text-amber-100'
+              : isPro
+                ? 'bg-indigo-500/20 border-indigo-400/30 text-indigo-100'
+                : 'bg-white/10 border-white/20 text-white/90'
+            }`}>
+            <Package className="w-3 h-3" />
+            <span className="text-[10px] font-bold">
+              Up to {typeof details.productLimit === 'number' ? details.productLimit.toLocaleString() : details.productLimit} Products
+            </span>
+          </div>
         </div>
 
         {/* Bottom Section: Price & Description */}
@@ -509,7 +524,13 @@ export default function SubscriptionModal({
                     {isLegacyStore ? 'Your Plan' : status === 'active' ? 'Change Your Plan' : 'Choose Your Plan'}
                   </h4>
                   {!isLegacyStore && (
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3">
+                      <button
+                        onClick={() => window.open('https://wa.me/2347032905036', '_blank')}
+                        className="text-[10px] text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-right sm:text-left"
+                      >
+                        Need monthly billing? <span className="font-bold underline decoration-dotted">Contact us</span>
+                      </button>
                       <div className="bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-full border border-slate-200 dark:border-slate-800 shadow-sm">
                         <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
                           Weekly Billing
