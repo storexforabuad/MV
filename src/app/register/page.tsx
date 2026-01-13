@@ -27,9 +27,9 @@ type StoreType =
     | 'electronics'
     | 'real-estate'
     | 'artist'
-    | 'digital-products'
-    | 'consultancy'
-    | 'events';
+    | 'beauty'
+    | 'home-services'
+    | 'digital-products';
 
 interface RegistrationData {
     // CEO Details
@@ -73,7 +73,7 @@ const STORE_TYPES: { id: StoreType; label: string; icon: any; description: strin
         id: 'fashion',
         label: 'Fashion',
         icon: Shirt,
-        description: 'Clothing brands, boutiques, and fashion designers.',
+        description: 'Clothing brands, boutiques, textile retailers, and designers.',
         color: 'from-pink-500 to-rose-500'
     },
     {
@@ -112,25 +112,25 @@ const STORE_TYPES: { id: StoreType; label: string; icon: any; description: strin
         color: 'from-purple-500 to-pink-500'
     },
     {
+        id: 'beauty',
+        label: 'Beauty',
+        icon: Sparkles,
+        description: 'Cosmetics, makeup artists, and beauty services.',
+        color: 'from-pink-400 to-rose-600'
+    },
+    {
+        id: 'home-services',
+        label: 'Home Services',
+        icon: Building2,
+        description: 'Cleaning, repairs, maintenance, and home improvement.',
+        color: 'from-amber-600 to-orange-700'
+    },
+    {
         id: 'digital-products',
         label: 'Digital Products',
         icon: Laptop,
         description: 'E-books, courses, software, and digital assets.',
         color: 'from-indigo-500 to-blue-500'
-    },
-    {
-        id: 'consultancy',
-        label: 'Consultancy',
-        icon: GraduationCap,
-        description: 'Professional services, coaching, and experts.',
-        color: 'from-teal-500 to-emerald-500'
-    },
-    {
-        id: 'events',
-        label: 'Events',
-        icon: PartyPopper,
-        description: 'Event planning, ticketing, and management.',
-        color: 'from-yellow-500 to-amber-500'
     },
 ];
 
