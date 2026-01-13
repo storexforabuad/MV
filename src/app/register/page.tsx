@@ -389,7 +389,7 @@ export default function RegisterPage() {
 
             <div className="space-y-4">
                 {(['basic', 'pro', 'promax'] as const).map((tier) => {
-                    const details = TIER_DETAILS[tier];
+                    const details = TIER_DETAILS[tier as keyof typeof TIER_DETAILS];
                     const isSelected = formData.subscriptionTier === tier;
                     const isProMax = tier === 'promax';
 
@@ -434,6 +434,29 @@ export default function RegisterPage() {
                     );
                 })}
             </div>
+        </motion.div>
+    );
+
+    const renderStep5_Success = () => (
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-12">
+            <div className="w-24 h-24 mx-auto bg-emerald-500 rounded-full flex items-center justify-center shadow-2xl shadow-emerald-500/40 mb-8 animate-bounce">
+                <CheckCircle2 className="w-12 h-12 text-white" />
+            </div>
+            <h2 className="text-3xl font-black text-white mb-4">Registration Complete!</h2>
+            <p className="text-slate-400 max-w-xs mx-auto mb-8">
+                Welcome to Bizapp! We have received your details and payment. Our team is setting up your store right now.
+            </p>
+            <div className="p-6 bg-slate-900/50 rounded-2xl border border-slate-800 max-w-sm mx-auto">
+                <p className="text-sm text-slate-300">
+                    You will receive an email at <span className="text-emerald-400 font-bold">{formData.ceoEmail}</span> shortly with your login details.
+                </p>
+            </div>
+            <button
+                onClick={() => window.location.href = '/'}
+                className="mt-12 text-emerald-500 font-bold hover:text-emerald-400"
+            >
+                Return to Home
+            </button>
         </motion.div>
     );
 
