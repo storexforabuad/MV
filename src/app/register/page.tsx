@@ -407,6 +407,8 @@ export default function RegisterPage() {
         </motion.div>
     );
 
+    const [discountInput, setDiscountInput] = useState('');
+
     const renderStep4_Subscription = () => (
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 pb-24">
             <div className="text-center mb-8">
@@ -415,21 +417,45 @@ export default function RegisterPage() {
             </div>
 
             {/* Discount Code Input */}
-            <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <Tag className="h-5 w-5 text-slate-500" />
-                </div>
-                <input
-                    type="text"
-                    placeholder="Have a discount code?"
-                    value={formData.referralCode}
-                    onChange={(e) => handleInputChange('referralCode', e.target.value)}
-                    className="w-full pl-10 pr-4 py-3 bg-slate-900/50 border border-slate-800 rounded-xl text-white placeholder:text-slate-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none text-sm"
-                />
-                {formData.referralCode && (
-                    <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                        <span className="text-xs font-bold text-emerald-500 animate-pulse">50% OFF APPLIED!</span>
+            <div className="space-y-2">
+                <div className="relative flex gap-2">
+                    <div className="relative flex-1">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Tag className="h-5 w-5 text-slate-500" />
+                        </div>
+                        <input
+                            type="text"
+                            placeholder="Have a discount code?"
+                            value={discountInput}
+                            onChange={(e) => setDiscountInput(e.target.value)}
+                            className="w-full pl-10 pr-4 py-3 bg-slate-900/50 border border-slate-800 rounded-xl text-white placeholder:text-slate-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none text-sm"
+                        />
                     </div>
+                    <button
+                        onClick={() => handleInputChange('referralCode', discountInput)}
+                        disabled={!discountInput}
+                        className="px-6 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
+                    >
+                        Apply
+                    </button>
+                </div>
+                {formData.referralCode && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex items-center justify-end gap-2"
+                    >
+                        <span className="text-xs font-bold text-emerald-500 animate-pulse">🎉 50% OFF APPLIED!</span>
+                        <button
+                            onClick={() => {
+                                handleInputChange('referralCode', '');
+                                setDiscountInput('');
+                            }}
+                            className="text-[10px] text-slate-500 hover:text-red-400 underline"
+                        >
+                            Remove
+                        </button>
+                    </motion.div>
                 )}
             </div>
 
