@@ -682,7 +682,7 @@ export default function RegisterPage() {
                 {/* Footer */}
                 {step === 1 && (
                     <footer className="flex-none py-4 text-center text-[10px] text-slate-600 relative z-10 bg-black/50 backdrop-blur-sm">
-                        <p>© {new Date().getFullYear()} BizzApp™ (Biz+App)™. All rights reserved.</p>
+                        <p>© {new Date().getFullYear()} Atlas Business Solutions. All rights reserved.</p>
                     </footer>
                 )}
 
