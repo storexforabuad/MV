@@ -597,7 +597,7 @@ export default function RegisterPage() {
 
             {/* Pay Button - Moved back to main content */}
             <button
-                onClick={handlePayment}
+                onClick={() => setShowEmailModal(true)}
                 disabled={isLoading}
                 className="w-full bg-white text-black font-bold py-4 rounded-2xl hover:bg-slate-200 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-8 shadow-xl shadow-white/10"
             >
