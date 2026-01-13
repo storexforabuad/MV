@@ -94,7 +94,7 @@ const STORE_TYPES: { id: StoreType; label: string; icon: any; description: strin
         id: 'electronics',
         label: 'Electronics',
         icon: Laptop,
-        description: 'New and used electronics, gadgets, and accessories.',
+        description: 'Phones, solar equipment, gadgets, and electronic accessories.',
         color: 'from-blue-400 to-indigo-600'
     },
     {
