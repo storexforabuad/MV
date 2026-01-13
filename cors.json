@@ -3,7 +3,8 @@
         "origin": [
             "http://localhost:3000",
             "https://bizapp.com",
-            "https://your-production-domain.com"
+            "https://tinyurl.com/bizzappreg",
+            "http://localhost:3000/register"
         ],
         "method": [
             "GET",

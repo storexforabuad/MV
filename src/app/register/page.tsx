@@ -307,7 +307,7 @@ export default function RegisterPage() {
             <p className="text-lg text-slate-400 max-w-md mx-auto leading-relaxed">
                 Create your premium online store in minutes.
                 <br />
-                <span className="text-emerald-400 font-bold">Bizapp (Biz+App)™</span> - Your Business, All in One App.
+                <span className="text-emerald-400 font-bold">BizzApp™</span> - Your Business, All in One App.
             </p>
             <button
                 onClick={() => setStep(2)}
@@ -487,7 +487,7 @@ export default function RegisterPage() {
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 pb-24">
             <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold text-white">Select a Plan</h2>
-                <p className="text-slate-400 text-sm">Choose the perfect plan to grow your business.</p>
+                <p className="text-slate-400 text-sm">Choose the perfect plan for your business.</p>
             </div>
 
             {/* Discount Code Input */}
@@ -599,7 +599,7 @@ export default function RegisterPage() {
             <button
                 onClick={() => setShowEmailModal(true)}
                 disabled={isLoading}
-                className="w-full bg-white text-black font-bold py-4 rounded-2xl hover:bg-slate-200 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-8 shadow-xl shadow-white/10"
+                className="w-full bg-emerald-600 text-white font-bold py-4 rounded-2xl hover:bg-emerald-500 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-8 shadow-xl shadow-emerald-500/20"
             >
                 {isLoading ? (
                     <Loader2 className="w-5 h-5 animate-spin" />
@@ -619,7 +619,7 @@ export default function RegisterPage() {
             </div>
             <h2 className="text-3xl font-black text-white mb-4">Registration Complete!</h2>
             <p className="text-slate-400 max-w-xs mx-auto mb-8">
-                Welcome to Bizapp! We have received your details and payment. Our team is setting up your store right now.
+                Welcome to BizzApp! We have received your details and payment. Our team is setting up your store right now.
             </p>
             <div className="p-6 bg-slate-900/50 rounded-2xl border border-slate-800 max-w-sm mx-auto">
                 <p className="text-sm text-slate-300">
@@ -652,7 +652,7 @@ export default function RegisterPage() {
                         <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/20">
                             <span className="font-black text-white text-lg">B</span>
                         </div>
-                        <span className="font-bold text-xl tracking-tight">Bizapp</span>
+                        <span className="font-bold text-xl tracking-tight">BizzApp™</span>
                     </div>
                     {step > 1 && step < 5 && (
                         <button
@@ -682,7 +682,7 @@ export default function RegisterPage() {
                 {/* Footer */}
                 {step === 1 && (
                     <footer className="flex-none py-4 text-center text-[10px] text-slate-600 relative z-10 bg-black/50 backdrop-blur-sm">
-                        <p>© {new Date().getFullYear()} Bizapp (Biz+App)™. All rights reserved.</p>
+                        <p>© {new Date().getFullYear()} BizzApp™ (Biz+App)™. All rights reserved.</p>
                     </footer>
                 )}
 
