@@ -116,7 +116,7 @@ const STORE_TYPES: { id: StoreType; label: string; icon: any; description: strin
         id: 'beauty',
         label: 'Beauty',
         icon: Sparkles,
-        description: 'Cosmetics, makeup artists, and beauty services.',
+        description: 'Cosmetics, makeup artists, perfume etc.',
         color: 'from-pink-400 to-rose-600'
     },
     {
