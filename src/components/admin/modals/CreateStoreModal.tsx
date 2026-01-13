@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, ChangeEvent, FormEvent, useRef } from "react";
+import { useState, ChangeEvent, FormEvent, useRef, useEffect } from "react";
 import { StoreMeta } from "../../../types/store";
 import { geography } from "../../../config/geography";
 import { categorySuggestions } from "../../../config/categories";
@@ -9,57 +9,40 @@ import {
   collection,
   doc,
   setDoc,
+  updateDoc,
   writeBatch,
   serverTimestamp,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Image from "next/image";
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  X,
+  Store,
+  ChevronLeft,
+  ChevronRight,
+  CheckCircle2,
+  Loader2,
+  ImagePlus,
+  Building2,
+  User,
+  MapPin,
+  Globe
+} from 'lucide-react';
+import { FloatingLabelInput, ModernToggle } from '../../ui/ComposerInputs';
 
 interface CreateStoreModalProps {
   isOpen: boolean;
   onClose: () => void;
+  initialData?: any; // Registration data
 }
-
-const ProgressBar = ({ step }: { step: number }) => (
-  <div className="w-full px-4 sm:px-8">
-    <div className="relative w-full h-1 bg-gray-200 dark:bg-gray-700 rounded-full">
-      <div
-        className="absolute top-0 left-0 h-1 bg-blue-500 rounded-full transition-all duration-500 ease-in-out"
-        style={{ width: `${((step - 1) / 2) * 100}%` }}
-      />
-      <div className="absolute w-full flex justify-between top-1/2 -translate-y-1/2">
-        {[1, 2, 3].map((s) => (
-          <div key={s} className="relative">
-            <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300 ${step >= s
-                ? "bg-blue-500 text-white"
-                : "bg-gray-300 dark:bg-gray-600 text-gray-500 dark:text-gray-300"
-                }`}
-            >
-              {step > s ? "✓" : s}
-            </div>
-            <p
-              className={`absolute top-10 left-1/2 -translate-x-1/2 text-xs text-center w-24 ${step >= s
-                ? "text-gray-800 dark:text-gray-200 font-semibold"
-                : "text-gray-500 dark:text-gray-400"
-                }`}
-            >
-              {s === 1 && "CEO Details"}
-              {s === 2 && "Business Info"}
-              {s === 3 && "Categories"}
-            </p>
-          </div>
-        ))}
-      </div>
-    </div>
-  </div>
-);
 
 export default function CreateStoreModal({
   isOpen,
   onClose,
+  initialData
 }: CreateStoreModalProps) {
-  const [step, setStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0); // 0: CEO, 1: Business, 2: Categories, 3: Creating, 4: Success
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<Partial<StoreMeta>>({
     name: "",
@@ -86,6 +69,37 @@ export default function CreateStoreModal({
   const [ceoImageFile, setCeoImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Lock body scroll when open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => { document.body.style.overflow = 'auto'; };
+  }, [isOpen]);
+
+  // Pre-fill form with initialData if provided
+  useEffect(() => {
+    if (initialData) {
+      setFormData(prev => ({
+        ...prev,
+        name: initialData.businessName || "",
+        whatsapp: initialData.businessPhone || "",
+        ceoName: initialData.ceoName || "",
+        ceoEmail: initialData.ceoEmail || "",
+        ceoPhone: initialData.ceoPhone || "",
+        storeType: initialData.storeType || "general",
+        businessDescription: initialData.businessDescription || "",
+        country: initialData.country || "",
+        state: initialData.state || "",
+      }));
+      if (initialData.ceoImageUrl) {
+        setImagePreview(initialData.ceoImageUrl);
+      }
+    }
+  }, [initialData]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -129,15 +143,12 @@ export default function CreateStoreModal({
     }
   };
 
-  const nextStep = () => setStep((prev) => (prev < 3 ? prev + 1 : prev));
-  const prevStep = () => setStep((prev) => (prev > 1 ? prev - 1 : prev));
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
     setIsLoading(true);
+    setCurrentStep(3); // Move to creating screen
 
     try {
-      let ceoImageUrl = "";
+      let ceoImageUrl = imagePreview || "";
       if (ceoImageFile) {
         const storageRef = ref(storage, `ceo-images/${Date.now()}_${ceoImageFile.name}`);
         await uploadBytes(storageRef, ceoImageFile);
@@ -155,6 +166,13 @@ export default function CreateStoreModal({
         ceoImage: ceoImageUrl,
         name: formData.name ?? "Default Store Name",
         whatsapp: formData.whatsapp ?? "",
+        // If created from registration, activate subscription
+        ...(initialData ? {
+          subscriptionStatus: 'active',
+          subscriptionTier: initialData.subscriptionTier,
+          subscriptionStartDate: serverTimestamp(),
+          subscriptionPlanCode: 'manual_activation', // Placeholder
+        } : {})
       };
 
       await setDoc(storeRef, finalFormData);
@@ -169,170 +187,335 @@ export default function CreateStoreModal({
 
       await batch.commit();
 
+      // If created from registration, mark registration as completed
+      if (initialData?.id) {
+        const registrationRef = doc(db, "registrations", initialData.id);
+        await updateDoc(registrationRef, { status: "completed" });
+      }
+
       console.log("Store and categories created successfully!");
-      onClose();
+      setCurrentStep(4); // Success
     } catch (error) {
       console.error("Error creating store:", error);
+      alert("Error creating store. Please try again.");
+      setCurrentStep(2); // Go back to last step
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (!isOpen) return null;
+  const resetState = () => {
+    setCurrentStep(0);
+    setFormData({
+      name: "",
+      whatsapp: "",
+      ceoName: "",
+      ceoEmail: "",
+      ceoPhone: "",
+      ceoInstagram: "",
+      businessDescription: "",
+      businessInstagram: "",
+      hasPhysicalShop: false,
+      shopNumber: "",
+      plazaBuildingName: "",
+      streetAddress: "",
+      country: "",
+      state: "",
+      storeType: "general",
+      bankAccountName: "",
+      bankAccountNumber: "",
+      bankName: "",
+    });
+    setCategories([]);
+    setCeoImageFile(null);
+    setImagePreview(null);
+  };
 
-  const selectedCountry = geography.find(c => c.name === formData.country);
+  const handleClose = () => {
+    onClose();
+    setTimeout(resetState, 300);
+  };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 backdrop-blur-sm">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md sm:max-w-lg md:max-w-2xl max-h-[90vh] flex flex-col transition-all duration-300 ease-in-out">
-        <div className="p-6 pt-12 sm:pt-16">
-          <ProgressBar step={step} />
-        </div>
+  const STEPS = [{ name: 'CEO Details' }, { name: 'Business Info' }, { name: 'Categories' }];
+  const modalVariants = { hidden: { opacity: 0, y: '100%' }, visible: { opacity: 1, y: 0 }, exit: { opacity: 0, y: '100%' } };
+  const MotionDiv = motion.div;
 
-        <div className="flex-grow overflow-y-auto p-6 space-y-6">
-          <form onSubmit={handleSubmit}>
-            {step === 1 && (
-              <div className="space-y-4 animate-fade-in">
-                <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-white">CEO Details</h2>
-                <p className="text-sm text-center text-gray-500 dark:text-gray-400">Tell us about the person leading this business</p>
-                <div
-                  className="w-32 h-32 mx-auto rounded-full border-4 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center cursor-pointer hover:border-blue-500 transition-all"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  {imagePreview ? (
-                    <Image src={imagePreview} alt="CEO Preview" width={128} height={128} className="rounded-full object-cover w-full h-full" />
-                  ) : (
-                    <span className="text-xs text-center text-gray-500">Click to upload image</span>
-                  )}
-                  <input type="file" ref={fileInputRef} onChange={handleImageChange} className="hidden" accept="image/*" />
-                </div>
-                <input name="ceoName" value={formData.ceoName} onChange={handleInputChange} placeholder="Full Name *" className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" required />
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <input name="ceoPhone" value={formData.ceoPhone} onChange={handleInputChange} placeholder="Phone Number *" className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" required />
-                  <input name="ceoEmail" value={formData.ceoEmail} onChange={handleInputChange} placeholder="Email Address *" type="email" className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" required />
-                </div>
-                <input name="ceoInstagram" value={formData.ceoInstagram} onChange={handleInputChange} placeholder="Instagram (@username)" className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" />
-              </div>
-            )}
-
-            {step === 2 && (
-              <div className="space-y-4 animate-fade-in">
-                <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-white">Business Info</h2>
-                <p className="text-sm text-center text-gray-500 dark:text-gray-400">Tell us about the business and where it&apos;s located</p>
-                <input name="name" value={formData.name} onChange={handleInputChange} placeholder="Business Name *" className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" required />
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <input name="whatsapp" value={formData.whatsapp} onChange={handleInputChange} placeholder="Business WhatsApp (e.g. +234...)" className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" />
-                  <input name="businessInstagram" value={formData.businessInstagram} onChange={handleInputChange} placeholder="Instagram (@username)" className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" />
-                </div>
-                <div className="flex flex-col gap-2">
-                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">🏢 What type of business is this?</label>
-                  <select
-                    name="storeType"
-                    value={formData.storeType || 'general'}
-                    onChange={handleInputChange}
-                    className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="general">🛍️ General (Retail, Food, etc.)</option>
-                    <option value="fashion">👗 Fashion (Ready-to-Wear, Bespoke)</option>
-                    <option value="automotive">🚗 Automotive (Car Dealership)</option>
-                    <option value="livestock">🐟 Livestock (Fishery & Aquaculture)</option>
-                    <option value="restaurant">🍔 Restaurant (Food & Drinks)</option>
-                    <option value="sports">⚽ Sports Arena / Pitch</option>
-                    <option value="sports-rental">🏟️ Sports Rental (Equipment)</option>
-                  </select>
-                  <p className="text-xs text-gray-500 dark:text-gray-400">
-                    This determines the product fields and storefront design.
-                  </p>
-                </div>
-                <div className="mt-4 space-y-2">
-                  <h4 className="text-sm font-medium">Payout Account (optional)</h4>
-                  <input name="bankAccountName" value={(formData as any).bankAccountName || ''} onChange={handleInputChange} placeholder="Account Name" className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" />
-                  <input name="bankAccountNumber" value={(formData as any).bankAccountNumber || ''} onChange={handleInputChange} placeholder="Account Number" className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" />
-                  <input name="bankName" value={(formData as any).bankName || ''} onChange={handleInputChange} placeholder="Bank Name" className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" />
-                </div>
-                <div className="flex items-center gap-4 p-3 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                  <label htmlFor="hasPhysicalShop" className="text-gray-700 dark:text-gray-300">Do you have a physical shop?</label>
-                  <input type="checkbox" id="hasPhysicalShop" name="hasPhysicalShop" checked={formData.hasPhysicalShop} onChange={handleInputChange} className="toggle-checkbox" />
-                </div>
-                {formData.hasPhysicalShop && (
-                  <div className="space-y-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg animate-fade-in">
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <input name="shopNumber" value={formData.shopNumber} onChange={handleInputChange} placeholder="Shop Number *" className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" required={formData.hasPhysicalShop} />
-                      <input name="plazaBuildingName" value={formData.plazaBuildingName} onChange={handleInputChange} placeholder="Plaza/Building Name *" className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" required={formData.hasPhysicalShop} />
-                    </div>
-                    <input name="streetAddress" value={formData.streetAddress} onChange={handleInputChange} placeholder="Street Address *" className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" required={formData.hasPhysicalShop} />
+  const renderStepContent = () => {
+    switch (currentStep) {
+      case 0: // CEO Details
+        return (
+          <MotionDiv key={0} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
+            <div className="flex flex-col items-center justify-center py-6">
+              <div
+                className="w-32 h-32 rounded-full border-4 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center cursor-pointer hover:border-blue-500 transition-all relative overflow-hidden group"
+                onClick={() => fileInputRef.current?.click()}
+              >
+                {imagePreview ? (
+                  <Image src={imagePreview} alt="CEO Preview" fill className="object-cover" />
+                ) : (
+                  <div className="flex flex-col items-center text-slate-400 group-hover:text-blue-500">
+                    <ImagePlus className="w-8 h-8 mb-1" />
+                    <span className="text-[10px]">Upload Photo</span>
                   </div>
                 )}
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <select name="country" value={formData.country} onChange={handleCountryChange} className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" required>
-                    <option value="">Select your country</option>
+                <input type="file" ref={fileInputRef} onChange={handleImageChange} className="hidden" accept="image/*" />
+              </div>
+              <p className="text-sm text-slate-500 mt-2">Tap to upload CEO photo</p>
+            </div>
+
+            <FloatingLabelInput label="Full Name" value={formData.ceoName || ''} onChange={(e) => handleInputChange(e)} required />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FloatingLabelInput label="Phone Number" value={formData.ceoPhone || ''} onChange={(e) => handleInputChange(e)} required />
+              <FloatingLabelInput label="Email Address" type="email" value={formData.ceoEmail || ''} onChange={(e) => handleInputChange(e)} required />
+            </div>
+            <FloatingLabelInput label="Instagram (@username)" value={formData.ceoInstagram || ''} onChange={(e) => handleInputChange(e)} />
+          </MotionDiv>
+        );
+
+      case 1: // Business Info
+        const selectedCountry = geography.find(c => c.name === formData.country);
+        return (
+          <MotionDiv key={1} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
+            <FloatingLabelInput label="Business Name" value={formData.name || ''} onChange={(e) => handleInputChange(e)} required />
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <FloatingLabelInput label="Business WhatsApp" value={formData.whatsapp || ''} onChange={(e) => handleInputChange(e)} />
+              <FloatingLabelInput label="Business Instagram" value={formData.businessInstagram || ''} onChange={(e) => handleInputChange(e)} />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Store Type</label>
+              <div className="relative">
+                <select
+                  name="storeType"
+                  value={formData.storeType || 'general'}
+                  onChange={handleInputChange}
+                  className="block w-full px-4 py-3.5 text-base text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+                >
+                  <option value="general">🛍️ General (Retail, Food, etc.)</option>
+                  <option value="restaurant">🍔 Restaurant (Food & Drinks)</option>
+                  <option value="fashion">👗 Fashion (Ready-to-Wear, Bespoke)</option>
+                  <option value="livestock">🐟 Livestock (Fishery & Aquaculture)</option>
+                  <option value="automotive">🚗 Automotive (Car Dealership)</option>
+                  <option value="social-commerce">🌐 Social Commerce</option>
+                  <option value="digital-products">💻 Digital Products</option>
+                  <option value="consultancy">🎓 Consultancy</option>
+                  <option value="events">🎉 Events</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-500">
+                  <ChevronRight className="w-5 h-5 rotate-90" />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Location</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="relative">
+                  <select name="country" value={formData.country} onChange={handleCountryChange} className="block w-full px-4 py-3.5 text-base text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+                    <option value="">Select Country</option>
                     {geography.map(c => <option key={c.name} value={c.name}>{c.flag} {c.name}</option>)}
                   </select>
-                  <select name="state" value={formData.state} onChange={handleInputChange} className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" required disabled={!formData.country}>
-                    <option value="">Select state/province</option>
+                </div>
+                <div className="relative">
+                  <select name="state" value={formData.state} onChange={handleInputChange} disabled={!formData.country} className="block w-full px-4 py-3.5 text-base text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all disabled:opacity-50">
+                    <option value="">Select State</option>
                     {selectedCountry?.states.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
                   </select>
                 </div>
-                <textarea name="businessDescription" value={formData.businessDescription} onChange={handleInputChange} placeholder="Business Description (max 500 chars)..." className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg h-24" maxLength={500}></textarea>
               </div>
-            )}
+            </div>
 
-            {step === 3 && (
-              <div className="space-y-4 animate-fade-in">
-                <h2 className="text-2xl font-bold text-center text-gray-800 dark:text-white">Product Categories</h2>
-                <p className="text-sm text-center text-gray-500 dark:text-gray-400">Select categories that best describe the products</p>
-                <div className="flex flex-wrap gap-2 justify-center">
-                  {categorySuggestions.map(cat => (
-                    <button key={cat} type="button" onClick={() => handleCategorySelect(cat)} className={`px-4 py-2 rounded-full text-sm font-semibold transition-all ${categories.includes(cat) ? 'bg-blue-500 text-white' : 'bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600'}`}>
-                      {cat}
-                    </button>
+            <ModernToggle label="Physical Shop?" description="Do you have a physical location?" checked={formData.hasPhysicalShop || false} onChange={checked => setFormData(prev => ({ ...prev, hasPhysicalShop: checked }))} />
+
+            <AnimatePresence>
+              {formData.hasPhysicalShop && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="space-y-4 overflow-hidden">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <FloatingLabelInput label="Shop Number" value={formData.shopNumber || ''} onChange={(e) => handleInputChange(e)} />
+                    <FloatingLabelInput label="Plaza Name" value={formData.plazaBuildingName || ''} onChange={(e) => handleInputChange(e)} />
+                  </div>
+                  <FloatingLabelInput label="Street Address" value={formData.streetAddress || ''} onChange={(e) => handleInputChange(e)} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300 ml-1">Description</label>
+              <textarea
+                name="businessDescription"
+                value={formData.businessDescription}
+                onChange={handleInputChange}
+                placeholder="Describe your business..."
+                className="block w-full px-4 py-3.5 text-base text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all h-24 resize-none"
+              />
+            </div>
+          </MotionDiv>
+        );
+
+      case 2: // Categories
+        return (
+          <MotionDiv key={2} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
+            <div className="text-center mb-4">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Select Categories</h3>
+              <p className="text-sm text-slate-500">What do you sell?</p>
+            </div>
+
+            <div className="flex flex-wrap gap-2 justify-center">
+              {categorySuggestions.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => handleCategorySelect(cat)}
+                  className={`px-4 py-2 rounded-full text-sm font-semibold transition-all border ${categories.includes(cat)
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-md'
+                    : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-blue-400'}`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+
+            <div className="relative mt-4">
+              <input
+                value={customCategory}
+                onChange={(e) => setCustomCategory(e.target.value)}
+                placeholder="Add custom category..."
+                className="block w-full px-4 py-3.5 pr-12 text-base text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all"
+              />
+              <button
+                onClick={handleAddCustomCategory}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-200 dark:hover:bg-blue-900/50 transition-colors"
+              >
+                <ImagePlus className="w-4 h-4" />
+              </button>
+            </div>
+
+            {categories.length > 0 && (
+              <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800">
+                <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Selected</h4>
+                <div className="flex flex-wrap gap-2">
+                  {categories.map(c => (
+                    <span key={c} className="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded-lg text-xs font-bold flex items-center gap-1">
+                      {c}
+                      <button onClick={() => handleCategorySelect(c)} className="hover:text-blue-900"><X className="w-3 h-3" /></button>
+                    </span>
                   ))}
                 </div>
-                <div className="flex gap-2">
-                  <input value={customCategory} onChange={(e) => setCustomCategory(e.target.value)} placeholder="Or add a custom category..." className="w-full p-3 bg-gray-100 dark:bg-gray-700 rounded-lg" />
-                  <button type="button" onClick={handleAddCustomCategory} className="p-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600">+</button>
-                </div>
-                <div>
-                  <h3 className="font-semibold mt-4">Selected Categories:</h3>
-                  {categories.length > 0 ? (
-                    <ul className="list-disc pl-5 mt-2 text-gray-700 dark:text-gray-300">
-                      {categories.map(c => <li key={c}>{c}</li>)}
-                    </ul>
-                  ) : (
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">No categories selected yet. System categories &apos;Promo&apos; and &apos;New Arrivals&apos; will be available by default.</p>
-                  )}
-                </div>
               </div>
             )}
-          </form>
-        </div>
+          </MotionDiv>
+        );
 
-        <div className="flex justify-between p-6 bg-gray-50 dark:bg-gray-900 rounded-b-2xl">
-          <button
-            onClick={prevStep}
-            disabled={step === 1 || isLoading}
-            className="px-6 py-2 rounded-lg bg-gray-300 dark:bg-gray-700 hover:bg-gray-400 disabled:opacity-50"
-          >
-            Back
-          </button>
-          {step < 3 ? (
-            <button
-              onClick={nextStep}
-              className="px-6 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600"
-            >
-              Next
-            </button>
-          ) : (
-            <button
-              onClick={handleSubmit}
-              disabled={isLoading}
-              className="px-6 py-2 rounded-lg bg-green-500 text-white hover:bg-green-600 disabled:opacity-50"
-            >
-              {isLoading ? "Creating..." : "Finish"}
-            </button>
+      case 3: // Creating
+        return (
+          <MotionDiv key={3} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-center justify-center py-20 text-center space-y-6">
+            <Loader2 className="w-16 h-16 text-blue-600 animate-spin" />
+            <div>
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Creating Store...</h3>
+              <p className="text-slate-500 dark:text-slate-400">Setting up your digital storefront.</p>
+            </div>
+          </MotionDiv>
+        );
+
+      case 4: // Success
+        return (
+          <MotionDiv key={4} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="flex flex-col items-center justify-center py-20 text-center space-y-6">
+            <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+              <CheckCircle2 className="w-12 h-12 text-green-600 dark:text-green-400" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Store Created!</h3>
+              <p className="text-slate-500 dark:text-slate-400">Your store is now live and ready.</p>
+            </div>
+          </MotionDiv>
+        );
+
+      default: return null;
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
+          initial="hidden" animate="visible" exit="exit"
+          variants={modalVariants}
+          transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+        >
+          {/* --- Header --- */}
+          <header className="flex-shrink-0 flex items-center justify-between w-full max-w-5xl mx-auto p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-950/80 backdrop-blur-lg z-10 sticky top-0">
+            <div className="flex items-center gap-4">
+              <div>
+                <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">
+                  {currentStep === 3 ? 'Processing' : currentStep === 4 ? 'Success' : 'Create New Store'}
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  Step {Math.min(currentStep + 1, 3)} of 3
+                </p>
+              </div>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg">
+              <Store className="w-6 h-6 text-white" />
+            </div>
+          </header>
+
+          {/* --- Progress Bar --- */}
+          {currentStep < 3 && (
+            <div className="w-full bg-slate-100 dark:bg-slate-800 h-1">
+              <motion.div
+                className="bg-gradient-to-r from-blue-500 to-indigo-600 h-1"
+                initial={{ width: '0%' }}
+                animate={{ width: `${((currentStep + 1) / STEPS.length) * 100}%` }}
+                transition={{ ease: "easeInOut", duration: 0.5 }}
+              />
+            </div>
           )}
-        </div>
-      </div >
-    </div >
+
+          {/* --- Main Scrollable Content --- */}
+          <main className="flex-grow w-full max-w-5xl mx-auto overflow-y-auto p-4 sm:p-6 scrollbar-hide">
+            <AnimatePresence mode="wait">
+              {renderStepContent()}
+            </AnimatePresence>
+          </main>
+
+          {/* --- Footer --- */}
+          <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 z-10">
+            <div className="absolute bottom-full left-0 right-0 h-12 bg-gradient-to-t from-white dark:from-slate-950 to-transparent pointer-events-none" />
+            <div className="max-w-5xl mx-auto flex items-center gap-3">
+              {currentStep === 0 && (
+                <button onClick={handleClose} className="flex-1 py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 font-semibold hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors">
+                  Cancel
+                </button>
+              )}
+
+              {currentStep > 0 && currentStep < 3 && (
+                <button onClick={() => setCurrentStep(s => s - 1)} className="w-24 sm:flex-1 py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-1 text-sm">
+                  <ChevronLeft className="w-4 h-4" /> Back
+                </button>
+              )}
+
+              {currentStep < 2 && (
+                <button onClick={() => setCurrentStep(s => s + 1)} className="flex-1 py-3.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg">
+                  Next <ChevronRight className="w-5 h-5" />
+                </button>
+              )}
+
+              {currentStep === 2 && (
+                <button onClick={handleSubmit} disabled={isLoading} className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold hover:from-blue-700 hover:to-indigo-700 transition-all shadow-lg flex items-center justify-center gap-2">
+                  {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Create Store'}
+                </button>
+              )}
+
+              {currentStep === 4 && (
+                <button onClick={handleClose} className="flex-1 py-3.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold hover:opacity-90 transition-opacity shadow-lg">
+                  Done
+                </button>
+              )}
+            </div>
+          </footer>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

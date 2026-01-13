@@ -194,6 +194,18 @@ match /productMetrics/{metricId} {
   allow delete: if true;
 }
 
+// --- Admin Config Rules ---
+match /admin/{docId} {
+  // Allow the dev team to read and update roadmap configurations
+  allow read, write: if true;
+}
+
+// --- Registration Rules ---
+match /registrations/{registrationId} {
+  allow create: if true;
+  allow read, update, delete: if true;
+}
+
 // --- Other Collections ---
 match /stockNotifications/{notificationId} {
   allow read, write, create, update, delete: if true;

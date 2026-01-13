@@ -35,7 +35,7 @@ export interface StoreMeta {
   country?: string;
 
   // Store Vertical
-  storeType?: 'general' | 'automotive' | 'livestock' | 'fashion' | 'restaurant' | 'sports' | 'sports-rental' | 'pitchperfect' | 'pitch';
+  storeType?: 'general' | 'restaurant' | 'fashion' | 'livestock' | 'automotive' | 'social-commerce' | 'digital-products' | 'consultancy' | 'events' | 'sports' | 'sports-rental' | 'pitchperfect' | 'pitch';
 
   // Timezone & payout tracking
   timezone?: string;
