@@ -307,7 +307,7 @@ export default function RegisterPage() {
             <p className="text-lg text-slate-400 max-w-md mx-auto leading-relaxed">
                 Create your premium online store in minutes.
                 <br />
-                <span className="text-emerald-400 font-bold">BizzApp™</span> - Your Business, All in One App.
+                <span className="text-emerald-400 font-bold">Bizz App™</span> - Your Business, All in One App.
             </p>
             <button
                 onClick={() => setStep(2)}
@@ -652,7 +652,7 @@ export default function RegisterPage() {
                         <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center shadow-lg shadow-emerald-500/20">
                             <span className="font-black text-white text-lg">B</span>
                         </div>
-                        <span className="font-bold text-xl tracking-tight">BizzApp™</span>
+                        <span className="font-bold text-xl tracking-tight">Bizz App™</span>
                     </div>
                     {step > 1 && step < 5 && (
                         <button
