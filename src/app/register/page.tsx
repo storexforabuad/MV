@@ -155,7 +155,7 @@ const PriceDisplay = ({ price, originalPrice }: { price: number; originalPrice: 
                     ₦{originalPrice.toLocaleString()}
                 </span>
             )}
-            <span className="text-xs text-slate-500 block">/week</span>
+            <span className="text-xs text-slate-500 block">weekly</span>
         </div>
     );
 };
@@ -408,6 +408,16 @@ export default function RegisterPage() {
     );
 
     const [discountInput, setDiscountInput] = useState('');
+    const [isApplyingDiscount, setIsApplyingDiscount] = useState(false);
+
+    const handleApplyDiscount = async () => {
+        if (!discountInput) return;
+        setIsApplyingDiscount(true);
+        // Simulate API call/validation delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        handleInputChange('referralCode', discountInput);
+        setIsApplyingDiscount(false);
+    };
 
     const renderStep4_Subscription = () => (
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 pb-24">
@@ -432,11 +442,15 @@ export default function RegisterPage() {
                         />
                     </div>
                     <button
-                        onClick={() => handleInputChange('referralCode', discountInput)}
-                        disabled={!discountInput}
-                        className="px-6 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-emerald-500/20 active:scale-95"
+                        onClick={handleApplyDiscount}
+                        disabled={!discountInput || isApplyingDiscount}
+                        className="px-6 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex items-center gap-2 min-w-[100px] justify-center"
                     >
-                        Apply
+                        {isApplyingDiscount ? (
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : (
+                            'Apply'
+                        )}
                     </button>
                 </div>
                 {formData.referralCode && (
@@ -516,6 +530,21 @@ export default function RegisterPage() {
                     );
                 })}
             </div>
+
+            {/* Pay Button - Moved back to main content */}
+            <button
+                onClick={handlePayment}
+                disabled={isLoading}
+                className="w-full bg-white text-black font-bold py-4 rounded-2xl hover:bg-slate-200 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-8 shadow-xl shadow-white/10"
+            >
+                {isLoading ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                    <>
+                        Pay & Register
+                    </>
+                )}
+            </button>
         </motion.div>
     );
 
@@ -593,19 +622,7 @@ export default function RegisterPage() {
                     </footer>
                 )}
 
-                {/* Sticky Pay Button for Step 4 */}
-                {step === 4 && (
-                    <div className="flex-none p-6 pt-2 bg-gradient-to-t from-black via-black to-transparent relative z-20">
-                        <button
-                            onClick={() => setShowEmailModal(true)}
-                            disabled={isLoading}
-                            className="w-full py-4 bg-white text-slate-900 rounded-xl font-black hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl flex items-center justify-center gap-2"
-                        >
-                            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <CreditCard className="w-5 h-5" />}
-                            Pay & Register
-                        </button>
-                    </div>
-                )}
+
             </div>
 
             {/* Email Modal */}
