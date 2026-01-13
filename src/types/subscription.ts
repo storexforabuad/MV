@@ -148,7 +148,7 @@ export const TIER_DETAILS = {
         name: 'Lite',
         price: 500,
         period: 'week',
-        description: 'Perfect for new and small vendors just starting their digital journey.',
+        description: 'Perfect for new and small vendors just starting their business empire.',
         productLimit: 100,
         color: 'blue',
         gradient: 'from-blue-500/10 to-cyan-500/10',
