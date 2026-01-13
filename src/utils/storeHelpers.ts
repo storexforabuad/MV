@@ -11,12 +11,7 @@
  * @returns true if the store should use the payment flow, false otherwise
  */
 export function shouldUsePaymentFlow(storeType: string | undefined): boolean {
-  if (!storeType) return true;
-
-  // Store types that use the new payment flow
-  const paymentFlowStoreTypes = ['general'];
-
-  return paymentFlowStoreTypes.includes(storeType);
+  return false;
 }
 
 /**
@@ -26,12 +21,7 @@ export function shouldUsePaymentFlow(storeType: string | undefined): boolean {
  * @returns true if the store should show the preview
  */
 export function shouldShowWhatsAppPreview(storeType: string | undefined): boolean {
-  if (!storeType) return false;
-
-  // Show preview only for fashion and restaurant as per user request
-  const previewStoreTypes = ['fashion', 'restaurant'];
-
-  return previewStoreTypes.includes(storeType);
+  return true;
 }
 
 /**
