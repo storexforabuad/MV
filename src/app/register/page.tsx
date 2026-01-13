@@ -24,7 +24,9 @@ type StoreType =
     | 'fashion'
     | 'livestock'
     | 'automotive'
-    | 'social-commerce'
+    | 'electronics'
+    | 'real-estate'
+    | 'artist'
     | 'digital-products'
     | 'consultancy'
     | 'events';
@@ -89,11 +91,25 @@ const STORE_TYPES: { id: StoreType; label: string; icon: any; description: strin
         color: 'from-slate-500 to-gray-500'
     },
     {
-        id: 'social-commerce',
-        label: 'Social Commerce',
-        icon: Globe,
-        description: 'Sell directly on social media with a unified link.',
-        color: 'from-violet-500 to-purple-500'
+        id: 'electronics',
+        label: 'Electronics',
+        icon: Laptop,
+        description: 'New and used electronics, gadgets, and accessories.',
+        color: 'from-blue-400 to-indigo-600'
+    },
+    {
+        id: 'real-estate',
+        label: 'Real Estate',
+        icon: Building2,
+        description: 'Property listings, rentals, and real estate services.',
+        color: 'from-slate-700 to-slate-900'
+    },
+    {
+        id: 'artist',
+        label: 'Artist',
+        icon: Sparkles,
+        description: 'Music, merch, and creative services for artists.',
+        color: 'from-purple-500 to-pink-500'
     },
     {
         id: 'digital-products',
@@ -182,7 +198,7 @@ export default function RegisterPage() {
         businessName: '',
         businessPhone: '',
         businessDescription: '',
-        country: 'Nigeria',
+        country: 'Morocco',
         state: '',
         storeType: 'general',
         subscriptionTier: 'pro',
@@ -346,6 +362,54 @@ export default function RegisterPage() {
                             type="tel"
                             className="w-full p-4 bg-slate-900/50 border border-slate-800 rounded-xl text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none placeholder:text-slate-600"
                         />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase ml-1">Country</label>
+                            <div className="relative">
+                                <select
+                                    value={formData.country}
+                                    onChange={(e) => {
+                                        handleInputChange('country', e.target.value);
+                                        handleInputChange('state', '');
+                                    }}
+                                    className="w-full p-4 bg-slate-900/50 border border-slate-800 rounded-xl text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none appearance-none"
+                                >
+                                    <option value="">Select Country</option>
+                                    {geography.map(c => (
+                                        <option key={c.name} value={c.name}>
+                                            {c.flag} {c.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <ChevronRight className="w-4 h-4 text-slate-500 rotate-90" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-slate-500 uppercase ml-1">State</label>
+                            <div className="relative">
+                                <select
+                                    value={formData.state}
+                                    onChange={(e) => handleInputChange('state', e.target.value)}
+                                    disabled={!formData.country}
+                                    className="w-full p-4 bg-slate-900/50 border border-slate-800 rounded-xl text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none appearance-none disabled:opacity-50"
+                                >
+                                    <option value="">Select State</option>
+                                    {geography.find(c => c.name === formData.country)?.states.map(s => (
+                                        <option key={s.name} value={s.name}>
+                                            {s.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <ChevronRight className="w-4 h-4 text-slate-500 rotate-90" />
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
