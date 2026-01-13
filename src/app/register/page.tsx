@@ -139,6 +139,14 @@ export default function RegisterPage() {
     const [step, setStep] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const mainRef = useRef<HTMLElement>(null);
+
+    useEffect(() => {
+        if (mainRef.current) {
+            mainRef.current.scrollTop = 0;
+        }
+    }, [step]);
+
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [formData, setFormData] = useState<RegistrationData>({
@@ -373,7 +381,7 @@ export default function RegisterPage() {
     );
 
     const renderStep4_Subscription = () => (
-        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 pb-24">
             <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold text-white">Select a Plan</h2>
                 <p className="text-slate-400 text-sm">Choose the perfect plan to grow your business.</p>
@@ -426,42 +434,10 @@ export default function RegisterPage() {
                     );
                 })}
             </div>
-
-            <form onSubmit={(e) => { e.preventDefault(); setShowEmailModal(true); }}>
-                <button
-                    type="submit"
-                    disabled={isLoading}
-                    className="w-full py-4 bg-white text-slate-900 rounded-xl font-black mt-8 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl flex items-center justify-center gap-2"
-                >
-                    {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <CreditCard className="w-5 h-5" />}
-                    Pay & Register
-                </button>
-            </form>
         </motion.div>
     );
 
-    const renderStep5_Success = () => (
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-12">
-            <div className="w-24 h-24 mx-auto bg-emerald-500 rounded-full flex items-center justify-center shadow-2xl shadow-emerald-500/40 mb-8 animate-bounce">
-                <CheckCircle2 className="w-12 h-12 text-white" />
-            </div>
-            <h2 className="text-3xl font-black text-white mb-4">Registration Complete!</h2>
-            <p className="text-slate-400 max-w-xs mx-auto mb-8">
-                Welcome to Bizapp! We have received your details and payment. Our team is setting up your store right now.
-            </p>
-            <div className="p-6 bg-slate-900/50 rounded-2xl border border-slate-800 max-w-sm mx-auto">
-                <p className="text-sm text-slate-300">
-                    You will receive an email at <span className="text-emerald-400 font-bold">{formData.ceoEmail}</span> shortly with your login details.
-                </p>
-            </div>
-            <button
-                onClick={() => window.location.href = '/'}
-                className="mt-12 text-emerald-500 font-bold hover:text-emerald-400"
-            >
-                Return to Home
-            </button>
-        </motion.div>
-    );
+    // ... (keep existing code)
 
     return (
         <div className="min-h-screen bg-black text-white font-sans selection:bg-emerald-500/30">
@@ -491,7 +467,7 @@ export default function RegisterPage() {
                 </header>
 
                 {/* Main Content */}
-                <main className="flex-1 overflow-y-auto px-6 pb-6 relative z-10 scrollbar-hide">
+                <main ref={mainRef} className="flex-1 overflow-y-auto px-6 pb-6 relative z-10 scrollbar-hide">
                     <div className="min-h-full flex flex-col justify-center">
                         {step > 1 && step < 5 && <StepIndicator currentStep={step - 1} totalSteps={3} />}
 
@@ -506,9 +482,25 @@ export default function RegisterPage() {
                 </main>
 
                 {/* Footer */}
-                <footer className="flex-none py-4 text-center text-[10px] text-slate-600 relative z-10 bg-black/50 backdrop-blur-sm">
-                    <p>© {new Date().getFullYear()} Bizapp (Biz+App)™. All rights reserved.</p>
-                </footer>
+                {step === 1 && (
+                    <footer className="flex-none py-4 text-center text-[10px] text-slate-600 relative z-10 bg-black/50 backdrop-blur-sm">
+                        <p>© {new Date().getFullYear()} Bizapp (Biz+App)™. All rights reserved.</p>
+                    </footer>
+                )}
+
+                {/* Sticky Pay Button for Step 4 */}
+                {step === 4 && (
+                    <div className="flex-none p-6 pt-2 bg-gradient-to-t from-black via-black to-transparent relative z-20">
+                        <button
+                            onClick={() => setShowEmailModal(true)}
+                            disabled={isLoading}
+                            className="w-full py-4 bg-white text-slate-900 rounded-xl font-black hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl flex items-center justify-center gap-2"
+                        >
+                            {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <CreditCard className="w-5 h-5" />}
+                            Pay & Register
+                        </button>
+                    </div>
+                )}
             </div>
 
             {/* Email Modal */}
