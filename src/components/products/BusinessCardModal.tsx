@@ -62,11 +62,11 @@ export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean;
                 <div ref={scrollContainerRef} className="flex-grow overflow-y-auto p-6">
                   <div className="max-w-3xl mx-auto w-full">
                     <div className="text-center mb-8">
-                      {storeMeta.ceoImage && (
+                      {(storeMeta.logo || storeMeta.ceoImage) && (
                         <div className="relative inline-block">
                           <Image
-                            src={storeMeta.ceoImage}
-                            alt={storeMeta.ceoName || 'CEO'}
+                            src={storeMeta.logo || storeMeta.ceoImage || ''}
+                            alt={storeMeta.name || 'Store Logo'}
                             width={100}
                             height={100}
                             className="w-24 h-24 rounded-full object-cover shadow-xl border-4 border-white dark:border-slate-800 mx-auto mb-4"

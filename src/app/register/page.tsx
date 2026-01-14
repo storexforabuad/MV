@@ -11,9 +11,10 @@ import {
     PartyPopper, GraduationCap, Bot, Tag, ArrowRight,
     MessageCircle, Smartphone
 } from 'lucide-react';
-import { db, storage } from '@/lib/firebase';
+import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { uploadImageToCloudinary } from '@/lib/cloudinaryClient';
+import { compressImage } from '@/utils/imageCompression';
 import { TIER_DETAILS, SubscriptionTier } from '@/types/subscription';
 import { geography } from '@/config/geography';
 
@@ -37,8 +38,8 @@ interface RegistrationData {
     ceoName: string;
     ceoPhone: string;
     ceoEmail: string;
-    ceoImage: File | null;
-    ceoImageUrl?: string;
+    logoImage: File | null;
+    logoUrl?: string;
 
     // Business Details
     businessName: string;
@@ -195,7 +196,7 @@ export default function RegisterPage() {
         ceoName: '',
         ceoPhone: '',
         ceoEmail: '',
-        ceoImage: null,
+        logoImage: null,
         businessName: '',
         businessPhone: '',
         businessDescription: '',
@@ -213,7 +214,7 @@ export default function RegisterPage() {
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             const file = e.target.files[0];
-            setFormData(prev => ({ ...prev, ceoImage: file }));
+            setFormData(prev => ({ ...prev, logoImage: file }));
             const reader = new FileReader();
             reader.onloadend = () => setImagePreview(reader.result as string);
             reader.readAsDataURL(file);
@@ -235,12 +236,11 @@ export default function RegisterPage() {
     const handlePayment = async () => {
         setIsLoading(true);
         try {
-            // 1. Upload Image if exists
-            let ceoImageUrl = '';
-            if (formData.ceoImage) {
-                const storageRef = ref(storage, `registrations/${Date.now()}_${formData.ceoImage.name}`);
-                await uploadBytes(storageRef, formData.ceoImage);
-                ceoImageUrl = await getDownloadURL(storageRef);
+            // 1. Upload Image to Cloudinary if exists
+            let logoUrl = '';
+            if (formData.logoImage) {
+                const compressedFile = await compressImage(formData.logoImage);
+                logoUrl = await uploadImageToCloudinary(compressedFile, 'registrations');
             }
 
             // 2. Initialize Paystack
@@ -266,8 +266,8 @@ export default function RegisterPage() {
                         // 3. Save Registration to Firestore
                         await addDoc(collection(db, 'registrations'), {
                             ...formData,
-                            ceoImage: null, // Don't save File object
-                            ceoImageUrl,
+                            logoImage: null, // Don't save File object
+                            logoUrl,
                             amountPaid: tierDetails.price,
                             paymentReference: response.reference,
                             status: 'pending',

@@ -4,7 +4,7 @@ import { useState, ChangeEvent, FormEvent, useRef, useEffect } from "react";
 import { StoreMeta } from "../../../types/store";
 import { geography } from "../../../config/geography";
 import { categorySuggestions } from "../../../config/categories";
-import { db, storage } from "../../../lib/firebase";
+import { db } from "../../../lib/firebase";
 import {
   collection,
   doc,
@@ -13,7 +13,8 @@ import {
   writeBatch,
   serverTimestamp,
 } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { uploadImageToCloudinary } from "../../../lib/cloudinaryClient";
+import { compressImage } from "../../../utils/imageCompression";
 import Image from "next/image";
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -66,7 +67,7 @@ export default function CreateStoreModal({
   });
   const [categories, setCategories] = useState<string[]>([]);
   const [customCategory, setCustomCategory] = useState("");
-  const [ceoImageFile, setCeoImageFile] = useState<File | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -95,8 +96,8 @@ export default function CreateStoreModal({
         country: initialData.country || "",
         state: initialData.state || "",
       }));
-      if (initialData.ceoImageUrl) {
-        setImagePreview(initialData.ceoImageUrl);
+      if (initialData.logoUrl) {
+        setImagePreview(initialData.logoUrl);
       }
     }
   }, [initialData]);
@@ -119,7 +120,7 @@ export default function CreateStoreModal({
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
-      setCeoImageFile(file);
+      setLogoFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setImagePreview(reader.result as string);
@@ -148,11 +149,10 @@ export default function CreateStoreModal({
     setCurrentStep(3); // Move to creating screen
 
     try {
-      let ceoImageUrl = imagePreview || "";
-      if (ceoImageFile) {
-        const storageRef = ref(storage, `ceo-images/${Date.now()}_${ceoImageFile.name}`);
-        await uploadBytes(storageRef, ceoImageFile);
-        ceoImageUrl = await getDownloadURL(storageRef);
+      let logoUrl = imagePreview || "";
+      if (logoFile) {
+        const compressedFile = await compressImage(logoFile);
+        logoUrl = await uploadImageToCloudinary(compressedFile, 'stores');
       }
 
       const storeId = formData.name?.toLowerCase().replace(/\s+/g, "-") ?? "";
@@ -163,7 +163,8 @@ export default function CreateStoreModal({
       const finalFormData = {
         ...formData,
         id: storeId,
-        ceoImage: ceoImageUrl,
+        logo: logoUrl,
+        ceoImage: logoUrl, // Keep for backward compatibility or if needed
         name: formData.name ?? "Default Store Name",
         whatsapp: formData.whatsapp ?? "",
         // If created from registration, activate subscription
@@ -227,7 +228,7 @@ export default function CreateStoreModal({
       bankName: "",
     });
     setCategories([]);
-    setCeoImageFile(null);
+    setLogoFile(null);
     setImagePreview(null);
   };
 
@@ -251,16 +252,16 @@ export default function CreateStoreModal({
                 onClick={() => fileInputRef.current?.click()}
               >
                 {imagePreview ? (
-                  <Image src={imagePreview} alt="CEO Preview" fill className="object-cover" />
+                  <Image src={imagePreview} alt="Logo Preview" fill className="object-cover" />
                 ) : (
                   <div className="flex flex-col items-center text-slate-400 group-hover:text-blue-500">
                     <ImagePlus className="w-8 h-8 mb-1" />
-                    <span className="text-[10px]">Upload Photo</span>
+                    <span className="text-[10px]">Upload Logo</span>
                   </div>
                 )}
                 <input type="file" ref={fileInputRef} onChange={handleImageChange} className="hidden" accept="image/*" />
               </div>
-              <p className="text-sm text-slate-500 mt-2">Tap to upload CEO photo</p>
+              <p className="text-sm text-slate-500 mt-2">Tap to upload store logo</p>
             </div>
 
             <FloatingLabelInput label="Full Name" value={formData.ceoName || ''} onChange={(e) => handleInputChange(e)} required />
