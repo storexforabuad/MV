@@ -90,8 +90,7 @@ const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferral
 
 const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.ElementType | null, glowClass: string, isAiCard?: boolean }[] = [
   {
-    label: '(Biz+Pro)™',
-    subtitle: 'App',
+    label: 'BizzApp™',
     icon: Globe,
     gradient: 'bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800',
     text: 'text-white',
@@ -100,7 +99,6 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
   },
   {
     label: 'Tips',
-    subtitle: 'Dashboard',
     icon: Lightbulb,
     gradient: 'bg-gradient-to-br from-yellow-400 via-amber-500 to-orange-600',
     text: 'text-white',
@@ -117,7 +115,6 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
   },
   {
     label: 'Warehouse',
-    subtitle: 'Source Products',
     icon: Warehouse,
     gradient: 'bg-gradient-to-br from-orange-500 via-amber-600 to-yellow-700',
     text: 'text-white',
@@ -135,8 +132,7 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
   }, */
 
   {
-    label: 'Share',
-    subtitle: 'Content',
+    label: 'Content',
     icon: Send,
     gradient: 'bg-gradient-to-br from-purple-500 to-violet-600',
     text: 'text-white',
@@ -218,7 +214,6 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
   },
   {
     label: 'Account',
-    subtitle: 'Details',
     icon: Briefcase,
     gradient: 'bg-gradient-to-br from-indigo-500 to-purple-600',
     text: 'text-white',
@@ -227,7 +222,6 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
   },
   {
     label: 'Subscription',
-    subtitle: 'Manage',
     icon: ShieldCheck,
     gradient: 'bg-gradient-to-br from-teal-500 via-emerald-600 to-green-700',
     text: 'text-white',
@@ -426,14 +420,10 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
   const handleOpenModal = (idx: number, card: typeof cardData[0]) => {
     const { label, subtitle } = card;
-    if (label === '(Biz+Pro)™') setIsBizconNetworkModalOpen(true);
+    if (label === 'BizzApp™') setIsBizconNetworkModalOpen(true);
     else if (label === 'Tips') setIsTipsModalOpen(true);
     else if (label === 'Views') setIsViewsModalOpen(true);
-    else if (label === 'Share') {
-      if (subtitle === 'Content') setIsSocialPostsModalOpen(true);
-      else setIsShareModalOpen(true);
-    }
-    else if (label === 'Content') setIsPostsModalOpen(true);
+    else if (label === 'Content') setIsSocialPostsModalOpen(true);
     else if (label === 'Commission') setIsCommissionModalOpen(true);
     else if (label === 'Ambassador') onAmbassadorCardClick();
     else if (label === 'Manage Categories') props.openManageCategories();
@@ -722,7 +712,6 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                   </div>
                   <div className="flex flex-col items-center ml-3 min-w-0 z-10">
                     <div className="text-base sm:text-lg font-bold drop-shadow">Subscription</div>
-                    <div className="text-xs sm:text-sm font-medium opacity-90 text-center leading-tight">Manage</div>
                   </div>
                 </button>
               </motion.div>
@@ -738,7 +727,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           }
 
           const Icon = card.icon;
-          const isHorizontal = card.label === 'Share' || card.label === 'Tips' || card.label === 'Content' || card.label === '(Biz+Pro)™' || card.label === 'Advert' || card.label === 'Account' || card.label === 'Subscription' || card.label === 'Warehouse';
+          const isHorizontal = card.label === 'Content' || card.label === 'Tips' || card.label === 'BizzApp™' || card.label === 'Advert' || card.label === 'Account' || card.label === 'Subscription' || card.label === 'Warehouse';
           const isTipsCard = card.label === 'Tips';
           const isPostsCard = card.label === 'Content';
           const spotlightClasses = spotlightStep === 'tips' && isTipsCard ? 'relative z-50 pointer-events-auto' : '';
@@ -775,7 +764,6 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                     </div>
                     <div className="flex flex-col items-center min-w-0 z-10 w-full">
                       <div className="text-lg sm:text-xl md:text-2xl font-bold drop-shadow">Account</div>
-                      <div className="text-xs sm:text-sm font-medium opacity-90 text-center leading-tight mt-1">Details</div>
                     </div>
                   </button>
                 </motion.div>
