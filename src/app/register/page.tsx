@@ -245,7 +245,9 @@ export default function RegisterPage() {
 
             // 2. Initialize Paystack
             const tierDetails = TIER_DETAILS[formData.subscriptionTier as keyof typeof TIER_DETAILS];
-            const amount = tierDetails.price * 100; // Convert to kobo
+            const hasDiscount = !!formData.referralCode;
+            const finalPrice = hasDiscount ? tierDetails.price / 2 : tierDetails.price;
+            const amount = finalPrice * 100; // Convert to kobo
 
             const paystackConfig = {
                 key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY,
@@ -268,7 +270,7 @@ export default function RegisterPage() {
                             ...formData,
                             logoImage: null, // Don't save File object
                             logoUrl,
-                            amountPaid: tierDetails.price,
+                            amountPaid: finalPrice,
                             paymentReference: response.reference,
                             status: 'pending',
                             referralCode: formData.referralCode || null,
@@ -684,7 +686,7 @@ export default function RegisterPage() {
                                 />
                             </div>
                         )}
-                        <span className="font-bold text-xl tracking-tight">BizzApp™</span>
+                        <span className="font-bold text-xl tracking-tight">BizzApp™ Network</span>
                     </div>
                     {step > 1 && step < 5 && (
                         <button
