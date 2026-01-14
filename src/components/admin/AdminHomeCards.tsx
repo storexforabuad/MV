@@ -369,6 +369,23 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     return () => { mounted = false; };
   }, [storeId]);
 
+  // Auto-refresh when cards become visible
+  useEffect(() => {
+    if (uiVisible && !refreshing) {
+      const autoRefresh = async () => {
+        setRefreshing(true);
+        try {
+          await onRefresh(true);
+        } catch (error) {
+          console.error("Auto-refresh failed:", error);
+        } finally {
+          setRefreshing(false);
+        }
+      };
+      autoRefresh();
+    }
+  }, [uiVisible]);
+
   const ordersIndex = cardData.findIndex(card => card.label === 'Orders');
   const cardsToRender = [...cardData];
   const customersCard: typeof cardData[0] = {
