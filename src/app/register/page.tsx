@@ -533,11 +533,13 @@ export default function RegisterPage() {
                     </div>
                     <button
                         onClick={handleApplyDiscount}
-                        disabled={!discountInput || isApplyingDiscount}
+                        disabled={!discountInput || isApplyingDiscount || !!formData.referralCode}
                         className="px-6 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex items-center gap-2 min-w-[100px] justify-center"
                     >
                         {isApplyingDiscount ? (
                             <Loader2 className="w-5 h-5 animate-spin" />
+                        ) : formData.referralCode ? (
+                            'Applied'
                         ) : (
                             'Apply'
                         )}
@@ -549,7 +551,7 @@ export default function RegisterPage() {
                         animate={{ opacity: 1, y: 0 }}
                         className="flex items-center justify-end gap-2"
                     >
-                        <span className="text-xs font-bold text-emerald-500 animate-pulse">🎉 50% OFF APPLIED!</span>
+                        <span className="text-xs font-bold text-emerald-500 animate-pulse">🎉 50% DISCOUNT APPLIED!</span>
                         <button
                             onClick={() => {
                                 handleInputChange('referralCode', '');
@@ -648,14 +650,28 @@ export default function RegisterPage() {
             <p className="text-slate-400 max-w-xs mx-auto mb-8">
                 Welcome to BizzApp! We have received your details and payment. Our team is setting up your store right now.
             </p>
-            <div className="p-6 bg-slate-900/50 rounded-2xl border border-slate-800 max-w-sm mx-auto">
+            <div className="p-6 bg-slate-900/50 rounded-2xl border border-slate-800 max-w-sm mx-auto space-y-4">
                 <p className="text-sm text-slate-300">
                     You will receive an email at <span className="text-emerald-400 font-bold">{formData.ceoEmail}</span> shortly with your login details.
                 </p>
+
+                <div className="pt-4 border-t border-slate-800">
+                    <p className="text-xs text-slate-500 mb-4 uppercase font-bold tracking-wider">Immediate Next Steps</p>
+                    <button
+                        onClick={() => {
+                            const message = encodeURIComponent(`Hello BizzApp Team! I just completed my registration for ${formData.businessName}. What are the next steps to get my store live?`);
+                            window.open(`https://wa.me/2347032905036?text=${message}`, '_blank');
+                        }}
+                        className="w-full py-4 bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 rounded-xl font-bold hover:bg-emerald-600/20 transition-all flex items-center justify-center gap-2 group"
+                    >
+                        <MessageCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                        Chat with Admin on WhatsApp
+                    </button>
+                </div>
             </div>
             <button
                 onClick={() => window.location.href = '/'}
-                className="mt-12 text-emerald-500 font-bold hover:text-emerald-400"
+                className="mt-8 text-slate-500 text-sm font-medium hover:text-slate-300 transition-colors"
             >
                 Return to Home
             </button>
