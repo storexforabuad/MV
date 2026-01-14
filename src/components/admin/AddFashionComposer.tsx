@@ -9,7 +9,7 @@ import { uploadImageToCloudinary } from '../../lib/cloudinaryClient';
 import { compressImage } from '../../utils/imageCompression';
 import { formatPrice } from '../../utils/price';
 import CategorySelectorModal from './modals/CategorySelectorModal';
-import { NIGERIAN_SIZE_CHART } from '../../utils/sizeUtils';
+import { NIGERIAN_SIZE_CHART, EUROPEAN_SHOE_CHART, FashionSizeCategory, getSizesForFashionCategory } from '../../utils/sizeUtils';
 import {
     X,
     Shirt,
@@ -60,6 +60,7 @@ interface BatchFashionProduct {
     // Fashion Specific
     colors: ColorVariant[];
     sizes: string[]; // Selected sizes
+    sizeCategory: FashionSizeCategory; // 'clothing' or 'shoes'
 }
 
 interface AddFashionComposerProps {
@@ -132,6 +133,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
         soldOut: false,
         colors: [],
         sizes: [],
+        sizeCategory: 'clothing', // Default to clothing
     });
 
     const [isCategorySelectorOpen, setCategorySelectorOpen] = useState(false);
@@ -170,6 +172,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
             soldOut: false,
             colors: [],
             sizes: [],
+            sizeCategory: 'clothing',
         });
         setUploadProgress([]);
         setIsUploading(false);
@@ -314,7 +317,8 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                 colors: uploadedColors,
                 sizes: productData.sizes,
                 soldOutSizes: [],
-                sizeChart: { type: 'nigerian-standard' as const },
+                sizeCategory: productData.sizeCategory,
+                sizeChart: { type: productData.sizeCategory === 'clothing' ? 'nigerian-standard' as const : 'european-shoe' as const },
                 limitedStock: productData.limitedStock,
                 soldOut: productData.soldOut,
             };
@@ -509,25 +513,54 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                 </button>
                             </div>
 
+                            {/* Size Category Toggle */}
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => {
+                                        handleProductChange('sizeCategory', 'clothing');
+                                        handleProductChange('sizes', []); // Reset sizes when switching
+                                    }}
+                                    className={`flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'clothing'
+                                        ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
+                                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
+                                        }`}
+                                >
+                                    <Shirt className="w-4 h-4" /> Clothing
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        handleProductChange('sizeCategory', 'shoes');
+                                        handleProductChange('sizes', []); // Reset sizes when switching
+                                    }}
+                                    className={`flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'shoes'
+                                        ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
+                                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
+                                        }`}
+                                >
+                                    👟 Shoes
+                                </button>
+                            </div>
+
+                            {/* Size Chips */}
                             <div className="flex flex-wrap gap-2">
-                                {NIGERIAN_SIZE_CHART.map((sizeItem) => {
-                                    const isSelected = productData.sizes.includes(sizeItem.size);
+                                {getSizesForFashionCategory(productData.sizeCategory).map((size) => {
+                                    const isSelected = productData.sizes.includes(size);
                                     return (
                                         <button
-                                            key={sizeItem.size}
-                                            onClick={() => toggleSize(sizeItem.size)}
+                                            key={size}
+                                            onClick={() => toggleSize(size)}
                                             className={`min-w-[3rem] h-10 px-3 rounded-lg border font-medium transition-all ${isSelected
                                                 ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white shadow-md transform scale-105'
                                                 : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500'
                                                 }`}
                                         >
-                                            {sizeItem.size}
+                                            {size}
                                         </button>
                                     );
                                 })}
                             </div>
                             <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                                <AlertCircle className="w-3 h-3" /> Standard Nigerian sizing
+                                <AlertCircle className="w-3 h-3" /> {productData.sizeCategory === 'clothing' ? 'Standard Nigerian/UK sizing' : 'European shoe sizing'}
                             </p>
                         </div>
 
@@ -773,28 +806,47 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                     className="relative bg-white dark:bg-slate-900 rounded-2xl p-6 w-full max-w-sm shadow-2xl"
                                 >
                                     <div className="flex justify-between items-center mb-4">
-                                        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">Size Guide (UK/NG)</h3>
+                                        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
+                                            {productData.sizeCategory === 'clothing' ? 'Size Guide (UK/NG)' : 'Shoe Size Guide (EU)'}
+                                        </h3>
                                         <button onClick={() => setSizeGuideOpen(false)} className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
                                             <X className="w-5 h-5 text-slate-500" />
                                         </button>
                                     </div>
                                     <div className="space-y-3">
-                                        <div className="grid grid-cols-3 gap-2 text-sm font-medium text-slate-500 border-b border-slate-200 dark:border-slate-700 pb-2">
-                                            <span>Size</span>
-                                            <span>Bust</span>
-                                            <span>Waist</span>
-                                        </div>
-                                        {NIGERIAN_SIZE_CHART.map((item) => (
-                                            <div key={item.size} className="grid grid-cols-3 gap-2 text-sm text-slate-900 dark:text-slate-100">
-                                                <span className="font-bold">UK {item.size}</span>
-                                                <span>{item.bust}"</span>
-                                                <span>{item.waist}"</span>
-                                            </div>
-                                        ))}
+                                        {productData.sizeCategory === 'clothing' ? (
+                                            <>
+                                                <div className="grid grid-cols-3 gap-2 text-sm font-medium text-slate-500 border-b border-slate-200 dark:border-slate-700 pb-2">
+                                                    <span>Size</span>
+                                                    <span>Bust</span>
+                                                    <span>Waist</span>
+                                                </div>
+                                                {NIGERIAN_SIZE_CHART.map((item) => (
+                                                    <div key={item.size} className="grid grid-cols-3 gap-2 text-sm text-slate-900 dark:text-slate-100">
+                                                        <span className="font-bold">UK {item.size}</span>
+                                                        <span>{item.bust}"</span>
+                                                        <span>{item.waist}"</span>
+                                                    </div>
+                                                ))}
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className="grid grid-cols-2 gap-2 text-sm font-medium text-slate-500 border-b border-slate-200 dark:border-slate-700 pb-2">
+                                                    <span>Size (EU)</span>
+                                                    <span>Foot Length</span>
+                                                </div>
+                                                {EUROPEAN_SHOE_CHART.map((item) => (
+                                                    <div key={item.size} className="grid grid-cols-2 gap-2 text-sm text-slate-900 dark:text-slate-100">
+                                                        <span className="font-bold">{item.size}</span>
+                                                        <span>{item.footLength} cm</span>
+                                                    </div>
+                                                ))}
+                                            </>
+                                        )}
                                     </div>
                                     <div className="mt-6 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-xs text-blue-700 dark:text-blue-300 flex gap-2">
                                         <Info className="w-4 h-4 flex-shrink-0" />
-                                        <p>Measurements are in inches. This is a standard guide, actual fit may vary by style.</p>
+                                        <p>{productData.sizeCategory === 'clothing' ? 'Measurements are in inches. This is a standard guide, actual fit may vary by style.' : 'Measure your foot length in cm to find your size. Sizes may vary by brand.'}</p>
                                     </div>
                                 </motion.div>
                             </div>

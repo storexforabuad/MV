@@ -46,6 +46,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
   const [selectedSize, setSelectedSize] = useState<string | undefined>(undefined);
   const { customer } = useCustomer();
   const [imageLoading, setImageLoading] = useState(true);
+  const [thumbnailsLoaded, setThumbnailsLoaded] = useState<Record<number, boolean>>({});
 
   // Fashion-specific state
   const [selectedColor, setSelectedColor] = useState<FashionProduct['colors'][0] | null>(null);
@@ -306,6 +307,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
           isOpen={isSizeGuideOpen}
           onClose={() => setIsSizeGuideOpen(false)}
           selectedSize={selectedSize}
+          sizeCategory={(product as FashionProduct).sizeCategory || 'clothing'}
         />
       )}
 
@@ -342,12 +344,18 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                         : 'opacity-60 hover:opacity-100'
                       }`}
                   >
+                    {/* Skeleton placeholder for unloaded thumbnails */}
+                    {!thumbnailsLoaded[index] && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-300 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-shimmer bg-[length:200%_100%]" />
+                    )}
                     <Image
                       src={image}
                       alt={`${product.name} ${index + 1}`}
                       fill
                       sizes="(max-width: 640px) 80px, 100px"
-                      className="object-cover"
+                      className={`object-cover transition-opacity duration-300 ${thumbnailsLoaded[index] ? 'opacity-100' : 'opacity-0'}`}
+                      loading={index === 0 ? undefined : 'lazy'}
+                      onLoadingComplete={() => setThumbnailsLoaded(prev => ({ ...prev, [index]: true }))}
                     />
                   </button>
                 ))}
@@ -533,12 +541,12 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
 
       {/* Sticky Action Buttons */}
       {!product.soldOut && (
-        <div className="fixed bottom-0 left-0 right-0 p-3 sm:p-4 bg-white dark:bg-background border-t border-gray-200 dark:border-gray-800 flex gap-3 z-40 safe-area-bottom shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.1)]">
-          <button onClick={handlePlaceOrderClick} disabled={!isOrderable} className="group relative flex-grow inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-green-600 text-white font-bold shadow-lg hover:bg-green-700 transition-all active:scale-[0.98] disabled:bg-gray-400 disabled:cursor-not-allowed text-base">
+        <div className="fixed bottom-0 left-0 right-0 p-3 sm:p-4 bg-white dark:bg-background border-t border-gray-100 dark:border-gray-800 flex gap-3 z-40 safe-area-bottom shadow-sm">
+          <button onClick={handlePlaceOrderClick} disabled={!isOrderable} className="group relative flex-grow inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-green-600 text-white font-bold shadow-md hover:shadow-lg hover:bg-green-700 transition-all active:scale-[0.98] disabled:bg-gray-400 disabled:cursor-not-allowed text-base">
             <ShoppingCart className="w-5 h-5" />
             <span>{shouldUsePaymentFlow(storeMeta?.storeType) ? 'Proceed to Payment' : 'Place Order'}</span>
           </button>
-          <button onClick={handleToggleCart} disabled={isTogglingCart || !isOrderable} className={`group relative flex-shrink-0 inline-flex items-center justify-center w-14 h-14 rounded-xl font-medium transition-all duration-300 transform-gpu active:scale-[0.9] disabled:opacity-50 disabled:cursor-not-allowed border border-gray-200 dark:border-gray-700 ${isInCart ? 'bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:border-red-800' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'}`}>
+          <button onClick={handleToggleCart} disabled={isTogglingCart || !isOrderable} className={`group relative flex-shrink-0 inline-flex items-center justify-center w-14 h-14 rounded-xl font-medium transition-all duration-300 transform-gpu active:scale-[0.9] disabled:opacity-50 disabled:cursor-not-allowed border border-gray-200 dark:border-gray-700 shadow-sm ${isInCart ? 'bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:border-red-800' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'}`}>
             <Heart className={`w-6 h-6 transition-transform duration-200 ease-in-out ${isInCart ? 'fill-current scale-110' : ''}`} />
           </button>
         </div>

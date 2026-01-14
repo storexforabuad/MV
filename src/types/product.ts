@@ -106,18 +106,21 @@ export interface LivestockProduct extends BaseProduct {
 export interface FashionProduct extends BaseProduct {
   productType: 'fashion';
 
+  // Category for sizing (clothing vs shoes)
+  sizeCategory?: 'clothing' | 'shoes'; // Optional for backward compatibility, defaults to 'clothing'
+
   // Variants
   colors: {
     name: string;
     hex: string;
     images: string[];
   }[];
-  sizes: string[]; // "6", "8", "10", etc.
+  sizes: string[]; // Clothing: "6"-"20", Shoes: "38"-"46"
   soldOutSizes?: string[]; // Subset of sizes that are unavailable
 
   // Size Guide
   sizeChart: {
-    type: 'nigerian-standard';
+    type: 'nigerian-standard' | 'european-shoe';
   };
 
   // Shared fields
@@ -128,6 +131,7 @@ export interface FashionProduct extends BaseProduct {
   limitedStock?: boolean;
   soldOut?: boolean; // Global sold out (all variants)
 }
+
 
 // ==========================================
 // FOOD & BEVERAGE PRODUCT (New)
