@@ -1,5 +1,5 @@
 'use client';
-import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays, CheckCircle2, Briefcase, ShieldCheck, Clock, AlertCircle, ExternalLink } from 'lucide-react';
+import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays, CheckCircle2, Briefcase, ShieldCheck, Clock, AlertCircle, ExternalLink, Warehouse } from 'lucide-react';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { useVendor } from '@/context/VendorContext';
 import { motion, Variants } from 'framer-motion';
@@ -27,6 +27,7 @@ import ExpensesModal from './modals/ExpensesModal';
 import { AdvertisingModal } from './modals/AdvertisingModal';
 import { EventsModal } from './modals/EventsModal';
 import SubscriptionModal from './modals/SubscriptionModal';
+import WarehouseModal from './modals/WarehouseModal';
 
 // Import the customer components
 import { AdminCustomersCard } from './AdminCustomersCard';
@@ -113,6 +114,15 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     text: 'text-white',
     component: null,
     glowClass: 'dark:shadow-pink-500/30 shadow-pink-500/50',
+  },
+  {
+    label: 'Warehouse',
+    subtitle: 'Source Products',
+    icon: Warehouse,
+    gradient: 'bg-gradient-to-br from-orange-500 via-amber-600 to-yellow-700',
+    text: 'text-white',
+    component: null,
+    glowClass: 'dark:shadow-orange-500/30 shadow-orange-500/50',
   },
   /* {
     label: 'Advert',
@@ -308,6 +318,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [isEventsModalOpen, setIsEventsModalOpen] = useState(false);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
+  const [isWarehouseModalOpen, setIsWarehouseModalOpen] = useState(false);
   const [showPostsNotification, setShowPostsNotification] = useState(false);
   const [bankAccountName, setBankAccountName] = useState<string | null>(null);
   const [bankAccountNumber, setBankAccountNumber] = useState<string | null>(null);
@@ -380,7 +391,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   }
 
   useEffect(() => {
-    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen || isAdvertisingModalOpen || isEventsModalOpen || isSubscriptionModalOpen || isAccountModalOpen;
+    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen || isAdvertisingModalOpen || isEventsModalOpen || isSubscriptionModalOpen || isAccountModalOpen || isWarehouseModalOpen;
     if (modalIsOpen) {
       window.history.pushState({ modalOpen: true }, '');
       const handlePopState = () => {
@@ -400,6 +411,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         setIsEventsModalOpen(false);
         setIsSubscriptionModalOpen(false);
         setIsAccountModalOpen(false);
+        setIsWarehouseModalOpen(false);
         if (setIsModalOpen) setIsModalOpen(false);
       };
       window.addEventListener('popstate', handlePopState);
@@ -410,7 +422,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         }
       };
     }
-  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, isAdvertisingModalOpen, isEventsModalOpen, isSubscriptionModalOpen, isAccountModalOpen, setIsModalOpen]);
+  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, isAdvertisingModalOpen, isEventsModalOpen, isSubscriptionModalOpen, isAccountModalOpen, isWarehouseModalOpen, setIsModalOpen]);
 
   const handleOpenModal = (idx: number, card: typeof cardData[0]) => {
     const { label, subtitle } = card;
@@ -432,6 +444,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     else if (label === 'Expenses') setIsExpensesModalOpen(true);
     else if (label === 'Advert') setIsAdvertisingModalOpen(true);
     else if (label === 'Events') setIsEventsModalOpen(true);
+    else if (label === 'Warehouse') setIsWarehouseModalOpen(true);
     else if (label === 'Subscription') setIsSubscriptionModalOpen(true);
     else if (label === 'Account') setIsAccountModalOpen(true);
     else setOpenModal(idx);
@@ -504,6 +517,11 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
   const handleCloseAccountModal = () => {
     setIsAccountModalOpen(false);
+    if (props.setIsModalOpen) props.setIsModalOpen(false);
+  }
+
+  const handleCloseWarehouseModal = () => {
+    setIsWarehouseModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
@@ -720,7 +738,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           }
 
           const Icon = card.icon;
-          const isHorizontal = card.label === 'Share' || card.label === 'Tips' || card.label === 'Content' || card.label === '(Biz+Pro)™' || card.label === 'Advert' || card.label === 'Account' || card.label === 'Subscription';
+          const isHorizontal = card.label === 'Share' || card.label === 'Tips' || card.label === 'Content' || card.label === '(Biz+Pro)™' || card.label === 'Advert' || card.label === 'Account' || card.label === 'Subscription' || card.label === 'Warehouse';
           const isTipsCard = card.label === 'Tips';
           const isPostsCard = card.label === 'Content';
           const spotlightClasses = spotlightStep === 'tips' && isTipsCard ? 'relative z-50 pointer-events-auto' : '';
@@ -867,6 +885,13 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           isOpen={isAccountModalOpen}
           handleClose={handleCloseAccountModal}
           storeId={storeId}
+        />
+      )}
+
+      {isWarehouseModalOpen && (
+        <WarehouseModal
+          isOpen={isWarehouseModalOpen}
+          onClose={handleCloseWarehouseModal}
         />
       )}
     </section>
