@@ -301,7 +301,7 @@ export default function RegisterPage() {
         >
             <div className="w-24 h-24 mx-auto bg-emerald-500/10 rounded-3xl flex items-center justify-center shadow-2xl shadow-emerald-500/20 mb-8 relative overflow-hidden">
                 <Image
-                    src="/bizz-app-logo.jpg"
+                    src="/bizz-app-logo.png"
                     alt="Bizz App Logo"
                     fill
                     className="object-cover"
@@ -313,7 +313,7 @@ export default function RegisterPage() {
             <p className="text-lg text-slate-400 max-w-md mx-auto leading-relaxed">
                 Create your premium online store in minutes.
                 <br />
-                <span className="text-emerald-400 font-bold">Bizz App™</span> - Your Business, All in One App.
+                <span className="text-emerald-400 font-bold">BizzApp™</span> - Your Business, All in One App.
             </p>
 
             {/* Partner Badges */}
@@ -676,13 +676,13 @@ export default function RegisterPage() {
                     <div className="flex items-center gap-2">
                         <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/10 relative overflow-hidden">
                             <Image
-                                src="/bizz-app-logo.jpg"
+                                src="/bizz-app-logo.png"
                                 alt="Bizz App Logo"
                                 fill
                                 className="object-cover"
                             />
                         </div>
-                        <span className="font-bold text-xl tracking-tight">Bizz App™</span>
+                        <span className="font-bold text-xl tracking-tight">BizzApp™</span>
                     </div>
                     {step > 1 && step < 5 && (
                         <button
