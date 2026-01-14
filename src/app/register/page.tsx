@@ -673,15 +673,17 @@ export default function RegisterPage() {
             <div className="relative z-10 max-w-md mx-auto h-dvh flex flex-col">
                 {/* Header */}
                 <header className="flex-none flex justify-between items-center p-6 relative z-20">
-                    <div className="flex items-center gap-2">
-                        <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/10 relative overflow-hidden">
-                            <Image
-                                src="/bizz-app-logo.png"
-                                alt="Bizz App Logo"
-                                fill
-                                className="object-cover"
-                            />
-                        </div>
+                    <div className={`flex items-center gap-2 w-full ${step === 1 ? 'justify-center' : 'justify-start'}`}>
+                        {step !== 1 && (
+                            <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/10 relative overflow-hidden">
+                                <Image
+                                    src="/bizz-app-logo.png"
+                                    alt="BizzApp Logo"
+                                    fill
+                                    className="object-cover"
+                                />
+                            </div>
+                        )}
                         <span className="font-bold text-xl tracking-tight">BizzApp™</span>
                     </div>
                     {step > 1 && step < 5 && (
