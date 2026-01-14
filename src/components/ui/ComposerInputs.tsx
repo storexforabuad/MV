@@ -14,10 +14,11 @@ export const ModernToggle: React.FC<{ checked: boolean; onChange: (checked: bool
     </label>
 );
 
-export const FloatingLabelInput: React.FC<{ label: string, value: string | number, onChange: (e: ChangeEvent<HTMLInputElement>) => void, type?: string, placeholder?: string, required?: boolean }> = ({ label, value, onChange, type = 'text', placeholder = ' ', required = false }) => (
+export const FloatingLabelInput: React.FC<{ label: string, value: string | number, onChange: (e: ChangeEvent<HTMLInputElement>) => void, name?: string, type?: string, placeholder?: string, required?: boolean }> = ({ label, value, onChange, name, type = 'text', placeholder = ' ', required = false }) => (
     <div className="relative">
         <input
             type={type}
+            name={name}
             value={value}
             onChange={onChange}
             placeholder={placeholder}

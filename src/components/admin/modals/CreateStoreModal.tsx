@@ -264,12 +264,12 @@ export default function CreateStoreModal({
               <p className="text-sm text-slate-500 mt-2">Tap to upload store logo</p>
             </div>
 
-            <FloatingLabelInput label="Full Name" value={formData.ceoName || ''} onChange={(e) => handleInputChange(e)} required />
+            <FloatingLabelInput label="Full Name" name="ceoName" value={formData.ceoName || ''} onChange={(e) => handleInputChange(e)} required />
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FloatingLabelInput label="Phone Number" value={formData.ceoPhone || ''} onChange={(e) => handleInputChange(e)} required />
-              <FloatingLabelInput label="Email Address" type="email" value={formData.ceoEmail || ''} onChange={(e) => handleInputChange(e)} required />
+              <FloatingLabelInput label="Phone Number" name="ceoPhone" value={formData.ceoPhone || ''} onChange={(e) => handleInputChange(e)} required />
+              <FloatingLabelInput label="Email Address" name="ceoEmail" type="email" value={formData.ceoEmail || ''} onChange={(e) => handleInputChange(e)} required />
             </div>
-            <FloatingLabelInput label="Instagram (@username)" value={formData.ceoInstagram || ''} onChange={(e) => handleInputChange(e)} />
+            <FloatingLabelInput label="Instagram (@username)" name="ceoInstagram" value={formData.ceoInstagram || ''} onChange={(e) => handleInputChange(e)} />
           </MotionDiv>
         );
 
@@ -277,11 +277,11 @@ export default function CreateStoreModal({
         const selectedCountry = geography.find(c => c.name === formData.country);
         return (
           <MotionDiv key={1} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-            <FloatingLabelInput label="Business Name" value={formData.name || ''} onChange={(e) => handleInputChange(e)} required />
+            <FloatingLabelInput label="Business Name" name="name" value={formData.name || ''} onChange={(e) => handleInputChange(e)} required />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FloatingLabelInput label="Business WhatsApp" value={formData.whatsapp || ''} onChange={(e) => handleInputChange(e)} />
-              <FloatingLabelInput label="Business Instagram" value={formData.businessInstagram || ''} onChange={(e) => handleInputChange(e)} />
+              <FloatingLabelInput label="Business WhatsApp" name="whatsapp" value={formData.whatsapp || ''} onChange={(e) => handleInputChange(e)} />
+              <FloatingLabelInput label="Business Instagram" name="businessInstagram" value={formData.businessInstagram || ''} onChange={(e) => handleInputChange(e)} />
             </div>
 
             <div className="space-y-2">
@@ -333,10 +333,10 @@ export default function CreateStoreModal({
               {formData.hasPhysicalShop && (
                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="space-y-4 overflow-hidden">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <FloatingLabelInput label="Shop Number" value={formData.shopNumber || ''} onChange={(e) => handleInputChange(e)} />
-                    <FloatingLabelInput label="Plaza Name" value={formData.plazaBuildingName || ''} onChange={(e) => handleInputChange(e)} />
+                    <FloatingLabelInput label="Shop Number" name="shopNumber" value={formData.shopNumber || ''} onChange={(e) => handleInputChange(e)} />
+                    <FloatingLabelInput label="Plaza Name" name="plazaBuildingName" value={formData.plazaBuildingName || ''} onChange={(e) => handleInputChange(e)} />
                   </div>
-                  <FloatingLabelInput label="Street Address" value={formData.streetAddress || ''} onChange={(e) => handleInputChange(e)} />
+                  <FloatingLabelInput label="Street Address" name="streetAddress" value={formData.streetAddress || ''} onChange={(e) => handleInputChange(e)} />
                 </motion.div>
               )}
             </AnimatePresence>
