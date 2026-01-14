@@ -9,7 +9,7 @@ import {
     Sparkles, CreditCard, Upload, Store, ShoppingBag,
     UtensilsCrossed, Shirt, Car, Fish, Globe, Laptop,
     PartyPopper, GraduationCap, Bot, Tag, ArrowRight,
-    MessageCircle, Smartphone
+    MessageCircle, Smartphone, Wrench
 } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -68,7 +68,7 @@ const STORE_TYPES: { id: StoreType; label: string; icon: any; description: strin
         id: 'restaurant',
         label: 'Restaurant',
         icon: UtensilsCrossed,
-        description: 'For food vendors, restaurants, and fast food chains.',
+        description: 'For food vendors, restaurants, bakeries, and fast food chains.',
         color: 'from-orange-500 to-red-500'
     },
     {
@@ -123,7 +123,7 @@ const STORE_TYPES: { id: StoreType; label: string; icon: any; description: strin
     {
         id: 'home-services',
         label: 'Home Services',
-        icon: Building2,
+        icon: Wrench,
         description: 'Cleaning, repairs, maintenance, and home improvement.',
         color: 'from-amber-600 to-orange-700'
     },
