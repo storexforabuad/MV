@@ -710,8 +710,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                   <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white bg-opacity-20 shadow">
                     <SubscriptionIcon className="w-5 h-5 sm:w-6 sm:h-6 drop-shadow" />
                   </div>
-                  <div className="flex flex-col items-center ml-3 min-w-0 z-10">
-                    <div className="text-base sm:text-lg font-bold drop-shadow">Subscription</div>
+                  <div className="flex flex-col items-center ml-2 sm:ml-3 min-w-0 z-10">
+                    <div className="text-[15px] sm:text-lg font-bold drop-shadow">Subscription</div>
                   </div>
                 </button>
               </motion.div>
@@ -739,8 +739,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                   {isPostsCard && showPostsNotification && (<span className="absolute top-2 right-2 flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></span>)}
                   <span className="card-blob" />
                   <div className={`flex-shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white bg-opacity-20 shadow`}><Icon className={`w-5 h-5 sm:w-6 sm:h-6 drop-shadow ${card.isAiCard ? 'ai-icon-glow' : ''}`} /></div>
-                  <div className="flex flex-col items-center ml-3 min-w-0 z-10">
-                    <div className={`text-base sm:text-lg font-bold drop-shadow ${card.isAiCard ? 'ai-text-gradient' : ''}`}>{card.label}</div>
+                  <div className="flex flex-col items-center ml-2 sm:ml-3 min-w-0 z-10">
+                    <div className={`text-[15px] sm:text-lg font-bold drop-shadow ${card.isAiCard ? 'ai-text-gradient' : ''}`}>{card.label}</div>
                     {card.subtitle && <div className={`text-xs sm:text-sm font-medium opacity-90 text-center leading-tight ${card.isAiCard ? 'ai-text-gradient' : ''}`}>{card.subtitle}</div>}
                   </div>
                 </button>
