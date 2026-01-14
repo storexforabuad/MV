@@ -686,7 +686,7 @@ export default function RegisterPage() {
                                 />
                             </div>
                         )}
-                        <span className="font-bold text-xl tracking-tight">BizzApp™ Network</span>
+                        <span className="font-bold text-xl tracking-tight">BizzApp™{step === 1 ? ' Network' : ''}</span>
                     </div>
                     {step > 1 && step < 5 && (
                         <button
