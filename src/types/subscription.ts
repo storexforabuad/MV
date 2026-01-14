@@ -191,7 +191,7 @@ export const TIER_DETAILS = {
     },
     general: {
         name: 'General',
-        price: 10000,
+        price: 20000,
         period: 'month',
         description: 'Full access with monthly billing and 14-day free trial.',
         productLimit: 'Unlimited',

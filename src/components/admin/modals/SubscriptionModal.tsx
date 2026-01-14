@@ -63,8 +63,8 @@ const TierCard = ({
         </div>
         <div className="flex items-baseline gap-2 mb-4">
           <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-slate-400 line-through decoration-emerald-500/50">₦{(details.price * 2).toLocaleString()}</span>
-            <span className="text-3xl font-black text-slate-900 dark:text-white">₦{details.price.toLocaleString()}</span>
+            <span className="text-[10px] font-bold text-slate-400 line-through decoration-emerald-500/50">₦{details.price.toLocaleString()}</span>
+            <span className="text-3xl font-black text-slate-900 dark:text-white">₦{(details.price / 2).toLocaleString()}</span>
           </div>
           <span className="text-sm font-medium text-slate-500">/{details.period}</span>
         </div>
@@ -140,10 +140,10 @@ const TierCard = ({
           <div className="flex items-baseline gap-2 mb-1">
             <div className="flex flex-col">
               <span className={`text-base font-bold line-through drop-shadow-sm ${isProMax ? 'text-amber-200/80 decoration-amber-400' : 'text-white/80 decoration-white/60'}`}>
-                ₦{(details.price * 2).toLocaleString()}
+                ₦{details.price.toLocaleString()}
               </span>
               <span className={`text-4xl sm:text-5xl font-black tracking-tighter drop-shadow-xl ${isProMax ? 'text-amber-400' : 'text-white'}`}>
-                ₦{details.price.toLocaleString()}
+                ₦{(details.price / 2).toLocaleString()}
               </span>
             </div>
           </div>

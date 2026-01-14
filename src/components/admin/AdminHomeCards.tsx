@@ -83,7 +83,7 @@ const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferral
     <p className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500">
       ₦{totalReferralBonus.toFixed(2)}
     </p>
-    <p className="text-sm text-text-secondary mt-2">This is 100% of the Bizpro App Commission paid out as bonuses to referrers.</p>
+    <p className="text-sm text-text-secondary mt-2">This is 100% of the BizzApp™ App Commission paid out as bonuses to referrers.</p>
     <button onClick={handleClose} className="mt-6 bg-blue-500 text-white font-bold py-2 px-4 rounded-lg">Close</button>
   </div>
 );
