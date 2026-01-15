@@ -29,7 +29,7 @@ const features = [
     {
         icon: BadgePercent,
         title: 'Affordable Pricing',
-        description: 'Exclusive discounts and best prices for BizzApp vendors.',
+        description: 'Exclusive discounts and best prices for ATLAS™ vendors.',
         gradient: 'from-green-500 to-emerald-600',
         bgLight: 'bg-green-50',
         bgDark: 'dark:bg-green-900/30',
@@ -85,7 +85,7 @@ export default function WarehouseModal({ isOpen, onClose }: WarehouseModalProps)
                     <header className="flex-shrink-0 flex items-center justify-between w-full max-w-5xl mx-auto p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
                         <div>
                             <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
-                                BizzApp Warehouse
+                                ATLAS™ Warehouse
                             </h2>
                             <p className="text-xs text-slate-500 dark:text-slate-400">
                                 Your sourcing hub for products & equipment
@@ -121,8 +121,8 @@ export default function WarehouseModal({ isOpen, onClose }: WarehouseModalProps)
                                 </h3>
 
                                 <p className="text-white/90 text-sm sm:text-base leading-relaxed max-w-xl">
-                                    The BizzApp Warehouse is your one-stop sourcing center for quality products and
-                                    business equipment at unbeatable prices. As a BizzApp vendor, you&apos;ll get exclusive
+                                    The ATLAS™ Warehouse is your one-stop sourcing center for quality products and
+                                    business equipment at unbeatable prices. As a ATLAS™ vendor, you&apos;ll get exclusive
                                     access to wholesale deals, bulk discounts, and fast delivery—everything you need
                                     to stock your store and scale your business.
                                 </p>
@@ -175,14 +175,14 @@ export default function WarehouseModal({ isOpen, onClose }: WarehouseModalProps)
                             transition={{ delay: 0.5 }}
                         >
                             <h4 className="text-lg font-semibold text-slate-800 dark:text-slate-200 mb-4">
-                                Why BizzApp Warehouse?
+                                Why ATLAS™ Warehouse?
                             </h4>
                             <ul className="space-y-3">
                                 {[
                                     'Curated selection of high-quality products for your store',
                                     'Exclusive vendor-only pricing you won\'t find elsewhere',
                                     'Direct sourcing from trusted manufacturers',
-                                    'Seamless integration with your BizzApp store',
+                                    'Seamless integration with your ATLAS™ store',
                                     'Dedicated support for bulk orders',
                                 ].map((benefit, idx) => (
                                     <li key={idx} className="flex items-start gap-3 text-sm text-slate-700 dark:text-slate-300">

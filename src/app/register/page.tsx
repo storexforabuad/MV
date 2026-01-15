@@ -745,7 +745,7 @@ export default function RegisterPage() {
                         </p>
                         <button
                             onClick={() => {
-                                const message = encodeURIComponent(`Hello BizzApp Team! I just registered my store "${formData.businessName}" ${isTrial ? 'on the Free Trial' : 'and made payment'}. When will my store be live?`);
+                                const message = encodeURIComponent(`Hello ATLAS™ Team! I just registered my store "${formData.businessName}" ${isTrial ? 'on the Free Trial' : 'and made payment'}. When will my store be live?`);
                                 window.open(`https://wa.me/2347032905036?text=${message}`, '_blank');
                             }}
                             className="w-full py-4 bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 rounded-xl font-bold hover:bg-emerald-600/20 transition-all flex items-center justify-center gap-2 group"
@@ -782,7 +782,7 @@ export default function RegisterPage() {
                             <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/10 relative overflow-hidden">
                                 <Image
                                     src="/bizz-app-logo.png"
-                                    alt="BizzApp Logo"
+                                    alt="ATLAS™ Logo"
                                     fill
                                     className="object-cover"
                                 />
