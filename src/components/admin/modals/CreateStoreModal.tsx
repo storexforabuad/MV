@@ -155,6 +155,16 @@ export default function CreateStoreModal({
         const compressedFile = await compressImage(logoFile);
         logoUrl = await uploadImageToCloudinary(compressedFile, 'stores');
       }
+
+      // Generate Store ID
+      const storeRef = doc(collection(db, 'stores'));
+      const storeId = storeRef.id;
+
+      // Determine Subscription Status
+      const isPaidRegistration = (initialData?.amountPaid || 0) > 0;
+      const subscriptionStatus = isPaidRegistration ? 'active' : 'trial';
+      const trialEndsAt = isPaidRegistration ? null : calculateTrialEndDate();
+
       const finalFormData = {
         ...formData,
         id: storeId,

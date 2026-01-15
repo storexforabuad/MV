@@ -285,7 +285,7 @@ export default function RegisterPage() {
             }
 
             // 2. Initialize Paystack
-            if (typeof window.PaystackPop === 'undefined') {
+            if (typeof (window as any).PaystackPop === 'undefined') {
                 alert('Payment system is loading. Please wait a moment and try again.');
                 setIsLoading(false);
                 return;
