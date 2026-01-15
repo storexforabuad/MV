@@ -595,20 +595,7 @@ export default function RegisterPage() {
                                 <PriceDisplay price={currentPrice} originalPrice={details.price} />
                             </div>
 
-                            <div className="flex flex-wrap items-center gap-2">
-                                <div className={`px-3 py-1 rounded-full text-[10px] font-bold ${isProMax ? 'bg-amber-500/20 text-amber-400' : 'bg-slate-800 text-slate-300'
-                                    }`}>
-                                    {typeof details.productLimit === 'number' ? `${details.productLimit} Products` : details.productLimit}
-                                </div>
 
-                                {(isPro || isProMax) && (
-                                    <div className={`px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1 ${isProMax ? 'bg-amber-500/20 text-amber-400' : 'bg-indigo-500/20 text-indigo-400'
-                                        }`}>
-                                        <Bot className="w-3 h-3" />
-                                        A.I Assistant
-                                    </div>
-                                )}
-                            </div>
 
                             {isSelected && (
                                 <div className="absolute top-4 right-4">
