@@ -384,7 +384,8 @@ export default function SubscriptionModal({
   const isLegacyStore = !storeType;
 
   // Hide trial banner and billing details for new tiers if they haven't subscribed yet
-  const showStatusBanner = isLegacyStore || status === 'active' || status === 'past_due';
+  // Hide trial banner and billing details for new tiers if they haven't subscribed yet
+  const showStatusBanner = isLegacyStore || status === 'active' || status === 'past_due' || status === 'trial' || status === 'expired';
   const showBillingDetails = isLegacyStore || status === 'active';
 
   return (
@@ -457,11 +458,11 @@ export default function SubscriptionModal({
                       </h3>
                       <p className="mt-1 text-xs font-medium text-slate-600 dark:text-slate-400">
                         {status === 'trial' && !trialExpired && `${trialDaysRemaining} days remaining in your free trial`}
-                        {status === 'trial' && trialExpired && 'Your free trial has ended. Subscribe to continue.'}
+                        {status === 'trial' && trialExpired && <span className="text-red-600 dark:text-red-400 font-bold">Your free trial has ended. Access is restricted. Subscribe now to restore full access.</span>}
                         {status === 'active' && 'Your subscription is active and auto-renews.'}
                         {status === 'past_due' && `Payment failed. ${graceDaysRemaining} days of grace period remaining.`}
                         {status === 'cancelled' && 'Your subscription has been cancelled.'}
-                        {status === 'expired' && 'Your subscription has expired.'}
+                        {status === 'expired' && <span className="text-red-600 dark:text-red-400 font-bold">Your subscription has expired. Access is restricted.</span>}
                       </p>
                     </div>
                     {(status === 'trial' || status === 'expired' || status === 'cancelled' || status === 'past_due') && (
@@ -671,13 +672,22 @@ export default function SubscriptionModal({
         {/* --- Footer --- */}
         <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 z-20">
           <div className="max-w-5xl mx-auto">
-            <motion.button
-              onClick={handleClose}
-              className="w-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-black py-4 px-8 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-[0.98] text-base tracking-tight"
-              whileTap={{ scale: 0.98 }}
-            >
-              Close
-            </motion.button>
+            {(!trialExpired && status !== 'expired') ? (
+              <motion.button
+                onClick={handleClose}
+                className="w-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-black py-4 px-8 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-[0.98] text-base tracking-tight"
+                whileTap={{ scale: 0.98 }}
+              >
+                Close
+              </motion.button>
+            ) : (
+              <div className="text-center">
+                <p className="text-sm text-red-500 font-bold mb-2">Subscription Required to Continue</p>
+                <button disabled className="w-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-black py-4 px-8 rounded-xl cursor-not-allowed opacity-50">
+                  Close
+                </button>
+              </div>
+            )}
           </div>
         </footer>
       </motion.div>

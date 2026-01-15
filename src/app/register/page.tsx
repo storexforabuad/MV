@@ -3,19 +3,20 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import Script from 'next/script';
 import {
     User, Building2, Phone, Mail, MapPin, Briefcase,
     CheckCircle2, ChevronRight, ChevronLeft, Loader2,
     Sparkles, CreditCard, Upload, Store, ShoppingBag,
     UtensilsCrossed, Shirt, Car, Fish, Globe, Laptop,
     PartyPopper, GraduationCap, Bot, Tag, ArrowRight,
-    MessageCircle, Smartphone, Wrench
+    MessageCircle, Smartphone, Wrench, Instagram, Zap, ChevronDown
 } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { uploadImageToCloudinary } from '@/lib/cloudinaryClient';
 import { compressImage } from '@/utils/imageCompression';
-import { TIER_DETAILS, SubscriptionTier } from '@/types/subscription';
+import { TIER_DETAILS, SubscriptionTier, calculateTrialEndDate } from '@/types/subscription';
 import { geography } from '@/config/geography';
 
 // --- Types ---
@@ -47,13 +48,15 @@ interface RegistrationData {
     businessDescription: string;
     country: string;
     state: string;
-    referralCode?: string;
+    instagramHandle?: string;
+    hasPhysicalStore: boolean;
 
     // Store Config
     storeType: StoreType;
 
     // Subscription
-    subscriptionTier: SubscriptionTier;
+    subscriptionTier: SubscriptionTier | null; // null if trial
+    isTrial: boolean;
 }
 
 const STORE_TYPES: { id: StoreType; label: string; icon: any; description: string; color: string }[] = [
@@ -200,11 +203,13 @@ export default function RegisterPage() {
         businessName: '',
         businessPhone: '',
         businessDescription: '',
-        country: 'Morocco',
+        country: 'Nigeria',
         state: '',
         storeType: 'general',
-        subscriptionTier: 'pro',
-        referralCode: ''
+        subscriptionTier: null,
+        isTrial: false,
+        instagramHandle: '',
+        hasPhysicalStore: false
     });
 
     const handleInputChange = (field: keyof RegistrationData, value: any) => {
@@ -223,6 +228,7 @@ export default function RegisterPage() {
 
     const [showEmailModal, setShowEmailModal] = useState(false);
     const [emailError, setEmailError] = useState('');
+    const [showAllTrialFeatures, setShowAllTrialFeatures] = useState(false);
 
     const handleEmailSubmit = () => {
         if (!formData.ceoEmail || !formData.ceoEmail.includes('@')) {
@@ -230,7 +236,42 @@ export default function RegisterPage() {
             return;
         }
         setShowEmailModal(false);
-        handlePayment();
+
+        if (formData.isTrial) {
+            handleTrialRegistration();
+        } else {
+            handlePayment();
+        }
+    };
+
+    const handleTrialRegistration = async () => {
+        setIsLoading(true);
+        try {
+            // 1. Upload Image to Cloudinary if exists
+            let logoUrl = '';
+            if (formData.logoImage) {
+                const compressedFile = await compressImage(formData.logoImage);
+                logoUrl = await uploadImageToCloudinary(compressedFile, 'registrations');
+            }
+
+            // 2. Save Registration to Firestore with Trial Status
+            await addDoc(collection(db, 'registrations'), {
+                ...formData,
+                logoImage: null,
+                logoUrl,
+                amountPaid: 0,
+                status: 'trial',
+                trialEndsAt: calculateTrialEndDate(),
+                createdAt: serverTimestamp()
+            });
+
+            setStep(5); // Success Step
+            setIsLoading(false);
+        } catch (error) {
+            console.error('Trial registration error:', error);
+            alert('Something went wrong. Please try again.');
+            setIsLoading(false);
+        }
     };
 
     const handlePayment = async () => {
@@ -244,9 +285,15 @@ export default function RegisterPage() {
             }
 
             // 2. Initialize Paystack
+            if (typeof window.PaystackPop === 'undefined') {
+                alert('Payment system is loading. Please wait a moment and try again.');
+                setIsLoading(false);
+                return;
+            }
+
             const tierDetails = TIER_DETAILS[formData.subscriptionTier as keyof typeof TIER_DETAILS];
-            const hasDiscount = !!formData.referralCode;
-            const finalPrice = hasDiscount ? tierDetails.price / 2 : tierDetails.price;
+            // Apply 50% discount (Fake Discount Strategy)
+            const finalPrice = tierDetails.price / 2;
             const amount = finalPrice * 100; // Convert to kobo
 
             const paystackConfig = {
@@ -272,8 +319,7 @@ export default function RegisterPage() {
                             logoUrl,
                             amountPaid: finalPrice,
                             paymentReference: response.reference,
-                            status: 'pending',
-                            referralCode: formData.referralCode || null,
+                            status: 'active', // Active immediately if paid
                             createdAt: serverTimestamp()
                         });
 
@@ -310,12 +356,12 @@ export default function RegisterPage() {
                 />
             </div>
             <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight">
-                Join the Future<br />of Commerce
+                Launch Your<br />Business Empire
             </h1>
             <p className="text-lg text-slate-400 max-w-md mx-auto leading-relaxed">
-                Create your premium online store in minutes.
+                Start selling in minutes. Manage everything from your phone.
                 <br />
-                <span className="text-emerald-400 font-bold">BizzApp™</span> - Your Business, All in One App.
+                <span className="text-emerald-400 font-bold">Join 5,000+ Nigerian businesses.</span>
             </p>
 
             {/* Partner Badges */}
@@ -334,20 +380,26 @@ export default function RegisterPage() {
                 </div>
             </div>
 
-            <button
-                onClick={() => setStep(2)}
-                className="w-full py-4 bg-white text-slate-900 rounded-2xl font-black text-lg hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-white/10 mt-6"
-            >
-                Get Started
-            </button>
+            <div className="space-y-3 mt-8">
+                <button
+                    onClick={() => setStep(2)}
+                    className="w-full py-4 bg-white text-slate-900 rounded-2xl font-black text-lg hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-white/10"
+                >
+                    Start Selling for Free
+                </button>
+                <div className="flex items-center justify-center gap-2 text-xs font-medium text-emerald-400/80 animate-pulse">
+                    <Sparkles className="w-3 h-3" />
+                    <span>No credit card required • 14-Day Free Trial</span>
+                </div>
+            </div>
         </motion.div>
     );
 
     const renderStep2_Details = () => (
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
             <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-white">Tell us about you</h2>
-                <p className="text-slate-400 text-sm">We need some basic details to set up your profile.</p>
+                <h2 className="text-2xl font-bold text-white">Let's set up your business</h2>
+                <p className="text-slate-400 text-sm">This takes less than 2 minutes.</p>
             </div>
 
             {/* Image Upload */}
@@ -387,6 +439,21 @@ export default function RegisterPage() {
                             type="tel"
                             className="w-full p-4 bg-slate-900/50 border border-slate-800 rounded-xl text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none placeholder:text-slate-600"
                         />
+                    </div>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-slate-500 uppercase ml-1">Instagram Handle (Optional)</label>
+                        <div className="relative">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <Instagram className="w-4 h-4 text-slate-500" />
+                            </div>
+                            <input
+                                value={formData.instagramHandle}
+                                onChange={(e) => handleInputChange('instagramHandle', e.target.value)}
+                                placeholder="@yourhandle"
+                                className="w-full pl-10 pr-4 py-4 bg-slate-900/50 border border-slate-800 rounded-xl text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none placeholder:text-slate-600"
+                            />
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -436,6 +503,13 @@ export default function RegisterPage() {
                             </div>
                         </div>
                     </div>
+
+                    <div className="flex items-center gap-3 p-4 bg-slate-900/30 rounded-xl border border-slate-800/50 cursor-pointer" onClick={() => handleInputChange('hasPhysicalStore', !formData.hasPhysicalStore)}>
+                        <div className={`w-5 h-5 rounded border flex items-center justify-center transition-colors ${formData.hasPhysicalStore ? 'bg-emerald-500 border-emerald-500' : 'border-slate-600'}`}>
+                            {formData.hasPhysicalStore && <CheckCircle2 className="w-3.5 h-3.5 text-white" />}
+                        </div>
+                        <span className="text-sm text-slate-300">I also sell in a physical shop</span>
+                    </div>
                 </div>
             </div>
 
@@ -454,8 +528,8 @@ export default function RegisterPage() {
     const renderStep3_StoreType = () => (
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
             <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-white">Choose your niche</h2>
-                <p className="text-slate-400 text-sm">Select the category that best fits your business.</p>
+                <h2 className="text-2xl font-bold text-white">What do you sell?</h2>
+                <p className="text-slate-400 text-sm">This helps us customize your store.</p>
             </div>
 
             <div className="grid grid-cols-2 gap-3 pb-4">
@@ -497,175 +571,200 @@ export default function RegisterPage() {
         </motion.div>
     );
 
-    const [discountInput, setDiscountInput] = useState('');
-    const [isApplyingDiscount, setIsApplyingDiscount] = useState(false);
-
-    const handleApplyDiscount = async () => {
-        if (!discountInput) return;
-        setIsApplyingDiscount(true);
-        // Simulate API call/validation delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        handleInputChange('referralCode', discountInput);
-        setIsApplyingDiscount(false);
-    };
-
     const renderStep4_Subscription = () => (
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 pb-24">
             <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-white">Select a Plan</h2>
-                <p className="text-slate-400 text-sm">Choose the perfect plan for your business.</p>
+                <h2 className="text-2xl font-bold text-white">Choose How to Start</h2>
+                <p className="text-slate-400 text-sm">Start free, or commit now for a lifetime discount.</p>
             </div>
 
-            {/* Discount Code Input */}
-            <div className="space-y-2">
-                <div className="relative flex gap-2">
-                    <div className="relative flex-1">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <Tag className="h-5 w-5 text-slate-500" />
-                        </div>
-                        <input
-                            type="text"
-                            placeholder="Have a discount code?"
-                            value={discountInput}
-                            onChange={(e) => setDiscountInput(e.target.value)}
-                            className="w-full pl-10 pr-4 py-3 bg-slate-900/50 border border-slate-800 rounded-xl text-white placeholder:text-slate-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all outline-none text-sm"
-                        />
-                    </div>
-                    <button
-                        onClick={handleApplyDiscount}
-                        disabled={!discountInput || isApplyingDiscount || !!formData.referralCode}
-                        className="px-6 py-3 bg-emerald-600 text-white font-bold rounded-xl hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-emerald-500/20 active:scale-95 flex items-center gap-2 min-w-[100px] justify-center"
-                    >
-                        {isApplyingDiscount ? (
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                        ) : formData.referralCode ? (
-                            'Applied'
-                        ) : (
-                            'Apply'
-                        )}
-                    </button>
+            {/* Path A: Free Trial */}
+            <div
+                onClick={(e) => {
+                    // Prevent triggering selection when clicking the "See more" button
+                    if ((e.target as HTMLElement).closest('button.feature-toggle')) return;
+
+                    handleInputChange('isTrial', true);
+                    handleInputChange('subscriptionTier', null);
+                    setShowEmailModal(true);
+                }}
+                className="relative p-6 rounded-3xl border-2 border-emerald-500 bg-emerald-500/10 cursor-pointer hover:scale-[1.02] transition-all shadow-xl shadow-emerald-500/10 group"
+            >
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-xs font-bold px-4 py-1 rounded-full shadow-lg z-10">
+                    MOST POPULAR
                 </div>
-                {formData.referralCode && (
-                    <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="flex items-center justify-end gap-2"
-                    >
-                        <span className="text-xs font-bold text-emerald-500 animate-pulse">🎉 50% DISCOUNT APPLIED!</span>
-                        <button
-                            onClick={() => {
-                                handleInputChange('referralCode', '');
-                                setDiscountInput('');
-                            }}
-                            className="text-[10px] text-slate-500 hover:text-red-400 underline"
-                        >
-                            Remove
-                        </button>
-                    </motion.div>
-                )}
+                <div className="flex items-center gap-4 mb-4">
+                    <div className="w-12 h-12 rounded-2xl bg-emerald-500 flex items-center justify-center shadow-lg flex-shrink-0">
+                        <Zap className="w-6 h-6 text-white fill-white" />
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-black text-white">Start Free Trial</h3>
+                        <p className="text-xs text-emerald-200 font-medium">Try everything FREE for 14 days</p>
+                    </div>
+                </div>
+
+                <div className="space-y-3 mb-6">
+                    {[
+                        'Your Own Website & App',
+                        'Sell Up to 200 Products',
+                        'Weekly Business Reports',
+                        'Reliable Delivery Network',
+                    ].map((feat, i) => (
+                        <div key={i} className="flex items-center gap-3 text-sm text-slate-200 font-medium">
+                            <div className="p-1 rounded-full bg-emerald-500/20">
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                            </div>
+                            {feat}
+                        </div>
+                    ))}
+
+                    <AnimatePresence>
+                        {showAllTrialFeatures && (
+                            <motion.div
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="space-y-3 overflow-hidden"
+                            >
+                                {[
+                                    'Stock Management',
+                                    'Order Management',
+                                    'Customer Database (CRM)',
+                                    'Marketing Tools',
+                                    'AI Assistant'
+                                ].map((feat, i) => (
+                                    <div key={`more-${i}`} className="flex items-center gap-3 text-sm text-slate-200 font-medium">
+                                        <div className="p-1 rounded-full bg-emerald-500/20">
+                                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                                        </div>
+                                        {feat}
+                                    </div>
+                                ))}
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+
+                <button
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setShowAllTrialFeatures(!showAllTrialFeatures);
+                    }}
+                    className="feature-toggle w-full py-2 flex items-center justify-center gap-2 text-xs font-bold text-emerald-400 hover:text-emerald-300 transition-colors mb-4"
+                >
+                    {showAllTrialFeatures ? 'Show Less' : 'See 5 More Benefits'}
+                    <ChevronDown className={`w-4 h-4 transition-transform ${showAllTrialFeatures ? 'rotate-180' : ''}`} />
+                </button>
+
+                <button className="w-full py-3 bg-emerald-600 text-white rounded-xl font-bold group-hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-500/20">
+                    Start My Free Trial
+                </button>
+                <p className="text-[10px] text-center text-slate-500 mt-3">No credit card required</p>
             </div>
 
+            <div className="relative flex items-center py-4">
+                <div className="flex-grow border-t border-slate-800"></div>
+                <span className="flex-shrink-0 mx-4 text-slate-500 text-xs font-bold uppercase tracking-widest">Or Pay Now & Save 50% Forever</span>
+                <div className="flex-grow border-t border-slate-800"></div>
+            </div>
+
+            {/* Path B: Paid Plans */}
             <div className="space-y-4">
                 {(['basic', 'pro', 'promax'] as const).map((tier) => {
                     const details = TIER_DETAILS[tier as keyof typeof TIER_DETAILS];
-                    const isSelected = formData.subscriptionTier === tier;
-                    const isProMax = tier === 'promax';
-                    const isPro = tier === 'pro';
-
-                    // Discount Logic
-                    const hasDiscount = !!formData.referralCode;
-                    const currentPrice = hasDiscount ? details.price / 2 : details.price;
+                    // Fake Discount Logic: Display price is doubled in config, so we show it halved here
+                    const discountedPrice = details.price / 2;
 
                     return (
                         <div
                             key={tier}
-                            onClick={() => handleInputChange('subscriptionTier', tier)}
-                            className={`relative p-6 rounded-3xl border-2 cursor-pointer transition-all overflow-hidden ${isSelected
-                                ? isProMax ? 'border-amber-500 bg-amber-500/10' : 'border-emerald-500 bg-emerald-500/10'
-                                : 'border-slate-800 bg-slate-900/40'
-                                }`}
+                            onClick={() => {
+                                handleInputChange('isTrial', false);
+                                handleInputChange('subscriptionTier', tier);
+                                setShowEmailModal(true);
+                            }}
+                            className="relative p-4 rounded-2xl border border-slate-800 bg-slate-900/40 cursor-pointer hover:border-slate-600 transition-all flex items-center justify-between group"
                         >
-                            <div className="flex justify-between items-start mb-4">
-                                <div>
-                                    <h3 className={`text-xl font-black ${isProMax ? 'text-amber-500' : 'text-white'}`}>
-                                        {details.name}
-                                    </h3>
-                                    <p className="text-xs text-slate-400 mt-1">{details.description}</p>
-                                </div>
-                                <PriceDisplay price={currentPrice} originalPrice={details.price} />
+                            <div>
+                                <h3 className="text-base font-bold text-white group-hover:text-emerald-400 transition-colors">
+                                    {details.name} Plan
+                                </h3>
+                                <p className="text-[10px] text-slate-400">{details.description}</p>
                             </div>
-
-
-
-                            {isSelected && (
-                                <div className="absolute top-4 right-4">
-                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center ${isProMax ? 'bg-amber-500' : 'bg-emerald-500'
-                                        }`}>
-                                        <CheckCircle2 className="w-4 h-4 text-white" />
-                                    </div>
-                                </div>
-                            )}
+                            <div className="text-right">
+                                <span className="text-xs text-slate-500 line-through block">₦{details.price.toLocaleString()}</span>
+                                <span className="text-lg font-black text-white">₦{discountedPrice.toLocaleString()}</span>
+                                <span className="text-[10px] text-slate-500 block">/week</span>
+                            </div>
                         </div>
                     );
                 })}
             </div>
-
-            {/* Pay Button - Moved back to main content */}
-            <button
-                onClick={() => setShowEmailModal(true)}
-                disabled={isLoading}
-                className="w-full bg-emerald-600 text-white font-bold py-4 rounded-2xl hover:bg-emerald-500 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 mt-8 shadow-xl shadow-emerald-500/20"
-            >
-                {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                ) : (
-                    <>
-                        <CreditCard className="w-5 h-5" />
-                        Pay & Register
-                    </>
-                )}
-            </button>
         </motion.div>
     );
 
-    const renderStep5_Success = () => (
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-12">
-            <div className="w-24 h-24 mx-auto bg-emerald-500 rounded-full flex items-center justify-center shadow-2xl shadow-emerald-500/40 mb-8 animate-bounce">
-                <CheckCircle2 className="w-12 h-12 text-white" />
-            </div>
-            <h2 className="text-3xl font-black text-white mb-4">Registration Complete!</h2>
-            <p className="text-slate-400 max-w-xs mx-auto mb-8">
-                Welcome to BizzApp! We have received your details and payment. Our team is setting up your store right now.
-            </p>
-            <div className="p-6 bg-slate-900/50 rounded-2xl border border-slate-800 max-w-sm mx-auto space-y-4">
-                <p className="text-sm text-slate-300">
-                    You will receive an email at <span className="text-emerald-400 font-bold">{formData.ceoEmail}</span> shortly with your login details.
+    const renderStep5_Success = () => {
+        const isTrial = formData.isTrial;
+
+        return (
+            <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-12">
+                <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center shadow-2xl mb-8 animate-bounce ${isTrial ? 'bg-emerald-500 shadow-emerald-500/40' : 'bg-blue-500 shadow-blue-500/40'}`}>
+                    {isTrial ? (
+                        <PartyPopper className="w-12 h-12 text-white" />
+                    ) : (
+                        <CheckCircle2 className="w-12 h-12 text-white" />
+                    )}
+                </div>
+
+                <h2 className="text-3xl font-black text-white mb-4">
+                    {isTrial ? "You're In! 🎉" : "Registration Complete!"}
+                </h2>
+
+                <p className="text-slate-400 max-w-xs mx-auto mb-8">
+                    {isTrial
+                        ? "Your 14-day free trial has started. Your store is being set up right now."
+                        : "We have received your payment. Your store is being set up right now."
+                    }
                 </p>
 
-                <div className="pt-4 border-t border-slate-800">
-                    <p className="text-xs text-slate-500 mb-4 uppercase font-bold tracking-wider">Immediate Next Steps</p>
-                    <button
-                        onClick={() => {
-                            const message = encodeURIComponent(`Hello BizzApp Team! I just completed my registration for ${formData.businessName}. What are the next steps to get my store live?`);
-                            window.open(`https://wa.me/2347032905036?text=${message}`, '_blank');
-                        }}
-                        className="w-full py-4 bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 rounded-xl font-bold hover:bg-emerald-600/20 transition-all flex items-center justify-center gap-2 group"
-                    >
-                        <MessageCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                        Chat with Admin on WhatsApp
-                    </button>
-                </div>
-            </div>
-            <button
-                onClick={() => window.location.href = '/'}
-                className="mt-8 text-slate-500 text-sm font-medium hover:text-slate-300 transition-colors"
-            >
-                Return to Home
-            </button>
-        </motion.div>
-    );
+                <div className="p-6 bg-slate-900/50 rounded-2xl border border-slate-800 max-w-sm mx-auto space-y-4">
+                    <div className="flex items-center gap-3 text-left">
+                        <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center flex-shrink-0">
+                            <Loader2 className="w-5 h-5 text-emerald-500 animate-spin" />
+                        </div>
+                        <div>
+                            <p className="text-sm font-bold text-white">Setting up store...</p>
+                            <p className="text-xs text-slate-500">Usually takes ~24 hours</p>
+                        </div>
+                    </div>
 
-    // ... (keep existing code)
+                    <div className="pt-4 border-t border-slate-800">
+                        <p className="text-xs text-slate-500 mb-4 uppercase font-bold tracking-wider">Notification</p>
+                        <p className="text-sm text-slate-300 mb-4">
+                            We will notify you on <span className="text-emerald-400 font-bold">WhatsApp</span> at <span className="text-white">{formData.businessPhone}</span> when your store is ready.
+                        </p>
+                        <button
+                            onClick={() => {
+                                const message = encodeURIComponent(`Hello BizzApp Team! I just registered my store "${formData.businessName}" ${isTrial ? 'on the Free Trial' : 'and made payment'}. When will my store be live?`);
+                                window.open(`https://wa.me/2347032905036?text=${message}`, '_blank');
+                            }}
+                            className="w-full py-4 bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 rounded-xl font-bold hover:bg-emerald-600/20 transition-all flex items-center justify-center gap-2 group"
+                        >
+                            <MessageCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                            Chat with Admin on WhatsApp
+                        </button>
+                    </div>
+                </div>
+
+                <button
+                    onClick={() => window.location.href = '/'}
+                    className="mt-8 text-slate-500 text-sm font-medium hover:text-slate-300 transition-colors"
+                >
+                    Return to Home
+                </button>
+            </motion.div>
+        );
+    };
 
     return (
         <div className="min-h-screen bg-black text-white font-sans selection:bg-emerald-500/30">
@@ -722,8 +821,6 @@ export default function RegisterPage() {
                         <p>© {new Date().getFullYear()} Atlas Business Solutions. All rights reserved.</p>
                     </footer>
                 )}
-
-
             </div>
 
             {/* Email Modal */}
@@ -746,9 +843,10 @@ export default function RegisterPage() {
                             <div className="w-16 h-16 bg-emerald-500/10 rounded-full flex items-center justify-center mb-6 mx-auto">
                                 <Mail className="w-8 h-8 text-emerald-500" />
                             </div>
-                            <h3 className="text-2xl font-bold text-center text-white mb-2">One Last Thing!</h3>
+                            <h3 className="text-2xl font-bold text-center text-white mb-2">Create Your Account</h3>
                             <p className="text-slate-400 text-center text-sm mb-8">
-                                Please enter your email address to receive important alerts.                            </p>
+                                Enter your email to secure your store.
+                            </p>
 
                             <div className="space-y-4">
                                 <div>
@@ -772,7 +870,7 @@ export default function RegisterPage() {
                                     onClick={handleEmailSubmit}
                                     className="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
                                 >
-                                    Continue to Payment
+                                    {formData.isTrial ? 'Start Free Trial' : 'Continue to Payment'}
                                     <ArrowRight className="w-5 h-5" />
                                 </button>
                             </div>
@@ -780,6 +878,7 @@ export default function RegisterPage() {
                     </div>
                 )}
             </AnimatePresence>
+            <Script src="https://js.paystack.co/v1/inline.js" strategy="afterInteractive" />
         </div>
     );
 }

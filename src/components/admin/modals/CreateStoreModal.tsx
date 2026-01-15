@@ -2,6 +2,7 @@
 
 import { useState, ChangeEvent, FormEvent, useRef, useEffect } from "react";
 import { StoreMeta } from "../../../types/store";
+import { calculateTrialEndDate } from "../../../types/subscription";
 import { geography } from "../../../config/geography";
 import { categorySuggestions } from "../../../config/categories";
 import { db } from "../../../lib/firebase";
@@ -154,12 +155,6 @@ export default function CreateStoreModal({
         const compressedFile = await compressImage(logoFile);
         logoUrl = await uploadImageToCloudinary(compressedFile, 'stores');
       }
-
-      const storeId = formData.name?.toLowerCase().replace(/\s+/g, "-") ?? "";
-      if (!storeId) throw new Error("Store name is required to generate an ID");
-
-      const storeRef = doc(db, "stores", storeId);
-
       const finalFormData = {
         ...formData,
         id: storeId,
@@ -167,13 +162,13 @@ export default function CreateStoreModal({
         ceoImage: logoUrl, // Keep for backward compatibility or if needed
         name: formData.name ?? "Default Store Name",
         whatsapp: formData.whatsapp ?? "",
-        // If created from registration, activate subscription
-        ...(initialData ? {
-          subscriptionStatus: 'active',
-          subscriptionTier: initialData.subscriptionTier,
-          subscriptionStartDate: serverTimestamp(),
-          subscriptionPlanCode: 'manual_activation', // Placeholder
-        } : {})
+
+        // Subscription Logic
+        subscriptionStatus,
+        subscriptionTier: initialData?.subscriptionTier || formData.storeType === 'general' ? 'general' : 'basic', // Default tier if not specified
+        subscriptionStartDate: serverTimestamp(),
+        trialEndsAt: trialEndsAt,
+        subscriptionPlanCode: isPaidRegistration ? 'paid_registration' : 'manual_trial',
       };
 
       await setDoc(storeRef, finalFormData);

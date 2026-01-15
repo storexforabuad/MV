@@ -146,7 +146,7 @@ export const SUBSCRIPTION_CONFIG = {
 export const TIER_DETAILS = {
     basic: {
         name: 'Lite',
-        price: 1000,
+        price: 1000, // Display price (will be halved to 500)
         period: 'week',
         description: 'Perfect for new and small vendors just starting their business empire.',
         productLimit: 100,
@@ -161,7 +161,7 @@ export const TIER_DETAILS = {
     },
     pro: {
         name: 'Pro',
-        price: 2000,
+        price: 2000, // Display price (will be halved to 1000)
         period: 'week',
         description: 'Ideal for growing businesses looking to scale and reach more customers.',
         productLimit: 500,
@@ -176,7 +176,7 @@ export const TIER_DETAILS = {
     },
     promax: {
         name: 'Max',
-        price: 7000,
+        price: 7000, // Display price (will be halved to 3500)
         period: 'week',
         description: 'The ultimate choice for wholesalers and big brands with high volume.',
         productLimit: 2000,
