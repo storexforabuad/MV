@@ -83,14 +83,14 @@ const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferral
     <p className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500">
       ₦{totalReferralBonus.toFixed(2)}
     </p>
-    <p className="text-sm text-text-secondary mt-2">This is 100% of the BizzApp™ App Commission paid out as bonuses to referrers.</p>
+    <p className="text-sm text-text-secondary mt-2">This is 100% of the ATLAS™ App Commission paid out as bonuses to referrers.</p>
     <button onClick={handleClose} className="mt-6 bg-blue-500 text-white font-bold py-2 px-4 rounded-lg">Close</button>
   </div>
 );
 
 const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.ElementType | null, glowClass: string, isAiCard?: boolean }[] = [
   {
-    label: 'BizzApp™',
+    label: 'ATLAS™',
     icon: Globe,
     gradient: 'bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800',
     text: 'text-white',
@@ -437,7 +437,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
   const handleOpenModal = (idx: number, card: typeof cardData[0]) => {
     const { label, subtitle } = card;
-    if (label === 'BizzApp™') setIsBizconNetworkModalOpen(true);
+    if (label === 'ATLAS™') setIsBizconNetworkModalOpen(true);
     else if (label === 'Tips') setIsTipsModalOpen(true);
     else if (label === 'Views') setIsViewsModalOpen(true);
     else if (label === 'Content') setIsSocialPostsModalOpen(true);
@@ -744,7 +744,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           }
 
           const Icon = card.icon;
-          const isHorizontal = card.label === 'Content' || card.label === 'Tips' || card.label === 'BizzApp™' || card.label === 'Advert' || card.label === 'Account' || card.label === 'Subscription' || card.label === 'Warehouse';
+          const isHorizontal = card.label === 'Content' || card.label === 'Tips' || card.label === 'ATLAS™' || card.label === 'Advert' || card.label === 'Account' || card.label === 'Subscription' || card.label === 'Warehouse';
           const isTipsCard = card.label === 'Tips';
           const isPostsCard = card.label === 'Content';
           const spotlightClasses = spotlightStep === 'tips' && isTipsCard ? 'relative z-50 pointer-events-auto' : '';

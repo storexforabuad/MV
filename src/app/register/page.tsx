@@ -708,7 +708,7 @@ export default function RegisterPage() {
 
         return (
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center py-12">
-                <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center shadow-2xl mb-8 animate-bounce ${isTrial ? 'bg-emerald-500 shadow-emerald-500/40' : 'bg-blue-500 shadow-blue-500/40'}`}>
+                <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center shadow-2xl mb-24 animate-bounce ${isTrial ? 'bg-emerald-500 shadow-emerald-500/40' : 'bg-blue-500 shadow-blue-500/40'}`}>
                     {isTrial ? (
                         <PartyPopper className="w-12 h-12 text-white" />
                     ) : (
@@ -751,13 +751,13 @@ export default function RegisterPage() {
                             className="w-full py-4 bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 rounded-xl font-bold hover:bg-emerald-600/20 transition-all flex items-center justify-center gap-2 group"
                         >
                             <MessageCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                            Chat with Admin on WhatsApp
+                            Chat with Admin
                         </button>
                     </div>
                 </div>
 
                 <button
-                    onClick={() => window.location.href = '/'}
+                    onClick={() => setStep(1)}
                     className="mt-8 text-slate-500 text-sm font-medium hover:text-slate-300 transition-colors"
                 >
                     Return to Home
@@ -788,7 +788,7 @@ export default function RegisterPage() {
                                 />
                             </div>
                         )}
-                        <span className="font-bold text-xl tracking-tight">BizzApp™{step === 1 ? ' Network' : ''}</span>
+                        <span className="font-bold text-xl tracking-tight">ATLAS™{step === 1 ? ' Network' : ''}</span>
                     </div>
                     {step > 1 && step < 5 && (
                         <button
