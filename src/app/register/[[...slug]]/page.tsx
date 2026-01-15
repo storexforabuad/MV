@@ -50,11 +50,10 @@ interface RegistrationData {
     state: string;
     instagramHandle?: string;
     hasPhysicalStore: boolean;
+    referralCode?: string;
 
     // Store Config
     storeType: StoreType;
-
-    // Subscription
     subscriptionTier: SubscriptionTier | null; // null if trial
     isTrial: boolean;
 }
@@ -181,7 +180,7 @@ const PriceDisplay = ({ price, originalPrice }: { price: number; originalPrice: 
     );
 };
 
-export default function RegisterPage() {
+export default function RegisterPage({ params }: { params: { slug?: string[] } }) {
     const [step, setStep] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -209,7 +208,8 @@ export default function RegisterPage() {
         subscriptionTier: null,
         isTrial: false,
         instagramHandle: '',
-        hasPhysicalStore: false
+        hasPhysicalStore: false,
+        referralCode: params?.slug?.[0] || ''
     });
 
     const handleInputChange = (field: keyof RegistrationData, value: any) => {

@@ -40,7 +40,6 @@ interface Registration {
   storeType: string;
   subscriptionTier: string;
   amountPaid: number;
-  status: 'pending' | 'completed';
   createdAt: any;
 }
 
@@ -58,7 +57,7 @@ export default function DevteamPage() {
   const [isClearingStoreOrders, setIsClearingStoreOrders] = useState(false); // State for clear store orders
   const [isClearingAllOrders, setIsClearingAllOrders] = useState(false); // State for clear all orders
   const [subscriptionFilter, setSubscriptionFilter] = useState<SubscriptionStatus | 'all'>('all'); // Subscription filter
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'admin' | 'registrations'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'admin' | 'registrations' | 'referrals'>('dashboard');
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
   const fetchStores = useCallback(async () => {
@@ -604,6 +603,19 @@ export default function DevteamPage() {
                 </div>
               )}
             </div>
+          )}
+
+          {/* --- REFERRALS TAB --- */}
+          {activeTab === 'referrals' && (
+            <motion.div
+              key="referrals"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="space-y-8"
+            >
+              <DevTeamReferrals />
+            </motion.div>
           )}
 
         </div>
