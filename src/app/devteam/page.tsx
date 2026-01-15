@@ -40,6 +40,8 @@ interface Registration {
   storeType: string;
   subscriptionTier: string;
   amountPaid: number;
+  status: 'pending' | 'completed';
+  referralCode?: string;
   createdAt: any;
 }
 
