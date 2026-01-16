@@ -196,8 +196,12 @@ function StoreCard({ store, formatCurrency }: { store: ReferralStoreStats, forma
                     </div>
                 </div>
                 <div className="text-right">
-                    <div className="text-sm font-black text-emerald-400">+{formatCurrency(store.commission.weeklyAmount)}</div>
-                    <div className="text-[9px] text-slate-500 font-bold uppercase">Weekly</div>
+                    {store.commission.weeklyAmount > 0 && (
+                        <>
+                            <div className="text-sm font-black text-emerald-400">+{formatCurrency(store.commission.weeklyAmount)}</div>
+                            <div className="text-[9px] text-slate-500 font-bold uppercase">Weekly</div>
+                        </>
+                    )}
                 </div>
                 <ChevronRight className={`w-5 h-5 text-slate-600 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
             </div>
@@ -210,6 +214,16 @@ function StoreCard({ store, formatCurrency }: { store: ReferralStoreStats, forma
                         exit={{ height: 0, opacity: 0 }}
                         className="px-4 pb-4 border-t border-slate-800/50 pt-4 space-y-4"
                     >
+                        {/* Status & Trial Info */}
+                        {store.status === 'trial' && store.trialEndsAt && (
+                            <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-3 flex items-center gap-3">
+                                <Clock className="w-4 h-4 text-amber-400" />
+                                <div className="text-[11px] text-amber-100/80">
+                                    Free Trial Ends: <span className="text-amber-400 font-bold">{new Date(store.trialEndsAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Performance Grid */}
                         <div className="grid grid-cols-2 gap-3">
                             <PerformanceMetric
@@ -230,7 +244,7 @@ function StoreCard({ store, formatCurrency }: { store: ReferralStoreStats, forma
                             <div className="text-[11px] text-emerald-100/80 leading-relaxed">
                                 You earn 20% of their weekly fee for 12 months.
                                 <br />
-                                <span className="text-emerald-400 font-bold">Expires: {new Date(store.referralDate).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                                <span className="text-emerald-400 font-bold">Commission Period Ends: {new Date(new Date(store.referralDate).setFullYear(new Date(store.referralDate).getFullYear() + 1)).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                             </div>
                         </div>
 

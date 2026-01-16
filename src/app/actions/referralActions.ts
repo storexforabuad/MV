@@ -23,6 +23,7 @@ export interface ReferralStoreStats {
     status: string;
     subscriptionTier: string;
     referralDate: string;
+    trialEndsAt?: string;
     weeklyPerformance: {
         views: { current: number; previous: number; trend: number };
         orders: { current: number; previous: number; trend: number };
@@ -108,6 +109,7 @@ export async function getReferralDashboardData(referralCode: string): Promise<Re
             };
 
             // Commission Calculation
+            const status = data.subscriptionStatus || 'trial';
             const tier = data.subscriptionTier as keyof typeof TIER_DETAILS;
             const tierInfo = TIER_DETAILS[tier];
             const weeklyFee = tierInfo ? (tierInfo.price / 2) : 0; // Halved price as per logic in registration
@@ -116,15 +118,18 @@ export async function getReferralDashboardData(referralCode: string): Promise<Re
                 start: referralDate,
                 end: addYears(referralDate, 1)
             });
-            const weeklyCommission = isEligible ? (weeklyFee * 0.2) : 0;
+
+            // Only calculate commission if store is active (subscribed)
+            const weeklyCommission = (isEligible && status === 'active') ? (weeklyFee * 0.2) : 0;
 
             return {
                 id: storeId,
                 name: data.name,
                 logo: data.logo,
-                status: data.subscriptionStatus || 'trial',
+                status: status,
                 subscriptionTier: data.subscriptionTier || 'basic',
                 referralDate: referralDate.toISOString(),
+                trialEndsAt: (data.trialEndsAt as Timestamp)?.toDate().toISOString(),
                 weeklyPerformance: {
                     views: { current: thisWeekViews, previous: lastWeekViews, trend: calculateTrend(thisWeekViews, lastWeekViews) },
                     orders: { current: thisWeekOrders, previous: lastWeekOrders, trend: calculateTrend(thisWeekOrders, lastWeekOrders) }
