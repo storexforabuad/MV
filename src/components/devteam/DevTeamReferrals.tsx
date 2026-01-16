@@ -1,22 +1,24 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
-import { Gift, Loader2, ServerCrash, Users, ChevronDown, ChevronUp, Copy } from 'lucide-react';
-import { collection, query, where, getDocs, orderBy } from 'firebase/firestore';
+import { useState, useEffect } from 'react';
+import { Gift, Loader2, ServerCrash, Users, ChevronDown, ChevronUp, Copy, Store } from 'lucide-react';
+import { collection, query, getDocs, orderBy, collectionGroup } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 
-interface Registration {
+interface ReferralItem {
   id: string;
   businessName: string;
-  ceoName: string;
-  referralCode?: string;
-  status: string;
+  ceoName?: string;
+  code: string; // referralCode OR referrerStoreId
+  source: 'url' | 'ambassador';
   createdAt: any;
+  status?: string;
 }
 
 interface ReferralGroup {
   code: string;
   count: number;
-  businesses: Registration[];
+  items: ReferralItem[];
+  source: 'url' | 'ambassador' | 'mixed';
 }
 
 const DevTeamReferrals: React.FC = () => {
@@ -29,42 +31,73 @@ const DevTeamReferrals: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      // Fetch all registrations that have a referral code
-      // Note: Firestore doesn't support "where field exists" easily in client SDK without a specific value check or order by
-      // So we'll fetch all non-pending registrations and filter client-side for now, or use a composite index if needed.
-      // For simplicity and since volume might not be huge yet, fetching all active/trial registrations is okay.
-
-      const q = query(
+      // 1. Fetch URL Referrals (from registrations collection)
+      const registrationsQuery = query(
         collection(db, 'registrations'),
         orderBy('createdAt', 'desc')
       );
+      const regSnapshot = await getDocs(registrationsQuery);
+      const urlReferrals: ReferralItem[] = regSnapshot.docs
+        .map(doc => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            businessName: data.businessName,
+            ceoName: data.ceoName,
+            code: data.referralCode,
+            source: 'url',
+            createdAt: data.createdAt,
+            status: data.status
+          } as ReferralItem;
+        })
+        .filter(r => r.code && r.code.trim() !== '' && (r.status === 'active' || r.status === 'trial' || r.status === 'completed'));
 
-      const snapshot = await getDocs(q);
-      const allRegs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Registration));
-
-      // Filter for those with referral codes and valid status
-      const validRegs = allRegs.filter(r =>
-        r.referralCode &&
-        r.referralCode.trim() !== '' &&
-        (r.status === 'active' || r.status === 'trial' || r.status === 'completed')
+      // 2. Fetch Ambassador Referrals (from referrals subcollections via collectionGroup)
+      const ambassadorQuery = query(
+        collectionGroup(db, 'referrals'),
+        orderBy('createdAt', 'desc')
       );
+      const ambSnapshot = await getDocs(ambassadorQuery);
+      const ambassadorReferrals: ReferralItem[] = ambSnapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          businessName: data.businessName,
+          ceoName: 'N/A', // Ambassador referrals might not have CEO name initially
+          code: data.referrerStoreId, // The store that referred them
+          source: 'ambassador',
+          createdAt: data.createdAt,
+          status: data.status
+        } as ReferralItem;
+      });
 
-      // Group by referral code
-      const groups: Record<string, Registration[]> = {};
-      validRegs.forEach(reg => {
-        const code = reg.referralCode!.toLowerCase(); // Normalize code
+      // 3. Merge and Group
+      const allReferrals = [...urlReferrals, ...ambassadorReferrals];
+      const groups: Record<string, ReferralItem[]> = {};
+
+      allReferrals.forEach(ref => {
+        const code = ref.code?.toLowerCase() || 'unknown';
         if (!groups[code]) {
           groups[code] = [];
         }
-        groups[code].push(reg);
+        groups[code].push(ref);
       });
 
-      // Convert to array and sort by count
-      const groupArray: ReferralGroup[] = Object.keys(groups).map(code => ({
-        code,
-        count: groups[code].length,
-        businesses: groups[code]
-      })).sort((a, b) => b.count - a.count);
+      // 4. Convert to array and sort
+      const groupArray: ReferralGroup[] = Object.keys(groups).map(code => {
+        const items = groups[code];
+        // Determine source type for the group
+        const hasUrl = items.some(i => i.source === 'url');
+        const hasAmb = items.some(i => i.source === 'ambassador');
+        const source = hasUrl && hasAmb ? 'mixed' : hasUrl ? 'url' : 'ambassador';
+
+        return {
+          code,
+          count: items.length,
+          items,
+          source
+        };
+      }).sort((a, b) => b.count - a.count);
 
       setReferralGroups(groupArray);
     } catch (err) {
@@ -129,11 +162,17 @@ const DevTeamReferrals: React.FC = () => {
                 className="p-4 flex items-center justify-between cursor-pointer hover:bg-slate-800 transition-colors"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-500 font-bold uppercase">
-                    {group.code.substring(0, 2)}
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold uppercase ${group.source === 'ambassador' ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'
+                    }`}>
+                    {group.source === 'ambassador' ? <Store className="w-5 h-5" /> : group.code.substring(0, 2)}
                   </div>
                   <div>
-                    <h3 className="font-bold text-white text-lg uppercase tracking-wide">{group.code}</h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-white text-lg uppercase tracking-wide">{group.code}</h3>
+                      {group.source === 'ambassador' && (
+                        <span className="text-[10px] bg-amber-500/20 text-amber-500 px-1.5 py-0.5 rounded border border-amber-500/30 uppercase font-bold">Ambassador</span>
+                      )}
+                    </div>
                     <p className="text-xs text-slate-400">{group.count} Referred Business{group.count !== 1 ? 'es' : ''}</p>
                   </div>
                 </div>
@@ -163,14 +202,23 @@ const DevTeamReferrals: React.FC = () => {
                       <tr>
                         <th className="px-4 py-3 rounded-l-lg">Business Name</th>
                         <th className="px-4 py-3">CEO</th>
+                        <th className="px-4 py-3">Source</th>
                         <th className="px-4 py-3 rounded-r-lg">Date</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {group.businesses.map((biz) => (
+                      {group.items.map((biz) => (
                         <tr key={biz.id} className="border-b border-slate-800/50 last:border-0 hover:bg-slate-800/30">
                           <td className="px-4 py-3 font-medium text-white">{biz.businessName}</td>
-                          <td className="px-4 py-3 text-slate-400">{biz.ceoName}</td>
+                          <td className="px-4 py-3 text-slate-400">{biz.ceoName || 'N/A'}</td>
+                          <td className="px-4 py-3">
+                            <span className={`text-xs px-2 py-1 rounded-full ${biz.source === 'ambassador'
+                                ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
+                                : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+                              }`}>
+                              {biz.source === 'ambassador' ? 'Ambassador' : 'Link'}
+                            </span>
+                          </td>
                           <td className="px-4 py-3 text-slate-500">
                             {biz.createdAt?.seconds ? new Date(biz.createdAt.seconds * 1000).toLocaleDateString() : 'N/A'}
                           </td>

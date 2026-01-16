@@ -10,7 +10,7 @@ import {
 import { Naira } from '@/components/common/Naira';
 import Image from 'next/image';
 
-interface Registration {
+export interface Registration {
     id: string;
     ceoName: string;
     ceoPhone: string;

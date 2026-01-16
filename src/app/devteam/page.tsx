@@ -29,21 +29,7 @@ interface StoreStats {
   rank: number;
 }
 
-interface Registration {
-  id: string;
-  ceoName: string;
-  ceoPhone: string;
-  ceoEmail: string;
-  ceoImageUrl?: string;
-  businessName: string;
-  businessPhone: string;
-  storeType: string;
-  subscriptionTier: string;
-  amountPaid: number;
-  status: 'pending' | 'completed';
-  referralCode?: string;
-  createdAt: any;
-}
+import { Registration } from '../../components/devteam/RegistrationDetailsModal';
 
 export default function DevteamPage() {
   const [stores, setStores] = useState<StoreMeta[]>([]);
@@ -71,7 +57,7 @@ export default function DevteamPage() {
     try {
       const q = query(
         collection(db, 'registrations'),
-        where('status', '==', 'pending'),
+        where('status', 'in', ['pending', 'active', 'trial']),
         orderBy('createdAt', 'desc')
       );
       const snapshot = await getDocs(q);
