@@ -179,6 +179,10 @@ export default function CreateStoreModal({
         subscriptionStartDate: serverTimestamp(),
         trialEndsAt: trialEndsAt,
         subscriptionPlanCode: isPaidRegistration ? 'paid_registration' : 'manual_trial',
+
+        // Referral Tracking
+        referralCode: initialData?.referralCode || null,
+        referralDate: initialData?.referralCode ? serverTimestamp() : null,
       };
 
       await setDoc(storeRef, finalFormData);
