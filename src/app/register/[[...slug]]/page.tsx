@@ -575,7 +575,7 @@ export default function RegisterPage({ params }: { params: { slug?: string[] } }
         <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6 pb-24">
             <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold text-white">Choose How to Start</h2>
-                <p className="text-slate-400 text-sm">Start free, or commit now for a lifetime discount.</p>
+                <p className="text-slate-400 text-sm">Start free, or subscribe now for a lifetime discount.</p>
             </div>
 
             {/* Path A: Free Trial */}
@@ -656,8 +656,18 @@ export default function RegisterPage({ params }: { params: { slug?: string[] } }
                     <ChevronDown className={`w-4 h-4 transition-transform ${showAllTrialFeatures ? 'rotate-180' : ''}`} />
                 </button>
 
-                <button className="w-full py-3 bg-emerald-600 text-white rounded-xl font-bold group-hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-500/20">
-                    Start My Free Trial
+                <button
+                    disabled={isLoading}
+                    className="w-full py-3 bg-emerald-600 text-white rounded-xl font-bold group-hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                    {isLoading && formData.isTrial ? (
+                        <>
+                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <span>Setting up your store...</span>
+                        </>
+                    ) : (
+                        "Start My Free Trial"
+                    )}
                 </button>
                 <p className="text-[10px] text-center text-slate-500 mt-3">No credit card required</p>
             </div>
@@ -683,18 +693,18 @@ export default function RegisterPage({ params }: { params: { slug?: string[] } }
                                 handleInputChange('subscriptionTier', tier);
                                 setShowEmailModal(true);
                             }}
-                            className="relative p-4 rounded-2xl border border-slate-800 bg-slate-900/40 cursor-pointer hover:border-slate-600 transition-all flex items-center justify-between group"
+                            className="relative p-3 md:p-4 rounded-2xl border border-slate-800 bg-slate-900/40 cursor-pointer hover:border-slate-600 transition-all flex items-center justify-between gap-3 group"
                         >
-                            <div>
-                                <h3 className="text-base font-bold text-white group-hover:text-emerald-400 transition-colors">
+                            <div className="min-w-0">
+                                <h3 className="text-sm md:text-base font-bold text-white group-hover:text-emerald-400 transition-colors truncate">
                                     {details.name} Plan
                                 </h3>
-                                <p className="text-[10px] text-slate-400">{details.description}</p>
+                                <p className="text-[10px] text-slate-400 line-clamp-2">{details.description}</p>
                             </div>
-                            <div className="text-right">
-                                <span className="text-xs text-slate-500 line-through block">₦{details.price.toLocaleString()}</span>
-                                <span className="text-lg font-black text-white">₦{discountedPrice.toLocaleString()}</span>
-                                <span className="text-[10px] text-slate-500 block">/week</span>
+                            <div className="text-right flex-shrink-0">
+                                <span className="text-[10px] md:text-xs text-slate-500 line-through block">₦{details.price.toLocaleString()}</span>
+                                <span className="text-base md:text-lg font-black text-emerald-400">₦{discountedPrice.toLocaleString()}</span>
+                                <span className="text-[10px] text-slate-500 block">weekly</span>
                             </div>
                         </div>
                     );
