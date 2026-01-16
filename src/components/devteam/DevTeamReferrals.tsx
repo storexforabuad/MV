@@ -89,7 +89,7 @@ const DevTeamReferrals: React.FC = () => {
         // Determine source type for the group
         const hasUrl = items.some(i => i.source === 'url');
         const hasAmb = items.some(i => i.source === 'ambassador');
-        const source = hasUrl && hasAmb ? 'mixed' : hasUrl ? 'url' : 'ambassador';
+        const source = (hasUrl && hasAmb ? 'mixed' : hasUrl ? 'url' : 'ambassador') as 'url' | 'ambassador' | 'mixed';
 
         return {
           code,
@@ -213,8 +213,8 @@ const DevTeamReferrals: React.FC = () => {
                           <td className="px-4 py-3 text-slate-400">{biz.ceoName || 'N/A'}</td>
                           <td className="px-4 py-3">
                             <span className={`text-xs px-2 py-1 rounded-full ${biz.source === 'ambassador'
-                                ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
-                                : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
+                              ? 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
+                              : 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20'
                               }`}>
                               {biz.source === 'ambassador' ? 'Ambassador' : 'Link'}
                             </span>
