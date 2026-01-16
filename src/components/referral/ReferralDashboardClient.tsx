@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Users,
@@ -108,8 +108,8 @@ export default function ReferralDashboardClient({ initialData }: ReferralDashboa
                     <div className="flex items-center gap-2">
                         <span className="text-slate-400 text-sm">Code: <span className="text-emerald-400 font-bold uppercase">{initialData.referralCode}</span></span>
                         <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${initialData.tier.name === 'Elite' ? 'bg-amber-500/20 text-amber-400' :
-                                initialData.tier.name === 'Pro' ? 'bg-blue-500/20 text-blue-400' :
-                                    'bg-slate-500/20 text-slate-400'
+                            initialData.tier.name === 'Pro' ? 'bg-blue-500/20 text-blue-400' :
+                                'bg-slate-500/20 text-slate-400'
                             }`}>
                             {initialData.tier.name} Tier
                         </span>
@@ -551,9 +551,18 @@ function StatBox({ label, value, icon: Icon, color }: any) {
 
 function StoreCard({ store, formatCurrency }: { store: ReferralStoreStats, formatCurrency: any }) {
     const [isExpanded, setIsExpanded] = useState(false);
+    const cardRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (isExpanded && cardRef.current) {
+            setTimeout(() => {
+                cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }
+    }, [isExpanded]);
 
     return (
-        <div className="bg-slate-900/40 border border-slate-800 rounded-3xl overflow-hidden">
+        <div ref={cardRef} className="bg-slate-900/40 border border-slate-800 rounded-3xl overflow-hidden">
             <div className="p-4 flex items-center gap-4" onClick={() => setIsExpanded(!isExpanded)}>
                 <div className="w-12 h-12 rounded-2xl bg-slate-800 relative overflow-hidden flex-shrink-0 border border-slate-700">
                     {store.logo ? (
@@ -689,8 +698,8 @@ function NotificationCard({ notif }: { notif: any }) {
     return (
         <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-4 flex items-start gap-4">
             <div className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ${notif.type === 'registration' ? 'bg-blue-500/10 text-blue-400' :
-                    notif.type === 'subscription' ? 'bg-emerald-500/10 text-emerald-400' :
-                        'bg-amber-500/10 text-amber-400'
+                notif.type === 'subscription' ? 'bg-emerald-500/10 text-emerald-400' :
+                    'bg-amber-500/10 text-amber-400'
                 }`}>
                 <Icon className="w-5 h-5" />
             </div>
