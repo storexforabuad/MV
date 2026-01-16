@@ -86,33 +86,38 @@ export default function ReferralDashboardClient({ initialData }: ReferralDashboa
     return (
         <div className="min-h-screen bg-black text-white font-sans selection:bg-emerald-500/30 pb-24">
             {/* Header */}
-            <header className="p-6 pt-12 relative overflow-hidden">
+            <header className="p-6 pt-10 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px] -mr-32 -mt-32" />
                 <div className="relative z-10">
-                    <div className="flex items-center justify-between gap-4">
-                        <div className="flex items-center gap-3 mb-2">
-                            <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center border border-emerald-500/20">
-                                <Zap className="w-6 h-6 text-emerald-400" />
+                    <div className="flex items-start justify-between gap-3 mb-5">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center border border-emerald-500/20 flex-shrink-0">
+                                <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400" />
                             </div>
-                            <h1 className="text-2xl font-black tracking-tight">Referral Dashboard</h1>
+                            <h1 className="text-lg sm:text-2xl font-black tracking-tight leading-[1.1]">
+                                Referral<br className="sm:hidden" /> Dashboard
+                            </h1>
                         </div>
                         {showInstallBanner && (
                             <button
                                 onClick={handleInstall}
-                                className="bg-emerald-500 text-black px-4 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
+                                className="bg-emerald-500 text-black px-3 py-2 rounded-xl text-[9px] font-black uppercase shadow-lg shadow-emerald-500/20 active:scale-95 transition-all whitespace-nowrap mt-0.5"
                             >
                                 Install App
                             </button>
                         )}
                     </div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-slate-400 text-sm">Code: <span className="text-emerald-400 font-bold uppercase">{initialData.referralCode}</span></span>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${initialData.tier.name === 'Elite' ? 'bg-amber-500/20 text-amber-400' :
-                            initialData.tier.name === 'Pro' ? 'bg-blue-500/20 text-blue-400' :
-                                'bg-slate-500/20 text-slate-400'
+                    <div className="flex flex-wrap items-center gap-2">
+                        <div className="bg-slate-900/60 border border-slate-800 px-3 py-1.5 rounded-full flex items-center gap-2">
+                            <span className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">Code</span>
+                            <span className="text-emerald-400 text-xs font-black uppercase">{initialData.referralCode}</span>
+                        </div>
+                        <div className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase border ${initialData.tier.name === 'Elite' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                                initialData.tier.name === 'Pro' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+                                    'bg-slate-500/10 text-slate-400 border-slate-500/20'
                             }`}>
                             {initialData.tier.name} Tier
-                        </span>
+                        </div>
                     </div>
                 </div>
             </header>
