@@ -556,13 +556,13 @@ function StoreCard({ store, formatCurrency }: { store: ReferralStoreStats, forma
     useEffect(() => {
         if (isExpanded && cardRef.current) {
             setTimeout(() => {
-                cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }, 100);
+                cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 250);
         }
     }, [isExpanded]);
 
     return (
-        <div ref={cardRef} className="bg-slate-900/40 border border-slate-800 rounded-3xl overflow-hidden">
+        <div ref={cardRef} className="bg-slate-900/40 border border-slate-800 rounded-3xl overflow-hidden scroll-mt-6">
             <div className="p-4 flex items-center gap-4" onClick={() => setIsExpanded(!isExpanded)}>
                 <div className="w-12 h-12 rounded-2xl bg-slate-800 relative overflow-hidden flex-shrink-0 border border-slate-700">
                     {store.logo ? (
