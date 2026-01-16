@@ -16,6 +16,15 @@ import { StoreMeta } from '@/types/store';
 import { TIER_DETAILS } from '@/types/subscription';
 import { subDays, startOfDay, endOfDay, isWithinInterval, addYears } from 'date-fns';
 
+export interface ReferralNotification {
+    id: string;
+    type: 'registration' | 'subscription' | 'milestone';
+    title: string;
+    message: string;
+    timestamp: string;
+    read: boolean;
+}
+
 export interface ReferralStoreStats {
     id: string;
     name: string;
@@ -44,15 +53,20 @@ export interface ReferralDashboardData {
         totalViews: number;
         totalWeeklyCommission: number;
     };
+    tier: {
+        name: 'Novice' | 'Pro' | 'Elite';
+        commissionPercentage: number;
+        nextTierThreshold: number | null;
+        progress: number; // 0 to 100
+    };
     registrations: any[];
     stores: ReferralStoreStats[];
+    notifications: ReferralNotification[];
 }
 
 export async function getReferralDashboardData(referralCode: string): Promise<ReferralDashboardData> {
     try {
         // 1. Fetch Registrations
-        // We remove orderBy to avoid needing a composite index for (referralCode, createdAt)
-        // We will sort in memory instead.
         const regsQuery = query(
             collection(db, 'registrations'),
             where('referralCode', '==', referralCode)
@@ -76,6 +90,26 @@ export async function getReferralDashboardData(referralCode: string): Promise<Re
             where('referralCode', '==', referralCode)
         );
         const storesSnapshot = await getDocs(storesQuery);
+
+        const activeStoresCount = storesSnapshot.docs.filter(d => d.data().subscriptionStatus === 'active').length;
+
+        // Calculate Tier
+        let tierName: 'Novice' | 'Pro' | 'Elite' = 'Novice';
+        let commissionPercentage = 10;
+        let nextTierThreshold: number | null = 3;
+        let progress = (activeStoresCount / 3) * 100;
+
+        if (activeStoresCount >= 11) {
+            tierName = 'Elite';
+            commissionPercentage = 30;
+            nextTierThreshold = null;
+            progress = 100;
+        } else if (activeStoresCount >= 3) {
+            tierName = 'Pro';
+            commissionPercentage = 20;
+            nextTierThreshold = 11;
+            progress = ((activeStoresCount - 3) / (11 - 3)) * 100;
+        }
 
         const now = new Date();
         const startOfThisWeek = subDays(now, 7);
@@ -120,7 +154,7 @@ export async function getReferralDashboardData(referralCode: string): Promise<Re
             });
 
             // Only calculate commission if store is active (subscribed)
-            const weeklyCommission = (isEligible && status === 'active') ? (weeklyFee * 0.2) : 0;
+            const weeklyCommission = (isEligible && status === 'active') ? (weeklyFee * (commissionPercentage / 100)) : 0;
 
             return {
                 id: storeId,
@@ -146,16 +180,38 @@ export async function getReferralDashboardData(referralCode: string): Promise<Re
         // 3. Summary
         const summary = {
             totalRegistrations: registrations.length,
-            activeStores: stores.filter(s => s.status === 'active').length,
+            activeStores: activeStoresCount,
             totalViews: stores.reduce((sum, s) => sum + s.weeklyPerformance.views.current, 0),
             totalWeeklyCommission: stores.reduce((sum, s) => sum + s.commission.weeklyAmount, 0)
         };
 
+        // 4. Notifications (Placeholder for now, could be fetched from a collection)
+        const notifications: ReferralNotification[] = [];
+
+        // Auto-generate some notifications based on recent activity for "Magic" feel
+        registrations.slice(0, 5).forEach(reg => {
+            notifications.push({
+                id: `reg-${reg.id}`,
+                type: 'registration',
+                title: 'New Registration',
+                message: `${reg.businessName} just joined using your link!`,
+                timestamp: reg.createdAt,
+                read: false
+            });
+        });
+
         return {
             referralCode,
             summary,
+            tier: {
+                name: tierName,
+                commissionPercentage,
+                nextTierThreshold,
+                progress
+            },
             registrations,
-            stores
+            stores,
+            notifications: notifications.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
         };
 
     } catch (error: any) {

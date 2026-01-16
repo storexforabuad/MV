@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Users,
@@ -16,7 +16,12 @@ import {
     Clock,
     CheckCircle2,
     AlertCircle,
-    Info
+    Info,
+    X,
+    Trophy,
+    Target,
+    BarChart3,
+    Calendar
 } from 'lucide-react';
 import { ReferralDashboardData, ReferralStoreStats } from '@/app/actions/referralActions';
 import { PerformanceChart, MiniTrendChart } from './ReferralCharts';
@@ -27,7 +32,35 @@ interface ReferralDashboardClientProps {
 }
 
 export default function ReferralDashboardClient({ initialData }: ReferralDashboardClientProps) {
-    const [activeTab, setActiveTab] = useState<'stores' | 'registrations'>('stores');
+    const [activeTab, setActiveTab] = useState<'stores' | 'registrations' | 'notifications'>('stores');
+    const [copySuccess, setCopySuccess] = useState(false);
+    const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+    const [showInstallBanner, setShowInstallBanner] = useState(false);
+    const [selectedModal, setSelectedModal] = useState<'tier' | 'referrals' | 'active' | 'earnings' | 'views' | null>(null);
+
+    useEffect(() => {
+        const handler = (e: any) => {
+            e.preventDefault();
+            setDeferredPrompt(e);
+            setShowInstallBanner(true);
+        };
+
+        window.addEventListener('beforeinstallprompt', handler);
+
+        return () => {
+            window.removeEventListener('beforeinstallprompt', handler);
+        };
+    }, []);
+
+    const handleInstall = async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') {
+            setDeferredPrompt(null);
+            setShowInstallBanner(false);
+        }
+    };
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('en-NG', {
@@ -37,21 +70,107 @@ export default function ReferralDashboardClient({ initialData }: ReferralDashboa
         }).format(amount);
     };
 
+    const referralLink = `tinyurl.com/atlasintl/register/${initialData.referralCode}`;
+
+    const handleCopyLink = () => {
+        navigator.clipboard.writeText(referralLink);
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+    };
+
+    const handleShareWhatsApp = () => {
+        const message = `Hey! I'm inviting you to start your business on MV. Use my link to get a 14-day free trial and a LIFETIME 50% discount on your subscription: ${referralLink}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+    };
+
     return (
         <div className="min-h-screen bg-black text-white font-sans selection:bg-emerald-500/30 pb-24">
             {/* Header */}
             <header className="p-6 pt-12 relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px] -mr-32 -mt-32" />
                 <div className="relative z-10">
-                    <div className="flex items-center gap-3 mb-2">
-                        <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center border border-emerald-500/20">
-                            <Zap className="w-6 h-6 text-emerald-400" />
+                    <div className="flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-3 mb-2">
+                            <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center border border-emerald-500/20">
+                                <Zap className="w-6 h-6 text-emerald-400" />
+                            </div>
+                            <h1 className="text-2xl font-black tracking-tight">Referral Dashboard</h1>
                         </div>
-                        <h1 className="text-2xl font-black tracking-tight">Referral Dashboard</h1>
+                        {showInstallBanner && (
+                            <button
+                                onClick={handleInstall}
+                                className="bg-emerald-500 text-black px-4 py-2 rounded-xl text-[10px] font-black uppercase shadow-lg shadow-emerald-500/20 active:scale-95 transition-all"
+                            >
+                                Install App
+                            </button>
+                        )}
                     </div>
-                    <p className="text-slate-400 text-sm">Code: <span className="text-emerald-400 font-bold uppercase">{initialData.referralCode}</span></p>
+                    <div className="flex items-center gap-2">
+                        <span className="text-slate-400 text-sm">Code: <span className="text-emerald-400 font-bold uppercase">{initialData.referralCode}</span></span>
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-black uppercase ${initialData.tier.name === 'Elite' ? 'bg-amber-500/20 text-amber-400' :
+                                initialData.tier.name === 'Pro' ? 'bg-blue-500/20 text-blue-400' :
+                                    'bg-slate-500/20 text-slate-400'
+                            }`}>
+                            {initialData.tier.name} Tier
+                        </span>
+                    </div>
                 </div>
             </header>
+
+            {/* Tier Progress */}
+            <div className="px-6 mb-8">
+                <motion.div
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setSelectedModal('tier')}
+                    className="bg-slate-900/40 border border-slate-800 rounded-3xl p-5 backdrop-blur-sm cursor-pointer hover:border-emerald-500/30 transition-colors group"
+                >
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Tier Progress</div>
+                        <div className="text-xs font-black text-emerald-400 flex items-center gap-1">
+                            {initialData.tier.commissionPercentage}% Commission
+                            <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
+                        </div>
+                    </div>
+                    <div className="h-2 bg-slate-800 rounded-full overflow-hidden mb-3">
+                        <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${initialData.tier.progress}%` }}
+                            className="h-full bg-gradient-to-r from-emerald-500 to-teal-400"
+                        />
+                    </div>
+                    {initialData.tier.nextTierThreshold && (
+                        <div className="text-[10px] text-slate-500 font-medium">
+                            Add <span className="text-white font-bold">{initialData.tier.nextTierThreshold - initialData.summary.activeStores}</span> more active stores to reach the next tier.
+                        </div>
+                    )}
+                </motion.div>
+            </div>
+
+            {/* Share Section */}
+            <div className="px-6 mb-8">
+                <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-3xl p-5">
+                    <h3 className="text-sm font-bold mb-4 flex items-center gap-2">
+                        <ArrowUpRight className="w-4 h-4 text-emerald-400" />
+                        Share Your Link
+                    </h3>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleCopyLink}
+                            className="flex-1 bg-slate-900 border border-slate-800 py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 active:scale-95 transition-all"
+                        >
+                            {copySuccess ? <CheckCircle2 className="w-4 h-4 text-emerald-400" /> : <CreditCard className="w-4 h-4 text-slate-400" />}
+                            {copySuccess ? 'Copied!' : 'Copy Link'}
+                        </button>
+                        <button
+                            onClick={handleShareWhatsApp}
+                            className="flex-1 bg-emerald-600 py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 active:scale-95 transition-all"
+                        >
+                            <MessageCircle className="w-4 h-4" />
+                            WhatsApp
+                        </button>
+                    </div>
+                </div>
+            </div>
 
             {/* Summary Stats */}
             <div className="px-6 grid grid-cols-2 gap-4 mb-8">
@@ -60,42 +179,52 @@ export default function ReferralDashboardClient({ initialData }: ReferralDashboa
                     value={initialData.summary.totalRegistrations.toString()}
                     icon={Users}
                     color="blue"
+                    onClick={() => setSelectedModal('referrals')}
                 />
                 <SummaryCard
                     label="Active Stores"
                     value={initialData.summary.activeStores.toString()}
                     icon={Store}
                     color="emerald"
+                    onClick={() => setSelectedModal('active')}
                 />
                 <SummaryCard
                     label="Weekly Earnings"
                     value={formatCurrency(initialData.summary.totalWeeklyCommission)}
                     icon={CreditCard}
                     color="amber"
-                    subLabel="20% Commission"
+                    subLabel={`${initialData.tier.commissionPercentage}% Commission`}
+                    onClick={() => setSelectedModal('earnings')}
                 />
                 <SummaryCard
                     label="Weekly Views"
                     value={initialData.summary.totalViews.toLocaleString()}
                     icon={TrendingUp}
                     color="purple"
+                    onClick={() => setSelectedModal('views')}
                 />
             </div>
 
             {/* Tabs */}
             <div className="px-6 mb-6">
-                <div className="flex bg-slate-900/50 p-1 rounded-2xl border border-slate-800">
+                <div className="flex bg-slate-900/50 p-1 rounded-2xl border border-slate-800 overflow-x-auto scrollbar-hide">
                     <button
                         onClick={() => setActiveTab('stores')}
-                        className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${activeTab === 'stores' ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-400'}`}
+                        className={`flex-1 min-w-[100px] py-3 rounded-xl text-[11px] font-bold transition-all ${activeTab === 'stores' ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-400'}`}
                     >
-                        Active Stores
+                        Stores
                     </button>
                     <button
                         onClick={() => setActiveTab('registrations')}
-                        className={`flex-1 py-3 rounded-xl text-sm font-bold transition-all ${activeTab === 'registrations' ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-400'}`}
+                        className={`flex-1 min-w-[100px] py-3 rounded-xl text-[11px] font-bold transition-all ${activeTab === 'registrations' ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-400'}`}
                     >
                         Registrations
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('notifications')}
+                        className={`flex-1 min-w-[100px] py-3 rounded-xl text-[11px] font-bold transition-all ${activeTab === 'notifications' ? 'bg-emerald-500 text-white shadow-lg' : 'text-slate-400'}`}
+                    >
+                        Notifications
                     </button>
                 </div>
             </div>
@@ -112,14 +241,14 @@ export default function ReferralDashboardClient({ initialData }: ReferralDashboa
                             className="space-y-4"
                         >
                             {initialData.stores.length === 0 ? (
-                                <EmptyState message="No active stores yet. Share your code to start earning!" />
+                                <EmptyState message="No active stores yet. Share your link to start earning!" />
                             ) : (
                                 initialData.stores.map((store) => (
                                     <StoreCard key={store.id} store={store} formatCurrency={formatCurrency} />
                                 ))
                             )}
                         </motion.div>
-                    ) : (
+                    ) : activeTab === 'registrations' ? (
                         <motion.div
                             key="registrations"
                             initial={{ opacity: 0, y: 20 }}
@@ -135,25 +264,42 @@ export default function ReferralDashboardClient({ initialData }: ReferralDashboa
                                 ))
                             )}
                         </motion.div>
+                    ) : (
+                        <motion.div
+                            key="notifications"
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -20 }}
+                            className="space-y-4"
+                        >
+                            {initialData.notifications.length === 0 ? (
+                                <EmptyState message="No notifications yet. We'll alert you here when things happen!" />
+                            ) : (
+                                initialData.notifications.map((notif) => (
+                                    <NotificationCard key={notif.id} notif={notif} />
+                                ))
+                            )}
+                        </motion.div>
                     )}
                 </AnimatePresence>
             </div>
 
-            {/* Floating Action Button */}
-            <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-full max-w-xs px-6">
-                <button
-                    onClick={() => window.open(`https://wa.me/2347032905036?text=Hello%20Admin,%20I'm%20a%20referrer%20with%20code%20${initialData.referralCode}.%20I'd%20like%20to%20discuss%20my%20earnings.`, '_blank')}
-                    className="w-full py-4 bg-emerald-600 text-white rounded-2xl font-black shadow-2xl shadow-emerald-500/20 flex items-center justify-center gap-2 active:scale-95 transition-transform"
-                >
-                    <MessageCircle className="w-5 h-5" />
-                    Talk to Admin
-                </button>
-            </div>
+            {/* Modals */}
+            <AnimatePresence>
+                {selectedModal && (
+                    <DashboardModal
+                        type={selectedModal}
+                        initialData={initialData}
+                        onClose={() => setSelectedModal(null)}
+                        formatCurrency={formatCurrency}
+                    />
+                )}
+            </AnimatePresence>
         </div>
     );
 }
 
-function SummaryCard({ label, value, icon: Icon, color, subLabel }: any) {
+function SummaryCard({ label, value, icon: Icon, color, subLabel, onClick }: any) {
     const colors: any = {
         emerald: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
         blue: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
@@ -162,13 +308,243 @@ function SummaryCard({ label, value, icon: Icon, color, subLabel }: any) {
     };
 
     return (
-        <div className={`p-4 rounded-3xl border ${colors[color]} bg-slate-900/40 backdrop-blur-sm`}>
+        <motion.div
+            whileTap={{ scale: 0.95 }}
+            onClick={onClick}
+            className={`p-4 rounded-3xl border ${colors[color]} bg-slate-900/40 backdrop-blur-sm cursor-pointer hover:bg-slate-900/60 transition-colors group`}
+        >
             <div className="flex items-center justify-between mb-2">
-                <Icon className="w-5 h-5 opacity-80" />
+                <Icon className="w-5 h-5 opacity-80 group-hover:scale-110 transition-transform" />
+                <ChevronRight className="w-3 h-3 opacity-0 group-hover:opacity-40 transition-opacity" />
             </div>
             <div className="text-xl font-black tracking-tight">{value}</div>
             <div className="text-[10px] font-bold uppercase tracking-wider opacity-60">{label}</div>
             {subLabel && <div className="text-[9px] mt-1 opacity-40">{subLabel}</div>}
+        </motion.div>
+    );
+}
+
+function DashboardModal({ type, initialData, onClose, formatCurrency }: any) {
+    return (
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center p-4 sm:p-6">
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={onClose}
+                className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            />
+            <motion.div
+                initial={{ y: '100%' }}
+                animate={{ y: 0 }}
+                exit={{ y: '100%' }}
+                className="relative w-full max-w-lg bg-slate-900 border border-slate-800 rounded-[40px] overflow-hidden shadow-2xl max-h-[92vh] flex flex-col"
+            >
+                {/* Header - Fixed */}
+                <div className="p-6 sm:p-8 pb-4 flex items-center justify-between flex-shrink-0">
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/20">
+                            {type === 'tier' ? <Trophy className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400" /> :
+                                type === 'referrals' ? <Users className="w-5 h-5 sm:w-6 sm:h-6 text-blue-400" /> :
+                                    type === 'active' ? <Store className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400" /> :
+                                        type === 'earnings' ? <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-amber-400" /> :
+                                            <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-purple-400" />}
+                        </div>
+                        <div>
+                            <h2 className="text-lg sm:text-xl font-black text-white uppercase tracking-tight">
+                                {type === 'tier' ? 'Tier Roadmap' :
+                                    type === 'referrals' ? 'Referral Stats' :
+                                        type === 'active' ? 'Active Stores' :
+                                            type === 'earnings' ? 'Earnings Deep Dive' :
+                                                'Traffic Insights'}
+                            </h2>
+                            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Detailed Breakdown</p>
+                        </div>
+                    </div>
+                    <button onClick={onClose} className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center text-slate-400 hover:text-white transition-colors">
+                        <X className="w-5 h-5" />
+                    </button>
+                </div>
+
+                {/* Content - Scrollable */}
+                <div className="flex-1 overflow-y-auto px-6 sm:px-8 py-2 scrollbar-hide">
+                    <div className="space-y-6 pb-6">
+                        {type === 'tier' && <TierModalContent initialData={initialData} />}
+                        {type === 'referrals' && <ReferralModalContent initialData={initialData} />}
+                        {type === 'active' && <ActiveModalContent initialData={initialData} />}
+                        {type === 'earnings' && <EarningsModalContent initialData={initialData} formatCurrency={formatCurrency} />}
+                        {type === 'views' && <ViewsModalContent initialData={initialData} />}
+                    </div>
+                </div>
+
+                {/* Footer - Fixed */}
+                <div className="p-6 sm:p-8 pt-4 flex-shrink-0">
+                    <button
+                        onClick={onClose}
+                        className="w-full py-4 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl font-black text-sm transition-colors shadow-lg active:scale-95"
+                    >
+                        Got it, thanks!
+                    </button>
+                </div>
+            </motion.div>
+        </div>
+    );
+}
+
+function TierModalContent({ initialData }: any) {
+    const tiers = [
+        { name: 'Novice', commission: 10, range: '0-2 Stores', color: 'slate' },
+        { name: 'Pro', commission: 20, range: '3-10 Stores', color: 'blue' },
+        { name: 'Elite', commission: 30, range: '11+ Stores', color: 'amber' }
+    ];
+
+    return (
+        <div className="space-y-4">
+            {tiers.map((t) => {
+                const isCurrent = initialData.tier.name === t.name;
+                return (
+                    <div key={t.name} className={`p-5 rounded-3xl border transition-all ${isCurrent ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-slate-800/30 border-slate-800'}`}>
+                        <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-3">
+                                <div className={`w-8 h-8 rounded-xl flex items-center justify-center ${isCurrent ? 'bg-emerald-500 text-black' : 'bg-slate-800 text-slate-500'}`}>
+                                    <Trophy className="w-4 h-4" />
+                                </div>
+                                <h3 className={`font-black uppercase tracking-tight ${isCurrent ? 'text-emerald-400' : 'text-slate-400'}`}>{t.name} Tier</h3>
+                            </div>
+                            {isCurrent && <span className="text-[10px] font-black bg-emerald-500 text-black px-2 py-0.5 rounded-full uppercase">Current</span>}
+                        </div>
+                        <div className="flex items-end justify-between">
+                            <div>
+                                <div className="text-2xl font-black text-white">{t.commission}%</div>
+                                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Commission</div>
+                            </div>
+                            <div className="text-right">
+                                <div className="text-sm font-bold text-slate-300">{t.range}</div>
+                                <div className="text-[10px] text-slate-500 font-medium">Active Referrals</div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            })}
+        </div>
+    );
+}
+
+function ReferralModalContent({ initialData }: any) {
+    const completed = initialData.registrations.filter((r: any) => r.status === 'completed').length;
+    const pending = initialData.registrations.length - completed;
+    const conversionRate = initialData.registrations.length > 0 ? Math.round((completed / initialData.registrations.length) * 100) : 0;
+
+    return (
+        <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+                <StatBox label="Live Stores" value={completed} icon={CheckCircle2} color="emerald" />
+                <StatBox label="Pending" value={pending} icon={Clock} color="blue" />
+            </div>
+            <div className="bg-blue-500/10 border border-blue-500/20 rounded-3xl p-6 text-center">
+                <div className="text-4xl font-black text-blue-400 mb-1">{conversionRate}%</div>
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Conversion Rate</div>
+                <p className="text-[11px] text-slate-500 mt-3 leading-relaxed">
+                    {conversionRate > 50 ? "You're doing great! Your referrals are highly likely to start a store." : "Keep following up with your pending registrations to boost your earnings!"}
+                </p>
+            </div>
+        </div>
+    );
+}
+
+function ActiveModalContent({ initialData }: any) {
+    const trialStores = initialData.stores.filter((s: any) => s.status === 'trial').length;
+    const paidStores = initialData.stores.length - trialStores;
+
+    return (
+        <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+                <StatBox label="Paid Subs" value={paidStores} icon={CreditCard} color="emerald" />
+                <StatBox label="On Trial" value={trialStores} icon={Zap} color="amber" />
+            </div>
+            <div className="bg-slate-800/30 border border-slate-800 rounded-3xl p-5 space-y-4">
+                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Quick Insight</h4>
+                <div className="flex items-start gap-4">
+                    <div className="w-10 h-10 bg-amber-500/10 rounded-2xl flex items-center justify-center flex-shrink-0">
+                        <AlertCircle className="w-5 h-5 text-amber-400" />
+                    </div>
+                    <p className="text-[11px] text-slate-400 leading-relaxed">
+                        You have <span className="text-white font-bold">{trialStores} stores</span> on trial. Remind them that their 50% lifetime discount is waiting for them if they subscribe before their trial ends!
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function EarningsModalContent({ initialData, formatCurrency }: any) {
+    const monthlyProjection = initialData.summary.totalWeeklyCommission * 4;
+    const yearlyProjection = monthlyProjection * 12;
+
+    return (
+        <div className="space-y-4">
+            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6 text-center">
+                <div className="text-3xl font-black text-emerald-400 mb-1">{formatCurrency(initialData.summary.totalWeeklyCommission)}</div>
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Current Weekly Income</div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-800/30 border border-slate-800 rounded-3xl p-5">
+                    <div className="text-[10px] font-bold text-slate-500 uppercase mb-1">Monthly (Est)</div>
+                    <div className="text-lg font-black text-white">{formatCurrency(monthlyProjection)}</div>
+                </div>
+                <div className="bg-slate-800/30 border border-slate-800 rounded-3xl p-5">
+                    <div className="text-[10px] font-bold text-slate-500 uppercase mb-1">Yearly (Est)</div>
+                    <div className="text-lg font-black text-white">{formatCurrency(yearlyProjection)}</div>
+                </div>
+            </div>
+            <p className="text-[10px] text-slate-500 text-center px-4 leading-relaxed">
+                *Projections are based on your current active stores and their subscription tiers. Earnings are paid out weekly.
+            </p>
+        </div>
+    );
+}
+
+function ViewsModalContent({ initialData }: any) {
+    return (
+        <div className="space-y-4">
+            <div className="bg-purple-500/10 border border-purple-500/20 rounded-3xl p-6 text-center">
+                <div className="text-4xl font-black text-purple-400 mb-1">{initialData.summary.totalViews.toLocaleString()}</div>
+                <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Weekly Traffic</div>
+            </div>
+            <div className="bg-slate-800/30 border border-slate-800 rounded-3xl p-5">
+                <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">Traffic Performance</h4>
+                <div className="space-y-4">
+                    {initialData.stores.slice(0, 3).map((s: any) => (
+                        <div key={s.id} className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-slate-800 rounded-lg flex items-center justify-center text-[10px] font-bold">
+                                    {s.name.charAt(0)}
+                                </div>
+                                <span className="text-xs font-bold text-slate-300">{s.name}</span>
+                            </div>
+                            <div className="text-xs font-black text-white">{s.weeklyPerformance.views.current.toLocaleString()} views</div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function StatBox({ label, value, icon: Icon, color }: any) {
+    const colors: any = {
+        emerald: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+        blue: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+        amber: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+    };
+
+    return (
+        <div className={`p-5 rounded-3xl border ${colors[color]} bg-slate-900/40`}>
+            <div className="flex items-center gap-2 mb-2">
+                <Icon className="w-4 h-4 opacity-60" />
+                <span className="text-[10px] font-bold uppercase tracking-wider opacity-60">{label}</span>
+            </div>
+            <div className="text-2xl font-black">{value}</div>
         </div>
     );
 }
@@ -242,7 +618,7 @@ function StoreCard({ store, formatCurrency }: { store: ReferralStoreStats, forma
                         <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-3 flex items-start gap-3">
                             <Info className="w-4 h-4 text-emerald-400 mt-0.5" />
                             <div className="text-[11px] text-emerald-100/80 leading-relaxed">
-                                You earn 20% of their weekly fee for 12 months.
+                                You earn commission on their weekly fee for 12 months.
                                 <br />
                                 <span className="text-emerald-400 font-bold">Commission Period Ends: {new Date(new Date(store.referralDate).setFullYear(new Date(store.referralDate).getFullYear() + 1)).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
                             </div>
@@ -297,6 +673,33 @@ function RegistrationCard({ reg }: any) {
             </div>
             <div className={`px-3 py-1 rounded-full text-[9px] font-black uppercase ${reg.status === 'completed' ? 'bg-emerald-500/20 text-emerald-400' : 'bg-blue-500/20 text-blue-400'}`}>
                 {reg.status === 'completed' ? 'Live' : 'Pending'}
+            </div>
+        </div>
+    );
+}
+
+function NotificationCard({ notif }: { notif: any }) {
+    const icons: any = {
+        registration: Users,
+        subscription: CreditCard,
+        milestone: Zap
+    };
+    const Icon = icons[notif.type] || Info;
+
+    return (
+        <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-4 flex items-start gap-4">
+            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 ${notif.type === 'registration' ? 'bg-blue-500/10 text-blue-400' :
+                    notif.type === 'subscription' ? 'bg-emerald-500/10 text-emerald-400' :
+                        'bg-amber-500/10 text-amber-400'
+                }`}>
+                <Icon className="w-5 h-5" />
+            </div>
+            <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between mb-1">
+                    <h4 className="text-xs font-black text-white uppercase tracking-tight">{notif.title}</h4>
+                    <span className="text-[9px] text-slate-500">{new Date(notif.timestamp).toLocaleDateString()}</span>
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">{notif.message}</p>
             </div>
         </div>
     );

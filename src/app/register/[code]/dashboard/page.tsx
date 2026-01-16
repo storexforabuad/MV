@@ -5,6 +5,7 @@ import { Metadata } from 'next';
 export const metadata: Metadata = {
     title: 'Referral Dashboard | ATLAS™',
     description: 'Track your referrals and earnings on ATLAS™.',
+    manifest: '/referral-manifest.json',
 };
 
 export default async function ReferralDashboardPage({ params }: { params: { code: string } }) {

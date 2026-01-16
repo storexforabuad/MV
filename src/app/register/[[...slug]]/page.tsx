@@ -380,6 +380,24 @@ export default function RegisterPage({ params }: { params: { slug?: string[] } }
                 </div>
             </div>
 
+            {formData.referralCode && (
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 mb-8 flex items-center gap-4 text-left"
+                >
+                    <div className="w-12 h-12 bg-emerald-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/20 flex-shrink-0">
+                        <Zap className="w-6 h-6 text-white fill-white" />
+                    </div>
+                    <div>
+                        <h3 className="text-sm font-black text-emerald-400 uppercase tracking-tight">Referral Bonus Applied!</h3>
+                        <p className="text-[11px] text-emerald-100/80 leading-tight">
+                            You get a <span className="text-white font-bold">14-Day Free Trial</span> + <span className="text-white font-bold">50% Lifetime Discount</span> on all plans.
+                        </p>
+                    </div>
+                </motion.div>
+            )}
+
             <div className="space-y-3 mt-8">
                 <button
                     onClick={() => setStep(2)}
