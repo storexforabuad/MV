@@ -45,6 +45,15 @@ export interface ReferralStoreStats {
     whatsapp: string;
 }
 
+export interface ReferralRegistration {
+    id: string;
+    businessName: string;
+    storeType: string;
+    status: string;
+    createdAt: string;
+    referralCode: string;
+}
+
 export interface ReferralDashboardData {
     referralCode: string;
     summary: {
@@ -59,7 +68,7 @@ export interface ReferralDashboardData {
         nextTierThreshold: number | null;
         progress: number; // 0 to 100
     };
-    registrations: any[];
+    registrations: ReferralRegistration[];
     stores: ReferralStoreStats[];
     notifications: ReferralNotification[];
 }
@@ -72,15 +81,21 @@ export async function getReferralDashboardData(referralCode: string): Promise<Re
             where('referralCode', '==', referralCode)
         );
         const regsSnapshot = await getDocs(regsQuery);
-        const registrations = regsSnapshot.docs
-            .map(doc => ({
-                id: doc.id,
-                ...doc.data(),
-                createdAt: (doc.data().createdAt as Timestamp)?.toDate().toISOString()
-            }))
+        const registrations: ReferralRegistration[] = regsSnapshot.docs
+            .map(doc => {
+                const data = doc.data();
+                return {
+                    id: doc.id,
+                    businessName: data.businessName || 'Unknown Business',
+                    storeType: data.storeType || 'General',
+                    status: data.status || 'pending',
+                    referralCode: data.referralCode || '',
+                    createdAt: (data.createdAt as Timestamp)?.toDate().toISOString() || new Date().toISOString()
+                };
+            })
             .sort((a, b) => {
-                const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-                const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+                const dateA = new Date(a.createdAt).getTime();
+                const dateB = new Date(b.createdAt).getTime();
                 return dateB - dateA;
             });
 

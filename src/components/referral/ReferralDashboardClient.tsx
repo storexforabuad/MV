@@ -23,7 +23,7 @@ import {
     BarChart3,
     Calendar
 } from 'lucide-react';
-import { ReferralDashboardData, ReferralStoreStats } from '@/app/actions/referralActions';
+import { ReferralDashboardData, ReferralStoreStats, ReferralRegistration } from '@/app/actions/referralActions';
 import { PerformanceChart, MiniTrendChart } from './ReferralCharts';
 import Image from 'next/image';
 
@@ -113,8 +113,8 @@ export default function ReferralDashboardClient({ initialData }: ReferralDashboa
                             <span className="text-emerald-400 text-xs font-black uppercase">{initialData.referralCode}</span>
                         </div>
                         <div className={`px-3 py-1.5 rounded-full text-[10px] font-black uppercase border ${initialData.tier.name === 'Elite' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                                initialData.tier.name === 'Pro' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
-                                    'bg-slate-500/10 text-slate-400 border-slate-500/20'
+                            initialData.tier.name === 'Pro' ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' :
+                                'bg-slate-500/10 text-slate-400 border-slate-500/20'
                             }`}>
                             {initialData.tier.name} Tier
                         </div>
@@ -671,7 +671,7 @@ function PerformanceMetric({ label, current, trend }: any) {
     );
 }
 
-function RegistrationCard({ reg }: any) {
+function RegistrationCard({ reg }: { reg: ReferralRegistration }) {
     return (
         <div className="bg-slate-900/40 border border-slate-800 rounded-3xl p-4 flex items-center gap-4">
             <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center border border-slate-700">
