@@ -22,7 +22,7 @@ export interface Registration {
     storeType: string;
     subscriptionTier: string;
     amountPaid: number;
-    status: 'pending' | 'completed';
+    status: 'pending' | 'completed' | 'active' | 'trial';
     createdAt: any;
     country?: string;
     state?: string;
@@ -148,7 +148,7 @@ export default function RegistrationDetailsModal({
                                         <div className="flex justify-between items-center">
                                             <span className="text-sm text-emerald-700 dark:text-emerald-300">Plan</span>
                                             <span className="px-2 py-1 bg-emerald-200 dark:bg-emerald-800 text-emerald-900 dark:text-white text-xs font-bold rounded uppercase">
-                                                {registration.subscriptionTier}
+                                                {registration.status === 'trial' ? 'Free Trial' : registration.subscriptionTier}
                                             </span>
                                         </div>
                                         <div className="pt-4 border-t border-emerald-200 dark:border-emerald-800/30">

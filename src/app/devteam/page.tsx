@@ -567,7 +567,7 @@ export default function DevteamPage() {
                         <div className="flex justify-between items-start mb-2">
                           <h3 className="text-xl font-bold text-gray-900 dark:text-white">{reg.businessName}</h3>
                           <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-bold uppercase">
-                            {reg.subscriptionTier} Plan
+                            {reg.status === 'trial' ? 'Free Trial' : `${reg.subscriptionTier} Plan`}
                           </span>
                         </div>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mb-1">CEO: <span className="font-medium text-gray-700 dark:text-gray-300">{reg.ceoName}</span></p>
