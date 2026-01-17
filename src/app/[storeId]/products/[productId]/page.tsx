@@ -382,14 +382,16 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
             ) : (
               <>
                 <h1 className="text-2xl sm:text-3xl font-bold card-text-gradient mb-4">{product.name}</h1>
-                {/* Price and Discount */}
-                <div className="flex items-center gap-3 mb-6 overflow-x-auto scrollbar-hide py-1">
-                  <p className="text-2xl font-semibold card-text-gradient whitespace-nowrap">{formatPrice(product.price)}</p>
-                  {discount && typeof product.originalPrice === 'number' && (
-                    <p className="text-lg text-gray-500 dark:text-gray-400 line-through whitespace-nowrap">{formatPrice(product.originalPrice)}</p>
-                  )}
 
-                  <div className="flex items-center gap-2 flex-nowrap shrink-0">
+                <div className="mb-6">
+                  <div className="flex items-center gap-3 mb-3">
+                    <p className="text-2xl font-semibold card-text-gradient">{formatPrice(product.price)}</p>
+                    {discount && typeof product.originalPrice === 'number' && (
+                      <p className="text-lg text-gray-500 dark:text-gray-400 line-through">{formatPrice(product.originalPrice)}</p>
+                    )}
+                  </div>
+
+                  <div className="flex items-center gap-2 flex-wrap">
                     {discount && typeof product.originalPrice === 'number' && (
                       <div className="badge-wrapper inline-flex">
                         <span className="product-badge bg-[var(--badge-green-bg)] text-[var(--badge-green-text)] whitespace-nowrap">
