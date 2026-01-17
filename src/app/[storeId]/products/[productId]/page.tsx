@@ -397,7 +397,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                     )}
                     {(isGeneralProduct(product) || isFashionProduct(product) || isLivestockProduct(product)) && product.limitedStock && (
                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-[var(--badge-yellow-bg)] text-[var(--badge-yellow-text)] shadow-sm whitespace-nowrap">
-                        ⚠️ Limited Stock
+                        Limited Stock
                       </span>
                     )}
                   </div>
