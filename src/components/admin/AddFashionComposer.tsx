@@ -7,6 +7,7 @@ import { Product, FashionProduct } from '../../types/product';
 import { addProduct } from '../../lib/db';
 import { uploadImageToCloudinary } from '../../lib/cloudinaryClient';
 import { compressImage } from '../../utils/imageCompression';
+import { applyWatermark } from '../../utils/watermark';
 import { formatPrice } from '../../utils/price';
 import CategorySelectorModal from './modals/CategorySelectorModal';
 import { NIGERIAN_SIZE_CHART, EUROPEAN_SHOE_CHART, FashionSizeCategory, getSizesForFashionCategory } from '../../utils/sizeUtils';
@@ -70,6 +71,8 @@ interface AddFashionComposerProps {
     categories: { id: string; name: string }[];
     onProductAdded: () => void;
     onAddCategory: (name: string) => Promise<void>;
+    storeName: string;
+    instagramHandle?: string;
 }
 
 // --- HELPER COMPONENTS ---
@@ -120,8 +123,9 @@ const PRESET_COLORS = [
 
 // --- MAIN COMPOSER COMPONENT ---
 
-const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose, storeId, categories, onProductAdded, onAddCategory }) => {
+const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose, storeId, categories, onProductAdded, onAddCategory, storeName, instagramHandle }) => {
     const [currentStep, setCurrentStep] = useState(0); // 0: Details, 1: Variants, 2: Pricing, 3: Review, 4: Uploading, 5: Summary
+    const [useWatermark, setUseWatermark] = useState(true);
     const [productData, setProductData] = useState<BatchFashionProduct>({
         id: Date.now().toString(),
         name: '',
@@ -281,10 +285,34 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                     const progressId = `${color.id}-${i}`;
 
                     setUploadProgress(prev => prev.map(p => p.id === progressId ? { ...p, status: 'compressing', statusText: 'Compressing...' } : p));
-                    const compressedFile = await compressImage(file);
+                    let processedFile = await compressImage(file);
+
+                    if (useWatermark) {
+                        setUploadProgress(prev => prev.map(p => p.id === progressId ? { ...p, status: 'compressing', statusText: 'Watermarking...' } : p));
+                        try {
+                            let watermarkText = '';
+                            if (instagramHandle) {
+                                const cleanHandle = instagramHandle.startsWith('@') ? instagramHandle : `@${instagramHandle}`;
+                                watermarkText = `${cleanHandle} | ATLAS™ Verified`;
+                            } else {
+                                // Format store name: Replace dots with spaces, capitalize each word
+                                const formattedName = storeName
+                                    .replace(/\./g, ' ')
+                                    .split(' ')
+                                    .filter(Boolean)
+                                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                                    .join(' ');
+                                watermarkText = `${formattedName} | ATLAS™ Verified`;
+                            }
+                            processedFile = await applyWatermark(processedFile, watermarkText);
+                        } catch (err) {
+                            console.error('Watermarking failed:', err);
+                            // Continue with compressed file if watermarking fails
+                        }
+                    }
 
                     setUploadProgress(prev => prev.map(p => p.id === progressId ? { ...p, status: 'uploading', statusText: 'Uploading...' } : p));
-                    const imageUrl = await uploadImageToCloudinary(compressedFile, storeId);
+                    const imageUrl = await uploadImageToCloudinary(processedFile, storeId);
 
                     setUploadProgress(prev => prev.map(p => p.id === progressId ? { ...p, status: 'success', statusText: 'Success!', imageUrl } : p));
                     uploadedImages.push(imageUrl);
@@ -585,6 +613,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                         </div>
 
                         <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-700">
+                            <ModernToggle label="Watermark Images" description="Add store name & Atlas verified to images" checked={useWatermark} onChange={setUseWatermark} />
                             <ModernToggle label="Limited Stock" description="Show 'Low Stock' badge to customers" checked={productData.limitedStock} onChange={checked => handleProductChange('limitedStock', checked)} />
                             <ModernToggle label="Sold Out" description="Mark as currently unavailable" checked={productData.soldOut} onChange={checked => handleProductChange('soldOut', checked)} />
                         </div>

@@ -491,6 +491,8 @@ export default function AdminStorePageClient({
           categories={categories}
           onProductAdded={() => fetchData()}
           onAddCategory={handleAddCategory}
+          storeName={storeMeta?.name || ''}
+          instagramHandle={storeMeta?.businessInstagram}
         />
       ) : storeMeta?.storeType === 'restaurant' ? (
         <AddMenuComposer
