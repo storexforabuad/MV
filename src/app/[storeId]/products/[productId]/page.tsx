@@ -381,23 +381,26 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
               </div>
             ) : (
               <>
-                {(isGeneralProduct(product) || isFashionProduct(product) || isLivestockProduct(product)) && product.limitedStock && (
-                  <div className="mb-4">
-                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[var(--badge-yellow-bg)] text-[var(--badge-yellow-text)] shadow-sm">
-                      ⚠️ Limited Stock
-                    </span>
-                  </div>
-                )}
                 <h1 className="text-2xl sm:text-3xl font-bold card-text-gradient mb-4">{product.name}</h1>
                 {/* Price and Discount */}
-                <div className="flex items-center gap-3 mb-6">
-                  <p className="text-2xl font-semibold card-text-gradient">{formatPrice(product.price)}</p>
+                <div className="flex items-center gap-3 mb-6 overflow-x-auto scrollbar-hide py-1">
+                  <p className="text-2xl font-semibold card-text-gradient whitespace-nowrap">{formatPrice(product.price)}</p>
                   {discount && typeof product.originalPrice === 'number' && (
-                    <>
-                      <p className="text-lg text-gray-500 dark:text-gray-400 line-through">{formatPrice(product.originalPrice)}</p>
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border border-gray-200 bg-[var(--badge-green-bg)] text-[var(--badge-green-text)]">{discount}% OFF</span>
-                    </>
+                    <p className="text-lg text-gray-500 dark:text-gray-400 line-through whitespace-nowrap">{formatPrice(product.originalPrice)}</p>
                   )}
+
+                  <div className="flex items-center gap-2 flex-nowrap shrink-0">
+                    {discount && typeof product.originalPrice === 'number' && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold border border-gray-200 bg-[var(--badge-green-bg)] text-[var(--badge-green-text)] whitespace-nowrap">
+                        {discount}% OFF
+                      </span>
+                    )}
+                    {(isGeneralProduct(product) || isFashionProduct(product) || isLivestockProduct(product)) && product.limitedStock && (
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-[var(--badge-yellow-bg)] text-[var(--badge-yellow-text)] shadow-sm whitespace-nowrap">
+                        ⚠️ Limited Stock
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 {/* FASHION PRODUCT UI */}
