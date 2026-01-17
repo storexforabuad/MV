@@ -19,7 +19,7 @@ import CustomerLookupModal from '@/components/customer/CustomerLookupModal';
 import OrderSummaryModal from '@/components/modals/OrderSummaryModal';
 import toast from 'react-hot-toast';
 import VehicleDetailPage from '@/components/products/VehicleDetailPage';
-import { ensureProductType, isFashionProduct, isGeneralProduct, isVehicleProduct, isFoodBeverageProduct } from '@/utils/productHelpers';
+import { ensureProductType, isFashionProduct, isGeneralProduct, isVehicleProduct, isFoodBeverageProduct, isLivestockProduct } from '@/utils/productHelpers';
 import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
 import SizeSelector from '@/components/products/SizeSelector';
 import { SizePreferencesCache } from '@/lib/sizePreferencesCache';
@@ -381,6 +381,13 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
               </div>
             ) : (
               <>
+                {(isGeneralProduct(product) || isFashionProduct(product) || isLivestockProduct(product)) && product.limitedStock && (
+                  <div className="mb-4">
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-[var(--badge-yellow-bg)] text-[var(--badge-yellow-text)] shadow-sm">
+                      ⚠️ Limited Stock
+                    </span>
+                  </div>
+                )}
                 <h1 className="text-2xl sm:text-3xl font-bold card-text-gradient mb-4">{product.name}</h1>
                 {/* Price and Discount */}
                 <div className="flex items-center gap-3 mb-6">

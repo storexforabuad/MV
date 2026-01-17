@@ -52,26 +52,17 @@ export default function ProductCard({ product, storeId, activeCategoryId }: Prod
 
   const discount = calculateDiscount(product.price, product.originalPrice);
   const isSoldOut = (() => {
-    if (isGeneralProduct(product)) {
-      return product.soldOut;
-    }
-    if (isFashionProduct(product)) {
-      return product.soldOut;
-    }
-    if (isVehicleProduct(product)) {
-      return !product.available;
-    }
-    if (isLivestockProduct(product)) {
-      return !product.inStock;
-    }
-    if (isFoodBeverageProduct(product)) {
-      return !product.available;
-    }
-    // Fallback for safety
+    if (isGeneralProduct(product)) return !!product.soldOut;
+    if (isFashionProduct(product)) return !!product.soldOut;
+    if (isVehicleProduct(product)) return !product.available;
+    if (isLivestockProduct(product)) return !product.available || !!product.soldOut;
+    if (isFoodBeverageProduct(product)) return !product.available || !!product.soldOut;
     return false;
   })();
 
-  const isLimitedStock = isGeneralProduct(product) ? product.limitedStock : false;
+  const isLimitedStock = (isGeneralProduct(product) || isFashionProduct(product) || isLivestockProduct(product))
+    ? !!product.limitedStock
+    : false;
 
   const handleImageError = () => {
     if (imgSrc !== DEFAULT_IMAGES.medium) {
