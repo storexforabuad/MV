@@ -384,22 +384,19 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                 <h1 className="text-2xl sm:text-3xl font-bold card-text-gradient mb-4">{product.name}</h1>
 
                 <div className="mb-6">
-                  <div className="flex items-center gap-3 mb-3">
+                  <div className="flex items-center gap-3 mb-3 flex-wrap">
                     <p className="text-2xl font-semibold card-text-gradient">{formatPrice(product.price)}</p>
                     {discount && typeof product.originalPrice === 'number' && (
-                      <p className="text-lg text-gray-500 dark:text-gray-400 line-through">{formatPrice(product.originalPrice)}</p>
+                      <>
+                        <p className="text-lg text-gray-500 dark:text-gray-400 line-through">{formatPrice(product.originalPrice)}</p>
+                        <div className="badge-wrapper inline-flex">
+                          <span className="product-badge bg-[var(--badge-green-bg)] text-[var(--badge-green-text)] whitespace-nowrap">
+                            {discount}% OFF
+                          </span>
+                        </div>
+                      </>
                     )}
-                  </div>
-
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {discount && typeof product.originalPrice === 'number' && (
-                      <div className="badge-wrapper inline-flex">
-                        <span className="product-badge bg-[var(--badge-green-bg)] text-[var(--badge-green-text)] whitespace-nowrap">
-                          {discount}% OFF
-                        </span>
-                      </div>
-                    )}
-                    {(isGeneralProduct(product) || isFashionProduct(product) || isLivestockProduct(product)) && product.limitedStock && (
+                    {!discount && (isGeneralProduct(product) || isFashionProduct(product) || isLivestockProduct(product)) && product.limitedStock && (
                       <div className="badge-wrapper inline-flex">
                         <span className="product-badge bg-[var(--badge-yellow-bg)] text-[var(--badge-yellow-text)] whitespace-nowrap">
                           Limited Stock
@@ -407,6 +404,14 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                       </div>
                     )}
                   </div>
+
+                  {discount && (isGeneralProduct(product) || isFashionProduct(product) || isLivestockProduct(product)) && product.limitedStock && (
+                    <div className="badge-wrapper inline-flex">
+                      <span className="product-badge bg-[var(--badge-yellow-bg)] text-[var(--badge-yellow-text)] whitespace-nowrap">
+                        Limited Stock
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* FASHION PRODUCT UI */}
