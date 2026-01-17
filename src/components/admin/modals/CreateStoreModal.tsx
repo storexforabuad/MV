@@ -13,6 +13,9 @@ import {
   updateDoc,
   writeBatch,
   serverTimestamp,
+  query,
+  where,
+  getDocs,
 } from "firebase/firestore";
 import { uploadImageToCloudinary } from "../../../lib/cloudinaryClient";
 import { compressImage } from "../../../utils/imageCompression";
@@ -92,7 +95,7 @@ export default function CreateStoreModal({
         ceoName: initialData.ceoName || "",
         ceoEmail: initialData.ceoEmail || "",
         ceoPhone: initialData.ceoPhone || "",
-        storeType: initialData.storeType || "general",
+        storeType: initialData.storeType?.trim() || "general",
         businessDescription: initialData.businessDescription || "",
         country: initialData.country || "",
         state: initialData.state || "",
@@ -157,8 +160,25 @@ export default function CreateStoreModal({
       }
 
       // Generate Store ID
-      const storeRef = doc(collection(db, 'stores'));
-      const storeId = storeRef.id;
+      const slugify = (text: string) => {
+        return text
+          .toString()
+          .toLowerCase()
+          .trim()
+          .replace(/\s+/g, '-')
+          .replace(/[^\w\-]+/g, '')
+          .replace(/\-\-+/g, '-');
+      };
+
+      const baseId = slugify(formData.name || "new-store");
+      // Check if store ID exists, if so append a short random string
+      let storeId = baseId;
+      const storeDoc = await getDocs(query(collection(db, 'stores'), where('id', '==', storeId)));
+      if (!storeDoc.empty) {
+        storeId = `${baseId}-${Math.random().toString(36).substring(2, 7)}`;
+      }
+
+      const storeRef = doc(db, 'stores', storeId);
 
       // Determine Subscription Status
       const isPaidRegistration = (initialData?.amountPaid || 0) > 0;
@@ -168,14 +188,22 @@ export default function CreateStoreModal({
       const finalFormData = {
         ...formData,
         id: storeId,
+        storeType: (formData.storeType || 'general').trim(),
         logo: logoUrl,
         ceoImage: logoUrl, // Keep for backward compatibility or if needed
         name: formData.name ?? "Default Store Name",
         whatsapp: formData.whatsapp ?? "",
 
+        // Stats & Status
+        totalViews: 0,
+        totalOrders: 0,
+        totalCommissionEarned: 0,
+        hasCompletedOnboarding: true,
+        fcmToken: initialData?.fcmToken || "",
+
         // Subscription Logic
         subscriptionStatus,
-        subscriptionTier: initialData?.subscriptionTier || formData.storeType === 'general' ? 'general' : 'basic', // Default tier if not specified
+        subscriptionTier: initialData?.subscriptionTier || (formData.storeType?.trim() === 'general' ? 'general' : 'basic'),
         subscriptionStartDate: serverTimestamp(),
         trialEndsAt: trialEndsAt,
         subscriptionPlanCode: isPaidRegistration ? 'paid_registration' : 'manual_trial',
