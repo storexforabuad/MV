@@ -391,14 +391,18 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
 
                   <div className="flex items-center gap-2 flex-nowrap shrink-0">
                     {discount && typeof product.originalPrice === 'number' && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold border border-gray-200 bg-[var(--badge-green-bg)] text-[var(--badge-green-text)] whitespace-nowrap">
-                        {discount}% OFF
-                      </span>
+                      <div className="badge-wrapper inline-flex">
+                        <span className="product-badge bg-[var(--badge-green-bg)] text-[var(--badge-green-text)] whitespace-nowrap">
+                          {discount}% OFF
+                        </span>
+                      </div>
                     )}
                     {(isGeneralProduct(product) || isFashionProduct(product) || isLivestockProduct(product)) && product.limitedStock && (
-                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-[var(--badge-yellow-bg)] text-[var(--badge-yellow-text)] shadow-sm whitespace-nowrap">
-                        Limited Stock
-                      </span>
+                      <div className="badge-wrapper inline-flex">
+                        <span className="product-badge bg-[var(--badge-yellow-bg)] text-[var(--badge-yellow-text)] whitespace-nowrap">
+                          Limited Stock
+                        </span>
+                      </div>
                     )}
                   </div>
                 </div>
