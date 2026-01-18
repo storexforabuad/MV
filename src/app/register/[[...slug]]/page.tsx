@@ -356,10 +356,10 @@ export default function RegisterPage({ params }: { params: { slug?: string[] } }
                 />
             </div>
             <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight">
-                Launch Your<br />Business Empire
+                Build Your<br />Business Empire
             </h1>
             <p className="text-lg text-slate-400 max-w-md mx-auto leading-relaxed">
-                Start selling in minutes. Manage everything from your phone.
+                Start selling in minutes. Manage your entire business from your phone.
                 <br />
                 <span className="text-emerald-400 font-bold">Join 5,000+ Nigerian businesses.</span>
             </p>
@@ -403,7 +403,7 @@ export default function RegisterPage({ params }: { params: { slug?: string[] } }
                     onClick={() => setStep(2)}
                     className="w-full py-4 bg-white text-slate-900 rounded-2xl font-black text-lg hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-white/10"
                 >
-                    Start Selling for Free
+                    Start My Empire (Free)
                 </button>
                 <div className="flex items-center justify-center gap-2 text-xs font-medium text-emerald-400/80 animate-pulse">
                     <Sparkles className="w-3 h-3" />
