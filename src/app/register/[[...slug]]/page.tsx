@@ -10,7 +10,7 @@ import {
     Sparkles, CreditCard, Upload, Store, ShoppingBag,
     UtensilsCrossed, Shirt, Car, Fish, Globe, Laptop,
     PartyPopper, GraduationCap, Bot, Tag, ArrowRight,
-    MessageCircle, Smartphone, Wrench, Instagram, Zap, ChevronDown
+    MessageCircle, Smartphone, Wrench, Instagram, Zap, ChevronDown, Clock
 } from 'lucide-react';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
@@ -184,11 +184,22 @@ export default function RegisterPage({ params }: { params: { slug?: string[] } }
     const [step, setStep] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
+    const [visibleChecklistItems, setVisibleChecklistItems] = useState(0);
     const mainRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
         if (mainRef.current) {
             mainRef.current.scrollTop = 0;
+        }
+
+        if (step === 5) {
+            setVisibleChecklistItems(0);
+            const timers = [
+                setTimeout(() => setVisibleChecklistItems(1), 800),
+                setTimeout(() => setVisibleChecklistItems(2), 1600),
+                setTimeout(() => setVisibleChecklistItems(3), 2400),
+            ];
+            return () => timers.forEach(clearTimeout);
         }
     }, [step]);
 
@@ -420,7 +431,8 @@ export default function RegisterPage({ params }: { params: { slug?: string[] } }
                 <p className="text-slate-400 text-sm">This takes less than 2 minutes.</p>
             </div>
 
-            {/* Image Upload */}
+            {/* Image Upload - Hidden for now */}
+            {/* 
             <div
                 onClick={() => fileInputRef.current?.click()}
                 className="w-32 h-32 mx-auto rounded-full border-2 border-dashed border-slate-700 hover:border-emerald-500 transition-colors flex items-center justify-center cursor-pointer overflow-hidden relative group bg-slate-900/50"
@@ -435,6 +447,7 @@ export default function RegisterPage({ params }: { params: { slug?: string[] } }
                 )}
                 <input type="file" ref={fileInputRef} onChange={handleImageChange} className="hidden" accept="image/*" />
             </div>
+            */}
 
             <div className="space-y-4 pt-4">
                 <div className="grid grid-cols-1 gap-4">
@@ -764,6 +777,51 @@ export default function RegisterPage({ params }: { params: { slug?: string[] } }
                             <p className="text-sm font-bold text-white">Setting up store...</p>
                             <p className="text-xs text-slate-500">Usually takes ~24 hours</p>
                         </div>
+                    </div>
+
+                    {/* Animated Checklist */}
+                    <div className="space-y-3 pt-2">
+                        <AnimatePresence>
+                            {visibleChecklistItems >= 1 && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="flex items-center gap-3 text-left"
+                                >
+                                    <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                    </div>
+                                    <p className="text-xs font-medium text-slate-300">Domain Name Secured</p>
+                                </motion.div>
+                            )}
+                            {visibleChecklistItems >= 2 && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="flex items-center gap-3 text-left"
+                                >
+                                    <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0">
+                                        <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                    </div>
+                                    <p className="text-xs font-medium text-slate-300">WhatsApp Order Syncing...</p>
+                                </motion.div>
+                            )}
+                            {visibleChecklistItems >= 3 && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="flex items-center gap-3 text-left"
+                                >
+                                    <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center flex-shrink-0">
+                                        <Clock className="w-4 h-4 text-amber-500 animate-pulse" />
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="text-xs font-bold text-white">Expert Review</p>
+                                        <p className="text-[10px] text-slate-500 leading-tight">Our team is verifying your store for 100% uptime.</p>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
                     </div>
 
                     <div className="pt-4 border-t border-slate-800">
