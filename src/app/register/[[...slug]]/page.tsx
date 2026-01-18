@@ -202,7 +202,7 @@ export default function RegisterPage({ params }: { params: { slug?: string[] } }
         businessName: '',
         businessPhone: '',
         businessDescription: '',
-        country: 'Nigeria',
+        country: 'Morocco',
         state: '',
         storeType: 'general',
         subscriptionTier: null,
@@ -533,7 +533,7 @@ export default function RegisterPage({ params }: { params: { slug?: string[] } }
 
             <button
                 onClick={() => {
-                    if (formData.businessName && formData.businessPhone) setStep(3);
+                    if (formData.businessName && formData.businessPhone) setStep(4);
                     else alert('Please fill in all required fields');
                 }}
                 className="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold mt-8 hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-500/20"
@@ -580,7 +580,7 @@ export default function RegisterPage({ params }: { params: { slug?: string[] } }
             </div>
 
             <button
-                onClick={() => setStep(4)}
+                onClick={() => setStep(3)}
                 className="w-full py-4 bg-emerald-600 text-white rounded-xl font-bold mt-4 hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
             >
                 Continue
@@ -835,8 +835,8 @@ export default function RegisterPage({ params }: { params: { slug?: string[] } }
 
                         <AnimatePresence mode="wait">
                             {step === 1 && renderStep1_Welcome()}
-                            {step === 2 && renderStep2_Details()}
-                            {step === 3 && renderStep3_StoreType()}
+                            {step === 2 && renderStep3_StoreType()}
+                            {step === 3 && renderStep2_Details()}
                             {step === 4 && renderStep4_Subscription()}
                             {step === 5 && renderStep5_Success()}
                         </AnimatePresence>
