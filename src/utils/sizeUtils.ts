@@ -1,5 +1,5 @@
 // Fashion size category type
-export type FashionSizeCategory = 'clothing' | 'shoes';
+export type FashionSizeCategory = 'clothing' | 'shoes' | 'caps';
 
 // Nigerian/UK Standard Clothing Sizes (6-20)
 export const NIGERIAN_SIZE_CHART = [
@@ -26,9 +26,17 @@ export const EUROPEAN_SHOE_CHART = [
     { size: '46', footLength: 29.5 },
 ];
 
+// Nigerian Cap Sizes (20-25.5)
+export const NIGERIAN_CAP_SIZE_CHART = [
+    { size: '20' }, { size: '20.5' }, { size: '21' }, { size: '21.5' },
+    { size: '22' }, { size: '22.5' }, { size: '23' }, { size: '23.5' },
+    { size: '24' }, { size: '24.5' }, { size: '25' }, { size: '25.5' },
+];
+
 // Helper to get sizes for a given fashion category
 export const getSizesForFashionCategory = (category: FashionSizeCategory): string[] => {
-    return category === 'clothing'
-        ? NIGERIAN_SIZE_CHART.map(item => item.size)
-        : EUROPEAN_SHOE_CHART.map(item => item.size);
+    if (category === 'clothing') return NIGERIAN_SIZE_CHART.map(item => item.size);
+    if (category === 'shoes') return EUROPEAN_SHOE_CHART.map(item => item.size);
+    if (category === 'caps') return NIGERIAN_CAP_SIZE_CHART.map(item => item.size);
+    return [];
 };
