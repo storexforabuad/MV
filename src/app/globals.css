@@ -9,6 +9,29 @@
 .pb-safe-area-inset-bottom {
   padding-bottom: calc(1rem + var(--safe-area-inset-bottom));
 }
+
+/* Platform Protection & Native Feel */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
+input, textarea, [contenteditable="true"] {
+  user-select: text !important;
+  -webkit-touch-callout: default !important;
+}
+
+img {
+  -webkit-user-drag: none;
+  pointer-events: none; /* Deter long-press on images */
+}
+
+/* Allow pointer events on interactive elements inside images if any, 
+   but generally we want to protect the image itself */
+a img, button img {
+  pointer-events: auto;
+}
 :root {
   /* ... existing variables ... */
   --navbar-bg-rgb: 255, 255, 255; /* for light mode */
