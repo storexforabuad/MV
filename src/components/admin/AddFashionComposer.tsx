@@ -10,7 +10,7 @@ import { compressImage } from '../../utils/imageCompression';
 import { applyWatermark } from '../../utils/watermark';
 import { formatPrice } from '../../utils/price';
 import CategorySelectorModal from './modals/CategorySelectorModal';
-import { NIGERIAN_SIZE_CHART, EUROPEAN_SHOE_CHART, FashionSizeCategory, getSizesForFashionCategory } from '../../utils/sizeUtils';
+import { NIGERIAN_SIZE_CHART, EUROPEAN_SHOE_CHART, NIGERIAN_CAP_SIZE_CHART, JALLAB_SIZE_CHART, FashionSizeCategory, getSizesForFashionCategory } from '../../utils/sizeUtils';
 import {
     X,
     Shirt,
@@ -351,7 +351,9 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                         ? 'nigerian-standard' as const
                         : productData.sizeCategory === 'shoes'
                             ? 'european-shoe' as const
-                            : 'nigerian-cap' as const
+                            : productData.sizeCategory === 'caps'
+                                ? 'nigerian-cap' as const
+                                : 'jallab-standard' as const
                 },
                 limitedStock: productData.limitedStock,
                 soldOut: productData.soldOut,
@@ -548,42 +550,54 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                             </div>
 
                             {/* Size Category Toggle */}
-                            <div className="flex gap-2">
+                            <div className="flex flex-wrap gap-2">
                                 <button
                                     onClick={() => {
                                         handleProductChange('sizeCategory', 'clothing');
-                                        handleProductChange('sizes', []); // Reset sizes when switching
+                                        handleProductChange('sizes', []);
                                     }}
                                     className={`flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'clothing'
                                         ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
                                         : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
                                         }`}
                                 >
-                                    <Shirt className="w-4 h-4" /> Clothing
+                                    Clothing
                                 </button>
                                 <button
                                     onClick={() => {
                                         handleProductChange('sizeCategory', 'shoes');
-                                        handleProductChange('sizes', []); // Reset sizes when switching
+                                        handleProductChange('sizes', []);
                                     }}
                                     className={`flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'shoes'
                                         ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
                                         : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
                                         }`}
                                 >
-                                    👟 Shoes
+                                    Shoes
                                 </button>
                                 <button
                                     onClick={() => {
                                         handleProductChange('sizeCategory', 'caps');
-                                        handleProductChange('sizes', []); // Reset sizes when switching
+                                        handleProductChange('sizes', []);
                                     }}
                                     className={`flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'caps'
                                         ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
                                         : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
                                         }`}
                                 >
-                                    🎓 Caps
+                                    Caps
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        handleProductChange('sizeCategory', 'jallabs');
+                                        handleProductChange('sizes', []);
+                                    }}
+                                    className={`flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'jallabs'
+                                        ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
+                                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
+                                        }`}
+                                >
+                                    Jallabs
                                 </button>
                             </div>
 
@@ -611,7 +625,9 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                         ? 'Standard Nigerian/UK sizing'
                                         : productData.sizeCategory === 'shoes'
                                             ? 'European shoe sizing'
-                                            : 'Nigerian cap sizing (circumference in inches)'
+                                            : productData.sizeCategory === 'caps'
+                                                ? 'Nigerian cap sizing (circumference in inches)'
+                                                : 'Jallab sizing (52-62)'
                                 }
                             </p>
                         </div>
@@ -860,7 +876,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                 >
                                     <div className="flex justify-between items-center mb-4">
                                         <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                                            {productData.sizeCategory === 'clothing' ? 'Size Guide (UK/NG)' : 'Shoe Size Guide (EU)'}
+                                            {productData.sizeCategory === 'clothing' ? 'Size Guide (UK/NG)' : productData.sizeCategory === 'shoes' ? 'Shoe Size Guide (EU)' : productData.sizeCategory === 'caps' ? 'Cap Size Guide (NG)' : 'Jallab Size Guide'}
                                         </h3>
                                         <button onClick={() => setSizeGuideOpen(false)} className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
                                             <X className="w-5 h-5 text-slate-500" />
@@ -882,7 +898,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                                     </div>
                                                 ))}
                                             </>
-                                        ) : (
+                                        ) : productData.sizeCategory === 'shoes' ? (
                                             <>
                                                 <div className="grid grid-cols-2 gap-2 text-sm font-medium text-slate-500 border-b border-slate-200 dark:border-slate-700 pb-2">
                                                     <span>Size (EU)</span>
@@ -895,11 +911,37 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                                     </div>
                                                 ))}
                                             </>
+                                        ) : productData.sizeCategory === 'caps' ? (
+                                            <>
+                                                <div className="grid grid-cols-1 gap-2 text-sm font-medium text-slate-500 border-b border-slate-200 dark:border-slate-700 pb-2">
+                                                    <span>Size (Circumference in inches)</span>
+                                                </div>
+                                                <div className="grid grid-cols-4 gap-2">
+                                                    {NIGERIAN_CAP_SIZE_CHART.map((item) => (
+                                                        <div key={item.size} className="text-sm text-slate-900 dark:text-slate-100 p-2 bg-slate-50 dark:bg-slate-800 rounded-lg text-center font-bold">
+                                                            {item.size}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className="grid grid-cols-1 gap-2 text-sm font-medium text-slate-500 border-b border-slate-200 dark:border-slate-700 pb-2">
+                                                    <span>Jallab Size</span>
+                                                </div>
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    {JALLAB_SIZE_CHART.map((item) => (
+                                                        <div key={item.size} className="text-sm text-slate-900 dark:text-slate-100 p-2 bg-slate-50 dark:bg-slate-800 rounded-lg text-center font-bold">
+                                                            {item.size}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </>
                                         )}
                                     </div>
                                     <div className="mt-6 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-xs text-blue-700 dark:text-blue-300 flex gap-2">
                                         <Info className="w-4 h-4 flex-shrink-0" />
-                                        <p>{productData.sizeCategory === 'clothing' ? 'Measurements are in inches. This is a standard guide, actual fit may vary by style.' : 'Measure your foot length in cm to find your size. Sizes may vary by brand.'}</p>
+                                        <p>{productData.sizeCategory === 'clothing' ? 'Measurements are in inches. This is a standard guide, actual fit may vary by style.' : productData.sizeCategory === 'shoes' ? 'Measure your foot length in cm to find your size. Sizes may vary by brand.' : productData.sizeCategory === 'caps' ? 'Measure the circumference of your head in inches to find your cap size.' : 'Jallab sizes range from 52-62. Choose based on your usual sizing.'}</p>
                                     </div>
                                 </motion.div>
                             </div>

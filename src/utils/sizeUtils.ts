@@ -1,5 +1,5 @@
 // Fashion size category type
-export type FashionSizeCategory = 'clothing' | 'shoes' | 'caps';
+export type FashionSizeCategory = 'clothing' | 'shoes' | 'caps' | 'jallabs';
 
 // Nigerian/UK Standard Clothing Sizes (6-20)
 export const NIGERIAN_SIZE_CHART = [
@@ -33,10 +33,17 @@ export const NIGERIAN_CAP_SIZE_CHART = [
     { size: '24' }, { size: '24.5' }, { size: '25' }, { size: '25.5' },
 ];
 
+// Jallab Sizes (52-62, increment of 2)
+export const JALLAB_SIZE_CHART = [
+    { size: '52' }, { size: '54' }, { size: '56' },
+    { size: '58' }, { size: '60' }, { size: '62' },
+];
+
 // Helper to get sizes for a given fashion category
 export const getSizesForFashionCategory = (category: FashionSizeCategory): string[] => {
     if (category === 'clothing') return NIGERIAN_SIZE_CHART.map(item => item.size);
     if (category === 'shoes') return EUROPEAN_SHOE_CHART.map(item => item.size);
     if (category === 'caps') return NIGERIAN_CAP_SIZE_CHART.map(item => item.size);
+    if (category === 'jallabs') return JALLAB_SIZE_CHART.map(item => item.size);
     return [];
 };

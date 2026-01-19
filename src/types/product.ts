@@ -106,8 +106,8 @@ export interface LivestockProduct extends BaseProduct {
 export interface FashionProduct extends BaseProduct {
   productType: 'fashion';
 
-  // Category for sizing (clothing vs shoes vs caps)
-  sizeCategory?: 'clothing' | 'shoes' | 'caps'; // Optional for backward compatibility, defaults to 'clothing'
+  // Category for sizing (clothing vs shoes vs caps vs jallabs)
+  sizeCategory?: 'clothing' | 'shoes' | 'caps' | 'jallabs'; // Optional for backward compatibility, defaults to 'clothing'
 
   // Variants
   colors: {
@@ -120,7 +120,7 @@ export interface FashionProduct extends BaseProduct {
 
   // Size Guide
   sizeChart: {
-    type: 'nigerian-standard' | 'european-shoe' | 'nigerian-cap';
+    type: 'nigerian-standard' | 'european-shoe' | 'nigerian-cap' | 'jallab-standard';
   };
 
   // Shared fields
