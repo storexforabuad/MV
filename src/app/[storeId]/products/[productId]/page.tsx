@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { useParams, useRouter } from 'next/navigation';
@@ -51,6 +51,15 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
   // Fashion-specific state
   const [selectedColor, setSelectedColor] = useState<FashionProduct['colors'][0] | null>(null);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
+  const [highlightSizeSection, setHighlightSizeSection] = useState(false);
+  const sizeSectionRef = useRef<HTMLDivElement>(null);
+
+  // Helper to trigger size section highlight
+  const triggerSizeHighlight = () => {
+    setHighlightSizeSection(true);
+    sizeSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => setHighlightSizeSection(false), 2000);
+  };
 
   const discount = product ? calculateDiscount(product.price, product.originalPrice) : null;
 
@@ -205,11 +214,16 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
   const handlePlaceOrderClick = () => {
     if (!product) return;
     if (productIsFashion && (!selectedColor || !selectedSize)) {
-      toast.error('Please select a color and size');
+      const missing = !selectedColor && !selectedSize
+        ? 'color and size'
+        : !selectedColor ? 'color' : 'size';
+      toast.error(`Please select a ${missing}`);
+      if (!selectedSize) triggerSizeHighlight();
       return;
     }
     if (isGeneralProduct(product) && product.sizeOption && !selectedSize) {
       toast.error('Please select a size first');
+      triggerSizeHighlight();
       return;
     }
     if (customer) setIsOrderModalOpen(true); else setIsLoginModalOpen(true);
@@ -218,11 +232,16 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
   const handleToggleCart = () => {
     if (!product || !storeId) return;
     if (productIsFashion && (!selectedColor || !selectedSize)) {
-      toast.error('Please select a color and size');
+      const missing = !selectedColor && !selectedSize
+        ? 'color and size'
+        : !selectedColor ? 'color' : 'size';
+      toast.error(`Please select a ${missing}`);
+      if (!selectedSize) triggerSizeHighlight();
       return;
     }
     if (isGeneralProduct(product) && product.sizeOption && !selectedSize) {
       toast.error('Please select a size first');
+      triggerSizeHighlight();
       return;
     }
 
@@ -438,7 +457,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                     </div>
 
                     {/* Size Selector */}
-                    <div className="mb-4">
+                    <div ref={sizeSectionRef} className="mb-4">
                       <div className="flex justify-between items-center mb-2">
                         <h3 className="text-sm font-medium text-gray-900 dark:text-white">Size</h3>
                         <button onClick={() => setIsSizeGuideOpen(true)} className="text-sm font-medium text-green-600 hover:text-green-500 dark:text-green-400 dark:hover:text-green-300 flex items-center gap-1">
@@ -446,15 +465,15 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                           <span>Size Guide</span>
                         </button>
                       </div>
-                      <SizeSelector selectedSize={selectedSize} onSizeSelect={setSelectedSize} sizes={(product as FashionProduct).sizes} disabledSizes={(product as FashionProduct).soldOutSizes} />
+                      <SizeSelector selectedSize={selectedSize} onSizeSelect={setSelectedSize} sizes={(product as FashionProduct).sizes} disabledSizes={(product as FashionProduct).soldOutSizes} highlight={highlightSizeSection} />
                     </div>
                   </div>
                 )}
 
                 {/* GENERAL PRODUCT UI */}
                 {isGeneralProduct(product) && product.sizeOption && product.availableSizes && (
-                  <div className="mb-6">
-                    <SizeSelector selectedSize={selectedSize} onSizeSelect={setSelectedSize} sizes={product.availableSizes} sizeCategory={product.sizeOption} />
+                  <div ref={!productIsFashion ? sizeSectionRef : undefined} className="mb-6">
+                    <SizeSelector selectedSize={selectedSize} onSizeSelect={setSelectedSize} sizes={product.availableSizes} sizeCategory={product.sizeOption} highlight={highlightSizeSection} />
                   </div>
                 )}
 
@@ -570,11 +589,11 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
       {/* Sticky Action Buttons */}
       {!product.soldOut && (
         <div className="fixed bottom-0 left-0 right-0 p-3 sm:p-4 bg-white dark:bg-background border-t border-gray-100 dark:border-gray-800 flex gap-3 z-40 safe-area-bottom shadow-sm">
-          <button onClick={handlePlaceOrderClick} disabled={!isOrderable} className="group relative flex-grow inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-green-600 text-white font-bold shadow-md hover:shadow-lg hover:bg-green-700 transition-all active:scale-[0.98] disabled:bg-gray-400 disabled:cursor-not-allowed text-base">
+          <button onClick={handlePlaceOrderClick} className={`group relative flex-grow inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold shadow-md transition-all active:scale-[0.98] text-base ${!isOrderable ? 'bg-gray-400 cursor-not-allowed text-white' : 'bg-green-600 text-white hover:shadow-lg hover:bg-green-700'}`}>
             <ShoppingCart className="w-5 h-5" />
             <span>{shouldUsePaymentFlow(storeMeta?.storeType) ? 'Proceed to Payment' : 'Place Order'}</span>
           </button>
-          <button onClick={handleToggleCart} disabled={isTogglingCart || !isOrderable} className={`group relative flex-shrink-0 inline-flex items-center justify-center w-14 h-14 rounded-xl font-medium transition-all duration-300 transform-gpu active:scale-[0.9] disabled:opacity-50 disabled:cursor-not-allowed border border-gray-200 dark:border-gray-700 shadow-sm ${isInCart ? 'bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:border-red-800' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'}`}>
+          <button onClick={handleToggleCart} disabled={isTogglingCart} className={`group relative flex-shrink-0 inline-flex items-center justify-center w-14 h-14 rounded-xl font-medium transition-all duration-300 transform-gpu active:scale-[0.9] disabled:opacity-50 disabled:cursor-not-allowed border border-gray-200 dark:border-gray-700 shadow-sm ${isInCart ? 'bg-red-50 text-red-600 border-red-200 dark:bg-red-900/20 dark:border-red-800' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'} ${!isOrderable ? 'opacity-50 cursor-not-allowed' : ''}`}>
             <Heart className={`w-6 h-6 transition-transform duration-200 ease-in-out ${isInCart ? 'fill-current scale-110' : ''}`} />
           </button>
         </div>

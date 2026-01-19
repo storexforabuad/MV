@@ -10,6 +10,7 @@ interface SizeSelectorProps {
     sizeCategory?: 'baby-clothes' | 'kids-shoes' | 'adult-shoes'; // Made optional
     disabledSizes?: string[]; // Added
     className?: string;
+    highlight?: boolean;
 }
 
 const SIZE_CATEGORY_LABELS: Record<string, string> = {
@@ -31,11 +32,24 @@ export const SizeSelector: React.FC<SizeSelectorProps> = ({
     sizeCategory,
     disabledSizes,
     className = '',
+    highlight = false,
 }) => {
     const helperText = sizeCategory ? SIZE_CATEGORY_HELPERS[sizeCategory] : 'Available sizes';
 
     return (
-        <div className={`space-y-3 ${className}`}>
+        <motion.div
+            className={`space-y-3 ${className}`}
+            animate={highlight ? {
+                scale: [1, 1.02, 1],
+                boxShadow: [
+                    '0 0 0 0 rgba(34, 197, 94, 0)',
+                    '0 0 0 8px rgba(34, 197, 94, 0.35)',
+                    '0 0 0 0 rgba(34, 197, 94, 0)'
+                ]
+            } : {}}
+            transition={{ duration: 0.6, repeat: 2, ease: 'easeInOut' }}
+            style={{ borderRadius: '12px', padding: '12px', margin: '-12px' }}
+        >
             <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{helperText}</p>
             </div>
@@ -81,8 +95,9 @@ export const SizeSelector: React.FC<SizeSelectorProps> = ({
                     );
                 })}
             </div>
-        </div>
+        </motion.div>
     );
 };
 
 export default SizeSelector;
+
