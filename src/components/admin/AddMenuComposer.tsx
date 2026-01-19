@@ -28,6 +28,9 @@ interface UploadProgress {
 interface BatchMenuProduct {
     id: string;
     file: File;
+    url?: string;
+    uploadStatus: UploadStatus;
+    uploadError?: string;
     name: string;
     price: number;
     isPromo: boolean;
@@ -110,13 +113,36 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
         setTimeout(resetState, 300);
     }
 
+    const startBackgroundUpload = async (productId: string, file: File) => {
+        // Update status to compressing
+        setBatchProducts(prev => prev.map(p => p.id === productId ? { ...p, uploadStatus: 'compressing' } : p));
+
+        try {
+            const compressedFile = await compressImage(file);
+
+            // Update status to uploading
+            setBatchProducts(prev => prev.map(p => p.id === productId ? { ...p, uploadStatus: 'uploading' } : p));
+
+            const imageUrl = await uploadImageToCloudinary(compressedFile, storeId);
+
+            // Update status to success
+            setBatchProducts(prev => prev.map(p => p.id === productId ? { ...p, uploadStatus: 'success', url: imageUrl } : p));
+
+        } catch (error) {
+            console.error("Background upload failed", error);
+            setBatchProducts(prev => prev.map(p => p.id === productId ? { ...p, uploadStatus: 'error', uploadError: 'Upload failed' } : p));
+        }
+    };
+
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
             const newFiles = Array.from(e.target.files).map((file, index) => {
                 const name = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
                 const baseProduct: BatchMenuProduct = {
-                    id: `${Date.now()}-${index}`,
+                    id: `${Date.now()}-${index}-${Math.random().toString(36).substr(2, 5)}`,
                     file,
+                    url: undefined,
+                    uploadStatus: 'idle',
                     name: template?.name || name,
                     price: template?.price || 0,
                     isPromo: template?.isPromo || false,
@@ -139,6 +165,9 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
             if (newFiles.length > 0) {
                 setBatchProducts(newFiles);
                 setCurrentStep(1);
+
+                // Start background uploads
+                newFiles.forEach(p => startBackgroundUpload(p.id, p.file));
             }
         }
     };
@@ -211,50 +240,74 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
         setIsUploading(true);
         setCurrentStep(4);
 
-        const initialProgress: UploadProgress[] = batchProducts.map(p => ({ id: p.id, fileName: p.name, status: 'idle', statusText: 'Waiting...' }));
+        const initialProgress: UploadProgress[] = batchProducts.map(p => ({
+            id: p.id,
+            fileName: p.name,
+            status: p.uploadStatus,
+            statusText: p.uploadStatus === 'success' ? 'Ready' : 'Processing...',
+            error: p.uploadError
+        }));
         setUploadProgress(initialProgress);
 
         let successCount = 0;
 
         for (const productData of batchProducts) {
-            try {
-                setUploadProgress(prev => prev.map(p => p.id === productData.id ? { ...p, status: 'compressing', statusText: 'Compressing...' } : p));
-                const compressedFile = await compressImage(productData.file);
+            let imageUrl = productData.url;
 
-                setUploadProgress(prev => prev.map(p => p.id === productData.id ? { ...p, status: 'uploading', statusText: 'Uploading...' } : p));
-                const imageUrl = await uploadImageToCloudinary(compressedFile, storeId);
+            if (productData.uploadStatus === 'success' && imageUrl) {
+                // Already uploaded
+            } else {
+                try {
+                    setUploadProgress(prev => prev.map(p => p.id === productData.id ? { ...p, status: 'compressing', statusText: 'Compressing...' } : p));
+                    const compressedFile = await compressImage(productData.file);
 
-                const productToAdd: Partial<FoodBeverageProduct> = {
-                    productType: 'food',
-                    name: productData.name,
-                    price: productData.isPromo ? productData.promoPrice! : productData.price,
-                    categoryId: productData.categoryId,
-                    images: [imageUrl],
-                    description: productData.ingredients, // Using description for ingredients/details
-                    soldOut: productData.soldOut,
-                    available: !productData.soldOut,
-                    commission: productData.commission,
-                    storeId: storeId,
-                    views: 0,
-                    subtype: productData.subtype,
-                    preparationTime: productData.preparationTime,
-                    isVegetarian: productData.isVegetarian,
-                    ingredients: productData.ingredients.split(',').map(i => i.trim()).filter(i => i),
-                    ...(productData.subtype === 'dish' && { spiciness: productData.spiciness }),
-                    ...(productData.subtype === 'drink' && { temperature: productData.temperature, isAlcoholic: productData.isAlcoholic }),
-                };
+                    setUploadProgress(prev => prev.map(p => p.id === productData.id ? { ...p, status: 'uploading', statusText: 'Uploading...' } : p));
+                    imageUrl = await uploadImageToCloudinary(compressedFile, storeId);
 
-                if (productData.isPromo) {
-                    productToAdd.originalPrice = productData.price;
+                    // Update local state just in case
+                    setBatchProducts(prev => prev.map(p => p.id === productData.id ? { ...p, uploadStatus: 'success', url: imageUrl } : p));
+
+                } catch (error) {
+                    const errorMessage = error instanceof Error ? error.message : String(error);
+                    setUploadProgress(prev => prev.map(p => p.id === productData.id ? { ...p, status: 'error', statusText: 'Failed', error: errorMessage } : p));
+                    continue; // Skip adding this product
                 }
+            }
 
-                await addProduct(storeId, productToAdd as Product);
+            if (imageUrl) {
+                try {
+                    const productToAdd: Partial<FoodBeverageProduct> = {
+                        productType: 'food',
+                        name: productData.name,
+                        price: productData.isPromo ? productData.promoPrice! : productData.price,
+                        categoryId: productData.categoryId,
+                        images: [imageUrl],
+                        description: productData.ingredients, // Using description for ingredients/details
+                        soldOut: productData.soldOut,
+                        available: !productData.soldOut,
+                        commission: productData.commission,
+                        storeId: storeId,
+                        views: 0,
+                        subtype: productData.subtype,
+                        preparationTime: productData.preparationTime,
+                        isVegetarian: productData.isVegetarian,
+                        ingredients: productData.ingredients.split(',').map(i => i.trim()).filter(i => i),
+                        ...(productData.subtype === 'dish' && { spiciness: productData.spiciness }),
+                        ...(productData.subtype === 'drink' && { temperature: productData.temperature, isAlcoholic: productData.isAlcoholic }),
+                    };
 
-                setUploadProgress(prev => prev.map(p => p.id === productData.id ? { ...p, status: 'success', statusText: 'Success!', imageUrl } : p));
-                successCount++;
-            } catch (error) {
-                const errorMessage = error instanceof Error ? error.message : String(error);
-                setUploadProgress(prev => prev.map(p => p.id === productData.id ? { ...p, status: 'error', statusText: 'Failed', error: errorMessage } : p));
+                    if (productData.isPromo) {
+                        productToAdd.originalPrice = productData.price;
+                    }
+
+                    await addProduct(storeId, productToAdd as Product);
+
+                    setUploadProgress(prev => prev.map(p => p.id === productData.id ? { ...p, status: 'success', statusText: 'Success!', imageUrl } : p));
+                    successCount++;
+                } catch (err) {
+                    console.error("Failed to add product to db", err);
+                    setUploadProgress(prev => prev.map(p => p.id === productData.id ? { ...p, status: 'error', statusText: 'DB Error' } : p));
+                }
             }
         }
 
@@ -303,6 +356,12 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                                     transition={{ ease: 'easeInOut' }}
                                 >
                                     <Image src={URL.createObjectURL(activeProduct.file)} alt="Product Preview" fill className="object-cover rounded-t-lg" />
+                                    <div className="absolute top-2 left-2 z-10 bg-black/50 backdrop-blur-md rounded-full px-3 py-1 flex items-center gap-2">
+                                        {activeProduct.uploadStatus === 'uploading' && <><ArrowPathIcon className="w-4 h-4 text-blue-400 animate-spin" /><span className="text-xs text-white">Uploading...</span></>}
+                                        {activeProduct.uploadStatus === 'compressing' && <><ArrowPathIcon className="w-4 h-4 text-yellow-400 animate-spin" /><span className="text-xs text-white">Compressing...</span></>}
+                                        {activeProduct.uploadStatus === 'success' && <><CheckCircleIcon className="w-4 h-4 text-green-400" /><span className="text-xs text-white">Ready</span></>}
+                                        {activeProduct.uploadStatus === 'error' && <><XMarkIcon className="w-4 h-4 text-red-400" /><span className="text-xs text-white">Error</span></>}
+                                    </div>
                                 </motion.div>
                             </AnimatePresence>
                             {batchProducts.length > 1 && (

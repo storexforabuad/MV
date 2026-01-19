@@ -25,9 +25,17 @@ interface UploadProgress {
     imageUrl?: string;
 }
 
+interface ImageItem {
+    id: string;
+    file: File;
+    url?: string;
+    status: UploadStatus;
+    error?: string;
+}
+
 interface VehicleFormData {
     id: string;
-    files: File[];
+    files: ImageItem[];
     make: string;
     model: string;
     year: number;
@@ -149,11 +157,53 @@ const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose
         setTimeout(resetState, 300);
     }
 
+    const startBackgroundUpload = async (imageItem: ImageItem) => {
+        // Update status to compressing
+        setVehicleData(prev => ({
+            ...prev,
+            files: prev.files.map(f => f.id === imageItem.id ? { ...f, status: 'compressing' } : f)
+        }));
+
+        try {
+            const compressedFile = await compressImage(imageItem.file);
+
+            // Update status to uploading
+            setVehicleData(prev => ({
+                ...prev,
+                files: prev.files.map(f => f.id === imageItem.id ? { ...f, status: 'uploading' } : f)
+            }));
+
+            const imageUrl = await uploadImageToCloudinary(compressedFile, storeId);
+
+            // Update status to success
+            setVehicleData(prev => ({
+                ...prev,
+                files: prev.files.map(f => f.id === imageItem.id ? { ...f, status: 'success', url: imageUrl } : f)
+            }));
+
+        } catch (error) {
+            console.error("Background upload failed", error);
+            setVehicleData(prev => ({
+                ...prev,
+                files: prev.files.map(f => f.id === imageItem.id ? { ...f, status: 'error', error: 'Upload failed' } : f)
+            }));
+        }
+    };
+
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
-            const newFiles = Array.from(e.target.files);
+            const newFiles = Array.from(e.target.files).map(file => ({
+                id: Math.random().toString(36).substr(2, 9),
+                file,
+                status: 'idle' as UploadStatus
+            }));
+
             if (newFiles.length > 0) {
                 setVehicleData(prev => ({ ...prev, files: [...prev.files, ...newFiles] }));
+
+                // Start background uploads
+                newFiles.forEach(item => startBackgroundUpload(item));
+
                 if (currentStep === 0) setCurrentStep(1);
             }
         }
@@ -178,58 +228,55 @@ const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose
         setCurrentStep(4); // Move to uploading screen
 
         const vehicleName = `${vehicleData.year} ${vehicleData.make} ${vehicleData.model}`.trim() || 'Vehicle';
-        const initialProgress: UploadProgress[] = [{
-            id: 'vehicle-upload',
-            fileName: vehicleName,
-            status: 'idle',
-            statusText: `Preparing to upload ${vehicleData.files.length} image${vehicleData.files.length > 1 ? 's' : ''}...`
-        }];
+
+        // Initialize progress based on current status
+        const initialProgress: UploadProgress[] = vehicleData.files.map((f, i) => ({
+            id: f.id,
+            fileName: `${vehicleName} - Image ${i + 1}`,
+            status: f.status,
+            statusText: f.status === 'success' ? 'Ready' : 'Processing...',
+            error: f.error
+        }));
         setUploadProgress(initialProgress);
 
         const uploadedImageUrls: string[] = [];
         let successCount = 0;
 
         for (let i = 0; i < vehicleData.files.length; i++) {
-            const file = vehicleData.files[i];
+            const item = vehicleData.files[i];
+
+            if (item.status === 'success' && item.url) {
+                uploadedImageUrls.push(item.url);
+                successCount++;
+                continue;
+            }
 
             try {
-                setUploadProgress([{
-                    id: 'vehicle-upload',
-                    fileName: vehicleName,
-                    status: 'compressing',
-                    statusText: `Compressing image ${i + 1} / ${vehicleData.files.length}...`
-                }]);
-                const compressedFile = await compressImage(file);
+                setUploadProgress(prev => prev.map(p => p.id === item.id ? { ...p, status: 'compressing', statusText: 'Compressing...' } : p));
+                const compressedFile = await compressImage(item.file);
 
-                setUploadProgress([{
-                    id: 'vehicle-upload',
-                    fileName: vehicleName,
-                    status: 'uploading',
-                    statusText: `Uploading image ${i + 1} / ${vehicleData.files.length}...`
-                }]);
+                setUploadProgress(prev => prev.map(p => p.id === item.id ? { ...p, status: 'uploading', statusText: 'Uploading...' } : p));
                 const imageUrl = await uploadImageToCloudinary(compressedFile, storeId);
+
                 uploadedImageUrls.push(imageUrl);
                 successCount++;
+
+                setUploadProgress(prev => prev.map(p => p.id === item.id ? { ...p, status: 'success', statusText: 'Success!' } : p));
+
             } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : String(error);
-                setUploadProgress([{
-                    id: 'vehicle-upload',
-                    fileName: vehicleName,
+                setUploadProgress(prev => prev.map(p => p.id === item.id ? {
+                    ...p,
                     status: 'error',
-                    statusText: `Failed at image ${i + 1}`,
+                    statusText: 'Failed',
                     error: errorMessage
-                }]);
-                break;
+                } : p));
+                // Don't break, try others
             }
         }
 
         if (successCount === vehicleData.files.length) {
-            setUploadProgress([{
-                id: 'vehicle-upload',
-                fileName: vehicleName,
-                status: 'success',
-                statusText: `All ${successCount} image${successCount > 1 ? 's' : ''} uploaded successfully!`
-            }]);
+            // All good
         }
 
         if (successCount > 0) {
@@ -295,9 +342,16 @@ const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose
                     <MotionDiv key={1} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-4 sm:p-6 space-y-6">
                         {/* Image Preview Strip */}
                         <div className="flex gap-2 overflow-x-auto pb-2">
-                            {vehicleData.files.map((file, i) => (
-                                <div key={i} className="relative w-20 h-20 flex-shrink-0">
-                                    <Image src={URL.createObjectURL(file)} alt="preview" fill className="object-cover rounded-lg" />
+                            {vehicleData.files.map((item, i) => (
+                                <div key={item.id} className="relative w-20 h-20 flex-shrink-0">
+                                    <Image src={URL.createObjectURL(item.file)} alt="preview" fill className="object-cover rounded-lg" />
+                                    {/* Status Indicator */}
+                                    <div className="absolute top-1 left-1 z-10">
+                                        {item.status === 'uploading' && <ArrowPathIcon className="w-4 h-4 text-blue-500 animate-spin drop-shadow-md" />}
+                                        {item.status === 'compressing' && <ArrowPathIcon className="w-4 h-4 text-yellow-500 animate-spin drop-shadow-md" />}
+                                        {item.status === 'success' && <CheckCircleIcon className="w-4 h-4 text-green-500 drop-shadow-md" />}
+                                        {item.status === 'error' && <XMarkIcon className="w-4 h-4 text-red-500 drop-shadow-md" />}
+                                    </div>
                                     <button onClick={() => removeFile(i)} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5"><XMarkIcon className="w-3 h-3" /></button>
                                 </div>
                             ))}
@@ -431,7 +485,7 @@ const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose
                                     <div className="w-16 h-16 bg-gray-200 dark:bg-gray-700 rounded-lg flex items-center justify-center overflow-hidden flex-shrink-0">
                                         {vehicleData.files[0] && (
                                             <Image
-                                                src={URL.createObjectURL(vehicleData.files[0])}
+                                                src={URL.createObjectURL(vehicleData.files[0].file)}
                                                 alt="Vehicle preview"
                                                 width={64}
                                                 height={64}
