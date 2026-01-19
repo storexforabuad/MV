@@ -204,7 +204,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
             id: Date.now().toString(),
             name: '',
             hex: '#000000',
-            hex: '#000000',
+
             images: [],
         };
         setProductData(prev => ({ ...prev, colors: [...prev.colors, newColor] }));
