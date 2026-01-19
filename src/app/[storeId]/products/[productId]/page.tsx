@@ -260,7 +260,14 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
   }, [product, selectedColor, selectedSize]);
 
 
-  if (isLoading) return <ProductDetailSkeleton />;
+  if (isLoading) {
+    return (
+      <>
+        <Navbar storeId={storeId} storeName="Loading..." />
+        <ProductDetailSkeleton />
+      </>
+    );
+  }
   if (!product) return <div className="p-4">Product not found</div>;
 
   if (storeMeta?.storeType === 'automotive' || isVehicleProduct(product)) {
