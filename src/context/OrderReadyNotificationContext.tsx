@@ -39,7 +39,7 @@ export const OrderReadyNotificationProvider: React.FC<{ children: React.ReactNod
   const [unacknowledgedOrders, setUnacknowledgedOrders] = useState<UnacknowledgedOrder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [acknowledgedOrderIds, setAcknowledgedOrderIds] = useState<string[]>([]);
+  const [acknowledgedOrderIds, setAcknowledgedOrderIds] = useState<string[] | null>(null);
 
   // Load acknowledged order IDs from customer doc
   useEffect(() => {
@@ -56,6 +56,7 @@ export const OrderReadyNotificationProvider: React.FC<{ children: React.ReactNod
         setAcknowledgedOrderIds(acknowledged);
       } catch (error) {
         console.error('Error loading acknowledged orders:', error);
+        setAcknowledgedOrderIds([]); // Fallback to empty array on error to allow flow to continue
       }
     };
 
@@ -102,6 +103,11 @@ export const OrderReadyNotificationProvider: React.FC<{ children: React.ReactNod
   useEffect(() => {
     if (!customer?.id) {
       setIsLoading(false);
+      return;
+    }
+
+    // Wait for acknowledged orders to load
+    if (acknowledgedOrderIds === null) {
       return;
     }
 
@@ -160,7 +166,7 @@ export const OrderReadyNotificationProvider: React.FC<{ children: React.ReactNod
       if (orderActions.acknowledgeOrders) {
         await orderActions.acknowledgeOrders(customer.id, orderIds);
       }
-      
+
       // Update local state
       setAcknowledgedOrderIds(prev => [...prev, ...orderIds]);
       setUnacknowledgedOrders([]);
