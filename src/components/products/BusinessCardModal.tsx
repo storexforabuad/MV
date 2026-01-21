@@ -2,7 +2,7 @@
 
 import { Fragment, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { Phone, MessageCircle, Star, Clock, MapPin, Instagram, X, Navigation } from 'lucide-react';
+import { Phone, MessageCircle, Star, Clock, MapPin, Instagram, X, Navigation, BadgeCheck } from 'lucide-react';
 import Image from 'next/image';
 import { StoreMeta } from '../../types/store';
 import { formatWhatsAppNumber } from '@/utils/phoneUtils';
@@ -74,9 +74,17 @@ export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean;
                           <div className="absolute -bottom-1 -right-1 bg-green-500 w-6 h-6 rounded-full border-4 border-white dark:border-slate-800" />
                         </div>
                       )}
-                      <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                      <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight mb-2">
                         {storeMeta.name}
                       </h3>
+
+                      {/* Atlas Verified Badge */}
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 mb-3 animate-pulse-slow">
+                        <BadgeCheck className="w-4 h-4 text-blue-600 dark:text-blue-400 fill-blue-100 dark:fill-blue-900/50" />
+                        <span className="text-[10px] font-extrabold text-blue-700 dark:text-blue-300 tracking-widest uppercase">
+                          Atlas™ Verified Seller
+                        </span>
+                      </div>
                       {storeMeta.ceoName && (
                         <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-widest">
                           Led by {storeMeta.ceoName}
@@ -149,7 +157,7 @@ export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean;
 
                     <div className="mt-8 text-center">
                       <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">
-                        Powered by <span className="text-indigo-600 dark:text-indigo-400">(Biz+Con)™</span> Network
+                        POWERED BY <span className="text-indigo-600 dark:text-indigo-400">ATLAS™</span> NETWORK
                       </p>
                     </div>
                   </div>

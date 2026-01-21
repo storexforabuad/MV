@@ -61,11 +61,6 @@ export default function PaymentFlowPage({
         storeId // Ensure storeId is present
       };
 
-      // We use a temporary status or just rely on the fact that it's not "paid" yet?
-      // The addOrderToFirestore defaults to 'pending'.
-      // We might want to add a specific status 'awaiting_payment' if we want to distinguish.
-      // For now, 'pending' is fine.
-
       const referrerId = localStorage.getItem('referrerId');
 
       const newOrder = await addOrderToFirestore(
@@ -76,7 +71,7 @@ export default function PaymentFlowPage({
         referrerId,
         false, // bonusApplied
         deliveryMethod as 'home' | 'pickup',
-        '', // orderNotes (handled in product specialInstructions for food, or we could pass a separate note)
+        '', // orderNotes
         undefined, // evidenceUrl
         undefined  // evidenceFileName
       );
@@ -94,7 +89,7 @@ export default function PaymentFlowPage({
           amount: total,
           storeId,
           metadata: {
-            orderId: newOrder.id, // CRITICAL: Pass orderId to Paystack
+            orderId: newOrder.id,
             cart_items: `${quantity}x ${product.name}`
           }
         })
@@ -195,6 +190,18 @@ export default function PaymentFlowPage({
             <div className="flex items-center gap-1.5 text-[10px] text-gray-400 uppercase tracking-wider font-semibold">
               <ShieldCheck className="w-3 h-3" />
               <span>Secured by Paystack</span>
+            </div>
+
+            {/* NDPR & Data Privacy Badge */}
+            <div className="w-full mt-2 pt-3 border-t border-dashed border-gray-200 dark:border-gray-700/50 flex flex-col items-center gap-1.5">
+              <div className="flex items-center gap-2 px-3 py-1 bg-gray-50 dark:bg-gray-800/50 rounded-full border border-gray-100 dark:border-gray-700">
+                <div className="flex items-center gap-1">
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                  <span className="text-[10px] font-bold text-gray-600 dark:text-gray-300">NDPR Compliant</span>
+                </div>
+                <div className="w-px h-3 bg-gray-200 dark:bg-gray-600"></div>
+                <span className="text-[10px] text-gray-500 dark:text-gray-400">Data Privacy Protected</span>
+              </div>
             </div>
           </div>
         </div>

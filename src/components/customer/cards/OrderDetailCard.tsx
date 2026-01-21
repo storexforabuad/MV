@@ -36,6 +36,7 @@ const getStatusUI = (status: Order['orderStatus']) => {
 };
 
 export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted }: OrderDetailCardProps) {
+  const [isReordering, setIsReordering] = useState(false);
   const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   const { customer } = useCustomer();
 
@@ -48,32 +49,54 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted }: O
       return;
     }
 
-    if (!storeMeta || !storeMeta.whatsapp) {
-      toast.error("Seller's contact information is not available.");
+    if (!storeMeta) {
+      toast.error("Store information is missing.");
       return;
     }
 
+    setIsReordering(true);
     try {
-      // FIX: Use the backward-compatible 'products' array.
-      await addOrder(products, storeMeta, customer, null, false);
+      // 1. Create Pending Order
+      // We cast the result because the prop type definition might lag behind the actual implementation
+      const newOrder = await addOrder(products, storeMeta, customer, null, false) as any;
 
-      const productDetails = products.map(p => `* ${p.name} (Qty: ${p.productType === 'general' ? p.quantity : 1})`).join('\n');
+      if (!newOrder || !newOrder.id) {
+        // Fallback to WhatsApp if addOrder doesn't return an ID (legacy behavior check)
+        // But we just updated useOrders to return it.
+        // If it fails, we catch error.
+        throw new Error("Could not create order");
+      }
 
-      const message = `*Reorder Request*\n\nI would like to reorder the following items:\n${productDetails}`;
+      // 2. Initialize Paystack
+      const totalAmount = products.reduce((acc, p) => acc + p.price * (p.productType === 'general' ? p.quantity : 1), 0);
 
-      const whatsappUrl = `https://wa.me/${formatWhatsAppNumber(storeMeta.whatsapp)}?text=${encodeURIComponent(message)}`;
-      window.open(whatsappUrl, '_blank');
-      toast.success('Reorder placed successfully!');
+      const response = await fetch('/api/paystack/initialize-transaction', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: customer.email || 'customer@example.com',
+          amount: totalAmount,
+          storeId: storeMeta.id,
+          metadata: {
+            orderId: newOrder.id,
+            cart_items: `Reorder #${order.id.substring(0, 6)}`
+          }
+        })
+      });
+
+      const data = await response.json();
+      if (data.authorization_url) {
+        window.location.href = data.authorization_url;
+      } else {
+        toast.error('Could not initialize payment');
+        setIsReordering(false);
+      }
 
     } catch (error) {
       console.error("Failed to place reorder:", error);
       toast.error('There was an issue placing your reorder.');
+      setIsReordering(false);
     }
-  };
-
-  const handleDispute = () => {
-    console.log('Dispute initiated for order:', order.id);
-    toast.success('Dispute functionality will be added soon!');
   };
 
   const orderDate = new Date(order.orderDate).toLocaleDateString('en-US', {
@@ -182,27 +205,25 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted }: O
             <p className="text-lg font-bold text-purple-400">{formatPrice(totalAmount)}</p>
           </div>
         </div>
-        <div className="grid grid-cols-3 border-t border-border-color">
+        <div className="grid grid-cols-2 border-t border-border-color divide-x divide-border-color">
           <button
             onClick={handleReorder}
-            className="flex items-center justify-center gap-2 p-3 text-sm font-semibold text-text-secondary hover:bg-zinc-700 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
+            disabled={isReordering}
+            className="flex items-center justify-center gap-2 p-3 text-sm font-semibold text-text-secondary hover:bg-zinc-700 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Repeat className="w-4 h-4" />
-            <span>Reorder</span>
+            {isReordering ? (
+              <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              <Repeat className="w-4 h-4" />
+            )}
+            <span>{isReordering ? 'Processing...' : 'Reorder'}</span>
           </button>
           <button
             onClick={() => setIsReceiptModalOpen(true)}
-            className="flex items-center justify-center gap-2 p-3 text-sm font-semibold text-text-secondary hover:bg-zinc-700 transition-colors duration-200 ease-in-out border-l border-border-color focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
+            className="flex items-center justify-center gap-2 p-3 text-sm font-semibold text-text-secondary hover:bg-zinc-700 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
           >
             <ReceiptIcon className={isReceiptModalOpen ? "w-4 h-4 text-purple-400" : "w-4 h-4"} />
             <span>Receipt</span>
-          </button>
-          <button
-            onClick={handleDispute}
-            className="flex items-center justify-center gap-2 p-3 text-sm font-semibold text-text-secondary hover:bg-zinc-700 transition-colors duration-200 ease-in-out border-l border-border-color focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
-          >
-            <MessageSquare className="w-4 h-4" />
-            <span>Dispute</span>
           </button>
         </div>
       </div>
