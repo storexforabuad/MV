@@ -456,6 +456,14 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             onBack={handleBackToSummary}
                             uploadedEvidence={uploadedEvidence}
                             total={total}
+                            customer={customer}
+                            product={product}
+                            quantity={quantity}
+                            selectedSize={selectedSize}
+                            selectedColor={selectedColor}
+                            selectedSpiciness={selectedSpiciness}
+                            specialInstructions={specialInstructions}
+                            deliveryMethod={deliveryMethod}
                           />
                         </div>
                       )}
@@ -500,28 +508,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                         </button>
                       ) : currentPage === 2 && isPaymentFlowEnabled ? (
                         <div className="flex flex-col gap-3">
-                          {uploadedEvidence ? (
-                            <button
-                              type="button"
-                              className="w-full rounded-xl border border-transparent bg-green-600 px-6 py-4 text-base font-bold text-white shadow-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                              onClick={handlePlaceOrder}
-                              disabled={isPlacingOrder}
-                            >
-                              {isPlacingOrder ? (
-                                <span className="flex items-center justify-center gap-2"><Loader2 className="h-5 w-5 animate-spin" />Placing Order...</span>
-                              ) : (
-                                'Complete Order'
-                              )}
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              className="w-full rounded-xl border border-transparent bg-gray-900 dark:bg-white px-6 py-4 text-base font-bold text-white dark:text-gray-900 shadow-lg hover:bg-gray-800 dark:hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all transform active:scale-[0.98]"
-                              onClick={() => setShowLeaveAppConfirmation(true)}
-                            >
-                              Leave App to Pay
-                            </button>
-                          )}
+                          {/* Footer actions are now handled within PaymentFlowPage for better UX */}
                         </div>
                       ) : currentPage === 2 && !isPaymentFlowEnabled ? (
                         <button

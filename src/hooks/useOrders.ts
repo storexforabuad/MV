@@ -50,6 +50,7 @@ export const useOrders = (customerId: string | null, storeId: string) => {
       const productsToSend = products.map(p => ({ ...p, storeId: storeMeta.id })) as Product[];
       const newOrder = await addOrderToFirestore(customerId, productsToSend, storeMeta, customerInfo, referralCode, bonusApplied, deliveryMethod, orderNotes, paymentEvidenceUrl, paymentEvidenceFileName);
       setOrders(prevOrders => [newOrder, ...prevOrders]);
+      return newOrder;
     } catch (error) {
       console.error("Error in addOrder:", error);
       throw new Error("Failed to place order.");

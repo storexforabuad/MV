@@ -11,7 +11,7 @@
  * @returns true if the store should use the payment flow, false otherwise
  */
 export function shouldUsePaymentFlow(storeType: string | undefined): boolean {
-  return false;
+  return storeType === 'fashion' || storeType === 'restaurant';
 }
 
 /**
