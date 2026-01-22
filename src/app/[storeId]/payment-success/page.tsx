@@ -5,6 +5,9 @@ import { useSearchParams, useRouter, useParams } from 'next/navigation';
 import { CheckCircle, Loader2, ShoppingBag, MessageSquare } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import Link from 'next/link';
+import { getOrderById } from '@/app/actions/orderActions';
+import { formatPrice } from '@/utils/price';
+import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 
 export default function PaymentSuccessPage() {
     const searchParams = useSearchParams();
@@ -15,6 +18,8 @@ export default function PaymentSuccessPage() {
 
     const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
     const [orderId, setOrderId] = useState<string | null>(null);
+    const [order, setOrder] = useState<any>(null);
+    const [isGeneratingMessage, setIsGeneratingMessage] = useState(false);
 
     useEffect(() => {
         if (!reference) {
@@ -61,6 +66,48 @@ export default function PaymentSuccessPage() {
 
         verifyPayment();
     }, [reference]);
+
+    useEffect(() => {
+        if (orderId && orderId !== 'Unknown' && storeId) {
+            getOrderById(storeId, orderId).then(setOrder).catch(console.error);
+        }
+    }, [orderId, storeId]);
+
+    const handleSendReceipt = () => {
+        if (!order) {
+            // Fallback if order details not loaded yet
+            const message = `Hello! I just paid for my order. Reference: ${reference}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
+            return;
+        }
+
+        const storeName = order.storeMeta?.name || 'the store';
+        const whatsapp = order.storeMeta?.whatsapp;
+
+        let productDetails = '';
+        if (order.products && order.products.length > 0) {
+            productDetails = order.products.map((p: any) => {
+                const productUrl = `https://tinyurl.com/bizcononline/${storeId}/products/${p.id}`;
+                return `• *${p.name}* (x${p.quantity || 1})\n🔗 ${productUrl}`;
+            }).join('\n\n');
+        }
+
+        const totalAmount = order.products.reduce((sum: number, p: any) => sum + (p.price * (p.quantity || 1)), 0);
+
+        const message = `✅ *Payment Successful!*\n\n` +
+            `Hello! I just completed the payment for my order at *${storeName}*.\n\n` +
+            `💳 *Reference:* ${reference}\n` +
+            `🆔 *Order ID:* #${orderId?.slice(0, 8)}\n\n` +
+            `📦 *Order Details:*\n${productDetails}\n\n` +
+            `💰 *Total Paid:* ${formatPrice(totalAmount)}\n\n` +
+            `Please confirm receipt and process my order. Thank you! 🙏✨`;
+
+        const whatsappUrl = whatsapp
+            ? `https://wa.me/${formatWhatsAppNumber(whatsapp)}?text=${encodeURIComponent(message)}`
+            : `https://wa.me/?text=${encodeURIComponent(message)}`;
+
+        window.open(whatsappUrl, '_blank');
+    };
 
     if (status === 'verifying') {
         return (
@@ -120,11 +167,7 @@ export default function PaymentSuccessPage() {
 
                 <div className="space-y-3">
                     <button
-                        onClick={() => {
-                            // TODO: Open WhatsApp with receipt
-                            const message = `Hello! I just paid for my order. Reference: ${reference}`;
-                            window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-                        }}
+                        onClick={handleSendReceipt}
                         className="w-full py-3.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold shadow-lg shadow-green-500/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
                     >
                         <MessageSquare className="w-5 h-5" />

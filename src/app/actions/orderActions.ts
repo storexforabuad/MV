@@ -222,6 +222,24 @@ export const addOrderToFirestore = async (
 };
 
 /**
+ * Fetches a single order by ID from both store and customer collections.
+ */
+export const getOrderById = async (storeId: string, orderId: string): Promise<StoreOrder | null> => {
+    try {
+        const orderRef = doc(db, 'stores', storeId, 'orders', orderId);
+        const orderSnap = await getDoc(orderRef);
+
+        if (orderSnap.exists()) {
+            return transformOrderData(orderSnap);
+        }
+        return null;
+    } catch (error) {
+        console.error("Error fetching order by ID:", error);
+        throw new Error("Failed to fetch order.");
+    }
+};
+
+/**
  * Updates the status of products within an order and the overall order status.
  * This function now also records revenue when an order becomes 'ready'.
  */
@@ -549,19 +567,19 @@ export const getRevenueAnalytics = async (storeId: string) => {
 export async function acknowledgeOrders(customerId: string, orderIds: string[]): Promise<void> {
     try {
         const customerRef = doc(db, 'customers', customerId);
-        
+
         // Get current acknowledged orders
         const customerDoc = await getDoc(customerRef);
         const currentAcknowledgedIds = customerDoc.data()?.acknowledgedOrderIds || [];
-        
+
         // Merge with new ones, avoiding duplicates
         const updatedAcknowledgedIds = Array.from(new Set([...currentAcknowledgedIds, ...orderIds]));
-        
+
         // Update customer document
         await updateDoc(customerRef, {
             acknowledgedOrderIds: updatedAcknowledgedIds,
         });
-        
+
         console.log(`✅ Orders acknowledged for customer ${customerId}:`, orderIds);
     } catch (error) {
         console.error('Error acknowledging orders:', error);

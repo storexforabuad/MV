@@ -1,4 +1,4 @@
-import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, orderBy, doc, getDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, addDoc, serverTimestamp, Timestamp, orderBy, doc, getDoc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/db";
 import { Customer, DeliveryAddress } from "@/types/customer";
 import { nanoid } from 'nanoid';
@@ -89,7 +89,7 @@ export const findCustomerByPhone = async (phoneNumber: string): Promise<Customer
  */
 export const findOrCreateCustomer = async (
   phoneNumber: string,
-  details: { name: string; deliveryAddress: DeliveryAddress }
+  details: { name: string; email?: string; deliveryAddress: DeliveryAddress }
 ): Promise<{ isNew: boolean; customer: Customer }> => {
   try {
     const existingCustomer = await findCustomerByPhone(phoneNumber);
@@ -132,6 +132,21 @@ export const findOrCreateCustomer = async (
       throw new Error(`Failed to find or create customer: ${error.message}`);
     }
     throw new Error("An unknown error occurred while processing your request.");
+  }
+};
+
+/**
+ * Updates a customer's email address.
+ * @param customerId The customer's ID.
+ * @param email The new email address.
+ */
+export const updateCustomerEmail = async (customerId: string, email: string): Promise<void> => {
+  try {
+    const customerRef = doc(db, "customers", customerId);
+    await updateDoc(customerRef, { email });
+  } catch (error) {
+    console.error("Error in updateCustomerEmail:", error);
+    throw new Error("Failed to update customer email.");
   }
 };
 
