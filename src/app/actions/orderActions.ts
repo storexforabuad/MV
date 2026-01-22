@@ -34,6 +34,7 @@ export interface Order {
     paymentStatus?: 'pending' | 'submitted'; // pending: no evidence yet, submitted: customer uploaded evidence
     paymentEvidenceUploadedAt?: string; // ISO string - for TTL cleanup tracking (30 days)
     paymentEvidenceFileName?: string; // Original filename for reference
+    deliveryMethod?: 'home' | 'pickup';
 }
 
 // Type for the detailed order object returned to the ADMIN client.
@@ -415,6 +416,7 @@ const transformOrderData = (doc: any): StoreOrder => {
                 ? data.paymentEvidenceUploadedAt.toDate().toISOString()
                 : data.paymentEvidenceUploadedAt
             : undefined,
+        deliveryMethod: data.deliveryMethod || 'home',
     };
 };
 

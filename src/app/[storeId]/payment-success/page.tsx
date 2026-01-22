@@ -88,17 +88,28 @@ export default function PaymentSuccessPage() {
         if (order.products && order.products.length > 0) {
             productDetails = order.products.map((p: any) => {
                 const productUrl = `https://tinyurl.com/atlasintl/${storeId}/products/${p.id}`;
-                return `• *${p.name}* (x${p.quantity || 1})\n🔗 ${productUrl}`;
+                return `• *${p.name.trim()}* (x${p.quantity || 1})\n🔗 ${productUrl}`;
             }).join('\n\n');
         }
 
         const totalAmount = order.products.reduce((sum: number, p: any) => sum + (p.price * (p.quantity || 1)), 0);
+
+        let deliveryDetails = '';
+        if (order.deliveryMethod === 'pickup') {
+            deliveryDetails = `🏪 *Delivery:* Pickup at Store`;
+        } else {
+            const addr = order.customerInfo?.deliveryAddress;
+            if (addr) {
+                deliveryDetails = `📍 *Delivery Address:*\n${addr.street}, ${addr.state}`;
+            }
+        }
 
         const message = `✅ *Payment Successful!*\n\n` +
             `Hello! I just completed the payment for my order at *${storeName}*.\n\n` +
             `💳 *Reference:* ${reference}\n` +
             `🆔 *Order ID:* #${orderId?.slice(0, 8)}\n\n` +
             `📦 *Order Details:*\n${productDetails}\n\n` +
+            (deliveryDetails ? `${deliveryDetails}\n\n` : '') +
             `💰 *Total Paid:* ${formatPrice(totalAmount)}\n\n` +
             `Please confirm receipt and process my order. Thank you! 🙏✨`;
 
