@@ -327,7 +327,7 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: "100%", opacity: 0 }}
                 transition={{ type: "spring", stiffness: 200, damping: 25 }}
-                className="bg-white dark:bg-slate-900 rounded-t-[2.5rem] sm:rounded-3xl shadow-2xl w-full max-w-md mx-auto relative overflow-hidden max-h-[90vh] flex flex-col"
+                className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-md mx-auto relative overflow-hidden max-h-[90vh] flex flex-col"
             >
                 <button onClick={handleClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
                     <X size={20} />
