@@ -26,7 +26,7 @@ import { useCustomer } from '@/context/CustomerContext';
 import { getMessaging, onMessage } from 'firebase/messaging';
 import { app } from '@/lib/firebase';
 import toast from 'react-hot-toast';
-import RamadanCountdown from '@/components/customer/RamadanCountdown';
+import HeroCarousel from '@/components/customer/HeroCarousel';
 
 const ProductGrid = dynamic(
   () => import('../../components/products/ProductGrid'),
@@ -389,7 +389,7 @@ export default function StorefrontPageClient({
       />
       <div className="pt-52 pb-safe-area-inset-bottom">
         <div className="mt-2">
-          <RamadanCountdown />
+          <HeroCarousel storeMeta={storeMeta} />
         </div>
         <ReferralBanner
           storeId={storeId}

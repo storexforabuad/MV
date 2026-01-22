@@ -11,7 +11,7 @@ interface TimeLeft {
     seconds: number;
 }
 
-export default function RamadanCountdown() {
+export default function RamadanCountdown({ className }: { className?: string }) {
     const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
 
     useEffect(() => {
@@ -53,12 +53,8 @@ export default function RamadanCountdown() {
     );
 
     return (
-        <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="mx-4 mb-6"
-        >
-            <div className="relative overflow-hidden rounded-[2.5rem] bg-indigo-950 border border-amber-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col justify-center">
+        <div className={className}>
+            <div className="relative overflow-hidden rounded-[2.5rem] bg-indigo-950 border border-amber-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] h-full flex flex-col justify-center">
                 {/* Background Image with Parallax-like effect */}
                 <div className="absolute inset-0">
                     <Image
@@ -120,6 +116,6 @@ export default function RamadanCountdown() {
                     }}
                 />
             </div>
-        </motion.div>
+        </div>
     );
 }
