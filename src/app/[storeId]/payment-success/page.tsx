@@ -10,8 +10,8 @@ export default function PaymentSuccessPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const params = useParams();
-    const reference = searchParams.get('reference');
-    const storeId = params.storeId as string;
+    const reference = searchParams?.get('reference');
+    const storeId = (params?.storeId as string) || '';
 
     const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
     const [orderId, setOrderId] = useState<string | null>(null);
@@ -108,7 +108,7 @@ export default function PaymentSuccessPage() {
                 <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 mb-8 border border-gray-100 dark:border-gray-700">
                     <div className="flex justify-between text-sm mb-2">
                         <span className="text-gray-500 dark:text-gray-400">Payment Reference</span>
-                        <span className="font-mono font-medium text-gray-900 dark:text-white truncate max-w-[150px]">{reference}</span>
+                        <span className="font-mono font-medium text-gray-900 dark:text-white truncate max-w-[150px]">{reference || 'N/A'}</span>
                     </div>
                     {orderId && (
                         <div className="flex justify-between text-sm">
