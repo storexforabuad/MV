@@ -32,7 +32,7 @@ const variants = {
     }
 };
 
-const swipeConfidenceThreshold = 10000;
+const swipeConfidenceThreshold = 500;
 const swipePower = (offset: number, velocity: number) => {
     return Math.abs(offset) * velocity;
 };
@@ -67,10 +67,12 @@ export default function HeroCarousel({ storeMeta }: HeroCarouselProps) {
         <div className="relative overflow-hidden rounded-[2.5rem] bg-indigo-950 border border-amber-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col justify-center w-full h-full">
             {/* Placeholder Background - User will update this */}
             <div className="absolute inset-0 bg-slate-900">
-                {/* 
-                    TODO: Replace with generated image 
-                    <Image src="/path/to/image.jpg" fill className="object-cover opacity-60" />
-                 */}
+                <Image
+                    src="/images/store-welcome.png"
+                    fill
+                    className="object-cover opacity-60"
+                    alt="Welcome to our restaurant"
+                />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
             </div>
 
@@ -130,16 +132,16 @@ export default function HeroCarousel({ storeMeta }: HeroCarouselProps) {
                     className="absolute w-full h-full"
                 >
                     {pageIndex === 0 ? (
-                        <RamadanCountdown className="w-full h-full" />
-                    ) : (
                         <WelcomeCard />
+                    ) : (
+                        <RamadanCountdown className="w-full h-full" />
                     )}
                 </motion.div>
             </AnimatePresence>
 
             {/* Indicators */}
             {slideCount > 1 && (
-                <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-20">
+                <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-20 pointer-events-none">
                     {[...Array(slideCount)].map((_, i) => (
                         <button
                             key={i}
@@ -147,10 +149,11 @@ export default function HeroCarousel({ storeMeta }: HeroCarouselProps) {
                                 setDirection(i > pageIndex ? 1 : -1);
                                 setPage(i);
                             }}
-                            className={`w-2 h-2 rounded-full transition-all duration-300 ${i === pageIndex
-                                    ? 'bg-amber-400 w-6'
-                                    : 'bg-white/30 hover:bg-white/50'
+                            className={`pointer-events-auto rounded-full transition-all duration-300 ${i === pageIndex
+                                ? 'bg-amber-400 w-6 h-1.5'
+                                : 'bg-white/30 hover:bg-white/50 w-1.5 h-1.5'
                                 }`}
+                            style={{ minWidth: '6px', minHeight: '6px', padding: 0, border: 'none' }}
                         />
                     ))}
                 </div>
