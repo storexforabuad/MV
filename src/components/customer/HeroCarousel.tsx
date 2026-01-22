@@ -47,7 +47,7 @@ export default function HeroCarousel({ storeMeta }: HeroCarouselProps) {
 
     const paginate = (newDirection: number) => {
         if (slideCount <= 1) return;
-        setPage([page + newDirection, newDirection] as any);
+        setPage(page + newDirection);
         setDirection(newDirection);
     };
 
