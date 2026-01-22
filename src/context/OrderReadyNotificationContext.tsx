@@ -168,7 +168,7 @@ export const OrderReadyNotificationProvider: React.FC<{ children: React.ReactNod
       }
 
       // Update local state
-      setAcknowledgedOrderIds(prev => [...prev, ...orderIds]);
+      setAcknowledgedOrderIds(prev => [...(prev || []), ...orderIds]);
       setUnacknowledgedOrders([]);
       setIsModalOpen(false);
     } catch (error) {
@@ -185,7 +185,7 @@ export const OrderReadyNotificationProvider: React.FC<{ children: React.ReactNod
         await orderActions.acknowledgeOrders(customer.id, [orderId]);
       }
 
-      setAcknowledgedOrderIds(prev => [...prev, orderId]);
+      setAcknowledgedOrderIds(prev => [...(prev || []), orderId]);
 
       setUnacknowledgedOrders(prev => {
         const remaining = prev.filter(o => o.orderId !== orderId);

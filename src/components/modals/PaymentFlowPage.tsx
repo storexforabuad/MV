@@ -10,6 +10,8 @@ import { Customer } from '@/types/customer';
 import { addOrderToFirestore } from '@/app/actions/orderActions';
 import { isFoodBeverageProduct } from '@/utils/productHelpers';
 
+import { CartItem } from '@/lib/cartContext';
+
 interface PaymentFlowPageProps {
   storeMeta: StoreMeta;
   onEvidenceUploaded: (evidenceUrl: string, fileName: string) => void;
@@ -17,13 +19,17 @@ interface PaymentFlowPageProps {
   uploadedEvidence?: { url: string; fileName: string };
   total: number;
   customer: Customer | null;
-  product: Product;
-  quantity: number;
+  deliveryMethod: string;
+  orderNotes?: string;
+  // For single product
+  product?: Product;
+  quantity?: number;
   selectedSize?: string;
   selectedColor?: string;
   selectedSpiciness?: string;
   specialInstructions?: string;
-  deliveryMethod: string;
+  // For cart
+  cartItems?: CartItem[];
 }
 
 export default function PaymentFlowPage({
@@ -37,7 +43,9 @@ export default function PaymentFlowPage({
   selectedColor,
   selectedSpiciness,
   specialInstructions,
-  deliveryMethod
+  deliveryMethod,
+  orderNotes,
+  cartItems
 }: PaymentFlowPageProps) {
   const [isProcessing, setIsProcessing] = useState(false);
   const storeId = storeMeta.id || '';
@@ -51,27 +59,40 @@ export default function PaymentFlowPage({
     setIsProcessing(true);
     try {
       // 1. Create Pending Order
-      const productToOrder = {
-        ...product,
-        quantity,
-        selectedSize,
-        selectedColor,
-        selectedSpiciness: isFoodBeverageProduct(product) ? selectedSpiciness : undefined,
-        specialInstructions: isFoodBeverageProduct(product) ? specialInstructions : undefined,
-        storeId // Ensure storeId is present
-      };
+      let itemsToOrder: any[] = [];
+
+      if (cartItems && cartItems.length > 0) {
+        itemsToOrder = cartItems.map(item => ({
+          ...item,
+          storeId // Ensure storeId is present
+        }));
+      } else if (product) {
+        itemsToOrder = [{
+          ...product,
+          quantity,
+          selectedSize,
+          selectedColor,
+          selectedSpiciness: isFoodBeverageProduct(product) ? selectedSpiciness : undefined,
+          specialInstructions: isFoodBeverageProduct(product) ? specialInstructions : undefined,
+          storeId // Ensure storeId is present
+        }];
+      }
+
+      if (itemsToOrder.length === 0) {
+        throw new Error('No items to order');
+      }
 
       const referrerId = localStorage.getItem('referrerId');
 
       const newOrder = await addOrderToFirestore(
         customer.id,
-        [productToOrder],
+        itemsToOrder,
         storeMeta,
         customer,
         referrerId,
         false, // bonusApplied
         deliveryMethod as 'home' | 'pickup',
-        '', // orderNotes
+        orderNotes || '', // orderNotes
         undefined, // evidenceUrl
         undefined  // evidenceFileName
       );
@@ -81,6 +102,10 @@ export default function PaymentFlowPage({
       }
 
       // 2. Initialize Paystack with Order ID
+      const cartSummary = cartItems
+        ? `${cartItems.length} items`
+        : `${quantity}x ${product?.name}`;
+
       const response = await fetch('/api/paystack/initialize-transaction', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -90,7 +115,7 @@ export default function PaymentFlowPage({
           storeId,
           metadata: {
             orderId: newOrder.id,
-            cart_items: `${quantity}x ${product.name}`
+            cart_items: cartSummary
           }
         })
       });

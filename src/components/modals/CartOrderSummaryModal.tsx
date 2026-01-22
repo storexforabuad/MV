@@ -394,6 +394,10 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                             onBack={handleBackToSummary}
                             uploadedEvidence={uploadedEvidence}
                             total={total}
+                            customer={customer}
+                            cartItems={cartItems}
+                            deliveryMethod={deliveryMethod}
+                            orderNotes={orderNotes}
                           />
                         </div>
                       )}

@@ -2,6 +2,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, Suspense } from 'react';
+import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useVendor } from '@/context/VendorContext';
 import { verifyVendorByPhone } from '@/app/actions/vendorActions';
