@@ -79,7 +79,7 @@ const tipsData: Record<TabType, Tip[]> = {
       icon: Globe,
       iconColor: 'text-slate-600 dark:text-slate-300',
       iconBg: 'bg-slate-100 dark:bg-slate-800',
-      title: 'Bizcon Network Benefits',
+      title: 'Atlas Network Benefits',
       description: 'You\'re part of the Business Connect Network—powered by partnerships with Google, Paystack, and OPay. This means cutting-edge tech, secure payments, and growing customer reach for your store.',
       proTip: 'Tap the (Biz+Con)™ card to learn more about how the network helps you succeed!',
     },
@@ -88,7 +88,7 @@ const tipsData: Record<TabType, Tip[]> = {
       iconColor: 'text-amber-500',
       iconBg: 'bg-amber-100 dark:bg-amber-900/30',
       title: 'Ambassador Program',
-      description: 'Refer other businesses to join Bizcon and earn rewards! Progress through tiers (Bronze → Silver → Gold) as you refer more vendors. The more they succeed, the more you earn.',
+      description: 'Refer other businesses to join Atlas and earn rewards! Progress through tiers (Bronze → Silver → Gold) as you refer more vendors. The more they succeed, the more you earn.',
       proTip: 'Check the Ambassador Hub to track your referrals, see their progress, and unlock higher commission rates.',
     },
     {

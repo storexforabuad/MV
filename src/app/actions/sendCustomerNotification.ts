@@ -64,7 +64,7 @@ export async function sendCustomerNotification(
 
         // Construct deep link URL with query parameters
         // Use tinyurl format as requested
-        const deepLinkUrl = `https://tinyurl.com/bizcononline/${storeId}?open=orders&orderId=${orderId}`;
+        const deepLinkUrl = `https://tinyurl.com/atlasintl/${storeId}?open=orders&orderId=${orderId}`;
 
         // Send notification via FCM
         const message = {

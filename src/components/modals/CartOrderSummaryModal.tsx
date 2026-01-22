@@ -192,7 +192,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
         toast.success('Order placed! Redirecting to WhatsApp...');
 
         const itemsSummary = cartItems.map(item => {
-          const productUrl = `https://tinyurl.com/bizcononline/${storeId}/products/${item.id}`;
+          const productUrl = `https://tinyurl.com/atlasintl/${storeId}/products/${item.id}`;
           const colorText = item.selectedColor ? `🎨 *Color:* ${item.selectedColor}\n` : '';
           const sizeText = item.selectedSize ? `📏 *Size:* ${item.selectedSize}\n` : '';
           const unitText = item.productType === 'livestock' ? (item as any).priceUnit === 'kg' ? 'kg' : 'pcs' : '';

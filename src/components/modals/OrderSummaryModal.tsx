@@ -213,7 +213,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
         toast.success('Order placed! Redirecting to WhatsApp...');
 
-        const productUrl = `https://tinyurl.com/bizcononline/${storeId}/products/${product.id}`;
+        const productUrl = `https://tinyurl.com/atlasintl/${storeId}/products/${product.id}`;
         const message = `🛍️ *New Order Request*\n\n` +
           `Hello! I would like to order this item:\n\n` +
           `*${product.name}*\n` +

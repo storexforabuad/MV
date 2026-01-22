@@ -87,7 +87,7 @@ export default function PaymentSuccessPage() {
         let productDetails = '';
         if (order.products && order.products.length > 0) {
             productDetails = order.products.map((p: any) => {
-                const productUrl = `https://tinyurl.com/bizcononline/${storeId}/products/${p.id}`;
+                const productUrl = `https://tinyurl.com/atlasintl/${storeId}/products/${p.id}`;
                 return `• *${p.name}* (x${p.quantity || 1})\n🔗 ${productUrl}`;
             }).join('\n\n');
         }

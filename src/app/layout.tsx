@@ -39,12 +39,12 @@ export async function generateMetadata({ params }: { params: { storeId: string }
 
   // Default metadata if no storeId or store not found
   return {
-    title: "BizCon™ Network",
+    title: "Atlas™ Network",
     description: "Discover Authentic Products At Affordable Prices",
     appleWebApp: {
       capable: true,
       statusBarStyle: "default",
-      title: "BizCon™ Network",
+      title: "Atlas™ Network",
     },
     formatDetection: {
       telephone: false,

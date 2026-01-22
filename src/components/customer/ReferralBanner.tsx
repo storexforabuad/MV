@@ -17,7 +17,7 @@ const ReferralBanner = ({ storeId, storeName, onLoginClick }: ReferralBannerProp
   const { customer } = useCustomer();
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
-  const referralLink = customer ? `https://tinyurl.com/bizcononline/${storeId}?ref=${customer.referralCode}` : '';
+  const referralLink = customer ? `https://tinyurl.com/atlasintl/${storeId}?ref=${customer.referralCode}` : '';
   const commissionEarned = customer?.referralDataByStore?.[storeId]?.commissionEarned || 0;
 
   const shimmerEffectClasses = `

@@ -272,7 +272,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
         if (categories) {
             const formattedCategories = formatCategories(categories);
             const defaultStoreCaption = `🌟 Discover authentic ${formattedCategories} at affordable prices in the new ${storeName || 'Online Store'} Online Store! 🛒. Tap the link below:`;
-            const fullStoreUrl = `https://tinyurl.com/bizcononline/${storeId}`;
+            const fullStoreUrl = `https://tinyurl.com/atlasintl/${storeId}`;
             setShareMessage(`${defaultStoreCaption}\n${fullStoreUrl}`);
         }
     }, [categories, storeName, storeId]);
@@ -1216,7 +1216,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                 {activeShareModal === 'link' ? (
                                     <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
                                         <p className="text-sm text-gray-600 dark:text-gray-300 break-all font-mono">
-                                            {`https://tinyurl.com/bizcononline/${storeId}`}
+                                            {`https://tinyurl.com/atlasintl/${storeId}`}
                                         </p>
                                     </div>
                                 ) : (
@@ -1240,7 +1240,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                 <button
                                     type="button"
                                     className="flex-1 justify-center rounded-xl border border-transparent bg-purple-600 px-4 py-3 text-sm font-bold text-white hover:bg-purple-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 transition-all shadow-lg shadow-purple-500/30"
-                                    onClick={() => handleCopyShare(activeShareModal === 'link' ? `https://tinyurl.com/bizcononline/${storeId}` : shareMessage)}
+                                    onClick={() => handleCopyShare(activeShareModal === 'link' ? `https://tinyurl.com/atlasintl/${storeId}` : shareMessage)}
                                 >
                                     Copy
                                 </button>

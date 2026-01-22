@@ -69,7 +69,7 @@ export default function ExpensesModal({ isOpen, onClose, totalCommission, totalE
                     <Percent className="w-5 h-5 text-red-500 dark:text-red-400" />
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-800 dark:text-slate-100">Bizcon™ Commission</p>
+                    <p className="font-semibold text-slate-800 dark:text-slate-100">Atlas™ Commission</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Platform & network fees</p>
                   </div>
                 </div>

@@ -101,7 +101,7 @@ const ReferralCard: FC<ReferralCardProps> = ({ referral, ambassadorTier, onViewD
   const handleShare = async () => {
     if (!referral.refereeStoreId) return;
 
-    const storeUrl = `https://tinyurl.com/bizcononline/${referral.refereeStoreId}`;
+    const storeUrl = `https://tinyurl.com/atlasintl/${referral.refereeStoreId}`;
 
     let formattedCategories = 'great products';
     if (categories.length > 0) {
