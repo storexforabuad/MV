@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { db } from '@/lib/db';
+import { doc, getDoc } from 'firebase/firestore';
 
 export async function POST(request: NextRequest) {
     try {
@@ -10,23 +12,32 @@ export async function POST(request: NextRequest) {
 
         const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 
-        // Calculate commission (4%)
-        // In a real split payment scenario, we would use 'subaccount' field.
-        // For now, we initialize the transaction to the main account.
-        // The commission logic is handled by Paystack if we provide a subaccount.
-        // Since we don't have vendor subaccounts yet, we collect all and track commission in metadata.
+        // Fetch store subaccount code
+        let subaccountCode = null;
+        if (storeId) {
+            const storeRef = doc(db, 'stores', storeId);
+            const storeSnap = await getDoc(storeRef);
+            if (storeSnap.exists()) {
+                subaccountCode = storeSnap.data().paystackSubaccountCode;
+            }
+        }
 
-        const params = {
+        // Calculate commission (4.5%)
+        const params: any = {
             email,
             amount: Math.round(amount * 100), // Convert to kobo
             metadata: {
                 ...metadata,
                 storeId,
-                commission_percent: 4,
-                commission_amount: amount * 0.04
+                commission_percent: 4.5,
+                commission_amount: amount * 0.045
             },
-            callback_url: `${request.headers.get('origin')}/${storeId}/payment-success` // We will need to create this page or handle callback
+            callback_url: `${request.headers.get('origin')}/${storeId}/payment-success`
         };
+
+        if (subaccountCode) {
+            params.subaccount = subaccountCode;
+        }
 
         const response = await fetch('https://api.paystack.co/transaction/initialize', {
             method: 'POST',

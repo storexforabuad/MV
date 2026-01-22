@@ -25,10 +25,29 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
   // Form State
   const [formData, setFormData] = useState<Partial<StoreMeta>>({});
   const [initialData, setInitialData] = useState<Partial<StoreMeta>>({});
+  const [banks, setBanks] = useState<{ name: string; code: string }[]>([]);
+  const [fetchingBanks, setFetchingBanks] = useState(false);
 
   useEffect(() => {
     if (!storeId || !isOpen) return;
     let mounted = true;
+
+    // Fetch banks
+    (async () => {
+      try {
+        setFetchingBanks(true);
+        const res = await fetch('/api/paystack/banks');
+        const data = await res.json();
+        if (data.banks && mounted) {
+          setBanks(data.banks);
+        }
+      } catch (err) {
+        console.error('Failed to fetch banks', err);
+      } finally {
+        if (mounted) setFetchingBanks(false);
+      }
+    })();
+
     (async () => {
       try {
         setFetching(true);
@@ -63,6 +82,39 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
       }, {} as any);
 
       await updateDoc(ref, dataToUpdate);
+
+      // Trigger Paystack Subaccount creation/update if bank details changed
+      if (
+        formData.bankAccountNumber &&
+        formData.bankCode &&
+        formData.name &&
+        (formData.bankAccountNumber !== initialData.bankAccountNumber ||
+          formData.bankCode !== initialData.bankCode)
+      ) {
+        try {
+          const subRes = await fetch('/api/paystack/subaccount', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              storeId,
+              businessName: formData.name,
+              settlementBank: formData.bankCode,
+              accountNumber: formData.bankAccountNumber,
+              subaccountCode: formData.paystackSubaccountCode
+            })
+          });
+          const subData = await subRes.json();
+          if (subData.status) {
+            setFormData(prev => ({ ...prev, paystackSubaccountCode: subData.subaccount_code }));
+            toast.success('Payout subaccount synchronized');
+          } else {
+            toast.error(`Payout sync failed: ${subData.error}`);
+          }
+        } catch (err) {
+          console.error('Subaccount sync error', err);
+        }
+      }
+
       setInitialData(formData); // Update initial data after successful save
       toast.success('Account details saved successfully');
       handleClose();
@@ -378,12 +430,24 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Bank Name</label>
-                          <input
-                            value={formData.bankName || ''}
-                            onChange={e => updateField('bankName', e.target.value)}
-                            className="w-full p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
-                            placeholder="e.g. First Bank"
-                          />
+                          <select
+                            value={formData.bankCode || ''}
+                            onChange={e => {
+                              const selectedBank = banks.find(b => b.code === e.target.value);
+                              setFormData(prev => ({
+                                ...prev,
+                                bankCode: e.target.value,
+                                bankName: selectedBank?.name || ''
+                              }));
+                            }}
+                            className="w-full p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:opacity-50"
+                            disabled={fetchingBanks}
+                          >
+                            <option value="">{fetchingBanks ? 'Loading banks...' : 'Select your bank'}</option>
+                            {banks.map(bank => (
+                              <option key={bank.code} value={bank.code}>{bank.name}</option>
+                            ))}
+                          </select>
                         </div>
                       </div>
                     )}

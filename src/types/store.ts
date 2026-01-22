@@ -49,6 +49,8 @@ export interface StoreMeta {
   bankAccountName?: string;
   bankAccountNumber?: string;
   bankName?: string;
+  bankCode?: string;
+  paystackSubaccountCode?: string;
 
   // Subscription Management
   subscriptionStatus?: 'trial' | 'active' | 'past_due' | 'cancelled' | 'expired';
