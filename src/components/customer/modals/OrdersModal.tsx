@@ -8,13 +8,14 @@ import { OrderDetailCard } from '../cards/OrderDetailCard';
 import { StoreMeta } from '@/types/store';
 import { Product } from '@/types/product';
 import { Customer } from '@/types/customer';
+import { CartItem } from '@/lib/cartContext';
 
 interface OrdersModalProps {
   isOpen: boolean;
   onClose: () => void;
   orders: Order[];
   storeId: string;
-  addOrder: (products: Product[], storeMeta: StoreMeta, customerInfo: Customer, referralCode: string | null, bonusApplied: boolean) => Promise<void>;
+  addOrder: (products: (Product | CartItem)[], storeMeta: StoreMeta, customerInfo: Customer, referralCode: string | null, bonusApplied?: boolean, deliveryMethod?: "home" | "pickup", orderNotes?: string, paymentEvidenceUrl?: string, paymentEvidenceFileName?: string) => Promise<Order>;
   storeMeta: StoreMeta;
   highlightOrderId?: string | null;
   onNotificationRequest?: () => Promise<{ success: boolean; error?: string }>;

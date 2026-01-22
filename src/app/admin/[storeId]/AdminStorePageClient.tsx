@@ -37,6 +37,8 @@ import dynamic from 'next/dynamic';
 import PreviewSkeleton from '../../../components/admin/PreviewSkeleton';
 import { markOnboardingAsCompleted } from '../../../app/actions/onboardingActions';
 import { useSpotlightContext } from '@/context/SpotlightContext';
+import NotificationCard from '../../../components/admin/NotificationCard';
+import { Notification } from '../../../types/notification';
 
 const OnboardingFlow = dynamic(() => import('../../../components/admin/onboarding/OnboardingFlow'), { ssr: false });
 const AddProductComposer = dynamic(() => import('../../../components/admin/AddProductComposer'), { ssr: false });
@@ -159,7 +161,66 @@ export default function AdminStorePageClient({
   const [deliveriesCount, setDeliveriesCount] = useState(initialDeliveryOrders.length);
   const [isHomeCardModalOpen, setIsHomeCardModalOpen] = useState(false);
   const [ambassadorTier, setAmbassadorTier] = useState<string>('bronze');
+
   const [highlightOrderId, setHighlightOrderId] = useState<string | null>(null);
+
+  // Mock Notifications
+  const [notifications, setNotifications] = useState<Notification[]>([
+    {
+      id: '1',
+      type: 'success',
+      title: 'New Order #1234',
+      message: 'Tunde just placed an order for ₦45,000.',
+      timestamp: Date.now() - 1000 * 60 * 5, // 5 mins ago
+      actionLabel: 'View Order',
+      isRead: false,
+    },
+    {
+      id: '2',
+      type: 'activity',
+      title: 'Product Trending 🔥',
+      message: "Your 'Blue Agbada' just hit 50 views today!",
+      timestamp: Date.now() - 1000 * 60 * 30, // 30 mins ago
+      actionLabel: 'Boost Post',
+      isRead: false,
+    },
+    {
+      id: '3',
+      type: 'action',
+      title: 'Low Stock Alert',
+      message: "Only 2 'Red Heels' left in Warehouse.",
+      timestamp: Date.now() - 1000 * 60 * 60 * 2, // 2 hours ago
+      actionLabel: 'Update Stock',
+      isRead: false,
+    },
+    {
+      id: '4',
+      type: 'critical',
+      title: 'Subscription Expiring',
+      message: 'Your trial ends in 2 days. Upgrade now to keep selling.',
+      timestamp: Date.now() - 1000 * 60 * 60 * 24, // 1 day ago
+      actionLabel: 'Upgrade Plan',
+      isRead: false,
+    }
+  ]);
+
+  const handleDismissNotification = (id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
+  const handleNotificationAction = (notification: Notification) => {
+    if (notification.actionLabel === 'View Order') {
+      setIsOrdersModalOpen(true);
+    } else if (notification.actionLabel === 'Update Stock') {
+      setIsManageModalOpen(true);
+    } else if (notification.actionLabel === 'Upgrade Plan') {
+      // Navigate to subscription page or modal
+      // router.push(`/${storeId}/admin/subscription`);
+      toast.success("Redirecting to subscription...");
+    } else {
+      toast.success(`Action: ${notification.actionLabel}`);
+    }
+  };
 
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -410,6 +471,11 @@ export default function AdminStorePageClient({
           <Suspense fallback={<AdminSkeleton contentOnly={true} />}>
             {activeSection === 'home' && (
               <div className={`mb-8 transition-opacity duration-500 ${uiVisible ? 'opacity-100' : 'opacity-0'}`}>
+                <NotificationCard
+                  notifications={notifications}
+                  onDismiss={handleDismissNotification}
+                  onAction={handleNotificationAction}
+                />
                 <AdminHomeCards
                   products={products}
                   categories={categories}

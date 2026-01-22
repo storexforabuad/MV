@@ -13,10 +13,11 @@ import { StoreMeta } from '@/types/store';
 import { Product } from '@/types/product';
 import { Customer } from '@/types/customer';
 import { formatWhatsAppNumber } from '@/utils/phoneUtils';
+import { CartItem } from '@/lib/cartContext';
 
 interface OrderDetailCardProps {
   order: Order;
-  addOrder: (products: Product[], storeMeta: StoreMeta, customerInfo: Customer, referralCode: string | null, bonusApplied: boolean) => Promise<void>;
+  addOrder: (products: (Product | CartItem)[], storeMeta: StoreMeta, customerInfo: Customer, referralCode: string | null, bonusApplied?: boolean, deliveryMethod?: "home" | "pickup", orderNotes?: string, paymentEvidenceUrl?: string, paymentEvidenceFileName?: string) => Promise<any>;
   storeMeta: StoreMeta;
   isHighlighted?: boolean;
 }
@@ -74,7 +75,7 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted }: O
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: customer.email || 'customer@example.com',
+          email: 'customer@example.com',
           amount: totalAmount,
           storeId: storeMeta.id,
           metadata: {
