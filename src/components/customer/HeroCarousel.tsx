@@ -41,8 +41,8 @@ export default function HeroCarousel({ storeMeta }: HeroCarouselProps) {
     const [page, setPage] = useState(0);
     const [direction, setDirection] = useState(0);
 
-    // Only show the second slide if it's a restaurant
-    const showWelcomeSlide = storeMeta?.storeType === 'restaurant';
+    // Only show the second slide if it's a restaurant or fashion store
+    const showWelcomeSlide = storeMeta?.storeType === 'restaurant' || storeMeta?.storeType === 'fashion';
     const slideCount = showWelcomeSlide ? 2 : 1;
 
     const paginate = (newDirection: number) => {
@@ -63,45 +63,55 @@ export default function HeroCarousel({ storeMeta }: HeroCarouselProps) {
         return () => clearInterval(timer);
     }, [page, slideCount]);
 
-    const WelcomeCard = () => (
-        <div className="relative overflow-hidden rounded-[2.5rem] bg-indigo-950 border border-amber-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col justify-center w-full h-full">
-            {/* Placeholder Background - User will update this */}
-            <div className="absolute inset-0 bg-slate-900">
-                <Image
-                    src="/images/store-welcome.png"
-                    fill
-                    className="object-cover opacity-60"
-                    alt="Welcome to our restaurant"
-                />
-                <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
-            </div>
+    const WelcomeCard = () => {
+        const isFashion = storeMeta?.storeType === 'fashion';
+        const welcomeImage = isFashion ? '/images/fashion-welcome.png' : '/images/store-welcome.png';
+        const badgeText = isFashion ? 'Bespoke Fashion' : 'Premium Dining';
+        const welcomeTitle = isFashion ? 'Welcome to' : 'Welcome to';
+        const welcomeSubtitle = isFashion ? (storeMeta?.name || 'Our Atelier') : (storeMeta?.name || 'Our Restaurant');
+        const description = isFashion
+            ? 'Discover timeless elegance and contemporary style, tailored for the modern individual.'
+            : 'Experience the finest culinary delights, crafted with passion and tradition.';
 
-            <div className="relative z-10 px-8 py-8 flex flex-col justify-center h-full items-start text-left gap-4">
-                <div className="space-y-2">
-                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 backdrop-blur-sm">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                        <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">
-                            Premium Dining
-                        </span>
-                    </div>
-
-                    <h3 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-none">
-                        Welcome to <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-500">
-                            {storeMeta?.name || 'Our Restaurant'}
-                        </span>
-                    </h3>
-
-                    <p className="text-sm text-gray-300 max-w-[280px] font-medium leading-relaxed">
-                        Experience the finest culinary delights, crafted with passion and tradition.
-                    </p>
+        return (
+            <div className="relative overflow-hidden rounded-[2.5rem] bg-indigo-950 border border-amber-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col justify-center w-full h-full">
+                <div className="absolute inset-0 bg-slate-900">
+                    <Image
+                        src={welcomeImage}
+                        fill
+                        className="object-cover opacity-60"
+                        alt={badgeText}
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
                 </div>
-            </div>
 
-            {/* Decorative shine */}
-            <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-amber-500/20 blur-[60px] rounded-full pointer-events-none" />
-        </div>
-    );
+                <div className="relative z-10 px-8 py-8 flex flex-col justify-center h-full items-start text-left gap-4">
+                    <div className="space-y-2">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 backdrop-blur-sm">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                            <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">
+                                {badgeText}
+                            </span>
+                        </div>
+
+                        <h3 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-none">
+                            {welcomeTitle} <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-500">
+                                {welcomeSubtitle}
+                            </span>
+                        </h3>
+
+                        <p className="text-sm text-gray-300 max-w-[280px] font-medium leading-relaxed">
+                            {description}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Decorative shine */}
+                <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-amber-500/20 blur-[60px] rounded-full pointer-events-none" />
+            </div>
+        );
+    };
 
     return (
         <div className="relative mx-4 mb-6 h-[220px] overflow-hidden rounded-[2.5rem]">
@@ -131,7 +141,7 @@ export default function HeroCarousel({ storeMeta }: HeroCarouselProps) {
                     }}
                     className="absolute w-full h-full"
                 >
-                    {pageIndex === 0 ? (
+                    {showWelcomeSlide && pageIndex === 0 ? (
                         <WelcomeCard />
                     ) : (
                         <RamadanCountdown className="w-full h-full" />
