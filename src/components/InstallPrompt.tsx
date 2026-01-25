@@ -6,13 +6,18 @@ import { useEffect, useState } from 'react';
 import { usePathname, useParams } from 'next/navigation';
 import { getStoreMeta } from '../lib/db';
 
-export default function InstallPrompt() {
+interface InstallPromptProps {
+  storeId?: string;
+}
+
+export default function InstallPrompt({ storeId: propStoreId }: InstallPromptProps) {
   const { showPrompt, handleInstall, handleDismiss } = useInstallPrompt();
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith('/admin') || pathname === '/signin';
   const isRoadmap = pathname === '/devteam/roadmap';
   const params = useParams();
-  const storeId = typeof params?.storeId === 'string' ? params.storeId : Array.isArray(params?.storeId) ? params.storeId[0] : '';
+
+  const storeId = propStoreId || (typeof params?.storeId === 'string' ? params.storeId : Array.isArray(params?.storeId) ? params.storeId[0] : '');
   const [storeName, setStoreName] = useState('');
 
   useEffect(() => {
