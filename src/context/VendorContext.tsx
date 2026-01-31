@@ -48,9 +48,11 @@ export const VendorProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // Temporarily disable the vendor lookup/login modal so vendors can access admin freely.
+  // Keep the function signature for API compatibility; revert to re-enable modal.
   const promptLogin = (storeId?: string) => {
-    if (storeId) setPendingStoreId(storeId);
-    setIsLoginModalOpen(true);
+    // no-op: intentionally not opening the login modal
+    return;
   };
 
   const handleLoginSuccess = async (v: Vendor) => {

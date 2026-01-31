@@ -34,6 +34,7 @@ import MobileNav from '../../../components/admin/MobileNav';
 import FloatingActionButton from '../../../components/admin/FloatingActionButton';
 import AdminHomeCards from '../../../components/admin/AdminHomeCards';
 import AdminInvoicePanel from '../../../components/admin/AdminInvoicePanel';
+import InstallPrompt from '../../../components/InstallPrompt';
 import dynamic from 'next/dynamic';
 import PreviewSkeleton from '../../../components/admin/PreviewSkeleton';
 import { markOnboardingAsCompleted } from '../../../app/actions/onboardingActions';
@@ -466,6 +467,9 @@ export default function AdminStorePageClient({
           storeMeta={storeMeta}
         />
       )}
+
+      {/* Install prompt for vendors to install their admin app */}
+      <InstallPrompt storeId={storeId} />
 
       {activeSection !== 'preview' ? (
         <main className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">
