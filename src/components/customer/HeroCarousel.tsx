@@ -66,11 +66,11 @@ export default function HeroCarousel({ storeMeta }: HeroCarouselProps) {
     const WelcomeCard = () => {
         const isFashion = storeMeta?.storeType === 'fashion';
         const welcomeImage = isFashion ? '/images/fashion-welcome.png' : '/images/store-welcome.png';
-        const badgeText = isFashion ? 'Bespoke Fashion' : 'Premium Dining';
+        const badgeText = isFashion ? 'RTW Fashion' : 'Premium Dining';
         const welcomeTitle = isFashion ? 'Welcome to' : 'Welcome to';
         const welcomeSubtitle = isFashion ? (storeMeta?.name || 'Our Atelier') : (storeMeta?.name || 'Our Restaurant');
         const description = isFashion
-            ? 'Discover timeless elegance and contemporary style, tailored for the modern individual.'
+            ? 'Discover trusted Ready-to-Wear fashion and household essentials from a brand you can rely on. Quality, style, and value combined.'
             : 'Experience the finest culinary delights, crafted with passion and tradition.';
 
         return (
@@ -85,23 +85,33 @@ export default function HeroCarousel({ storeMeta }: HeroCarouselProps) {
                     <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
                 </div>
 
-                <div className="relative z-10 px-8 py-8 flex flex-col justify-center h-full items-start text-left gap-4">
+                <div className="relative z-10 px-6 sm:px-8 py-6 sm:py-8 flex flex-col justify-center h-full items-start text-left gap-4">
                     <div className="space-y-2">
-                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 backdrop-blur-sm">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                            <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">
-                                {badgeText}
-                            </span>
+                        <div className="flex flex-wrap gap-2 items-center">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 backdrop-blur-sm">
+                                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                                <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">
+                                    {badgeText}
+                                </span>
+                            </div>
+                            {isFashion && (
+                                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 backdrop-blur-sm">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
+                                    <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">
+                                        Household Items
+                                    </span>
+                                </div>
+                            )}
                         </div>
 
-                        <h3 className="text-3xl sm:text-4xl font-black text-white tracking-tight leading-none">
+                        <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-none break-words">
                             {welcomeTitle} <br />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 to-amber-500">
                                 {welcomeSubtitle}
                             </span>
                         </h3>
 
-                        <p className="text-sm text-gray-300 max-w-[280px] font-medium leading-relaxed">
+                        <p className="text-sm text-gray-300 max-w-xs sm:max-w-sm font-medium leading-relaxed line-clamp-3">
                             {description}
                         </p>
                     </div>
