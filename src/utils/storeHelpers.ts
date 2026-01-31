@@ -5,12 +5,19 @@
 
 /**
  * Determines if a store type should use the new payment flow (two-page modal with payment evidence upload).
- * Currently only 'restaurant' uses this flow, but can be expanded to other store types.
+ * Currently only 'fashion' and 'restaurant' use this flow, but only if they don't have a subscription.
+ * Subscription stores always use WhatsApp preview checkout instead.
  * 
- * @param storeType - The type of store ('restaurant', 'clothing', 'livestock', etc.)
+ * @param storeType - The type of store ('restaurant', 'fashion', 'livestock', etc.)
+ * @param subscriptionStatus - The subscription status of the store (trial, active, past_due, cancelled, expired, or undefined)
  * @returns true if the store should use the payment flow, false otherwise
  */
-export function shouldUsePaymentFlow(storeType: string | undefined): boolean {
+export function shouldUsePaymentFlow(storeType: string | undefined, subscriptionStatus: string | undefined): boolean {
+  // Subscription stores always use WhatsApp checkout, never Paystack
+  if (subscriptionStatus) {
+    return false;
+  }
+  // Only non-subscription fashion and restaurant stores use payment flow
   return storeType === 'fashion' || storeType === 'restaurant';
 }
 
