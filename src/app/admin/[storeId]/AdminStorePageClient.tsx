@@ -308,44 +308,48 @@ export default function AdminStorePageClient({
   useEffect(() => {
     // Validate vendor from localStorage/context on admin page load
     // Wait for vendor initial loading to complete to avoid race where vendor is still being read from localStorage
-    (async () => {
-      if (!storeId) return;
-      if (vendorLoading) return; // still initializing vendor from storage
+    // Temporarily disable vendor verification/redirect so vendors can access admin freely.
+    // To re-enable: remove the if (false) guard and restore original verification logic.
+    if (false) {
+      (async () => {
+        if (!storeId) return;
+        if (vendorLoading) return; // still initializing vendor from storage
 
-      // If no vendor present, open vendor login modal and wait for login
-      if (!vendor) {
-        // open vendor login modal for this store
-        try {
-          promptLogin(storeId);
-        } catch (e) {
-          // fallback to redirect to storefront if promptLogin not available
-          router.push(`/${storeId}`);
-        }
-        return;
-      }
-
-      try {
-        const res = await verifyVendorByPhone(storeId, vendor.phone);
-        if (!res.success) {
-          // Allow a fallback when the stored vendor session explicitly targets this storeId
-          // This handles cases where phone normalization mismatches occur but the vendor was previously
-          // authenticated for the same store and saved in localStorage.
-          if (vendor.storeId === storeId) {
-            // treat as valid session
-            return;
+        // If no vendor present, open vendor login modal and wait for login
+        if (!vendor) {
+          // open vendor login modal for this store
+          try {
+            promptLogin(storeId);
+          } catch (e) {
+            // fallback to redirect to storefront if promptLogin not available
+            router.push(`/${storeId}`);
           }
-          // clear and redirect to storefront when vendor is not valid for this store
+          return;
+        }
+
+        try {
+          const res = await verifyVendorByPhone(storeId, vendor.phone);
+          if (!res.success) {
+            // Allow a fallback when the stored vendor session explicitly targets this storeId
+            // This handles cases where phone normalization mismatches occur but the vendor was previously
+            // authenticated for the same store and saved in localStorage.
+            if (vendor.storeId === storeId) {
+              // treat as valid session
+              return;
+            }
+            // clear and redirect to storefront when vendor is not valid for this store
+            setVendor(null);
+            router.push(`/${storeId}`);
+          }
+        } catch (err) {
+          console.error('Error validating vendor on admin load', err);
+          // On error, be conservative but allow vendor if their session storeId matches
+          if (vendor.storeId === storeId) return;
           setVendor(null);
           router.push(`/${storeId}`);
         }
-      } catch (err) {
-        console.error('Error validating vendor on admin load', err);
-        // On error, be conservative but allow vendor if their session storeId matches
-        if (vendor.storeId === storeId) return;
-        setVendor(null);
-        router.push(`/${storeId}`);
-      }
-    })();
+      })();
+    }
 
     if (searchParams && searchParams.get('open') === 'posts') {
       setIsPostsModalOpen(true);

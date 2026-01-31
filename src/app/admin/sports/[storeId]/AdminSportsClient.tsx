@@ -26,33 +26,38 @@ export default function AdminSportsClient({ storeMeta, storeId: propStoreId }: A
   const storeId = storeMeta?.id || propStoreId || '';
 
   useEffect(() => {
-    (async () => {
-      if (!storeId) return;
-      if (vendorLoading) return; // still initializing vendor from storage
+    // Temporarily disable vendor verification/redirect so vendors can access admin freely.
+    // To re-enable: remove the if (false) guard and restore original verification logic.
+    if (false) {
+      (async () => {
+        if (!storeId) return;
+        if (vendorLoading) return; // still initializing vendor from storage
 
-      if (!vendor) {
-        try {
-          promptLogin(storeId);
-        } catch (e) {
-          router.push(`/sports/${encodeURIComponent(storeId)}`);
-        }
-        return;
-      }
-
-      try {
-        const res = await verifyVendorByPhone(storeId, vendor.phone);
-        if (!res.success) {
-          setVendor(null);
-          router.push(`/sports/${encodeURIComponent(storeId)}`);
+        if (!vendor) {
+          try {
+            promptLogin(storeId);
+          } catch (e) {
+            router.push(`/sports/${encodeURIComponent(storeId)}`);
+          }
           return;
         }
-        setAuthorized(true);
-      } catch (err) {
-        console.error('Error validating vendor on sports admin load', err);
-        setVendor(null);
-        router.push(`/sports/${encodeURIComponent(storeId)}`);
-      }
-    })();
+
+        try {
+          const res = await verifyVendorByPhone(storeId, vendor.phone);
+          if (!res.success) {
+            setVendor(null);
+            router.push(`/sports/${encodeURIComponent(storeId)}`);
+            return;
+          }
+          setAuthorized(true);
+        } catch (err) {
+          console.error('Error validating vendor on sports admin load', err);
+          setVendor(null);
+          router.push(`/sports/${encodeURIComponent(storeId)}`);
+        }
+      })();
+    }
+    setAuthorized(true);
   }, [storeId, vendor, vendorLoading]);
 
   if (vendorLoading || !authorized) {
