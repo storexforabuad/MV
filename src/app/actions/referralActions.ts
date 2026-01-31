@@ -15,6 +15,7 @@ import {
 import { StoreMeta } from '@/types/store';
 import { TIER_DETAILS } from '@/types/subscription';
 import { subDays, startOfDay, endOfDay, isWithinInterval, addYears } from 'date-fns';
+import { commissionEndDate, remainingWeeksUntil, projectedTotalFromWeekly } from '@/utils/commission';
 
 export interface ReferralNotification {
     id: string;
@@ -41,6 +42,9 @@ export interface ReferralStoreStats {
         weeklyAmount: number;
         totalEarned: number; // This would ideally be fetched from a log, but for now we calculate current weekly
         isEligible: boolean;
+        projected5YearTotal?: number;
+        totalRemainingCommission?: number;
+        periodEnd?: string;
     };
     whatsapp: string;
 }
@@ -170,6 +174,10 @@ export async function getReferralDashboardData(referralCode: string): Promise<Re
 
             // Only calculate commission if store is active (subscribed)
             const weeklyCommission = (isEligible && status === 'active') ? (weeklyFee * (commissionPercentage / 100)) : 0;
+            const periodEnd = commissionEndDate(referralDate, 5);
+            const remainingWeeks = remainingWeeksUntil(referralDate, 5);
+            const projected5YearTotal = projectedTotalFromWeekly(weeklyCommission, 5);
+            const totalRemainingCommission = weeklyCommission * remainingWeeks;
 
             return {
                 id: storeId,
@@ -186,7 +194,10 @@ export async function getReferralDashboardData(referralCode: string): Promise<Re
                 commission: {
                     weeklyAmount: weeklyCommission,
                     totalEarned: 0, // Placeholder for now
-                    isEligible
+                    isEligible,
+                    projected5YearTotal: Math.round(projected5YearTotal),
+                    totalRemainingCommission: Math.round(totalRemainingCommission),
+                    periodEnd: periodEnd.toISOString()
                 },
                 whatsapp: data.whatsapp || ''
             };

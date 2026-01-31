@@ -405,6 +405,16 @@ function TierModalContent({ initialData }: any) {
 
     return (
         <div className="space-y-4">
+            <div className="bg-slate-800/30 border border-slate-800 rounded-2xl p-4">
+                <h4 className="text-sm font-black text-white mb-2">How commissions are calculated</h4>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                    You earn a share of Atlas's platform fee on each referred store's revenue. Formula: <span className="font-bold text-white">Weekly commission = sum(revenue last 7 days) × 4.5% × your tier%</span>.
+                </p>
+                <p className="text-[11px] text-slate-500 mt-2">
+                    Example: If a referred store made ₦100,000 in the last 7 days, Atlas fee = ₦4,500. As a <span className="font-bold">Pro (20%)</span> you earn ₦900 for that store that week.
+                </p>
+            </div>
+
             {tiers.map((t) => {
                 const isCurrent = initialData.tier.name === t.name;
                 return (
@@ -483,16 +493,18 @@ function ActiveModalContent({ initialData }: any) {
 }
 
 function EarningsModalContent({ initialData, formatCurrency }: any) {
-    const monthlyProjection = initialData.summary.totalWeeklyCommission * 4;
-    const yearlyProjection = monthlyProjection * 12;
+    const weekly = initialData.summary.totalWeeklyCommission || 0;
+    const monthlyProjection = weekly * 4;
+    const yearlyProjection = weekly * 52;
+    const fiveYearProjection = initialData.summary.total5YearProjection ?? (weekly * 52 * 5);
 
     return (
         <div className="space-y-4">
             <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-6 text-center">
-                <div className="text-3xl font-black text-emerald-400 mb-1">{formatCurrency(initialData.summary.totalWeeklyCommission)}</div>
+                <div className="text-3xl font-black text-emerald-400 mb-1">{formatCurrency(weekly)}</div>
                 <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Current Weekly Income</div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                 <div className="bg-slate-800/30 border border-slate-800 rounded-3xl p-5">
                     <div className="text-[10px] font-bold text-slate-500 uppercase mb-1">Monthly (Est)</div>
                     <div className="text-lg font-black text-white">{formatCurrency(monthlyProjection)}</div>
@@ -501,9 +513,17 @@ function EarningsModalContent({ initialData, formatCurrency }: any) {
                     <div className="text-[10px] font-bold text-slate-500 uppercase mb-1">Yearly (Est)</div>
                     <div className="text-lg font-black text-white">{formatCurrency(yearlyProjection)}</div>
                 </div>
+                <div className="bg-slate-800/30 border border-slate-800 rounded-3xl p-5">
+                    <div className="text-[10px] font-bold text-slate-500 uppercase mb-1">5-Year Projection</div>
+                    <div className="text-lg font-black text-white">{formatCurrency(fiveYearProjection)}</div>
+                </div>
+                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-3xl p-5">
+                    <div className="text-[10px] font-bold text-slate-700 uppercase mb-1">Total Remaining</div>
+                    <div className="text-lg font-black text-emerald-400">{formatCurrency(initialData.summary.totalRemainingCommission || 0)}</div>
+                </div>
             </div>
             <p className="text-[10px] text-slate-500 text-center px-4 leading-relaxed">
-                *Projections are based on your current active stores and their subscription tiers. Earnings are paid out weekly.
+                *Projections include expected commission for up to 5 years per referred store. Earnings are paid out weekly.
             </p>
         </div>
     );
@@ -632,9 +652,22 @@ function StoreCard({ store, formatCurrency }: { store: ReferralStoreStats, forma
                         <div className="bg-emerald-500/5 border border-emerald-500/10 rounded-2xl p-3 flex items-start gap-3">
                             <Info className="w-4 h-4 text-emerald-400 mt-0.5" />
                             <div className="text-[11px] text-emerald-100/80 leading-relaxed">
-                                You earn commission on their weekly fee for 12 months.
+                                You earn commission on their weekly fee for up to 5 years.
                                 <br />
-                                <span className="text-emerald-400 font-bold">Commission Period Ends: {new Date(new Date(store.referralDate).setFullYear(new Date(store.referralDate).getFullYear() + 1)).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+                                <span className="text-emerald-400 font-bold">Commission Period Ends: {(() => {
+                                    try {
+                                        if (store.commission?.periodEnd) return new Date(store.commission.periodEnd).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+                                        return new Date(new Date(store.referralDate).setFullYear(new Date(store.referralDate).getFullYear() + 5)).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+                                    } catch (e) {
+                                        return '—';
+                                    }
+                                })()}</span>
+                                {store.commission?.projected5YearTotal ? (
+                                    <div className="text-[11px] text-slate-300 mt-2">Projected 5-year commission: <span className="font-black text-emerald-300">{formatCurrency(store.commission.projected5YearTotal)}</span></div>
+                                ) : null}
+                                {store.commission?.totalRemainingCommission ? (
+                                    <div className="text-[11px] text-slate-300">Remaining expected: <span className="font-black text-emerald-300">{formatCurrency(store.commission.totalRemainingCommission)}</span></div>
+                                ) : null}
                             </div>
                         </div>
 

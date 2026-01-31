@@ -1,18 +1,30 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { CheckCircle2, ArrowRight, Store, LayoutDashboard } from 'lucide-react';
-import Image from 'next/image';
+import { useEffect } from 'react';
+import { ArrowRight, LayoutDashboard } from 'lucide-react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import InstallPrompt from '@/components/InstallPrompt';
+import TickIcon from '@/components/start/TickIcon';
+import SuccessNextSteps from '@/components/start/SuccessNextSteps';
+import { sendEvent } from '@/lib/analytics';
+import dynamic from 'next/dynamic';
+
+const StorePreviewBar = dynamic(() => import('@/components/start/StorePreviewBar'), { ssr: false });
 
 export default function SuccessPage() {
     const searchParams = useSearchParams();
     const storeId = searchParams?.get('storeId') || '';
+    const adminHref = storeId ? `/admin/${storeId}` : '/admin';
+    const storeHref = storeId ? `/${storeId}` : '/';
+
+    useEffect(() => {
+        if (storeId) sendEvent('store_created', { storeId });
+    }, [storeId]);
 
     return (
-        <div className="min-h-screen bg-black text-white font-sans selection:bg-emerald-500/30 flex flex-col items-center justify-center p-6 relative overflow-hidden">
+        <div className="min-h-screen bg-white text-slate-900 font-sans selection:bg-emerald-500/30 flex flex-col items-center justify-center p-6 relative overflow-hidden">
             {/* Background Effects */}
             <div className="absolute inset-0 z-0">
                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-emerald-500/20 rounded-full blur-[120px] opacity-30" />
@@ -23,16 +35,15 @@ export default function SuccessPage() {
                     initial={{ scale: 0.8, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ duration: 0.5 }}
-                    className="mb-8 relative mx-auto w-64 h-48"
+                    className="mb-8 relative mx-auto w-36 h-36 flex items-center justify-center"
                 >
-                    <Image
-                        src="/images/start-success.png"
-                        alt="Success"
-                        fill
-                        className="object-contain"
-                        priority
-                    />
+                    <TickIcon className="w-36 h-36" />
                 </motion.div>
+
+                {/* Store preview bar */}
+                <div className="mb-4">
+                    <StorePreviewBar storeId={storeId} />
+                </div>
 
                 <motion.h1
                     initial={{ y: 20, opacity: 0 }}
@@ -58,20 +69,27 @@ export default function SuccessPage() {
                     transition={{ delay: 0.4 }}
                     className="space-y-4"
                 >
-                    <div className="bg-slate-900/50 border border-slate-800 rounded-3xl p-6 backdrop-blur-sm">
+                    <div className="mb-2">
+                        {/* Store preview and install CTA */}
+                        <div className="mb-3">
+                            {/* Rendered by StorePreviewBar - lazy loaded in place */}
+                        </div>
+                        {/* Keep InstallPrompt in case browser shows native prompt UI */}
                         <InstallPrompt storeId={storeId} />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
-                        <Link href="/admin" className="bg-slate-900 border border-slate-800 hover:bg-slate-800 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors">
+                        <Link href={adminHref} className="bg-slate-900 border border-slate-800 hover:bg-slate-800 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors">
                             <LayoutDashboard className="w-4 h-4" />
                             Dashboard
                         </Link>
-                        <Link href="/" className="bg-emerald-500 hover:bg-emerald-400 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors">
+                        <Link href={storeHref} className="bg-emerald-500 hover:bg-emerald-400 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-colors">
                             View Store
                             <ArrowRight className="w-4 h-4" />
                         </Link>
                     </div>
+
+                    <SuccessNextSteps storeId={storeId} />
                 </motion.div>
             </div>
         </div>

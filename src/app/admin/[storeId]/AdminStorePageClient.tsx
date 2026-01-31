@@ -472,11 +472,13 @@ export default function AdminStorePageClient({
           <Suspense fallback={<AdminSkeleton contentOnly={true} />}>
             {activeSection === 'home' && (
               <div className={`mb-8 transition-opacity duration-500 ${uiVisible ? 'opacity-100' : 'opacity-0'}`}>
-                <NotificationCard
-                  notifications={notifications}
-                  onDismiss={handleDismissNotification}
-                  onAction={handleNotificationAction}
-                />
+                {false && (
+                  <NotificationCard
+                    notifications={notifications}
+                    onDismiss={handleDismissNotification}
+                    onAction={handleNotificationAction}
+                  />
+                )}
                 <AdminHomeCards
                   products={products}
                   categories={categories}
