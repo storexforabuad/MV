@@ -169,7 +169,7 @@ export async function getReferralDashboardData(referralCode: string): Promise<Re
             const referralDate = (data.referralDate as Timestamp)?.toDate() || new Date();
             const isEligible = isWithinInterval(now, {
                 start: referralDate,
-                end: addYears(referralDate, 1)
+                end: addYears(referralDate, 5)
             });
 
             // Only calculate commission if store is active (subscribed)

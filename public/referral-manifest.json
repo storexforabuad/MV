@@ -2,7 +2,7 @@
     "name": "MV Referral Dashboard",
     "short_name": "MV Referral",
     "description": "Track your referrals and earnings on MV.",
-    "start_url": ".",
+    "start_url": "/start/",
     "display": "standalone",
     "background_color": "#000000",
     "theme_color": "#10b981",

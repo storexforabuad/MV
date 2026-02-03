@@ -21,11 +21,16 @@ import {
     Trophy,
     Target,
     BarChart3,
-    Calendar
+    Calendar,
+    User,
+    Copy,
+    Check,
+    ExternalLink
 } from 'lucide-react';
 import { ReferralDashboardData, ReferralStoreStats, ReferralRegistration } from '@/app/actions/referralActions';
 import { PerformanceChart, MiniTrendChart } from './ReferralCharts';
 import Image from 'next/image';
+import Link from 'next/link';
 
 interface ReferralDashboardClientProps {
     initialData: ReferralDashboardData;
@@ -98,14 +103,23 @@ export default function ReferralDashboardClient({ initialData }: ReferralDashboa
                                 Referral<br className="sm:hidden" /> Dashboard
                             </h1>
                         </div>
-                        {showInstallBanner && (
-                            <button
-                                onClick={handleInstall}
-                                className="bg-emerald-500 text-black px-3 py-2 rounded-xl text-[9px] font-black uppercase shadow-lg shadow-emerald-500/20 active:scale-95 transition-all whitespace-nowrap mt-0.5"
+                        <div className="flex items-center gap-2">
+                            <Link
+                                href={`/start/${initialData.referralCode}/profile`}
+                                className="p-2.5 bg-slate-900 border border-slate-800 rounded-lg hover:bg-slate-800 transition-colors"
+                                title="Profile"
                             >
-                                Install App
-                            </button>
-                        )}
+                                <User className="w-5 h-5 text-emerald-400" />
+                            </Link>
+                            {showInstallBanner && (
+                                <button
+                                    onClick={handleInstall}
+                                    className="bg-emerald-500 text-black px-3 py-2 rounded-xl text-[9px] font-black uppercase shadow-lg shadow-emerald-500/20 active:scale-95 transition-all whitespace-nowrap"
+                                >
+                                    Install App
+                                </button>
+                            )}
+                        </div>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                         <div className="bg-slate-900/60 border border-slate-800 px-3 py-1.5 rounded-full flex items-center gap-2">
@@ -408,10 +422,10 @@ function TierModalContent({ initialData }: any) {
             <div className="bg-slate-800/30 border border-slate-800 rounded-2xl p-4">
                 <h4 className="text-sm font-black text-white mb-2">How commissions are calculated</h4>
                 <p className="text-[11px] text-slate-400 leading-relaxed">
-                    You earn a share of Atlas's platform fee on each referred store's revenue. Formula: <span className="font-bold text-white">Weekly commission = sum(revenue last 7 days) × 4.5% × your tier%</span>.
+                    You earn a percentage of each referred store's <span className="font-bold text-white">weekly subscription fee</span>. Formula: <span className="font-bold text-white">Weekly commission = Subscription Tier Price × Your Tier%</span>.
                 </p>
                 <p className="text-[11px] text-slate-500 mt-2">
-                    Example: If a referred store made ₦100,000 in the last 7 days, Atlas fee = ₦4,500. As a <span className="font-bold">Pro (20%)</span> you earn ₦900 for that store that week.
+                    Example: If a referred store is on <span className="font-bold">Pro tier (₦50,000/week)</span> and you're at <span className="font-bold">Pro (20%)</span>, you earn <span className="font-bold text-emerald-400">₦10,000 per week</span> for up to 5 years.
                 </p>
             </div>
 
@@ -671,6 +685,19 @@ function StoreCard({ store, formatCurrency }: { store: ReferralStoreStats, forma
                             </div>
                         </div>
 
+                        {/* Store Links */}
+                        <div className="space-y-2">
+                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Quick Links</div>
+                            <StoreLink 
+                                label="Storefront" 
+                                url={`tinyurl.com/atlasintl/${store.id}`}
+                            />
+                            <StoreLink 
+                                label="Admin Dashboard" 
+                                url={`tinyurl.com/atlasintl/admin/${store.id}`}
+                            />
+                        </div>
+
                         {/* Action Buttons */}
                         <div className="flex gap-2">
                             <button
@@ -684,6 +711,36 @@ function StoreCard({ store, formatCurrency }: { store: ReferralStoreStats, forma
                     </motion.div>
                 )}
             </AnimatePresence>
+        </div>
+    );
+}
+
+function StoreLink({ label, url }: { label: string; url: string }) {
+    const [copySuccess, setCopySuccess] = useState(false);
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(url);
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+    };
+
+    return (
+        <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-3 flex items-center justify-between">
+            <div className="flex items-center gap-2 min-w-0">
+                <ExternalLink className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
+                <span className="text-[10px] font-bold text-slate-300 truncate">{url}</span>
+            </div>
+            <button
+                onClick={handleCopy}
+                className="ml-2 p-1.5 hover:bg-slate-700 rounded-lg transition-colors flex-shrink-0"
+                title="Copy link"
+            >
+                {copySuccess ? (
+                    <Check className="w-3.5 h-3.5 text-emerald-400" />
+                ) : (
+                    <Copy className="w-3.5 h-3.5 text-slate-500" />
+                )}
+            </button>
         </div>
     );
 }
