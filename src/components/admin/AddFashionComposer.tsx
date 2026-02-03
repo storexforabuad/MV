@@ -69,6 +69,7 @@ interface BatchFashionProduct {
     colors: ColorVariant[];
     sizes: string[]; // Selected sizes
     sizeCategory: FashionSizeCategory; // 'clothing', 'shoes', or 'caps'
+    hasSizes: boolean; // Whether this product has sizes (defaults to false)
 }
 
 interface AddFashionComposerProps {
@@ -145,6 +146,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
         colors: [],
         sizes: [],
         sizeCategory: 'clothing', // Default to clothing
+        hasSizes: false, // Sizes are optional by default
     });
 
     const [isCategorySelectorOpen, setCategorySelectorOpen] = useState(false);
@@ -152,6 +154,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
     const [uploadProgress, setUploadProgress] = useState<UploadProgress[]>([]);
     const [isUploading, setIsUploading] = useState(false);
     const [activeColorId, setActiveColorId] = useState<string | null>(null);
+    const [highlightSizeSection, setHighlightSizeSection] = useState(false);
 
     // Lock body scroll when open
     useEffect(() => {
@@ -184,6 +187,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
             colors: [],
             sizes: [],
             sizeCategory: 'clothing',
+            hasSizes: false,
         });
         setUploadProgress([]);
         setIsUploading(false);
@@ -345,8 +349,22 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
     };
 
     const handleSubmit = async () => {
-        if (!productData.name || !productData.price || !productData.categoryId || productData.colors.length === 0 || productData.sizes.length === 0) {
-            toast.error('Please fill all required fields, add at least one color and one size.');
+        // Validate required fields
+        if (!productData.name || !productData.price || !productData.categoryId || productData.colors.length === 0) {
+            toast.error('Please fill all required fields and add at least one color.');
+            return;
+        }
+
+        // Validate sizes if hasSizes is enabled
+        if (productData.hasSizes && productData.sizes.length === 0) {
+            toast.error('Please select at least one size');
+            return;
+        }
+
+        // Validate that at least one color has images
+        const colorsWithImages = productData.colors.filter(c => c.images.length > 0);
+        if (colorsWithImages.length === 0) {
+            toast.error('Please add at least one image to a color');
             return;
         }
 
@@ -440,8 +458,17 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                 };
             }));
 
+            // Filter out colors with no images
+            const validColors = uploadedColors.filter(color => color.images.length > 0);
+
+            if (validColors.length === 0) {
+                toast.error('No valid colors with images. Please check your uploads.');
+                setIsUploading(false);
+                return;
+            }
+
             // Flatten all images for the main product image array
-            const allImages = uploadedColors.flatMap(c => c.images);
+            const allImages = validColors.flatMap(c => c.images);
 
             const productBase = {
                 id: '', // DB will assign
@@ -457,9 +484,9 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                 productType: 'fashion' as const,
                 categoryId: productData.categoryId,
                 category: categories.find(c => c.id === productData.categoryId)?.name || '',
-                colors: uploadedColors,
-                sizes: productData.sizes,
-                soldOutSizes: [],
+                colors: validColors,
+                sizes: productData.hasSizes ? productData.sizes : undefined, // Only include sizes if hasSizes is true
+                soldOutSizes: productData.hasSizes ? [] : undefined,
                 sizeCategory: productData.sizeCategory,
                 sizeChart: {
                     type: productData.sizeCategory === 'clothing'
@@ -492,6 +519,49 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
             toast.error('Failed to upload product.');
             setIsUploading(false);
         }
+    };
+
+    const handleNextStep = () => {
+        // Validate before advancing from step 1 (Variants)
+        if (currentStep === 1) {
+            // Check if colors without images exist
+            const colorsWithoutImages = productData.colors.filter(c => c.images.length === 0);
+            if (colorsWithoutImages.length > 0) {
+                const colorNames = colorsWithoutImages.map(c => c.name || 'Unnamed').join(', ');
+                toast.error(`Please add images to: ${colorNames}`);
+                return;
+            }
+
+            // Check size requirement if hasSizes is enabled
+            if (productData.hasSizes && productData.sizes.length === 0) {
+                toast.error('Please select at least one size');
+                setHighlightSizeSection(true);
+                setTimeout(() => setHighlightSizeSection(false), 3000);
+                return;
+            }
+        }
+
+        // Validate step 0 (Details)
+        if (currentStep === 0) {
+            if (!productData.name || !productData.categoryId) {
+                toast.error('Please fill in product name and category');
+                return;
+            }
+        }
+
+        // Validate step 2 (Pricing)
+        if (currentStep === 2) {
+            if (!productData.price || productData.price <= 0) {
+                toast.error('Please enter a valid price');
+                return;
+            }
+            if (productData.isPromo && (!productData.promoPrice || productData.promoPrice <= 0)) {
+                toast.error('Please enter a valid promo price');
+                return;
+            }
+        }
+
+        setCurrentStep(s => s + 1);
     };
 
     const renderStepContent = () => {
@@ -652,106 +722,141 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                     </div>
                                 )}
                             </AnimatePresence>
+
+                            {/* Warning for colors without images */}
+                            {activeColor && activeColor.images.length === 0 && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: -10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="p-4 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 flex items-start gap-3"
+                                >
+                                    <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                                    <div className="flex-1">
+                                        <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">Missing Image</p>
+                                        <p className="text-xs text-amber-700 dark:text-amber-300">Add at least one image to "{activeColor.name || 'this color'}" before proceeding</p>
+                                    </div>
+                                </motion.div>
+                            )}
                         </div>
 
                         {/* SIZES SECTION */}
-                        <div className="space-y-4 pt-6 border-t border-slate-200 dark:border-slate-700">
-                            <div className="flex justify-between items-center">
-                                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
-                                    <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
-                                        <Scissors className="w-4 h-4 text-purple-500" />
-                                    </div>
-                                    Sizes
-                                </h3>
-                                <button
-                                    onClick={() => setSizeGuideOpen(true)}
-                                    className="text-xs font-medium text-blue-600 dark:text-blue-400 flex items-center gap-1 hover:underline"
-                                >
-                                    <Ruler className="w-3 h-3" /> Size Guide
-                                </button>
-                            </div>
+                        <div className={`space-y-4 pt-6 border-t border-slate-200 dark:border-slate-700 rounded-xl p-4 transition-all duration-300 ${
+                            highlightSizeSection 
+                                ? 'bg-orange-50 dark:bg-orange-900/20 border-l-4 border-l-orange-500 shadow-lg' 
+                                : ''
+                        }`}>
+                            {/* Sizes Optional Toggle */}
+                            <ModernToggle 
+                                label="Add Sizes to This Product?" 
+                                description="Enable if this item comes in different sizes" 
+                                checked={productData.hasSizes} 
+                                onChange={checked => {
+                                    handleProductChange('hasSizes', checked);
+                                    if (!checked) handleProductChange('sizes', []); // Clear sizes if toggle is turned off
+                                }} 
+                            />
 
-                            {/* Size Category Toggle */}
-                            <div className="flex flex-wrap gap-2">
-                                <button
-                                    onClick={() => {
-                                        handleProductChange('sizeCategory', 'clothing');
-                                        handleProductChange('sizes', []);
-                                    }}
-                                    className={`flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'clothing'
-                                        ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
-                                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
-                                        }`}
-                                >
-                                    Clothing
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        handleProductChange('sizeCategory', 'shoes');
-                                        handleProductChange('sizes', []);
-                                    }}
-                                    className={`flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'shoes'
-                                        ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
-                                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
-                                        }`}
-                                >
-                                    Shoes
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        handleProductChange('sizeCategory', 'caps');
-                                        handleProductChange('sizes', []);
-                                    }}
-                                    className={`flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'caps'
-                                        ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
-                                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
-                                        }`}
-                                >
-                                    Caps
-                                </button>
-                                <button
-                                    onClick={() => {
-                                        handleProductChange('sizeCategory', 'jallabs');
-                                        handleProductChange('sizes', []);
-                                    }}
-                                    className={`flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'jallabs'
-                                        ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
-                                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
-                                        }`}
-                                >
-                                    Jallabs
-                                </button>
-                            </div>
-
-                            {/* Size Chips */}
-                            <div className="flex flex-wrap gap-2">
-                                {getSizesForFashionCategory(productData.sizeCategory).map((size) => {
-                                    const isSelected = productData.sizes.includes(size);
-                                    return (
+                            {/* Conditional Size Selection UI */}
+                            {productData.hasSizes && (
+                                <>
+                                    <div className="flex justify-between items-center">
+                                        <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center">
+                                                <Scissors className="w-4 h-4 text-purple-500" />
+                                            </div>
+                                            Sizes
+                                        </h3>
                                         <button
-                                            key={size}
-                                            onClick={() => toggleSize(size)}
-                                            className={`min-w-[3rem] h-10 px-3 rounded-lg border font-medium transition-all ${isSelected
-                                                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white shadow-md transform scale-105'
-                                                : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500'
+                                            onClick={() => setSizeGuideOpen(true)}
+                                            className="text-xs font-medium text-blue-600 dark:text-blue-400 flex items-center gap-1 hover:underline"
+                                        >
+                                            <Ruler className="w-3 h-3" /> Size Guide
+                                        </button>
+                                    </div>
+
+                                    {/* Size Category Toggle */}
+                                    <div className="flex flex-wrap gap-2">
+                                        <button
+                                            onClick={() => {
+                                                handleProductChange('sizeCategory', 'clothing');
+                                                handleProductChange('sizes', []);
+                                            }}
+                                            className={`flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'clothing'
+                                                ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
+                                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
                                                 }`}
                                         >
-                                            {size}
+                                            Clothing
                                         </button>
-                                    );
-                                })}
-                            </div>
-                            <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                                <AlertCircle className="w-3 h-3" /> {
-                                    productData.sizeCategory === 'clothing'
-                                        ? 'Standard Nigerian/UK sizing'
-                                        : productData.sizeCategory === 'shoes'
-                                            ? 'European shoe sizing'
-                                            : productData.sizeCategory === 'caps'
-                                                ? 'Nigerian cap sizing (circumference in inches)'
-                                                : 'Jallab sizing (52-62)'
-                                }
-                            </p>
+                                        <button
+                                            onClick={() => {
+                                                handleProductChange('sizeCategory', 'shoes');
+                                                handleProductChange('sizes', []);
+                                            }}
+                                            className={`flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'shoes'
+                                                ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
+                                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
+                                                }`}
+                                        >
+                                            Shoes
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                handleProductChange('sizeCategory', 'caps');
+                                                handleProductChange('sizes', []);
+                                            }}
+                                            className={`flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'caps'
+                                                ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
+                                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
+                                                }`}
+                                        >
+                                            Caps
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                handleProductChange('sizeCategory', 'jallabs');
+                                                handleProductChange('sizes', []);
+                                            }}
+                                            className={`flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'jallabs'
+                                                ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
+                                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
+                                                }`}
+                                        >
+                                            Jallabs
+                                        </button>
+                                    </div>
+
+                                    {/* Size Chips */}
+                                    <div className="flex flex-wrap gap-2">
+                                        {getSizesForFashionCategory(productData.sizeCategory).map((size) => {
+                                            const isSelected = productData.sizes.includes(size);
+                                            return (
+                                                <button
+                                                    key={size}
+                                                    onClick={() => toggleSize(size)}
+                                                    className={`min-w-[3rem] h-10 px-3 rounded-lg border font-medium transition-all ${isSelected
+                                                        ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white shadow-md transform scale-105'
+                                                        : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-500'
+                                                        }`}
+                                                >
+                                                    {size}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                                        <AlertCircle className="w-3 h-3" /> {
+                                            productData.sizeCategory === 'clothing'
+                                                ? 'Standard Nigerian/UK sizing'
+                                                : productData.sizeCategory === 'shoes'
+                                                    ? 'European shoe sizing'
+                                                    : productData.sizeCategory === 'caps'
+                                                        ? 'Nigerian cap sizing (circumference in inches)'
+                                                        : 'Jallab sizing (52-62)'
+                                        }
+                                    </p>
+                                </>
+                            )}
                         </div>
 
                     </motion.div>
@@ -947,7 +1052,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                             )}
 
                             {currentStep < 3 && (
-                                <button onClick={() => setCurrentStep(s => s + 1)} className="flex-1 py-3.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg">
+                                <button onClick={handleNextStep} className="flex-1 py-3.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg">
                                     Next <ChevronRight className="w-5 h-5" />
                                 </button>
                             )}

@@ -115,7 +115,7 @@ export interface FashionProduct extends BaseProduct {
     hex: string;
     images: string[];
   }[];
-  sizes: string[]; // Clothing: "6"-"20", Shoes: "38"-"46"
+  sizes?: string[]; // Clothing: "6"-"20", Shoes: "38"-"46". Optional if hasSizes is false
   soldOutSizes?: string[]; // Subset of sizes that are unavailable
 
   // Size Guide

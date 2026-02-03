@@ -213,13 +213,19 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
 
   const handlePlaceOrderClick = () => {
     if (!product) return;
-    if (productIsFashion && (!selectedColor || !selectedSize)) {
-      const missing = !selectedColor && !selectedSize
-        ? 'color and size'
-        : !selectedColor ? 'color' : 'size';
-      toast.error(`Please select a ${missing}`);
-      if (!selectedSize) triggerSizeHighlight();
-      return;
+    if (productIsFashion) {
+      const fashionProduct = product as FashionProduct;
+      const requiresSize = fashionProduct.sizes && fashionProduct.sizes.length > 0;
+      
+      if (!selectedColor) {
+        toast.error('Please select a color');
+        return;
+      }
+      if (requiresSize && !selectedSize) {
+        toast.error('Please select a size');
+        triggerSizeHighlight();
+        return;
+      }
     }
     if (isGeneralProduct(product) && product.sizeOption && !selectedSize) {
       toast.error('Please select a size first');
@@ -231,13 +237,19 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
 
   const handleToggleCart = () => {
     if (!product || !storeId) return;
-    if (productIsFashion && (!selectedColor || !selectedSize)) {
-      const missing = !selectedColor && !selectedSize
-        ? 'color and size'
-        : !selectedColor ? 'color' : 'size';
-      toast.error(`Please select a ${missing}`);
-      if (!selectedSize) triggerSizeHighlight();
-      return;
+    if (productIsFashion) {
+      const fashionProduct = product as FashionProduct;
+      const requiresSize = fashionProduct.sizes && fashionProduct.sizes.length > 0;
+      
+      if (!selectedColor) {
+        toast.error('Please select a color');
+        return;
+      }
+      if (requiresSize && !selectedSize) {
+        toast.error('Please select a size');
+        triggerSizeHighlight();
+        return;
+      }
     }
     if (isGeneralProduct(product) && product.sizeOption && !selectedSize) {
       toast.error('Please select a size first');
@@ -246,7 +258,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
     }
 
     setIsTogglingCart(true);
-    const cartId = productIsFashion ? `${product.id}-${selectedColor?.name}-${selectedSize}` : `${product.id}-${selectedSize}`;
+    const cartId = productIsFashion ? `${product.id}-${selectedColor?.name}-${selectedSize || ''}` : `${product.id}-${selectedSize || ''}`;
 
     if (isInCart) {
       dispatch({ type: 'REMOVE_ITEM', payload: { id: product.id, selectedSize, selectedColor: selectedColor?.name } });
@@ -268,7 +280,12 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
     }
 
     if (isFashionProduct(product)) {
-      return !!selectedColor && !!selectedSize && !product.soldOutSizes?.includes(selectedSize);
+      const fashionProduct = product as FashionProduct;
+      const requiresSize = fashionProduct.sizes && fashionProduct.sizes.length > 0;
+      
+      if (!selectedColor) return false;
+      if (requiresSize && (!selectedSize || fashionProduct.soldOutSizes?.includes(selectedSize))) return false;
+      return true;
     }
 
     if (isGeneralProduct(product)) {
@@ -456,17 +473,19 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                       </div>
                     </div>
 
-                    {/* Size Selector */}
-                    <div ref={sizeSectionRef} className="mb-4">
-                      <div className="flex justify-between items-center mb-2">
-                        <h3 className="text-sm font-medium text-gray-900 dark:text-white">Size</h3>
-                        <button onClick={() => setIsSizeGuideOpen(true)} className="text-sm font-medium text-green-600 hover:text-green-500 dark:text-green-400 dark:hover:text-green-300 flex items-center gap-1">
-                          <Info size={16} />
-                          <span>Size Guide</span>
-                        </button>
+                    {/* Size Selector - Only show if product has sizes */}
+                    {productIsFashion && (product as FashionProduct).sizes?.length ? (
+                      <div ref={sizeSectionRef} className="mb-4">
+                        <div className="flex justify-between items-center mb-2">
+                          <h3 className="text-sm font-medium text-gray-900 dark:text-white">Size</h3>
+                          <button onClick={() => setIsSizeGuideOpen(true)} className="text-sm font-medium text-green-600 hover:text-green-500 dark:text-green-400 dark:hover:text-green-300 flex items-center gap-1">
+                            <Info size={16} />
+                            <span>Size Guide</span>
+                          </button>
+                        </div>
+                        <SizeSelector selectedSize={selectedSize} onSizeSelect={setSelectedSize} sizes={(product as FashionProduct).sizes!} disabledSizes={(product as FashionProduct).soldOutSizes} highlight={highlightSizeSection} />
                       </div>
-                      <SizeSelector selectedSize={selectedSize} onSizeSelect={setSelectedSize} sizes={(product as FashionProduct).sizes} disabledSizes={(product as FashionProduct).soldOutSizes} highlight={highlightSizeSection} />
-                    </div>
+                    ) : null}
                   </div>
                 )}
 

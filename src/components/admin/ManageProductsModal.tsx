@@ -101,10 +101,14 @@ const ProductRow = React.memo(({
                     <div className="w-4 h-4 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[8px] font-bold border border-white dark:border-gray-800">+{product.colors.length - 3}</div>
                   )}
                 </div>
-                <span className="text-xs text-gray-500 dark:text-gray-400">
-                  {product.sizes.length} sizes
-                  {product.soldOutSizes && product.soldOutSizes.length > 0 && ` (${product.sizes.length - product.soldOutSizes.length} avail)`}
-                </span>
+                {product.sizes && product.sizes.length > 0 ? (
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {product.sizes.length} sizes
+                    {product.soldOutSizes && product.soldOutSizes.length > 0 && ` (${product.sizes.length - product.soldOutSizes.length} avail)`}
+                  </span>
+                ) : (
+                  <span className="text-xs text-gray-500 dark:text-gray-400">No sizes</span>
+                )}
                 {product.soldOut && <span className="px-2 py-0.5 text-xs font-medium text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-400 rounded-full">Sold Out</span>}
               </div>
             )}
