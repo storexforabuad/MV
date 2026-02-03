@@ -15,6 +15,7 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
   const pathname = usePathname();
   const isAdmin = pathname?.startsWith('/admin') || pathname === '/signin';
   const isRoadmap = pathname === '/devteam/roadmap';
+  const isReferralDashboard = /^\/(register|start)\/[^/]+\/dashboard\/?$/.test(pathname || '');
   const params = useParams();
 
   const storeId = propStoreId || (typeof params?.storeId === 'string' ? params.storeId : Array.isArray(params?.storeId) ? params.storeId[0] : '');
@@ -33,7 +34,7 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
     fetchStoreName();
   }, [storeId]);
 
-  if (!showPrompt || (!storeId && !isRoadmap)) return null;
+  if (!showPrompt || (!storeId && !isRoadmap && !isReferralDashboard)) return null;
 
   return (
     <>
@@ -51,9 +52,9 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
           <div className="flex flex-col items-start">
             <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
               <span className="text-xl">
-                {isRoadmap ? '🗺️' : '📱'}
+                {isRoadmap ? '🗺️' : isReferralDashboard ? '💰' : '📱'}
               </span>{' '}
-              {isRoadmap ? 'Install Scaling Roadmap' : isAdmin ? 'Install Control Center ' : `Get ${storeName} App`}
+              {isRoadmap ? 'Install Scaling Roadmap' : isReferralDashboard ? 'Install Your Dashboard' : isAdmin ? 'Install Control Center ' : `Get ${storeName} App`}
             </h3>
             <p className="mt-2 text-sm text-text-secondary space-y-2 leading-relaxed">
               {isRoadmap ? (
@@ -62,6 +63,13 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
                   <span className="flex items-center gap-2"><span>📅</span> Access your daily scaling routine</span>
                   <span className="flex items-center gap-2"><span>📈</span> Monitor growth metrics in real-time</span>
                   <span className="flex items-center gap-2"><span>🛠️</span> Access the marketing playbook anywhere</span>
+                </>
+              ) : isReferralDashboard ? (
+                <>
+                  <span className="flex items-center gap-2"><span>💰</span> Quick access to your dashboard</span>
+                  <span className="flex items-center gap-2"><span>📊</span> Track referral earnings in real-time</span>
+                  <span className="flex items-center gap-2"><span>🎯</span> Manage ambassador profile anytime</span>
+                  <span className="flex items-center gap-2"><span>⚡</span> Get instant notifications on new referrals</span>
                 </>
               ) : isAdmin ? (
                 <>

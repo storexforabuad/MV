@@ -6,6 +6,7 @@ import { SpotlightProvider, useSpotlightContext } from '@/context/SpotlightConte
 import { CustomerProvider } from '@/context/CustomerContext';
 import { VendorProvider } from '@/context/VendorContext';
 import { AnimatePresence, motion } from 'framer-motion';
+import { usePWARedirect } from '@/hooks/usePWARedirect';
 
 const InstallPrompt = dynamic(() => import('../components/InstallPrompt'), {
   ssr: false
@@ -38,11 +39,17 @@ function SpotlightOverlay() {
   );
 }
 
+function PWARedirectHandler() {
+  usePWARedirect();
+  return null;
+}
+
 export default function ClientProviders({ children }: { children: React.ReactNode }) {
   return (
     <CustomerProvider>
       <VendorProvider>
         <SpotlightProvider>
+          <PWARedirectHandler />
           {children}
           <InstallPrompt />
           <Toaster 
