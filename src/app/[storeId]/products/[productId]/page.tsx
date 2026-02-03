@@ -464,8 +464,8 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                     <div className="mb-4">
                       <h3 className="text-sm font-medium text-gray-900 dark:text-white mb-2">Color: <span className="font-normal">{selectedColor?.name || 'Select a color'}</span></h3>
                       <div className="flex flex-wrap gap-2">
-                        {(product as FashionProduct).colors.map((color) => (
-                          <button key={color.name} onClick={() => handleColorSelect(color)} className={`relative rounded-full h-8 w-8 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ${selectedColor?.name === color.name ? 'ring-2 ring-offset-2 ring-green-500' : ''}`}>
+                        {Array.from(new Map((product as FashionProduct).colors.map(c => [c.hex, c])).values()).map((color) => (
+                          <button key={color.hex} onClick={() => handleColorSelect(color)} className={`relative rounded-full h-8 w-8 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 ${selectedColor?.hex === color.hex ? 'ring-2 ring-offset-2 ring-green-500' : ''}`}>
                             <span className="sr-only">{color.name}</span>
                             <span style={{ backgroundColor: color.hex }} className="block h-full w-full rounded-full border border-black border-opacity-10" />
                           </button>
