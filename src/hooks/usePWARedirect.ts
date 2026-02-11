@@ -18,7 +18,7 @@ export function usePWARedirect() {
 
     try {
       // Check for query param fallback first
-      const codeFromQuery = searchParams.get('code');
+      const codeFromQuery = searchParams?.get('code');
       if (codeFromQuery) {
         localStorage.setItem(PWA_INTENDED_PATH_KEY, `/start/${codeFromQuery}/dashboard`);
         localStorage.setItem(PWA_PATH_TIMESTAMP_KEY, new Date().getTime().toString());

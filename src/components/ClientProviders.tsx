@@ -1,6 +1,7 @@
 
 'use client';
 
+import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { SpotlightProvider, useSpotlightContext } from '@/context/SpotlightContext';
 import { CustomerProvider } from '@/context/CustomerContext';
@@ -49,7 +50,9 @@ export default function ClientProviders({ children }: { children: React.ReactNod
     <CustomerProvider>
       <VendorProvider>
         <SpotlightProvider>
-          <PWARedirectHandler />
+          <Suspense fallback={null}>
+            <PWARedirectHandler />
+          </Suspense>
           {children}
           <InstallPrompt />
           <Toaster 
