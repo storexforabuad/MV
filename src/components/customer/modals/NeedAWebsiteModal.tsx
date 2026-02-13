@@ -175,7 +175,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                     Time to upgrade your side hustle to a business empire
                   </h1>
                   <p className="text-slate-300 text-base">
-                    Get a professional website for as little as <span className="font-bold text-amber-400">₦500/week</span> (50% OFF) in just 3 steps.
+                    Get a professional website for as little as <span className="font-bold text-amber-400">₦500/week</span> in just 3 steps.
                   </p>
                 </div>
 
@@ -192,7 +192,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                 <div className="space-y-2 pt-4">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-amber-400" />
-                    <span className="text-sm text-slate-300">Mobile-first professional design</span>
+                    <span className="text-sm text-slate-300">Upload up to 1000 products</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-amber-400" />
