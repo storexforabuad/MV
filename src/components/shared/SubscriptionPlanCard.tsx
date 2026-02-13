@@ -4,6 +4,7 @@ import { Check } from 'lucide-react';
 
 interface SubscriptionPlanCardProps {
   planId: string;
+  name?: string;
   promoPrice: number;
   realPrice: number;
   productLimit: number;
@@ -24,6 +25,7 @@ const SubscriptionPlanCard = ({
   featured,
   isSelected,
   onSelect,
+  name,
 }: SubscriptionPlanCardProps) => {
   return (
     <button
@@ -49,6 +51,10 @@ const SubscriptionPlanCard = ({
       )}
 
       <div className="text-left pt-2">
+        {/* Tier name */}
+        {name && (
+          <div className="mb-2 text-sm text-slate-300 font-semibold">{name}</div>
+        )}
         {/* Pricing */}
         <div className="mb-3">
           <div className="flex items-center gap-2 mb-1">

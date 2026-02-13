@@ -359,6 +359,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                         )}
 
                         <div className="text-left pt-2">
+                          <div className="mb-2 text-sm text-slate-300 font-semibold">{tier.name}</div>
                           <div className="mb-3">
                             <div className="flex items-center gap-2 mb-1">
                               <span className="text-sm text-slate-400 line-through">₦{tier.price.toLocaleString()}</span>

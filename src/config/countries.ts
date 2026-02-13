@@ -118,21 +118,21 @@ export const TIER_DETAILS = {
     name: 'Lite',
     price: 1000, // Display price (will be halved to 500 for promo)
     period: 'week',
-    productLimit: 100,
+    productLimit: 20,
     featured: false,
   },
   pro: {
     name: 'Pro',
     price: 2000, // Display price (will be halved to 1000 for promo)
     period: 'week',
-    productLimit: 500,
+    productLimit: 100,
     featured: true,
   },
   max: {
     name: 'Max',
     price: 7000, // Display price (will be halved to 3500 for promo)
     period: 'week',
-    productLimit: 2000,
+    productLimit: 1000,
     featured: false,
   },
 };
