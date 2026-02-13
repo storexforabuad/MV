@@ -24,7 +24,7 @@ import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
 import SizeSelector from '@/components/products/SizeSelector';
 import { SizePreferencesCache } from '@/lib/sizePreferencesCache';
 import SizeGuideModal from '@/components/products/SizeGuideModal';
-import ReferralBanner from '@/components/customer/ReferralBanner';
+import NeedAWebsiteBanner from '@/components/customer/NeedAWebsiteBanner';
 
 const ProductDetailSkeleton = dynamic(() => import('@/components/ProductDetailSkeleton'), { ssr: false });
 const AnimatedViewCount = dynamic(() => import('@/components/AnimatedViewCount'), {
@@ -593,10 +593,8 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
 
                 {/* Action Buttons */}
                 <div className="mt-8 -mx-4 sm:mx-0">
-                  <ReferralBanner
+                  <NeedAWebsiteBanner
                     storeId={storeId}
-                    storeName={storeMeta?.name || storeId}
-                    onLoginClick={() => setIsLoginModalOpen(true)}
                   />
                 </div>
               </>

@@ -18,7 +18,7 @@ import SkeletonLoader from '@/components/SkeletonLoader';
 import type { Product } from '@/types/product';
 import ConnectionErrorToast from '@/components/ConnectionErrorToast';
 import { ProductListCache } from '@/lib/productCache';
-import ReferralBanner from '@/components/customer/ReferralBanner';
+import NeedAWebsiteBanner from '@/components/customer/NeedAWebsiteBanner';
 import CustomerLookupModal from '@/components/customer/CustomerLookupModal';
 import NavigationStore, { NavigationState } from '@/lib/navigationStore';
 import { requestCustomerNotificationPermission } from '@/lib/requestCustomerNotifications';
@@ -391,10 +391,8 @@ export default function StorefrontPageClient({
         <div className="mt-2">
           <HeroCarousel storeMeta={storeMeta} />
         </div>
-        <ReferralBanner
+        <NeedAWebsiteBanner
           storeId={storeId}
-          storeName={storeName}
-          onLoginClick={() => setIsLoginModalOpen(true)}
         />
 
         {/* Store Closed Banner */}
