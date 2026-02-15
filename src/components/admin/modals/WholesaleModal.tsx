@@ -37,6 +37,8 @@ import {
 } from '@/app/actions/wholesaleActions';
 import { StoreMeta } from '@/types/store';
 import { WholesalePartner, WholesaleRequest } from '@/types/wholesale';
+import { PartnerDetailModal } from './PartnerDetailModal';
+import { OrderReviewModal } from './OrderReviewModal';
 import toast from 'react-hot-toast';
 
 interface WholesaleModalProps {
@@ -82,6 +84,17 @@ export default function WholesaleModal({
   const [selectedStore, setSelectedStore] = useState<StoreMeta | null>(null);
   const [requestMessage, setRequestMessage] = useState('');
 
+  // Partner detail modal
+  const [showPartnerDetail, setShowPartnerDetail] = useState(false);
+  const [selectedPartner, setSelectedPartner] = useState<WholesalePartner | null>(null);
+  const [partnerStoreData, setPartnerStoreData] = useState<StoreMeta | null>(null);
+
+  // Order review modal
+  const [showOrderReview, setShowOrderReview] = useState(false);
+  const [orderItems, setOrderItems] = useState<any[]>([]);
+  const [orderTotal, setOrderTotal] = useState(0);
+  const [orderPaymentTerms, setOrderPaymentTerms] = useState<0 | 7 | 14 | 30>(0);
+
   // Load data based on active tab
   useEffect(() => {
     if (!isOpen) return;
@@ -118,6 +131,40 @@ export default function WholesaleModal({
 
     loadData();
   }, [isOpen, activeTab, storeId, searchQuery, sortBy]);
+
+  // Load partner store data when partner is selected
+  useEffect(() => {
+    if (selectedPartner && showPartnerDetail) {
+      const loadPartnerData = async () => {
+        try {
+          // In a real app, you'd fetch from API
+          // For now, get from discoverable stores if available
+          const found = discoverableStores.find((s) => s.id === selectedPartner.partnerStoreId);
+          if (found) {
+            setPartnerStoreData(found);
+          } else {
+            // Fallback: create minimal store data from partner info
+            setPartnerStoreData({
+              id: selectedPartner.partnerStoreId,
+              name: selectedPartner.partnerStoreName,
+              logo: '',
+              category: selectedPartner.storeType ? [selectedPartner.storeType] : [],
+              followers: 0,
+              views: 0,
+              createdAt: selectedPartner.connectedAt,
+              owner: '',
+              products: [],
+              whatsapp: '',
+              wholesaleConfig: selectedPartner.wholesaleConfig,
+            } as StoreMeta);
+          }
+        } catch (error) {
+          console.error('Error loading partner data:', error);
+        }
+      };
+      loadPartnerData();
+    }
+  }, [selectedPartner, showPartnerDetail, discoverableStores]);
 
   const handleSendRequest = async (toStoreId: string) => {
     try {
@@ -343,6 +390,10 @@ export default function WholesaleModal({
                 partners={partners}
                 onPause={handlePausePartner}
                 onRemove={handleRemovePartner}
+                onPartnerClick={(partner) => {
+                  setSelectedPartner(partner);
+                  setShowPartnerDetail(true);
+                }}
               />
             )}
 
@@ -392,6 +443,60 @@ export default function WholesaleModal({
         onSend={() => selectedStore && handleSendRequest(selectedStore.id)}
         sending={loading}
       />
+
+      {/* Partner Detail Modal */}
+      {selectedPartner && partnerStoreData && (
+        <PartnerDetailModal
+          partner={partnerStoreData}
+          buyerStoreId={storeId}
+          isOpen={showPartnerDetail}
+          onClose={() => {
+            setShowPartnerDetail(false);
+            setSelectedPartner(null);
+            setPartnerStoreData(null);
+          }}
+          onOrderReview={(items, total, paymentTerms) => {
+            setOrderItems(items);
+            setOrderTotal(total);
+            setOrderPaymentTerms(paymentTerms as 0 | 7 | 14 | 30);
+            setShowPartnerDetail(false);
+            setShowOrderReview(true);
+          }}
+        />
+      )}
+
+      {/* Order Review Modal */}
+      {selectedPartner && partnerStoreData && (
+        <OrderReviewModal
+          partner={partnerStoreData}
+          buyerStoreId={storeId}
+          items={orderItems}
+          total={orderTotal}
+          paymentTermsDays={orderPaymentTerms}
+          isOpen={showOrderReview}
+          onClose={() => {
+            setShowOrderReview(false);
+            setOrderItems([]);
+            setOrderTotal(0);
+            setOrderPaymentTerms(0);
+          }}
+          onSuccess={(orderId) => {
+            toast.success('Order created successfully!');
+            setShowOrderReview(false);
+            setOrderItems([]);
+            setOrderTotal(0);
+            setOrderPaymentTerms(0);
+            // Reload partners to show updated stats
+            const reloadPartners = async () => {
+              const result = await getWholesalePartners(storeId);
+              if (result.success && result.partners) {
+                setPartners(result.partners);
+              }
+            };
+            reloadPartners();
+          }}
+        />
+      )}
     </AnimatePresence>
   );
 }
@@ -451,37 +556,55 @@ function DiscoveryTab({
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {stores.map((store) => (
             <motion.div
-              key={store.id}
+              key={store.id || `store-${Math.random()}`}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               className="p-4 border border-slate-200 dark:border-slate-700 rounded-2xl hover:shadow-lg dark:hover:bg-slate-800 transition"
             >
               <div className="flex items-start gap-3 mb-3">
-                {store.logo && (
+                {store.logo ? (
                   <img
                     src={store.logo}
-                    alt={store.name}
-                    className="w-12 h-12 rounded-full object-cover"
+                    alt={store.name || 'Store'}
+                    className="w-12 h-12 rounded-full object-cover flex-shrink-0"
                   />
+                ) : (
+                  <div className="w-12 h-12 rounded-full bg-slate-300 dark:bg-slate-600 flex items-center justify-center flex-shrink-0">
+                    <ShoppingCart className="w-6 h-6 text-slate-500 dark:text-slate-400" />
+                  </div>
                 )}
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-slate-900 dark:text-white truncate">
-                    {store.name}
+                    {store.name || 'Unknown Store'}
                   </h3>
-                  {store.state && (
+                  {store.state ? (
                     <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
-                      <MapPin className="w-3 h-3" /> {store.state}
+                      <MapPin className="w-3 h-3 flex-shrink-0" /> {store.state}
+                    </p>
+                  ) : (
+                    <p className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
+                      <MapPin className="w-3 h-3 flex-shrink-0" /> Location not set
                     </p>
                   )}
                 </div>
               </div>
 
+              {/* Description: Show if available, otherwise show fallback */}
+              {store.businessDescription && (
+                <p className="text-sm text-slate-600 dark:text-slate-400 mb-3 line-clamp-2">
+                  {store.businessDescription}
+                </p>
+              )}
+
               <div className="space-y-2 mb-4 text-sm text-slate-600 dark:text-slate-400">
                 <p className="flex items-center gap-2">
-                  <Star className="w-4 h-4" /> 4.5/5.0
+                  <Star className="w-4 h-4 flex-shrink-0" /> 4.5/5.0
                 </p>
                 <p className="flex items-center gap-2">
-                  <ShoppingCart className="w-4 h-4" /> {store.totalOrders || 0} orders/month
+                  <ShoppingCart className="w-4 h-4 flex-shrink-0" />
+                  {store.totalOrders && store.totalOrders > 0
+                    ? `${store.totalOrders} orders/month`
+                    : 'New seller'}
                 </p>
               </div>
 
@@ -538,7 +661,7 @@ function RequestsTab({
                     </p>
                   )}
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    {req.createdAt?.toDate().toLocaleDateString()}
+                    {req.createdAt && (req.createdAt instanceof Date ? req.createdAt.toLocaleDateString() : req.createdAt.toDate?.().toLocaleDateString())}
                   </p>
                 </div>
                 <div className="flex gap-2">
@@ -600,7 +723,7 @@ function RequestsTab({
                     </span>
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    Sent: {req.createdAt?.toDate().toLocaleDateString()}
+                    Sent: {req.createdAt && (req.createdAt instanceof Date ? req.createdAt.toLocaleDateString() : req.createdAt.toDate?.().toLocaleDateString())}
                   </p>
                 </div>
               </div>
@@ -616,10 +739,12 @@ function PartnersTab({
   partners,
   onPause,
   onRemove,
+  onPartnerClick,
 }: {
   partners: WholesalePartner[];
   onPause: (id: string) => void;
   onRemove: (id: string) => void;
+  onPartnerClick: (partner: WholesalePartner) => void;
 }) {
   return (
     <div>
@@ -637,13 +762,17 @@ function PartnersTab({
               key={partner.id}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-4 border border-slate-200 dark:border-slate-700 rounded-2xl"
+              className="p-4 border border-slate-200 dark:border-slate-700 rounded-2xl hover:shadow-lg transition"
             >
               <div className="mb-4">
                 <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold text-slate-900 dark:text-white">
+                  <button
+                    onClick={() => onPartnerClick(partner)}
+                    disabled={partner.status !== 'active'}
+                    className="font-semibold text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 text-left transition disabled:cursor-not-allowed disabled:opacity-50"
+                  >
                     {partner.partnerStoreName}
-                  </h3>
+                  </button>
                   <span
                     className={`text-xs font-medium px-2 py-1 rounded ${
                       partner.status === 'active'
@@ -662,12 +791,20 @@ function PartnersTab({
                 {partner.lastOrderDate && (
                   <p className="flex items-center gap-1">
                     <Clock className="w-4 h-4" />
-                    Last order: {partner.lastOrderDate.toDate().toLocaleDateString()}
+                    Last order: {(partner.lastOrderDate instanceof Date ? partner.lastOrderDate.toLocaleDateString() : partner.lastOrderDate.toDate?.().toLocaleDateString())}
                   </p>
                 )}
               </div>
 
               <div className="flex gap-2">
+                {partner.status === 'active' && (
+                  <button
+                    onClick={() => onPartnerClick(partner)}
+                    className="flex-1 p-2 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-900/30 transition text-sm font-medium"
+                  >
+                    <ShoppingCart className="w-4 h-4 inline mr-1" /> Browse & Order
+                  </button>
+                )}
                 <button
                   onClick={() => onPause(partner.id)}
                   className="flex-1 p-2 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition text-sm font-medium"

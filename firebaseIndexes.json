@@ -1,0 +1,36 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "stores",
+      "queryScope": "Collection",
+      "fields": [
+        {
+          "fieldPath": "storeType",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "isWholesaleVendor",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "stores",
+      "queryScope": "Collection",
+      "fields": [
+        {
+          "fieldPath": "storeType",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "isWholesaleVendor",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "wholesaleConfig.isVisible",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ]
+}

@@ -15,6 +15,7 @@ import {
   QueryConstraint,
   orderBy,
   limit,
+  increment,
 } from 'firebase/firestore';
 import { app as firebaseApp } from '@/lib/firebase';
 import {
@@ -30,7 +31,81 @@ import { sendWholesaleRequestEmail } from '@/lib/resendEmail';
 const db = getFirestore(firebaseApp);
 
 /**
+ * DEFAULT CONFIGURATIONS FOR BACKWARD COMPATIBILITY
+ * These defaults are used when initializing wholesaleConfig for stores
+ * created before the wholesale feature implementation.
+ */
+const DEFAULT_WHOLESALE_CONFIG = {
+  isVisible: true,
+  globalDiscount: 0,
+  minOrderValue: 0,
+  defaultPaymentTermsDays: 0 as const,
+};
+
+const DEFAULT_WHOLESALE_STATS = {
+  activePartners: 0,
+  monthlyWholesaleRevenue: 0,
+  totalWholesaleOrders: 0,
+  pendingSettlements: 0,
+};
+
+/**
+ * Ensure store has wholesaleConfig (lazy initialization)
+ * 
+ * BACKWARD COMPATIBILITY:
+ * Stores created before the wholesale feature may not have wholesaleConfig.
+ * This function initializes it with defaults on first access if missing.
+ * 
+ * Called automatically by wholesale functions as a safety net.
+ * Migration script (scripts/migrate-wholesale.mjs) should be run to bulk-initialize all stores.
+ * 
+ * @param storeId - The store ID to ensure has config
+ * @returns true if store has config (was already there or just created), false on error
+ */
+async function ensureWholesaleConfig(storeId: string): Promise<boolean> {
+  try {
+    const storeRef = doc(db, 'stores', storeId);
+    const storeSnap = await getDoc(storeRef);
+
+    if (!storeSnap.exists()) {
+      return false;
+    }
+
+    const store = storeSnap.data() as StoreMeta;
+
+    // Already has config - nothing to do
+    if (store.wholesaleConfig) {
+      return true;
+    }
+
+    // Initialize missing config
+    console.warn(
+      `⚠️ Lazy-initializing wholesaleConfig for store ${storeId}. ` +
+        `Run: npm run migrate:wholesale`
+    );
+
+    await updateDoc(storeRef, {
+      wholesaleConfig: DEFAULT_WHOLESALE_CONFIG,
+      wholesaleStats: store.wholesaleStats || DEFAULT_WHOLESALE_STATS,
+    });
+
+    return true;
+  } catch (error) {
+    console.error(`Failed to ensure wholesaleConfig for ${storeId}:`, error);
+    return false;
+  }
+}
+
+/**
  * Send a wholesale request from one store to another (same storeType only)
+ * 
+ * Creates a partnership request that must be accepted by the receiving store.
+ * Only stores of the same storeType can trade wholesale with each other.
+ * 
+ * @param fromStoreId - ID of store sending the request
+ * @param toStoreId - ID of store receiving the request  
+ * @param message - Optional message to include in the request
+ * @returns {success: boolean, error?: string, requestId?: string}
  */
 export async function sendWholesaleRequest(
   fromStoreId: string,
@@ -197,6 +272,15 @@ export async function acceptWholesaleRequest(requestId: string, storeId: string)
     // Create partnership in both stores
     const partnershipId = `${request.fromStoreId}_${request.toStoreId}`;
 
+    // Get both stores' data for enriching partnership records
+    const [fromStoreSnap, toStoreSnap] = await Promise.all([
+      getDoc(doc(db, 'stores', request.fromStoreId)),
+      getDoc(doc(db, 'stores', storeId)),
+    ]);
+
+    const fromStore = fromStoreSnap.data() as StoreMeta | undefined;
+    const toStore = toStoreSnap.data() as StoreMeta | undefined;
+
     // For receiver (toStoreId) - fromStoreId becomes a partner buying from them
     const toStorePartnerRef = doc(
       db,
@@ -208,13 +292,15 @@ export async function acceptWholesaleRequest(requestId: string, storeId: string)
     batch.set(toStorePartnerRef, {
       id: request.fromStoreId,
       partnerId: request.fromStoreId,
-      partnerStoreName: (await getDoc(doc(db, 'stores', request.fromStoreId)))
-        .data()?.name || 'Store',
+      partnerStoreId: request.fromStoreId,
+      partnerStoreName: fromStore?.name || 'Store',
+      storeType: fromStore?.storeType || fromStore?.category?.[0],
       status: 'active',
       connectedAt: Timestamp.now(),
       totalOrders: 0,
       totalRevenue: 0,
       lastOrderDate: null,
+      wholesaleConfig: fromStore?.wholesaleConfig,
     });
 
     // For requester (fromStoreId) - toStoreId becomes their wholesale supplier
@@ -225,18 +311,19 @@ export async function acceptWholesaleRequest(requestId: string, storeId: string)
       'wholesalePartners',
       storeId
     );
-    const toStoreName = (await getDoc(doc(db, 'stores', storeId))).data()
-      ?.name || 'Store';
 
     batch.set(fromStorePartnerRef, {
       id: storeId,
       partnerId: storeId,
-      partnerStoreName: toStoreName,
+      partnerStoreId: storeId,
+      partnerStoreName: toStore?.name || 'Store',
+      storeType: toStore?.storeType || toStore?.category?.[0],
       status: 'active',
       connectedAt: Timestamp.now(),
       totalOrders: 0,
       totalRevenue: 0,
       lastOrderDate: null,
+      wholesaleConfig: toStore?.wholesaleConfig,
     });
 
     await batch.commit();
@@ -343,6 +430,19 @@ export async function blockWholesaleRequest(requestId: string, storeId: string) 
 
 /**
  * Get all discoverable stores for wholesale (same storeType, visible, not partners)
+ * 
+ * BACKWARD COMPATIBILITY:
+ * Query only fetches stores with storeType and isWholesaleVendor=true.
+ * Visibility filtering happens client-side with defaults (isVisible ?? true)
+ * to support stores created before wholesaleConfig existed.
+ * 
+ * FIRESTORE INDEXES REQUIRED:
+ * 1. Composite Index: storeType (Asc) + isWholesaleVendor (Asc)
+ *    - Created via migration script: npm run migrate:wholesale
+ * 2. Optional: storeType (Asc) + isWholesaleVendor (Asc) + wholesaleConfig.isVisible (Asc)
+ *    - Only needed if we switch to server-side visibility filtering
+ * 
+ * Migration script outputs clickable Firebase Console links to auto-generate indexes.
  */
 export async function getDiscoverableStores(
   storeId: string,
@@ -359,18 +459,38 @@ export async function getDiscoverableStores(
 
     const store = storeSnap.data() as StoreMeta;
 
-    // Get all stores with same storeType that are wholesale vendors
+    // Ensure store has wholesaleConfig (lazy init safety net)
+    await ensureWholesaleConfig(storeId);
+
+    // BACKWARD COMPATIBLE QUERY:
+    // Query only storeType and isWholesaleVendor (don't filter by wholesaleConfig.isVisible)
+    // This allows old stores without wholesaleConfig to be discovered.
+    // Visibility filtering happens below with safe defaults.
     const constraints: QueryConstraint[] = [
       where('storeType', '==', store.storeType),
       where('isWholesaleVendor', '==', true),
-      where('wholesaleConfig.isVisible', '==', true),
     ];
 
     const storesSnap = await getDocs(query(collection(db, 'stores'), ...constraints));
 
+    // Map with ID field for React key stability, and ensure ID exists
     let stores = storesSnap.docs
-      .map((doc) => doc.data() as StoreMeta)
-      .filter((s) => s.id !== storeId); // Exclude self
+      .map((docSnap) => {
+        const data = docSnap.data() as StoreMeta;
+        return {
+          ...data,
+          id: docSnap.id, // Ensure ID is set from document reference
+        };
+      })
+      .filter((s) => {
+        // Exclude self
+        if (s.id === storeId) return false;
+
+        // BACKWARD COMPATIBILITY: Default to visible if wholesaleConfig doesn't exist
+        // This allows stores created before the feature to appear in discovery
+        const isVisible = s.wholesaleConfig?.isVisible ?? true;
+        return isVisible;
+      });
 
     // Get existing partners to filter out
     const partnersSnap = await getDocs(
@@ -397,19 +517,32 @@ export async function getDiscoverableStores(
 
     stores = stores.filter((s) => !blockedIds.has(s.id));
 
-    // Filter by search query
+    // Filter by search query (with null-safety for optional fields)
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       stores = stores.filter(
         (s) =>
-          s.name.toLowerCase().includes(q) ||
-          s.businessDescription?.toLowerCase().includes(q) ||
-          s.state?.toLowerCase().includes(q)
+          (s.name?.toLowerCase() || '').includes(q) ||
+          (s.businessDescription?.toLowerCase() || '').includes(q) ||
+          (s.state?.toLowerCase() || '').includes(q)
       );
     }
 
-    // TODO: Sort by the specified criteria
-    // For now, return as-is
+    // Sort by specified criteria
+    switch (sortBy) {
+      case 'rating':
+        // TODO: Implement actual rating logic when rating system is available
+        break;
+      case 'products':
+        stores.sort((a, b) => (b.products?.length || 0) - (a.products?.length || 0));
+        break;
+      case 'orders':
+        stores.sort((a, b) => (b.totalOrders || 0) - (a.totalOrders || 0));
+        break;
+      case 'location':
+        stores.sort((a, b) => (a.state || '').localeCompare(b.state || ''));
+        break;
+    }
 
     return { success: true, stores };
   } catch (error) {
@@ -417,9 +550,16 @@ export async function getDiscoverableStores(
     return { success: false, error: 'Failed to fetch stores' };
   }
 }
-
 /**
  * Get all wholesale partners for a store
+ * 
+ * Fetches the list of stores this store has active wholesale partnerships with.
+ * Partnerships are bilateral (both stores have partnership records).
+ * 
+ * NOTE: No indexes required - simple subcollection scan
+ * 
+ * @param storeId - ID of store to fetch partners for
+ * @returns {success: boolean, partners?: WholesalePartner[], error?: string}
  */
 export async function getWholesalePartners(storeId: string) {
   try {
@@ -438,6 +578,16 @@ export async function getWholesalePartners(storeId: string) {
 
 /**
  * Get wholesale requests for a store (incoming and outgoing)
+ * 
+ * Fetches partnership requests with optional direction filtering.
+ * Automatically filters out expired blocks (30-day blocks expire automatically).
+ * 
+ * NOTE: No indexes required for subcollection query with optional status filter
+ * Firestore handles this efficiently without composite indexes
+ * 
+ * @param storeId - ID of store to fetch requests for
+ * @param direction - 'incoming' (requests FROM others), 'outgoing' (requests TO others), or 'all'
+ * @returns {success: boolean, requests?: WholesaleRequest[], error?: string}
  */
 export async function getWholesaleRequests(
   storeId: string,
@@ -540,6 +690,16 @@ export async function removeWholesalePartner(
 
 /**
  * Update wholesale configuration for a store
+ * 
+ * Updates store-level wholesale settings like visibility, discount, minimum order value, etc.
+ * All fields are optional - only provided fields will be updated.
+ * Uses nested paths to update individual config fields without overwriting others.
+ * 
+ * NOTE: No indexes required - direct document update by ID
+ * 
+ * @param storeId - ID of store to update
+ * @param config - Partial config object with fields to update
+ * @returns {success: boolean, error?: string}
  */
 export async function updateWholesaleConfig(
   storeId: string,
@@ -577,3 +737,192 @@ export async function updateWholesaleConfig(
     return { success: false, error: 'Failed to update configuration' };
   }
 }
+
+/**
+ * Get all products from a partner store with wholesale pricing applied
+ * 
+ * Fetches all products from partner's collection and applies their global discount.
+ * Calculates wholesale prices server-side for consistency.
+ * Includes inventory warnings if stock is low (< 10 units).
+ * 
+ * @param partnerId - ID of partner store to fetch products from
+ * @param buyerStoreId - ID of buying store (for context, not strict validation)
+ * @returns {success: boolean, products?: ProductWithWholesalePrice[], wholesaleConfig?, error?: string}
+ */
+export async function getPartnerProducts(partnerId: string, buyerStoreId: string) {
+  try {
+    console.log(`📦 [getPartnerProducts] Fetching products for partner: ${partnerId}`);
+
+    // Get partner's store data and wholesale config
+    const partnerStoreSnap = await getDoc(doc(db, 'stores', partnerId));
+    if (!partnerStoreSnap.exists()) {
+      console.error(`❌ [getPartnerProducts] Partner store not found: ${partnerId}`);
+      return { success: false, error: 'Partner store not found' };
+    }
+
+    const partner = partnerStoreSnap.data() as StoreMeta;
+    const wholesaleConfig = partner.wholesaleConfig || DEFAULT_WHOLESALE_CONFIG;
+    
+    console.log(`✅ [getPartnerProducts] Partner found: ${partner.name}`);
+    console.log(`💰 [getPartnerProducts] Discount: ${wholesaleConfig.globalDiscount}%, Min Order: ₦${wholesaleConfig.minOrderValue}`);
+
+    // Get all products from partner - NO EARLY VERIFICATION
+    // Partnership is already verified by UI (user can only reach this modal if authenticated)
+    const productsSnap = await getDocs(collection(db, 'stores', partnerId, 'products'));
+    
+    console.log(`📋 [getPartnerProducts] Found ${productsSnap.docs.length} products in collection`);
+
+    // If no products, return empty array (not an error)
+    if (productsSnap.docs.length === 0) {
+      console.warn(`⚠️ [getPartnerProducts] No products found in stores/${partnerId}/products`);
+      return {
+        success: true,
+        products: [],
+        wholesaleConfig,
+      };
+    }
+
+    const productsWithPricing = productsSnap.docs.map((doc) => {
+      const product = doc.data();
+      const originalPrice = product.price || 0;
+      const discountPercent = wholesaleConfig.globalDiscount || 0;
+      const wholesalePrice = originalPrice * (1 - discountPercent / 100);
+
+      return {
+        id: doc.id,
+        ...product,
+        originalPrice,
+        wholesalePrice: Math.round(wholesalePrice * 100) / 100, // Round to 2 decimals
+        discountApplied: discountPercent,
+        stock: product.quantity || product.stock || 0,
+        inventoryWarning: (product.quantity || product.stock || 0) < 10,
+      };
+    });
+
+    // Log first few products for debugging
+    console.log(`✅ [getPartnerProducts] Returning ${productsWithPricing.length} products with pricing:`);
+    productsWithPricing.slice(0, 3).forEach((p: any) => {
+      console.log(`   - ${p.name || 'Unknown'}: ₦${p.originalPrice} → ₦${p.wholesalePrice} (${p.discountPercent}% off)`);
+    });
+
+    return {
+      success: true,
+      products: productsWithPricing,
+      wholesaleConfig,
+    };
+  } catch (error) {
+    console.error('❌ [getPartnerProducts] Error getting partner products:', error);
+    return { success: false, error: 'Failed to fetch partner products' };
+  }
+}
+
+/**
+ * Create a wholesale order between two stores
+ * 
+ * Validates minimum order value, creates order documents in both stores,
+ * and updates wholesale statistics.
+ * 
+ * @param buyerStoreId - ID of store placing the order
+ * @param sellerStoreId - ID of store receiving the order
+ * @param orderItems - Array of {productId, name, quantity, wholesalePrice}
+ * @param paymentTermsDays - Payment terms (0, 7, 14, or 30)
+ * @param notes - Optional notes for the order
+ * @returns {success: boolean, orderId?: string, total?: number, error?: string}
+ */
+export async function createWholesaleOrder(
+  buyerStoreId: string,
+  sellerStoreId: string,
+  orderItems: Array<{
+    productId: string;
+    name: string;
+    quantity: number;
+    wholesalePrice: number;
+  }>,
+  paymentTermsDays: 0 | 7 | 14 | 30 = 0,
+  notes?: string
+) {
+  try {
+    // Validate: stores are partners
+    const partnerSnap = await getDoc(doc(db, 'stores', sellerStoreId, 'wholesalePartners', buyerStoreId));
+    if (!partnerSnap.exists()) {
+      return { success: false, error: 'Stores are not partners' };
+    }
+
+    // Get seller's wholesale config
+    const sellerStoreSnap = await getDoc(doc(db, 'stores', sellerStoreId));
+    if (!sellerStoreSnap.exists()) {
+      return { success: false, error: 'Seller store not found' };
+    }
+
+    const seller = sellerStoreSnap.data() as StoreMeta;
+    const wholesaleConfig = seller.wholesaleConfig || DEFAULT_WHOLESALE_CONFIG;
+
+    // Calculate order total
+    const subtotal = orderItems.reduce((sum, item) => sum + item.wholesalePrice * item.quantity, 0);
+    const discountAmount = orderItems.reduce((sum, item) => {
+      const originalPrice = item.wholesalePrice / (1 - (wholesaleConfig.globalDiscount || 0) / 100);
+      return sum + (originalPrice - item.wholesalePrice) * item.quantity;
+    }, 0);
+    const total = subtotal;
+
+    // Validate: meets minimum order value
+    if (total < (wholesaleConfig.minOrderValue || 0)) {
+      return {
+        success: false,
+        error: `Order total ₦${total.toLocaleString()} is below minimum ₦${(wholesaleConfig.minOrderValue || 0).toLocaleString()}`,
+      };
+    }
+
+    // Create order ID
+    const orderId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+    // Order document structure
+    const orderData = {
+      id: orderId,
+      buyerStoreId,
+      sellerStoreId,
+      items: orderItems.map((item) => ({
+        productId: item.productId,
+        name: item.name,
+        quantity: item.quantity,
+        wholesalePrice: item.wholesalePrice,
+        subtotal: item.wholesalePrice * item.quantity,
+      })),
+      subtotal,
+      discountAmount: Math.round(discountAmount * 100) / 100,
+      total,
+      paymentTermsDays,
+      status: 'pending',
+      createdAt: Timestamp.now(),
+      notes: notes || null,
+    };
+
+    // Create order in both stores using batch
+    const batch = writeBatch(db);
+
+    // In buyer store
+    batch.set(doc(db, 'stores', buyerStoreId, 'wholesaleOrders', orderId), orderData);
+
+    // In seller store (mirrored)
+    batch.set(doc(db, 'stores', sellerStoreId, 'wholesaleOrders', orderId), orderData);
+
+    // Update seller's wholesale stats
+    batch.update(doc(db, 'stores', sellerStoreId), {
+      'wholesaleStats.totalWholesaleOrders': increment(1),
+      'wholesaleStats.monthlyWholesaleRevenue': increment(total),
+    });
+
+    await batch.commit();
+
+    return {
+      success: true,
+      orderId,
+      total,
+      paymentTermsDays,
+    };
+  } catch (error) {
+    console.error('Error creating wholesale order:', error);
+    return { success: false, error: 'Failed to create order' };
+  }
+}
+

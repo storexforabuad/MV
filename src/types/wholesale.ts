@@ -21,13 +21,21 @@ export interface WholesaleRequest {
 export interface WholesalePartner {
   id: string;
   partnerId: string; // The partner's storeId
+  partnerStoreId: string; // Alias for partnerId for clarity
   partnerStoreName: string;
+  storeType?: string; // Store type (e.g., 'cosmetics', 'sports')
   status: 'active' | 'paused';
   connectedAt: Timestamp;
   totalOrders: number;
   totalRevenue: number; // Gross amount (before platform fee)
   lastOrderDate?: Timestamp;
   customAgreedDiscount?: number; // If different from global discount
+  wholesaleConfig?: {
+    isVisible: boolean;
+    globalDiscount: number;
+    minOrderValue: number;
+    defaultPaymentTermsDays: number;
+  };
 }
 
 /**
