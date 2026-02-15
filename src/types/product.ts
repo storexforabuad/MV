@@ -15,6 +15,18 @@ interface BaseProduct {
   createdAt: { toMillis: () => number } | Timestamp;
   commission?: number;
   onPromo?: boolean;
+
+  // Wholesale B2B Features
+  isAvailableForWholesale?: boolean;  // Default: false
+  minOrderQuantity?: number;           // e.g., 50 units minimum for wholesale
+  wholesalePricing?: {
+    globalDiscount: number;            // e.g., 30 (percent)
+    tierPricing?: Array<{
+      minQty: number;
+      discount: number;
+    }>;
+    customPartnerDiscounts?: Record<string, number>;  // partnerId -> discount %
+  };
 }
 
 // ==========================================

@@ -22,7 +22,6 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
   const isValidWhatsApp = modal.formData.whatsapp.replace(/\D/g, '').length === 11;
 
   // Form validation helpers
-  const isScreen1Valid = true;
   const isScreen2Valid = !!modal.formData.storeType;
   const isScreen3Valid = !!(
     modal.formData.businessName.trim().length >= 2 &&
@@ -39,7 +38,6 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
   };
 
   const handleNextScreen = () => {
-    if (modal.currentScreen === 1 && !isScreen1Valid) return;
     if (modal.currentScreen === 2 && !isScreen2Valid) return;
     if (modal.currentScreen === 3 && !isScreen3Valid) return;
     if (modal.currentScreen === 4 && !isScreen4Valid) return;
@@ -159,52 +157,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
         {/* Content - Scrollable */}
         <div className="flex-1 overflow-y-auto">
           <div className="p-6 pb-28">
-            {/* Screen 1: Value Proposition */}
-            {modal.currentScreen === 1 && (
-              <div className="space-y-6">
-                {/* Ramadan Badge */}
-                <div className="flex items-center gap-2 justify-center">
-                  <div className="bg-gradient-to-r from-amber-500 to-amber-600 text-white text-xs font-bold px-4 py-1.5 rounded-full">
-                    50% OFF RAMADAN PROMO
-                  </div>
-                </div>
-
-                {/* Main Heading */}
-                <div className="space-y-4">
-                  <h1 className="text-3xl font-bold text-white leading-tight">
-                    Time to upgrade your side hustle to a business empire
-                  </h1>
-                  <p className="text-slate-300 text-base">
-                    Get a professional website for as little as <span className="font-bold text-amber-400">₦500/week</span> in just 3 steps.
-                  </p>
-                </div>
-
-                {/* Limited Slots Warning */}
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 flex items-start gap-3">
-                  <AlertCircle className="text-amber-400 flex-shrink-0 mt-0.5" size={18} />
-                  <div>
-                    <p className="text-sm font-semibold text-amber-400">Limited Slots Available</p>
-                    <p className="text-xs text-amber-200/70 mt-1">This Ramadan offer is exclusive and limited. Act now to secure your spot!</p>
-                  </div>
-                </div>
-
-                {/* Features Preview */}
-                <div className="space-y-2 pt-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-amber-400" />
-                    <span className="text-sm text-slate-300">Upload up to 1000 products</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-amber-400" />
-                    <span className="text-sm text-slate-300">Lightning-fast performance</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-2 h-2 rounded-full bg-amber-400" />
-                    <span className="text-sm text-slate-300">SEO optimized for visibility</span>
-                  </div>
-                </div>
-              </div>
-            )}
+              {/* (Value-prop screen removed; category selection is now first visible step) */}
 
             {/* Screen 2: Category Selection */}
             {modal.currentScreen === 2 && (
@@ -502,7 +455,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
         {/* Footer CTA */}
         {modal.currentScreen !== 'success' && (
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-slate-900 via-slate-900 to-transparent px-6 py-4 border-t border-slate-700/50 flex gap-2">
-            {typeof modal.currentScreen === 'number' && modal.currentScreen > 1 && (
+            {typeof modal.currentScreen === 'number' && modal.currentScreen > 2 && (
               <button
                 onClick={modal.prevScreen}
                 className="px-4 py-3 rounded-xl border border-slate-700 text-slate-300 hover:border-slate-600 transition-colors font-medium"
@@ -512,14 +465,14 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
             )}
             <button
               onClick={handleNextScreen}
-              disabled={(modal.currentScreen === 1 && !isScreen1Valid) ||
-                       (modal.currentScreen === 2 && !isScreen2Valid) ||
-                       (modal.currentScreen === 3 && !isScreen3Valid) ||
-                       (modal.currentScreen === 4 && !isScreen4Valid) ||
-                       modal.loading}
+              disabled={
+                (modal.currentScreen === 2 && !isScreen2Valid) ||
+                (modal.currentScreen === 3 && !isScreen3Valid) ||
+                (modal.currentScreen === 4 && !isScreen4Valid) ||
+                modal.loading
+              }
               className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
-                ((modal.currentScreen === 1 && !isScreen1Valid) ||
-                 (modal.currentScreen === 2 && !isScreen2Valid) ||
+                ((modal.currentScreen === 2 && !isScreen2Valid) ||
                  (modal.currentScreen === 3 && !isScreen3Valid) ||
                  (modal.currentScreen === 4 && !isScreen4Valid) ||
                  modal.loading)
@@ -527,7 +480,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                   : 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-900/30 hover:scale-[1.02] active:scale-[0.98]'
               }`}
             >
-              {modal.loading ? 'Processing...' : (modal.currentScreen === 1 ? 'Get Started' : modal.currentScreen === 4 ? 'Pay & Register' : 'Next')}
+              {modal.loading ? 'Processing...' : (modal.currentScreen === 2 ? 'Get Started' : modal.currentScreen === 4 ? 'Pay & Register' : 'Next')}
               {!modal.loading && typeof modal.currentScreen === 'number' && modal.currentScreen < 4 && <ArrowRight size={16} />}
             </button>
           </div>

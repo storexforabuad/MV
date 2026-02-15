@@ -31,7 +31,7 @@ type RegistrationAction =
   | { type: 'RESET' };
 
 const initialState: RegistrationState = {
-  currentScreen: 1,
+  currentScreen: 2,
   formData: {
     storeType: null,
     businessName: '',

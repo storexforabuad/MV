@@ -64,6 +64,22 @@ export interface StoreMeta {
   // Admin Notifications
   adminTokens?: string[];
   subscriptionEmailToken?: string;   // Secure token for email management links
+
+  // Wholesale B2B Features
+  isWholesaleVendor?: boolean;       // Opt-in to wholesale feature
+  wholesaleConfig?: {
+    isVisible: boolean;               // Show in other vendors' discovery lists
+    globalDiscount: number;           // Default % for all products (0-100)
+    minOrderValue: number;            // Min order total in ₦
+    defaultPaymentTermsDays: 0 | 7 | 14 | 30;  // Default net terms
+  };
+  wholesaleStats?: {
+    activePartners: number;
+    monthlyWholesaleRevenue: number;
+    totalWholesaleOrders: number;
+    lastInvoiceDate?: Timestamp;
+    pendingSettlements: number;
+  };
 }
 
 export interface ProductCategory {

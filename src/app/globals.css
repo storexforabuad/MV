@@ -2,6 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Pulse glow animation for refresh button */
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+  }
+  50% {
+    opacity: 1;
+    box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
+  }
+}
+
+.pulse-glow {
+  animation: pulse-glow 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
 /* Base Theme Variables */
 :root {
   --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);

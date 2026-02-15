@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState, useCallback, Suspense } from 'react';
+import { useEffect, useState, useCallback, Suspense, useRef } from 'react';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useVendor } from '@/context/VendorContext';
@@ -441,6 +441,17 @@ export default function AdminStorePageClient({
     }
   };
 
+  const handleRefreshOverlayTap = () => {
+    const refreshButton = document.querySelector('[data-refresh-button]');
+    if (refreshButton) {
+      refreshButton.classList.add('pulse-glow');
+      setTimeout(() => {
+        refreshButton.classList.remove('pulse-glow');
+      }, 1500);
+    }
+    toast.success('Wait for refresh to complete');
+  };
+
   if (loading || showOnboarding === null) return <AdminSkeleton />;
 
   if (isTransitioning) {
@@ -463,7 +474,17 @@ export default function AdminStorePageClient({
   };
 
   return (
-    <div className="min-h-screen bg-background pb-16 md:pb-0 transition-colors">
+    <div className="min-h-screen bg-background pb-16 md:pb-0 transition-colors relative">
+      {/* Refresh overlay - blocks interactions during refresh */}
+      {isRefreshing && (
+        <div
+          onClick={handleRefreshOverlayTap}
+          onTouchStart={handleRefreshOverlayTap}
+          className="fixed inset-0 z-50 bg-transparent cursor-not-allowed lg:hidden"
+          style={{ pointerEvents: 'auto' }}
+        />
+      )}
+
       {!isModalOpen && (
         <AdminHeader
           onLogout={handleLogout}
@@ -656,6 +677,7 @@ export default function AdminStorePageClient({
             onAddProductClick={() => setIsComposerOpen(true)}
             onManageProductsClick={() => setIsManageModalOpen(true)}
             onManageCategoriesClick={() => setIsManageCategoriesModalOpen(true)}
+            isRefreshing={isRefreshing}
           />
         }
       </div>

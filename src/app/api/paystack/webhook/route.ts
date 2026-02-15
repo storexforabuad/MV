@@ -6,6 +6,7 @@ import {
     activateSubscription,
     updateSubscriptionStatus,
 } from '@/app/actions/subscriptionActions';
+import { handleWholesalePayment } from '@/app/actions/wholesaleWebhook';
 
 /**
  * POST /api/paystack/webhook
@@ -114,10 +115,32 @@ async function handleSubscriptionCreate(data: any, storeId: string) {
 }
 
 /**
- * Handle charge.success event (renewal payment)
+ * Handle charge.success event (renewal payment or wholesale order payment)
  */
 async function handleChargeSuccess(data: any, storeId: string) {
     try {
+        // Check if this is a wholesale order payment
+        const wholesaleOrderId = data.metadata?.wholesaleOrderId;
+        const buyerStoreId = data.metadata?.buyerStoreId;
+        const sellerStoreId = data.metadata?.sellerStoreId;
+        const paymentTermsDays = data.metadata?.paymentTermsDays;
+        const paystackTransactionRef = data.reference;
+
+        if (wholesaleOrderId && buyerStoreId && sellerStoreId !== undefined) {
+            // Handle wholesale order payment
+            await handleWholesalePayment({
+                wholesaleOrderId,
+                buyerStoreId,
+                sellerStoreId,
+                paymentTermsDays: parseInt(paymentTermsDays || '0'),
+                paystackTransactionRef,
+                amountInKobo: data.amount,
+            });
+
+            console.log(`Wholesale order payment successful: ${wholesaleOrderId}`);
+            return;
+        }
+
         // Check if this is a subscription renewal
         if (data.subscription) {
             const nextPaymentDate = new Date(data.subscription.next_payment_date);

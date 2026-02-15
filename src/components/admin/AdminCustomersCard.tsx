@@ -32,13 +32,16 @@ export const AdminCustomersCard: React.FC<AdminCustomersCardProps> = ({ storeId,
     fetchCount();
   }, [storeId]);
 
-  const cardGradient = gradient || 'bg-gradient-to-br from-slate-500 to-slate-600';
   const cardGlow = glowClass || 'shadow-[0_0_25px_-5px_rgba(100,116,139,0.5)]';
+  // support inline CSS gradients (linear-gradient strings) as well as tailwind gradient classes
+  const inlineStyle = gradient && gradient.startsWith && gradient.startsWith('linear-gradient') ? { background: gradient } : undefined;
+  const cardGradientClass = inlineStyle ? '' : (gradient || 'bg-gradient-to-br from-slate-500 to-slate-600');
 
   return (
     <button
-        className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden text-white w-full h-full min-h-[7rem] ${cardGradient} ${cardGlow}`}
-        onClick={onClick}
+      style={inlineStyle}
+      className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden text-white w-full h-full min-h-[7rem] ${cardGradientClass} ${cardGlow}`}
+      onClick={onClick}
     >
         <span className="card-blob" />
         <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white bg-opacity-20 mb-1 sm:mb-2 shadow">

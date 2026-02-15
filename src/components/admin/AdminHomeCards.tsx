@@ -28,6 +28,7 @@ import { AdvertisingModal } from './modals/AdvertisingModal';
 import { EventsModal } from './modals/EventsModal';
 import SubscriptionModal from './modals/SubscriptionModal';
 import WarehouseModal from './modals/WarehouseModal';
+import WholesaleModal from './modals/WholesaleModal';
 
 // Import the customer components
 import { AdminCustomersCard } from './AdminCustomersCard';
@@ -88,7 +89,7 @@ const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferral
   </div>
 );
 
-const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.ElementType | null, glowClass: string, isAiCard?: boolean }[] = [
+const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.ElementType | null, glowClass: string, isAiCard?: boolean, colspan?: number, isWholesaleCard?: boolean }[] = [
   {
     label: 'ATLAS™',
     icon: Globe,
@@ -134,10 +135,10 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
   {
     label: 'Content',
     icon: Send,
-    gradient: 'bg-gradient-to-br from-purple-500 to-violet-600',
+    gradient: 'linear-gradient(135deg,#8B5CF6 0%,#EC4899 100%)',
     text: 'text-white',
     component: null,
-    glowClass: 'dark:shadow-violet-500/30 shadow-violet-500/50',
+    glowClass: 'dark:shadow-pink-600/30 shadow-pink-500/50',
   },
 
   {
@@ -171,19 +172,19 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     label: 'Views',
     valueKey: 'totalViews',
     icon: Eye,
-    gradient: 'bg-gradient-to-br from-sky-400 to-blue-500',
+    gradient: 'linear-gradient(135deg,#06B6D4 0%,#3B82F6 100%)',
     text: 'text-white',
     component: TotalViewsModal,
-    glowClass: 'dark:shadow-sky-500/30 shadow-sky-500/50',
+    glowClass: 'dark:shadow-sky-600/30 shadow-sky-600/50',
   },
   {
     label: 'Orders',
     valueKey: 'totalOrders',
     icon: ShoppingCart,
-    gradient: 'bg-gradient-to-br from-orange-400 via-orange-500 to-amber-600',
+    gradient: 'linear-gradient(135deg,#F59E0B 0%,#F97316 100%)',
     text: 'text-white',
     component: null,
-    glowClass: 'dark:shadow-orange-500/30 shadow-orange-500/50',
+    glowClass: 'dark:shadow-amber-600/30 shadow-amber-500/50',
   },
   {
     label: 'Deliveries',
@@ -195,30 +196,40 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     glowClass: 'dark:shadow-green-500/30 shadow-green-500/50',
   },
   {
+    label: 'Wholesale',
+    icon: ShoppingCart,
+    gradient: 'bg-gradient-to-br from-amber-600 via-orange-600 to-red-700',
+    text: 'text-white',
+    component: null,
+    glowClass: 'dark:shadow-amber-600/50 shadow-amber-600/50',
+    colspan: 2,
+    isWholesaleCard: true,
+  },
+  {
     label: 'Manage Categories',
     valueKey: 'totalCategories',
     icon: Tag,
-    gradient: 'bg-gradient-to-br from-rose-500 via-orange-500 to-amber-500',
+    gradient: 'linear-gradient(135deg,#D946EF 0%,#FB923C 100%)',
     text: 'text-white',
     component: null,
-    glowClass: 'dark:shadow-orange-500/30 shadow-orange-500/50',
+    glowClass: 'dark:shadow-rose-500/30 shadow-amber-500/50',
   },
   {
     label: 'Manage Products',
     valueKey: 'totalProducts',
     icon: Archive,
-    gradient: 'bg-gradient-to-br from-blue-600 to-indigo-800',
+    gradient: 'linear-gradient(135deg,#3B82F6 0%,#6366F1 100%)',
     text: 'text-white',
     component: null,
-    glowClass: 'dark:shadow-blue-600/30 shadow-blue-600/50',
+    glowClass: 'dark:shadow-indigo-600/30 shadow-indigo-600/50',
   },
   {
     label: 'Account',
     icon: Briefcase,
-    gradient: 'bg-gradient-to-br from-indigo-500 to-purple-600',
+    gradient: 'linear-gradient(135deg,#7C3AED 0%,#A78BFA 100%)',
     text: 'text-white',
     component: AccountModal,
-    glowClass: 'dark:shadow-indigo-500/30 shadow-indigo-500/50',
+    glowClass: 'dark:shadow-violet-600/30 shadow-violet-500/50',
   },
   {
     label: 'Subscription',
@@ -313,6 +324,12 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isWarehouseModalOpen, setIsWarehouseModalOpen] = useState(false);
+  const [isWholesaleModalOpen, setIsWholesaleModalOpen] = useState(false);
+  const [wholesaleStats, setWholesaleStats] = useState({
+    activePartners: 0,
+    pendingRequests: 0,
+    monthlyRevenue: 0
+  });
   const [showPostsNotification, setShowPostsNotification] = useState(false);
   const [bankAccountName, setBankAccountName] = useState<string | null>(null);
   const [bankAccountNumber, setBankAccountNumber] = useState<string | null>(null);
@@ -387,14 +404,20 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   }, [uiVisible]);
 
   const ordersIndex = cardData.findIndex(card => card.label === 'Orders');
-  const cardsToRender = [...cardData];
+  
+  // Filter to show only specific cards (include Content and Wholesale)
+  const allowedCards = ['Views', 'Manage Categories', 'Manage Products', 'Account', 'Subscription', 'Content', 'Wholesale', 'Revenue'];
+  const filteredCardData = cardData.filter(card => allowedCards.includes(card.label));
+  const cardsToRender = [...filteredCardData];
+  
   const customersCard: typeof cardData[0] = {
     label: 'Customers',
     icon: Users,
-    gradient: 'bg-gradient-to-br from-sky-600 via-blue-700 to-indigo-800',
+    // use inline gradient string (will be applied as inline style by AdminCustomersCard)
+    gradient: 'linear-gradient(135deg,#06B6D4 0%,#3B82F6 100%)',
     text: 'text-white',
     component: AdminCustomersCard,
-    glowClass: 'dark:shadow-blue-600/30 shadow-blue-600/50'
+    glowClass: 'dark:shadow-sky-600/30 shadow-sky-600/50'
   };
 
   if (ordersIndex !== -1) {
@@ -402,7 +425,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   }
 
   useEffect(() => {
-    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen || isAdvertisingModalOpen || isEventsModalOpen || isSubscriptionModalOpen || isAccountModalOpen || isWarehouseModalOpen;
+    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen || isAdvertisingModalOpen || isEventsModalOpen || isSubscriptionModalOpen || isAccountModalOpen || isWarehouseModalOpen || isWholesaleModalOpen;
     if (modalIsOpen) {
       window.history.pushState({ modalOpen: true }, '');
       const handlePopState = () => {
@@ -423,6 +446,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         setIsSubscriptionModalOpen(false);
         setIsAccountModalOpen(false);
         setIsWarehouseModalOpen(false);
+        setIsWholesaleModalOpen(false);
         if (setIsModalOpen) setIsModalOpen(false);
       };
       window.addEventListener('popstate', handlePopState);
@@ -433,9 +457,11 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         }
       };
     }
-  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, isAdvertisingModalOpen, isEventsModalOpen, isSubscriptionModalOpen, isAccountModalOpen, isWarehouseModalOpen, setIsModalOpen]);
+  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, isAdvertisingModalOpen, isEventsModalOpen, isSubscriptionModalOpen, isAccountModalOpen, isWarehouseModalOpen, isWholesaleModalOpen, setIsModalOpen]);
 
   const handleOpenModal = (idx: number, card: typeof cardData[0]) => {
+    if (props.isRefreshing) return; // Prevent opening modals during refresh
+    
     const { label, subtitle } = card;
     if (label === 'ATLAS™') setIsBizconNetworkModalOpen(true);
     else if (label === 'Tips') setIsTipsModalOpen(true);
@@ -452,6 +478,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     else if (label === 'Advert') setIsAdvertisingModalOpen(true);
     else if (label === 'Events') setIsEventsModalOpen(true);
     else if (label === 'Warehouse') setIsWarehouseModalOpen(true);
+    else if (label === 'Wholesale') setIsWholesaleModalOpen(true);
     else if (label === 'Subscription') setIsSubscriptionModalOpen(true);
     else if (label === 'Account') setIsAccountModalOpen(true);
     else setOpenModal(idx);
@@ -532,6 +559,61 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
+  const handleCloseWholesaleModal = () => {
+    setIsWholesaleModalOpen(false);
+    if (props.setIsModalOpen) props.setIsModalOpen(false);
+  }
+
+  // Fetch wholesale stats for card display
+  useEffect(() => {
+    if (!storeId) return;
+
+    let mounted = true;
+
+    const fetchWholesaleStats = async () => {
+      try {
+        const db = getFirestore(firebaseApp);
+        const storeRef = doc(db, 'stores', storeId);
+        const storeSnap = await getDoc(storeRef);
+        
+        if (!mounted) return;
+        
+        if (storeSnap.exists()) {
+          const storeData = storeSnap.data();
+          const stats = storeData?.wholesaleStats || {};
+          
+          // Extract wholesale stats from store document
+          const activePartners = stats.activePartners || 0;
+          const pendingRequests = stats.pendingRequests || 0;
+          const monthlyRevenue = stats.monthlyWholesaleRevenue || 0;
+          
+          if (mounted) {
+            setWholesaleStats({
+              activePartners,
+              pendingRequests,
+              monthlyRevenue
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching wholesale stats:', error);
+        if (mounted) {
+          setWholesaleStats({
+            activePartners: 0,
+            pendingRequests: 0,
+            monthlyRevenue: 0
+          });
+        }
+      }
+    };
+
+    fetchWholesaleStats();
+
+    return () => {
+      mounted = false;
+    };
+  }, [storeId, isWholesaleModalOpen]);
+
   const containerVariants: Variants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
   const itemVariants: Variants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } } };
   const modalVariants: Variants = { hidden: { opacity: 0, scale: 0.95, y: 20 }, visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: [0.25, 1, 0.5, 1] } }, exit: { opacity: 0, scale: 0.95, y: 20, transition: { duration: 0.2, ease: 'easeOut' } } };
@@ -571,6 +653,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
       <div className="mb-4 flex items-center gap-2">
         <button
+          data-refresh-button
           onClick={async () => {
             setRefreshing(true);
             await onRefresh(true);
@@ -670,6 +753,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             `}</style>
 
         {cardsToRender.map((card, idx) => {
+          // allow inline CSS gradients (linear-gradient strings) via style
+          const inlineStyle = card.gradient && card.gradient.startsWith && card.gradient.startsWith('linear-gradient') ? { background: card.gradient } : undefined;
           // Dynamic Ambassador card with tier-based color
           if (card.label === 'Ambassador') {
             const tier = (props.ambassadorTier || 'bronze').toLowerCase();
@@ -743,6 +828,51 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             );
           }
 
+          // Wholesale card - 2 row span on mobile, 2 column span on desktop
+          if (card.label === 'Wholesale' && card.isWholesaleCard) {
+            return (
+              <motion.div key={`wholesale-${idx}`} variants={itemVariants} className="row-span-2 sm:col-span-2 sm:row-span-1">
+                <button
+                  onClick={() => handleOpenModal(idx, card)}
+                  className={`dashboard-card relative flex flex-row items-stretch rounded-2xl p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} text-white ${card.glowClass} w-full h-full min-h-[7rem]`}
+                  tabIndex={0}
+                  type="button"
+                >
+                  <span className="card-blob" />
+                  
+                  {/* Left section: Icon */}
+                  <div className="flex-shrink-0 flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white bg-opacity-20 shadow">
+                    <ShoppingCart className="w-7 h-7 sm:w-8 sm:h-8 drop-shadow" />
+                  </div>
+
+                  {/* Right section: Metrics grid */}
+                  <div className="flex-1 ml-4 z-10 grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-xs sm:text-sm opacity-90">Active Partners</div>
+                      <div className="text-lg sm:text-2xl font-bold">{wholesaleStats.activePartners}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs sm:text-sm opacity-90">Pending Requests</div>
+                      <div className="text-lg sm:text-2xl font-bold">{wholesaleStats.pendingRequests}</div>
+                    </div>
+                    <div className="col-span-2">
+                      <div className="text-xs sm:text-sm opacity-90">This Month</div>
+                      <div className="text-lg sm:text-xl font-bold">₦{wholesaleStats.monthlyRevenue.toLocaleString()}</div>
+                    </div>
+                  </div>
+
+                  {/* Status badge */}
+                  <div className="absolute top-3 right-3">
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-white bg-opacity-20 rounded-full text-xs font-medium">
+                      <Eye className="w-3 h-3" />
+                      Visible
+                    </span>
+                  </div>
+                </button>
+              </motion.div>
+            );
+          }
+
           const Icon = card.icon;
           const isHorizontal = card.label === 'Content' || card.label === 'Tips' || card.label === 'ATLAS™' || card.label === 'Advert' || card.label === 'Account' || card.label === 'Subscription' || card.label === 'Warehouse';
           const isTipsCard = card.label === 'Tips';
@@ -752,7 +882,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           if (isHorizontal) {
             return (
               <motion.div key={`${card.label}-${idx}`} variants={itemVariants} className={`relative ${spotlightClasses}`}>
-                <button className={`dashboard-card relative flex flex-row items-center justify-center rounded-2xl p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card)}>
+                <button style={inlineStyle} className={`dashboard-card relative flex flex-row items-center justify-center rounded-2xl p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card)}>
                   {isPostsCard && showPostsNotification && (<span className="absolute top-2 right-2 flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></span>)}
                   <span className="card-blob" />
                   <div className={`flex-shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white bg-opacity-20 shadow`}><Icon className={`w-5 h-5 sm:w-6 sm:h-6 drop-shadow ${card.isAiCard ? 'ai-icon-glow' : ''}`} /></div>
@@ -760,7 +890,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                     <div className={`text-[15px] sm:text-lg font-bold drop-shadow ${card.isAiCard ? 'ai-text-gradient' : ''}`}>{card.label}</div>
                     {card.subtitle && <div className={`text-xs sm:text-sm font-medium opacity-90 text-center leading-tight ${card.isAiCard ? 'ai-text-gradient' : ''}`}>{card.subtitle}</div>}
                   </div>
-                </button>
+                  </button>
                 {spotlightStep === 'tips' && isTipsCard && (<SpotlightTooltip text="Check here for helpful tips and stats about your dashboard." className="top-full mt-5 left-1/2 -translate-x-1/2" />)}
               </motion.div>
             );
@@ -770,7 +900,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
               return (
                 <motion.div key={`account-${idx}`} variants={itemVariants}>
                   <button
-                    className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`}
+                    style={inlineStyle}
+                    className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`}
                     tabIndex={0}
                     type="button"
                     onClick={() => handleOpenModal(idx, card)}
@@ -789,7 +920,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
             return (
               <motion.div key={`${card.label}-${idx}`} variants={itemVariants}>
-                <button className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card)}>
+                <button style={inlineStyle} className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card)}>
                   <span className="card-blob" />
                   <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white bg-opacity-20 mb-1 sm:mb-2 shadow">
                     <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 drop-shadow" />
@@ -897,6 +1028,14 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         <WarehouseModal
           isOpen={isWarehouseModalOpen}
           onClose={handleCloseWarehouseModal}
+        />
+      )}
+
+      {isWholesaleModalOpen && (
+        <WholesaleModal
+          isOpen={isWholesaleModalOpen}
+          onClose={handleCloseWholesaleModal}
+          storeId={storeId}
         />
       )}
     </section>
