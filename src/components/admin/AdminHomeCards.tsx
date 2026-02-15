@@ -828,48 +828,28 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             );
           }
 
-          // Wholesale card - spans full width with responsive layout
+          // Wholesale card - simplified vertical layout
           if (card.label === 'Wholesale' && card.isWholesaleCard) {
             return (
-              <motion.div key={`wholesale-${idx}`} variants={itemVariants} className="col-span-2">
+              <motion.div key={`wholesale-${idx}`} variants={itemVariants}>
                 <button
                   onClick={() => handleOpenModal(idx, card)}
-                  className={`dashboard-card relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 rounded-2xl p-4 sm:p-5 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} text-white ${card.glowClass} w-full min-h-[10rem] sm:min-h-[7rem]`}
+                  className={`dashboard-card relative flex flex-col items-center justify-center gap-3 rounded-2xl p-6 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} text-white ${card.glowClass} w-full min-h-[140px]`}
                   tabIndex={0}
                   type="button"
                 >
                   <span className="card-blob" />
                   
-                  {/* Left section: Icon */}
-                  <div className="flex-shrink-0 flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white bg-opacity-20 shadow">
-                    <ShoppingCart className="w-7 h-7 sm:w-8 sm:h-8 drop-shadow" />
+                  {/* Icon */}
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white bg-opacity-20">
+                    <ShoppingCart className="w-6 h-6" />
                   </div>
 
-                  {/* Right section: Metrics grid */}
-                  <div className="flex-1 w-full z-10">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
-                      <div className="flex flex-col">
-                        <div className="text-xs sm:text-sm opacity-90 font-medium">Active Partners</div>
-                        <div className="text-lg sm:text-2xl font-bold mt-1">{wholesaleStats.activePartners}</div>
-                      </div>
-                      <div className="flex flex-col">
-                        <div className="text-xs sm:text-sm opacity-90 font-medium">Pending Requests</div>
-                        <div className="text-lg sm:text-2xl font-bold mt-1">{wholesaleStats.pendingRequests}</div>
-                      </div>
-                      <div className="flex flex-col col-span-2 sm:col-span-1">
-                        <div className="text-xs sm:text-sm opacity-90 font-medium">This Month</div>
-                        <div className="text-sm sm:text-lg font-bold mt-1">₦{wholesaleStats.monthlyRevenue.toLocaleString()}</div>
-                      </div>
-                    </div>
-                  </div>
+                  {/* Active Partners Count */}
+                  <div className="text-3xl font-bold">{wholesaleStats.activePartners}</div>
 
-                  {/* Status badge */}
-                  <div className="absolute top-3 right-3 z-20">
-                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-white bg-opacity-20 rounded-full text-xs font-medium whitespace-nowrap">
-                      <Eye className="w-3 h-3 flex-shrink-0" />
-                      Visible
-                    </span>
-                  </div>
+                  {/* Card Label */}
+                  <div className="text-sm font-medium text-center opacity-90">Wholesale</div>
                 </button>
               </motion.div>
             );
