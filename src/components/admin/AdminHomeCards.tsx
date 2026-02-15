@@ -89,7 +89,7 @@ const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferral
   </div>
 );
 
-const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.ElementType | null, glowClass: string, isAiCard?: boolean, colspan?: number, isWholesaleCard?: boolean }[] = [
+const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.ElementType | null, glowClass: string, isAiCard?: boolean, colspan?: number, isWholesaleCard?: boolean, cardType?: 'metric' | 'action' }[] = [
   {
     label: 'ATLAS™',
     icon: Globe,
@@ -97,6 +97,7 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     text: 'text-white',
     component: null,
     glowClass: 'dark:shadow-blue-500/30 shadow-blue-500/50',
+    cardType: 'action',
   },
   {
     label: 'Tips',
@@ -105,6 +106,7 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     text: 'text-white',
     component: TipsModal,
     glowClass: 'dark:shadow-yellow-500/30 shadow-yellow-500/50',
+    cardType: 'action',
   },
   {
     label: 'Events',
@@ -113,6 +115,7 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     text: 'text-white',
     component: null,
     glowClass: 'dark:shadow-pink-500/30 shadow-pink-500/50',
+    cardType: 'action',
   },
   {
     label: 'Warehouse',
@@ -121,6 +124,7 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     text: 'text-white',
     component: null,
     glowClass: 'dark:shadow-orange-500/30 shadow-orange-500/50',
+    cardType: 'action',
   },
   /* {
     label: 'Advert',
@@ -139,6 +143,7 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     text: 'text-white',
     component: null,
     glowClass: 'dark:shadow-pink-600/30 shadow-pink-500/50',
+    cardType: 'action',
   },
 
   {
@@ -149,6 +154,7 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     text: 'text-white',
     component: null,
     glowClass: 'dark:shadow-green-500/30 shadow-green-500/50',
+    cardType: 'metric',
   },
   {
     label: 'Expenses',
@@ -158,6 +164,7 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     text: 'text-white',
     component: null,
     glowClass: 'dark:shadow-orange-500/30 shadow-orange-500/50',
+    cardType: 'metric',
   },
   {
     label: 'Ambassador',
@@ -167,6 +174,7 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     text: 'text-white',
     component: null,
     glowClass: 'dark:shadow-orange-500/30 shadow-orange-500/50',
+    cardType: 'metric',
   },
   {
     label: 'Views',
@@ -176,6 +184,7 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     text: 'text-white',
     component: TotalViewsModal,
     glowClass: 'dark:shadow-sky-600/30 shadow-sky-600/50',
+    cardType: 'metric',
   },
   {
     label: 'Orders',
@@ -185,6 +194,7 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     text: 'text-white',
     component: null,
     glowClass: 'dark:shadow-amber-600/30 shadow-amber-500/50',
+    cardType: 'metric',
   },
   {
     label: 'Deliveries',
@@ -194,6 +204,7 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     text: 'text-white',
     component: null,
     glowClass: 'dark:shadow-green-500/30 shadow-green-500/50',
+    cardType: 'metric',
   },
   {
     label: 'Wholesale',
@@ -202,7 +213,7 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     text: 'text-white',
     component: null,
     glowClass: 'dark:shadow-amber-600/50 shadow-amber-600/50',
-    colspan: 2,
+    cardType: 'metric',
     isWholesaleCard: true,
   },
   {
@@ -213,6 +224,7 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     text: 'text-white',
     component: null,
     glowClass: 'dark:shadow-rose-500/30 shadow-amber-500/50',
+    cardType: 'metric',
   },
   {
     label: 'Manage Products',
@@ -222,6 +234,7 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     text: 'text-white',
     component: null,
     glowClass: 'dark:shadow-indigo-600/30 shadow-indigo-600/50',
+    cardType: 'metric',
   },
   {
     label: 'Account',
@@ -230,6 +243,7 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     text: 'text-white',
     component: AccountModal,
     glowClass: 'dark:shadow-violet-600/30 shadow-violet-500/50',
+    cardType: 'action',
   },
   {
     label: 'Subscription',
@@ -238,6 +252,7 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     text: 'text-white',
     component: SubscriptionModal,
     glowClass: 'dark:shadow-teal-500/30 shadow-teal-500/50',
+    cardType: 'action',
   },
 ];
 
@@ -618,6 +633,37 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const itemVariants: Variants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } } };
   const modalVariants: Variants = { hidden: { opacity: 0, scale: 0.95, y: 20 }, visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: [0.25, 1, 0.5, 1] } }, exit: { opacity: 0, scale: 0.95, y: 20, transition: { duration: 0.2, ease: 'easeOut' } } };
 
+  /**
+   * MetricCard Component - Tall vertical layout for metric cards
+   * Shows: Icon (top) -> Count (center) -> Label (bottom)
+   */
+  const MetricCard = ({ icon: Icon, label, count, gradient, glowClass, onClick, inlineStyle }: { icon: React.ElementType; label: string; count: string | number; gradient: string; glowClass: string; onClick: () => void; inlineStyle?: React.CSSProperties }) => (
+    <motion.div variants={itemVariants}>
+      <button
+        style={inlineStyle}
+        className={`dashboard-card relative flex flex-col items-center justify-center gap-3 rounded-2xl p-6 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${gradient} text-white ${glowClass} w-full min-h-[140px]`}
+        tabIndex={0}
+        type="button"
+        onClick={onClick}
+      >
+        <span className="card-blob" />
+        
+        {/* Icon */}
+        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white bg-opacity-20">
+          <Icon className="w-6 h-6" />
+        </div>
+
+        {/* Count */}
+        <div className="text-3xl font-bold drop-shadow">{count}</div>
+
+        {/* Label */}
+        <div className="text-sm font-medium text-center opacity-90">
+          {label === 'Manage Categories' ? 'Categories' : label === 'Manage Products' ? 'Products' : label}
+        </div>
+      </button>
+    </motion.div>
+  );
+
   return (
     <section className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 overflow-x-hidden">
       <motion.div
@@ -856,12 +902,29 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           }
 
           const Icon = card.icon;
-          const isHorizontal = card.label === 'Content' || card.label === 'Tips' || card.label === 'ATLAS™' || card.label === 'Advert' || card.label === 'Account' || card.label === 'Subscription' || card.label === 'Warehouse';
           const isTipsCard = card.label === 'Tips';
           const isPostsCard = card.label === 'Content';
           const spotlightClasses = spotlightStep === 'tips' && isTipsCard ? 'relative z-50 pointer-events-auto' : '';
 
-          if (isHorizontal) {
+          // Render metric cards (Revenue, Views, Products, Categories, Orders, Deliveries, Wholesale, etc.)
+          if (card.cardType === 'metric') {
+            const metricValue = (() => {
+              const value = card.valueKey ? (props as any)[card.valueKey] : '';
+              if (card.label === 'Commission') return formatCurrencyForCard(props.totalCommission);
+              if (card.label === 'Bonus') return formatCurrencyForCard(props.totalReferralBonus);
+              if (card.label === 'Revenue') return formatCurrencyForCard(props.totalRevenue);
+              if (card.label === 'Expenses') return formatCurrencyForCard(props.totalExpenses + props.totalCommission);
+              if (card.label === 'Ambassador') return props.referrals;
+              if (card.label === 'Deliveries') return 0;
+              if (card.label === 'Events') return 1;
+              if (typeof value === 'number' || typeof value === 'string') return value;
+              return '0';
+            })();
+            return <MetricCard key={`${card.label}-${idx}`} icon={Icon} label={card.label} count={metricValue} gradient={card.gradient} glowClass={card.glowClass} onClick={() => handleOpenModal(idx, card)} inlineStyle={inlineStyle} />;
+          }
+
+          // Render action cards (ATLAS™, Tips, Content, Account, Subscription, Warehouse, Events)
+          if (card.cardType === 'action') {
             return (
               <motion.div key={`${card.label}-${idx}`} variants={itemVariants} className={`relative ${spotlightClasses}`}>
                 <button style={inlineStyle} className={`dashboard-card relative flex flex-row items-center justify-center rounded-2xl p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card)}>
@@ -872,62 +935,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                     <div className={`text-[15px] sm:text-lg font-bold drop-shadow ${card.isAiCard ? 'ai-text-gradient' : ''}`}>{card.label}</div>
                     {card.subtitle && <div className={`text-xs sm:text-sm font-medium opacity-90 text-center leading-tight ${card.isAiCard ? 'ai-text-gradient' : ''}`}>{card.subtitle}</div>}
                   </div>
-                  </button>
-                {spotlightStep === 'tips' && isTipsCard && (<SpotlightTooltip text="Check here for helpful tips and stats about your dashboard." className="top-full mt-5 left-1/2 -translate-x-1/2" />)}
-              </motion.div>
-            );
-          } else {
-            // Special rendering for Account card to show bank preview + edit/add CTA
-            if (card.label === 'Account') {
-              return (
-                <motion.div key={`account-${idx}`} variants={itemVariants}>
-                  <button
-                    style={inlineStyle}
-                    className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`}
-                    tabIndex={0}
-                    type="button"
-                    onClick={() => handleOpenModal(idx, card)}
-                  >
-                    <span className="card-blob" />
-                    <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white bg-opacity-20 mb-2 shadow">
-                      <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 drop-shadow" />
-                    </div>
-                    <div className="flex flex-col items-center min-w-0 z-10 w-full">
-                      <div className="text-lg sm:text-xl md:text-2xl font-bold drop-shadow">Account</div>
-                    </div>
-                  </button>
-                </motion.div>
-              );
-            }
-
-            return (
-              <motion.div key={`${card.label}-${idx}`} variants={itemVariants}>
-                <button style={inlineStyle} className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card)}>
-                  <span className="card-blob" />
-                  <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white bg-opacity-20 mb-1 sm:mb-2 shadow">
-                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 drop-shadow" />
-                  </div>
-                  <div className="flex flex-col items-center min-w-0 z-10 w-full">
-                    <div className="text-lg sm:text-xl md:text-2xl font-bold drop-shadow">
-                      {(() => {
-                        const value = card.valueKey ? (props as any)[card.valueKey] : '';
-                        if (card.label === 'Commission') return formatCurrencyForCard(props.totalCommission);
-                        if (card.label === 'Bonus') return formatCurrencyForCard(props.totalReferralBonus);
-                        if (card.label === 'Revenue') return formatCurrencyForCard(props.totalRevenue);
-                        if (card.label === 'Expenses') return formatCurrencyForCard(props.totalExpenses + props.totalCommission);
-                        if (card.label === 'Ambassador') return props.referrals;
-                        if (card.label === 'Deliveries') return 0;
-                        if (card.label === 'Events') return 1;
-                        if (typeof value === 'number' || typeof value === 'string') return value;
-                        return '';
-                      })()}
-                    </div>
-                    <div className="text-xs sm:text-sm font-medium opacity-90 text-center px-1 leading-tight">
-                      {card.label === 'Manage Categories' ? 'Categories' : card.label === 'Manage Products' ? 'Products' : card.label}
-                    </div>
-                    {card.subtitle && <div className="text-xs opacity-70 mt-1">{card.subtitle}</div>}
-                  </div>
                 </button>
+                {spotlightStep === 'tips' && isTipsCard && (<SpotlightTooltip text="Check here for helpful tips and stats about your dashboard." className="top-full mt-5 left-1/2 -translate-x-1/2" />)}
               </motion.div>
             );
           }
