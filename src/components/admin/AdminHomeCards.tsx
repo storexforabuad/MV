@@ -828,13 +828,13 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             );
           }
 
-          // Wholesale card - 2 row span on mobile, 2 column span on desktop
+          // Wholesale card - spans full width with responsive layout
           if (card.label === 'Wholesale' && card.isWholesaleCard) {
             return (
-              <motion.div key={`wholesale-${idx}`} variants={itemVariants} className="row-span-2 sm:col-span-2 sm:row-span-1">
+              <motion.div key={`wholesale-${idx}`} variants={itemVariants} className="col-span-2">
                 <button
                   onClick={() => handleOpenModal(idx, card)}
-                  className={`dashboard-card relative flex flex-row items-stretch rounded-2xl p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} text-white ${card.glowClass} w-full h-full min-h-[7rem]`}
+                  className={`dashboard-card relative flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6 rounded-2xl p-4 sm:p-5 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} text-white ${card.glowClass} w-full min-h-[10rem] sm:min-h-[7rem]`}
                   tabIndex={0}
                   type="button"
                 >
@@ -846,25 +846,27 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                   </div>
 
                   {/* Right section: Metrics grid */}
-                  <div className="flex-1 ml-4 z-10 grid grid-cols-2 gap-4">
-                    <div>
-                      <div className="text-xs sm:text-sm opacity-90">Active Partners</div>
-                      <div className="text-lg sm:text-2xl font-bold">{wholesaleStats.activePartners}</div>
-                    </div>
-                    <div>
-                      <div className="text-xs sm:text-sm opacity-90">Pending Requests</div>
-                      <div className="text-lg sm:text-2xl font-bold">{wholesaleStats.pendingRequests}</div>
-                    </div>
-                    <div className="col-span-2">
-                      <div className="text-xs sm:text-sm opacity-90">This Month</div>
-                      <div className="text-lg sm:text-xl font-bold">₦{wholesaleStats.monthlyRevenue.toLocaleString()}</div>
+                  <div className="flex-1 w-full z-10">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
+                      <div className="flex flex-col">
+                        <div className="text-xs sm:text-sm opacity-90 font-medium">Active Partners</div>
+                        <div className="text-lg sm:text-2xl font-bold mt-1">{wholesaleStats.activePartners}</div>
+                      </div>
+                      <div className="flex flex-col">
+                        <div className="text-xs sm:text-sm opacity-90 font-medium">Pending Requests</div>
+                        <div className="text-lg sm:text-2xl font-bold mt-1">{wholesaleStats.pendingRequests}</div>
+                      </div>
+                      <div className="flex flex-col col-span-2 sm:col-span-1">
+                        <div className="text-xs sm:text-sm opacity-90 font-medium">This Month</div>
+                        <div className="text-sm sm:text-lg font-bold mt-1">₦{wholesaleStats.monthlyRevenue.toLocaleString()}</div>
+                      </div>
                     </div>
                   </div>
 
                   {/* Status badge */}
-                  <div className="absolute top-3 right-3">
-                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-white bg-opacity-20 rounded-full text-xs font-medium">
-                      <Eye className="w-3 h-3" />
+                  <div className="absolute top-3 right-3 z-20">
+                    <span className="inline-flex items-center gap-1 px-2 py-1 bg-white bg-opacity-20 rounded-full text-xs font-medium whitespace-nowrap">
+                      <Eye className="w-3 h-3 flex-shrink-0" />
                       Visible
                     </span>
                   </div>
@@ -920,7 +922,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
             return (
               <motion.div key={`${card.label}-${idx}`} variants={itemVariants}>
-                <button style={inlineStyle} className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card)}>
+                <button style={inlineStyle} className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card)}>
                   <span className="card-blob" />
                   <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white bg-opacity-20 mb-1 sm:mb-2 shadow">
                     <Icon className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 drop-shadow" />

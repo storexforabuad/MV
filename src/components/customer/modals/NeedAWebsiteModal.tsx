@@ -1,6 +1,7 @@
 "use client";
 
-import { X, Globe, ArrowRight, AlertCircle, Check } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { X, Globe, ArrowRight, AlertCircle, Check, CreditCard } from 'lucide-react';
 import { useWebsiteRegistrationModal } from '@/hooks/useWebsiteRegistrationModal';
 import CountryStateSelector from '@/components/shared/CountryStateSelector';
 import ProgressIndicator from '@/components/shared/ProgressIndicator';
@@ -17,6 +18,14 @@ interface NeedAWebsiteModalProps {
 
 const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsiteModalProps) => {
   const modal = useWebsiteRegistrationModal();
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to top when screen changes
+  useEffect(() => {
+    if (contentRef.current) {
+      contentRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [modal.currentScreen]);
 
   // WhatsApp validation: Accept 11 digits only for Nigeria
   const isValidWhatsApp = modal.formData.whatsapp.replace(/\D/g, '').length === 11;
@@ -155,7 +164,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
         </div>
 
         {/* Content - Scrollable */}
-        <div className="flex-1 overflow-y-auto">
+        <div ref={contentRef} className="flex-1 overflow-y-auto">
           <div className="p-6 pb-28">
               {/* (Value-prop screen removed; category selection is now first visible step) */}
 
@@ -312,7 +321,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                         )}
 
                         <div className="text-left pt-2">
-                          <div className="mb-2 text-sm text-slate-300 font-semibold">{tier.name}</div>
+                          <div className="mb-2 text-sm text-slate-300 font-semibold">{tier.name} Plan</div>
                           <div className="mb-3">
                             <div className="flex items-center gap-2 mb-1">
                               <span className="text-sm text-slate-400 line-through">₦{tier.price.toLocaleString()}</span>
@@ -480,8 +489,19 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                   : 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-900/30 hover:scale-[1.02] active:scale-[0.98]'
               }`}
             >
-              {modal.loading ? 'Processing...' : (modal.currentScreen === 2 ? 'Get Started' : modal.currentScreen === 4 ? 'Pay & Register' : 'Next')}
-              {!modal.loading && typeof modal.currentScreen === 'number' && modal.currentScreen < 4 && <ArrowRight size={16} />}
+              {modal.loading ? (
+                'Processing...'
+              ) : modal.currentScreen === 2 ? (
+                <>Get Started</>
+              ) : modal.currentScreen === 4 ? (
+                <>
+                  Subscribe
+                  <CreditCard size={18} />
+                </>
+              ) : (
+                <>Next</>
+              )}
+              {!modal.loading && typeof modal.currentScreen === 'number' && modal.currentScreen < 4 && modal.currentScreen !== 4 && <ArrowRight size={16} />}
             </button>
           </div>
         )}

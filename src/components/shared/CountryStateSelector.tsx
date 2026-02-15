@@ -25,9 +25,9 @@ const CountryStateSelector = ({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="flex gap-3">
       {/* Country Dropdown with Flags */}
-      <div>
+      <div className="flex-1">
         <label className="block text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wide">
           Country
         </label>
@@ -51,7 +51,7 @@ const CountryStateSelector = ({
       </div>
 
       {/* State Dropdown */}
-      <div>
+      <div className="flex-1">
         <label className="block text-xs font-semibold text-slate-300 mb-2 uppercase tracking-wide">
           State/Region
         </label>
