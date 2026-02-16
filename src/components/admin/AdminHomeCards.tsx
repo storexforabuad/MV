@@ -821,19 +821,13 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
             return (
               <motion.div key={`ambassador-${idx}`} variants={itemVariants}>
-                <button className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${gradient} text-white ${glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card)}>
+                <button className={`dashboard-card relative flex flex-col items-center justify-center gap-3 rounded-2xl p-6 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${gradient} text-white ${glowClass} w-full min-h-[140px]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card)}>
                   <span className="card-blob" />
-                  <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white bg-opacity-20 mb-1 sm:mb-2 shadow">
-                    <Star className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 drop-shadow" />
+                  <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white bg-opacity-20">
+                    <Star className="w-6 h-6 drop-shadow" />
                   </div>
-                  <div className="flex flex-col items-center min-w-0 z-10 w-full">
-                    <div className="text-lg sm:text-xl md:text-2xl font-bold drop-shadow">
-                      {props.referrals}
-                    </div>
-                    <div className="text-xs sm:text-sm font-medium opacity-90 text-center px-1 leading-tight">
-                      Ambassador
-                    </div>
-                  </div>
+                  <div className="text-3xl font-bold drop-shadow">{props.referrals}</div>
+                  <div className="text-sm font-medium text-center opacity-90">Ambassador</div>
                 </button>
               </motion.div>
             );
@@ -849,17 +843,17 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             return (
               <motion.div key={`subscription-${idx}`} variants={itemVariants}>
                 <button
-                  className={`dashboard-card relative flex flex-row items-center justify-center rounded-2xl p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${gradient} text-white ${glowClass} w-full h-full min-h-[7rem]`}
+                  className={`dashboard-card relative flex flex-row items-center justify-start rounded-2xl p-4 md:p-5 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${gradient} text-white ${glowClass} w-full min-h-[140px]`}
                   tabIndex={0}
                   type="button"
                   onClick={() => handleOpenModal(idx, card)}
                 >
                   <span className="card-blob" />
-                  <div className="flex-shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white bg-opacity-20 shadow">
-                    <SubscriptionIcon className="w-5 h-5 sm:w-6 sm:h-6 drop-shadow" />
+                  <div className="flex-shrink-0 flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white bg-opacity-20 shadow">
+                    <SubscriptionIcon className="w-6 h-6 sm:w-7 sm:h-7 drop-shadow" />
                   </div>
-                  <div className="flex flex-col items-center ml-2 sm:ml-3 min-w-0 z-10">
-                    <div className="text-[15px] sm:text-lg font-bold drop-shadow">Subscription</div>
+                  <div className="flex flex-col items-start justify-center ml-4 sm:ml-5 min-w-0 z-10 flex-1">
+                    <div className="text-base sm:text-lg font-bold drop-shadow">Subscription</div>
                   </div>
                 </button>
               </motion.div>
@@ -927,16 +921,16 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           if (card.cardType === 'action') {
             return (
               <motion.div key={`${card.label}-${idx}`} variants={itemVariants} className={`relative ${spotlightClasses}`}>
-                <button style={inlineStyle} className={`dashboard-card relative flex flex-row items-center justify-center rounded-2xl p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.text} ${card.glowClass} w-full h-full min-h-[7rem]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card)}>
+                <button style={inlineStyle} className={`dashboard-card relative flex flex-row items-center justify-start rounded-2xl p-4 md:p-5 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.text} ${card.glowClass} w-full min-h-[140px]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card)}>
                   {isPostsCard && showPostsNotification && (<span className="absolute top-2 right-2 flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></span>)}
                   <span className="card-blob" />
-                  <div className={`flex-shrink-0 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white bg-opacity-20 shadow`}><Icon className={`w-5 h-5 sm:w-6 sm:h-6 drop-shadow ${card.isAiCard ? 'ai-icon-glow' : ''}`} /></div>
-                  <div className="flex flex-col items-center ml-2 sm:ml-3 min-w-0 z-10">
-                    <div className={`text-[15px] sm:text-lg font-bold drop-shadow ${card.isAiCard ? 'ai-text-gradient' : ''}`}>{card.label}</div>
-                    {card.subtitle && <div className={`text-xs sm:text-sm font-medium opacity-90 text-center leading-tight ${card.isAiCard ? 'ai-text-gradient' : ''}`}>{card.subtitle}</div>}
+                  <div className={`flex-shrink-0 flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white bg-opacity-20 shadow`}><Icon className={`w-6 h-6 sm:w-7 sm:h-7 drop-shadow ${card.isAiCard ? 'ai-icon-glow' : ''}`} /></div>
+                  <div className="flex flex-col items-start justify-center ml-4 sm:ml-5 min-w-0 z-10 flex-1">
+                    <div className={`text-base sm:text-lg font-bold drop-shadow ${card.isAiCard ? 'ai-text-gradient' : ''}`}>{card.label}</div>
+                    {card.subtitle && <div className={`text-xs sm:text-sm font-medium opacity-90 leading-tight ${card.isAiCard ? 'ai-text-gradient' : ''}`}>{card.subtitle}</div>}
                   </div>
                 </button>
-                {spotlightStep === 'tips' && isTipsCard && (<SpotlightTooltip text="Check here for helpful tips and stats about your dashboard." className="top-full mt-5 left-1/2 -translate-x-1/2" />)}
+                {spotlightStep === 'tips' && isTipsCard && (<SpotlightTooltip text="Check here for helpful tips and stats about your dashboard." className="top-full mt-4 left-1/2 -translate-x-1/2" />)}
               </motion.div>
             );
           }
