@@ -154,7 +154,6 @@ export default function ProductDetail({ params }: { params: { id: string } }) {
                   loading="eager"
                   placeholder="blur"
                   blurDataURL={product.images[selectedImage]}
-                  onLoadingComplete={() => setImageLoading(false)}
                   onLoad={() => setImageLoading(false)}
                 />
               ) : (

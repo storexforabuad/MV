@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import { SpotlightProvider, useSpotlightContext } from '@/context/SpotlightContext';
 import { CustomerProvider } from '@/context/CustomerContext';
 import { VendorProvider } from '@/context/VendorContext';
+import { WishlistProvider } from '@/context/WishlistContext';
 import { AnimatePresence, motion } from 'framer-motion';
 import { usePWARedirect } from '@/hooks/usePWARedirect';
 
@@ -49,25 +50,27 @@ export default function ClientProviders({ children }: { children: React.ReactNod
   return (
     <CustomerProvider>
       <VendorProvider>
-        <SpotlightProvider>
-          <Suspense fallback={null}>
-            <PWARedirectHandler />
-          </Suspense>
-          {children}
-          <InstallPrompt />
-          <Toaster 
-            position="bottom-center"
-            toastOptions={{
-              className: 'toast',
-              style: {
-                background: 'var(--card-background)',
-                color: 'var(--text-primary)',
-                border: '1px solid var(--border-color)',
-              },
-            }}
-          />
-          <SpotlightOverlay />
-        </SpotlightProvider>
+        <WishlistProvider>
+          <SpotlightProvider>
+            <Suspense fallback={null}>
+              <PWARedirectHandler />
+            </Suspense>
+            {children}
+            <InstallPrompt />
+            <Toaster 
+              position="bottom-center"
+              toastOptions={{
+                className: 'toast',
+                style: {
+                  background: 'var(--card-background)',
+                  color: 'var(--text-primary)',
+                  border: '1px solid var(--border-color)',
+                },
+              }}
+            />
+            <SpotlightOverlay />
+          </SpotlightProvider>
+        </WishlistProvider>
       </VendorProvider>
     </CustomerProvider>
   );

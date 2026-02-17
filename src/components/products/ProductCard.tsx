@@ -1,10 +1,15 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Heart, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
+import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 import { Product } from '../../types/product';
 import { calculateDiscount, formatPrice } from '../../utils/price';
 import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import { useProductDetailPrefetch } from '../../hooks/useProductDetailPrefetch';
+import { useWishlist } from '../../context/WishlistContext';
+import { useCustomer } from '../../context/CustomerContext';
 import NavigationStore from '@/lib/navigationStore';
 import {
   isGeneralProduct,
@@ -25,20 +30,127 @@ interface ProductCardProps {
   product: Product;
   storeId?: string | null;
   activeCategoryId: string;
+  storeMeta?: any; // StoreMeta type, optional for ProductCard
+  onOrderClick?: (product: Product, selectedColor?: string, selectedSize?: string) => void;
 }
 
-export default function ProductCard({ product, storeId, activeCategoryId }: ProductCardProps) {
+export default function ProductCard({ product, storeId, activeCategoryId, storeMeta, onOrderClick }: ProductCardProps) {
   const [imageLoading, setImageLoading] = useState(true);
   const [imgSrc, setImgSrc] = useState(product.images?.[0] || DEFAULT_IMAGES.medium);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [selectedColor, setSelectedColor] = useState<string | undefined>(isFashionProduct(product) && product.colors?.[0] ? product.colors[0].name : undefined);
+  const [selectedSize, setSelectedSize] = useState<string | undefined>();
   const cardRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
+  const { customer } = useCustomer();
+  const [wishlistLoading, setWishlistLoading] = useState(false);
+
+  // Detect mobile device
+  useEffect(() => {
+    const checkMobile = () => {
+      const isMobileDevice = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+        || window.matchMedia('(max-width: 768px)').matches
+        || window.innerWidth <= 768;
+      setIsMobile(isMobileDevice);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   useIntersectionObserver(cardRef as React.RefObject<Element>, (entries) => {
     if (entries[0].isIntersecting) setIsVisible(true);
   }, { threshold: 0.2 });
 
   useProductDetailPrefetch(storeId, product.id, (isVisible || isHovered));
+
+  // Check if product is in wishlist
+  const isInWishlist = wishlist.some(item => item.id === product.id);
+
+  // Get images for carousel (fashion with color or general product)
+  const getCarouselImages = (): string[] => {
+    if (isFashionProduct(product) && selectedColor && product.colors) {
+      const colorData = product.colors.find(c => c.name === selectedColor || c.hex === selectedColor);
+      return colorData?.images || product.images || [];
+    }
+    return product.images || [];
+  };
+
+  const carouselImages = getCarouselImages();
+  const totalImages = carouselImages.length;
+  const hasMultipleImages = totalImages > 1;
+
+  // Handle wishlist toggle
+  const handleWishlistToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Haptic feedback
+    if (navigator.vibrate) {
+      navigator.vibrate(15);
+    }
+    
+    setWishlistLoading(true);
+    try {
+      if (isInWishlist) {
+        removeFromWishlist(product.id);
+        toast.success('Removed from wishlist', {
+          duration: 2000,
+          position: 'bottom-center',
+          style: {
+            background: 'var(--card-background)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-color)',
+          },
+        });
+      } else {
+        addToWishlist(product);
+        toast.success('Added to wishlist', {
+          duration: 2000,
+          position: 'bottom-center',
+          style: {
+            background: 'var(--card-background)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-color)',
+          },
+        });
+      }
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
+
+  // Handle order button click
+  const handleOrderClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (onOrderClick) {
+      onOrderClick(product, selectedColor, selectedSize);
+    }
+  };
+
+  // Handle image carousel navigation
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev === 0 ? totalImages - 1 : prev - 1));
+  };
+
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => (prev === totalImages - 1 ? 0 : prev + 1));
+  };
+
+  const handleDotClick = (e: React.MouseEvent, index: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setCurrentImageIndex(index);
+  };
 
   if (!product.id) {
     console.error('Missing product id in ProductCard', { product });
@@ -73,6 +185,9 @@ export default function ProductCard({ product, storeId, activeCategoryId }: Prod
       setImgSrc(DEFAULT_IMAGES.large);
     }
   };
+
+  // Update displayed image when carousel index changes or color changes
+  const displayImage = carouselImages[currentImageIndex] || DEFAULT_IMAGES.medium;
 
   const handleClick = () => {
     NavigationStore.saveState(activeCategoryId, window.scrollY);
@@ -136,7 +251,7 @@ export default function ProductCard({ product, storeId, activeCategoryId }: Prod
           )}
 
           <Image
-            src={imgSrc}
+            src={displayImage}
             alt={product.name}
             fill
             sizes="(max-width: 640px) 400px, (max-width: 1024px) 800px, 1200px"
@@ -146,10 +261,100 @@ export default function ProductCard({ product, storeId, activeCategoryId }: Prod
             loading="lazy"
             draggable="false"
             placeholder="blur"
-            blurDataURL={imgSrc}
+            blurDataURL={displayImage}
             onLoad={() => setImageLoading(false)}
             onError={handleImageError}
           />
+
+          {/* Floating Action Buttons - Only show when NOT sold out */}
+          {!isSoldOut && (
+            <div className={`absolute inset-0 flex flex-col items-end justify-between p-3 transition-opacity duration-300 ${
+              isMobile 
+                ? 'opacity-100 pointer-events-auto' 
+                : 'opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto'
+            }`}>
+              {/* Heart Icon - Wishlist (Top Right) */}
+              <motion.button
+                onClick={handleWishlistToggle}
+                disabled={wishlistLoading}
+                className="relative flex-shrink-0 p-3 rounded-full card-glass shadow-lg flex items-center justify-center disabled:opacity-50"
+                aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+                type="button"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Heart
+                  size={20}
+                  className={`transition-all duration-200 ${
+                    isInWishlist
+                      ? 'fill-red-500 text-red-500'
+                      : 'text-gray-600 dark:text-gray-300'
+                  }`}
+                />
+              </motion.button>
+
+              {/* Cart Icon - Order (Bottom Right) */}
+              <motion.button
+                onClick={handleOrderClick}
+                disabled={isSoldOut}
+                className="flex-shrink-0 p-3 rounded-full card-glass shadow-lg flex items-center justify-center disabled:opacity-50"
+                aria-label="Place order"
+                type="button"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <ShoppingCart size={20} className="text-green-500 dark:text-green-400" />
+              </motion.button>
+            </div>
+          )}
+
+          {/* Navigation Arrows - Only show when NOT sold out and multiple images */}
+          {!isSoldOut && hasMultipleImages && (
+            <>
+              {/* Left Arrow */}
+              <motion.button
+                onClick={handlePrevImage}
+                className="absolute left-3 top-1/2 transform -translate-y-1/2 z-20 p-2.5 rounded-full card-glass shadow-lg flex items-center justify-center"
+                aria-label="Previous image"
+                type="button"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <ChevronLeft size={20} className="text-[var(--text-primary)]" />
+              </motion.button>
+
+              {/* Right Arrow */}
+              <motion.button
+                onClick={handleNextImage}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 z-20 p-2.5 rounded-full card-glass shadow-lg flex items-center justify-center"
+                aria-label="Next image"
+                type="button"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <ChevronRight size={20} className="text-[var(--text-primary)]" />
+              </motion.button>
+            </>
+          )}
+
+          {/* Carousel Dots - Bottom Center - Only show when NOT sold out */}
+          {!isSoldOut && hasMultipleImages && (
+            <div className={`absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-0.5 z-10 transition-opacity duration-300 ${
+              isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            }`}>
+              {carouselImages.map((_, index) => (
+                <span
+                  key={index}
+                  className={`transition-all duration-200 rounded-full ${
+                    index === currentImageIndex
+                      ? 'w-1 h-1 bg-white shadow-md'
+                      : 'w-0.75 h-0.75 bg-white/60'
+                  }`}
+                  aria-label={`Image ${index + 1} of ${totalImages}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="mt-3 space-y-1 px-1 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]

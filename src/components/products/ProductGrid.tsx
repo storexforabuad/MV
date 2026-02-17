@@ -13,6 +13,7 @@ import { useOrders } from '@/hooks/useOrders';
 import { OrdersModal } from '@/components/customer/modals/OrdersModal';
 import { ReferralsModal } from '@/components/customer/modals/ReferralsModal';
 import { ensureProductType } from '../../utils/productHelpers';
+import OrderSummaryModal from '../modals/OrderSummaryModal';
 import SkeletonLoader from '../SkeletonLoader';
 
 const VehicleCard = dynamic(() => import('./VehicleCard'), {
@@ -123,6 +124,19 @@ const ProductGrid = memo(function ProductGrid({
   const { orders, addOrder } = useOrders(customer?.id ?? null, storeId || "");
   const [isSingleColumn, setIsSingleColumn] = useState(false);
   const [isReferralModalOpen, setReferralModalOpen] = useState(false);
+  
+  // Order modal state
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [orderModalProduct, setOrderModalProduct] = useState<Product | null>(null);
+  const [orderModalColor, setOrderModalColor] = useState<string | undefined>();
+  const [orderModalSize, setOrderModalSize] = useState<string | undefined>();
+
+  const handleOrderClick = (product: Product, selectedColor?: string, selectedSize?: string) => {
+    setOrderModalProduct(product);
+    setOrderModalColor(selectedColor);
+    setOrderModalSize(selectedSize);
+    setIsOrderModalOpen(true);
+  };
 
   // Handle swipe gesture detection
   const handleDragEnd = (event: any, info: PanInfo) => {
@@ -264,13 +278,36 @@ const ProductGrid = memo(function ProductGrid({
                 {productWithType.productType === 'vehicle' ? (
                   <VehicleCard product={productWithType} storeId={storeId} />
                 ) : (
-                  <ProductCard product={productWithType} storeId={storeId} activeCategoryId={activeCategoryId} />
+                  <ProductCard 
+                    product={productWithType} 
+                    storeId={storeId} 
+                    activeCategoryId={activeCategoryId} 
+                    storeMeta={storeMeta}
+                    onOrderClick={handleOrderClick}
+                  />
                 )}
               </motion.div>
             );
           })
         )}
       </motion.div>
+
+      {/* Order Summary Modal */}
+      {orderModalProduct && storeMeta && (
+        <OrderSummaryModal
+          isOpen={isOrderModalOpen}
+          onClose={() => {
+            setIsOrderModalOpen(false);
+            // Delay clearing product to allow modal exit animation to complete
+            setTimeout(() => setOrderModalProduct(null), 300);
+          }}
+          product={orderModalProduct}
+          storeMeta={storeMeta}
+          customer={null}
+          selectedSize={orderModalSize}
+          selectedColor={orderModalColor}
+        />
+      )}
     </LayoutGroup>
   );
 });

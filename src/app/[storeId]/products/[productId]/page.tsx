@@ -372,7 +372,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                 height={600}
                 className={`w-full h-auto object-contain transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
                 priority
-                onLoadingComplete={() => setImageLoading(false)}
+                onLoad={() => setImageLoading(false)}
               />
             </div>
             {allImages.length > 1 && (
@@ -398,7 +398,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                       sizes="(max-width: 640px) 80px, 100px"
                       className={`object-cover transition-opacity duration-300 ${thumbnailsLoaded[index] ? 'opacity-100' : 'opacity-0'}`}
                       loading={index === 0 ? undefined : 'lazy'}
-                      onLoadingComplete={() => setThumbnailsLoaded(prev => ({ ...prev, [index]: true }))}
+                      onLoad={() => setThumbnailsLoaded(prev => ({ ...prev, [index]: true }))}
                     />
                   </button>
                 ))}
