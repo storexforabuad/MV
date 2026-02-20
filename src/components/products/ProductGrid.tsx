@@ -203,12 +203,13 @@ const ProductGrid = memo(function ProductGrid({
             >
               <Info className="w-5 h-5 text-[var(--text-primary)]" />
             </GlassButton>
-            <GlassButton
+            {/* Referral Button Hidden as per request */}
+            {/* <GlassButton
               onClick={handleReferralsClick}
               aria-label="Your Referral Bonuses"
             >
               <Gift className="w-5 h-5 text-[var(--text-primary)]" />
-            </GlassButton>
+            </GlassButton> */}
             <GlassButton
               onClick={handleOrdersClick}
               aria-label="Your Orders"

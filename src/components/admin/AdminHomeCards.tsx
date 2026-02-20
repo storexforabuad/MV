@@ -419,12 +419,12 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   }, [uiVisible]);
 
   const ordersIndex = cardData.findIndex(card => card.label === 'Orders');
-  
+
   // Filter to show only specific cards (include Content and Wholesale)
   const allowedCards = ['Views', 'Manage Categories', 'Manage Products', 'Account', 'Subscription', 'Content', 'Wholesale', 'Revenue'];
   const filteredCardData = cardData.filter(card => allowedCards.includes(card.label));
   const cardsToRender = [...filteredCardData];
-  
+
   const customersCard: typeof cardData[0] = {
     label: 'Customers',
     icon: Users,
@@ -476,7 +476,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
   const handleOpenModal = (idx: number, card: typeof cardData[0]) => {
     if (props.isRefreshing) return; // Prevent opening modals during refresh
-    
+
     const { label, subtitle } = card;
     if (label === 'ATLAS™') setIsBizconNetworkModalOpen(true);
     else if (label === 'Tips') setIsTipsModalOpen(true);
@@ -590,18 +590,18 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         const db = getFirestore(firebaseApp);
         const storeRef = doc(db, 'stores', storeId);
         const storeSnap = await getDoc(storeRef);
-        
+
         if (!mounted) return;
-        
+
         if (storeSnap.exists()) {
           const storeData = storeSnap.data();
           const stats = storeData?.wholesaleStats || {};
-          
+
           // Extract wholesale stats from store document
           const activePartners = stats.activePartners || 0;
           const pendingRequests = stats.pendingRequests || 0;
           const monthlyRevenue = stats.monthlyWholesaleRevenue || 0;
-          
+
           if (mounted) {
             setWholesaleStats({
               activePartners,
@@ -638,16 +638,16 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
    * Shows: Icon (top) -> Count (center) -> Label (bottom)
    */
   const MetricCard = ({ icon: Icon, label, count, gradient, glowClass, onClick, inlineStyle }: { icon: React.ElementType; label: string; count: string | number; gradient: string; glowClass: string; onClick: () => void; inlineStyle?: React.CSSProperties }) => (
-    <motion.div variants={itemVariants}>
+    <motion.div variants={itemVariants} key={label} className="h-full">
       <button
         style={inlineStyle}
-        className={`dashboard-card relative flex flex-col items-center justify-center gap-3 rounded-2xl p-6 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${gradient} text-white ${glowClass} w-full min-h-[140px]`}
+        className={`dashboard-card relative flex flex-col items-center justify-center gap-3 rounded-[2rem] p-4 sm:p-5 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${gradient} text-white ${glowClass} w-full min-h-[140px] h-full`}
         tabIndex={0}
         type="button"
         onClick={onClick}
       >
         <span className="card-blob" />
-        
+
         {/* Icon */}
         <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white bg-opacity-20">
           <Icon className="w-6 h-6" />
@@ -744,7 +744,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         )}
       </div>
       <motion.div
-        className="grid grid-cols-2 sm:grid-cols-3 md:col-span-4 gap-2 sm:gap-4"
+        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4"
         variants={containerVariants}
         initial="hidden"
         animate={uiVisible ? 'visible' : 'hidden'}
@@ -820,8 +820,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             const glowClass = tierGlows[tier as keyof typeof tierGlows] || tierGlows.bronze;
 
             return (
-              <motion.div key={`ambassador-${idx}`} variants={itemVariants}>
-                <button className={`dashboard-card relative flex flex-col items-center justify-center gap-3 rounded-2xl p-6 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${gradient} text-white ${glowClass} w-full min-h-[140px]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card)}>
+              <motion.div key={card.label} variants={itemVariants} className="h-full">
+                <button className={`dashboard-card relative flex flex-col items-center justify-center gap-3 rounded-[2rem] p-4 sm:p-5 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${gradient} text-white ${glowClass} w-full min-h-[140px] h-full`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card)}>
                   <span className="card-blob" />
                   <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white bg-opacity-20">
                     <Star className="w-6 h-6 drop-shadow" />
@@ -841,9 +841,9 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             const glowClass = getSubscriptionGlow(status);
 
             return (
-              <motion.div key={`subscription-${idx}`} variants={itemVariants}>
+              <motion.div key={card.label} variants={itemVariants} className="h-full">
                 <button
-                  className={`dashboard-card relative flex flex-row items-center justify-start rounded-2xl p-4 md:p-5 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${gradient} text-white ${glowClass} w-full min-h-[140px]`}
+                  className={`dashboard-card relative flex flex-row items-center justify-start gap-4 rounded-[2rem] p-4 sm:p-5 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${gradient} text-white ${glowClass} w-full min-h-[140px] h-full`}
                   tabIndex={0}
                   type="button"
                   onClick={() => handleOpenModal(idx, card)}
@@ -853,7 +853,10 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                     <SubscriptionIcon className="w-6 h-6 sm:w-7 sm:h-7 drop-shadow" />
                   </div>
                   <div className="flex flex-col items-start justify-center ml-4 sm:ml-5 min-w-0 z-10 flex-1">
-                    <div className="text-base sm:text-lg font-bold drop-shadow">Subscription</div>
+                    <div className="text-base sm:text-lg font-bold drop-shadow">
+                      <span className="hidden sm:inline">Subscription</span>
+                      <span className="sm:hidden">Sub</span>
+                    </div>
                   </div>
                 </button>
               </motion.div>
@@ -862,7 +865,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
           if (card.label === 'Customers' && card.component === AdminCustomersCard) {
             return (
-              <motion.div key="customers-card" variants={itemVariants}>
+              <motion.div key={card.label} variants={itemVariants} className="h-full">
                 <AdminCustomersCard storeId={props.storeId} onClick={() => { setIsCustomersModalOpen(true); if (props.setIsModalOpen) props.setIsModalOpen(true); }} gradient={customersCard.gradient} glowClass={customersCard.glowClass} />
               </motion.div>
             );
@@ -871,15 +874,15 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           // Wholesale card - simplified vertical layout
           if (card.label === 'Wholesale' && card.isWholesaleCard) {
             return (
-              <motion.div key={`wholesale-${idx}`} variants={itemVariants}>
+              <motion.div key={card.label} variants={itemVariants} className="h-full">
                 <button
                   onClick={() => handleOpenModal(idx, card)}
-                  className={`dashboard-card relative flex flex-col items-center justify-center gap-3 rounded-2xl p-6 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} text-white ${card.glowClass} w-full min-h-[140px]`}
+                  className={`dashboard-card relative flex flex-col items-center justify-center gap-3 rounded-[2rem] p-4 sm:p-5 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient} text-white ${card.glowClass} w-full min-h-[140px] h-full`}
                   tabIndex={0}
                   type="button"
                 >
                   <span className="card-blob" />
-                  
+
                   {/* Icon */}
                   <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white bg-opacity-20">
                     <ShoppingCart className="w-6 h-6" />
@@ -914,14 +917,14 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
               if (typeof value === 'number' || typeof value === 'string') return value;
               return '0';
             })();
-            return <MetricCard key={`${card.label}-${idx}`} icon={Icon} label={card.label} count={metricValue} gradient={card.gradient} glowClass={card.glowClass} onClick={() => handleOpenModal(idx, card)} inlineStyle={inlineStyle} />;
+            return <MetricCard key={card.label} icon={Icon} label={card.label} count={metricValue} gradient={card.gradient} glowClass={card.glowClass} onClick={() => handleOpenModal(idx, card)} inlineStyle={inlineStyle} />;
           }
 
           // Render action cards (ATLAS™, Tips, Content, Account, Subscription, Warehouse, Events)
           if (card.cardType === 'action') {
             return (
-              <motion.div key={`${card.label}-${idx}`} variants={itemVariants} className={`relative ${spotlightClasses}`}>
-                <button style={inlineStyle} className={`dashboard-card relative flex flex-row items-center justify-start rounded-2xl p-4 md:p-5 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.text} ${card.glowClass} w-full min-h-[140px]`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card)}>
+              <motion.div key={card.label} variants={itemVariants} className={`relative h-full ${spotlightClasses}`}>
+                <button style={inlineStyle} className={`dashboard-card relative flex flex-row items-center justify-start gap-4 rounded-[2rem] p-4 sm:p-5 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.text} ${card.glowClass} w-full min-h-[140px] h-full`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card)}>
                   {isPostsCard && showPostsNotification && (<span className="absolute top-2 right-2 flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></span>)}
                   <span className="card-blob" />
                   <div className={`flex-shrink-0 flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white bg-opacity-20 shadow`}><Icon className={`w-6 h-6 sm:w-7 sm:h-7 drop-shadow ${card.isAiCard ? 'ai-icon-glow' : ''}`} /></div>

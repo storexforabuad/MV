@@ -40,25 +40,28 @@ export const AdminCustomersCard: React.FC<AdminCustomersCardProps> = ({ storeId,
   return (
     <button
       style={inlineStyle}
-      className={`dashboard-card relative flex flex-col items-center justify-center rounded-2xl p-2 sm:p-3 md:p-4 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden text-white w-full h-full min-h-[7rem] ${cardGradientClass} ${cardGlow}`}
+      className={`dashboard-card relative flex flex-col items-center justify-center gap-3 rounded-[2rem] p-4 sm:p-5 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden text-white w-full h-full min-h-[140px] ${cardGradientClass} ${cardGlow}`}
       onClick={onClick}
     >
-        <span className="card-blob" />
-        <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full bg-white bg-opacity-20 mb-1 sm:mb-2 shadow">
-            <Users className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 drop-shadow" />
-        </div>
-        <div className="flex flex-col items-center min-w-0 z-10 w-full">
-            <div className="text-lg sm:text-xl md:text-2xl font-bold drop-shadow">
-                {isLoading ? (
-                    <div className="h-7 w-10 bg-gray-400/50 animate-pulse rounded-md" />
-                ) : (
-                    customerCount
-                )}
-            </div>
-            <div className="text-xs sm:text-sm font-medium opacity-90 text-center px-1 leading-tight">
-                Customers
-            </div>
-        </div>
+      <span className="card-blob" />
+      {/* Icon */}
+      <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white bg-opacity-20 shadow">
+        <Users className="w-6 h-6 drop-shadow" />
+      </div>
+
+      {/* Count */}
+      <div className="text-3xl font-bold drop-shadow">
+        {isLoading ? (
+          <div className="h-9 w-12 bg-white/20 animate-pulse rounded-md" />
+        ) : (
+          customerCount
+        )}
+      </div>
+
+      {/* Label */}
+      <div className="text-sm font-medium text-center opacity-90">
+        Customers
+      </div>
     </button>
   );
 };
