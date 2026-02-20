@@ -3,11 +3,10 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { toast } from 'react-hot-toast';
-import { Repeat, MessageSquare, Clock, ReceiptIcon, CheckCircle, Truck } from 'lucide-react';
+import { Repeat, MessageSquare, Clock, CheckCircle, Truck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Order } from '../../../hooks/useOrders';
 import { formatPrice } from '../../../utils/price';
-import { ReceiptModal } from '../../modals/ReceiptModal';
 import { useCustomer } from '@/context/CustomerContext';
 import { StoreMeta } from '@/types/store';
 import { Product } from '@/types/product';
@@ -38,7 +37,6 @@ const getStatusUI = (status: Order['orderStatus']) => {
 
 export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted }: OrderDetailCardProps) {
   const [isReordering, setIsReordering] = useState(false);
-  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   const { customer } = useCustomer();
 
   // Backward compatibility: Handle both new multi-product orders and old single-product orders.
@@ -206,43 +204,21 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted }: O
             <p className="text-lg font-bold text-purple-400">{formatPrice(totalAmount)}</p>
           </div>
         </div>
-        <div className="grid grid-cols-2 border-t border-border-color divide-x divide-border-color">
+        <div className="flex border-t border-border-color">
           <button
             onClick={handleReorder}
             disabled={isReordering}
-            className="flex items-center justify-center gap-2 p-3 text-sm font-semibold text-text-secondary hover:bg-zinc-700 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 flex items-center justify-center gap-2 p-3 text-sm font-bold text-text-secondary hover:bg-zinc-700 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isReordering ? (
               <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
             ) : (
               <Repeat className="w-4 h-4" />
             )}
-            <span>{isReordering ? 'Processing...' : 'Reorder'}</span>
-          </button>
-          <button
-            onClick={() => setIsReceiptModalOpen(true)}
-            className="flex items-center justify-center gap-2 p-3 text-sm font-semibold text-text-secondary hover:bg-zinc-700 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
-          >
-            <ReceiptIcon className={isReceiptModalOpen ? "w-4 h-4 text-purple-400" : "w-4 h-4"} />
-            <span>Receipt</span>
+            <span>{isReordering ? 'Processing...' : 'Reorder Now'}</span>
           </button>
         </div>
       </div>
-      {/* The ReceiptModal already accepts an 'order' array and should be compatible */}
-      <ReceiptModal
-        isOpen={isReceiptModalOpen}
-        onClose={() => setIsReceiptModalOpen(false)}
-        orders={[{
-          ...order,
-          products: products.map(p => ({
-            id: p.id,
-            name: p.name,
-            price: p.price,
-            quantity: p.productType === 'general' ? p.quantity : 1,
-            selectedSize: (p as any).selectedSize
-          }))
-        }]} // The modal expects an array of orders 
-      />
     </>
   );
 }
