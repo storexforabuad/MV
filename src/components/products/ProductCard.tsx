@@ -274,7 +274,7 @@ export default function ProductCard({
           if (isSingleView) {
             e.preventDefault();
             e.stopPropagation();
-            if (onOrderClick) {
+            if (onOrderClick && !isSoldOut) {
               // Intelligent Color Mapping: Pre-select color based on current visible image
               let finalSelectedColor = selectedColor;
               if (isFashionProduct(product) && product.colors) {

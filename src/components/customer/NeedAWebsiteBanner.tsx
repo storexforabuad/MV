@@ -24,16 +24,21 @@ const NeedAWebsiteBanner = ({ storeId }: NeedAWebsiteBannerProps) => {
       <div className="px-4 sm:px-6 mt-3 mb-4">
         <button
           onClick={() => setIsModalOpen(true)}
-          className={`w-full relative bg-gradient-to-br from-[#1a1a40] via-[#2d1b4d] to-[#1a1a40] border border-amber-500/30 p-4 rounded-[1.5rem] shadow-xl flex items-center transition-all hover:scale-[1.01] active:scale-[0.99] group ${shimmerEffectClasses}`}
+          className="w-full relative p-4 rounded-[1.5rem] shadow-xl transition-all hover:scale-[1.01] active:scale-[0.99] group bg-gradient-to-br from-[#1a1a40] via-[#2d1b4d] to-[#1a1a40] border border-amber-500/30"
         >
+          {/* Shimmer Layer - Nested to allow badge to escape overflow-hidden */}
+          <div className="absolute inset-0 rounded-[1.5rem] overflow-hidden pointer-events-none">
+            <div className="absolute inset-0 before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_4s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/5 before:to-transparent" />
+          </div>
+
           {/* Promo Badge */}
-          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg shadow-amber-500/20 z-20 uppercase tracking-widest">
+          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg shadow-amber-500/20 z-20 uppercase tracking-widest border border-amber-400/20">
             PROMO
           </div>
 
           {/* Subtle background glow */}
-          <div className="absolute -top-10 -right-10 w-32 h-32 bg-amber-400/10 blur-[50px] rounded-full opacity-50" />
-          <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500/10 blur-[50px] rounded-full opacity-50" />
+          <div className="absolute -top-10 -right-10 w-32 h-32 bg-amber-400/10 blur-[50px] rounded-full opacity-50 z-0" />
+          <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500/10 blur-[50px] rounded-full opacity-50 z-0" />
 
           <div className="relative z-10 w-full flex justify-between items-center gap-4">
             <div className="flex items-center gap-3">

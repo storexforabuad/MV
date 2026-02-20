@@ -156,11 +156,7 @@ const ProductGrid = memo(function ProductGrid({
   };
 
   const handleOrdersClick = () => {
-    if (customer) {
-      setOrdersModalOpen(true);
-    } else {
-      promptLogin();
-    }
+    setOrdersModalOpen(true);
   };
 
   const handleReferralsClick = () => {
