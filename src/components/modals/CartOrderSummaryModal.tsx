@@ -9,7 +9,7 @@ import { StoreMeta } from '@/types/store';
 import { Customer } from '@/types/customer';
 import { formatPrice } from '@/utils/price';
 import { useOrders } from '@/hooks/useOrders';
-import { Loader2, MessageSquare, ExternalLink } from 'lucide-react';
+import { Loader2, MessageSquare, ExternalLink, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getCustomerDetails } from '@/app/actions/customerActions';
 import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
@@ -40,8 +40,12 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
   const [showLeaveAppConfirmation, setShowLeaveAppConfirmation] = useState(false);
   const [whatsappMessage, setWhatsappMessage] = useState('');
   const [hasPlacedOrder, setHasPlacedOrder] = useState(false);
+  const [showSizeError, setShowSizeError] = useState(false);
+  const [imageLoading, setImageLoading] = useState<Record<string, boolean>>({});
+
   const hasPushedState = useRef(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const sizeSectionRef = useRef<Record<string, HTMLDivElement | null>>({});
 
   const storeId = passedStoreId || cartItems[0]?.storeId;
   const { addOrder } = useOrders(customer?.id || null, storeId || "");
@@ -65,6 +69,8 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
       setUploadedEvidence(undefined);
       setShowLeaveAppConfirmation(false);
       setHasPlacedOrder(false);
+      setShowSizeError(false);
+      setImageLoading({});
 
       // Restore modal state from localStorage if payment flow is enabled
       if (isPaymentFlowEnabled && storeId) {
@@ -303,6 +309,17 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                     </button>
                   </div>
 
+                  <style jsx global>{`
+                    @keyframes shake {
+                      0%, 100% { transform: translateX(0); }
+                      25% { transform: translateX(-4px); }
+                      75% { transform: translateX(4px); }
+                    }
+                    .animate-shake {
+                      animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+                    }
+                  `}</style>
+
                   {/* Main Content */}
                   <div ref={scrollContainerRef} className="flex-grow overflow-y-auto p-4 sm:p-6">
                     <div className="max-w-3xl mx-auto w-full">
@@ -310,61 +327,90 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                       {currentPage === 1 && (
                         <div className="pt-4 sm:pt-8">
                           <div className="space-y-4">
-                            {cartItems.map(item => (
-                              <div key={item.id + (item.selectedColor || '') + (item.selectedSize || '')} className="flex items-center space-x-4 p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
-                                <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
-                                  <div className="absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 animate-shimmer bg-[length:200%_100%]" />
-                                  <Image src={item.images[0]} alt={item.name} width={64} height={64} className="h-16 w-16 object-cover relative z-10" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate">{item.name}</h4>
-                                  <div className="flex flex-wrap gap-2 mt-1.5">
-                                    {item.selectedColor && (
-                                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
-                                        {item.selectedColor}
-                                      </span>
-                                    )}
-                                    {item.selectedSize && (
-                                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-100 dark:border-green-800">
-                                        Size: {item.selectedSize}
-                                      </span>
-                                    )}
-                                  </div>
+                            {cartItems.map(item => {
+                              const hasSizes = (item as any).sizes?.length > 0 || (item as any).sizeOption?.length > 0;
+                              const isMissingSize = hasSizes && !item.selectedSize;
+                              const itemId = item.id + (item.selectedColor || '') + (item.selectedSize || '');
 
-                                  {/* Interactive Size Selector for Cart Items */}
-                                  {((item as any).sizes || (item as any).sizeOption) && (
-                                    <div className="mt-2.5 flex flex-wrap gap-1.5 pt-2.5 border-t border-gray-100 dark:border-gray-800/50">
-                                      {((item as any).sizes || (item as any).sizeOption).map((size: string) => (
-                                        <button
-                                          key={size}
-                                          onClick={() => dispatch({
-                                            type: 'UPDATE_SIZE',
-                                            payload: {
-                                              id: item.id,
-                                              oldSize: item.selectedSize,
-                                              newSize: size,
-                                              selectedColor: item.selectedColor
-                                            }
-                                          })}
-                                          className={`flex items-center justify-center min-w-[32px] px-2 py-1 rounded-md border text-[10px] font-bold transition-all duration-200 ${item.selectedSize === size
-                                            ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 ring-1 ring-green-400'
-                                            : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600'
-                                            }`}
-                                        >
-                                          {size}
-                                        </button>
-                                      ))}
+                              return (
+                                <div
+                                  key={itemId}
+                                  ref={el => { sizeSectionRef.current[itemId] = el; }}
+                                  className={`flex items-center space-x-4 p-3 rounded-xl bg-gray-50 dark:bg-gray-900 border transition-all duration-300 ${isMissingSize && showSizeError ? 'border-red-500 bg-red-50 dark:bg-red-900/10 animate-shake ring-1 ring-red-500' : 'border-gray-100 dark:border-gray-800'}`}
+                                >
+                                  <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 shadow-inner">
+                                    <div className={`absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 animate-shimmer bg-[length:200%_100%] transition-opacity duration-300 ${imageLoading[itemId] !== false ? 'opacity-100' : 'opacity-0'}`} />
+                                    <Image
+                                      src={item.images[0]}
+                                      alt={item.name}
+                                      width={64}
+                                      height={64}
+                                      className={`h-16 w-16 object-cover relative z-10 transition-opacity duration-300 ${imageLoading[itemId] !== false ? 'opacity-0' : 'opacity-100'}`}
+                                      onLoad={() => setImageLoading(prev => ({ ...prev, [itemId]: false }))}
+                                    />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center justify-between gap-2">
+                                      <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate">{item.name}</h4>
+                                      {isMissingSize && showSizeError && (
+                                        <span className="flex-shrink-0 text-[10px] font-bold text-red-600 dark:text-red-400 flex items-center gap-1 bg-red-100 dark:bg-red-900/20 px-1.5 py-0.5 rounded-full">
+                                          <AlertCircle className="w-3 h-3" /> REQUIRED
+                                        </span>
+                                      )}
                                     </div>
-                                  )}
-                                  <div className="mt-1.5 flex items-center justify-between">
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">
-                                      {formatPrice(item.price)} x {item.quantity}
-                                    </p>
-                                    <p className="text-sm font-bold text-gray-900 dark:text-white">{formatPrice(item.price * item.quantity)}</p>
+                                    <div className="flex flex-wrap gap-2 mt-1.5">
+                                      {item.selectedColor && (
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+                                          {item.selectedColor}
+                                        </span>
+                                      )}
+                                      {item.selectedSize && (
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-100 dark:border-green-800">
+                                          Size: {item.selectedSize}
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    {/* Interactive Size Selector for Cart Items */}
+                                    {((item as any).sizes || (item as any).sizeOption) && (
+                                      <div className={`mt-2.5 flex flex-wrap gap-1.5 pt-2.5 border-t ${isMissingSize && showSizeError ? 'border-red-200 dark:border-red-800/50' : 'border-gray-100 dark:border-gray-800/50'}`}>
+                                        {((item as any).sizes || (item as any).sizeOption).map((size: string) => (
+                                          <button
+                                            key={size}
+                                            onClick={() => {
+                                              dispatch({
+                                                type: 'UPDATE_SIZE',
+                                                payload: {
+                                                  id: item.id,
+                                                  oldSize: item.selectedSize,
+                                                  newSize: size,
+                                                  selectedColor: item.selectedColor
+                                                }
+                                              });
+                                              if (isMissingSize) setShowSizeError(false);
+                                            }}
+                                            className={`flex items-center justify-center min-w-[32px] px-2 py-1 rounded-md border text-[10px] font-bold transition-all duration-200 ${item.selectedSize === size
+                                              ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 ring-1 ring-green-400'
+                                              : isMissingSize && showSizeError
+                                                ? 'border-red-200 dark:border-red-900/30 text-gray-500 dark:text-gray-400 hover:border-red-300'
+                                                : 'border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                                              }`}
+                                          >
+                                            {size}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    )}
+                                    <div className="mt-1.5 flex items-center justify-between">
+                                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                                        {formatPrice(item.price)} x {item.quantity}
+                                      </p>
+                                      <p className="text-sm font-bold text-gray-900 dark:text-white">{formatPrice(item.price * item.quantity)}</p>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
 
                           {/* Order Notes */}
@@ -470,16 +516,30 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                       {currentPage === 1 ? (
                         <button
                           type="button"
-                          className="w-full rounded-xl border border-transparent bg-green-600 px-6 py-4 text-base font-bold text-white shadow-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                          onClick={isPaymentFlowEnabled ? handleProceedToPayment : handlePlaceOrder}
+                          className={`w-full rounded-xl border border-transparent px-6 py-4 text-base font-bold text-white shadow-lg transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+                            ${cartItems.some(item => ((item as any).sizes?.length > 0 || (item as any).sizeOption?.length > 0) && !item.selectedSize)
+                              ? 'bg-gray-400 dark:bg-gray-700 cursor-not-allowed'
+                              : 'bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2'}`}
+                          onClick={() => {
+                            const itemMissingSize = cartItems.find(item => ((item as any).sizes?.length > 0 || (item as any).sizeOption?.length > 0) && !item.selectedSize);
+                            if (itemMissingSize) {
+                              setShowSizeError(true);
+                              const itemId = itemMissingSize.id + (itemMissingSize.selectedColor || '') + (itemMissingSize.selectedSize || '');
+                              sizeSectionRef.current[itemId]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                              // Haptic feedback for error
+                              if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
+                              return;
+                            }
+                            isPaymentFlowEnabled ? handleProceedToPayment() : handlePlaceOrder();
+                          }}
                           disabled={isPlacingOrder || !storeId || (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false)}
                         >
                           {isPlacingOrder ? (
                             <span className="flex items-center justify-center gap-2"><Loader2 className="h-5 w-5 animate-spin" />Processing...</span>
                           ) : (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false) ? (
                             'Store Closed'
-                          ) : isPaymentFlowEnabled ? (
-                            'Order via Whatsapp'
+                          ) : cartItems.some(item => ((item as any).sizes?.length > 0 || (item as any).sizeOption?.length > 0) && !item.selectedSize) ? (
+                            'Select Sizes to Continue'
                           ) : (
                             'Order via Whatsapp'
                           )}

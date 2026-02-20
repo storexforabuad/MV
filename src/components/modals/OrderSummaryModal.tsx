@@ -8,7 +8,8 @@ import { Product } from '@/types/product';
 import { StoreMeta } from '@/types/store';
 import { Customer } from '@/types/customer';
 import { formatPrice } from '@/utils/price';
-import { Minus, Plus, Loader2, MessageSquare, ExternalLink } from 'lucide-react';
+import { Minus, Plus, Loader2, MessageSquare, ExternalLink, AlertCircle } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useOrders } from '@/hooks/useOrders';
 import toast from 'react-hot-toast';
 import { useParams } from 'next/navigation';
@@ -53,6 +54,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const [showLeaveAppConfirmation, setShowLeaveAppConfirmation] = useState(false);
   const [whatsappMessage, setWhatsappMessage] = useState('');
   const [hasPlacedOrder, setHasPlacedOrder] = useState(false);
+  const [showSizeError, setShowSizeError] = useState(false);
 
   // Interactive color and size selection state
   const [interactiveSelectedColor, setInteractiveSelectedColor] = useState<string | undefined>(selectedColor);
@@ -61,6 +63,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
   const hasPushedState = useRef(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const sizeSectionRef = useRef<HTMLDivElement>(null);
 
   const routeParams = useParams();
   const storeId = typeof routeParams?.storeId === 'string' ? routeParams.storeId : Array.isArray(routeParams?.storeId) ? routeParams.storeId[0] : undefined;
@@ -82,6 +85,10 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
       setUploadedEvidence(undefined);
       setShowLeaveAppConfirmation(false);
       setHasPlacedOrder(false);
+      setShowSizeError(false);
+      setInteractiveSelectedColor(selectedColor);
+      setInteractiveSelectedSize(selectedSize);
+      setImageLoading(true);
 
       // Restore modal state from localStorage if payment flow is enabled
       if (isPaymentFlowEnabled && storeId) {
@@ -146,8 +153,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
   // Update product image when color changes
   useEffect(() => {
-    if (product && isFashionProduct(product) && interactiveSelectedColor && product.colors) {
-      const colorData = product.colors.find(c => c.name === interactiveSelectedColor || c.hex === interactiveSelectedColor);
+    if (product && isFashionProduct(product) && interactiveSelectedColor && (product as any).colors) {
+      const colorData = (product as any).colors.find((c: any) => c.name === interactiveSelectedColor || c.hex === interactiveSelectedColor);
       if (colorData && colorData.images && colorData.images.length > 0) {
         setCurrentProductImage(colorData.images[0]);
       }
@@ -342,6 +349,17 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                     </button>
                   </div>
 
+                  <style jsx global>{`
+                    @keyframes shake {
+                      0%, 100% { transform: translateX(0); }
+                      25% { transform: translateX(-4px); }
+                      75% { transform: translateX(4px); }
+                    }
+                    .animate-shake {
+                      animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+                    }
+                  `}</style>
+
                   {/* Main Content */}
                   <div ref={scrollContainerRef} className="flex-grow overflow-y-auto p-4 sm:p-6">
                     <div className="max-w-3xl mx-auto w-full">
@@ -349,18 +367,14 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                         <div className="pt-4 sm:pt-8">
                           {/* Product Details */}
                           <div className="flex items-center space-x-4">
-                            <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-50 dark:bg-gray-900 shadow-sm">
-                              {imageLoading && (
-                                <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800">
-                                  <div className="w-full h-full bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 animate-shimmer bg-[length:200%_100%]" />
-                                </div>
-                              )}
+                            <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-50 dark:bg-gray-900 shadow-inner">
+                              <div className={`absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 animate-shimmer bg-[length:200%_100%] transition-opacity duration-300 ${imageLoading ? 'opacity-100' : 'opacity-0'}`} />
                               <Image
                                 src={currentProductImage}
                                 alt={product.name}
                                 width={80}
                                 height={80}
-                                className={`h-20 w-20 object-cover transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                                className={`h-20 w-20 object-cover relative z-10 transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
                                 onLoad={() => setImageLoading(false)}
                               />
                             </div>
@@ -433,18 +447,31 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
                             {/* Size Selection - For Products with Sizes */}
                             {hasSizes(product) && (
-                              <div className="mt-6">
-                                <label className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3 block">
-                                  📏 Select Size
-                                </label>
+                              <div ref={sizeSectionRef} className={`mt-6 p-4 rounded-xl transition-all duration-300 ${showSizeError ? 'bg-red-50 dark:bg-red-900/10 animate-shake ring-1 ring-red-500' : ''}`}>
+                                <div className="flex items-center justify-between mb-3">
+                                  <label className={`text-sm font-bold flex items-center gap-2 ${showSizeError ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-gray-200'}`}>
+                                    📏 Select Size
+                                    {showSizeError && <AlertCircle className="w-4 h-4" />}
+                                  </label>
+                                  {showSizeError && (
+                                    <span className="text-[10px] font-bold text-red-600 dark:text-red-400 uppercase tracking-wider">
+                                      Required
+                                    </span>
+                                  )}
+                                </div>
                                 <div className="flex flex-wrap gap-2">
                                   {getSizes(product).map((size: string) => (
                                     <button
                                       key={size}
-                                      onClick={() => setInteractiveSelectedSize(size)}
+                                      onClick={() => {
+                                        setInteractiveSelectedSize(size);
+                                        setShowSizeError(false);
+                                      }}
                                       className={`flex items-center justify-center py-2 px-4 rounded-lg border-2 font-medium text-sm transition-all duration-200 ${interactiveSelectedSize === size
                                         ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 ring-2 ring-green-400'
-                                        : 'border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                                        : showSizeError
+                                          ? 'border-red-200 dark:border-red-900/30 text-gray-500 dark:text-gray-400 hover:border-red-300'
+                                          : 'border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
                                         }`}
                                     >
                                       {size}
@@ -591,16 +618,28 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                       {currentPage === 1 ? (
                         <button
                           type="button"
-                          className="w-full rounded-xl border border-transparent bg-green-600 px-6 py-4 text-base font-bold text-white shadow-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
-                          onClick={isPaymentFlowEnabled ? handleProceedToPayment : handlePlaceOrder}
+                          className={`w-full rounded-xl border border-transparent px-6 py-4 text-base font-bold text-white shadow-lg transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+                            ${hasSizes(product) && !interactiveSelectedSize
+                              ? 'bg-gray-400 dark:bg-gray-700 cursor-not-allowed'
+                              : 'bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2'}`}
+                          onClick={() => {
+                            if (hasSizes(product) && !interactiveSelectedSize) {
+                              setShowSizeError(true);
+                              sizeSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                              // Haptic feedback for error
+                              if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
+                              return;
+                            }
+                            isPaymentFlowEnabled ? handleProceedToPayment() : handlePlaceOrder();
+                          }}
                           disabled={isPlacingOrder || (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false)}
                         >
                           {isPlacingOrder ? (
                             <span className="flex items-center justify-center gap-2"><Loader2 className="h-5 w-5 animate-spin" />Processing...</span>
                           ) : (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false) ? (
                             'Store Closed'
-                          ) : isPaymentFlowEnabled ? (
-                            'Order via Whatsapp'
+                          ) : hasSizes(product) && !interactiveSelectedSize ? (
+                            'Select Size to Continue'
                           ) : (
                             'Order via Whatsapp'
                           )}

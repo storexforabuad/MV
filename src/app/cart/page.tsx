@@ -93,10 +93,6 @@ export default function CartPage() {
   };
 
   const handleCheckout = (storeId: string) => {
-    if (!customer) {
-      setIsLoginModalOpen(true);
-      return;
-    }
     setCurrentStoreId(storeId);
     setIsOrderModalOpen(true);
   };

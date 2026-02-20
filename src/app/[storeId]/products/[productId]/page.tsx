@@ -232,7 +232,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
       triggerSizeHighlight();
       return;
     }
-    if (customer) setIsOrderModalOpen(true); else setIsLoginModalOpen(true);
+    setIsOrderModalOpen(true);
   };
 
   const handleToggleCart = () => {
