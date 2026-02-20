@@ -12,6 +12,7 @@ import { useWishlist } from '../../context/WishlistContext';
 import { useCustomer } from '../../context/CustomerContext';
 import { useCart } from '../../lib/cartContext';
 import NavigationStore from '@/lib/navigationStore';
+import { incrementProductViews } from '@/lib/db';
 import {
   isGeneralProduct,
   isVehicleProduct,
@@ -58,6 +59,13 @@ export default function ProductCard({
   const { state: cartState, dispatch: cartDispatch } = useCart();
   const { customer } = useCustomer();
   const [wishlistLoading, setWishlistLoading] = useState(false);
+  const hasTrackedInteraction = useRef(false);
+
+  const handleTrackInteraction = () => {
+    if (!storeId || !product.id || hasTrackedInteraction.current) return;
+    incrementProductViews(storeId, product.id);
+    hasTrackedInteraction.current = true;
+  };
 
   // Detect mobile device
   useEffect(() => {
@@ -195,6 +203,7 @@ export default function ProductCard({
   const handlePrevImage = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    handleTrackInteraction();
     setDirection(-1);
     setCurrentImageIndex((prev) => (prev === 0 ? totalImages - 1 : prev - 1));
   };
@@ -202,6 +211,7 @@ export default function ProductCard({
   const handleNextImage = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    handleTrackInteraction();
     setDirection(1);
     setCurrentImageIndex((prev) => (prev === totalImages - 1 ? 0 : prev + 1));
   };
@@ -275,6 +285,7 @@ export default function ProductCard({
               }
 
               onOrderClick(product, finalSelectedColor, selectedSize);
+              handleTrackInteraction();
               // Haptic feedback
               if (navigator.vibrate) navigator.vibrate(20);
             }

@@ -101,7 +101,7 @@ const ViewsBreakdown: FC<ViewsBreakdownProps> = ({ storeId }) => {
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 text-center">
         <div className="bg-slate-100 dark:bg-slate-800/60 p-4 rounded-lg ring-1 ring-slate-200 dark:ring-slate-700">
-          <p className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider mb-1">Product Views (7d)</p>
+          <p className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider mb-1">Product Interacts (7d)</p>
           <p className="text-3xl font-black text-sky-500">{totalProductViews7d}</p>
         </div>
         <div className="bg-slate-100 dark:bg-slate-800/60 p-4 rounded-lg ring-1 ring-slate-200 dark:ring-slate-700">
@@ -111,6 +111,7 @@ const ViewsBreakdown: FC<ViewsBreakdownProps> = ({ storeId }) => {
         <div className="bg-slate-100 dark:bg-slate-800/60 p-4 rounded-lg ring-1 ring-slate-200 dark:ring-slate-700">
           <p className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider mb-1">Product (All-Time)</p>
           <p className="text-2xl font-black text-slate-800 dark:text-slate-100">{storeMeta?.totalViews ?? 0}</p>
+          <p className="text-[8px] text-slate-400 dark:text-slate-500 mt-1 italic">Counts taps & carousels</p>
         </div>
         <div className="bg-slate-100 dark:bg-slate-800/60 p-4 rounded-lg ring-1 ring-slate-200 dark:ring-slate-700">
           <p className="text-[10px] uppercase font-bold text-slate-500 dark:text-slate-400 tracking-wider mb-1">Store (All-Time)</p>
@@ -160,7 +161,7 @@ const ViewsBreakdown: FC<ViewsBreakdownProps> = ({ storeId }) => {
                 labelStyle={{ fontSize: 11, fontWeight: 800, color: '#94a3b8', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}
                 labelFormatter={(label) => new Date(label).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
               />
-              <Bar dataKey="views" fill="#0ea5e9" name="Product Views" radius={[4, 4, 0, 0]} barSize={20} />
+              <Bar dataKey="views" fill="#0ea5e9" name="Product Interacts" radius={[4, 4, 0, 0]} barSize={20} />
               <Bar dataKey="storePageViews" fill="#f59e0b" name="Store Visits" radius={[4, 4, 0, 0]} barSize={20} />
             </BarChart>
           </ResponsiveContainer>
