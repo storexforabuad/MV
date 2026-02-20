@@ -124,7 +124,7 @@ const ProductGrid = memo(function ProductGrid({
   const { orders, addOrder } = useOrders(customer?.id ?? null, storeId || "");
   const [isSingleColumn, setIsSingleColumn] = useState(false);
   const [isReferralModalOpen, setReferralModalOpen] = useState(false);
-  
+
   // Order modal state
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [orderModalProduct, setOrderModalProduct] = useState<Product | null>(null);
@@ -278,10 +278,10 @@ const ProductGrid = memo(function ProductGrid({
                 {productWithType.productType === 'vehicle' ? (
                   <VehicleCard product={productWithType} storeId={storeId} />
                 ) : (
-                  <ProductCard 
-                    product={productWithType} 
-                    storeId={storeId} 
-                    activeCategoryId={activeCategoryId} 
+                  <ProductCard
+                    product={productWithType}
+                    storeId={storeId}
+                    activeCategoryId={activeCategoryId}
                     storeMeta={storeMeta}
                     onOrderClick={handleOrderClick}
                   />
@@ -292,22 +292,16 @@ const ProductGrid = memo(function ProductGrid({
         )}
       </motion.div>
 
-      {/* Order Summary Modal */}
-      {orderModalProduct && storeMeta && (
-        <OrderSummaryModal
-          isOpen={isOrderModalOpen}
-          onClose={() => {
-            setIsOrderModalOpen(false);
-            // Delay clearing product to allow modal exit animation to complete
-            setTimeout(() => setOrderModalProduct(null), 300);
-          }}
-          product={orderModalProduct}
-          storeMeta={storeMeta}
-          customer={null}
-          selectedSize={orderModalSize}
-          selectedColor={orderModalColor}
-        />
-      )}
+      <OrderSummaryModal
+        isOpen={isOrderModalOpen}
+        onClose={() => setIsOrderModalOpen(false)}
+        product={orderModalProduct}
+        storeMeta={storeMeta ?? null}
+        customer={null}
+        selectedSize={orderModalSize}
+        selectedColor={orderModalColor}
+        openedFrom="productCard"
+      />
     </LayoutGroup>
   );
 });

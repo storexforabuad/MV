@@ -51,7 +51,7 @@ export default function ProductCard({ product, storeId, activeCategoryId, storeM
   // Detect mobile device
   useEffect(() => {
     const checkMobile = () => {
-      const isMobileDevice = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+      const isMobileDevice = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
         || window.matchMedia('(max-width: 768px)').matches
         || window.innerWidth <= 768;
       setIsMobile(isMobileDevice);
@@ -88,12 +88,12 @@ export default function ProductCard({ product, storeId, activeCategoryId, storeM
   const handleWishlistToggle = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     // Haptic feedback
     if (navigator.vibrate) {
       navigator.vibrate(15);
     }
-    
+
     setWishlistLoading(true);
     try {
       if (isInWishlist) {
@@ -268,16 +268,18 @@ export default function ProductCard({ product, storeId, activeCategoryId, storeM
 
           {/* Floating Action Buttons - Only show when NOT sold out */}
           {!isSoldOut && (
-            <div className={`absolute inset-0 flex flex-col items-end justify-between p-3 transition-opacity duration-300 ${
-              isMobile 
-                ? 'opacity-100 pointer-events-auto' 
+            <div className={`absolute inset-0 flex flex-col items-end justify-between p-3 transition-opacity duration-300 ${isMobile
+                ? 'opacity-100 pointer-events-auto'
                 : 'opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto'
-            }`}>
+              }`}>
               {/* Heart Icon - Wishlist (Top Right) */}
               <motion.button
                 onClick={handleWishlistToggle}
                 disabled={wishlistLoading}
-                className="relative flex-shrink-0 p-3 rounded-full card-glass shadow-lg flex items-center justify-center disabled:opacity-50"
+                className={`relative flex-shrink-0 p-3 rounded-full card-glass shadow-lg flex items-center justify-center disabled:opacity-50 border-2 transition-colors ${isInWishlist
+                    ? 'border-transparent'
+                    : 'border-red-500 bg-red-50 dark:bg-red-900/20'
+                  }`}
                 aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
                 type="button"
                 whileHover={{ scale: 1.05 }}
@@ -285,11 +287,10 @@ export default function ProductCard({ product, storeId, activeCategoryId, storeM
               >
                 <Heart
                   size={20}
-                  className={`transition-all duration-200 ${
-                    isInWishlist
+                  className={`transition-all duration-200 ${isInWishlist
                       ? 'fill-red-500 text-red-500'
-                      : 'text-gray-600 dark:text-gray-300'
-                  }`}
+                      : 'text-red-500'
+                    }`}
                 />
               </motion.button>
 
@@ -339,17 +340,15 @@ export default function ProductCard({ product, storeId, activeCategoryId, storeM
 
           {/* Carousel Dots - Bottom Center - Only show when NOT sold out */}
           {!isSoldOut && hasMultipleImages && (
-            <div className={`absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-0.5 z-10 transition-opacity duration-300 ${
-              isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-            }`}>
+            <div className={`absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-0.5 z-10 transition-opacity duration-300 ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+              }`}>
               {carouselImages.map((_, index) => (
                 <span
                   key={index}
-                  className={`transition-all duration-200 rounded-full ${
-                    index === currentImageIndex
+                  className={`transition-all duration-200 rounded-full ${index === currentImageIndex
                       ? 'w-1 h-1 bg-white shadow-md'
                       : 'w-0.75 h-0.75 bg-white/60'
-                  }`}
+                    }`}
                   aria-label={`Image ${index + 1} of ${totalImages}`}
                 />
               ))}

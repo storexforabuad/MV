@@ -216,7 +216,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
     if (productIsFashion) {
       const fashionProduct = product as FashionProduct;
       const requiresSize = fashionProduct.sizes && fashionProduct.sizes.length > 0;
-      
+
       if (!selectedColor) {
         toast.error('Please select a color');
         return;
@@ -240,7 +240,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
     if (productIsFashion) {
       const fashionProduct = product as FashionProduct;
       const requiresSize = fashionProduct.sizes && fashionProduct.sizes.length > 0;
-      
+
       if (!selectedColor) {
         toast.error('Please select a color');
         return;
@@ -282,7 +282,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
     if (isFashionProduct(product)) {
       const fashionProduct = product as FashionProduct;
       const requiresSize = fashionProduct.sizes && fashionProduct.sizes.length > 0;
-      
+
       if (!selectedColor) return false;
       if (requiresSize && (!selectedSize || fashionProduct.soldOutSizes?.includes(selectedSize))) return false;
       return true;
@@ -343,6 +343,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
           customer={customer}
           selectedSize={selectedSize}
           selectedColor={selectedColor?.name}
+          openedFrom="productDetails"
         />
       )}
       {productIsFashion && (
