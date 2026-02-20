@@ -24,11 +24,16 @@ const NeedAWebsiteBanner = ({ storeId }: NeedAWebsiteBannerProps) => {
       <div className="px-4 sm:px-6 mt-3 mb-4">
         <button
           onClick={() => setIsModalOpen(true)}
-          className={`w-full relative bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 border border-amber-500/20 p-4 rounded-[1.5rem] shadow-xl flex items-center transition-all hover:scale-[1.01] active:scale-[0.99] ${shimmerEffectClasses}`}
+          className={`w-full relative bg-gradient-to-br from-[#1a1a40] via-[#2d1b4d] to-[#1a1a40] border border-amber-500/30 p-4 rounded-[1.5rem] shadow-xl flex items-center transition-all hover:scale-[1.01] active:scale-[0.99] group ${shimmerEffectClasses}`}
         >
+          {/* Promo Badge */}
+          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg shadow-amber-500/20 z-20 uppercase tracking-widest">
+            PROMO
+          </div>
+
           {/* Subtle background glow */}
-          <div className="absolute -top-10 -right-10 w-32 h-32 bg-amber-400/5 blur-[50px] rounded-full" />
-          <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-amber-500/10 blur-[50px] rounded-full" />
+          <div className="absolute -top-10 -right-10 w-32 h-32 bg-amber-400/10 blur-[50px] rounded-full opacity-50" />
+          <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500/10 blur-[50px] rounded-full opacity-50" />
 
           <div className="relative z-10 w-full flex justify-between items-center gap-4">
             <div className="flex items-center gap-3">
@@ -36,11 +41,13 @@ const NeedAWebsiteBanner = ({ storeId }: NeedAWebsiteBannerProps) => {
                 <Globe className="text-amber-400" size={20} />
               </div>
               <div className="text-left">
-                <p className="text-xs text-amber-200/60 font-medium uppercase tracking-wider">Looking to Grow?</p>
-                <p className="text-sm text-white font-bold">Need a website for your business?</p>
+                <p className="text-xs text-amber-400 font-black uppercase tracking-[0.2em] mb-0.5">Looking to Grow?</p>
+                <p className="text-sm sm:text-base text-white font-black tracking-tight">Need a website for your business?</p>
               </div>
             </div>
-            <div className="text-amber-400 font-bold text-xs">Learn More →</div>
+            <div className="text-amber-400 font-black text-[10px] uppercase tracking-widest flex items-center gap-1 group-hover:gap-2 transition-all">
+              Learn More <span>→</span>
+            </div>
           </div>
         </button>
       </div>

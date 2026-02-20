@@ -16,22 +16,31 @@ export const useOrders = (customerId: string | null, storeId: string) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchOrders = useCallback(async () => {
-    if (!storeId || !customerId) {
+    if (!storeId) {
       setOrders([]);
       setIsLoading(false);
       return;
     }
+
     try {
       setIsLoading(true);
-      // We are now fetching all store orders and filtering by customer on the client
-      // This is not ideal for performance, but it aligns with the current refactor.
-      // A more performant solution would be to fetch from the customer's subcollection.
-      const allStoreOrders = await fetchStoreOrders(storeId);
-      const customerOrders = allStoreOrders.filter(o => o.customerInfo.id === customerId);
-      setOrders(customerOrders);
+
+      if (customerId) {
+        // Fetch from Firestore for logged-in users
+        const allStoreOrders = await fetchStoreOrders(storeId);
+        const customerOrders = allStoreOrders.filter(o => o.customerInfo.id === customerId);
+        setOrders(customerOrders);
+      } else {
+        // Fetch from localStorage for anonymous users
+        const savedOrders = localStorage.getItem(`orders_${storeId}`);
+        if (savedOrders) {
+          setOrders(JSON.parse(savedOrders));
+        } else {
+          setOrders([]);
+        }
+      }
     } catch (error) {
-      toast.error('Failed to fetch orders.');
-      console.error(error);
+      console.error('Failed to fetch orders:', error);
     } finally {
       setIsLoading(false);
     }
@@ -42,13 +51,35 @@ export const useOrders = (customerId: string | null, storeId: string) => {
   }, [fetchOrders]);
 
   const addOrder = async (products: (Product | CartItem)[], storeMeta: StoreMeta, customerInfo: Customer, referralCode: string | null, bonusApplied: boolean = false, deliveryMethod: 'home' | 'pickup' = 'home', orderNotes?: string, paymentEvidenceUrl?: string, paymentEvidenceFileName?: string) => {
-    if (!customerId || !customerInfo) {
-      throw new Error("User is not logged in.");
-    }
-
     try {
       const productsToSend = products.map(p => ({ ...p, storeId: storeMeta.id })) as Product[];
-      const newOrder = await addOrderToFirestore(customerId, productsToSend, storeMeta, customerInfo, referralCode, bonusApplied, deliveryMethod, orderNotes, paymentEvidenceUrl, paymentEvidenceFileName);
+
+      let newOrder: Order;
+
+      if (customerId && customerInfo.id) {
+        // Standard Firestore order for logged-in users
+        newOrder = await addOrderToFirestore(customerId, productsToSend, storeMeta, customerInfo, referralCode, bonusApplied, deliveryMethod, orderNotes, paymentEvidenceUrl, paymentEvidenceFileName);
+      } else {
+        // Simple mock order for anonymous users (saved to localStorage)
+        newOrder = {
+          id: `guest_${Date.now()}`,
+          products: productsToSend,
+          storeMeta,
+          orderDate: new Date().toISOString(),
+          orderStatus: 'processing',
+          deliveryMethod,
+          orderNotes,
+          paymentStatus: 'pending',
+          customerInfo: {
+            ...customerInfo,
+            id: 'guest'
+          }
+        } as any;
+
+        const guestOrders = JSON.parse(localStorage.getItem(`orders_${storeId}`) || '[]');
+        localStorage.setItem(`orders_${storeId}`, JSON.stringify([newOrder, ...guestOrders]));
+      }
+
       setOrders(prevOrders => [newOrder, ...prevOrders]);
       return newOrder;
     } catch (error) {

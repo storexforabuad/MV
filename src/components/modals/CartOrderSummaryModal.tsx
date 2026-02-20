@@ -140,7 +140,12 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
   };
 
   const handlePlaceOrder = async () => {
-    if (!storeMeta || !customer || !storeId) return;
+    if (!storeMeta || !storeId) return;
+
+    if (isPaymentFlowEnabled && !customer) {
+      toast.error('Please log in to use the secure payment flow');
+      return;
+    }
 
     if (isPaymentFlowEnabled && !uploadedEvidence) {
       toast.error('Please upload payment evidence first');
@@ -158,6 +163,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
       const referrerId = localStorage.getItem('referrerId');
 
       if (isPaymentFlowEnabled) {
+        if (!customer) throw new Error("Customer session not found");
         await addOrder(
           cartItems,
           storeMetaWithId,
@@ -182,7 +188,14 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
         onOrderSuccess();
         onClose();
       } else {
-        await addOrder(cartItems, storeMetaWithId, customer, referrerId, false, deliveryMethod as 'home' | 'pickup', orderNotes);
+        const guestInfo: Customer = customer || {
+          id: 'guest',
+          name: 'Guest Customer',
+          phoneNumber: '',
+          deliveryAddress: { street: '', state: '' }
+        };
+
+        await addOrder(cartItems, storeMetaWithId, guestInfo, referrerId, false, deliveryMethod as 'home' | 'pickup', orderNotes);
 
         if (customer?.id) {
           requestCustomerNotificationPermission(customer.id).catch(err =>
@@ -211,7 +224,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
           `${itemsSummary}\n\n` +
           `--------------------\n` +
           `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n` +
-          `${deliveryMethod === 'home' && customer.deliveryAddress ? `📍 *Address:* ${customer.deliveryAddress.street}\n` : ''}` +
+          `${deliveryMethod === 'home' ? (customer?.deliveryAddress?.street ? `📍 *Address:* ${customer.deliveryAddress.street}\n` : '📍 *Address:* (Please provide your address below)\n') : ''}` +
           (orderNotes ? `📝 *Special Instructions:* ${orderNotes}\n` : '') +
           `*Grand Total (excl. delivery):* ${formatPrice(total)}\n\n` +
           `Please confirm availability and provide payment details.\n\n` +

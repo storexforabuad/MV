@@ -181,7 +181,12 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   };
 
   const handlePlaceOrder = async () => {
-    if (!product || !storeId || !storeMeta || !customer) return;
+    if (!product || !storeId || !storeMeta) return;
+
+    if (isPaymentFlowEnabled && !customer) {
+      toast.error('Please log in to use the secure payment flow');
+      return;
+    }
 
     if (isPaymentFlowEnabled && !uploadedEvidence) {
       toast.error('Please upload payment evidence first');
@@ -208,6 +213,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
       };
 
       if (isPaymentFlowEnabled) {
+        if (!customer) throw new Error("Customer session not found");
         await addOrder(
           [productToOrder],
           storeMetaWithId,
@@ -230,7 +236,14 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
         clearModalState(storeId);
         onClose();
       } else {
-        await addOrder([productToOrder], storeMetaWithId, customer, referrerId, false, deliveryMethod as 'home' | 'pickup');
+        const guestInfo: Customer = customer || {
+          id: 'guest',
+          name: 'Guest Customer',
+          phoneNumber: '',
+          deliveryAddress: { street: '', state: '' }
+        };
+
+        await addOrder([productToOrder], storeMetaWithId, guestInfo, referrerId, false, deliveryMethod as 'home' | 'pickup');
 
         if (customer?.id) {
           requestCustomerNotificationPermission(customer.id).catch(err =>
@@ -252,7 +265,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
           (isFoodBeverageProduct(product) && specialInstructions ? `📝 *Note:* ${specialInstructions}\n` : '') +
           `💰 *Price:* ${formatPrice(product.price)}\n` +
           `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n` +
-          `${deliveryMethod === 'home' && customer.deliveryAddress ? `📍 *To:* ${customer.deliveryAddress.street}\n` : ''}` +
+          `${deliveryMethod === 'home' ? (customer?.deliveryAddress?.street ? `📍 *To:* ${customer.deliveryAddress.street}\n` : '📍 *Address:* (Please provide your address below)\n') : ''}` +
           `*Total (excluding delivery):* ${formatPrice(total)}\n\n` +
           `Please provide delivery fee and payment details.\n\n` +
           `Thank you! 🙏`;

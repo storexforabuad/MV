@@ -300,8 +300,8 @@ export default function ProductCard({
           transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]
           transform-gpu will-change-transform
           group-hover:shadow-[0_16px_24px_-8px_rgba(0,0,0,0.12),0_4px_12px_-4px_rgba(0,0,0,0.08)] dark:group-hover:shadow-xl dark:group-hover:shadow-white/15
-          group-hover:translate-y-[-4px]
-          bg-white dark:bg-card-background"
+          ${!isMobile ? 'group-hover:translate-y-[-4px]' : ''}
+          bg-white dark:bg-card-background border-2 border-transparent active:border-blue-500/50 active:ring-4 active:ring-blue-500/20"
           style={{
             transform: 'translate3d(0,0,0)',
             perspective: '1000px',
@@ -433,13 +433,11 @@ export default function ProductCard({
             </div>
           )}
 
-          {/* Action Overlay - Handles image tap and "flash" highlight */}
+          {/* Action Tap Effect - High performance scale */}
           {isSingleView && (
             <motion.div
               className="absolute inset-0 z-20 cursor-pointer pointer-events-auto rounded-2xl"
               whileTap={{
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                boxShadow: 'inset 0 0 0 4px rgba(59, 130, 246, 0.4)',
                 scale: 0.98
               }}
               transition={{ duration: 0.1 }}
@@ -493,8 +491,8 @@ export default function ProductCard({
           )}
         </div>
 
-        <div className="mt-3 space-y-1 px-1 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
-          group-hover:translate-y-[-2px]">
+        <div className={`mt-3 space-y-1 px-1 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
+          ${!isMobile ? 'group-hover:translate-y-[-2px]' : ''}`}>
           <h3 className="text-sm font-medium text-text-primary line-clamp-2 card-text-gradient">
             {product.name}
           </h3>
