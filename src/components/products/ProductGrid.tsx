@@ -122,7 +122,7 @@ const ProductGrid = memo(function ProductGrid({
   const router = useRouter();
   const { customer, promptLogin } = useCustomer();
   const { orders, addOrder } = useOrders(customer?.id ?? null, storeId || "");
-  const [isSingleColumn, setIsSingleColumn] = useState(false);
+  const [isSingleColumn, setIsSingleColumn] = useState(true);
   const [isReferralModalOpen, setReferralModalOpen] = useState(false);
 
   // Order modal state
@@ -191,11 +191,12 @@ const ProductGrid = memo(function ProductGrid({
       {storeId && (
         <div className="sm:hidden fixed bottom-16 left-0 right-0 z-40 flex justify-center pointer-events-none">
           <div className="flex items-center gap-1 pointer-events-auto">
-            <GlassButton
+            {/* Layout Toggle Hidden as per request */}
+            {/* <GlassButton
               onClick={() => setIsSingleColumn(!isSingleColumn)}
               aria-label="Toggle grid layout"
               text={isSingleColumn ? 'Double' : 'Single'}
-            />
+            /> */}
             <GlassButton
               onClick={onAboutClick}
               aria-label="About this business"
