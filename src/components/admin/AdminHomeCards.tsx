@@ -849,13 +849,6 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             );
           }
 
-          if (card.label === 'Customers' && card.component === AdminCustomersCard) {
-            return (
-              <motion.div key={card.label} variants={itemVariants} className="h-full">
-                <AdminCustomersCard storeId={props.storeId} onClick={() => { setIsCustomersModalOpen(true); if (props.setIsModalOpen) props.setIsModalOpen(true); }} gradient={customersCard.gradient} glowClass={customersCard.glowClass} />
-              </motion.div>
-            );
-          }
 
           // Wholesale card - simplified vertical layout
           if (card.label === 'Wholesale' && card.isWholesaleCard) {

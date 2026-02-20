@@ -125,6 +125,7 @@ export default function StorefrontPageClient({
 
   // Handle order highlighting from deep link
   useEffect(() => {
+    if (!searchParams) return;
     const openParam = searchParams.get('open');
     if (openParam === 'orders') {
       const orderId = searchParams.get('orderId');
@@ -301,6 +302,7 @@ export default function StorefrontPageClient({
 
   // Handle category deep link auto-scroll on mount
   useEffect(() => {
+    if (!searchParams) return;
     const categoryId = searchParams.get('category');
     if (categoryId) {
       // Auto scroll to product grid
