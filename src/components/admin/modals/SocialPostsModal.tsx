@@ -187,6 +187,9 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
     const [metricsMap, setMetricsMap] = useState<Map<string, ProductMetrics>>(new Map());
     const [isLoadingMetrics, setIsLoadingMetrics] = useState(true);
 
+    // Link Generation State
+    const [selectedLinkCategoryId, setSelectedLinkCategoryId] = useState<string>('');
+
     // Performance Optimizations
     const [displayLimit, setDisplayLimit] = useState(20);
     const deferredSearchTerm = useDeferredValue(searchTerm);
@@ -269,13 +272,16 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
 
     // Initialize share message
     useEffect(() => {
-        if (categories) {
-            const formattedCategories = formatCategories(categories);
-            const defaultStoreCaption = `🌟 Discover authentic ${formattedCategories} at affordable prices in the new ${storeName || 'Online Store'} Online Store! 🛒. Tap the link below:`;
-            const fullStoreUrl = `https://tinyurl.com/atlasintl/${storeId}`;
-            setShareMessage(`${defaultStoreCaption}\n${fullStoreUrl}`);
+        const formattedCategories = formatCategories(categories);
+        const defaultStoreCaption = `🌟 Discover authentic ${formattedCategories} at affordable prices in the new ${storeName || 'Online Store'} Online Store! 🛒. Tap the link below:`;
+
+        let fullStoreUrl = `https://tinyurl.com/atlasintl/${storeId}`;
+        if (selectedLinkCategoryId) {
+            fullStoreUrl += `?category=${selectedLinkCategoryId}`;
         }
-    }, [categories, storeName, storeId]);
+
+        setShareMessage(`${defaultStoreCaption}\n${fullStoreUrl}`);
+    }, [categories, storeName, storeId, selectedLinkCategoryId]);
 
     const handleCopyShare = (text: string) => {
         navigator.clipboard.writeText(text);
@@ -298,6 +304,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
         setActiveShareModal('none');
         setShowConfirmModal(false);
         setDontShowAgain(false);
+        setSelectedLinkCategoryId('');
         // shareMessage is reset by useEffect on categories change
     };
 
@@ -515,6 +522,56 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                     <SparklesIcon className="w-5 h-5" />
                     <h3 className="font-semibold text-base">Smart Suggestions</h3>
                 </div>
+            </div>
+
+            {/* Dynamic Category Link Selection */}
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-3 shadow-sm">
+                <label className="block text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">
+                    Generate Link for Category
+                </label>
+                <div className="relative">
+                    <div className="flex gap-2">
+                        <div className="relative flex-1">
+                            <select
+                                value={selectedLinkCategoryId}
+                                onChange={(e) => setSelectedLinkCategoryId(e.target.value)}
+                                className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500/20 appearance-none cursor-pointer"
+                            >
+                                <option value="">🏠 All Products</option>
+                                <option value="promo">🏷️ Promo / Clearance</option>
+                                <option value="popular">🔥 Most Popular</option>
+                                <option value="new-arrivals">✨ New Arrivals</option>
+                                {categories?.map(cat => (
+                                    <option key={cat.id} value={cat.id}>
+                                        📁 {cat.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
+                        </div>
+                        <button
+                            onClick={() => {
+                                const url = `https://tinyurl.com/atlasintl/${storeId}${selectedLinkCategoryId ? `?category=${selectedLinkCategoryId}` : ''}`;
+                                navigator.clipboard.writeText(url);
+                                toast.success('Link copied!');
+                            }}
+                            className="p-2.5 bg-purple-600 text-white rounded-lg hover:bg-purple-700 active:scale-95 transition-all flex items-center justify-center shadow-lg"
+                            title="Copy Link Directly"
+                        >
+                            <ClipboardDocumentIcon className="w-5 h-5" />
+                        </button>
+                    </div>
+                </div>
+                {selectedLinkCategoryId && (
+                    <p className="mt-2 text-[10px] text-purple-600 dark:text-purple-400 font-medium flex items-center gap-1">
+                        <SparklesIcon className="w-3 h-3" />
+                        <span>Customers will auto-scroll to this category when they visit!</span>
+                    </p>
+                )}
             </div>
 
             {/* Info Box */}
@@ -1216,7 +1273,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                 {activeShareModal === 'link' ? (
                                     <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
                                         <p className="text-sm text-gray-600 dark:text-gray-300 break-all font-mono">
-                                            {`https://tinyurl.com/atlasintl/${storeId}`}
+                                            {`https://tinyurl.com/atlasintl/${storeId}${selectedLinkCategoryId ? `?category=${selectedLinkCategoryId}` : ''}`}
                                         </p>
                                     </div>
                                 ) : (
@@ -1240,7 +1297,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                 <button
                                     type="button"
                                     className="flex-1 justify-center rounded-xl border border-transparent bg-purple-600 px-4 py-3 text-sm font-bold text-white hover:bg-purple-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 transition-all shadow-lg shadow-purple-500/30"
-                                    onClick={() => handleCopyShare(activeShareModal === 'link' ? `https://tinyurl.com/atlasintl/${storeId}` : shareMessage)}
+                                    onClick={() => handleCopyShare(activeShareModal === 'link' ? `https://tinyurl.com/atlasintl/${storeId}${selectedLinkCategoryId ? `?category=${selectedLinkCategoryId}` : ''}` : shareMessage)}
                                 >
                                     Copy
                                 </button>

@@ -1,5 +1,6 @@
 'use client';
 import { useState, useEffect, useCallback, useRef, useTransition, useLayoutEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { DocumentSnapshot } from 'firebase/firestore';
 import {
@@ -66,33 +67,36 @@ export default function StorefrontPageClient({
   storeId,
   initialStoreMeta,
   initialCategories,
-  initialProducts
+  initialProducts,
+  initialCategory: serverCategory
 }: {
   storeId: string;
   initialStoreMeta?: any;
   initialCategories?: { id: string; name: string }[];
   initialProducts?: Product[];
+  initialCategory?: string;
 }) {
   const scrollDirection = useScrollDirection();
   const scrollRestoreState = useRef<NavigationState | null>(NavigationStore.getState());
 
   const restoredCategory = scrollRestoreState.current?.category;
-  // If we are restoring a category that is NOT the default 'promo' (which initialProducts represents),
-  // we should ignore initialProducts to prevent showing the wrong list and triggering premature scroll restoration.
-  const isRestoringDifferentCategory = restoredCategory && restoredCategory !== 'promo';
+  const initialCategory = serverCategory || restoredCategory || 'promo';
+
+  // If we are restoring a category OR using a deep link that is NOT the default 'promo',
+  // we should ignore initialProducts to prevent showing the wrong list.
+  const isShowingDifferentCategory = initialCategory !== 'promo';
 
   const [products, setProducts] = useState<Product[]>(
-    isRestoringDifferentCategory ? [] : (initialProducts || [])
+    isShowingDifferentCategory ? [] : (initialProducts || [])
   );
   const [categories, setCategories] = useState<{ id: string; name: string }[]>(initialCategories || []);
   const [storeName, setStoreName] = useState(initialStoreMeta?.name || '');
   const [loading, setLoading] = useState(false);
 
   // We are "initial loading" if we don't have products to show yet.
-  // This happens if we didn't get initialProducts OR if we are restoring a different category.
-  const [initialLoading, setInitialLoading] = useState(!initialProducts || !!isRestoringDifferentCategory);
+  const [initialLoading, setInitialLoading] = useState(!initialProducts || !!isShowingDifferentCategory);
 
-  const [activeCategoryId, setActiveCategoryId] = useState(() => scrollRestoreState.current?.category || 'promo');
+  const [activeCategoryId, setActiveCategoryId] = useState(initialCategory);
   const [lastVisible, setLastVisible] = useState<DocumentSnapshot | null>(null);
   const [hasMore, setHasMore] = useState(true);
   const { isConnectionError, setIsConnectionError } = useConnectionCheck();
@@ -117,19 +121,19 @@ export default function StorefrontPageClient({
     }
   }, [storeId]);
 
-  // Handle deep linking
+  const searchParams = useSearchParams();
+
+  // Handle order highlighting from deep link
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      if (params.get('open') === 'orders') {
-        const orderId = params.get('orderId');
-        if (orderId) {
-          setHighlightOrderId(orderId);
-        }
-        setIsOrdersModalOpen(true);
+    const openParam = searchParams.get('open');
+    if (openParam === 'orders') {
+      const orderId = searchParams.get('orderId');
+      if (orderId) {
+        setHighlightOrderId(orderId);
       }
+      setIsOrdersModalOpen(true);
     }
-  }, []);
+  }, [searchParams]);
 
   const handleNotificationRequest = async () => {
     if (customer?.id) {
@@ -293,6 +297,20 @@ export default function StorefrontPageClient({
     setLoading(true);
     setActiveCategoryId(categoryId);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  // Handle category deep link auto-scroll on mount
+  useEffect(() => {
+    const categoryId = searchParams.get('category');
+    if (categoryId) {
+      // Auto scroll to product grid
+      setTimeout(() => {
+        if (productGridRef.current) {
+          productGridRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 1200); // Give time for layout and images to load
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Handle swipe gesture

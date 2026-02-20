@@ -24,12 +24,15 @@ import {
 
 // ... imports
 
-export default async function StorefrontPage({ params }: PageProps) {
+export default async function StorefrontPage({ params, searchParams }: PageProps) {
     const [storeMeta, categories, promoProducts] = await Promise.all([
         getStoreMetaAdminCached(params.storeId),
         getCategoriesAdminCached(params.storeId),
         getPromoProductsAdmin(params.storeId)
     ]);
+
+    const searchParamsObj = await searchParams;
+    const initialCategory = (searchParamsObj?.category as string) || 'promo';
 
     return (
         <StorefrontPageClient
@@ -37,6 +40,7 @@ export default async function StorefrontPage({ params }: PageProps) {
             initialStoreMeta={storeMeta}
             initialCategories={categories}
             initialProducts={promoProducts}
+            initialCategory={initialCategory}
         />
     );
 }
