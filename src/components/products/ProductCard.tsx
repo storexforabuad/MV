@@ -2,7 +2,7 @@ import { useRef, useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Heart, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 import { Product } from '../../types/product';
 import { calculateDiscount, formatPrice } from '../../utils/price';
@@ -32,12 +32,14 @@ interface ProductCardProps {
   activeCategoryId: string;
   storeMeta?: any; // StoreMeta type, optional for ProductCard
   onOrderClick?: (product: Product, selectedColor?: string, selectedSize?: string) => void;
+  isSingleView?: boolean;
 }
 
-export default function ProductCard({ product, storeId, activeCategoryId, storeMeta, onOrderClick }: ProductCardProps) {
+export default function ProductCard({ product, storeId, activeCategoryId, storeMeta, onOrderClick, isSingleView }: ProductCardProps) {
   const [imageLoading, setImageLoading] = useState(true);
   const [imgSrc, setImgSrc] = useState(product.images?.[0] || DEFAULT_IMAGES.medium);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [direction, setDirection] = useState(0); // 1 for next, -1 for prev
   const [selectedColor, setSelectedColor] = useState<string | undefined>(isFashionProduct(product) && product.colors?.[0] ? product.colors[0].name : undefined);
   const [selectedSize, setSelectedSize] = useState<string | undefined>();
   const cardRef = useRef<HTMLDivElement>(null);
@@ -137,18 +139,21 @@ export default function ProductCard({ product, storeId, activeCategoryId, storeM
   const handlePrevImage = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setDirection(-1);
     setCurrentImageIndex((prev) => (prev === 0 ? totalImages - 1 : prev - 1));
   };
 
   const handleNextImage = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setDirection(1);
     setCurrentImageIndex((prev) => (prev === totalImages - 1 ? 0 : prev + 1));
   };
 
   const handleDotClick = (e: React.MouseEvent, index: number) => {
     e.preventDefault();
     e.stopPropagation();
+    setDirection(index > currentImageIndex ? 1 : -1);
     setCurrentImageIndex(index);
   };
 
@@ -197,10 +202,22 @@ export default function ProductCard({ product, storeId, activeCategoryId, storeM
     <Link href={productLink} passHref>
       <div
         ref={cardRef}
-        className="relative group"
+        className="relative group h-full"
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        onClick={handleClick}
+        onClick={(e) => {
+          if (isSingleView) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (onOrderClick) {
+              onOrderClick(product, selectedColor, selectedSize);
+              // Haptic feedback
+              if (navigator.vibrate) navigator.vibrate(20);
+            }
+          } else {
+            handleClick();
+          }
+        }}
         style={{ WebkitTapHighlightColor: 'transparent' }}
       >
         <div className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden
@@ -250,61 +267,114 @@ export default function ProductCard({ product, storeId, activeCategoryId, storeM
             </div>
           )}
 
-          <Image
-            src={displayImage}
-            alt={product.name}
-            fill
-            sizes="(max-width: 640px) 400px, (max-width: 1024px) 800px, 1200px"
-            className={`object-cover object-center transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
-              will-change-transform group-hover:scale-[1.03]
-              ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
-            loading="lazy"
-            draggable="false"
-            placeholder="blur"
-            blurDataURL={displayImage}
-            onLoad={() => setImageLoading(false)}
-            onError={handleImageError}
-          />
+          <AnimatePresence initial={false} custom={direction} mode="popLayout">
+            <motion.div
+              key={currentImageIndex}
+              custom={direction}
+              variants={{
+                enter: (direction: number) => ({
+                  x: direction > 0 ? '100%' : direction < 0 ? '-100%' : 0,
+                  opacity: 0,
+                  scale: 0.95
+                }),
+                center: {
+                  zIndex: 1,
+                  x: 0,
+                  opacity: 1,
+                  scale: 1
+                },
+                exit: (direction: number) => ({
+                  zIndex: 0,
+                  x: direction < 0 ? '100%' : direction > 0 ? '-100%' : 0,
+                  opacity: 0,
+                  scale: 0.95
+                })
+              }}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={{
+                x: { type: "spring", stiffness: 300, damping: 30 },
+                opacity: { duration: 0.3 }
+              }}
+              className="absolute inset-0"
+            >
+              <Image
+                src={displayImage}
+                alt={product.name}
+                fill
+                sizes="(max-width: 640px) 400px, (max-width: 1024px) 800px, 1200px"
+                className={`object-cover object-center
+                  will-change-transform group-hover:scale-[1.03]
+                  ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                loading="lazy"
+                draggable="false"
+                placeholder="blur"
+                blurDataURL={displayImage}
+                onLoad={() => setImageLoading(false)}
+                onError={handleImageError}
+              />
+            </motion.div>
+          </AnimatePresence>
 
           {/* Floating Action Buttons - Only show when NOT sold out */}
           {!isSoldOut && (
             <div className={`absolute inset-0 flex flex-col items-end justify-between p-3 transition-opacity duration-300 ${isMobile
-                ? 'opacity-100 pointer-events-auto'
-                : 'opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto'
+              ? 'opacity-100 pointer-events-auto'
+              : 'opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto'
               }`}>
-              {/* Heart Icon - Wishlist (Top Right) */}
-              <motion.button
-                onClick={handleWishlistToggle}
-                disabled={wishlistLoading}
-                className={`relative flex-shrink-0 p-3 rounded-full card-glass shadow-lg flex items-center justify-center disabled:opacity-50 border-2 transition-colors ${isInWishlist
+              {/* Heart Icon - Wishlist (Top Right) - Hide in Single View to avoid redundancy with bottom heart */}
+              {!isSingleView && (
+                <motion.button
+                  onClick={handleWishlistToggle}
+                  disabled={wishlistLoading}
+                  className={`relative flex-shrink-0 p-3 rounded-full card-glass shadow-lg flex items-center justify-center disabled:opacity-50 border-2 transition-colors ${isInWishlist
                     ? 'border-transparent'
                     : 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                  }`}
-                aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
-                type="button"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Heart
-                  size={20}
-                  className={`transition-all duration-200 ${isInWishlist
+                    }`}
+                  aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+                  type="button"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Heart
+                    size={20}
+                    className={`transition-all duration-200 ${isInWishlist
                       ? 'fill-red-500 text-red-500'
                       : 'text-red-500'
-                    }`}
-                />
-              </motion.button>
+                      }`}
+                  />
+                </motion.button>
+              )}
+              {isSingleView && <div />} {/* Spacer for flex-col justify-between */}
 
-              {/* Cart Icon - Order (Bottom Right) */}
+              {/* Bottom Right Icon: Cart (Grid) or Heart (Single View) */}
               <motion.button
-                onClick={handleOrderClick}
+                onClick={(e) => {
+                  if (isSingleView) {
+                    handleWishlistToggle(e);
+                  } else {
+                    handleOrderClick(e);
+                  }
+                }}
                 disabled={isSoldOut}
                 className="flex-shrink-0 p-3 rounded-full card-glass shadow-lg flex items-center justify-center disabled:opacity-50"
-                aria-label="Place order"
+                aria-label={isSingleView ? "Wishlist" : "Place order"}
                 type="button"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <ShoppingCart size={20} className="text-green-500 dark:text-green-400" />
+                {isSingleView ? (
+                  <Heart
+                    size={20}
+                    className={`transition-all duration-200 ${isInWishlist
+                      ? 'fill-red-500 text-red-500'
+                      : 'text-red-500'
+                      }`}
+                  />
+                ) : (
+                  <ShoppingCart size={20} className="text-green-500 dark:text-green-400" />
+                )}
               </motion.button>
             </div>
           )}
@@ -346,8 +416,8 @@ export default function ProductCard({ product, storeId, activeCategoryId, storeM
                 <span
                   key={index}
                   className={`transition-all duration-200 rounded-full ${index === currentImageIndex
-                      ? 'w-1 h-1 bg-white shadow-md'
-                      : 'w-0.75 h-0.75 bg-white/60'
+                    ? 'w-1 h-1 bg-white shadow-md'
+                    : 'w-0.75 h-0.75 bg-white/60'
                     }`}
                   aria-label={`Image ${index + 1} of ${totalImages}`}
                 />

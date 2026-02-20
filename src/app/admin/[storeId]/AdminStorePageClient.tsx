@@ -519,7 +519,7 @@ export default function AdminStorePageClient({
                   isRefreshing={isRefreshing}
                   totalProducts={products.length}
                   totalCategories={categories.length}
-                  totalViews={products.reduce((sum, p) => sum + (p.views || 0), 0)}
+                  totalViews={products.reduce((sum, p) => sum + (p.views || 0), 0) + (storeMeta?.storePageViews || 0)}
                   debtors={0}
                   subscriptionStatus={storeMeta?.subscriptionStatus || 'trial'}
                   referrals={referrals.length}

@@ -596,8 +596,41 @@ export async function incrementProductViews(storeId: string, productId: string):
   }
 }
 
+export async function incrementStorePageViews(storeId: string): Promise<void> {
+  try {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const dailyMetricsRef = doc(db, 'stores', storeId, 'dailyMetrics', today);
+    const storeRef = doc(db, 'stores', storeId);
+    const batch = writeBatch(db);
 
-// --- New & Updated Global Marketplace Functions ---
+    // Increment store page views on the store document
+    batch.update(storeRef, {
+      storePageViews: increment(1),
+      lastVisited: serverTimestamp()
+    });
+
+    // Increment daily store page views
+    batch.set(dailyMetricsRef, {
+      storePageViews: increment(1),
+      date: today
+    }, { merge: true });
+
+    await batch.commit();
+
+  } catch (error) {
+    if (error instanceof FirebaseError) {
+      console.error('[STORE] Firebase error incrementing store page views:', {
+        message: error.message,
+        code: error.code,
+        storeId,
+      });
+    } else {
+      console.error('[STORE] Error incrementing store page views:', error);
+    }
+  }
+}
+
+
 
 async function executePaginatedQuery(q: Query): Promise<PaginatedProductsResult> {
   const snapshot = await getDocs(q);

@@ -8,6 +8,7 @@ import {
   getCategories,
   getStoreMeta,
   getStorePopularProducts,
+  incrementStorePageViews,
 }
   from '@/lib/db';
 import { useConnectionCheck } from '@/hooks/useConnectionCheck';
@@ -108,6 +109,13 @@ export default function StorefrontPageClient({
   // Swipe gesture state
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [isSwipeTransitioning, setIsSwipeTransitioning] = useState(false);
+
+  // Track store page visit
+  useEffect(() => {
+    if (storeId) {
+      incrementStorePageViews(storeId);
+    }
+  }, [storeId]);
 
   // Handle deep linking
   useEffect(() => {

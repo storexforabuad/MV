@@ -12,6 +12,7 @@ interface StoreMeta {
   storeType?: string;
   name?: string;
   whatsapp?: string;
+  storePageViews?: number;
 }
 
 interface AdminSportsClientProps {
@@ -82,7 +83,7 @@ export default function AdminSportsClient({ storeMeta, storeId: propStoreId }: A
           isRefreshing={false}
           totalProducts={0}
           totalCategories={0}
-          totalViews={0}
+          totalViews={storeMeta?.storePageViews || 0}
           debtors={0}
           subscriptionStatus={'Active'}
           referrals={0}

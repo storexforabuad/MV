@@ -12,6 +12,8 @@ export interface StoreMeta {
   owner: string;
   products: string[];
   totalOrders?: number;
+  totalViews?: number; // Added totalViews to match what's in Firestore
+  storePageViews?: number;
   promoCaption?: string;
   hasCompletedOnboarding?: boolean;
   description?: string;

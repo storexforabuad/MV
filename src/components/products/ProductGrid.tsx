@@ -284,6 +284,7 @@ const ProductGrid = memo(function ProductGrid({
                     activeCategoryId={activeCategoryId}
                     storeMeta={storeMeta}
                     onOrderClick={handleOrderClick}
+                    isSingleView={isSingleColumn}
                   />
                 )}
               </motion.div>
