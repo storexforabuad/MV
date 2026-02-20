@@ -19,6 +19,7 @@ interface OrdersModalProps {
   storeMeta: StoreMeta;
   highlightOrderId?: string | null;
   onNotificationRequest?: () => Promise<{ success: boolean; error?: string }>;
+  onReorder?: (order: Order) => void;
 }
 
 const formatDateGroup = (dateStr: string) => {
@@ -44,7 +45,8 @@ const OrdersModal: React.FC<OrdersModalProps> = ({
   addOrder,
   storeMeta,
   highlightOrderId,
-  onNotificationRequest
+  onNotificationRequest,
+  onReorder
 }) => {
   const [hasRequestedNotifications, setHasRequestedNotifications] = React.useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -137,6 +139,7 @@ const OrdersModal: React.FC<OrdersModalProps> = ({
                                     addOrder={addOrder}
                                     storeMeta={storeMeta}
                                     isHighlighted={highlightOrderId === order.id}
+                                    onReorder={onReorder}
                                   />
                                 </div>
                               ))}

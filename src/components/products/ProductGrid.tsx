@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { Info, Phone, MessageCircle, Star, Clock, MapPin, Instagram, Gift } from 'lucide-react';
 import { Product } from '../../types/product';
+import { Order } from '../../hooks/useOrders';
 import { motion, LayoutGroup, AnimatePresence, Transition, PanInfo } from 'framer-motion';
 import Image from 'next/image';
 import { getStoreMeta } from '../../lib/db';
@@ -14,7 +15,9 @@ import { OrdersModal } from '@/components/customer/modals/OrdersModal';
 import { ReferralsModal } from '@/components/customer/modals/ReferralsModal';
 import { ensureProductType } from '../../utils/productHelpers';
 import OrderSummaryModal from '../modals/OrderSummaryModal';
+import CartOrderSummaryModal from '../modals/CartOrderSummaryModal';
 import SkeletonLoader from '../SkeletonLoader';
+import { CartItem } from '@/lib/cartContext';
 
 const VehicleCard = dynamic(() => import('./VehicleCard'), {
   loading: () => (
@@ -130,6 +133,34 @@ const ProductGrid = memo(function ProductGrid({
   const [orderModalProduct, setOrderModalProduct] = useState<Product | null>(null);
   const [orderModalColor, setOrderModalColor] = useState<string | undefined>();
   const [orderModalSize, setOrderModalSize] = useState<string | undefined>();
+  const [orderModalQuantity, setOrderModalQuantity] = useState(1);
+
+  // Reorder state
+  const [isReorderModalOpen, setIsReorderModalOpen] = useState(false);
+  const [reorderItems, setReorderItems] = useState<CartItem[]>([]);
+
+  const handleReorder = (order: Order) => {
+    const orderItems = order.products.map(p => ({
+      ...p,
+      quantity: p.productType === 'general' ? (p as any).quantity || 1 : 1,
+      selectedColor: (p as any).selectedColor || (p as any).color,
+      selectedSize: (p as any).selectedSize || (p as any).size,
+      storeId: storeId || order.storeMeta.id
+    })) as CartItem[];
+
+    if (orderItems.length === 1) {
+      // Use existing OrderSummaryModal for single item reorders
+      setOrderModalProduct(orderItems[0] as any);
+      setOrderModalColor(orderItems[0].selectedColor);
+      setOrderModalSize(orderItems[0].selectedSize);
+      setOrderModalQuantity(orderItems[0].quantity);
+      setIsOrderModalOpen(true);
+    } else {
+      // Use CartOrderSummaryModal for multi-item reorders
+      setReorderItems(orderItems);
+      setIsReorderModalOpen(true);
+    }
+  };
 
   const handleOrderClick = (product: Product, selectedColor?: string, selectedSize?: string) => {
     setOrderModalProduct(product);
@@ -226,6 +257,7 @@ const ProductGrid = memo(function ProductGrid({
           storeMeta={storeMeta}
           highlightOrderId={highlightOrderId}
           onNotificationRequest={onNotificationRequest}
+          onReorder={handleReorder}
         />
       )}
       {storeId && <ReferralsModal isOpen={isReferralModalOpen} onClose={() => setReferralModalOpen(false)} storeId={storeId} />}
@@ -299,8 +331,21 @@ const ProductGrid = memo(function ProductGrid({
         customer={null}
         selectedSize={orderModalSize}
         selectedColor={orderModalColor}
+        initialQuantity={orderModalQuantity}
         openedFrom="productCard"
       />
+
+      {storeMeta && (
+        <CartOrderSummaryModal
+          isOpen={isReorderModalOpen}
+          onClose={() => setIsReorderModalOpen(false)}
+          onOrderSuccess={() => setIsReorderModalOpen(false)}
+          cartItems={reorderItems}
+          storeMeta={storeMeta}
+          customer={customer}
+          storeId={storeId}
+        />
+      )}
     </LayoutGroup>
   );
 });

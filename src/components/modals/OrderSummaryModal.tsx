@@ -38,12 +38,13 @@ interface OrderSummaryModalProps {
   customer: Customer | null;
   selectedSize?: string;
   selectedColor?: string;
+  initialQuantity?: number;
   openedFrom?: 'productDetails' | 'productCard';
 }
 
-export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta, customer: initialCustomer, selectedSize, selectedColor, openedFrom }: OrderSummaryModalProps) {
+export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta, customer: initialCustomer, selectedSize, selectedColor, initialQuantity = 1, openedFrom }: OrderSummaryModalProps) {
   const [currentPage, setCurrentPage] = useState<1 | 2>(1);
-  const [quantity, setQuantity] = useState(1);
+  const [quantity, setQuantity] = useState(initialQuantity);
   const [deliveryMethod, setDeliveryMethod] = useState('home');
   const [customer, setCustomer] = useState<Customer | null>(initialCustomer);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
@@ -78,7 +79,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
   useEffect(() => {
     if (isOpen) {
-      setQuantity(1);
+      setQuantity(initialQuantity);
       setCurrentPage(1);
       setSelectedSpiciness('medium');
       setSpecialInstructions('');

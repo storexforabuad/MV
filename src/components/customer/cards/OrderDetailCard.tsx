@@ -20,6 +20,7 @@ interface OrderDetailCardProps {
   addOrder: (products: (Product | CartItem)[], storeMeta: StoreMeta, customerInfo: Customer, referralCode: string | null, bonusApplied?: boolean, deliveryMethod?: "home" | "pickup", orderNotes?: string, paymentEvidenceUrl?: string, paymentEvidenceFileName?: string) => Promise<any>;
   storeMeta: StoreMeta;
   isHighlighted?: boolean;
+  onReorder?: (order: Order) => void;
 }
 
 const getStatusUI = (status: Order['orderStatus']) => {
@@ -36,7 +37,7 @@ const getStatusUI = (status: Order['orderStatus']) => {
   }
 };
 
-export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted }: OrderDetailCardProps) {
+export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted, onReorder }: OrderDetailCardProps) {
   const [isReordering, setIsReordering] = useState(false);
   const { customer } = useCustomer();
 
@@ -44,61 +45,8 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted }: O
   const products = order.products || [];
 
   const handleReorder = async () => {
-    if (!storeMeta) {
-      toast.error("Store information is missing.");
-      return;
-    }
-
-    const customerInfo = customer || {
-      id: 'guest',
-      name: 'Guest Customer',
-      phoneNumber: '',
-      email: '',
-      referralCode: '',
-      deliveryAddress: { country: '', state: '', street: '' },
-      createdAt: Timestamp.now(),
-      totalReferralCommission: 0,
-      successfulReferralCount: 0
-    } as Customer;
-
-    setIsReordering(true);
-    try {
-      // 1. Create Pending Order
-      const newOrder = await addOrder(products, storeMeta, customerInfo, null, false) as any;
-
-      if (!newOrder || !newOrder.id) {
-        throw new Error("Could not create order");
-      }
-
-      // 2. Initialize Paystack
-      const totalAmount = products.reduce((acc, p) => acc + p.price * (p.productType === 'general' ? p.quantity : 1), 0);
-
-      const response = await fetch('/api/paystack/initialize-transaction', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: customerInfo.email || 'customer@example.com',
-          amount: totalAmount,
-          storeId: storeMeta.id,
-          metadata: {
-            orderId: newOrder.id,
-            cart_items: `Reorder #${order.id.substring(0, 6)}`
-          }
-        })
-      });
-
-      const data = await response.json();
-      if (data.authorization_url) {
-        window.location.href = data.authorization_url;
-      } else {
-        toast.error('Could not initialize payment');
-        setIsReordering(false);
-      }
-
-    } catch (error) {
-      console.error("Failed to place reorder:", error);
-      toast.error('There was an issue placing your reorder.');
-      setIsReordering(false);
+    if (onReorder) {
+      onReorder(order);
     }
   };
 
