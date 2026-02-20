@@ -188,12 +188,12 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
         onOrderSuccess();
         onClose();
       } else {
-        const guestInfo: Customer = customer || {
+        const guestInfo = (customer || {
           id: 'guest',
           name: 'Guest Customer',
           phoneNumber: '',
-          deliveryAddress: { street: '', state: '' }
-        };
+          deliveryAddress: { street: '', state: '', country: '' }
+        }) as Customer;
 
         await addOrder(cartItems, storeMetaWithId, guestInfo, referrerId, false, deliveryMethod as 'home' | 'pickup', orderNotes);
 
