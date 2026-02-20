@@ -10,6 +10,7 @@ import { useIntersectionObserver } from '../../hooks/useIntersectionObserver';
 import { useProductDetailPrefetch } from '../../hooks/useProductDetailPrefetch';
 import { useWishlist } from '../../context/WishlistContext';
 import { useCustomer } from '../../context/CustomerContext';
+import { useCart } from '../../lib/cartContext';
 import NavigationStore from '@/lib/navigationStore';
 import {
   isGeneralProduct,
@@ -35,7 +36,14 @@ interface ProductCardProps {
   isSingleView?: boolean;
 }
 
-export default function ProductCard({ product, storeId, activeCategoryId, storeMeta, onOrderClick, isSingleView }: ProductCardProps) {
+export default function ProductCard({
+  product,
+  storeId,
+  activeCategoryId,
+  storeMeta,
+  onOrderClick,
+  isSingleView
+}: ProductCardProps) {
   const [imageLoading, setImageLoading] = useState(true);
   const [imgSrc, setImgSrc] = useState(product.images?.[0] || DEFAULT_IMAGES.medium);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -47,6 +55,7 @@ export default function ProductCard({ product, storeId, activeCategoryId, storeM
   const [isHovered, setIsHovered] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
+  const { state: cartState, dispatch: cartDispatch } = useCart();
   const { customer } = useCustomer();
   const [wishlistLoading, setWishlistLoading] = useState(false);
 
@@ -72,6 +81,12 @@ export default function ProductCard({ product, storeId, activeCategoryId, storeM
 
   // Check if product is in wishlist
   const isInWishlist = wishlist.some(item => item.id === product.id);
+
+  // Check if product is in cart (matching ProductDetail footer heart logic)
+  const isInCart = cartState.items.some(item =>
+    item.id === product.id &&
+    (!isFashionProduct(product) || item.selectedColor === selectedColor)
+  );
 
   // Get images for carousel (fashion with color or general product)
   const getCarouselImages = (): string[] => {
@@ -123,6 +138,47 @@ export default function ProductCard({ product, storeId, activeCategoryId, storeM
       }
     } finally {
       setWishlistLoading(false);
+    }
+  };
+
+  // Handle cart toggle (acting as Heart in Single View)
+  const handleToggleCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Haptic feedback
+    if (navigator.vibrate) {
+      navigator.vibrate(15);
+    }
+
+    if (isInCart) {
+      cartDispatch({
+        type: 'REMOVE_ITEM',
+        payload: { id: product.id, selectedSize, selectedColor }
+      });
+      toast.success('Removed from wishlist', {
+        duration: 2000,
+        position: 'bottom-center',
+        style: {
+          background: 'var(--card-background)',
+          color: 'var(--text-primary)',
+          border: '1px solid var(--border-color)',
+        },
+      });
+    } else {
+      cartDispatch({
+        type: 'ADD_ITEM',
+        payload: { ...product, quantity: 1, storeId: storeId || product.storeId, selectedSize, selectedColor }
+      });
+      toast.success('Added to wishlist', {
+        duration: 2000,
+        position: 'bottom-center',
+        style: {
+          background: 'var(--card-background)',
+          color: 'var(--text-primary)',
+          border: '1px solid var(--border-color)',
+        },
+      });
     }
   };
 
@@ -203,14 +259,22 @@ export default function ProductCard({ product, storeId, activeCategoryId, storeM
       <div
         ref={cardRef}
         className="relative group h-full"
-        onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={(e) => {
           if (isSingleView) {
             e.preventDefault();
             e.stopPropagation();
             if (onOrderClick) {
-              onOrderClick(product, selectedColor, selectedSize);
+              // Intelligent Color Mapping: Pre-select color based on current visible image
+              let finalSelectedColor = selectedColor;
+              if (isFashionProduct(product) && product.colors) {
+                const colorMatch = product.colors.find(c => c.images?.includes(displayImage));
+                if (colorMatch) {
+                  finalSelectedColor = colorMatch.name;
+                }
+              }
+
+              onOrderClick(product, finalSelectedColor, selectedSize);
               // Haptic feedback
               if (navigator.vibrate) navigator.vibrate(20);
             }
@@ -226,7 +290,6 @@ export default function ProductCard({ product, storeId, activeCategoryId, storeM
           transform-gpu will-change-transform
           group-hover:shadow-[0_16px_24px_-8px_rgba(0,0,0,0.12),0_4px_12px_-4px_rgba(0,0,0,0.08)] dark:group-hover:shadow-xl dark:group-hover:shadow-white/15
           group-hover:translate-y-[-4px]
-          active:scale-[0.97] active:ring-4 active:ring-blue-500/40 dark:active:ring-sky-400/40 active:ring-offset-2 active:ring-offset-white dark:active:ring-offset-gray-900
           bg-white dark:bg-card-background"
           style={{
             transform: 'translate3d(0,0,0)',
@@ -323,60 +386,53 @@ export default function ProductCard({ product, storeId, activeCategoryId, storeM
               ? 'opacity-100 pointer-events-auto'
               : 'opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto'
               }`}>
-              {/* Heart Icon - Wishlist (Top Right) - Hide in Single View to avoid redundancy with bottom heart */}
-              {!isSingleView && (
+              {/* Spacer - Top heart was here, now removed */}
+              <div />
+
+              {/* Bottom Right Icon: Cart (Grid) or Heart (Single View) */}
+              <motion.div className="z-30">
                 <motion.button
-                  onClick={handleWishlistToggle}
-                  disabled={wishlistLoading}
-                  className={`relative flex-shrink-0 p-3 rounded-full card-glass shadow-lg flex items-center justify-center disabled:opacity-50 border-2 transition-colors ${isInWishlist
-                    ? 'border-transparent'
-                    : 'border-red-500 bg-red-50 dark:bg-red-900/20'
-                    }`}
-                  aria-label={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
+                  onClick={(e) => {
+                    if (isSingleView) {
+                      handleToggleCart(e);
+                    } else {
+                      handleOrderClick(e);
+                    }
+                  }}
+                  disabled={isSoldOut}
+                  className="flex-shrink-0 p-3 rounded-full card-glass shadow-lg flex items-center justify-center disabled:opacity-50"
+                  aria-label={isSingleView ? "Add to cart" : "Place order"}
                   type="button"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <Heart
-                    size={20}
-                    className={`transition-all duration-200 ${isInWishlist
-                      ? 'fill-red-500 text-red-500'
-                      : 'text-red-500'
-                      }`}
-                  />
+                  {isSingleView ? (
+                    <Heart
+                      size={20}
+                      className={`transition-all duration-200 ${isInCart
+                        ? 'fill-red-500 text-red-500'
+                        : 'text-red-500'
+                        }`}
+                    />
+                  ) : (
+                    <ShoppingCart size={20} className="text-green-500 dark:text-green-400" />
+                  )}
                 </motion.button>
-              )}
-              {isSingleView && <div />} {/* Spacer for flex-col justify-between */}
-
-              {/* Bottom Right Icon: Cart (Grid) or Heart (Single View) */}
-              <motion.button
-                onClick={(e) => {
-                  if (isSingleView) {
-                    handleWishlistToggle(e);
-                  } else {
-                    handleOrderClick(e);
-                  }
-                }}
-                disabled={isSoldOut}
-                className="flex-shrink-0 p-3 rounded-full card-glass shadow-lg flex items-center justify-center disabled:opacity-50"
-                aria-label={isSingleView ? "Wishlist" : "Place order"}
-                type="button"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {isSingleView ? (
-                  <Heart
-                    size={20}
-                    className={`transition-all duration-200 ${isInWishlist
-                      ? 'fill-red-500 text-red-500'
-                      : 'text-red-500'
-                      }`}
-                  />
-                ) : (
-                  <ShoppingCart size={20} className="text-green-500 dark:text-green-400" />
-                )}
-              </motion.button>
+              </motion.div>
             </div>
+          )}
+
+          {/* Action Overlay - Handles image tap and "flash" highlight */}
+          {isSingleView && (
+            <motion.div
+              className="absolute inset-0 z-20 cursor-pointer pointer-events-auto rounded-2xl"
+              whileTap={{
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                boxShadow: 'inset 0 0 0 4px rgba(59, 130, 246, 0.4)',
+                scale: 0.98
+              }}
+              transition={{ duration: 0.1 }}
+            />
           )}
 
           {/* Navigation Arrows - Only show when NOT sold out and multiple images */}
@@ -397,7 +453,7 @@ export default function ProductCard({ product, storeId, activeCategoryId, storeM
               {/* Right Arrow */}
               <motion.button
                 onClick={handleNextImage}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 z-20 p-2.5 rounded-full card-glass shadow-lg flex items-center justify-center"
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 z-30 p-2.5 rounded-full card-glass shadow-lg flex items-center justify-center"
                 aria-label="Next image"
                 type="button"
                 whileHover={{ scale: 1.05 }}

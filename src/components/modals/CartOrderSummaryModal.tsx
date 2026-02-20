@@ -27,9 +27,10 @@ interface CartOrderSummaryModalProps {
   cartItems: CartItem[];
   storeMeta: StoreMeta | null;
   customer: Customer | null;
+  storeId?: string;
 }
 
-export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess, cartItems, storeMeta, customer: initialCustomer }: CartOrderSummaryModalProps) {
+export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess, cartItems, storeMeta, customer: initialCustomer, storeId: passedStoreId }: CartOrderSummaryModalProps) {
   const [currentPage, setCurrentPage] = useState<1 | 2>(1);
   const [deliveryMethod, setDeliveryMethod] = useState('home');
   const [customer, setCustomer] = useState<Customer | null>(initialCustomer);
@@ -42,7 +43,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
   const hasPushedState = useRef(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const storeId = cartItems[0]?.storeId;
+  const storeId = passedStoreId || cartItems[0]?.storeId;
   const { addOrder } = useOrders(customer?.id || null, storeId || "");
   const { dispatch } = useCart();
 
@@ -93,8 +94,8 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
   useEffect(() => {
     if (!isOpen) return;
 
-    // Push state to handle back button only once
-    if (!hasPushedState.current) {
+    // Push state to handle back button only once and only if the modal is actually open
+    if (isOpen && !hasPushedState.current) {
       window.history.pushState({ modal: 'cart-order-summary' }, '');
       hasPushedState.current = true;
     }
@@ -311,11 +312,37 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                                       </span>
                                     )}
                                     {item.selectedSize && (
-                                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
-                                        {item.selectedSize}
+                                      <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-100 dark:border-green-800">
+                                        Size: {item.selectedSize}
                                       </span>
                                     )}
                                   </div>
+
+                                  {/* Interactive Size Selector for Cart Items */}
+                                  {((item as any).sizes || (item as any).sizeOption) && (
+                                    <div className="mt-2.5 flex flex-wrap gap-1.5 pt-2.5 border-t border-gray-100 dark:border-gray-800/50">
+                                      {((item as any).sizes || (item as any).sizeOption).map((size: string) => (
+                                        <button
+                                          key={size}
+                                          onClick={() => dispatch({
+                                            type: 'UPDATE_SIZE',
+                                            payload: {
+                                              id: item.id,
+                                              oldSize: item.selectedSize,
+                                              newSize: size,
+                                              selectedColor: item.selectedColor
+                                            }
+                                          })}
+                                          className={`flex items-center justify-center min-w-[32px] px-2 py-1 rounded-md border text-[10px] font-bold transition-all duration-200 ${item.selectedSize === size
+                                            ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 ring-1 ring-green-400'
+                                            : 'border-gray-200 dark:border-gray-700 text-gray-500 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-600'
+                                            }`}
+                                        >
+                                          {size}
+                                        </button>
+                                      ))}
+                                    </div>
+                                  )}
                                   <div className="mt-1.5 flex items-center justify-between">
                                     <p className="text-xs text-gray-500 dark:text-gray-400">
                                       {formatPrice(item.price)} x {item.quantity}
@@ -439,9 +466,9 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                           ) : (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false) ? (
                             'Store Closed'
                           ) : isPaymentFlowEnabled ? (
-                            'Proceed to Payment'
+                            'Order via Whatsapp'
                           ) : (
-                            'Place Order'
+                            'Order via Whatsapp'
                           )}
                         </button>
                       ) : currentPage === 2 && isPaymentFlowEnabled ? (

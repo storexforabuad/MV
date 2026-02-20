@@ -42,8 +42,8 @@ export default function HeroCarousel({ storeMeta }: HeroCarouselProps) {
     const [direction, setDirection] = useState(0);
 
     // Only show the second slide if it's a restaurant or fashion store
-    const showWelcomeSlide = storeMeta?.storeType === 'restaurant' || storeMeta?.storeType === 'fashion';
-    const slideCount = showWelcomeSlide ? 2 : 1;
+    const showWelcomeSlide = false;
+    const slideCount = 1;
 
     const paginate = (newDirection: number) => {
         if (slideCount <= 1) return;

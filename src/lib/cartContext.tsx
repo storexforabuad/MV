@@ -21,6 +21,7 @@ type CartAction =
   | { type: 'ADD_ITEM'; payload: Omit<Product, 'storeId'> & { quantity: number; storeId?: string | null; selectedSize?: string; selectedColor?: string } }
   | { type: 'REMOVE_ITEM'; payload: { id: string; selectedSize?: string; selectedColor?: string } }
   | { type: 'UPDATE_QUANTITY'; payload: { id: string; quantity: number; selectedSize?: string; selectedColor?: string } }
+  | { type: 'UPDATE_SIZE'; payload: { id: string; oldSize?: string; newSize: string; selectedColor?: string } }
   | { type: 'CLEAR_CART' };
 
 const CartContext = createContext<{
@@ -37,70 +38,105 @@ const initialState: CartState = {
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case 'ADD_ITEM': {
-        const { id, selectedSize, selectedColor } = action.payload;
-        const existingItem = state.items.find(
-            item => item.id === id && item.selectedSize === selectedSize && item.selectedColor === selectedColor
+      const { id, selectedSize, selectedColor } = action.payload;
+      const existingItem = state.items.find(
+        item => item.id === id && item.selectedSize === selectedSize && item.selectedColor === selectedColor
+      );
+
+      if (existingItem) {
+        const items = state.items.map(item =>
+          (item.id === id && item.selectedSize === selectedSize && item.selectedColor === selectedColor)
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
         );
-
-        if (existingItem) {
-            const items = state.items.map(item =>
-                (item.id === id && item.selectedSize === selectedSize && item.selectedColor === selectedColor)
-                    ? { ...item, quantity: item.quantity + 1 }
-                    : item
-            );
-            return {
-                ...state,
-                items,
-                totalItems: state.totalItems + 1,
-                totalAmount: state.totalAmount + action.payload.price,
-            };
-        }
-
-        const { storeId, ...restOfPayload } = action.payload;
-        const newItem: CartItem = {
-            ...restOfPayload,
-            quantity: 1,
-            storeId: storeId ?? undefined,
-        };
-
         return {
-            ...state,
-            items: [...state.items, newItem],
-            totalItems: state.totalItems + 1,
-            totalAmount: state.totalAmount + action.payload.price,
+          ...state,
+          items,
+          totalItems: state.totalItems + 1,
+          totalAmount: state.totalAmount + action.payload.price,
         };
+      }
+
+      const { storeId, ...restOfPayload } = action.payload;
+      const newItem: CartItem = {
+        ...restOfPayload,
+        quantity: 1,
+        storeId: storeId ?? undefined,
+      };
+
+      return {
+        ...state,
+        items: [...state.items, newItem],
+        totalItems: state.totalItems + 1,
+        totalAmount: state.totalAmount + action.payload.price,
+      };
     }
 
     case 'REMOVE_ITEM': {
-        const { id, selectedSize, selectedColor } = action.payload;
-        const itemToRemove = state.items.find(item => item.id === id && item.selectedSize === selectedSize && item.selectedColor === selectedColor);
-        if (!itemToRemove) return state;
+      const { id, selectedSize, selectedColor } = action.payload;
+      const itemToRemove = state.items.find(item => item.id === id && item.selectedSize === selectedSize && item.selectedColor === selectedColor);
+      if (!itemToRemove) return state;
 
-        return {
-            ...state,
-            items: state.items.filter(item => !(item.id === id && item.selectedSize === selectedSize && item.selectedColor === selectedColor)),
-            totalItems: state.totalItems - itemToRemove.quantity,
-            totalAmount: state.totalAmount - (itemToRemove.price * itemToRemove.quantity),
-        };
+      return {
+        ...state,
+        items: state.items.filter(item => !(item.id === id && item.selectedSize === selectedSize && item.selectedColor === selectedColor)),
+        totalItems: state.totalItems - itemToRemove.quantity,
+        totalAmount: state.totalAmount - (itemToRemove.price * itemToRemove.quantity),
+      };
     }
 
     case 'UPDATE_QUANTITY': {
-        const { id, quantity, selectedSize, selectedColor } = action.payload;
-        if (quantity < 1) return state;
+      const { id, quantity, selectedSize, selectedColor } = action.payload;
+      if (quantity < 1) return state;
 
-        const itemToUpdate = state.items.find(item => item.id === id && item.selectedSize === selectedSize && item.selectedColor === selectedColor);
-        if (!itemToUpdate) return state;
+      const itemToUpdate = state.items.find(item => item.id === id && item.selectedSize === selectedSize && item.selectedColor === selectedColor);
+      if (!itemToUpdate) return state;
 
-        const quantityDiff = quantity - itemToUpdate.quantity;
+      const quantityDiff = quantity - itemToUpdate.quantity;
 
+      return {
+        ...state,
+        items: state.items.map(item =>
+          (item.id === id && item.selectedSize === selectedSize && item.selectedColor === selectedColor) ? { ...item, quantity } : item
+        ),
+        totalItems: state.totalItems + quantityDiff,
+        totalAmount: state.totalAmount + (itemToUpdate.price * quantityDiff),
+      };
+    }
+
+    case 'UPDATE_SIZE': {
+      const { id, oldSize, newSize, selectedColor } = action.payload;
+      const itemToUpdate = state.items.find(item => item.id === id && item.selectedSize === oldSize && item.selectedColor === selectedColor);
+      if (!itemToUpdate) return state;
+
+      // Check if an item with the NEW size already exists
+      const existingItemWithNewSize = state.items.find(
+        item => item.id === id && item.selectedSize === newSize && item.selectedColor === selectedColor
+      );
+
+      if (existingItemWithNewSize && newSize !== oldSize) {
+        // Merge them
         return {
-            ...state,
-            items: state.items.map(item =>
-                (item.id === id && item.selectedSize === selectedSize && item.selectedColor === selectedColor) ? { ...item, quantity } : item
-            ),
-            totalItems: state.totalItems + quantityDiff,
-            totalAmount: state.totalAmount + (itemToUpdate.price * quantityDiff),
+          ...state,
+          items: state.items
+            .filter(item => !(item.id === id && item.selectedSize === oldSize && item.selectedColor === selectedColor))
+            .map(item =>
+              (item.id === id && item.selectedSize === newSize && item.selectedColor === selectedColor)
+                ? { ...item, quantity: item.quantity + itemToUpdate.quantity }
+                : item
+            )
         };
+      }
+
+      // Just update the size
+      return {
+        ...state,
+        items: state.items.map(item =>
+          (item.id === id && item.selectedSize === oldSize && item.selectedColor === selectedColor)
+            ? { ...item, selectedSize: newSize }
+            : item
+        )
+      };
     }
 
     case 'CLEAR_CART':

@@ -163,6 +163,14 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
   if (!product) return null;
 
+  const hasSizes = (p: any) => {
+    return (p.sizes && p.sizes.length > 0) || (p.sizeOption && p.sizeOption.length > 0);
+  };
+
+  const getSizes = (p: any): string[] => {
+    return p.sizes || p.sizeOption || [];
+  };
+
   const total = product.price * quantity;
 
   const handleEvidenceUploaded = (evidenceUrl: string, fileName: string) => {
@@ -375,64 +383,64 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                               </div>
                             </div>
                           </div>
-                          {openedFrom === 'productCard' && (
-                            <>
-                              {/* Color Selection - For Fashion Products */}
-                              {isFashionProduct(product) && product.colors && product.colors.length > 0 && (
-                                <div className="mt-8">
-                                  <label className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3 block">
-                                    🎨 Select Color
-                                  </label>
-                                  <div className="flex flex-wrap gap-3">
-                                    {product.colors.map((color) => (
-                                      <button
-                                        key={color.name}
-                                        onClick={() => setInteractiveSelectedColor(color.name)}
-                                        className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border-2 transition-all duration-200 ${interactiveSelectedColor === color.name
-                                            ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 ring-2 ring-blue-400'
-                                            : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
-                                          }`}
-                                      >
-                                        <div
-                                          className="w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600 shadow-sm"
-                                          style={{ backgroundColor: color.hex }}
-                                        />
-                                        <span className="text-sm font-medium text-gray-900 dark:text-white">{color.name}</span>
-                                        {interactiveSelectedColor === color.name && (
-                                          <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                          </svg>
-                                        )}
-                                      </button>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
 
-                              {/* Size Selection - For Fashion Products with Sizes */}
-                              {isFashionProduct(product) && (product as any).sizeOption && (product as any).sizeOption.length > 0 && (
-                                <div className="mt-6">
-                                  <label className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3 block">
-                                    📏 Select Size
-                                  </label>
-                                  <div className="grid grid-cols-6 sm:grid-cols-8 gap-2">
-                                    {(product as any).sizeOption.map((size: string) => (
-                                      <button
-                                        key={size}
-                                        onClick={() => setInteractiveSelectedSize(size)}
-                                        className={`flex items-center justify-center py-2 px-1 sm:px-2 rounded-lg border-2 font-medium text-sm transition-all duration-200 ${interactiveSelectedSize === size
-                                            ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 ring-2 ring-green-400'
-                                            : 'border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
-                                          }`}
-                                      >
-                                        {size}
-                                      </button>
-                                    ))}
-                                  </div>
+                          {/* Variant Selection (Color/Size) */}
+                          <div className="space-y-6">
+                            {/* Color Selection - For Products with Colors */}
+                            {(product as any).colors && (product as any).colors.length > 0 && (
+                              <div className="mt-8">
+                                <label className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3 block">
+                                  🎨 Select Color
+                                </label>
+                                <div className="flex flex-wrap gap-3">
+                                  {(product as any).colors.map((color: any) => (
+                                    <button
+                                      key={color.name}
+                                      onClick={() => setInteractiveSelectedColor(color.name)}
+                                      className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border-2 transition-all duration-200 ${interactiveSelectedColor === color.name
+                                        ? 'border-green-500 bg-green-50 dark:bg-green-900/20 ring-2 ring-green-400'
+                                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                                        }`}
+                                    >
+                                      <div
+                                        className="w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600 shadow-sm"
+                                        style={{ backgroundColor: color.hex }}
+                                      />
+                                      <span className="text-sm font-medium text-gray-900 dark:text-white">{color.name}</span>
+                                      {interactiveSelectedColor === color.name && (
+                                        <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                        </svg>
+                                      )}
+                                    </button>
+                                  ))}
                                 </div>
-                              )}
-                            </>
-                          )}
+                              </div>
+                            )}
+
+                            {/* Size Selection - For Products with Sizes */}
+                            {hasSizes(product) && (
+                              <div className="mt-6">
+                                <label className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3 block">
+                                  📏 Select Size
+                                </label>
+                                <div className="flex flex-wrap gap-2">
+                                  {getSizes(product).map((size: string) => (
+                                    <button
+                                      key={size}
+                                      onClick={() => setInteractiveSelectedSize(size)}
+                                      className={`flex items-center justify-center py-2 px-4 rounded-lg border-2 font-medium text-sm transition-all duration-200 ${interactiveSelectedSize === size
+                                        ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 ring-2 ring-green-400'
+                                        : 'border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                                        }`}
+                                    >
+                                      {size}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
 
                           {/* Food Options */}
                           {isFoodBeverageProduct(product) && (
@@ -579,9 +587,9 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           ) : (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false) ? (
                             'Store Closed'
                           ) : isPaymentFlowEnabled ? (
-                            'Proceed to Payment'
+                            'Order via Whatsapp'
                           ) : (
-                            'Place Order'
+                            'Order via Whatsapp'
                           )}
                         </button>
                       ) : currentPage === 2 && isPaymentFlowEnabled ? (
