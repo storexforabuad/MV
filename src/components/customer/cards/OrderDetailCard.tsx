@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Image from 'next/image';
+import { Timestamp } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
 import { Repeat, MessageSquare, Clock, CheckCircle, Truck } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -43,26 +44,29 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted }: O
   const products = order.products || [];
 
   const handleReorder = async () => {
-    if (!customer) {
-      toast.error('Please log in to reorder.');
-      return;
-    }
-
     if (!storeMeta) {
       toast.error("Store information is missing.");
       return;
     }
 
+    const customerInfo = customer || {
+      id: 'guest',
+      name: 'Guest Customer',
+      phoneNumber: '',
+      email: '',
+      referralCode: '',
+      deliveryAddress: { country: '', state: '', street: '' },
+      createdAt: Timestamp.now(),
+      totalReferralCommission: 0,
+      successfulReferralCount: 0
+    } as Customer;
+
     setIsReordering(true);
     try {
       // 1. Create Pending Order
-      // We cast the result because the prop type definition might lag behind the actual implementation
-      const newOrder = await addOrder(products, storeMeta, customer, null, false) as any;
+      const newOrder = await addOrder(products, storeMeta, customerInfo, null, false) as any;
 
       if (!newOrder || !newOrder.id) {
-        // Fallback to WhatsApp if addOrder doesn't return an ID (legacy behavior check)
-        // But we just updated useOrders to return it.
-        // If it fails, we catch error.
         throw new Error("Could not create order");
       }
 
@@ -73,7 +77,7 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted }: O
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: 'customer@example.com',
+          email: customerInfo.email || 'customer@example.com',
           amount: totalAmount,
           storeId: storeMeta.id,
           metadata: {
@@ -210,12 +214,8 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted }: O
             disabled={isReordering}
             className="flex-1 flex items-center justify-center gap-2 p-3 text-sm font-bold text-text-secondary hover:bg-zinc-700 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isReordering ? (
-              <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin"></div>
-            ) : (
-              <Repeat className="w-4 h-4" />
-            )}
-            <span>{isReordering ? 'Processing...' : 'Reorder Now'}</span>
+            <Repeat className="w-4 h-4" />
+            <span>Reorder Now</span>
           </button>
         </div>
       </div>

@@ -420,24 +420,10 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
   const ordersIndex = cardData.findIndex(card => card.label === 'Orders');
 
-  // Filter to show only specific cards (include Content and Wholesale)
-  const allowedCards = ['Views', 'Manage Categories', 'Manage Products', 'Account', 'Subscription', 'Content', 'Wholesale', 'Revenue'];
+  // Filter to show only specific cards (include Content)
+  const allowedCards = ['Views', 'Manage Categories', 'Manage Products', 'Account', 'Subscription', 'Content'];
   const filteredCardData = cardData.filter(card => allowedCards.includes(card.label));
   const cardsToRender = [...filteredCardData];
-
-  const customersCard: typeof cardData[0] = {
-    label: 'Customers',
-    icon: Users,
-    // use inline gradient string (will be applied as inline style by AdminCustomersCard)
-    gradient: 'linear-gradient(135deg,#06B6D4 0%,#3B82F6 100%)',
-    text: 'text-white',
-    component: AdminCustomersCard,
-    glowClass: 'dark:shadow-sky-600/30 shadow-sky-600/50'
-  };
-
-  if (ordersIndex !== -1) {
-    cardsToRender.splice(ordersIndex + 1, 0, customersCard);
-  }
 
   useEffect(() => {
     const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen || isAdvertisingModalOpen || isEventsModalOpen || isSubscriptionModalOpen || isAccountModalOpen || isWarehouseModalOpen || isWholesaleModalOpen;
