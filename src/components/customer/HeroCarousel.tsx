@@ -154,7 +154,7 @@ export default function HeroCarousel({ storeMeta }: HeroCarouselProps) {
                     {showWelcomeSlide && pageIndex === 0 ? (
                         <WelcomeCard />
                     ) : (
-                        <RamadanCountdown className="w-full h-full" />
+                        <RamadanCountdown className="w-full h-full" storeName={storeMeta?.name} />
                     )}
                 </motion.div>
             </AnimatePresence>

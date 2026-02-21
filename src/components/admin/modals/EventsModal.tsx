@@ -40,7 +40,7 @@ export const EventsModal = ({ isOpen, onClose }: EventsModalProps) => {
                             {/* Ramadan Banner */}
                             <div className="relative w-full aspect-[16/9] max-w-2xl mx-auto mb-8 rounded-3xl overflow-hidden shadow-2xl border border-indigo-500/20 group">
                                 <Image
-                                    src="/images/events/ramadan_2026.png"
+                                    src="/images/events/ramadan_2026_new.png"
                                     alt="Ramadan 2026"
                                     fill
                                     className="object-cover transition-transform duration-700 group-hover:scale-105"

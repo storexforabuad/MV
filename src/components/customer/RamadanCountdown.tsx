@@ -165,7 +165,7 @@ function useRingSize() {
     return size;
 }
 
-export default function RamadanCountdown({ className }: { className?: string }) {
+export default function RamadanCountdown({ className, storeName }: { className?: string; storeName?: string }) {
     const [now, setNow] = useState<Date | null>(null);
     const ringSize = useRingSize();
     const cardRef = useRef<HTMLDivElement>(null);
@@ -249,8 +249,25 @@ export default function RamadanCountdown({ className }: { className?: string }) 
             <div className={className}>
                 <div className="relative overflow-hidden rounded-[2.5rem] bg-indigo-950 border border-amber-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] h-full flex flex-col justify-center">
                     <div className="absolute inset-0">
-                        <Image src="/images/events/ramadan_2026.png" alt="Ramadan Background" fill className="object-cover opacity-40 scale-110" />
+                        <Image src="/images/events/ramadan_2026_new.png" alt="Ramadan Background" fill className="object-cover opacity-40 scale-110" />
                         <div className="absolute inset-0 bg-gradient-to-b from-indigo-950/90 via-indigo-950/40 to-indigo-950/90" />
+                    </div>
+                    {/* Store Name Overlay */}
+                    {storeName && (
+                        <div className="absolute top-3 left-3 z-20 max-w-[40%] sm:max-w-[45%]">
+                            <div className="bg-black/30 backdrop-blur-md rounded-full border border-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 shadow-lg">
+                                <p className="text-white font-bold text-[9px] sm:text-[11px] truncate">
+                                    {storeName}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                    {/* BizConnect Badge */}
+                    <div className="absolute bottom-2 right-3 z-20">
+                        <div className="bg-black/30 backdrop-blur-md rounded-full border border-white/10 px-2 py-0.5 sm:px-2.5 sm:py-1 shadow-lg flex items-center gap-1">
+                            <span className="text-[7px] sm:text-[9px] text-white/70 font-medium tracking-tight">Powered by</span>
+                            <span className="text-[8px] sm:text-[10px] font-bold text-amber-400">BizConnect</span>
+                        </div>
                     </div>
                     <div className="absolute top-4 left-6 opacity-30"><Moon className="w-12 h-12 text-amber-400 rotate-12" /></div>
                     <div className="absolute bottom-4 right-6 opacity-20"><Sparkles className="w-16 h-16 text-amber-400" /></div>
@@ -304,8 +321,25 @@ export default function RamadanCountdown({ className }: { className?: string }) 
                 >
                     {/* Background */}
                     <div className="absolute inset-0">
-                        <Image src="/images/events/ramadan_2026.png" alt="Ramadan Background" fill className="object-cover opacity-30 scale-110" />
+                        <Image src="/images/events/ramadan_2026_new.png" alt="Ramadan Background" fill className="object-cover opacity-30 scale-110" />
                         <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/95 via-indigo-950/70 to-purple-950/90" />
+                    </div>
+                    {/* Store Name Overlay */}
+                    {storeName && (
+                        <div className="absolute top-3 left-3 z-20 max-w-[40%] sm:max-w-[45%]">
+                            <div className="bg-black/30 backdrop-blur-md rounded-full border border-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 shadow-lg">
+                                <p className="text-white font-bold text-[9px] sm:text-[11px] truncate">
+                                    {storeName}
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                    {/* BizConnect Badge */}
+                    <div className="absolute bottom-2 right-3 z-20">
+                        <div className="bg-black/30 backdrop-blur-md rounded-full border border-white/10 px-2 py-0.5 sm:px-2.5 sm:py-1 shadow-lg flex items-center gap-1">
+                            <span className="text-[7px] sm:text-[9px] text-white/70 font-medium tracking-tight">Powered by</span>
+                            <span className="text-[8px] sm:text-[10px] font-bold text-amber-400">BizConnect</span>
+                        </div>
                     </div>
 
                     {/* Floating decorative stars */}
@@ -477,8 +511,25 @@ export default function RamadanCountdown({ className }: { className?: string }) 
         <div className={className}>
             <div className="relative overflow-hidden rounded-[2.5rem] bg-indigo-950 border border-amber-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] h-full flex flex-col justify-center">
                 <div className="absolute inset-0">
-                    <Image src="/images/events/ramadan_2026.png" alt="Eid Background" fill className="object-cover opacity-25 scale-110" />
+                    <Image src="/images/events/ramadan_2026_new.png" alt="Eid Background" fill className="object-cover opacity-25 scale-110" />
                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/95 via-purple-950/80 to-indigo-950/95" />
+                </div>
+                {/* Store Name Overlay */}
+                {storeName && (
+                    <div className="absolute top-3 left-3 z-20 max-w-[40%] sm:max-w-[45%]">
+                        <div className="bg-black/30 backdrop-blur-md rounded-full border border-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 shadow-lg">
+                            <p className="text-white font-bold text-[9px] sm:text-[11px] truncate">
+                                {storeName}
+                            </p>
+                        </div>
+                    </div>
+                )}
+                {/* BizConnect Badge */}
+                <div className="absolute bottom-2 right-3 z-20">
+                    <div className="bg-black/30 backdrop-blur-md rounded-full border border-white/10 px-2 py-0.5 sm:px-2.5 sm:py-1 shadow-lg flex items-center gap-1">
+                        <span className="text-[7px] sm:text-[9px] text-white/70 font-medium tracking-tight">Powered by</span>
+                        <span className="text-[8px] sm:text-[10px] font-bold text-amber-400">BizConnect</span>
+                    </div>
                 </div>
                 <div className="absolute top-4 left-6 opacity-30"><Moon className="w-12 h-12 text-amber-400 rotate-12" /></div>
                 <div className="absolute bottom-4 right-6 opacity-20"><Sparkles className="w-16 h-16 text-amber-400" /></div>
