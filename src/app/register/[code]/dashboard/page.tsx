@@ -3,8 +3,8 @@ import ReferralDashboardClient from '@/components/referral/ReferralDashboardClie
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Referral Dashboard | ATLAS™',
-    description: 'Track your referrals and earnings on ATLAS™.',
+    title: 'Referral Dashboard | BizConnect™',
+    description: 'Track your referrals and earnings on BizConnect™.',
     manifest: '/referral-manifest.json',
 };
 

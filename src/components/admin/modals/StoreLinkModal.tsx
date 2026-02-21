@@ -62,7 +62,7 @@ const StoreLinkModal: React.FC<StoreLinkModalProps> = ({ isOpen, handleClose, st
                 }
             } catch (err) {
                 // fallback to tinyurl pattern
-                setFullUrl(`https://tinyurl.com/atlasintl/${storeId}`);
+                setFullUrl(`https://tinyurl.com/bizconnet/${storeId}`);
             }
         };
         build();

@@ -19,8 +19,8 @@ export interface BusinessConfig {
 }
 
 export const businessConfig: BusinessConfig = {
-  name: "Atlas Network",
-  shortName: "Atlas",
+  name: "BizConnect Network",
+  shortName: "BizConnect",
   description: "Authentic Products at affordable prices",
   contact: {
     whatsapp: "+2348119772223",

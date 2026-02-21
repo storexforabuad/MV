@@ -6,7 +6,7 @@ interface PageProps {
 }
 
 export const metadata = {
-    title: 'Ambassador Profile | ATLAS',
+    title: 'Ambassador Profile | BizConnect',
     description: 'Manage your ambassador profile and earnings details'
 };
 

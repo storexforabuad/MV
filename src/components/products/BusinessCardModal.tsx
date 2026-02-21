@@ -78,7 +78,7 @@ export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean;
                         {storeMeta.name}
                       </h3>
 
-                      {/* Atlas Verified Badge */}
+                      {/* BizConnect Verified Badge */}
                       <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 mb-3 animate-pulse-slow">
                         <BadgeCheck className="w-4 h-4 text-blue-600 dark:text-blue-400 fill-blue-100 dark:fill-blue-900/50" />
                         <span className="text-[10px] font-extrabold text-blue-700 dark:text-blue-300 tracking-widest uppercase">

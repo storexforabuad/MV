@@ -831,7 +831,7 @@ export default function RegisterPage({ params }: { params: { slug?: string[] } }
                         </p>
                         <button
                             onClick={() => {
-                                const message = encodeURIComponent(`Hello ATLAS™ Team! I just registered my store "${formData.businessName}" ${isTrial ? 'on the Free Trial' : 'and made payment'}. When will my store be live?`);
+                                const message = encodeURIComponent(`Hello BizConnect™Team! I just registered my store "${formData.businessName}" ${isTrial ? 'on the Free Trial' : 'and made payment'}. When will my store be live?`);
                                 window.open(`https://wa.me/2347032905036?text=${message}`, '_blank');
                             }}
                             className="w-full py-4 bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 rounded-xl font-bold hover:bg-emerald-600/20 transition-all flex items-center justify-center gap-2 group"
@@ -868,13 +868,13 @@ export default function RegisterPage({ params }: { params: { slug?: string[] } }
                             <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/10 relative overflow-hidden">
                                 <Image
                                     src="/bizz-app-logo.png"
-                                    alt="ATLAS™ Logo"
+                                    alt="BizConnect™Logo"
                                     fill
                                     className="object-cover"
                                 />
                             </div>
                         )}
-                        <span className="font-bold text-xl tracking-tight">ATLAS™{step === 1 ? ' Network' : ''}</span>
+                        <span className="font-bold text-xl tracking-tight">BizConnect™{step === 1 ? ' Network' : ''}</span>
                     </div>
                     {step > 1 && step < 5 && (
                         <button
@@ -904,7 +904,7 @@ export default function RegisterPage({ params }: { params: { slug?: string[] } }
                 {/* Footer */}
                 {step === 1 && (
                     <footer className="flex-none py-4 text-center text-[10px] text-slate-600 relative z-10 bg-black/50 backdrop-blur-sm">
-                        <p>© {new Date().getFullYear()} Atlas Business Solutions. All rights reserved.</p>
+                        <p>© {new Date().getFullYear()} BizConnect Business Solutions. All rights reserved.</p>
                     </footer>
                 )}
             </div>

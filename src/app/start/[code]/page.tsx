@@ -1,7 +1,7 @@
 import StartLandingClient from '@/components/start/StartLandingClient';
 
 export const metadata = {
-    title: 'You\'ve Been Invited | Atlas',
+    title: 'You\'ve Been Invited | BizConnect',
     description: 'Claim your free store and start selling today.',
 };
 

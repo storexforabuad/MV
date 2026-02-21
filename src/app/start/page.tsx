@@ -3,7 +3,7 @@ import CodeEntryForm from '@/components/referral/CodeEntryForm';
 import { Suspense } from 'react';
 
 export const metadata = {
-    title: 'Start Your Business | Atlas',
+    title: 'Start Your Business | BizConnect',
     description: 'The premium platform for modern commerce. Launch your online store in minutes.',
 };
 
@@ -16,7 +16,7 @@ export default function StartPage() {
                     <div className="hidden lg:flex lg:w-1/2 flex-col items-center justify-center p-8">
                         <StartLandingClient />
                     </div>
-                    
+
                     {/* Code entry section - full width on mobile, half on desktop */}
                     <div className="w-full lg:w-1/2 flex items-center justify-center p-4 lg:p-8">
                         <CodeEntryForm />

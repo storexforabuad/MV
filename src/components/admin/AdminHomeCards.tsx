@@ -84,14 +84,14 @@ const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferral
     <p className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500">
       ₦{totalReferralBonus.toFixed(2)}
     </p>
-    <p className="text-sm text-text-secondary mt-2">This is 100% of the ATLAS™ App Commission paid out as bonuses to referrers.</p>
+    <p className="text-sm text-text-secondary mt-2">This is 100% of the BizConnect™App Commission paid out as bonuses to referrers.</p>
     <button onClick={handleClose} className="mt-6 bg-blue-500 text-white font-bold py-2 px-4 rounded-lg">Close</button>
   </div>
 );
 
 const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.ElementType | null, glowClass: string, isAiCard?: boolean, colspan?: number, isWholesaleCard?: boolean, cardType?: 'metric' | 'action' }[] = [
   {
-    label: 'ATLAS™',
+    label: 'BizConnect™',
     icon: Globe,
     gradient: 'bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800',
     text: 'text-white',
@@ -464,7 +464,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     if (props.isRefreshing) return; // Prevent opening modals during refresh
 
     const { label, subtitle } = card;
-    if (label === 'ATLAS™') setIsBizconNetworkModalOpen(true);
+    if (label === 'BizConnect™') setIsBizconNetworkModalOpen(true);
     else if (label === 'Tips') setIsTipsModalOpen(true);
     else if (label === 'Views') setIsViewsModalOpen(true);
     else if (label === 'Content') setIsSocialPostsModalOpen(true);
@@ -899,7 +899,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             return <MetricCard key={card.label} icon={Icon} label={card.label} count={metricValue} gradient={card.gradient} glowClass={card.glowClass} onClick={() => handleOpenModal(idx, card)} inlineStyle={inlineStyle} />;
           }
 
-          // Render action cards (ATLAS™, Tips, Content, Account, Subscription, Warehouse, Events)
+          // Render action cards (BizConnect™, Tips, Content, Account, Subscription, Warehouse, Events)
           if (card.cardType === 'action') {
             return (
               <motion.div key={card.label} variants={itemVariants} className={`relative h-full ${spotlightClasses}`}>

@@ -75,7 +75,7 @@ export default function ReferralDashboardClient({ initialData }: ReferralDashboa
         }).format(amount);
     };
 
-    const referralLink = `tinyurl.com/atlasintl/register/${initialData.referralCode}`;
+    const referralLink = `tinyurl.com/bizconnet/register/${initialData.referralCode}`;
 
     const handleCopyLink = () => {
         navigator.clipboard.writeText(referralLink);
@@ -688,13 +688,13 @@ function StoreCard({ store, formatCurrency }: { store: ReferralStoreStats, forma
                         {/* Store Links */}
                         <div className="space-y-2">
                             <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Quick Links</div>
-                            <StoreLink 
-                                label="Storefront" 
-                                url={`tinyurl.com/atlasintl/${store.id}`}
+                            <StoreLink
+                                label="Storefront"
+                                url={`tinyurl.com/bizconnet/${store.id}`}
                             />
-                            <StoreLink 
-                                label="Admin Dashboard" 
-                                url={`tinyurl.com/atlasintl/admin/${store.id}`}
+                            <StoreLink
+                                label="Admin Dashboard"
+                                url={`tinyurl.com/bizconnet/admin/${store.id}`}
                             />
                         </div>
 

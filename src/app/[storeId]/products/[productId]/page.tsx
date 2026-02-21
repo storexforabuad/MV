@@ -70,7 +70,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
 
   const handleShare = (withReferral: boolean) => {
     if (!product || !storeId) return;
-    const productUrl = `https://tinyurl.com/atlasintl/${storeId}/products/${product.id}`;
+    const productUrl = `https://tinyurl.com/bizconnet/${storeId}/products/${product.id}`;
     const canonicalShareUrl = withReferral && customer ? `${productUrl}?ref=${customer.referralCode}` : productUrl;
     const shareText = `Check out "${product.name}"! I think you'll love it. Use my link to shop:`;
     const shareData = { title: product.name, text: shareText, url: canonicalShareUrl };

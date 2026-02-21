@@ -87,7 +87,7 @@ export default function PaymentSuccessPage() {
         let productDetails = '';
         if (order.products && order.products.length > 0) {
             productDetails = order.products.map((p: any) => {
-                const productUrl = `https://tinyurl.com/atlasintl/${storeId}/products/${p.id}`;
+                const productUrl = `https://tinyurl.com/bizconnet/${storeId}/products/${p.id}`;
                 return `• *${p.name.trim()}* (x${p.quantity || 1})\n🔗 ${productUrl}`;
             }).join('\n\n');
         }
@@ -196,7 +196,7 @@ export default function PaymentSuccessPage() {
             </div>
 
             <div className="absolute bottom-4 text-center text-xs text-gray-400">
-                Secured by <span className="font-bold text-gray-500">Atlas™</span>
+                Secured by <span className="font-bold text-gray-500">BizConnect™</span>
             </div>
         </div>
     );

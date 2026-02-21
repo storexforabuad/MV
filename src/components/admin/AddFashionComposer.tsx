@@ -259,7 +259,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                     let watermarkText = '';
                     if (instagramHandle) {
                         const cleanHandle = instagramHandle.startsWith('@') ? instagramHandle : `@${instagramHandle}`;
-                        watermarkText = `${cleanHandle} | ATLAS™ Verified`;
+                        watermarkText = `${cleanHandle} | BizConnect™Verified`;
                     } else {
                         const formattedName = storeName
                             .replace(/\./g, ' ')
@@ -267,7 +267,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                             .filter(Boolean)
                             .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
                             .join(' ');
-                        watermarkText = `${formattedName} | ATLAS™ Verified`;
+                        watermarkText = `${formattedName} | BizConnect™Verified`;
                     }
                     processedFile = await applyWatermark(processedFile, watermarkText);
                 } catch (err) {
@@ -428,7 +428,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                             let watermarkText = '';
                             if (instagramHandle) {
                                 const cleanHandle = instagramHandle.startsWith('@') ? instagramHandle : `@${instagramHandle}`;
-                                watermarkText = `${cleanHandle} | ATLAS™ Verified`;
+                                watermarkText = `${cleanHandle} | BizConnect™Verified`;
                             } else {
                                 const formattedName = storeName
                                     .replace(/\./g, ' ')
@@ -436,7 +436,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                     .filter(Boolean)
                                     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
                                     .join(' ');
-                                watermarkText = `${formattedName} | ATLAS™ Verified`;
+                                watermarkText = `${formattedName} | BizConnect™Verified`;
                             }
                             processedFile = await applyWatermark(processedFile, watermarkText);
                         } catch (err) {
@@ -740,20 +740,19 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                         </div>
 
                         {/* SIZES SECTION */}
-                        <div className={`space-y-4 pt-6 border-t border-slate-200 dark:border-slate-700 rounded-xl p-4 transition-all duration-300 ${
-                            highlightSizeSection 
-                                ? 'bg-orange-50 dark:bg-orange-900/20 border-l-4 border-l-orange-500 shadow-lg' 
-                                : ''
-                        }`}>
+                        <div className={`space-y-4 pt-6 border-t border-slate-200 dark:border-slate-700 rounded-xl p-4 transition-all duration-300 ${highlightSizeSection
+                            ? 'bg-orange-50 dark:bg-orange-900/20 border-l-4 border-l-orange-500 shadow-lg'
+                            : ''
+                            }`}>
                             {/* Sizes Optional Toggle */}
-                            <ModernToggle 
-                                label="Add Sizes to This Product?" 
-                                description="Enable if this item comes in different sizes" 
-                                checked={productData.hasSizes} 
+                            <ModernToggle
+                                label="Add Sizes to This Product?"
+                                description="Enable if this item comes in different sizes"
+                                checked={productData.hasSizes}
                                 onChange={checked => {
                                     handleProductChange('hasSizes', checked);
                                     if (!checked) handleProductChange('sizes', []); // Clear sizes if toggle is turned off
-                                }} 
+                                }}
                             />
 
                             {/* Conditional Size Selection UI */}
@@ -880,7 +879,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                         </div>
 
                         <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-700">
-                            <ModernToggle label="Watermark Images" description="Add store name & Atlas verified to images" checked={useWatermark} onChange={setUseWatermark} />
+                            <ModernToggle label="Watermark Images" description="Add store name & BizConnect verified to images" checked={useWatermark} onChange={setUseWatermark} />
                             <ModernToggle label="Limited Stock" description="Show 'Low Stock' badge to customers" checked={productData.limitedStock} onChange={checked => handleProductChange('limitedStock', checked)} />
                             <ModernToggle label="Sold Out" description="Mark as currently unavailable" checked={productData.soldOut} onChange={checked => handleProductChange('soldOut', checked)} />
                         </div>

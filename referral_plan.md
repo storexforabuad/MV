@@ -1,6 +1,6 @@
 # Referral Dashboard: Robust Implementation Plan
 
-This plan outlines the technical strategy for implementing a premium referral dashboard on ATLAS™, following the guidelines in `aerials.md`.
+This plan outlines the technical strategy for implementing a premium referral dashboard on BizConnect™, following the guidelines in `aerials.md`.
 
 ## ⚙️ Diagnosis & Analysis
 
