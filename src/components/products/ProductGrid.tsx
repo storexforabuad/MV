@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import { Info, Phone, MessageCircle, Star, Clock, MapPin, Instagram, Gift } from 'lucide-react';
 import { Product } from '../../types/product';
 import { Order } from '../../hooks/useOrders';
-import { motion, LayoutGroup, AnimatePresence, Transition, PanInfo } from 'framer-motion';
+import { motion, LayoutGroup, AnimatePresence, Transition } from 'framer-motion';
 import Image from 'next/image';
 import { getStoreMeta } from '../../lib/db';
 import { StoreMeta } from '../../types/store';
@@ -169,22 +169,6 @@ const ProductGrid = memo(function ProductGrid({
     setIsOrderModalOpen(true);
   };
 
-  // Handle swipe gesture detection
-  const handleDragEnd = (event: any, info: PanInfo) => {
-    const swipeThreshold = 30; // Reduced threshold for easier swipes
-    const swipeVelocity = 300; // Reduced velocity threshold
-
-    const { offset, velocity } = info;
-
-    // Swipe left (next category)
-    if (offset.x < -swipeThreshold || velocity.x < -swipeVelocity) {
-      onSwipeLeft?.();
-    }
-    // Swipe right (previous category)
-    else if (offset.x > swipeThreshold || velocity.x > swipeVelocity) {
-      onSwipeRight?.();
-    }
-  };
 
   const handleOrdersClick = () => {
     setOrdersModalOpen(true);
@@ -264,12 +248,6 @@ const ProductGrid = memo(function ProductGrid({
 
       <motion.div
         ref={containerRef}
-        drag="x"
-        dragConstraints={{ left: 0, right: 0 }}
-        dragElastic={0.7} // Increased elasticity for better feel
-        dragMomentum={false}
-        onDragEnd={handleDragEnd}
-        style={{ touchAction: 'pan-y' }} // Prevent vertical scroll interference
         animate={{
           x: swipeDirection === 'left' ? -20 : swipeDirection === 'right' ? 20 : 0,
           opacity: isSwipeTransitioning ? 0.7 : 1
