@@ -140,10 +140,10 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
   {
     label: 'Circles',
     icon: Users,
-    gradient: 'bg-gradient-to-br from-indigo-500 via-purple-600 to-fuchsia-700',
+    gradient: 'linear-gradient(135deg,#10B981 0%,#3B82F6 100%)',
     text: 'text-white',
     component: null,
-    glowClass: 'dark:shadow-purple-500/30 shadow-purple-500/50',
+    glowClass: 'dark:shadow-indigo-500/30 shadow-indigo-500/50',
     cardType: 'action',
   },
 
