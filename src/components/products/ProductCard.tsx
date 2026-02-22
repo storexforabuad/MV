@@ -271,6 +271,13 @@ export default function ProductCard({
         className="relative group h-full"
         onMouseLeave={() => setIsHovered(false)}
         onClick={(e) => {
+          if (isSoldOut) {
+            e.preventDefault();
+            e.stopPropagation();
+            toast.error('Product is sold out', { duration: 2000, position: 'bottom-center' });
+            if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
+            return;
+          }
           if (isSingleView) {
             e.preventDefault();
             e.stopPropagation();

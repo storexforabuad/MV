@@ -22,6 +22,7 @@ type CartAction =
   | { type: 'REMOVE_ITEM'; payload: { id: string; selectedSize?: string; selectedColor?: string } }
   | { type: 'UPDATE_QUANTITY'; payload: { id: string; quantity: number; selectedSize?: string; selectedColor?: string } }
   | { type: 'UPDATE_SIZE'; payload: { id: string; oldSize?: string; newSize: string; selectedColor?: string } }
+  | { type: 'UPDATE_COLOR'; payload: { id: string; oldColor?: string; newColor: string; selectedSize?: string } }
   | { type: 'CLEAR_CART' };
 
 const CartContext = createContext<{
@@ -134,6 +135,41 @@ function cartReducer(state: CartState, action: CartAction): CartState {
         items: state.items.map(item =>
           (item.id === id && item.selectedSize === oldSize && item.selectedColor === selectedColor)
             ? { ...item, selectedSize: newSize }
+            : item
+        )
+      };
+    }
+
+    case 'UPDATE_COLOR': {
+      const { id, oldColor, newColor, selectedSize } = action.payload;
+      const itemToUpdate = state.items.find(item => item.id === id && item.selectedColor === oldColor && item.selectedSize === selectedSize);
+      if (!itemToUpdate) return state;
+
+      // Check if an item with the NEW color already exists
+      const existingItemWithNewColor = state.items.find(
+        item => item.id === id && item.selectedColor === newColor && item.selectedSize === selectedSize
+      );
+
+      if (existingItemWithNewColor && newColor !== oldColor) {
+        // Merge them
+        return {
+          ...state,
+          items: state.items
+            .filter(item => !(item.id === id && item.selectedColor === oldColor && item.selectedSize === selectedSize))
+            .map(item =>
+              (item.id === id && item.selectedColor === newColor && item.selectedSize === selectedSize)
+                ? { ...item, quantity: item.quantity + itemToUpdate.quantity }
+                : item
+            )
+        };
+      }
+
+      // Just update the color
+      return {
+        ...state,
+        items: state.items.map(item =>
+          (item.id === id && item.selectedColor === oldColor && item.selectedSize === selectedSize)
+            ? { ...item, selectedColor: newColor }
             : item
         )
       };

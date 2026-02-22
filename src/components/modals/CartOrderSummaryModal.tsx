@@ -209,7 +209,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
           );
         }
 
-        toast.success('Order placed! Redirecting to WhatsApp...');
+        // toast.success('Order placed! Redirecting to WhatsApp...');
 
         const itemsSummary = cartItems.map(item => {
           const productUrl = `https://tinyurl.com/bizconnet/${storeId}/products/${item.id}`;
@@ -332,6 +332,14 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                               const isMissingSize = hasSizes && !item.selectedSize;
                               const itemId = item.id + (item.selectedColor || '') + (item.selectedSize || '');
 
+                              let displayImage = item.images?.[0] || '';
+                              if ((item as any).colors && item.selectedColor) {
+                                const colorObj = (item as any).colors.find((c: any) => c.name === item.selectedColor || c.hex === item.selectedColor);
+                                if (colorObj?.images?.length > 0) {
+                                  displayImage = colorObj.images[0];
+                                }
+                              }
+
                               return (
                                 <div
                                   key={itemId}
@@ -341,7 +349,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                                   <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800 shadow-inner">
                                     <div className={`absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 animate-shimmer bg-[length:200%_100%] transition-opacity duration-300 ${imageLoading[itemId] !== false ? 'opacity-100' : 'opacity-0'}`} />
                                     <Image
-                                      src={item.images[0]}
+                                      src={displayImage}
                                       alt={item.name}
                                       width={64}
                                       height={64}
@@ -370,6 +378,35 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                                         </span>
                                       )}
                                     </div>
+
+                                    {/* Interactive Color Selector for Cart Items */}
+                                    {((item as any).colors) && (item as any).colors.length > 0 && (
+                                      <div className="mt-2.5 flex flex-wrap gap-1.5 pt-2.5 border-t border-gray-100 dark:border-gray-800/50">
+                                        {((item as any).colors).map((color: any) => (
+                                          <button
+                                            key={color.name}
+                                            onClick={() => {
+                                              dispatch({
+                                                type: 'UPDATE_COLOR',
+                                                payload: {
+                                                  id: item.id,
+                                                  oldColor: item.selectedColor,
+                                                  newColor: color.name,
+                                                  selectedSize: item.selectedSize
+                                                }
+                                              });
+                                            }}
+                                            className={`flex items-center justify-center gap-1.5 px-2 py-1 rounded-md border text-[10px] font-bold transition-all duration-200 ${item.selectedColor === color.name
+                                              ? 'border-green-500 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 ring-1 ring-green-400'
+                                              : 'border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
+                                              }`}
+                                          >
+                                            <div className="w-3.5 h-3.5 rounded-full border border-gray-300 dark:border-gray-600 shadow-sm" style={{ backgroundColor: color.hex }} />
+                                            {color.name}
+                                          </button>
+                                        ))}
+                                      </div>
+                                    )}
 
                                     {/* Interactive Size Selector for Cart Items */}
                                     {((item as any).sizes || (item as any).sizeOption) && (

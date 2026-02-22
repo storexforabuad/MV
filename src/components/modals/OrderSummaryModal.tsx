@@ -259,7 +259,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
           );
         }
 
-        toast.success('Order placed! Redirecting to WhatsApp...');
+        // toast.success('Order placed! Redirecting to WhatsApp...');
 
         const productUrl = `https://tinyurl.com/bizconnet/${storeId}/products/${product.id}`;
         const message = `🛍️ *New Order Request*\n\n` +
