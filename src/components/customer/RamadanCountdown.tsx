@@ -254,8 +254,8 @@ export default function RamadanCountdown({ className, storeName }: { className?:
                     </div>
                     {/* Store Name Overlay */}
                     {storeName && (
-                        <div className="absolute top-3 left-3 z-20 max-w-[40%] sm:max-w-[45%]">
-                            <div className="bg-black/30 backdrop-blur-md rounded-full border border-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 shadow-lg">
+                        <div className="absolute top-4 sm:top-5 left-4 sm:left-5 z-20 max-w-[40%] sm:max-w-[45%]">
+                            <div className="bg-black/30 backdrop-blur-md rounded-[1rem] sm:rounded-2xl border border-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 shadow-lg">
                                 <p className="text-white font-bold text-[9px] sm:text-[11px] truncate">
                                     {storeName}
                                 </p>
@@ -263,10 +263,10 @@ export default function RamadanCountdown({ className, storeName }: { className?:
                         </div>
                     )}
                     {/* BizConnect Badge */}
-                    <div className="absolute bottom-2 right-3 z-20">
-                        <div className="bg-black/30 backdrop-blur-md rounded-full border border-white/10 px-2 py-0.5 sm:px-2.5 sm:py-1 shadow-lg flex items-center gap-1">
+                    <div className="absolute bottom-3 right-4 z-20">
+                        <div className="bg-black/30 backdrop-blur-md rounded-xl sm:rounded-[1rem] border border-white/10 px-2 py-0.5 sm:px-2.5 sm:py-1 shadow-lg flex items-center gap-1">
                             <span className="text-[7px] sm:text-[9px] text-white/70 font-medium tracking-tight">Powered by</span>
-                            <span className="text-[8px] sm:text-[10px] font-bold text-amber-400">BizConnect</span>
+                            <span className="text-[8px] sm:text-[10px] font-bold text-amber-400">BizConnect&trade;</span>
                         </div>
                     </div>
                     <div className="absolute top-4 left-6 opacity-30"><Moon className="w-12 h-12 text-amber-400 rotate-12" /></div>
@@ -326,8 +326,8 @@ export default function RamadanCountdown({ className, storeName }: { className?:
                     </div>
                     {/* Store Name Overlay */}
                     {storeName && (
-                        <div className="absolute top-3 left-3 z-20 max-w-[40%] sm:max-w-[45%]">
-                            <div className="bg-black/30 backdrop-blur-md rounded-full border border-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 shadow-lg">
+                        <div className="absolute top-4 sm:top-5 left-4 sm:left-5 z-20 max-w-[40%] sm:max-w-[45%]">
+                            <div className="bg-black/30 backdrop-blur-md rounded-[1rem] sm:rounded-2xl border border-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 shadow-lg">
                                 <p className="text-white font-bold text-[9px] sm:text-[11px] truncate">
                                     {storeName}
                                 </p>
@@ -335,10 +335,10 @@ export default function RamadanCountdown({ className, storeName }: { className?:
                         </div>
                     )}
                     {/* BizConnect Badge */}
-                    <div className="absolute bottom-2 right-3 z-20">
-                        <div className="bg-black/30 backdrop-blur-md rounded-full border border-white/10 px-2 py-0.5 sm:px-2.5 sm:py-1 shadow-lg flex items-center gap-1">
+                    <div className="absolute bottom-3 right-4 z-20">
+                        <div className="bg-black/30 backdrop-blur-md rounded-xl sm:rounded-[1rem] border border-white/10 px-2 py-0.5 sm:px-2.5 sm:py-1 shadow-lg flex items-center gap-1">
                             <span className="text-[7px] sm:text-[9px] text-white/70 font-medium tracking-tight">Powered by</span>
-                            <span className="text-[8px] sm:text-[10px] font-bold text-amber-400">BizConnect</span>
+                            <span className="text-[8px] sm:text-[10px] font-bold text-amber-400">BizConnect&trade;</span>
                         </div>
                     </div>
 
@@ -516,8 +516,8 @@ export default function RamadanCountdown({ className, storeName }: { className?:
                 </div>
                 {/* Store Name Overlay */}
                 {storeName && (
-                    <div className="absolute top-3 left-3 z-20 max-w-[40%] sm:max-w-[45%]">
-                        <div className="bg-black/30 backdrop-blur-md rounded-full border border-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 shadow-lg">
+                    <div className="absolute top-4 sm:top-5 left-4 sm:left-5 z-20 max-w-[40%] sm:max-w-[45%]">
+                        <div className="bg-black/30 backdrop-blur-md rounded-[1rem] sm:rounded-2xl border border-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 shadow-lg">
                             <p className="text-white font-bold text-[9px] sm:text-[11px] truncate">
                                 {storeName}
                             </p>
@@ -525,10 +525,10 @@ export default function RamadanCountdown({ className, storeName }: { className?:
                     </div>
                 )}
                 {/* BizConnect Badge */}
-                <div className="absolute bottom-2 right-3 z-20">
-                    <div className="bg-black/30 backdrop-blur-md rounded-full border border-white/10 px-2 py-0.5 sm:px-2.5 sm:py-1 shadow-lg flex items-center gap-1">
+                <div className="absolute bottom-3 right-4 z-20">
+                    <div className="bg-black/30 backdrop-blur-md rounded-xl sm:rounded-[1rem] border border-white/10 px-2 py-0.5 sm:px-2.5 sm:py-1 shadow-lg flex items-center gap-1">
                         <span className="text-[7px] sm:text-[9px] text-white/70 font-medium tracking-tight">Powered by</span>
-                        <span className="text-[8px] sm:text-[10px] font-bold text-amber-400">BizConnect</span>
+                        <span className="text-[8px] sm:text-[10px] font-bold text-amber-400">BizConnect&trade;</span>
                     </div>
                 </div>
                 <div className="absolute top-4 left-6 opacity-30"><Moon className="w-12 h-12 text-amber-400 rotate-12" /></div>
