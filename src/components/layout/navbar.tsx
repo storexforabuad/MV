@@ -9,15 +9,17 @@ import { useTheme } from '@/lib/themeContext';
 import { usePathname, useRouter } from 'next/navigation';
 import PinEntryModal from '../modals/PinEntryModal';
 import { getAdminSession } from '@/lib/adminSession';
+import NavigationStore from '@/lib/navigationStore';
 
 interface NavbarProps {
   storeId?: string;
   storeName?: string;
   scrollDirection?: 'up' | 'down';
   backButtonHref?: string;
+  activeCategoryId?: string;
 }
 
-export default function Navbar({ storeId, storeName, scrollDirection = 'up', backButtonHref }: NavbarProps) {
+export default function Navbar({ storeId, storeName, scrollDirection = 'up', backButtonHref, activeCategoryId }: NavbarProps) {
   const { state } = useCart();
   const { theme, toggleTheme } = useTheme();
   const [isBouncing, setIsBouncing] = useState(false);
@@ -99,6 +101,16 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
 
   const doTrigger = () => {
     if (!storeId) return;
+
+    // Save state before leaving for admin - ONLY from storefront root
+    const pathSegments = pathname?.split('/').filter(Boolean) || [];
+    const isStorefrontRoot = pathSegments.length === 1;
+
+    if (!isAdminRoute && isStorefrontRoot && activeCategoryId) {
+      console.log(`[Navbar] Saving Storefront State: category="${activeCategoryId}", scroll=${window.scrollY}`);
+      NavigationStore.saveState(activeCategoryId, window.scrollY);
+    }
+
     const session = getAdminSession(storeId);
     if (session) {
       router.push(`/admin/${storeId}`);

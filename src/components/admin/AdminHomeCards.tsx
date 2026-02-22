@@ -650,8 +650,18 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   };
 
   const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+    hidden: { opacity: 0, y: 30, scale: 0.95 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      transition: {
+        type: "spring",
+        stiffness: 100,
+        damping: 15,
+        mass: 1
+      }
+    }
   };
 
   const modalVariants: Variants = {
@@ -692,7 +702,13 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         className="mb-4"
       >
         <button
-          onClick={() => router.push('/' + storeId)}
+          onClick={() => {
+            if (window.history.length > 1) {
+              router.back();
+            } else {
+              router.push('/' + storeId);
+            }
+          }}
           className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-bold py-4 px-5 rounded-2xl shadow-sm hover:shadow-md transition-all flex items-center gap-4 group relative overflow-hidden"
         >
           <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -766,7 +782,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
       <motion.div
         className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4"
         variants={containerVariants}
-        initial={false} // Prevent re-animating on every prop change
+        initial={false}
         animate={uiVisible ? 'visible' : 'hidden'}
         onAnimationComplete={() => onAnimationComplete?.()}
       >

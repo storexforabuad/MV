@@ -77,24 +77,31 @@ export default function StorefrontPageClient({
   initialCategory?: string;
 }) {
   const scrollDirection = useScrollDirection();
-  const scrollRestoreState = useRef<NavigationState | null>(NavigationStore.getState());
-
+  const scrollRestoreState = useRef<NavigationState | null>(typeof window !== 'undefined' ? NavigationStore.getState() : null);
   const restoredCategory = scrollRestoreState.current?.category;
-  const initialCategory = serverCategory || restoredCategory || 'promo';
+
+  // Prioritize restoredCategory to ensure we land on the correct tab when returning from Admin/Product details
+  const initialCategory = restoredCategory || serverCategory || 'promo';
+
+  if (restoredCategory) {
+    console.log(`[Storefront] Found saved state: category="${restoredCategory}", scroll=${scrollRestoreState.current?.scrollPosition}`);
+  }
 
   // If we are restoring a category OR using a deep link that is NOT the default 'promo',
   // we should ignore initialProducts to prevent showing the wrong list.
   const isShowingDifferentCategory = initialCategory !== 'promo';
 
+  const cachedProducts = typeof window !== 'undefined' ? ProductListCache.get(`store_${storeId}_products_${initialCategory || 'all'}_page1`) : null;
+
   const [products, setProducts] = useState<Product[]>(
-    isShowingDifferentCategory ? [] : (initialProducts || [])
+    cachedProducts || (isShowingDifferentCategory ? [] : (initialProducts || []))
   );
   const [categories, setCategories] = useState<{ id: string; name: string }[]>(initialCategories || []);
   const [storeName, setStoreName] = useState(initialStoreMeta?.name || '');
   const [loading, setLoading] = useState(false);
 
   // We are "initial loading" if we don't have products to show yet.
-  const [initialLoading, setInitialLoading] = useState(!initialProducts || !!isShowingDifferentCategory);
+  const [initialLoading, setInitialLoading] = useState(!products.length && (!initialProducts || !!isShowingDifferentCategory));
 
   const [activeCategoryId, setActiveCategoryId] = useState(initialCategory);
   const [lastVisible, setLastVisible] = useState<DocumentSnapshot | null>(null);
@@ -351,7 +358,6 @@ export default function StorefrontPageClient({
       // Always fetch products for the active category.
       // If we initialized with initialProducts and activeCategoryId is 'promo', 
       // fetchProducts will still run but we can optimize it or let it refresh.
-      // For now, let's let it refresh to ensure client-side consistency, 
       // but we could skip if products.length > 0 && activeCategoryId === 'promo'.
       await fetchProducts(activeCategoryId, 1, null);
     };
@@ -360,15 +366,56 @@ export default function StorefrontPageClient({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storeId, activeCategoryId]);
 
-  useLayoutEffect(() => {
-    if (scrollRestoreState.current?.scrollPosition && products.length > 0) {
-      const { scrollPosition } = scrollRestoreState.current;
-      window.scrollTo(0, scrollPosition);
-      scrollRestoreState.current = null;
-      NavigationStore.clearState();
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    // Use a fresh read to ensure we have the absolute latest state
+    const state = NavigationStore.getState();
+    if (state.scrollPosition && products.length > 0) {
+      console.log('[Storefront] Attempting Scroll Restoration to:', state.scrollPosition);
+      const { scrollPosition } = state;
+
+      let attempts = 0;
+      const attemptScroll = () => {
+        attempts++;
+        if (attempts > 40) { // Increased patience for slow networks/large grids
+          console.warn('[Storefront] Scroll restoration timed out after 40 attempts');
+          NavigationStore.clearState();
+          scrollRestoreState.current = null;
+          return;
+        }
+
+        const totalHeight = document.documentElement.scrollHeight;
+        const windowHeight = window.innerHeight;
+
+        // If document isn't tall enough yet to reach the position, and we haven't timed out, wait
+        if (totalHeight < (scrollPosition + windowHeight) && attempts < 20) {
+          requestAnimationFrame(attemptScroll);
+          return;
+        }
+
+        window.scrollTo({
+          top: scrollPosition,
+          behavior: 'instant' as any
+        });
+
+        // Verify if we're close enough (within 10px)
+        const currentScroll = window.scrollY;
+        if (Math.abs(currentScroll - scrollPosition) < 10 || (totalHeight - windowHeight <= currentScroll + 5)) {
+          console.log('[Storefront] Scroll successfully restored at attempt:', attempts);
+          NavigationStore.clearState();
+          scrollRestoreState.current = null;
+        } else {
+          // If not reached (maybe layout shifted), retry immediately
+          requestAnimationFrame(attemptScroll);
+        }
+      };
+
+      // Initial buffer to let React finish rendering the grid items
+      const timer = setTimeout(attemptScroll, 100);
+      return () => clearTimeout(timer);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [products]);
+  }, [products.length]);
 
   const fetchMoreProducts = useCallback(() => {
     if (!loading && hasMore) {
@@ -401,6 +448,7 @@ export default function StorefrontPageClient({
         storeId={storeId}
         storeName={storeName}
         scrollDirection={scrollDirection}
+        activeCategoryId={activeCategoryId}
       />
       <CategoryBar
         onCategorySelect={handleCategorySelect}

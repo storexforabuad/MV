@@ -316,6 +316,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
         storeId={storeId}
         storeName={storeMeta?.name || storeId || 'Store'}
         backButtonHref={`/${storeId}`}
+        activeCategoryId={category?.id}
       />
       <CustomerLookupModal
         isOpen={isLoginModalOpen}

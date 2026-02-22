@@ -37,11 +37,12 @@ export default function CategoryBar({ onCategorySelect, activeCategoryId, catego
   };
 
   useEffect(() => {
-    // Scroll to active category on mount and when it changes
-    // Also re-run when categories change (e.g. loading from server) to ensure correct position
-    if (activeCategoryId) {
-      // Increased timeout for mobile stability and to wait for layout
-      setTimeout(() => scrollToCategory(activeCategoryId), 200);
+    if (activeCategoryId && categories.length > 0) {
+      // Try multiple times to ensure buttons are rendered and measured
+      const attempts = [50, 200, 500, 1000];
+      attempts.forEach(delay => {
+        setTimeout(() => scrollToCategory(activeCategoryId), delay);
+      });
     }
   }, [activeCategoryId, categories.length]);
 

@@ -40,8 +40,8 @@ import dynamic from 'next/dynamic';
 import PreviewSkeleton from '../../../components/admin/PreviewSkeleton';
 import { markOnboardingAsCompleted } from '../../../app/actions/onboardingActions';
 import { useSpotlightContext } from '@/context/SpotlightContext';
-import NotificationCard from '../../../components/admin/NotificationCard';
 import { Notification } from '../../../types/notification';
+import { clearAdminSession } from '@/lib/adminSession';
 
 const OnboardingFlow = dynamic(() => import('../../../components/admin/onboarding/OnboardingFlow'), { ssr: false });
 const AddProductComposer = dynamic(() => import('../../../components/admin/AddProductComposer'), { ssr: false });
@@ -149,12 +149,8 @@ export default function AdminStorePageClient({
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isPreviewLoading, setIsPreviewLoading] = useState(true);
-  const [showOnboarding, setShowOnboarding] = useState<boolean | null>(
-    initialStoreMeta?.hasCompletedOnboarding ? false : null
-  );
-  const [uiVisible, setUiVisible] = useState(
-    !!initialStoreMeta?.hasCompletedOnboarding
-  );
+  const [showOnboarding, setShowOnboarding] = useState<boolean | null>(false);
+  const [uiVisible, setUiVisible] = useState(true);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const { spotlightStep, setSpotlightStep } = useSpotlightContext();
   const [shouldShowSpotlight, setShouldShowSpotlight] = useState(false);
@@ -271,15 +267,8 @@ export default function AdminStorePageClient({
 
       refreshOrders();
 
-      const hasCompletedOnboarding = localStorage.getItem('hasCompletedOnboarding') === 'true';
-      if (fetchedStoreMeta?.hasCompletedOnboarding || hasCompletedOnboarding) {
-        setShowOnboarding(false);
-        setUiVisible(true);
-      } else {
-        setShowOnboarding(true);
-        setUiVisible(false);
-      }
-
+      // UI state stability: We no longer toggle showOnboarding or uiVisible here
+      // as it causes flickering during background refreshes.
     } catch {
       // handle error
     } finally {
@@ -296,15 +285,14 @@ export default function AdminStorePageClient({
       setAmbassadorTier((initialStoreMeta as any).ambassadorTier || 'bronze');
     }
 
-    const hasCompletedOnboarding = localStorage.getItem('hasCompletedOnboarding') === 'true';
-    if (initialStoreMeta?.hasCompletedOnboarding || hasCompletedOnboarding) {
-      setShowOnboarding(false);
-      if (!uiVisible) setUiVisible(true);
-    } else {
-      setShowOnboarding(true);
-      setUiVisible(false);
-    }
-  }, [storeId, initialStoreMeta]);
+    // Force onboarding off and UI on for instant access
+    setShowOnboarding(false);
+    setUiVisible(true);
+
+    // Initial background sync
+    fetchData(true);
+  }, [storeId, initialStoreMeta, fetchData]);
+
 
   useEffect(() => {
     // Validate vendor from localStorage/context on admin page load
@@ -451,7 +439,7 @@ export default function AdminStorePageClient({
     toast.success('Wait for refresh to complete');
   };
 
-  if (loading || showOnboarding === null) return <AdminSkeleton />;
+  if (showOnboarding === null) return <AdminSkeleton />;
 
   if (isTransitioning) {
     return <AdminSkeleton />;
@@ -468,6 +456,7 @@ export default function AdminStorePageClient({
   };
 
   const confirmLogout = async () => {
+    clearAdminSession(storeId);
     setVendor(null);
     router.push(`/${storeId}`);
   };
