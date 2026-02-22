@@ -185,8 +185,8 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                         key={store.id}
                         onClick={() => modal.updateForm({ storeType: store.id })}
                         className={`p-4 rounded-xl border-2 transition-all text-left ${isSelected
-                            ? 'border-amber-500 bg-amber-500/20 text-white'
-                            : 'border-slate-700 bg-slate-800/50 text-slate-300 hover:border-amber-500/50'
+                          ? 'border-amber-500 bg-amber-500/20 text-white'
+                          : 'border-slate-700 bg-slate-800/50 text-slate-300 hover:border-amber-500/50'
                           }`}
                       >
                         <div className="flex items-start justify-between gap-3">
@@ -290,8 +290,13 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
             {modal.currentScreen === 4 && (
               <div className="space-y-6">
                 <div>
-                  <h3 className="text-lg font-bold text-white mb-2">Choose Your Plan</h3>
-                  <p className="text-sm text-slate-400">All plans include Ramadan promo pricing</p>
+                  <h3 className="text-xl font-extrabold text-white mb-2 italic">Stop Paying ₦850k Upfront</h3>
+                  <p className="text-sm text-slate-400">Get a professional business website <span className="text-amber-400 font-semibold">valued at ₦850,000</span> for a small weekly subscription.</p>
+                </div>
+
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-lg w-fit">
+                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+                  <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">Zero Setup Fee • Go Live Today</span>
                 </div>
 
                 <div className="space-y-3">
@@ -303,12 +308,12 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                         key={tierId}
                         onClick={() => modal.updateForm({ planId: tierId })}
                         className={`relative w-full p-5 rounded-xl border transition-all text-left ${isSelected
-                            ? 'border-amber-500 bg-amber-500/5 shadow-lg shadow-amber-500/20'
-                            : 'border-slate-700 bg-slate-800/50 hover:border-amber-500/50'
+                          ? 'border-amber-500 bg-amber-500/5 shadow-lg shadow-amber-500/20'
+                          : 'border-slate-700 bg-slate-800/50 hover:border-amber-500/50'
                           }`}
                       >
                         {tier.featured && !isSelected && (
-                          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+                          <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter">
                             Most Popular
                           </div>
                         )}
@@ -320,17 +325,21 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                         )}
 
                         <div className="text-left pt-2">
-                          <div className="mb-2 text-sm text-slate-300 font-semibold">{tier.name} Plan</div>
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="text-sm text-slate-300 font-bold uppercase tracking-wide">{tier.name} Plan</div>
+                            <div className="text-[10px] font-black text-slate-500 uppercase">Value: ₦850k{(tierId === 'pro' || tierId === 'max') ? '+' : ''}</div>
+                          </div>
+
                           <div className="mb-3">
                             <div className="flex items-center gap-2 mb-1">
                               <span className="text-sm text-slate-400 line-through">₦{tier.price.toLocaleString()}</span>
-                              <div className="bg-amber-500/20 text-amber-400 text-xs font-bold px-2 py-0.5 rounded">
-                                50% OFF
+                              <div className="bg-amber-500/10 text-amber-400 text-[10px] font-black px-2 py-0.5 rounded border border-amber-500/20 uppercase">
+                                Special Ramadan Rate
                               </div>
                             </div>
-                            <div className="text-2xl font-bold text-amber-400">
+                            <div className="text-2xl font-black text-amber-400">
                               ₦{promoPrice.toLocaleString()}
-                              <span className="text-xs text-slate-400 font-normal ml-1">{tier.period}</span>
+                              <span className="text-xs text-slate-400 font-normal ml-1 lowercase">/{tier.period}</span>
                             </div>
                           </div>
 
@@ -348,15 +357,20 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                   })}
                 </div>
 
-                {/* Ramadan Promo Messaging */}
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 space-y-2">
-                  <p className="text-sm font-semibold text-amber-400">
-                    🎉 Lifetime 50% Discount
+                {/* Value Prop Messaging */}
+                <div className="bg-slate-800/80 border border-slate-700/50 rounded-xl p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                      <Globe className="text-amber-400" size={16} />
+                    </div>
+                    <p className="text-sm font-bold text-white">
+                      Why pay ₦850k upfront?
+                    </p>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed italic">
+                    We've automated professional web development so you can grow your business without the heavy debt. <span className="text-slate-200 font-semibold">Traditional Agency Cost: ₦850,000+</span>. Your subscription covers hosting, maintenance, and regular updates.
                   </p>
-                  <p className="text-xs text-amber-200/80">
-                    All businesses registered before <span className="font-semibold">{RAMADAN_PROMO_END_DATE}</span> will receive a <span className="font-bold">permanent 50% discount</span> on their subscription plan. This is a one-time Ramadan offer!
-                  </p>
-                  <p className="text-xs text-amber-200/70 mt-3">
+                  <p className="text-[10px] text-slate-500 mt-2">
                     Weekly auto-renewing subscription. Cancel anytime.
                   </p>
                 </div>
@@ -374,7 +388,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                 {/* Success Message */}
                 <div>
                   <h3 className="text-2xl font-bold text-white mb-2">Welcome Aboard!</h3>
-                  <p className="text-slate-300 text-sm">Your account is being set up</p>
+                  <p className="text-slate-300 text-sm px-4 leading-relaxed">You've just saved <span className="text-amber-400 font-bold uppercase tracking-tight">₦850,000+</span> on your professional website setup!</p>
                 </div>
 
                 {/* Full Business Details */}
@@ -435,7 +449,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                       <Check className="text-amber-400 flex-shrink-0 mt-0.5" size={18} />
                       <div>
                         <p className="text-xs font-semibold text-white">Plan</p>
-                        <p className="text-xs text-amber-400 mt-0.5 font-semibold">₦{Math.round(selectedTierDetails.price / 2)}/week (50% OFF)</p>
+                        <p className="text-xs text-amber-400 mt-0.5 font-semibold">₦{Math.round(selectedTierDetails.price / 2)}/week (Special Rate)</p>
                       </div>
                     </div>
                   )}
@@ -480,11 +494,11 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                 modal.loading
               }
               className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${((modal.currentScreen === 2 && !isScreen2Valid) ||
-                  (modal.currentScreen === 3 && !isScreen3Valid) ||
-                  (modal.currentScreen === 4 && !isScreen4Valid) ||
-                  modal.loading)
-                  ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                  : 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-900/30 hover:scale-[1.02] active:scale-[0.98]'
+                (modal.currentScreen === 3 && !isScreen3Valid) ||
+                (modal.currentScreen === 4 && !isScreen4Valid) ||
+                modal.loading)
+                ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                : 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-900/30 hover:scale-[1.02] active:scale-[0.98]'
                 }`}
             >
               {modal.loading ? (
