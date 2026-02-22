@@ -103,6 +103,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                 amountPaid: finalPrice,
                 paymentReference: response.reference,
                 status: 'active',
+                referralCode: storeId, // Link this registration to the vendor storefront
                 createdAt: serverTimestamp()
               });
 
@@ -156,9 +157,9 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
 
           {/* Progress bar only on screens 2-4 */}
           {typeof modal.currentScreen === 'number' && modal.currentScreen >= 2 && modal.currentScreen <= 4 && (
-            <ProgressIndicator 
-              currentStep={modal.currentScreen - 1} 
-              totalSteps={3} 
+            <ProgressIndicator
+              currentStep={modal.currentScreen - 1}
+              totalSteps={3}
             />
           )}
         </div>
@@ -166,7 +167,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
         {/* Content - Scrollable */}
         <div ref={contentRef} className="flex-1 overflow-y-auto">
           <div className="p-6 pb-28">
-              {/* (Value-prop screen removed; category selection is now first visible step) */}
+            {/* (Value-prop screen removed; category selection is now first visible step) */}
 
             {/* Screen 2: Category Selection */}
             {modal.currentScreen === 2 && (
@@ -183,11 +184,10 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                       <button
                         key={store.id}
                         onClick={() => modal.updateForm({ storeType: store.id })}
-                        className={`p-4 rounded-xl border-2 transition-all text-left ${
-                          isSelected
+                        className={`p-4 rounded-xl border-2 transition-all text-left ${isSelected
                             ? 'border-amber-500 bg-amber-500/20 text-white'
                             : 'border-slate-700 bg-slate-800/50 text-slate-300 hover:border-amber-500/50'
-                        }`}
+                          }`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-3 flex-1">
@@ -302,11 +302,10 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                       <button
                         key={tierId}
                         onClick={() => modal.updateForm({ planId: tierId })}
-                        className={`relative w-full p-5 rounded-xl border transition-all text-left ${
-                          isSelected
+                        className={`relative w-full p-5 rounded-xl border transition-all text-left ${isSelected
                             ? 'border-amber-500 bg-amber-500/5 shadow-lg shadow-amber-500/20'
                             : 'border-slate-700 bg-slate-800/50 hover:border-amber-500/50'
-                        }`}
+                          }`}
                       >
                         {tier.featured && !isSelected && (
                           <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-xs font-bold px-3 py-1 rounded-full">
@@ -480,14 +479,13 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                 (modal.currentScreen === 4 && !isScreen4Valid) ||
                 modal.loading
               }
-              className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${
-                ((modal.currentScreen === 2 && !isScreen2Valid) ||
-                 (modal.currentScreen === 3 && !isScreen3Valid) ||
-                 (modal.currentScreen === 4 && !isScreen4Valid) ||
-                 modal.loading)
+              className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${((modal.currentScreen === 2 && !isScreen2Valid) ||
+                  (modal.currentScreen === 3 && !isScreen3Valid) ||
+                  (modal.currentScreen === 4 && !isScreen4Valid) ||
+                  modal.loading)
                   ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
                   : 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-900/30 hover:scale-[1.02] active:scale-[0.98]'
-              }`}
+                }`}
             >
               {modal.loading ? (
                 'Processing...'

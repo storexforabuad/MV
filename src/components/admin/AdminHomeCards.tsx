@@ -10,6 +10,7 @@ import { useSpotlightContext } from '@/context/SpotlightContext';
 import TotalViewsModal from './modals/TotalViewsModal';
 import StoreLinkModal from './modals/StoreLinkModal';
 import { AmbassadorHubModal } from './modals/AmbassadorHubModal';
+import CirclesModal from './modals/CirclesModal';
 
 import TipsModal from './modals/TipsModal';
 import AccountModal from './modals/AccountModal';
@@ -135,6 +136,16 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     component: null,
     glowClass: 'dark:shadow-pink-500/30 shadow-pink-500/50',
   }, */
+
+  {
+    label: 'Circles',
+    icon: Users,
+    gradient: 'bg-gradient-to-br from-indigo-500 via-purple-600 to-fuchsia-700',
+    text: 'text-white',
+    component: null,
+    glowClass: 'dark:shadow-purple-500/30 shadow-purple-500/50',
+    cardType: 'action',
+  },
 
   {
     label: 'Content',
@@ -340,6 +351,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isWarehouseModalOpen, setIsWarehouseModalOpen] = useState(false);
   const [isWholesaleModalOpen, setIsWholesaleModalOpen] = useState(false);
+  const [isCirclesModalOpen, setIsCirclesModalOpen] = useState(false);
   const [wholesaleStats, setWholesaleStats] = useState({
     activePartners: 0,
     pendingRequests: 0,
@@ -421,12 +433,12 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const ordersIndex = cardData.findIndex(card => card.label === 'Orders');
 
   // Filter to show only specific cards (include Content)
-  const allowedCards = ['Views', 'Manage Categories', 'Manage Products', 'Account', 'Subscription', 'Content'];
+  const allowedCards = ['Views', 'Manage Categories', 'Manage Products', 'Account', 'Subscription', 'Content', 'Circles'];
   const filteredCardData = cardData.filter(card => allowedCards.includes(card.label));
   const cardsToRender = [...filteredCardData];
 
   useEffect(() => {
-    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen || isAdvertisingModalOpen || isEventsModalOpen || isSubscriptionModalOpen || isAccountModalOpen || isWarehouseModalOpen || isWholesaleModalOpen;
+    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen || isAdvertisingModalOpen || isEventsModalOpen || isSubscriptionModalOpen || isAccountModalOpen || isWarehouseModalOpen || isWholesaleModalOpen || isCirclesModalOpen;
     if (modalIsOpen) {
       window.history.pushState({ modalOpen: true }, '');
       const handlePopState = () => {
@@ -448,6 +460,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         setIsAccountModalOpen(false);
         setIsWarehouseModalOpen(false);
         setIsWholesaleModalOpen(false);
+        setIsCirclesModalOpen(false);
         if (setIsModalOpen) setIsModalOpen(false);
       };
       window.addEventListener('popstate', handlePopState);
@@ -458,7 +471,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         }
       };
     }
-  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, isAdvertisingModalOpen, isEventsModalOpen, isSubscriptionModalOpen, isAccountModalOpen, isWarehouseModalOpen, isWholesaleModalOpen, setIsModalOpen]);
+  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, isAdvertisingModalOpen, isEventsModalOpen, isSubscriptionModalOpen, isAccountModalOpen, isWarehouseModalOpen, isWholesaleModalOpen, isCirclesModalOpen, setIsModalOpen]);
 
   const handleOpenModal = (idx: number, card: typeof cardData[0]) => {
     if (props.isRefreshing) return; // Prevent opening modals during refresh
@@ -482,6 +495,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     else if (label === 'Wholesale') setIsWholesaleModalOpen(true);
     else if (label === 'Subscription') setIsSubscriptionModalOpen(true);
     else if (label === 'Account') setIsAccountModalOpen(true);
+    else if (label === 'Circles') setIsCirclesModalOpen(true);
     else setOpenModal(idx);
 
     if (props.setIsModalOpen && label !== 'Orders' && label !== 'Manage Products' && label !== 'Ambassador' && label !== 'Manage Categories') props.setIsModalOpen(true);
@@ -562,6 +576,11 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
   const handleCloseWholesaleModal = () => {
     setIsWholesaleModalOpen(false);
+    if (props.setIsModalOpen) props.setIsModalOpen(false);
+  }
+
+  const handleCloseCirclesModal = () => {
+    setIsCirclesModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
@@ -1005,7 +1024,14 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           storeId={storeId}
         />
       )}
+
+      {isCirclesModalOpen && (
+        <CirclesModal
+          isOpen={isCirclesModalOpen}
+          onClose={handleCloseCirclesModal}
+          storeId={storeId}
+        />
+      )}
     </section>
   );
 }
-
