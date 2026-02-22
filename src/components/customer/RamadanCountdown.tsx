@@ -316,8 +316,7 @@ export default function RamadanCountdown({ className, storeName }: { className?:
             <div className={className}>
                 <div
                     ref={cardRef}
-                    onClick={() => !showDownloadPrompt && !isDownloading && setShowDownloadPrompt(true)}
-                    className={`relative overflow-hidden rounded-[2.5rem] bg-indigo-950 border border-amber-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] h-full flex flex-col justify-center transition-all duration-300 ${!showDownloadPrompt && !isDownloading ? 'cursor-pointer active:scale-[0.98]' : ''}`}
+                    className="relative overflow-hidden rounded-[2.5rem] bg-indigo-950 border border-amber-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] h-full flex flex-col justify-center transition-all duration-300"
                 >
                     {/* Background */}
                     <div className="absolute inset-0">

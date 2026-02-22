@@ -217,7 +217,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
           const sizeText = item.selectedSize ? `📏 *Size:* ${item.selectedSize}\n` : '';
           const unitText = item.productType === 'livestock' ? (item as any).priceUnit === 'kg' ? 'kg' : 'pcs' : '';
 
-          return `*${item.name}*\n` +
+          return `*${item.name.trim()}*\n` +
             `🔗 ${productUrl}\n` +
             colorText +
             sizeText +

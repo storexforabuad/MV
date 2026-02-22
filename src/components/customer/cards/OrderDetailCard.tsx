@@ -33,7 +33,7 @@ const getStatusUI = (status: Order['orderStatus']) => {
       return { icon: <CheckCircle className="w-4 h-4" />, text: 'Partially Ready', color: 'text-yellow-400' };
     case 'processing':
     default:
-      return { icon: <Clock className="w-4 h-4" />, text: 'Processing', color: 'text-yellow-400' };
+      return null;
   }
 };
 
@@ -70,22 +70,24 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted, onR
               <p className="font-bold text-lg card-text-gradient truncate">Order #{order.id.substring(0, 6)}</p>
               <p className="text-sm text-text-secondary">Placed on {orderDate}</p>
             </div>
-            <div className={`flex items-center gap-2 text-sm font-medium ${statusInfo.color}`}>
-              {isHighlighted && order.orderStatus === 'ready' ? (
-                <motion.div
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.5, repeat: 2, repeatType: "reverse" }}
-                  className="flex items-center gap-2"
-                >
-                  {statusInfo.icon}
-                  <span>{statusInfo.text}</span>
-                </motion.div>
-              ) : (
-                <>
-                  {statusInfo.icon}
-                  <span>{statusInfo.text}</span>
-                </>
+            <div className={`flex items-center gap-2 text-sm font-medium ${statusInfo?.color || ''}`}>
+              {statusInfo && (
+                isHighlighted && order.orderStatus === 'ready' ? (
+                  <motion.div
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 0.5, repeat: 2, repeatType: "reverse" }}
+                    className="flex items-center gap-2"
+                  >
+                    {statusInfo.icon}
+                    <span>{statusInfo.text}</span>
+                  </motion.div>
+                ) : (
+                  <>
+                    {statusInfo.icon}
+                    <span>{statusInfo.text}</span>
+                  </>
+                )
               )}
             </div>
           </div>
@@ -110,6 +112,11 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted, onR
                   <div className="flex-1">
                     <p className="font-semibold text-text-primary text-sm">{product.name}</p>
                     <div className="flex flex-wrap gap-1 mt-1">
+                      {((product as any).selectedColor) && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                          Color: {(product as any).selectedColor}
+                        </span>
+                      )}
                       {((product as any).selectedSize) && (
                         <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
                           Size: {(product as any).selectedSize}

@@ -264,7 +264,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
         const productUrl = `https://tinyurl.com/bizconnet/${storeId}/products/${product.id}`;
         const message = `🛍️ *New Order Request*\n\n` +
           `Hello! I would like to order this item:\n\n` +
-          `*${product.name}*\n` +
+          `*${product.name.trim()}*\n` +
           `🔗 *Product Link:* ${productUrl}\n` +
           `🔢 *Quantity:* ${quantity} ${product.productType === 'livestock' ? ((product as any).priceUnit === 'kg' ? 'kg' : 'pcs') : ''}\n` +
           (interactiveSelectedColor ? `🎨 *Color:* ${interactiveSelectedColor}\n` : '') +
