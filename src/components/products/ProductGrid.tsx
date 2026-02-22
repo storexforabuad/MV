@@ -111,6 +111,7 @@ interface ProductGridProps {
   swipeDirection?: 'left' | 'right' | null;
   isSwipeTransitioning?: boolean;
   isLoading?: boolean;
+  onCategoryChange?: (categoryId: string) => void;
 }
 
 const ProductGrid = memo(function ProductGrid({
@@ -128,7 +129,8 @@ const ProductGrid = memo(function ProductGrid({
   onSwipeRight,
   swipeDirection,
   isSwipeTransitioning,
-  isLoading
+  isLoading,
+  onCategoryChange
 }: ProductGridProps) {
   const router = useRouter();
   const { customer, promptLogin } = useCustomer();

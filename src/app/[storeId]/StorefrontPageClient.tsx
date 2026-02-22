@@ -22,7 +22,7 @@ import ConnectionErrorToast from '@/components/ConnectionErrorToast';
 import { ProductListCache } from '@/lib/productCache';
 import NeedAWebsiteBanner from '@/components/customer/NeedAWebsiteBanner';
 import CustomerLookupModal from '@/components/customer/CustomerLookupModal';
-import NavigationStore, { NavigationState } from '@/lib/navigationStore';
+import NavigationStore from '@/lib/navigationStore';
 import { requestCustomerNotificationPermission } from '@/lib/requestCustomerNotifications';
 import { useCustomer } from '@/context/CustomerContext';
 import { getMessaging, onMessage } from 'firebase/messaging';
@@ -77,7 +77,7 @@ export default function StorefrontPageClient({
   initialCategory?: string;
 }) {
   const scrollDirection = useScrollDirection();
-  const scrollRestoreState = useRef<NavigationState | null>(typeof window !== 'undefined' ? NavigationStore.getState() : null);
+  const scrollRestoreState = useRef<{ category: string; scrollPosition: number } | null>(typeof window !== 'undefined' ? NavigationStore.getState() : null);
   const restoredCategory = scrollRestoreState.current?.category;
 
   // Prioritize restoredCategory to ensure we land on the correct tab when returning from Admin/Product details
@@ -541,6 +541,7 @@ export default function StorefrontPageClient({
                 swipeDirection={swipeDirection}
                 isSwipeTransitioning={isSwipeTransitioning}
                 isLoading={loading}
+                onCategoryChange={handleCategorySelect}
               />
               {storeId && <BusinessCardModal open={aboutOpen} onClose={() => setAboutOpen(false)} storeMeta={storeMeta || undefined} />}
               {hasMore && (
