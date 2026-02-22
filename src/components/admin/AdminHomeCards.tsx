@@ -301,7 +301,45 @@ const getSubscriptionIcon = (status: string) => {
   }
 };
 
-import { sendVendorNotification } from '@/app/actions/sendVendorNotification';
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+};
+
+const itemVariants: Variants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+};
+
+const modalVariants: Variants = {
+  hidden: { opacity: 0, scale: 0.95, y: 20 },
+  visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: [0.25, 1, 0.5, 1] } },
+  exit: { opacity: 0, scale: 0.95, y: 20, transition: { duration: 0.2, ease: 'easeOut' } }
+};
+
+/**
+ * MetricCard Component - Moved outside to prevent forced re-mounting
+ */
+const MetricCard = ({ icon: Icon, label, count, gradient, glowClass, onClick, inlineStyle }: { icon: React.ElementType; label: string; count: string | number; gradient: string; glowClass: string; onClick: () => void; inlineStyle?: React.CSSProperties }) => (
+  <motion.div variants={itemVariants} key={label} className="h-full">
+    <button
+      style={inlineStyle}
+      className={`dashboard-card relative flex flex-col items-center justify-center gap-3 rounded-[2rem] p-4 sm:p-5 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${gradient} text-white ${glowClass} w-full min-h-[140px] h-full`}
+      tabIndex={0}
+      type="button"
+      onClick={onClick}
+    >
+      <span className="card-blob" />
+      <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white bg-opacity-20">
+        <Icon className="w-6 h-6" />
+      </div>
+      <div className="text-3xl font-bold drop-shadow">{count}</div>
+      <div className="text-sm font-medium text-center opacity-90">
+        {label === 'Manage Categories' ? 'Categories' : label === 'Manage Products' ? 'Products' : label}
+      </div>
+    </button>
+  </motion.div>
+);
 
 const handleTestNotification = async (storeId: string) => {
   if (!confirm('Send test notification?')) return;
@@ -409,22 +447,15 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     return () => { mounted = false; };
   }, [storeId]);
 
-  // Auto-refresh when cards become visible
+  // Auto-refresh when cards become visible - REMOVED TO PREVENT RENDER LOOPS
+  // Data is now prefetched by parent, manual refresh handles updates.
+  /*
   useEffect(() => {
     if (uiVisible && !refreshing) {
-      const autoRefresh = async () => {
-        setRefreshing(true);
-        try {
-          await onRefresh(true);
-        } catch (error) {
-          console.error("Auto-refresh failed:", error);
-        } finally {
-          setRefreshing(false);
-        }
-      };
-      autoRefresh();
+      ...
     }
   }, [uiVisible]);
+  */
 
   const ordersIndex = cardData.findIndex(card => card.label === 'Orders');
 
@@ -629,13 +660,24 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     };
   }, [storeId, isWholesaleModalOpen]);
 
-  const containerVariants: Variants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
-  const itemVariants: Variants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } } };
-  const modalVariants: Variants = { hidden: { opacity: 0, scale: 0.95, y: 20 }, visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: [0.25, 1, 0.5, 1] } }, exit: { opacity: 0, scale: 0.95, y: 20, transition: { duration: 0.2, ease: 'easeOut' } } };
+  const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
+
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } }
+  };
+
+  const modalVariants: Variants = {
+    hidden: { opacity: 0, scale: 0.95, y: 20 },
+    visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.3, ease: [0.25, 1, 0.5, 1] } },
+    exit: { opacity: 0, scale: 0.95, y: 20, transition: { duration: 0.2, ease: 'easeOut' } }
+  };
 
   /**
-   * MetricCard Component - Tall vertical layout for metric cards
-   * Shows: Icon (top) -> Count (center) -> Label (bottom)
+   * MetricCard Component - Moved outside to prevent forced re-mounting
    */
   const MetricCard = ({ icon: Icon, label, count, gradient, glowClass, onClick, inlineStyle }: { icon: React.ElementType; label: string; count: string | number; gradient: string; glowClass: string; onClick: () => void; inlineStyle?: React.CSSProperties }) => (
     <motion.div variants={itemVariants} key={label} className="h-full">
@@ -647,16 +689,10 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         onClick={onClick}
       >
         <span className="card-blob" />
-
-        {/* Icon */}
         <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white bg-opacity-20">
           <Icon className="w-6 h-6" />
         </div>
-
-        {/* Count */}
         <div className="text-3xl font-bold drop-shadow">{count}</div>
-
-        {/* Label */}
         <div className="text-sm font-medium text-center opacity-90">
           {label === 'Manage Categories' ? 'Categories' : label === 'Manage Products' ? 'Products' : label}
         </div>
@@ -746,7 +782,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
       <motion.div
         className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4"
         variants={containerVariants}
-        initial="hidden"
+        initial={false} // Prevent re-animating on every prop change
         animate={uiVisible ? 'visible' : 'hidden'}
         onAnimationComplete={() => onAnimationComplete?.()}
       >
@@ -938,7 +974,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         className="mt-8 mb-12 flex flex-col items-center justify-center text-gray-400 dark:text-gray-600"
         initial={{ opacity: 0, y: 20, scale: 0.8 }}
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
-        viewport={{ once: false, margin: "0px 0px -50px 0px" }}
+        viewport={{ once: true, margin: "0px 0px -50px 0px" }}
         transition={{ type: "spring", stiffness: 200, damping: 15 }}
       >
         <div className="w-12 h-1 bg-gray-200 dark:bg-gray-800 rounded-full mb-4" />
