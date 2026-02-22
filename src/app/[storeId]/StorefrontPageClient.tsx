@@ -121,6 +121,29 @@ export default function StorefrontPageClient({
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [isSwipeTransitioning, setIsSwipeTransitioning] = useState(false);
 
+  // Continuous scroll saving
+  useEffect(() => {
+    if (typeof window === 'undefined' || !activeCategoryId) return;
+
+    let timeoutId: NodeJS.Timeout;
+    const handleScroll = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        // Only save if we're not currently in a scroll-restoration phase
+        // and only if scroll is > 0 to avoid overwriting with 0 on mount
+        if (window.scrollY > 0) {
+          NavigationStore.saveScrollPosition(activeCategoryId, window.scrollY);
+        }
+      }, 500); // 500ms debounce
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      clearTimeout(timeoutId);
+    };
+  }, [activeCategoryId]);
+
   // Track store page visit
   useEffect(() => {
     if (storeId) {
@@ -296,16 +319,27 @@ export default function StorefrontPageClient({
   }, [getAllCategories, activeCategoryId]);
 
   const handleCategorySelect = useCallback((categoryId: string) => {
-    console.log(`[StorefrontPageClient] Category selected: ${categoryId}`);
-    scrollRestoreState.current = null;
-    NavigationStore.clearState();
+    // Save current category's scroll before switching
+    if (activeCategoryId) {
+      console.log(`[Storefront] Saving scroll for category "${activeCategoryId}": ${window.scrollY}`);
+      NavigationStore.saveScrollPosition(activeCategoryId, window.scrollY);
+    }
 
-    // Clear products immediately and set loading to true to show skeletons
+    console.log(`[StorefrontPageClient] Category selected: ${categoryId}`);
+
+    // Clear products and set loading
     setProducts([]);
     setLoading(true);
     setActiveCategoryId(categoryId);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, []);
+
+    // Check if we have a saved scroll for the NEW category
+    const savedScroll = NavigationStore.getScrollPosition(categoryId);
+    if (!savedScroll) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    // If we DO have a saved scroll, we don't scroll to top, 
+    // the scroll restoration Effect will handle jumping to the right spot once products load.
+  }, [activeCategoryId]);
 
   // Handle category deep link auto-scroll on mount
   useEffect(() => {
@@ -366,29 +400,27 @@ export default function StorefrontPageClient({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storeId, activeCategoryId]);
 
+  // Per-category scroll restoration
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Use a fresh read to ensure we have the absolute latest state
-    const state = NavigationStore.getState();
-    if (state.scrollPosition && products.length > 0) {
-      console.log('[Storefront] Attempting Scroll Restoration to:', state.scrollPosition);
-      const { scrollPosition } = state;
+    // Get the scroll position for the CURRENT active category
+    const scrollPosition = NavigationStore.getScrollPosition(activeCategoryId);
+
+    if (scrollPosition && products.length > 0) {
+      console.log(`[Storefront] Attempting Scroll Restoration for "${activeCategoryId}" to: ${scrollPosition}`);
 
       let attempts = 0;
       const attemptScroll = () => {
         attempts++;
-        if (attempts > 40) { // Increased patience for slow networks/large grids
-          console.warn('[Storefront] Scroll restoration timed out after 40 attempts');
-          NavigationStore.clearState();
-          scrollRestoreState.current = null;
+        if (attempts > 40) {
+          console.warn('[Storefront] Scroll restoration timed out');
           return;
         }
 
         const totalHeight = document.documentElement.scrollHeight;
         const windowHeight = window.innerHeight;
 
-        // If document isn't tall enough yet to reach the position, and we haven't timed out, wait
         if (totalHeight < (scrollPosition + windowHeight) && attempts < 20) {
           requestAnimationFrame(attemptScroll);
           return;
@@ -399,23 +431,18 @@ export default function StorefrontPageClient({
           behavior: 'instant' as any
         });
 
-        // Verify if we're close enough (within 10px)
         const currentScroll = window.scrollY;
         if (Math.abs(currentScroll - scrollPosition) < 10 || (totalHeight - windowHeight <= currentScroll + 5)) {
           console.log('[Storefront] Scroll successfully restored at attempt:', attempts);
-          NavigationStore.clearState();
-          scrollRestoreState.current = null;
         } else {
-          // If not reached (maybe layout shifted), retry immediately
           requestAnimationFrame(attemptScroll);
         }
       };
 
-      // Initial buffer to let React finish rendering the grid items
       const timer = setTimeout(attemptScroll, 100);
       return () => clearTimeout(timer);
     }
-  }, [products.length]);
+  }, [activeCategoryId, products.length]);
 
   const fetchMoreProducts = useCallback(() => {
     if (!loading && hasMore) {
