@@ -2,7 +2,7 @@
 import { memo, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Info, Phone, MessageCircle, Star, Clock, MapPin, Instagram, Gift } from 'lucide-react';
+import { Info, Phone, MessageCircle, Star, Clock, MapPin, Instagram, Gift, Search } from 'lucide-react';
 import { Product } from '../../types/product';
 import { Order } from '../../hooks/useOrders';
 import { motion, LayoutGroup, AnimatePresence, Transition } from 'framer-motion';
@@ -13,11 +13,19 @@ import { useCustomer } from '@/context/CustomerContext';
 import { useOrders } from '@/hooks/useOrders';
 import { OrdersModal } from '@/components/customer/modals/OrdersModal';
 import { ReferralsModal } from '@/components/customer/modals/ReferralsModal';
-import { ensureProductType } from '../../utils/productHelpers';
+import {
+  ensureProductType,
+  isGeneralProduct,
+  isFashionProduct,
+  isVehicleProduct,
+  isLivestockProduct,
+  isFoodBeverageProduct,
+} from '../../utils/productHelpers';
 import OrderSummaryModal from '../modals/OrderSummaryModal';
 import CartOrderSummaryModal from '../modals/CartOrderSummaryModal';
 import SkeletonLoader from '../SkeletonLoader';
 import { CartItem } from '@/lib/cartContext';
+import SearchOverlay from '@/components/customer/modals/SearchOverlay';
 
 const VehicleCard = dynamic(() => import('./VehicleCard'), {
   loading: () => (
@@ -139,6 +147,9 @@ const ProductGrid = memo(function ProductGrid({
   const [isReorderModalOpen, setIsReorderModalOpen] = useState(false);
   const [reorderItems, setReorderItems] = useState<CartItem[]>([]);
 
+  // Search state
+  const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
+
   const handleReorder = (order: Order) => {
     const orderItems = order.products.map(p => ({
       ...p,
@@ -227,6 +238,12 @@ const ProductGrid = memo(function ProductGrid({
               text="Orders"
               badgeCount={orders.length}
             />
+            <GlassButton
+              onClick={() => setIsSearchOverlayOpen(true)}
+              aria-label="Search products"
+            >
+              <Search className="w-5 h-5 text-[var(--text-primary)]" />
+            </GlassButton>
           </div>
         </div>
       )}
@@ -242,6 +259,21 @@ const ProductGrid = memo(function ProductGrid({
           highlightOrderId={highlightOrderId}
           onNotificationRequest={onNotificationRequest}
           onReorder={handleReorder}
+        />
+      )}
+      {storeId && (
+        <SearchOverlay
+          isOpen={isSearchOverlayOpen}
+          onClose={() => setIsSearchOverlayOpen(false)}
+          products={products}
+          onProductClick={(product) => {
+            setIsSearchOverlayOpen(false);
+            // Always navigate to product page from search results to provide full context (category + product)
+            const targetUrl = storeId
+              ? `/${storeId}/products/${product.id}`
+              : `/bizcon/products/${product.id}?storeId=${product.storeId}`;
+            router.push(targetUrl);
+          }}
         />
       )}
       {storeId && <ReferralsModal isOpen={isReferralModalOpen} onClose={() => setReferralModalOpen(false)} storeId={storeId} />}
