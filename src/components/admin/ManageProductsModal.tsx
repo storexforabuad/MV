@@ -123,9 +123,15 @@ const ProductRow = React.memo(({
             <Percent className="w-4 h-4" />
             <span>{product.commission || 0}%</span>
           </div>
+
+          {product.isDropshipped && (
+            <div className="flex items-center gap-1 text-purple-600 bg-purple-100 dark:bg-purple-900/30 px-2 py-0.5 rounded-full">
+              <span className="text-xs font-semibold">Dropshipped</span>
+            </div>
+          )}
         </div>
       </div>
-      {!isSelectMode && (
+      {!isSelectMode && !product.isDropshipped && (
         <Menu as="div" className="relative flex-shrink-0">
           <Menu.Button
             ref={menuButtonRef}

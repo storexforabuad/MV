@@ -33,6 +33,7 @@ import AdminSkeleton from '../../../components/admin/AdminSkeleton';
 import MobileNav from '../../../components/admin/MobileNav';
 import FloatingActionButton from '../../../components/admin/FloatingActionButton';
 import AdminHomeCards from '../../../components/admin/AdminHomeCards';
+import WarehouseHub from '../../../components/admin/WarehouseHub';
 import AdminInvoicePanel from '../../../components/admin/AdminInvoicePanel';
 import InstallPrompt from '../../../components/InstallPrompt';
 import dynamic from 'next/dynamic';
@@ -414,9 +415,7 @@ export default function AdminStorePageClient({
   };
 
   useEffect(() => {
-    if (activeSection === 'preview') {
-      setIsPreviewLoading(true);
-    }
+    // We no longer load the preview tab, replaced by warehouse
   }, [activeSection]);
 
   function handleOnboardingComplete() {
@@ -541,17 +540,9 @@ export default function AdminStorePageClient({
           </div>
         </div>
 
-        {/* Store Preview - Always mounted, visibility toggled */}
-        <div className={`${activeSection !== 'preview' ? 'hidden' : ''}`}>
-          <div className="w-full h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)]">
-            {isPreviewLoading && <PreviewSkeleton />}
-            <iframe
-              src={`/${storeId}`}
-              title="Store Preview"
-              onLoad={() => setIsPreviewLoading(false)}
-              className={`w-full h-full border-0 ${isPreviewLoading ? 'hidden' : 'block'}`}
-            />
-          </div>
+        {/* Warehouse View (Replaces Store Preview) */}
+        <div className={`${activeSection !== 'warehouse' ? 'hidden' : ''} h-[calc(100vh-8rem)]`}>
+          <WarehouseHub storeId={storeId} storeName={storeMeta?.name} />
         </div>
       </main>
 
@@ -661,7 +652,7 @@ export default function AdminStorePageClient({
       />
 
       <div className={`transition-opacity duration-500 ${uiVisible ? 'opacity-100' : 'opacity-0'}`}>
-        {activeSection !== 'preview' && <FloatingActionButton isModalOpen={isModalOpen} />}
+        {activeSection !== 'warehouse' && <FloatingActionButton isModalOpen={isModalOpen} />}
         {spotlightStep !== 'tips' && !isModalOpen &&
           <MobileNav
             activeSection={activeSection}

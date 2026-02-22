@@ -16,6 +16,7 @@ import {
   orderBy,
   limit,
   increment,
+  collectionGroup,
 } from 'firebase/firestore';
 import { app as firebaseApp } from '@/lib/firebase';
 import {
@@ -81,7 +82,7 @@ async function ensureWholesaleConfig(storeId: string): Promise<boolean> {
     // Initialize missing config
     console.warn(
       `⚠️ Lazy-initializing wholesaleConfig for store ${storeId}. ` +
-        `Run: npm run migrate:wholesale`
+      `Run: npm run migrate:wholesale`
     );
 
     await updateDoc(storeRef, {
@@ -762,14 +763,14 @@ export async function getPartnerProducts(partnerId: string, buyerStoreId: string
 
     const partner = partnerStoreSnap.data() as StoreMeta;
     const wholesaleConfig = partner.wholesaleConfig || DEFAULT_WHOLESALE_CONFIG;
-    
+
     console.log(`✅ [getPartnerProducts] Partner found: ${partner.name}`);
     console.log(`💰 [getPartnerProducts] Discount: ${wholesaleConfig.globalDiscount}%, Min Order: ₦${wholesaleConfig.minOrderValue}`);
 
     // Get all products from partner - NO EARLY VERIFICATION
     // Partnership is already verified by UI (user can only reach this modal if authenticated)
     const productsSnap = await getDocs(collection(db, 'stores', partnerId, 'products'));
-    
+
     console.log(`📋 [getPartnerProducts] Found ${productsSnap.docs.length} products in collection`);
 
     // If no products, return empty array (not an error)
@@ -923,6 +924,140 @@ export async function createWholesaleOrder(
   } catch (error) {
     console.error('Error creating wholesale order:', error);
     return { success: false, error: 'Failed to create order' };
+  }
+}
+
+/**
+ * B2B Dropshipping: Copy a product from a supplier to a reseller's store
+ * 
+ * Creates a duplicate of the product in the reseller's products subcollection.
+ * Adds dropshipping metadata (`isDropshipped`, `supplierId`, `sourceProductId`)
+ * to track the origin and allow for future inventory syncs.
+ * 
+ * @param sourceProductId - ID of the product in the supplier's store
+ * @param sourceStoreId - ID of the supplier's store
+ * @param targetStoreId - ID of the reseller's store (where it will be copied to)
+ * @param resellerCategoryId - (Optional) The category ID in the reseller's store to place the product
+ */
+export async function copyProductToDropshipStore(
+  sourceProductId: string,
+  sourceStoreId: string,
+  targetStoreId: string,
+  resellerCategoryId?: string
+) {
+  try {
+    // 1. Fetch the original product
+    const sourceProductRef = doc(db, 'stores', sourceStoreId, 'products', sourceProductId);
+    const sourceProductSnap = await getDoc(sourceProductRef);
+
+    if (!sourceProductSnap.exists()) {
+      return { success: false, error: 'Source product not found' };
+    }
+
+    const sourceData = sourceProductSnap.data();
+
+    // 2. Fetch the supplier's wholesale config to apply the default discount mapping (if desired)
+    const supplierStoreSnap = await getDoc(doc(db, 'stores', sourceStoreId));
+    let wholesaleDiscount = 0;
+    if (supplierStoreSnap.exists()) {
+      const supplierData = supplierStoreSnap.data() as StoreMeta;
+      wholesaleDiscount = supplierData.wholesaleConfig?.globalDiscount || 0;
+    }
+
+    // 3. Create dropshipped clone data
+    // Deep clone is simulated by destructuring and removing unnecessary fields
+    const { id, createdAt, updatedAt, ...restData } = sourceData;
+
+    // Determine the baseline cost for the reseller
+    const originalPrice = sourceData.price || 0;
+    const wholesalePrice = originalPrice * (1 - wholesaleDiscount / 100);
+
+    // Create a new unique ID for the copied product
+    const newProductId = `drop_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+
+    const dropshippedProductData = {
+      ...restData,
+      id: newProductId,
+      categoryId: resellerCategoryId || '', // User can assign this later if not provided
+      price: originalPrice, // Default to selling at original MSRP (reseller can change this)
+      wholesaleCost: wholesalePrice, // Keep track of what they owe the supplier
+      isDropshipped: true,
+      supplierId: sourceStoreId,
+      sourceProductId: sourceProductId,
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+      views: 0,
+      sales: 0,
+    };
+
+    // 4. Save to the target store's products collection
+    const targetProductRef = doc(db, 'stores', targetStoreId, 'products', newProductId);
+    await setDoc(targetProductRef, dropshippedProductData);
+
+    // 5. Increment product count on the target store
+    await updateDoc(doc(db, 'stores', targetStoreId), {
+      productCount: increment(1)
+    });
+
+    return { success: true, newProductId };
+  } catch (error) {
+    console.error('Error copying product for dropshipping:', error);
+    return { success: false, error: 'Failed to copy product' };
+  }
+}
+
+/**
+ * B2B Dropshipping: Sync Inventory
+ * 
+ * Called when a supplier updates a product's inventory (e.g. quantity, soldOut, limitedStock)
+ * This function locates all reseller stores that copied this product and updates their copies 
+ * to ensure resellers don't sell out-of-stock items.
+ * 
+ * @param sourceProductId - ID of the product that was updated
+ * @param inventoryUpdates - The fields to sync (e.g., { soldOut: true })
+ */
+export async function syncDropshippedProductsInventory(
+  sourceProductId: string,
+  inventoryUpdates: { soldOut?: boolean; limitedStock?: boolean; quantity?: number; stock?: number }
+) {
+  try {
+    // Implementation Note:
+    // To find all copied products, we use a collectionGroup query across all 'products' 
+    // subcollections where sourceProductId matches.
+    // Ensure you have a composite index on products: sourceProductId (ASC) 
+
+    // CAUTION: Firebase requires a collection group index for this query.
+    // If it fails, the console will log a direct link to create the index.
+    const productsGroupQuery = query(
+      collectionGroup(db, 'products'),
+      where('sourceProductId', '==', sourceProductId)
+    );
+
+    const snapshot = await getDocs(productsGroupQuery);
+
+    if (snapshot.empty) {
+      return { success: true, count: 0 }; // No resellers copied this product
+    }
+
+    const batch = writeBatch(db);
+    let count = 0;
+
+    snapshot.docs.forEach((docSnap) => {
+      // Because we are querying a collectionGroup, docSnap.ref points exactly 
+      // to the reseller's product document.
+      batch.update(docSnap.ref, {
+        ...inventoryUpdates,
+        updatedAt: Timestamp.now()
+      });
+      count++;
+    });
+
+    await batch.commit();
+
+    return { success: true, count };
+  } catch (error) {
+    console.error('Error syncing dropshipped inventory:', error);
+    return { success: false, error: 'Failed to sync inventory' };
   }
 }
 

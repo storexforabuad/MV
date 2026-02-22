@@ -43,6 +43,23 @@ const CustomerOrdersCard = ({ order, onMarkReady, isHighlighted }: { order: Stor
   const { customerInfo, products } = order;
   const whatsappUrl = `https://wa.me/${formatWhatsAppNumber(customerInfo.phoneNumber)}`;
 
+  // Find if there are any dropshipped items in this order
+  const dropshippedItems = products.filter((p: any) => p.isDropshipped && p.supplierId);
+  const hasDropshippedItems = dropshippedItems.length > 0;
+
+  // Calculate the total wholesale cost owed to suppliers for this order
+  const totalWholesaleCost = dropshippedItems.reduce((sum: number, item: any) => {
+    return sum + (item.wholesaleCost || 0) * (item.quantity || 1);
+  }, 0);
+
+  // Build the WhatsApp forwarding message for the supplier
+  // Note: in a multi-supplier scenario, we'd group by supplier. But for MVP, we just combine.
+  const buildSupplierMessage = () => {
+    const itemsList = dropshippedItems.map((item: any) => `- ${item.quantity}x ${item.name} (Source ID: ${item.sourceProductId})`).join('%0A');
+    const note = `Hello! I received an order for your dropshipped items:%0A%0A${itemsList}%0A%0ATotal Cost (My Cost): ₦${totalWholesaleCost.toLocaleString()}%0A%0A*Shipping Details:*%0A${customerInfo.name}%0A${customerInfo.phoneNumber}%0A${customerInfo.deliveryAddress.street}, ${customerInfo.deliveryAddress.state}%0A%0APlease let me know how to send you the ₦${totalWholesaleCost.toLocaleString()} so you can fulfill this order!`;
+    return note;
+  };
+
   return (
     <motion.div
       id={`order-${order.id}`}
@@ -94,6 +111,28 @@ const CustomerOrdersCard = ({ order, onMarkReady, isHighlighted }: { order: Stor
           <OrderProductRow key={product.id || index} product={product} />
         ))}
       </div>
+
+      {hasDropshippedItems && (
+        <div className="px-5 py-3 bg-purple-50 dark:bg-purple-900/10 border-t border-purple-100 dark:border-purple-800">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col">
+              <p className="text-xs font-bold text-purple-700 dark:text-purple-400 uppercase tracking-wider mb-1">Dropship Fulfillment</p>
+              <p className="text-[13px] text-slate-600 dark:text-slate-400">
+                You owe the supplier <span className="font-bold text-slate-900 dark:text-white">₦{totalWholesaleCost.toLocaleString()}</span>
+              </p>
+            </div>
+            <a
+              href={`https://wa.me/?text=${buildSupplierMessage()}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-colors"
+            >
+              <MessageCircle className="w-3.5 h-3.5" />
+              Forward
+            </a>
+          </div>
+        </div>
+      )}
 
       {order.paymentEvidenceUrl && (
         <PaymentEvidenceViewer

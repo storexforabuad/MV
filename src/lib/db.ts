@@ -156,6 +156,8 @@ export async function getStoreMeta(storeId: string): Promise<StoreMeta | null> {
   }
 }
 
+import { syncDropshippedProductsInventory } from '../app/actions/wholesaleActions';
+
 export async function updateProduct(storeId: string, productId: string, data: Partial<Product>): Promise<void> {
   try {
     const productRef = doc(db, 'stores', storeId, 'products', productId);
@@ -186,6 +188,21 @@ export async function updateProduct(storeId: string, productId: string, data: Pa
       }
 
       await updateDoc(productRef, sanitizedData);
+
+      // --- B2B Dropshipping Sync ---
+      // If inventory-related fields are updated, sync them to all resellers who copied this product.
+      const syncFields: any = {};
+      if ('soldOut' in sanitizedData) syncFields.soldOut = sanitizedData.soldOut;
+      if ('limitedStock' in sanitizedData) syncFields.limitedStock = sanitizedData.limitedStock;
+      if ('quantity' in sanitizedData) syncFields.quantity = sanitizedData.quantity;
+      if ('stock' in sanitizedData) syncFields.stock = (sanitizedData as any).stock;
+
+      if (Object.keys(syncFields).length > 0) {
+        // Fire and forget, or await to gracefully handle
+        syncDropshippedProductsInventory(productId, syncFields).catch(err => {
+          console.error('[Dropship Sync] Failed to sync inventory for', productId, err);
+        });
+      }
     }
   } catch (error) {
     console.error('Error updating product:', error);

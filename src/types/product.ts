@@ -27,6 +27,12 @@ interface BaseProduct {
     }>;
     customPartnerDiscounts?: Record<string, number>;  // partnerId -> discount %
   };
+
+  // Dropshipping (B2B Copied Products)
+  isDropshipped?: boolean;
+  supplierId?: string;         // ID of the store that originally created the product
+  sourceProductId?: string;    // ID of the original product in the supplier's store
+  wholesaleCost?: number;      // How much the reseller owes the supplier per unit
 }
 
 // ==========================================

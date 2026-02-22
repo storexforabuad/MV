@@ -30,8 +30,6 @@ import { AdvertisingModal } from './modals/AdvertisingModal';
 import { EventsModal } from './modals/EventsModal';
 import SubscriptionModal from './modals/SubscriptionModal';
 import WarehouseModal from './modals/WarehouseModal';
-import WholesaleModal from './modals/WholesaleModal';
-
 // Import the customer components
 import { AdminCustomersCard } from './AdminCustomersCard';
 import { CustomersListModal } from './CustomersListModal';
@@ -340,20 +338,6 @@ const MetricCard = ({ icon: Icon, label, count, gradient, glowClass, onClick, in
     </button>
   </motion.div>
 );
-
-const handleTestNotification = async (storeId: string) => {
-  if (!confirm('Send test notification?')) return;
-  try {
-    const result = await sendVendorNotification(storeId, 'TEST-ORDER-123', 'Test Customer');
-    if (result.success) {
-      alert('Test notification sent! Check your other device.');
-    } else {
-      alert(`Failed: ${result.error}`);
-    }
-  } catch (error: any) {
-    alert(`Error: ${error.message}`);
-  }
-};
 
 export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const router = useRouter();
@@ -1045,14 +1029,6 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         <WarehouseModal
           isOpen={isWarehouseModalOpen}
           onClose={handleCloseWarehouseModal}
-        />
-      )}
-
-      {isWholesaleModalOpen && (
-        <WholesaleModal
-          isOpen={isWholesaleModalOpen}
-          onClose={handleCloseWholesaleModal}
-          storeId={storeId}
         />
       )}
 

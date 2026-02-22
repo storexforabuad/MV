@@ -8,6 +8,7 @@ import {
   HomeIcon as HomeIconSolid,
   BuildingStorefrontIcon as BuildingStorefrontIconSolid
 } from '@heroicons/react/24/solid';
+import { Warehouse as WarehouseOutline } from 'lucide-react';
 import { useSpotlightContext } from '@/context/SpotlightContext';
 
 interface MobileNavProps {
@@ -22,8 +23,6 @@ interface MobileNavProps {
 
 const navItems = [
   { id: 'home', iconOutline: HomeIconOutline, iconSolid: HomeIconSolid, label: 'Home' },
-  // revert to 'preview' id to preserve existing callers
-  { id: 'preview', iconOutline: BuildingStorefrontIconOutline, iconSolid: BuildingStorefrontIconSolid, label: 'Store' },
   { id: 'add', iconOutline: PlusIcon, iconSolid: PlusIcon, label: 'Upload' },
 ];
 
@@ -32,7 +31,7 @@ const MobileNav = ({ activeSection, setActiveSection, onAddProductClick, onManag
 
   const handleClick = (item: typeof navItems[0]) => {
     if (isRefreshing) return; // Disable nav clicks during refresh
-    
+
     if (item.id === 'add') {
       onAddProductClick();
     } else if (item.id === 'manage') {
@@ -46,7 +45,7 @@ const MobileNav = ({ activeSection, setActiveSection, onAddProductClick, onManag
   };
 
   const HomeIconComponent = activeSection === 'home' ? HomeIconSolid : HomeIconOutline;
-  const StoreIconComponent = activeSection === 'preview' ? BuildingStorefrontIconSolid : BuildingStorefrontIconOutline;
+  const StoreIconComponent = activeSection === 'warehouse' ? WarehouseOutline : WarehouseOutline;
 
   return (
     <nav
@@ -74,23 +73,14 @@ const MobileNav = ({ activeSection, setActiveSection, onAddProductClick, onManag
           {/* Center spacer reserved for the floating + button */}
           <div className="w-16 flex justify-center items-center" aria-hidden />
 
-          <div className="flex-1 flex justify-center items-center">
-            {/* Store button (right) - icon + label */}
-            <button
-              onClick={() => handleClick(navItems[1])}
-              className={`flex flex-col items-center justify-center h-14 w-14 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-1 focus:ring-offset-0 focus:ring-blue-400/50 ${activeSection === 'preview' ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-neutral-400'}`}
-              style={{ WebkitTapHighlightColor: 'transparent' }}
-            >
-              <StoreIconComponent className="h-6 w-6" strokeWidth={activeSection === 'preview' ? 2 : 1.5} />
-              <span className={`text-xs font-medium mt-1 tracking-tight ${activeSection === 'preview' ? 'font-semibold' : 'font-normal'}`}>Store</span>
-            </button>
-          </div>
+          {/* Right side is intentionally left blank for a 2-tab layout */}
+          <div className="flex-1 flex justify-center items-center" aria-hidden />
         </div>
 
         {/* Centered + button */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
           <button
-            onClick={() => handleClick(navItems[2])}
+            onClick={() => handleClick(navItems[1])}
             className="w-16 h-16 bg-neutral-800 dark:bg-neutral-100 rounded-full shadow-lg flex items-center justify-center text-white dark:text-black focus:outline-none focus:ring-2 focus:ring-offset-4 focus:ring-offset-background dark:focus:ring-offset-zinc-800 focus:ring-neutral-500 transition-transform duration-200 ease-in-out hover:scale-105 active:scale-95"
             aria-label="Add product"
           >

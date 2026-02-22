@@ -23,7 +23,7 @@ function SecuritySection({
   updateField,
 }: {
   formData: Partial<any>;
-  updateField: (key: string, value: any) => void;
+  updateField: (key: keyof StoreMeta, value: any) => void;
 }) {
   const hasExistingPin = !!(formData.adminPin && formData.adminPin.length === 4);
   const [changingPin, setChangingPin] = useState(false);
@@ -117,10 +117,10 @@ function SecuritySection({
                 value={confirmPin}
                 onChange={e => handleConfirmChange(e.target.value.replace(/\D/g, '').slice(0, 4))}
                 className={`w-full p-3.5 pl-10 bg-slate-50 dark:bg-slate-950 border rounded-xl focus:ring-2 outline-none transition-all tracking-[1em] text-lg font-bold ${pinError
-                    ? 'border-red-400 focus:ring-red-400'
-                    : newPin && confirmPin && newPin === confirmPin && newPin.length === 4
-                      ? 'border-green-400 focus:ring-green-400'
-                      : 'border-slate-200 dark:border-slate-800 focus:ring-indigo-500'
+                  ? 'border-red-400 focus:ring-red-400'
+                  : newPin && confirmPin && newPin === confirmPin && newPin.length === 4
+                    ? 'border-green-400 focus:ring-green-400'
+                    : 'border-slate-200 dark:border-slate-800 focus:ring-indigo-500'
                   }`}
                 placeholder="••••"
               />
@@ -191,6 +191,13 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
           const data = snap.data() as StoreMeta;
           setFormData(data);
           setInitialData(data);
+
+          if (data.adminPin === '0000') {
+            setActiveSection('security');
+          } else {
+            // Reset to business if opened again and pin is not 0000 (though we mount/unmount the modal)
+            setActiveSection('business');
+          }
         }
       } catch (err) {
         console.error('Failed to load account info', err);

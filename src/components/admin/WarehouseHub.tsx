@@ -22,40 +22,24 @@ import {
   Clock,
   AlertCircle,
 } from 'lucide-react';
-import {
-  sendWholesaleRequest,
-  getDiscoverableStores,
-  getWholesalePartners,
-  getWholesaleRequests,
-  pauseWholesalePartner,
-  resumeWholesalePartner,
-  removeWholesalePartner,
-  updateWholesaleConfig,
-  acceptWholesaleRequest,
-  rejectWholesaleRequest,
-  blockWholesaleRequest,
-} from '@/app/actions/wholesaleActions';
+import { sendWholesaleRequest, getDiscoverableStores, getWholesalePartners, getWholesaleRequests, pauseWholesalePartner, resumeWholesalePartner, removeWholesalePartner, updateWholesaleConfig, acceptWholesaleRequest, rejectWholesaleRequest, blockWholesaleRequest } from '@/app/actions/wholesaleActions';
 import { StoreMeta } from '@/types/store';
 import { WholesalePartner, WholesaleRequest } from '@/types/wholesale';
-import { PartnerDetailModal } from './PartnerDetailModal';
-import { OrderReviewModal } from './OrderReviewModal';
+import { PartnerDetailModal } from './modals/PartnerDetailModal';
+import { OrderReviewModal } from './modals/OrderReviewModal';
 import toast from 'react-hot-toast';
 
-interface WholesaleModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+interface WarehouseHubProps {
   storeId: string;
   storeName?: string;
 }
 
 type Tab = 'discovery' | 'requests' | 'partners' | 'settings';
 
-export default function WholesaleModal({
-  isOpen,
-  onClose,
+export default function WarehouseHub({
   storeId,
   storeName = 'Store',
-}: WholesaleModalProps) {
+}: WarehouseHubProps) {
   const [activeTab, setActiveTab] = useState<Tab>('discovery');
   const [loading, setLoading] = useState(false);
 
@@ -97,8 +81,7 @@ export default function WholesaleModal({
 
   // Load data based on active tab
   useEffect(() => {
-    if (!isOpen) return;
-
+    // We removed isOpen, so this effect runs on mount and tab changes
     const loadData = async () => {
       setLoading(true);
       try {
@@ -130,7 +113,7 @@ export default function WholesaleModal({
     };
 
     loadData();
-  }, [isOpen, activeTab, storeId, searchQuery, sortBy]);
+  }, [activeTab, storeId, searchQuery, sortBy]);
 
   // Load partner store data when partner is selected
   useEffect(() => {
@@ -292,142 +275,102 @@ export default function WholesaleModal({
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        onClick={onClose}
-        className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
-      >
-        <motion.div
-          initial={{ y: '100%', opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: '100%', opacity: 0 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          onClick={(e) => e.stopPropagation()}
-          className="fixed bottom-0 left-0 right-0 z-50 flex flex-col max-h-[90vh] rounded-t-3xl bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
-        >
-          {/* --- Header --- */}
-          <header className="flex-shrink-0 w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
-            <div className="max-w-5xl mx-auto px-4 sm:px-6">
-              <div className="flex items-center justify-between py-4 sm:py-6">
-                <div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
-                    Wholesale Hub
-                  </h2>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">Discover partners & manage wholesale orders</p>
-                </div>
-                <button
-                  onClick={onClose}
-                  className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-
-              {/* Tabs */}
-              <div className="flex gap-2 sm:gap-4 py-4 border-t border-slate-200 dark:border-slate-700">
-                {(['discovery', 'requests', 'partners', 'settings'] as Tab[]).map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
-                    className={`px-4 py-2 rounded-lg font-medium transition-all ${
-                      activeTab === tab
-                        ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
-                    }`}
-                  >
-                    {tab === 'discovery' && 'Discover'}
-                    {tab === 'requests' && `Requests${incomingRequests.length > 0 ? ` (${incomingRequests.length})` : ''}`}
-                    {tab === 'partners' && 'Partners'}
-                    {tab === 'settings' && 'Settings'}
-                  </button>
-                ))}
-              </div>
+    <div className="flex flex-col h-full bg-white dark:bg-slate-900 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative z-0">
+      {/* --- Header --- */}
+      <header className="flex-shrink-0 w-full border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md">
+        <div className="px-6">
+          <div className="flex items-center justify-between py-5">
+            <div>
+              <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-600 to-amber-600 dark:from-orange-400 dark:to-amber-500">
+                B2B Dropshipping Hub
+              </h2>
+              <p className="text-sm text-slate-500 dark:text-slate-400">Discover partners & source wholesale products</p>
             </div>
-          </header>
+          </div>
 
-          {/* --- Main Scrollable Content --- */}
-          <main className="flex-grow w-full max-w-5xl mx-auto overflow-y-auto p-4 sm:p-6 scrollbar-hide">
-            {loading && (
-              <div className="flex items-center justify-center h-full min-h-[400px]">
-                <div className="animate-spin">
-                  <ShoppingCart className="w-10 h-10 text-amber-500" />
-                </div>
-              </div>
-            )}
-
-            {!loading && activeTab === 'discovery' && (
-              <DiscoveryTab
-                stores={discoverableStores}
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                sortBy={sortBy}
-                onSortChange={setSortBy}
-                onRequestClick={(store) => {
-                  setSelectedStore(store);
-                  setShowSendRequest(true);
-                }}
-              />
-            )}
-
-            {!loading && activeTab === 'requests' && (
-              <RequestsTab
-                incoming={incomingRequests}
-                outgoing={outgoingRequests}
-                onAccept={handleAcceptRequest}
-                onReject={handleRejectRequest}
-                onBlock={handleBlockRequest}
-              />
-            )}
-
-            {!loading && activeTab === 'partners' && (
-              <PartnersTab
-                partners={partners}
-                onPause={handlePausePartner}
-                onRemove={handleRemovePartner}
-                onPartnerClick={(partner) => {
-                  setSelectedPartner(partner);
-                  setShowPartnerDetail(true);
-                }}
-              />
-            )}
-
-            {!loading && activeTab === 'settings' && (
-              <SettingsTab
-                isVisible={isVisible}
-                onVisibilityChange={setIsVisible}
-                globalDiscount={globalDiscount}
-                onDiscountChange={setGlobalDiscount}
-                minOrderValue={minOrderValue}
-                onMinOrderChange={setMinOrderValue}
-                paymentTerms={paymentTerms}
-                onPaymentTermsChange={setPaymentTerms}
-                onSave={handleUpdateConfig}
-                saving={loading}
-              />
-            )}
-          </main>
-
-          {/* --- Footer --- */}
-          <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-slate-700">
-            <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent dark:from-slate-950 dark:to-transparent pointer-events-none" />
-            <div className="relative max-w-5xl mx-auto">
-              <motion.button
-                onClick={onClose}
-                className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
-                whileTap={{ scale: 0.98 }}
+          {/* Tabs */}
+          <div className="flex gap-2 sm:gap-4 py-2">
+            {(['discovery', 'requests', 'partners', 'settings'] as Tab[]).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={`px-4 py-2 text-sm rounded-lg font-medium transition-all ${activeTab === tab
+                  ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
+                  }`}
               >
-                Done
-              </motion.button>
+                {tab === 'discovery' && 'Discover'}
+                {tab === 'requests' && `Requests${incomingRequests.length > 0 ? ` (${incomingRequests.length})` : ''}`}
+                {tab === 'partners' && 'Partners'}
+                {tab === 'settings' && 'Settings'}
+              </button>
+            ))}
+          </div>
+        </div>
+      </header>
+
+      {/* --- Main Scrollable Content --- */}
+      <main className="flex-grow w-full overflow-y-auto p-6 scrollbar-hide">
+        {loading && (
+          <div className="flex items-center justify-center h-full min-h-[400px]">
+            <div className="animate-spin">
+              <ShoppingCart className="w-10 h-10 text-amber-500" />
             </div>
-          </footer>
-        </motion.div>
-      </motion.div>
+          </div>
+        )}
+
+        {!loading && activeTab === 'discovery' && (
+          <DiscoveryTab
+            stores={discoverableStores}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            sortBy={sortBy}
+            onSortChange={setSortBy}
+            onRequestClick={(store) => {
+              setSelectedStore(store);
+              setShowSendRequest(true);
+            }}
+          />
+        )}
+
+        {!loading && activeTab === 'requests' && (
+          <RequestsTab
+            incoming={incomingRequests}
+            outgoing={outgoingRequests}
+            onAccept={handleAcceptRequest}
+            onReject={handleRejectRequest}
+            onBlock={handleBlockRequest}
+          />
+        )}
+
+        {!loading && activeTab === 'partners' && (
+          <PartnersTab
+            partners={partners}
+            onPause={handlePausePartner}
+            onRemove={handleRemovePartner}
+            onPartnerClick={(partner) => {
+              setSelectedPartner(partner);
+              setShowPartnerDetail(true);
+            }}
+          />
+        )}
+
+        {!loading && activeTab === 'settings' && (
+          <SettingsTab
+            isVisible={isVisible}
+            onVisibilityChange={setIsVisible}
+            globalDiscount={globalDiscount}
+            onDiscountChange={setGlobalDiscount}
+            minOrderValue={minOrderValue}
+            onMinOrderChange={setMinOrderValue}
+            paymentTerms={paymentTerms}
+            onPaymentTermsChange={setPaymentTerms}
+            onSave={handleUpdateConfig}
+            saving={loading}
+          />
+        )}
+      </main>
 
       {/* Send Request Modal */}
       <SendRequestModal
@@ -445,59 +388,63 @@ export default function WholesaleModal({
       />
 
       {/* Partner Detail Modal */}
-      {selectedPartner && partnerStoreData && (
-        <PartnerDetailModal
-          partner={partnerStoreData}
-          buyerStoreId={storeId}
-          isOpen={showPartnerDetail}
-          onClose={() => {
-            setShowPartnerDetail(false);
-            setSelectedPartner(null);
-            setPartnerStoreData(null);
-          }}
-          onOrderReview={(items, total, paymentTerms) => {
-            setOrderItems(items);
-            setOrderTotal(total);
-            setOrderPaymentTerms(paymentTerms as 0 | 7 | 14 | 30);
-            setShowPartnerDetail(false);
-            setShowOrderReview(true);
-          }}
-        />
-      )}
+      {
+        selectedPartner && partnerStoreData && (
+          <PartnerDetailModal
+            partner={partnerStoreData}
+            buyerStoreId={storeId}
+            isOpen={showPartnerDetail}
+            onClose={() => {
+              setShowPartnerDetail(false);
+              setSelectedPartner(null);
+              setPartnerStoreData(null);
+            }}
+            onOrderReview={(items, total, paymentTerms) => {
+              setOrderItems(items);
+              setOrderTotal(total);
+              setOrderPaymentTerms(paymentTerms as 0 | 7 | 14 | 30);
+              setShowPartnerDetail(false);
+              setShowOrderReview(true);
+            }}
+          />
+        )
+      }
 
       {/* Order Review Modal */}
-      {selectedPartner && partnerStoreData && (
-        <OrderReviewModal
-          partner={partnerStoreData}
-          buyerStoreId={storeId}
-          items={orderItems}
-          total={orderTotal}
-          paymentTermsDays={orderPaymentTerms}
-          isOpen={showOrderReview}
-          onClose={() => {
-            setShowOrderReview(false);
-            setOrderItems([]);
-            setOrderTotal(0);
-            setOrderPaymentTerms(0);
-          }}
-          onSuccess={(orderId) => {
-            toast.success('Order created successfully!');
-            setShowOrderReview(false);
-            setOrderItems([]);
-            setOrderTotal(0);
-            setOrderPaymentTerms(0);
-            // Reload partners to show updated stats
-            const reloadPartners = async () => {
-              const result = await getWholesalePartners(storeId);
-              if (result.success && result.partners) {
-                setPartners(result.partners);
-              }
-            };
-            reloadPartners();
-          }}
-        />
-      )}
-    </AnimatePresence>
+      {
+        selectedPartner && partnerStoreData && (
+          <OrderReviewModal
+            partner={partnerStoreData}
+            buyerStoreId={storeId}
+            items={orderItems}
+            total={orderTotal}
+            paymentTermsDays={orderPaymentTerms}
+            isOpen={showOrderReview}
+            onClose={() => {
+              setShowOrderReview(false);
+              setOrderItems([]);
+              setOrderTotal(0);
+              setOrderPaymentTerms(0);
+            }}
+            onSuccess={(orderId) => {
+              toast.success('Order created successfully!');
+              setShowOrderReview(false);
+              setOrderItems([]);
+              setOrderTotal(0);
+              setOrderPaymentTerms(0);
+              // Reload partners to show updated stats
+              const reloadPartners = async () => {
+                const result = await getWholesalePartners(storeId);
+                if (result.success && result.partners) {
+                  setPartners(result.partners);
+                }
+              };
+              reloadPartners();
+            }}
+          />
+        )
+      }
+    </div>
   );
 }
 
@@ -713,11 +660,10 @@ function RequestsTab({
                   </p>
                   <div className="flex items-center gap-2 mt-1">
                     <span
-                      className={`text-xs font-medium px-2 py-1 rounded ${
-                        req.status === 'pending'
-                          ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
-                          : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                      }`}
+                      className={`text-xs font-medium px-2 py-1 rounded ${req.status === 'pending'
+                        ? 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
+                        : 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                        }`}
                     >
                       {req.status === 'pending' ? 'Pending' : 'Accepted'}
                     </span>
@@ -774,11 +720,10 @@ function PartnersTab({
                     {partner.partnerStoreName}
                   </button>
                   <span
-                    className={`text-xs font-medium px-2 py-1 rounded ${
-                      partner.status === 'active'
-                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                        : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
-                    }`}
+                    className={`text-xs font-medium px-2 py-1 rounded ${partner.status === 'active'
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+                      : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
+                      }`}
                   >
                     {partner.status === 'active' ? 'Active' : 'Paused'}
                   </span>
@@ -867,14 +812,12 @@ function SettingsTab({
           </label>
           <button
             onClick={() => onVisibilityChange(!isVisible)}
-            className={`relative inline-flex h-8 w-14 items-center rounded-full transition ${
-              isVisible ? 'bg-green-600' : 'bg-gray-300 dark:bg-gray-600'
-            }`}
+            className={`relative inline-flex h-8 w-14 items-center rounded-full transition ${isVisible ? 'bg-green-600' : 'bg-gray-300 dark:bg-gray-600'
+              }`}
           >
             <span
-              className={`inline-block h-6 w-6 transform rounded-full bg-white transition ${
-                isVisible ? 'translate-x-7' : 'translate-x-1'
-              }`}
+              className={`inline-block h-6 w-6 transform rounded-full bg-white transition ${isVisible ? 'translate-x-7' : 'translate-x-1'
+                }`}
             />
           </button>
         </div>
