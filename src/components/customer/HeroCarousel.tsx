@@ -79,6 +79,7 @@ export default function HeroCarousel({ storeMeta }: HeroCarouselProps) {
                     <Image
                         src={welcomeImage}
                         fill
+                        priority
                         className="object-cover opacity-60"
                         alt={badgeText}
                     />

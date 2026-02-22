@@ -1,6 +1,7 @@
 'use client';
-import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays, CheckCircle2, Briefcase, ShieldCheck, Clock, AlertCircle, ExternalLink, Warehouse } from 'lucide-react';
+import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays, CheckCircle2, Briefcase, ShieldCheck, Clock, AlertCircle, ExternalLink, Warehouse, Settings, ArrowLeft } from 'lucide-react';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useVendor } from '@/context/VendorContext';
 import { motion, Variants } from 'framer-motion';
 import { useSpotlightContext } from '@/context/SpotlightContext';
@@ -127,36 +128,24 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     glowClass: 'dark:shadow-orange-500/30 shadow-orange-500/50',
     cardType: 'action',
   },
-  /* {
-    label: 'Advert',
-    subtitle: 'Boost Sales',
-    icon: Megaphone,
-    gradient: 'bg-gradient-to-br from-pink-500 via-rose-500 to-purple-600',
-    text: 'text-white',
-    component: null,
-    glowClass: 'dark:shadow-pink-500/30 shadow-pink-500/50',
-  }, */
-
   {
     label: 'Circles',
     icon: Users,
-    gradient: 'linear-gradient(135deg,#10B981 0%,#3B82F6 100%)',
+    gradient: 'linear-gradient(135deg,#34C759 0%,#28CD41 100%)',
     text: 'text-white',
     component: null,
-    glowClass: 'dark:shadow-indigo-500/30 shadow-indigo-500/50',
+    glowClass: 'dark:shadow-green-500/30 shadow-green-500/50',
     cardType: 'action',
   },
-
   {
-    label: 'Content',
+    label: 'Share',
     icon: Send,
-    gradient: 'linear-gradient(135deg,#8B5CF6 0%,#EC4899 100%)',
+    gradient: 'linear-gradient(135deg,#FF9500 0%,#FF3B30 100%)',
     text: 'text-white',
     component: null,
-    glowClass: 'dark:shadow-pink-600/30 shadow-pink-500/50',
+    glowClass: 'dark:shadow-orange-600/30 shadow-orange-500/50',
     cardType: 'action',
   },
-
   {
     label: 'Revenue',
     valueKey: 'totalRevenue',
@@ -231,7 +220,7 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     label: 'Manage Categories',
     valueKey: 'totalCategories',
     icon: Tag,
-    gradient: 'linear-gradient(135deg,#D946EF 0%,#FB923C 100%)',
+    gradient: 'linear-gradient(135deg,#FFD60A 0%,#FFCC00 100%)',
     text: 'text-white',
     component: null,
     glowClass: 'dark:shadow-rose-500/30 shadow-amber-500/50',
@@ -241,19 +230,19 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     label: 'Manage Products',
     valueKey: 'totalProducts',
     icon: Archive,
-    gradient: 'linear-gradient(135deg,#3B82F6 0%,#6366F1 100%)',
+    gradient: 'linear-gradient(135deg,#FF3B30 0%,#FF2D55 100%)',
     text: 'text-white',
     component: null,
-    glowClass: 'dark:shadow-indigo-600/30 shadow-indigo-600/50',
+    glowClass: 'dark:shadow-red-600/30 shadow-red-600/50',
     cardType: 'metric',
   },
   {
-    label: 'Account',
-    icon: Briefcase,
-    gradient: 'linear-gradient(135deg,#7C3AED 0%,#A78BFA 100%)',
+    label: 'Settings',
+    icon: Settings,
+    gradient: 'linear-gradient(135deg,#8E8E93 0%,#636366 100%)',
     text: 'text-white',
     component: AccountModal,
-    glowClass: 'dark:shadow-violet-600/30 shadow-violet-500/50',
+    glowClass: 'dark:shadow-gray-600/30 shadow-gray-500/50',
     cardType: 'action',
   },
   {
@@ -329,6 +318,7 @@ const handleTestNotification = async (storeId: string) => {
 };
 
 export default function AdminHomeCards(props: AdminHomeCardsProps) {
+  const router = useRouter();
   const { spotlightStep, completeSpotlight } = useSpotlightContext();
   const [openModal, setOpenModal] = useState<number | null>(null);
   const [isTipsModalOpen, setIsTipsModalOpen] = useState(false);
@@ -364,6 +354,12 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [refreshing, setRefreshing] = useState(false);
   const { setIsModalOpen, onRefresh, uiVisible, onAnimationComplete, onOrdersCardClick, onProductsCardClick, storeId, onAmbassadorCardClick } = props;
   const { vendor, promptLogin } = useVendor();
+
+  // Prefetch storefront route on mount so Back to Store is instant
+  useEffect(() => {
+    if (storeId) router.prefetch(`/${storeId}`);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeId]);
 
   useEffect(() => {
     if (!storeId) return;
@@ -432,10 +428,9 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
   const ordersIndex = cardData.findIndex(card => card.label === 'Orders');
 
-  // Filter to show only specific cards (include Content)
-  const allowedCards = ['Views', 'Manage Categories', 'Manage Products', 'Account', 'Subscription', 'Content', 'Circles'];
-  const filteredCardData = cardData.filter(card => allowedCards.includes(card.label));
-  const cardsToRender = [...filteredCardData];
+  // Filter to show only specific cards
+  const allowedCards = ['Share', 'Settings', 'Views', 'Manage Categories', 'Manage Products', 'Subscription', 'Circles'];
+  const cardsToRender = cardData.filter(card => allowedCards.includes(card.label));
 
   useEffect(() => {
     const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen || isAdvertisingModalOpen || isEventsModalOpen || isSubscriptionModalOpen || isAccountModalOpen || isWarehouseModalOpen || isWholesaleModalOpen || isCirclesModalOpen;
@@ -480,7 +475,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     if (label === 'BizConnect™') setIsBizconNetworkModalOpen(true);
     else if (label === 'Tips') setIsTipsModalOpen(true);
     else if (label === 'Views') setIsViewsModalOpen(true);
-    else if (label === 'Content') setIsSocialPostsModalOpen(true);
+    else if (label === 'Share') setIsSocialPostsModalOpen(true);
     else if (label === 'Commission') setIsCommissionModalOpen(true);
     else if (label === 'Ambassador') onAmbassadorCardClick();
     else if (label === 'Manage Categories') props.openManageCategories();
@@ -494,7 +489,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     else if (label === 'Warehouse') setIsWarehouseModalOpen(true);
     else if (label === 'Wholesale') setIsWholesaleModalOpen(true);
     else if (label === 'Subscription') setIsSubscriptionModalOpen(true);
-    else if (label === 'Account') setIsAccountModalOpen(true);
+    else if (label === 'Settings') setIsAccountModalOpen(true);
     else if (label === 'Circles') setIsCirclesModalOpen(true);
     else setOpenModal(idx);
 
@@ -677,26 +672,26 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         className="mb-4"
       >
         <button
-          onClick={() => window.open(props.storeLink, '_blank')}
+          onClick={() => router.push('/' + storeId)}
           className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-bold py-4 px-5 rounded-2xl shadow-sm hover:shadow-md transition-all flex items-center gap-4 group relative overflow-hidden"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+          <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
 
           <div className="relative flex-shrink-0">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-              <Globe className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+            <div className="w-12 h-12 rounded-2xl bg-green-50 dark:bg-green-900/30 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+              <Globe className="w-6 h-6 text-green-600 dark:text-green-400" />
             </div>
             <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 border-2 border-white dark:border-slate-900 rounded-full animate-pulse" />
           </div>
 
           <div className="flex flex-col items-start text-left min-w-0">
-            <span className="text-base font-bold tracking-tight truncate w-full">View Onlinestore</span>
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate w-full">See your shop live on the web</span>
+            <span className="text-base font-bold tracking-tight truncate w-full">Back to Store</span>
+            <span className="text-xs text-slate-500 dark:text-slate-400 font-medium truncate w-full">Return to your shop storefront</span>
           </div>
 
           <div className="ml-auto flex items-center gap-2 flex-shrink-0">
-            <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800 group-hover:bg-indigo-50 dark:group-hover:bg-indigo-900/50 transition-colors">
-              <ExternalLink className="w-5 h-5 text-slate-400 group-hover:text-indigo-500" />
+            <div className="p-2 rounded-xl bg-slate-50 dark:bg-slate-800 group-hover:bg-green-50 dark:group-hover:bg-green-900/50 transition-colors">
+              <ArrowLeft className="w-5 h-5 text-slate-400 group-hover:text-green-500" />
             </div>
           </div>
         </button>
@@ -898,7 +893,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
           const Icon = card.icon;
           const isTipsCard = card.label === 'Tips';
-          const isPostsCard = card.label === 'Content';
+          const isPostsCard = card.label === 'Share';
           const spotlightClasses = spotlightStep === 'tips' && isTipsCard ? 'relative z-50 pointer-events-auto' : '';
 
           // Render metric cards (Revenue, Views, Products, Categories, Orders, Deliveries, Wholesale, etc.)
@@ -918,7 +913,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             return <MetricCard key={card.label} icon={Icon} label={card.label} count={metricValue} gradient={card.gradient} glowClass={card.glowClass} onClick={() => handleOpenModal(idx, card)} inlineStyle={inlineStyle} />;
           }
 
-          // Render action cards (BizConnect™, Tips, Content, Account, Subscription, Warehouse, Events)
+          // Render action cards (BizConnect™, Tips, Share, Settings, Subscription, Warehouse, Events)
           if (card.cardType === 'action') {
             return (
               <motion.div key={card.label} variants={itemVariants} className={`relative h-full ${spotlightClasses}`}>

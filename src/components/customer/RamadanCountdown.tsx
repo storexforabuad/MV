@@ -249,7 +249,7 @@ export default function RamadanCountdown({ className, storeName }: { className?:
             <div className={className}>
                 <div className="relative overflow-hidden rounded-[2.5rem] bg-indigo-950 border border-amber-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] h-full flex flex-col justify-center">
                     <div className="absolute inset-0">
-                        <Image src="/images/events/ramadan_2026_new.png" alt="Ramadan Background" fill className="object-cover opacity-40 scale-110" />
+                        <Image src="/images/events/ramadan_2026_new.png" alt="Ramadan Background" fill priority className="object-cover opacity-40 scale-110" />
                         <div className="absolute inset-0 bg-gradient-to-b from-indigo-950/90 via-indigo-950/40 to-indigo-950/90" />
                     </div>
                     {/* Store Name Overlay */}
@@ -320,7 +320,7 @@ export default function RamadanCountdown({ className, storeName }: { className?:
                 >
                     {/* Background */}
                     <div className="absolute inset-0">
-                        <Image src="/images/events/ramadan_2026_new.png" alt="Ramadan Background" fill className="object-cover opacity-30 scale-110" />
+                        <Image src="/images/events/ramadan_2026_new.png" alt="Ramadan Background" fill priority className="object-cover opacity-30 scale-110" />
                         <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/95 via-indigo-950/70 to-purple-950/90" />
                     </div>
                     {/* Store Name Overlay */}
@@ -510,7 +510,7 @@ export default function RamadanCountdown({ className, storeName }: { className?:
         <div className={className}>
             <div className="relative overflow-hidden rounded-[2.5rem] bg-indigo-950 border border-amber-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] h-full flex flex-col justify-center">
                 <div className="absolute inset-0">
-                    <Image src="/images/events/ramadan_2026_new.png" alt="Eid Background" fill className="object-cover opacity-25 scale-110" />
+                    <Image src="/images/events/ramadan_2026_new.png" alt="Eid Background" fill priority className="object-cover opacity-25 scale-110" />
                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/95 via-purple-950/80 to-indigo-950/95" />
                 </div>
                 {/* Store Name Overlay */}

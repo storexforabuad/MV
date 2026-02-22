@@ -7,6 +7,8 @@ import { Heart, Moon, Sun, ShoppingBag, ArrowLeft } from 'lucide-react';
 import { useCart } from '@/lib/cartContext';
 import { useTheme } from '@/lib/themeContext';
 import { usePathname, useRouter } from 'next/navigation';
+import PinEntryModal from '../modals/PinEntryModal';
+import { getAdminSession } from '@/lib/adminSession';
 
 interface NavbarProps {
   storeId?: string;
@@ -53,11 +55,17 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
   const [tapCount, setTapCount] = useState(0); // 0..3
   const idleResetRef = useRef<number | null>(null);
   const lastTapTsRef = useRef<number>(0);
+  const isMountedRef = useRef(true);
+
+  useEffect(() => {
+    return () => { isMountedRef.current = false; };
+  }, []);
 
   const TAP_MIN_INTERVAL = 40; // ms, ignore faster taps
   const TAP_IDLE_TIMEOUT = 1500; // ms to reset
   const SUCCESS_HOLD = 250; // ms to hold green before triggering
   const COLOR_TRANSITION_MS = 180; // ms
+  const [isPinModalOpen, setIsPinModalOpen] = useState(false);
 
   const [reducedMotion, setReducedMotion] = useState(false);
   useEffect(() => {
@@ -70,7 +78,37 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
     }
   }, []);
 
+  // Prefetch admin route as soon as navbar mounts on a storefront page
+  useEffect(() => {
+    if (storeId && !isAdminRoute) {
+      router.prefetch(`/admin/${storeId}`);
+      router.prefetch(`/${storeId}`);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeId]);
+
   const resetTaps = () => {
+    setTapCount(0);
+    if (idleResetRef.current) {
+      clearTimeout(idleResetRef.current);
+      idleResetRef.current = null;
+    }
+  };
+
+  const tapCountRef = useRef(0);
+
+  const doTrigger = () => {
+    if (!storeId) return;
+    const session = getAdminSession(storeId);
+    if (session) {
+      router.push(`/admin/${storeId}`);
+    } else {
+      setIsPinModalOpen(true);
+    }
+  };
+
+  const resetTapState = () => {
+    tapCountRef.current = 0;
     setTapCount(0);
     if (idleResetRef.current) {
       clearTimeout(idleResetRef.current);
@@ -83,46 +121,42 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
     if (now - lastTapTsRef.current < TAP_MIN_INTERVAL) return;
     lastTapTsRef.current = now;
 
-    setTapCount((prev) => {
-      const next = Math.min(prev + 1, 3);
+    // Cancel any pending idle reset
+    if (idleResetRef.current) {
+      clearTimeout(idleResetRef.current);
+      idleResetRef.current = null;
+    }
 
-      // schedule idle reset
-      if (idleResetRef.current) {
-        clearTimeout(idleResetRef.current);
-        idleResetRef.current = null;
-      }
-      idleResetRef.current = window.setTimeout(() => resetTaps(), TAP_IDLE_TIMEOUT);
+    tapCountRef.current += 1;
+    // Clamp visual state to 1–3 for colour feedback
+    setTapCount(Math.min(tapCountRef.current, 3));
 
-      if (next === 3) {
-        // hold briefly on green, then trigger prompt
-        if (idleResetRef.current) {
-          clearTimeout(idleResetRef.current);
-          idleResetRef.current = null;
-        }
-        // stronger haptic on final tap
-        try {
-          if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-            // final tap: longer buzz pattern
-            (navigator as any).vibrate([30, 40, 30]);
-          }
-        } catch (e) { }
-        // keep green visible for SUCCESS_HOLD then trigger
-        setTimeout(() => {
-          if (storeId) promptLogin(storeId);
-          resetTaps();
-        }, reducedMotion ? 100 : SUCCESS_HOLD);
-      }
-
-      return next;
-    });
-    // Haptic feedback on supported devices (subtle)
+    // Subtle haptic
     try {
       if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
-        // short vibration for tap
         (navigator as any).vibrate(12);
       }
-    } catch (e) {
-      // ignore vibration errors
+    } catch (e) { }
+
+    if (tapCountRef.current >= 3) {
+      // ✅ Triple-tap reached — final haptic, brief green flash, then trigger
+      try {
+        if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+          (navigator as any).vibrate([30, 40, 30]);
+        }
+      } catch (e) { }
+
+      const delay = reducedMotion ? 100 : 350; // Increased delay slightly to ensure green state is seen
+      setTimeout(() => {
+        doTrigger();
+        resetTapState();
+      }, delay);
+
+    } else {
+      // Schedule idle reset if vendor stops tapping
+      idleResetRef.current = window.setTimeout(() => {
+        resetTapState();
+      }, TAP_IDLE_TIMEOUT) as unknown as number;
     }
   };
 
@@ -238,6 +272,14 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
           </div>
         </div>
       </div>
+
+      {storeId && (
+        <PinEntryModal
+          isOpen={isPinModalOpen}
+          onClose={() => setIsPinModalOpen(false)}
+          storeId={storeId}
+        />
+      )}
     </nav>
   );
 }

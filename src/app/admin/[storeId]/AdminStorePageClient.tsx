@@ -485,83 +485,75 @@ export default function AdminStorePageClient({
         />
       )}
 
-      {!isModalOpen && (
-        <AdminHeader
-          onLogout={handleLogout}
-          isRefreshing={false}
-          storeMeta={storeMeta}
-        />
-      )}
+      <AdminHeader
+        onLogout={handleLogout}
+        isRefreshing={false}
+        storeMeta={storeMeta}
+      />
 
       {/* Install prompt for vendors to install their admin app */}
       <InstallPrompt storeId={storeId} />
 
-      {activeSection !== 'preview' ? (
-        <main className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">
-          <Suspense fallback={<AdminSkeleton contentOnly={true} />}>
-            {activeSection === 'home' && (
-              <div className={`mb-8 transition-opacity duration-500 ${uiVisible ? 'opacity-100' : 'opacity-0'}`}>
-                {false && (
-                  <NotificationCard
-                    notifications={notifications}
-                    onDismiss={handleDismissNotification}
-                    onAction={handleNotificationAction}
-                  />
-                )}
-                <AdminHomeCards
-                  products={products}
-                  categories={categories}
-                  contacts={contacts}
-                  setActiveSection={setActiveSection}
-                  storeLink={`/${storeId}`}
-                  storeType={storeMeta?.storeType}
-                  onRefresh={() => fetchData(true)}
-                  isRefreshing={isRefreshing}
-                  totalProducts={products.length}
-                  totalCategories={categories.length}
-                  totalViews={products.reduce((sum, p) => sum + (p.views || 0), 0) + (storeMeta?.storePageViews || 0)}
-                  debtors={0}
-                  subscriptionStatus={storeMeta?.subscriptionStatus || 'trial'}
-                  referrals={referrals.length}
-                  onReferralAdded={() => fetchData(true)}
-                  totalContacts={contacts.reduce((sum, region) => sum + (region.contacts?.length || 0), 0)}
-                  storeId={storeId}
-                  totalOrders={orders.length}
-                  promoCaption={storeMeta?.promoCaption}
-                  uiVisible={uiVisible}
-                  storeName={storeMeta?.name}
-                  ceoEmail={storeMeta?.ceoEmail}
-                  totalRevenue={realTotalRevenue}
-                  onAnimationComplete={handleAnimationComplete}
-                  onOrdersCardClick={() => setIsOrdersModalOpen(true)}
-                  openManageCategories={() => setIsManageCategoriesModalOpen(true)}
-                  onProductsCardClick={() => setIsManageModalOpen(true)}
-                  onAmbassadorCardClick={() => setIsAmbassadorHubModalOpen(true)}
-                  totalCommission={commissionAnalytics.totalCommission}
-                  totalReferralBonus={totalReferralBonus}
-                  totalExpenses={0}
-                  deliveries={deliveriesCount}
-                  setIsModalOpen={setIsHomeCardModalOpen}
-                  ambassadorTier={ambassadorTier}
-                />
-                <div className="mt-6">
-                  {storeMeta?.storeType === 'sports' && <AdminInvoicePanel storeId={storeId} />}
-                </div>
-              </div>
-            )}
-          </Suspense>
-        </main>
-      ) : (
-        <div className="w-full h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)]">
-          {isPreviewLoading && <PreviewSkeleton />}
-          <iframe
-            src={`/${storeId}`}
-            title="Store Preview"
-            onLoad={() => setIsPreviewLoading(false)}
-            className={`w-full h-full border-0 ${isPreviewLoading ? 'hidden' : 'block'}`}
-          />
+
+      <main className="px-4 sm:px-6 lg:px-8 py-6 max-w-7xl mx-auto">
+        {/* Home Dashboard - Always mounted, visibility toggled */}
+        <div className={`${activeSection !== 'home' ? 'hidden' : ''}`}>
+          <div className={`mb-8 transition-opacity duration-500 ${uiVisible ? 'opacity-100' : 'opacity-0'}`}>
+            <AdminHomeCards
+              products={products}
+              categories={categories}
+              contacts={contacts}
+              setActiveSection={setActiveSection}
+              storeLink={`/${storeId}`}
+              storeType={storeMeta?.storeType}
+              onRefresh={() => fetchData(true)}
+              isRefreshing={isRefreshing}
+              totalProducts={products.length}
+              totalCategories={categories.length}
+              totalViews={products.reduce((sum, p) => sum + (p.views || 0), 0) + (storeMeta?.storePageViews || 0)}
+              debtors={0}
+              subscriptionStatus={storeMeta?.subscriptionStatus || 'trial'}
+              referrals={referrals.length}
+              onReferralAdded={() => fetchData(true)}
+              totalContacts={contacts.reduce((sum, region) => sum + (region.contacts?.length || 0), 0)}
+              storeId={storeId}
+              totalOrders={orders.length}
+              promoCaption={storeMeta?.promoCaption}
+              uiVisible={uiVisible}
+              storeName={storeMeta?.name}
+              ceoEmail={storeMeta?.ceoEmail}
+              totalRevenue={realTotalRevenue}
+              onAnimationComplete={handleAnimationComplete}
+              onOrdersCardClick={() => setIsOrdersModalOpen(true)}
+              openManageCategories={() => setIsManageCategoriesModalOpen(true)}
+              onProductsCardClick={() => setIsManageModalOpen(true)}
+              onAmbassadorCardClick={() => setIsAmbassadorHubModalOpen(true)}
+              totalCommission={commissionAnalytics.totalCommission}
+              totalReferralBonus={totalReferralBonus}
+              totalExpenses={0}
+              deliveries={deliveriesCount}
+              setIsModalOpen={setIsHomeCardModalOpen}
+              ambassadorTier={ambassadorTier}
+            />
+            <div className="mt-6">
+              {storeMeta?.storeType === 'sports' && <AdminInvoicePanel storeId={storeId} />}
+            </div>
+          </div>
         </div>
-      )}
+
+        {/* Store Preview - Always mounted, visibility toggled */}
+        <div className={`${activeSection !== 'preview' ? 'hidden' : ''}`}>
+          <div className="w-full h-[calc(100vh-8rem)] md:h-[calc(100vh-4rem)]">
+            {isPreviewLoading && <PreviewSkeleton />}
+            <iframe
+              src={`/${storeId}`}
+              title="Store Preview"
+              onLoad={() => setIsPreviewLoading(false)}
+              className={`w-full h-full border-0 ${isPreviewLoading ? 'hidden' : 'block'}`}
+            />
+          </div>
+        </div>
+      </main>
 
       {storeMeta?.storeType === 'automotive' ? (
         <AddVehicleComposer

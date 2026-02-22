@@ -82,6 +82,7 @@ export interface StoreMeta {
     lastInvoiceDate?: Timestamp;
     pendingSettlements: number;
   };
+  adminPin?: string; // 4-digit PIN for admin access
 }
 
 export interface ProductCategory {

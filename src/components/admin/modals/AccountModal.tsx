@@ -5,7 +5,7 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/db';
 import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Briefcase, Loader2, User, MapPin, CreditCard, Store, ChevronRight, X } from 'lucide-react';
+import { Briefcase, Loader2, User, MapPin, CreditCard, Store, ChevronRight, X, Lock } from 'lucide-react';
 import { StoreMeta } from '@/types/store';
 import { geography } from '../../../config/geography';
 
@@ -15,8 +15,142 @@ interface AccountModalProps {
   storeId: string;
 }
 
-type Section = 'business' | 'ceo' | 'address' | 'bank';
+type Section = 'business' | 'ceo' | 'address' | 'bank' | 'security';
 
+// ─── SecuritySection sub-component ────────────────────────────────────────────
+function SecuritySection({
+  formData,
+  updateField,
+}: {
+  formData: Partial<any>;
+  updateField: (key: string, value: any) => void;
+}) {
+  const hasExistingPin = !!(formData.adminPin && formData.adminPin.length === 4);
+  const [changingPin, setChangingPin] = useState(false);
+  const [newPin, setNewPin] = useState('');
+  const [confirmPin, setConfirmPin] = useState('');
+  const [pinError, setPinError] = useState('');
+
+  const handlePinChange = (val: string) => {
+    setNewPin(val);
+    setPinError('');
+    if (confirmPin && val !== confirmPin) {
+      setPinError('PINs do not match');
+    } else if (confirmPin && val === confirmPin && val.length === 4) {
+      updateField('adminPin', val);
+      setPinError('');
+    }
+  };
+
+  const handleConfirmChange = (val: string) => {
+    setConfirmPin(val);
+    setPinError('');
+    if (newPin && val !== newPin && val.length === 4) {
+      setPinError('PINs do not match');
+    } else if (newPin && val === newPin && val.length === 4) {
+      updateField('adminPin', val);
+      setPinError('');
+    }
+  };
+
+  return (
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-xl border border-indigo-100 dark:border-indigo-800/50">
+        <p className="text-sm text-indigo-800 dark:text-indigo-200 leading-relaxed">
+          Set a 4-digit PIN to secure your administrative access. Triple-tap your store name on the storefront to enter it.
+        </p>
+      </div>
+
+      {hasExistingPin && !changingPin ? (
+        // Masked display — PIN is already set
+        <div>
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Admin Access PIN</label>
+          <div className="flex items-center gap-3">
+            <div className="flex gap-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setChangingPin(true);
+                setNewPin('');
+                setConfirmPin('');
+                setPinError('');
+              }}
+              className="text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+            >
+              Change PIN
+            </button>
+          </div>
+          <p className="mt-2 text-xs text-slate-500">PIN is set. Tap &ldquo;Change PIN&rdquo; to update it.</p>
+        </div>
+      ) : (
+        // New PIN entry with confirmation
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+              {hasExistingPin ? 'New PIN' : 'Admin Access PIN'}
+            </label>
+            <div className="relative max-w-[200px]">
+              <input
+                type="password"
+                inputMode="numeric"
+                maxLength={4}
+                value={newPin}
+                onChange={e => handlePinChange(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                className="w-full p-3.5 pl-10 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all tracking-[1em] text-lg font-bold"
+                placeholder="••••"
+              />
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Confirm PIN</label>
+            <div className="relative max-w-[200px]">
+              <input
+                type="password"
+                inputMode="numeric"
+                maxLength={4}
+                value={confirmPin}
+                onChange={e => handleConfirmChange(e.target.value.replace(/\D/g, '').slice(0, 4))}
+                className={`w-full p-3.5 pl-10 bg-slate-50 dark:bg-slate-950 border rounded-xl focus:ring-2 outline-none transition-all tracking-[1em] text-lg font-bold ${pinError
+                    ? 'border-red-400 focus:ring-red-400'
+                    : newPin && confirmPin && newPin === confirmPin && newPin.length === 4
+                      ? 'border-green-400 focus:ring-green-400'
+                      : 'border-slate-200 dark:border-slate-800 focus:ring-indigo-500'
+                  }`}
+                placeholder="••••"
+              />
+              <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            </div>
+            {pinError && (
+              <p className="mt-1.5 text-xs text-red-500 font-medium">{pinError}</p>
+            )}
+            {!pinError && newPin && confirmPin && newPin === confirmPin && newPin.length === 4 && (
+              <p className="mt-1.5 text-xs text-green-600 font-medium">✓ PINs match</p>
+            )}
+          </div>
+
+          {hasExistingPin && (
+            <button
+              type="button"
+              onClick={() => { setChangingPin(false); setNewPin(''); setConfirmPin(''); }}
+              className="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+            >
+              Cancel
+            </button>
+          )}
+          <p className="text-xs text-slate-500">Enter exactly 4 digits. Default is 0000.</p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ───────────────────────────────────────────────────────────────────────────────
 export default function AccountModal({ isOpen, handleClose, storeId }: AccountModalProps) {
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
@@ -145,6 +279,7 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
     { id: 'ceo', label: 'CEO Details', icon: User },
     { id: 'address', label: 'Physical Address', icon: MapPin },
     { id: 'bank', label: 'Bank Account', icon: CreditCard },
+    { id: 'security', label: 'Security', icon: Lock },
   ];
 
   const selectedCountry = geography.find(c => c.name === formData.country);
@@ -450,6 +585,11 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
                           </select>
                         </div>
                       </div>
+                    )}
+
+                    {/* --- Security Section --- */}
+                    {activeSection === 'security' && (
+                      <SecuritySection formData={formData} updateField={updateField} />
                     )}
 
                   </div>
