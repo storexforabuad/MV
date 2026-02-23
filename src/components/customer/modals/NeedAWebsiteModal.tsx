@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from 'react';
-import { X, Globe, ArrowRight, AlertCircle, Check, CreditCard } from 'lucide-react';
+import { X, Globe, ArrowRight, AlertCircle, Check, CreditCard, Sparkles } from 'lucide-react';
 import { useWebsiteRegistrationModal } from '@/hooks/useWebsiteRegistrationModal';
 import CountryStateSelector from '@/components/shared/CountryStateSelector';
 import ProgressIndicator from '@/components/shared/ProgressIndicator';
@@ -289,14 +289,19 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
             {/* Screen 4: Subscription Plans */}
             {modal.currentScreen === 4 && (
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-xl font-extrabold text-white mb-2 italic">Stop Paying ₦850k Upfront</h3>
-                  <p className="text-sm text-slate-400">Get a professional business website <span className="text-amber-400 font-semibold">valued at ₦850,000</span> for a small weekly subscription.</p>
+                <div className="relative overflow-hidden">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Sparkles className="text-amber-400" size={20} />
+                    <h3 className="text-xl font-black text-white uppercase tracking-tighter">Ramadan Special Offer</h3>
+                  </div>
+                  <p className="text-sm text-slate-400 leading-relaxed">
+                    Get your professional business website live this season with our <span className="text-amber-400 font-bold">limited-time 50% discount</span>.
+                  </p>
                 </div>
 
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 rounded-lg w-fit">
-                  <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-                  <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">Zero Setup Fee • Go Live Today</span>
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-amber-500/10 border border-amber-500/20 rounded-lg w-fit">
+                  <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+                  <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Ramadan Exclusive • Go Live Today</span>
                 </div>
 
                 <div className="space-y-3">
@@ -327,7 +332,6 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                         <div className="text-left pt-2">
                           <div className="flex items-center justify-between mb-2">
                             <div className="text-sm text-slate-300 font-bold uppercase tracking-wide">{tier.name} Plan</div>
-                            <div className="text-[10px] font-black text-slate-500 uppercase">Value: ₦850k{(tierId === 'pro' || tierId === 'max') ? '+' : ''}</div>
                           </div>
 
                           <div className="mb-3">
@@ -358,17 +362,17 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                 </div>
 
                 {/* Value Prop Messaging */}
-                <div className="bg-slate-800/80 border border-slate-700/50 rounded-xl p-4 space-y-3">
+                <div className="bg-amber-500/5 border border-amber-500/20 rounded-xl p-4 space-y-3">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center">
-                      <Globe className="text-amber-400" size={16} />
+                      <Sparkles className="text-amber-400" size={16} />
                     </div>
-                    <p className="text-sm font-bold text-white">
-                      Why pay ₦850k upfront?
+                    <p className="text-sm font-bold text-white uppercase tracking-tight">
+                      Celebrate Ramadan Digitally
                     </p>
                   </div>
                   <p className="text-xs text-slate-400 leading-relaxed italic">
-                    We've automated professional web development so you can grow your business without the heavy debt. <span className="text-slate-200 font-semibold">Traditional Agency Cost: ₦850,000+</span>. Your subscription covers hosting, maintenance, and regular updates.
+                    Celebrate Ramadan by taking your business digital. Join <span className="text-amber-400 font-bold">500+ vendors</span> already selling online this season.
                   </p>
                   <p className="text-[10px] text-slate-500 mt-2">
                     Weekly auto-renewing subscription. Cancel anytime.
@@ -387,8 +391,8 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
 
                 {/* Success Message */}
                 <div>
-                  <h3 className="text-2xl font-bold text-white mb-2">Welcome Aboard!</h3>
-                  <p className="text-slate-300 text-sm px-4 leading-relaxed">You've just saved <span className="text-amber-400 font-bold uppercase tracking-tight">₦850,000+</span> on your professional website setup!</p>
+                  <h3 className="text-2xl font-bold text-white mb-2 underline decoration-amber-500/30">Welcome Aboard!</h3>
+                  <p className="text-slate-300 text-sm px-4 leading-relaxed italic">Congratulations! You've successfully secured the <span className="text-amber-400 font-black uppercase tracking-tight">Ramadan Special</span> offer for your business.</p>
                 </div>
 
                 {/* Full Business Details */}
