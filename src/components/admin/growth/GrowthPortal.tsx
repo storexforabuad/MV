@@ -78,14 +78,19 @@ export default function GrowthPortal() {
     }, [db]);
 
     const handlePWAInstall = () => {
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
-        if (isIOS) {
+        const ua = navigator.userAgent;
+        const isIOS = /iPad|iPhone|iPod/.test(ua) && !(window as any).MSStream;
+        const isMacSafari = /^((?!chrome|android).)*safari/i.test(ua);
+
+        if (isIOS || isMacSafari) {
+            // Show the step-by-step iOS/Safari guide
             setIsPWAInstructionsOpen(true);
         } else if (isInstallAvailable) {
+            // Native Chrome/Edge/Android install prompt
             handleInstall();
         } else {
-            // Provide feedback if not installable (e.g., already installed)
-            setIsPWAInstructionsOpen(true);
+            // Desktop — already installed or install not available
+            alert('App is already installed, or open this page in Chrome/Edge to install it.');
         }
     };
 
