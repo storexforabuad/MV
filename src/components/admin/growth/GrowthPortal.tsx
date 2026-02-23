@@ -201,7 +201,7 @@ export default function GrowthPortal() {
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
                     >
-                        {activeTab === 'overview' && <OverviewTab currentVendors={currentVendors} />}
+                        {activeTab === 'overview' && <OverviewTab currentVendors={currentVendors} currentWeeklyRR={currentWeeklyRR} />}
                         {activeTab === 'strategy' && <StrategyTab />}
                         {activeTab === 'team' && <TeamTab />}
                         {activeTab === 'analytics' && <AnalyticsTab currentVendors={currentVendors} currentWeeklyRR={currentWeeklyRR} />}
