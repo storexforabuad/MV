@@ -104,6 +104,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                 paymentReference: response.reference,
                 status: 'active',
                 referralCode: storeId, // Link this registration to the vendor storefront
+                isWeeklyBilling: true, // Real paying customer — counts toward WeeklyRR
                 createdAt: serverTimestamp()
               });
 

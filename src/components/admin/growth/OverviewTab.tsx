@@ -154,13 +154,17 @@ const dailyRoutines: Record<string, { title: string; tasks: { time: string; task
     }
 };
 
-// Static weekly momentum data (manual for now)
+// Real vendor acquisition data — update manually each week
+// Excludes test stores and free-for-life accounts (mum-mupeeder, mum-akhi)
 const weeklyMomentum = [
+    { week: 'W1 Jan', vendors: 0 },
+    { week: 'W2 Jan', vendors: 0 },
+    { week: 'W3 Jan', vendors: 0 },
+    { week: 'W4 Jan', vendors: 0 },
     { week: 'W1 Feb', vendors: 0 },
     { week: 'W2 Feb', vendors: 0 },
-    { week: 'W3 Feb', vendors: 0 },
-    { week: 'W4 Feb', vendors: 1 },
-    { week: 'W1 Mar', vendors: 0 },
+    { week: 'W3 Feb', vendors: 1 }, // supermom-ng signed up
+    { week: 'W4 Feb', vendors: 0 },
 ];
 const maxVendors = Math.max(...weeklyMomentum.map(w => w.vendors), 1);
 

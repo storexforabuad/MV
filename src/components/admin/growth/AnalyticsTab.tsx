@@ -44,6 +44,8 @@ export default function AnalyticsTab({ currentVendors, currentWeeklyRR }: { curr
             let churned = 0, trials = 0;
             snap.forEach(doc => {
                 const data = doc.data();
+                // Exclude test stores from all analytics metrics
+                if (data.isTestStore) return;
                 const tier = (data.subscriptionTier || 'unknown').toLowerCase();
                 breakdown[tier] = (breakdown[tier] || 0) + 1;
                 if (data.subscriptionStatus === 'cancelled' || data.subscriptionStatus === 'expired') churned++;
@@ -52,7 +54,7 @@ export default function AnalyticsTab({ currentVendors, currentWeeklyRR }: { curr
             setTierBreakdown(breakdown);
             setChurnCount(churned);
             setTrialCount(trials);
-            setTotalStores(snap.size);
+            setTotalStores(snap.docs.filter(d => !d.data().isTestStore).length);
         }).catch(() => { });
     }, []);
 

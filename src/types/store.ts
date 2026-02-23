@@ -86,6 +86,8 @@ export interface StoreMeta {
   adminPin?: string; // 4-digit PIN for admin access
   isInfluencer?: boolean;     // Flag for influencer accounts
   isFreePlan?: boolean;       // Flag for free forever accounts (no billing)
+  isTestStore?: boolean;      // Flag for internal test/dev stores (excluded from metrics)
+  isWeeklyBilling?: boolean;  // TRUE only for accounts from NeedAWebsiteModal (weekly plan). Source of truth for WeeklyRR.
 }
 
 export interface ProductCategory {

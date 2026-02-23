@@ -55,10 +55,15 @@ export default function GrowthPortal() {
         }
 
         const storesRef = collection(db, 'stores');
-        const payingQuery = query(storesRef, where('subscriptionStatus', '==', 'active'));
+        // ONLY count real weekly-billing subscribers (from NeedAWebsiteModal / customer sign-up flow)
+        // Admin-created accounts (test, influencer, legacy monthly) are excluded automatically
+        const weeklyBillingQuery = query(storesRef, where('isWeeklyBilling', '==', true));
 
-        const unsubscribe = onSnapshot(payingQuery, (snapshot) => {
-            const realPayingCount = snapshot.size;
+        const unsubscribe = onSnapshot(weeklyBillingQuery, (snapshot) => {
+            const realPayingCount = snapshot.docs.filter(doc => {
+                const data = doc.data();
+                return data.subscriptionStatus === 'active';
+            }).length;
             const configRef = doc(db, 'admin', 'roadmap');
             getDoc(configRef).then((docSnap) => {
                 const boost = docSnap.exists() ? (docSnap.data().manualBoost || 0) : 0;
