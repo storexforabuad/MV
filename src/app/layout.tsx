@@ -26,9 +26,10 @@ export async function generateMetadata({ params }: { params: { storeId: string }
       return {
         title: store.name,
         description: store.description || "Discover Amazing Products",
+        manifest: '/manifest.json',
         appleWebApp: {
           capable: true,
-          statusBarStyle: "default",
+          statusBarStyle: "black-translucent",
           title: store.name,
         },
         formatDetection: {
@@ -42,9 +43,10 @@ export async function generateMetadata({ params }: { params: { storeId: string }
   return {
     title: "BizConnect™",
     description: "Discover Authentic Products At Affordable Prices",
+    manifest: '/manifest.json',
     appleWebApp: {
       capable: true,
-      statusBarStyle: "default",
+      statusBarStyle: "black-translucent",
       title: "BizConnect™",
     },
     formatDetection: {

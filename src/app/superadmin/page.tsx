@@ -12,18 +12,25 @@ import {
     Bell,
     Package,
     ArrowUpRight,
-    Zap
+    Zap,
+    Download
 } from 'lucide-react';
+import { db } from '@/lib/firebase';
+import { collection, query, where, onSnapshot } from 'firebase/firestore';
 import MetricCard3D from '@/components/superadmin/MetricCard3D';
 import RegistrationPipeline from '@/components/superadmin/RegistrationPipeline';
 import TenantDirectory from '@/components/superadmin/TenantDirectory';
 import GlobalBroadcast from '@/components/superadmin/GlobalBroadcast';
 import BillingWatchdog from '@/components/superadmin/BillingWatchdog';
+import NotificationModal from '@/components/superadmin/NotificationModal';
 import { getPlatformStats } from '@/app/actions/superadminActions';
 
 export default function SuperAdminPage() {
     const [activeTab, setActiveTab] = useState('pulse');
     const [stats, setStats] = useState<any>(null);
+    const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+    const [pendingCount, setPendingCount] = useState(0);
+    const [isNotifOpen, setIsNotifOpen] = useState(false);
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -35,21 +42,71 @@ export default function SuperAdminPage() {
         fetchStats();
         // Refresh every 30 seconds
         const interval = setInterval(fetchStats, 30000);
-        return () => clearInterval(interval);
+
+        // PWA Install Logic
+        const handleBeforeInstallPrompt = (e: any) => {
+            e.preventDefault();
+            setDeferredPrompt(e);
+        };
+        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+        // Listen for pending registrations for the notification bell
+        const q = query(collection(db, 'registrations'), where('status', 'in', ['pending', 'active']));
+        const unsubPending = onSnapshot(q, (snapshot) => {
+            setPendingCount(snapshot.size);
+        });
+
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+            unsubPending();
+        };
     }, []);
+
+    const handleInstall = async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                setDeferredPrompt(null);
+            }
+        }
+    };
 
     return (
         <div className="space-y-6 pb-32">
             {/* Header Section */}
-            <header className="flex items-center justify-between">
+            <header className="flex items-start justify-between">
                 <div>
-                    <h1 className="text-3xl font-black tracking-tight text-slate-900 border-b-4 border-indigo-500/20 inline-block pb-1">
-                        SuperAdmin
-                    </h1>
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-3xl font-black tracking-tight text-slate-900 border-b-4 border-indigo-500/20 inline-block pb-1">
+                            SuperAdmin
+                        </h1>
+                    </div>
                     <p className="text-slate-500 font-medium mt-1">Platform Creator Dashboard</p>
+
+                    {deferredPrompt && (
+                        <motion.button
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            onClick={handleInstall}
+                            className="mt-3 h-8 px-4 rounded-xl bg-indigo-600 shadow-lg shadow-indigo-200 flex items-center justify-center text-white text-[10px] font-black uppercase tracking-widest gap-2 hover:bg-indigo-700 transition-all border border-indigo-500 animate-pulse"
+                        >
+                            <Download className="w-3 h-3" /> Install Dash App
+                        </motion.button>
+                    )}
                 </div>
-                <button className="w-12 h-12 rounded-2xl bg-white shadow-soft flex items-center justify-center text-slate-600 hover:text-indigo-600 transition-colors border border-slate-100">
-                    <Bell className="w-6 h-6" />
+
+                <button
+                    onClick={() => setIsNotifOpen(true)}
+                    className="w-12 h-12 rounded-2xl bg-white shadow-soft flex items-center justify-center text-slate-600 hover:text-indigo-600 transition-colors border border-slate-100 relative group"
+                >
+                    <Bell className={`w-6 h-6 ${pendingCount > 0 ? 'animate-swing' : ''}`} />
+                    {pendingCount > 0 && (
+                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-md animate-in fade-in zoom-in group-hover:scale-110 transition-transform">
+                            {pendingCount}
+                        </span>
+                    )}
                 </button>
             </header>
 
@@ -163,6 +220,13 @@ export default function SuperAdminPage() {
                 </motion.div>
             </AnimatePresence>
 
+            {/* Notification Modal */}
+            <NotificationModal
+                isOpen={isNotifOpen}
+                onClose={() => setIsNotifOpen(false)}
+                onJumpToApply={() => setActiveTab('apply')}
+            />
+
             {/* Bottom Navigation */}
             <nav className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-white/80 backdrop-blur-xl border border-white/20 squircle-32 shadow-2xl p-2 flex items-center justify-between z-50">
                 {[
@@ -194,6 +258,18 @@ export default function SuperAdminPage() {
             <style jsx>{`
         .shadow-soft {
           box-shadow: 0 10px 30px -10px rgba(0,0,0,0.05);
+        }
+        @keyframes swing {
+          0% { transform: rotate(0deg); }
+          10% { transform: rotate(10deg); }
+          30% { transform: rotate(-10deg); }
+          50% { transform: rotate(5deg); }
+          70% { transform: rotate(-5deg); }
+          100% { transform: rotate(0deg); }
+        }
+        .animate-swing {
+          animation: swing 1s ease-in-out infinite;
+          transform-origin: top center;
         }
       `}</style>
         </div>
