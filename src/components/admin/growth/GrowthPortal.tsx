@@ -45,7 +45,17 @@ export default function GrowthPortal() {
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
     const [isPWAInstructionsOpen, setIsPWAInstructionsOpen] = useState(false);
+    const [isStandalone, setIsStandalone] = useState(false);
     const { isInstallAvailable, handleInstall } = useInstallPrompt();
+
+    // Detect if already installed as PWA
+    useEffect(() => {
+        const mq = window.matchMedia('(display-mode: standalone)');
+        setIsStandalone(mq.matches);
+        const handler = (e: MediaQueryListEvent) => setIsStandalone(e.matches);
+        mq.addEventListener('change', handler);
+        return () => mq.removeEventListener('change', handler);
+    }, []);
 
     const db = getFirestore(firebaseApp);
 
@@ -147,13 +157,15 @@ export default function GrowthPortal() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                        {/* PWA Install Button */}
-                        <button
-                            onClick={handlePWAInstall}
-                            className="flex items-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-slate-900/10"
-                        >
-                            <Smartphone className="w-3.5 h-3.5" /> Install App
-                        </button>
+                        {/* PWA Install Button — hidden when already installed */}
+                        {!isStandalone && (
+                            <button
+                                onClick={handlePWAInstall}
+                                className="flex items-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-slate-900/10"
+                            >
+                                <Smartphone className="w-3.5 h-3.5" /> Install App
+                            </button>
+                        )}
 
                         <button
                             onClick={() => setIsUpdateModalOpen(true)}
