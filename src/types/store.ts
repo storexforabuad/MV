@@ -56,6 +56,7 @@ export interface StoreMeta {
 
   // Subscription Management
   subscriptionStatus?: 'trial' | 'active' | 'past_due' | 'cancelled' | 'expired';
+  subscriptionTier?: 'basic' | 'pro' | 'promax' | 'general';
   subscriptionPlanCode?: string;     // Paystack plan code
   subscriptionCode?: string;         // Paystack subscription code
   paystackCustomerCode?: string;     // Paystack customer code for recurring billing

@@ -3,12 +3,13 @@
 import Link from 'next/link';
 import { useEffect, useState, useRef } from 'react';
 import { useVendor } from '@/context/VendorContext';
-import { Heart, Moon, Sun, ShoppingBag, ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, Moon, Sun, Heart } from 'lucide-react';
 import { useCart } from '@/lib/cartContext';
 import { useTheme } from '@/lib/themeContext';
 import { usePathname, useRouter } from 'next/navigation';
 import PinEntryModal from '../modals/PinEntryModal';
 import { getAdminSession } from '@/lib/adminSession';
+import { createSuperAdminSession } from '@/lib/superadminSession';
 import NavigationStore from '@/lib/navigationStore';
 
 interface NavbarProps {
@@ -52,9 +53,7 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
 
   // Triple-tap detection for vendor shortcut to admin
   const { promptLogin } = useVendor();
-
-  // Visual tap state for color feedback
-  const [tapCount, setTapCount] = useState(0); // 0..3
+  const [tapCount, setTapCount] = useState(0);
   const idleResetRef = useRef<number | null>(null);
   const lastTapTsRef = useRef<number>(0);
   const isMountedRef = useRef(true);
@@ -63,10 +62,9 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
     return () => { isMountedRef.current = false; };
   }, []);
 
-  const TAP_MIN_INTERVAL = 40; // ms, ignore faster taps
-  const TAP_IDLE_TIMEOUT = 1500; // ms to reset
-  const SUCCESS_HOLD = 250; // ms to hold green before triggering
-  const COLOR_TRANSITION_MS = 180; // ms
+  const TAP_MIN_INTERVAL = 40;
+  const TAP_IDLE_TIMEOUT = 1500;
+  const COLOR_TRANSITION_MS = 180;
   const [isPinModalOpen, setIsPinModalOpen] = useState(false);
 
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -80,34 +78,21 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
     }
   }, []);
 
-  // Prefetch admin route as soon as navbar mounts on a storefront page
   useEffect(() => {
     if (storeId && !isAdminRoute) {
       router.prefetch(`/admin/${storeId}`);
       router.prefetch(`/${storeId}`);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storeId]);
-
-  const resetTaps = () => {
-    setTapCount(0);
-    if (idleResetRef.current) {
-      clearTimeout(idleResetRef.current);
-      idleResetRef.current = null;
-    }
-  };
 
   const tapCountRef = useRef(0);
 
   const doTrigger = () => {
     if (!storeId) return;
-
-    // Save state before leaving for admin - ONLY from storefront root
     const pathSegments = pathname?.split('/').filter(Boolean) || [];
     const isStorefrontRoot = pathSegments.length === 1;
 
     if (!isAdminRoute && isStorefrontRoot && activeCategoryId) {
-      console.log(`[Navbar] Saving Storefront State: category="${activeCategoryId}", scroll=${window.scrollY}`);
       NavigationStore.saveState(activeCategoryId, window.scrollY);
     }
 
@@ -133,17 +118,14 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
     if (now - lastTapTsRef.current < TAP_MIN_INTERVAL) return;
     lastTapTsRef.current = now;
 
-    // Cancel any pending idle reset
     if (idleResetRef.current) {
       clearTimeout(idleResetRef.current);
       idleResetRef.current = null;
     }
 
     tapCountRef.current += 1;
-    // Clamp visual state to 1–3 for colour feedback
     setTapCount(Math.min(tapCountRef.current, 3));
 
-    // Subtle haptic
     try {
       if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
         (navigator as any).vibrate(12);
@@ -151,24 +133,45 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
     } catch (e) { }
 
     if (tapCountRef.current >= 3) {
-      // ✅ Triple-tap reached — final haptic, brief green flash, then trigger
       try {
         if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
           (navigator as any).vibrate([30, 40, 30]);
         }
       } catch (e) { }
 
-      const delay = reducedMotion ? 100 : 350; // Increased delay slightly to ensure green state is seen
+      const delay = reducedMotion ? 100 : 350;
       setTimeout(() => {
         doTrigger();
         resetTapState();
       }, delay);
-
     } else {
-      // Schedule idle reset if vendor stops tapping
       idleResetRef.current = window.setTimeout(() => {
         resetTapState();
       }, TAP_IDLE_TIMEOUT) as unknown as number;
+    }
+  };
+
+  // --- SuperAdmin Secret Access ---
+  const saTapCountRef = useRef(0);
+  const saIdleResetRef = useRef<number | null>(null);
+
+  const handleLogoTap = () => {
+    if (saIdleResetRef.current) clearTimeout(saIdleResetRef.current);
+    saTapCountRef.current += 1;
+
+    if (saTapCountRef.current === 5) {
+      try {
+        if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+          (navigator as any).vibrate([50, 50, 50, 50, 50]);
+        }
+      } catch (e) { }
+      createSuperAdminSession();
+      router.push('/superadmin');
+      saTapCountRef.current = 0;
+    } else {
+      saIdleResetRef.current = window.setTimeout(() => {
+        saTapCountRef.current = 0;
+      }, 1000) as unknown as number;
     }
   };
 
@@ -182,19 +185,11 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
             {showBackButton ? (
               <>
                 {backButtonHref ? (
-                  <Link
-                    href={backButtonHref}
-                    className="p-2 rounded-lg hover:bg-card-hover transition-colors"
-                    aria-label="Go back"
-                  >
+                  <Link href={backButtonHref} className="p-2 rounded-lg hover:bg-card-hover transition-colors" aria-label="Go back">
                     <ArrowLeft className="h-6 w-6 text-text-primary" />
                   </Link>
                 ) : (
-                  <button
-                    onClick={handleBack}
-                    className="p-2 rounded-lg hover:bg-card-hover transition-colors"
-                    aria-label="Go back"
-                  >
+                  <button onClick={handleBack} className="p-2 rounded-lg hover:bg-card-hover transition-colors" aria-label="Go back">
                     <ArrowLeft className="h-6 w-6 text-text-primary" />
                   </button>
                 )}
@@ -204,13 +199,12 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
               </>
             ) : storeName ? (
               <div className="flex items-center gap-2">
-                <ShoppingBag className="h-8 w-8 text-text-primary" />
+                <ShoppingBag className="h-8 w-8 text-text-primary cursor-pointer" onClick={handleLogoTap} />
                 <button
                   onClick={handleTitleTap}
                   aria-label="Store title"
                   className="text-xl font-semibold flex items-center gap-2 premium-title-gradient hover:opacity-80 transition-opacity text-left"
                   style={{
-                    // only set an explicit text color when tapped for feedback
                     ...(tapCount > 0
                       ? (() => {
                         const light = theme === 'light';
@@ -228,54 +222,27 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
                 >
                   {storeName}
                 </button>
-                <span className="sr-only" aria-live="polite">{tapCount > 0 ? `Access activation: ${tapCount} of 3` : ''}</span>
               </div>
             ) : (
-              <Link href="/" className="flex items-center gap-2">
+              <div onClick={handleLogoTap} className="flex items-center gap-2 cursor-pointer">
                 <ShoppingBag className="h-8 w-8 text-text-primary" />
                 <span className="text-xl font-semibold flex items-center gap-2 premium-title-gradient">
                   {storeName || 'Store'}
                 </span>
-              </Link>
+              </div>
             )}
           </div>
 
           <div className="flex items-center gap-4">
-            <button
-              onClick={toggleTheme}
-              className="p-3 rounded-lg hover:bg-card-hover transition-colors"
-              aria-label="Toggle theme"
-            >
-              {theme === 'light' ? (
-                <Moon className="w-5 h-5 text-text-primary" />
-              ) : (
-                <Sun className="w-5 h-5 text-text-primary" />
-              )}
+            <button onClick={toggleTheme} className="p-3 rounded-lg hover:bg-card-hover transition-colors" aria-label="Toggle theme">
+              {theme === 'light' ? <Moon className="w-5 h-5 text-text-primary" /> : <Sun className="w-5 h-5 text-text-primary" />}
             </button>
 
             {!isAdminRoute && (
-              <Link
-                href="/cart"
-                className="relative group p-2"
-              >
+              <Link href="/cart" className="relative group p-2">
                 <div className="relative">
-                  <Heart
-                    className={`h-7 w-7 text-text-primary transition-colors ${state.totalItems > 0 ? 'fill-current text-red-500' : ''}`}
-                  />
-                  <span
-                    className={`absolute -top-1 -right-1 
-                      text-xs rounded-full h-5 w-5 flex items-center justify-center
-                      transition-all duration-300
-                      ${isBouncing ? 'animate-badge-bounce' : ''}
-                      ${state.totalItems > 0
-                        ? 'bg-red-500/80 text-white'
-                        : 'bg-gray-500/80 text-white'
-                      }`}
-                    style={{
-                      transform: 'translateZ(0)',
-                      backfaceVisibility: 'hidden'
-                    }}
-                  >
+                  <Heart className={`h-7 w-7 text-text-primary transition-colors ${state.totalItems > 0 ? 'fill-current text-red-500' : ''}`} />
+                  <span className={`absolute -top-1 -right-1 text-xs rounded-full h-5 w-5 flex items-center justify-center transition-all duration-300 ${isBouncing ? 'animate-badge-bounce' : ''} ${state.totalItems > 0 ? 'bg-red-500/80 text-white' : 'bg-gray-500/80 text-white'}`}>
                     {state.totalItems}
                   </span>
                 </div>

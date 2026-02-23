@@ -10,6 +10,7 @@ import ReferralHandlerWrapper from '@/components/ReferralHandlerWrapper'
 import { getStoreMeta } from '@/lib/db'
 import Script from 'next/script'
 import ProtectionProvider from '@/components/ProtectionProvider'
+import GlobalAnnouncement from '@/components/common/GlobalAnnouncement'
 
 const poppins = Poppins({
   subsets: ['latin'],
@@ -75,6 +76,7 @@ export default function RootLayout({
               <ClientProviders>
                 <ProtectionProvider>
                   <ReferralHandlerWrapper />
+                  <GlobalAnnouncement />
                   <Navbar />
                   {children}
                 </ProtectionProvider>
