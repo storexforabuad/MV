@@ -17,6 +17,12 @@ import { useState } from 'react';
 
 const marketingPlaybook = [
     {
+        channel: 'Influencer "Free Forever"',
+        tactic: 'Provide 100% discount to high-traffic influencers. Their storefront becomes the "Trojan Horse" for customer conversion.',
+        impact: 'Viral Scale',
+        icon: Zap
+    },
+    {
         channel: 'Instagram "Hunt & DM"',
         tactic: 'Identify vendors with 1k-10k followers and offer a 14-day free trial.',
         impact: 'High Conversion',
@@ -37,11 +43,15 @@ const marketingPlaybook = [
 ];
 
 export default function StrategyTab() {
+    const [activeTemplate, setActiveTemplate] = useState<'dm' | 'influencer'>('dm');
     const [copied, setCopied] = useState(false);
 
-    const copyTemplate = () => {
-        const text = "Hi [Vendor Name]! 🥘 I'm a huge fan of your food. I actually took the liberty of setting up a demo digital menu for you with some of your best dishes: [Link]. It handles WhatsApp orders and payments automatically. If you like it, you can claim it and start using it today! What do you think?";
-        navigator.clipboard.writeText(text);
+    const copyTemplate = (type: 'dm' | 'influencer') => {
+        const texts = {
+            dm: "Hi [Vendor Name]! 🥘 I'm a huge fan of your food. I actually took the liberty of setting up a demo digital menu for you with some of your best dishes: [Link]. It handles WhatsApp orders and payments automatically. If you like it, you can claim it and start using it today! What do you think?",
+            influencer: "Hey [Name]! 🌟 I love your content. We've built a professional storefront platform called BizConnect™ and we'd love to set you up with a **Free Forever Max Account** for your merch/products. It looks premium, handles all orders on WhatsApp, and your followers will love the experience. Check out this demo we made for you: [Link]. No strings attached – would you be interested?"
+        };
+        navigator.clipboard.writeText(texts[type]);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
@@ -86,14 +96,15 @@ export default function StrategyTab() {
                 <h2 className="text-lg font-bold flex items-center gap-2 px-2">
                     <Zap className="w-5 h-5 text-yellow-500" /> Outreach Templates
                 </h2>
-                <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-6">
+                <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-sm space-y-8">
+                    {/* Standard DM */}
                     <div className="space-y-4">
                         <div className="flex items-center justify-between">
                             <h3 className="font-bold text-sm flex items-center gap-2">
-                                <Instagram className="w-4 h-4 text-pink-500" /> Food Vendor DM (Pre-built Store)
+                                <Instagram className="w-4 h-4 text-pink-500" /> Standard DM (Pre-built Store)
                             </h3>
                             <button
-                                onClick={copyTemplate}
+                                onClick={() => copyTemplate('dm')}
                                 className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-3 py-1.5 rounded-lg transition-all"
                             >
                                 {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
@@ -104,8 +115,29 @@ export default function StrategyTab() {
                             <p className="text-sm text-slate-700 dark:text-slate-300 italic leading-relaxed">
                                 "Hi [Vendor Name]! 🥘 I'm a huge fan of your food. I actually took the liberty of setting up a **demo digital menu** for you with some of your best dishes: [Link]. It handles WhatsApp orders and payments automatically. If you like it, you can claim it and start using it today! What do you think?"
                             </p>
+                        </div>
+                    </div>
+
+                    {/* Influencer Pitch */}
+                    <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                            <h3 className="font-bold text-sm flex items-center gap-2">
+                                <Zap className="w-4 h-4 text-yellow-500" /> Influencer "Free Forever" Pitch
+                            </h3>
+                            <button
+                                onClick={() => copyTemplate('influencer')}
+                                className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-3 py-1.5 rounded-lg transition-all"
+                            >
+                                {copied ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                                {copied ? 'Copied' : 'Copy Template'}
+                            </button>
+                        </div>
+                        <div className="bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 relative">
+                            <p className="text-sm text-slate-700 dark:text-slate-300 italic leading-relaxed">
+                                "Hey [Name]! 🌟 I love your content. We've built a professional storefront platform called BizConnect™ and we'd love to set you up with a **Free Forever Max Account** for your merch/products. It looks premium, handles all orders on WhatsApp, and your followers will love the experience. Check out this demo we made for you: [Link]. No strings attached – would you be interested?"
+                            </p>
                             <div className="absolute -top-2 -right-2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-lg">
-                                HIGH CONVERSION
+                                VIRAL SCALE
                             </div>
                         </div>
                     </div>

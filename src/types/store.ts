@@ -84,6 +84,8 @@ export interface StoreMeta {
     pendingSettlements: number;
   };
   adminPin?: string; // 4-digit PIN for admin access
+  isInfluencer?: boolean;     // Flag for influencer accounts
+  isFreePlan?: boolean;       // Flag for free forever accounts (no billing)
 }
 
 export interface ProductCategory {

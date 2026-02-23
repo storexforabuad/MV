@@ -28,7 +28,7 @@ interface Milestone {
     description: string;
     targetDate: string;
     targetVendors: number;
-    targetMRR: number;
+    targetWeeklyRR: number;
     status: 'completed' | 'current' | 'upcoming';
     icon: any;
     tasks: string[];
@@ -41,7 +41,7 @@ const milestones: Milestone[] = [
         description: 'Perfect the product with the first 10 vendors in Kano.',
         targetDate: 'Feb 2026',
         targetVendors: 10,
-        targetMRR: 50000,
+        targetWeeklyRR: 50000,
         status: 'current',
         icon: Rocket,
         tasks: [
@@ -57,7 +57,7 @@ const milestones: Milestone[] = [
         description: 'Prove the model works for a regional community.',
         targetDate: 'Apr 2026',
         targetVendors: 100,
-        targetMRR: 500000,
+        targetWeeklyRR: 500000,
         status: 'upcoming',
         icon: Target,
         tasks: [
@@ -73,7 +73,7 @@ const milestones: Milestone[] = [
         description: 'Expand to Lagos & Abuja with paid acquisition.',
         targetDate: 'Jul 2026',
         targetVendors: 1000,
-        targetMRR: 5000000,
+        targetWeeklyRR: 5000000,
         status: 'upcoming',
         icon: Zap,
         tasks: [
@@ -89,7 +89,7 @@ const milestones: Milestone[] = [
         description: 'Rapid acquisition across 5 major Nigerian cities.',
         targetDate: 'Dec 2026',
         targetVendors: 10000,
-        targetMRR: 50000000,
+        targetWeeklyRR: 50000000,
         status: 'upcoming',
         icon: Globe,
         tasks: [

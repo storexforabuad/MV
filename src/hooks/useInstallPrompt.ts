@@ -26,6 +26,7 @@ export function useInstallPrompt() {
   const storeId = typeof params?.storeId === 'string' ? params.storeId : '';
   const isOnStoreHomepage = pathname === `/${storeId}`;
   const isOnRoadmap = pathname === '/devteam/roadmap';
+  const isOnGrowthPortal = pathname === '/devteam/growth';
 
   // 1. Effect for capturing the browser event. Runs only once.
   useEffect(() => {
@@ -45,7 +46,7 @@ export function useInstallPrompt() {
   // 2. Effect for deciding WHEN to show the prompt.
   // This runs when the event is captured, or when the user navigates.
   useEffect(() => {
-    if (deferredPrompt && (isOnStoreHomepage || isOnRoadmap)) {
+    if (deferredPrompt && (isOnStoreHomepage || isOnRoadmap || isOnGrowthPortal)) {
       const lastPrompted = localStorage.getItem(PWA_PROMPT_LAST_SHOWN_KEY);
       const now = new Date().getTime();
 
@@ -57,7 +58,7 @@ export function useInstallPrompt() {
         console.log('Not showing prompt, within 24-hour cooldown.');
       }
     }
-  }, [deferredPrompt, isOnStoreHomepage]);
+  }, [deferredPrompt, isOnStoreHomepage, isOnRoadmap, isOnGrowthPortal]);
 
   const handleDismiss = useCallback(() => {
     setShowPrompt(false);

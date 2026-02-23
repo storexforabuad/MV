@@ -68,6 +68,7 @@ export default function CreateStoreModal({
     bankAccountName: "",
     bankAccountNumber: "",
     bankName: "",
+    isInfluencer: false,
   });
   const [categories, setCategories] = useState<string[]>([]);
   const [customCategory, setCustomCategory] = useState("");
@@ -181,9 +182,10 @@ export default function CreateStoreModal({
       const storeRef = doc(db, 'stores', storeId);
 
       // Determine Subscription Status
+      const isInfluencer = formData.isInfluencer;
       const isPaidRegistration = (initialData?.amountPaid || 0) > 0;
-      const subscriptionStatus = isPaidRegistration ? 'active' : 'trial';
-      const trialEndsAt = isPaidRegistration ? null : calculateTrialEndDate();
+      const subscriptionStatus = (isPaidRegistration || isInfluencer) ? 'active' : 'trial';
+      const trialEndsAt = (isPaidRegistration || isInfluencer) ? null : calculateTrialEndDate();
 
       const finalFormData = {
         ...formData,
@@ -203,10 +205,12 @@ export default function CreateStoreModal({
 
         // Subscription Logic
         subscriptionStatus,
-        subscriptionTier: initialData?.subscriptionTier || (formData.storeType?.trim() === 'general' ? 'general' : 'basic'),
+        subscriptionTier: isInfluencer ? 'max' : (initialData?.subscriptionTier || (formData.storeType?.trim() === 'general' ? 'general' : 'basic')),
         subscriptionStartDate: serverTimestamp(),
         trialEndsAt: trialEndsAt,
-        subscriptionPlanCode: isPaidRegistration ? 'paid_registration' : 'manual_trial',
+        subscriptionPlanCode: isInfluencer ? 'influencer_free' : (isPaidRegistration ? 'paid_registration' : 'manual_trial'),
+        isInfluencer: isInfluencer || false,
+        isFreePlan: isInfluencer || false,
 
         // Referral Tracking
         referralCode: initialData?.referralCode || null,
@@ -263,6 +267,7 @@ export default function CreateStoreModal({
       bankAccountName: "",
       bankAccountNumber: "",
       bankName: "",
+      isInfluencer: false,
     });
     setCategories([]);
     setLogoFile(null);
@@ -363,6 +368,13 @@ export default function CreateStoreModal({
                 </div>
               </div>
             </div>
+
+            <ModernToggle
+              label="Influencer Account?"
+              description="Free Forever Max Account"
+              checked={formData.isInfluencer || false}
+              onChange={checked => setFormData(prev => ({ ...prev, isInfluencer: checked }))}
+            />
 
             <ModernToggle label="Physical Shop?" description="Do you have a physical location?" checked={formData.hasPhysicalShop || false} onChange={checked => setFormData(prev => ({ ...prev, hasPhysicalShop: checked }))} />
 

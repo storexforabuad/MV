@@ -25,6 +25,7 @@ import { getFirestore, collection, onSnapshot, doc, getDoc, setDoc, query, where
 import { app as firebaseApp } from '@/lib/firebase';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 import { Naira } from '@/components/common/Naira';
+import PWAInstallModal from './PWAInstallModal';
 
 // Tabs
 import OverviewTab from './OverviewTab';
@@ -38,11 +39,12 @@ type TabType = 'overview' | 'strategy' | 'team' | 'analytics' | 'vendors';
 export default function GrowthPortal() {
     const [activeTab, setActiveTab] = useState<TabType>('overview');
     const [currentVendors, setCurrentVendors] = useState(0);
-    const [currentMRR, setCurrentMRR] = useState(0);
+    const [currentWeeklyRR, setCurrentWeeklyRR] = useState(0);
     const [manualBoost, setManualBoost] = useState(0);
     const [loading, setLoading] = useState(true);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+    const [isPWAInstructionsOpen, setIsPWAInstructionsOpen] = useState(false);
     const { isInstallAvailable, handleInstall } = useInstallPrompt();
 
     const db = getFirestore(firebaseApp);
@@ -62,13 +64,25 @@ export default function GrowthPortal() {
                 const boost = docSnap.exists() ? (docSnap.data().manualBoost || 0) : 0;
                 setManualBoost(boost);
                 setCurrentVendors(realPayingCount + boost);
-                setCurrentMRR((realPayingCount + boost) * 5000);
+                setCurrentWeeklyRR((realPayingCount + boost) * 5000);
                 setLoading(false);
             });
         });
 
         return () => unsubscribe();
     }, [db]);
+
+    const handlePWAInstall = () => {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !(window as any).MSStream;
+        if (isIOS) {
+            setIsPWAInstructionsOpen(true);
+        } else if (isInstallAvailable) {
+            handleInstall();
+        } else {
+            // Provide feedback if not installable (e.g., already installed)
+            setIsPWAInstructionsOpen(true);
+        }
+    };
 
     const handleUpdateBoost = async (newBoost: number) => {
         try {
@@ -123,6 +137,14 @@ export default function GrowthPortal() {
                     </div>
 
                     <div className="flex items-center gap-2">
+                        {/* PWA Install Button */}
+                        <button
+                            onClick={handlePWAInstall}
+                            className="flex items-center gap-2 bg-slate-900 dark:bg-white text-white dark:text-slate-900 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-lg shadow-slate-900/10"
+                        >
+                            <Smartphone className="w-3.5 h-3.5" /> Install App
+                        </button>
+
                         <button
                             onClick={() => setIsUpdateModalOpen(true)}
                             className="hidden sm:flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-bold transition-all active:scale-95 shadow-lg shadow-indigo-500/20"
@@ -161,9 +183,9 @@ export default function GrowthPortal() {
                         </div>
                     </div>
                     <div className="text-right hidden sm:block">
-                        <p className="text-[10px] font-bold text-slate-400 uppercase">Current MRR</p>
+                        <p className="text-[10px] font-bold text-slate-400 uppercase">Current WeeklyRR</p>
                         <p className="text-sm font-black text-slate-900 dark:text-white flex items-center justify-end">
-                            <Naira />{currentMRR.toLocaleString()}
+                            <Naira />{currentWeeklyRR.toLocaleString()}
                         </p>
                     </div>
                 </div>
@@ -182,7 +204,7 @@ export default function GrowthPortal() {
                         {activeTab === 'overview' && <OverviewTab currentVendors={currentVendors} />}
                         {activeTab === 'strategy' && <StrategyTab />}
                         {activeTab === 'team' && <TeamTab />}
-                        {activeTab === 'analytics' && <AnalyticsTab currentVendors={currentVendors} currentMRR={currentMRR} />}
+                        {activeTab === 'analytics' && <AnalyticsTab currentVendors={currentVendors} currentWeeklyRR={currentWeeklyRR} />}
                         {activeTab === 'vendors' && <VendorsTab />}
                     </motion.div>
                 </AnimatePresence>
@@ -276,6 +298,12 @@ export default function GrowthPortal() {
                     </div>
                 )}
             </AnimatePresence>
+
+            {/* --- PWA Instructions Modal --- */}
+            <PWAInstallModal
+                isOpen={isPWAInstructionsOpen}
+                onClose={() => setIsPWAInstructionsOpen(false)}
+            />
         </div>
     );
 }

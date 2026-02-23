@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { Naira } from '@/components/common/Naira';
 
-export default function AnalyticsTab({ currentVendors, currentMRR }: { currentVendors: number, currentMRR: number }) {
+export default function AnalyticsTab({ currentVendors, currentWeeklyRR }: { currentVendors: number, currentWeeklyRR: number }) {
     return (
         <div className="space-y-8">
             {/* --- Profitability Analysis --- */}
@@ -32,17 +32,17 @@ export default function AnalyticsTab({ currentVendors, currentMRR }: { currentVe
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
                     <div className="p-5 bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-100 dark:border-slate-800">
-                        <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Monthly Revenue (10k Goal)</p>
+                        <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Weekly Revenue (10k Goal)</p>
                         <p className="text-3xl font-black text-green-600 flex items-center"><Naira />50,000,000</p>
                     </div>
                     <div className="p-5 bg-slate-50 dark:bg-slate-800/50 rounded-3xl border border-slate-100 dark:border-slate-800">
-                        <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Net Monthly Profit</p>
+                        <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Net Weekly Profit</p>
                         <p className="text-3xl font-black text-indigo-600 flex items-center"><Naira />32,050,000</p>
                     </div>
                 </div>
 
                 <div className="space-y-3">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Monthly Cost Breakdown</p>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Weekly Cost Breakdown</p>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {[
                             { label: 'Marketing (CAC)', amount: '10,000,000', percent: '20%', icon: Rocket, color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-900/10' },
@@ -72,7 +72,7 @@ export default function AnalyticsTab({ currentVendors, currentMRR }: { currentVe
                         <p className="text-sm font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-tight">Profit Margin: 64.1%</p>
                     </div>
                     <p className="text-xs text-indigo-700 dark:text-indigo-300 leading-relaxed">
-                        Exceptional SaaS margins. You only need ~3,600 vendors to cover all monthly costs. Reinvest profit into the Global Marketplace.
+                        Exceptional SaaS margins. You only need ~3,600 vendors to cover all weekly costs. Reinvest profit into the Global Marketplace.
                     </p>
                 </div>
             </section>
@@ -88,16 +88,16 @@ export default function AnalyticsTab({ currentVendors, currentMRR }: { currentVe
                             <TrendingUp className="w-24 h-24" />
                         </div>
                         <p className="text-[10px] text-indigo-200 uppercase font-black tracking-widest mb-1">Conservative (10k Vendors)</p>
-                        <p className="text-3xl font-black flex items-center"><Naira />50,000,000 <span className="text-xs font-normal ml-2 text-indigo-200">MRR</span></p>
-                        <p className="text-sm text-indigo-100 mt-2 font-medium">₦600M Annual Revenue</p>
+                        <p className="text-3xl font-black flex items-center"><Naira />50,000,000 <span className="text-xs font-normal ml-2 text-indigo-200">WRR</span></p>
+                        <p className="text-sm text-indigo-100 mt-2 font-medium">₦2.6B Annual Revenue</p>
                     </div>
                     <div className="p-6 bg-slate-900 rounded-3xl text-white shadow-xl shadow-slate-900/20 relative overflow-hidden">
                         <div className="absolute top-0 right-0 p-4 opacity-10">
                             <Rocket className="w-24 h-24" />
                         </div>
                         <p className="text-[10px] text-slate-400 uppercase font-black tracking-widest mb-1">Aggressive (50k Vendors)</p>
-                        <p className="text-3xl font-black flex items-center"><Naira />250,000,000 <span className="text-xs font-normal ml-2 text-slate-400">MRR</span></p>
-                        <p className="text-sm text-slate-400 mt-2 font-medium">₦3B Annual Revenue</p>
+                        <p className="text-3xl font-black flex items-center"><Naira />250,000,000 <span className="text-xs font-normal ml-2 text-slate-400">WRR</span></p>
+                        <p className="text-sm text-slate-400 mt-2 font-medium">₦13B Annual Revenue</p>
                     </div>
                 </div>
             </section>
