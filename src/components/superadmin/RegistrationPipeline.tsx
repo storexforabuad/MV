@@ -23,11 +23,13 @@ import {
     ShieldCheck
 } from 'lucide-react';
 import { fulfillRegistration, rejectRegistration } from '@/app/actions/superadminActions';
+import RegistrationDetailsModal from './RegistrationDetailsModal';
 
 export default function RegistrationPipeline() {
     const [registrations, setRegistrations] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [processingId, setProcessingId] = useState<string | null>(null);
+    const [selectedReg, setSelectedReg] = useState<any | null>(null);
 
     useEffect(() => {
         const q = query(
@@ -105,9 +107,15 @@ export default function RegistrationPipeline() {
 
                                 <div className="flex items-center gap-2">
                                     <button
+                                        onClick={() => setSelectedReg(reg)}
+                                        className="bg-slate-50 hover:bg-slate-100 text-slate-600 px-4 py-3 rounded-2xl font-bold text-xs transition-colors"
+                                    >
+                                        View Details
+                                    </button>
+                                    <button
                                         disabled={!!processingId}
                                         onClick={() => handleReject(reg.id)}
-                                        className="flex-1 md:flex-none p-3 rounded-2xl border border-red-50 text-red-500 hover:bg-red-50 transition-colors"
+                                        className="p-3 rounded-2xl border border-red-50 text-red-500 hover:bg-red-50 transition-colors"
                                     >
                                         <XCircle className="w-6 h-6" />
                                     </button>
@@ -124,6 +132,21 @@ export default function RegistrationPipeline() {
                     </AnimatePresence>
                 </div>
             )}
+
+            <RegistrationDetailsModal
+                isOpen={!!selectedReg}
+                registration={selectedReg}
+                onClose={() => setSelectedReg(null)}
+                onApprove={() => {
+                    handleApprove(selectedReg.id);
+                    setSelectedReg(null);
+                }}
+                onReject={() => {
+                    handleReject(selectedReg.id);
+                    setSelectedReg(null);
+                }}
+                isProcessing={processingId === selectedReg?.id}
+            />
         </div>
     );
 }

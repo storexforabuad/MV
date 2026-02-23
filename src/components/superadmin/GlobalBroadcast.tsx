@@ -6,8 +6,14 @@ import {
     doc,
     getDoc,
     setDoc,
+    addDoc,
+    collection,
+    query,
+    orderBy,
+    limit,
     serverTimestamp,
-    onSnapshot
+    onSnapshot,
+    Timestamp
 } from 'firebase/firestore';
 import { motion } from 'framer-motion';
 import {
@@ -22,6 +28,7 @@ import {
 export default function GlobalBroadcast() {
     const [message, setMessage] = useState('');
     const [currentBroadcast, setCurrentBroadcast] = useState<any>(null);
+    const [history, setHistory] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isPublishing, setIsPublishing] = useState(false);
 
@@ -34,19 +41,40 @@ export default function GlobalBroadcast() {
             }
             setIsLoading(false);
         });
-        return () => unsub();
+
+        const q = query(
+            collection(db, 'broadcasts'),
+            orderBy('publishedAt', 'desc'),
+            limit(5)
+        );
+        const unsubHistory = onSnapshot(q, (snapshot) => {
+            const h = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setHistory(h);
+        });
+
+        return () => {
+            unsub();
+            unsubHistory();
+        };
     }, []);
 
     const handlePublish = async () => {
         if (!message.trim()) return;
         setIsPublishing(true);
         try {
-            await setDoc(doc(db, 'platform', 'broadcast'), {
+            const broadcastData = {
                 message: message.trim(),
                 publishedAt: serverTimestamp(),
                 active: true,
                 type: 'announcement'
-            });
+            };
+
+            // 1. Set current active broadcast
+            await setDoc(doc(db, 'platform', 'broadcast'), broadcastData);
+
+            // 2. Add to history
+            await addDoc(collection(db, 'broadcasts'), broadcastData);
+
             setMessage('');
         } catch (error) {
             console.error('Publish failed:', error);
@@ -131,6 +159,24 @@ export default function GlobalBroadcast() {
                             {currentBroadcast?.active ? currentBroadcast.message : "No active broadcast"}
                         </p>
                     </div>
+                </div>
+            </div>
+
+            {/* History Section */}
+            <div className="space-y-4">
+                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest px-4">Recent History</h3>
+                <div className="space-y-2">
+                    {history.map((h) => (
+                        <div key={h.id} className="bg-white squircle-24 p-4 shadow-soft border border-slate-50 flex items-center justify-between">
+                            <p className="text-xs font-bold text-slate-600 truncate flex-1 pr-4">{h.message}</p>
+                            <span className="text-[10px] font-black text-slate-300 uppercase shrink-0">
+                                {h.publishedAt instanceof Timestamp ? h.publishedAt.toDate().toLocaleDateString() : 'Just now'}
+                            </span>
+                        </div>
+                    ))}
+                    {history.length === 0 && (
+                        <p className="text-center text-slate-300 text-xs italic py-4 font-medium">No previous broadcasts recorded.</p>
+                    )}
                 </div>
             </div>
         </div>

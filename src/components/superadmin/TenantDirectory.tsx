@@ -28,19 +28,30 @@ export default function TenantDirectory() {
     const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
-        const q = query(collection(db, 'stores'), orderBy('createdAt', 'desc'));
+        // Remove orderBy to avoid indexing issues during debugging
+        const q = query(collection(db, 'stores'));
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const storeData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as StoreMeta));
-            setStores(storeData);
+            // Client-side sort instead for reliability
+            setStores(storeData.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0)));
+            setIsLoading(false);
+        }, (error) => {
+            console.error("Tenant fetch failed:", error);
             setIsLoading(false);
         });
         return () => unsubscribe();
     }, []);
 
-    const filteredStores = stores.filter(s =>
-        s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        s.id.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredStores = stores.filter(s => {
+        const search = searchTerm.toLowerCase().trim();
+        if (!search) return true;
+        return (
+            (s.name?.toLowerCase() || '').includes(search) ||
+            (s.id?.toLowerCase() || '').includes(search) ||
+            (s.ceoName?.toLowerCase() || '').includes(search) ||
+            (s.ceoPhone?.toLowerCase() || '').includes(search)
+        );
+    });
 
     if (isLoading) return <div className="text-center py-20 animate-pulse text-slate-400 font-bold uppercase tracking-widest">Scanning tenants...</div>;
 
@@ -83,8 +94,8 @@ export default function TenantDirectory() {
                                     </div>
                                 </div>
                                 <div className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${store.subscriptionStatus === 'active'
-                                        ? 'bg-emerald-50 text-emerald-600'
-                                        : 'bg-amber-50 text-amber-600'
+                                    ? 'bg-emerald-50 text-emerald-600'
+                                    : 'bg-amber-50 text-amber-600'
                                     }`}>
                                     {store.subscriptionStatus || 'TRIAL'}
                                 </div>

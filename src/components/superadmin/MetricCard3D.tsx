@@ -49,24 +49,24 @@ export default function MetricCard3D({ title, value, subValue, icon, color }: Me
         <motion.div
             whileHover={{ y: -5, scale: 1.02 }}
             transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-            className={`p-6 bg-white squircle-32 shadow-lg ${theme.shadow} border-2 ${theme.border} relative overflow-hidden group h-full`}
+            className={`p-4 sm:p-6 bg-white squircle-24 sm:squircle-32 shadow-lg ${theme.shadow} border-2 ${theme.border} relative overflow-hidden group h-full`}
         >
             {/* 3D Visual Accent */}
             <div className={`absolute -right-6 -top-6 w-24 h-24 ${theme.bg} rounded-full group-hover:scale-125 transition-transform duration-700 blur-xl`} />
 
             <div className="relative z-10 flex flex-col h-full justify-between">
-                <div className="flex items-center gap-3 mb-4">
-                    <div className={`w-10 h-10 ${theme.iconBg} rounded-xl flex items-center justify-center text-white shadow-lg`}>
+                <div className="flex items-center gap-2 sm:gap-3 mb-2 sm:mb-4">
+                    <div className={`w-8 h-8 sm:w-10 sm:h-10 ${theme.iconBg} rounded-xl flex items-center justify-center text-white shadow-lg shrink-0`}>
                         {icon}
                     </div>
-                    <h3 className="text-slate-400 font-bold text-xs uppercase tracking-widest">{title}</h3>
+                    <h3 className="text-slate-400 font-bold text-[10px] sm:text-xs uppercase tracking-widest truncate">{title}</h3>
                 </div>
 
                 <div>
-                    <div className="flex items-baseline gap-2">
-                        <span className="text-3xl font-black text-slate-900 tracking-tight">{value}</span>
+                    <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
+                        <span className="text-xl sm:text-3xl font-black text-slate-900 tracking-tight">{value}</span>
                         {subValue && (
-                            <span className={`font-bold text-sm ${theme.text}`}>{subValue}</span>
+                            <span className={`font-bold text-[10px] sm:text-sm ${theme.text} truncate`}>{subValue}</span>
                         )}
                     </div>
                 </div>

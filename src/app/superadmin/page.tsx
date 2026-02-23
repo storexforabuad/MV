@@ -39,7 +39,7 @@ export default function SuperAdminPage() {
     }, []);
 
     return (
-        <div className="space-y-8">
+        <div className="space-y-6 pb-32">
             {/* Header Section */}
             <header className="flex items-center justify-between">
                 <div>
@@ -63,8 +63,8 @@ export default function SuperAdminPage() {
                     className="min-h-[60vh]"
                 >
                     {activeTab === 'pulse' && (
-                        <div className="space-y-6">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="space-y-4">
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
                                 <MetricCard3D
                                     title="Global GMV"
                                     value={stats ? `₦${(stats.totalGMV / 1000).toFixed(1)}K` : '...'}
