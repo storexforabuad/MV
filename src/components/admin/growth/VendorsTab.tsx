@@ -109,39 +109,12 @@ export default function VendorsTab() {
     const [loading, setLoading] = useState(true);
     const [filter, setFilter] = useState<SubscriptionStatus | 'all'>('all');
 
-    const fetchData = useCallback(async () => {
-        try {
-            const storesData = await getStores();
-            setStores(storesData);
-
-            const statsPromises = storesData.map(async (store) => {
-                const products = await getProducts(store.id);
-                const totalViews = products.reduce((sum, p) => sum + (p.views || 0), 0);
-                return {
-                    id: store.id,
-                    name: store.name,
-                    totalProducts: products.length,
-                    totalViews,
-                    rank: 0,
-                    subscriptionStatus: (store.subscriptionStatus || 'trial') as SubscriptionStatus,
-                    storeType: store.storeType || 'general'
-                };
-            });
-
-            const stats = await Promise.all(statsPromises);
-            stats.sort((a, b) => b.totalViews - a.totalViews);
-            stats.forEach((s, i) => s.rank = i + 1);
-            setStoreStats(stats);
-            setLoading(false);
-        } catch (error) {
-            console.error('Error fetching vendor data:', error);
-            setLoading(false);
-        }
-    }, []);
-
     useEffect(() => {
-        fetchData();
-    }, [fetchData]);
+        // RESET: Force empty/0 states for clean start
+        setStores([]);
+        setStoreStats([]);
+        setLoading(false);
+    }, []);
 
     const statusCounts = {
         all: stores.length,

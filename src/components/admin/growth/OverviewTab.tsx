@@ -52,16 +52,16 @@ const milestones: Milestone[] = [
         targetDate: 'Feb 2026',
         targetDateObj: new Date('2026-02-28'),
         targetVendors: 10,
-        targetWeeklyRR: 50000,
+        targetWeeklyRR: 11750,
         status: 'current',
         icon: Rocket,
         tasks: [
-            'Onboard 1st vendor (Kano Food)',
+            'Onboard 1st vendor (Food/Fashion)',
             'Fix initial UX bottlenecks',
             'Manual outreach in Kano markets',
             'Reach 10 active vendors'
         ],
-        doThisNow: 'Send 20 DMs to food vendors in Kano markets via Instagram today.'
+        doThisNow: 'Send 20 DMs to Food and Fashion vendors in Kano via Instagram today.'
     },
     {
         id: 'kano-100',
@@ -70,16 +70,16 @@ const milestones: Milestone[] = [
         targetDate: 'Apr 2026',
         targetDateObj: new Date('2026-04-30'),
         targetVendors: 100,
-        targetWeeklyRR: 500000,
+        targetWeeklyRR: 117500,
         status: 'upcoming',
         icon: Target,
         tasks: [
             'Implement referral viral loop',
-            'Small-scale Instagram DM outreach',
+            'Expand focus to Beauty & Beauty hubs',
             'Optimize vendor onboarding flow',
             'Reach 100 active vendors'
         ],
-        doThisNow: 'Call your top 3 current vendors and ask for 2 referrals each.'
+        doThisNow: 'Call your top 3 current vendors (Food/Fashion) and ask for 2 referrals each.'
     },
     {
         id: 'growth',
@@ -88,7 +88,7 @@ const milestones: Milestone[] = [
         targetDate: 'Jul 2026',
         targetDateObj: new Date('2026-07-31'),
         targetVendors: 1000,
-        targetWeeklyRR: 5000000,
+        targetWeeklyRR: 1175000,
         status: 'upcoming',
         icon: Zap,
         tasks: [
@@ -175,15 +175,9 @@ export default function OverviewTab({ currentVendors, currentWeeklyRR }: { curre
 
     // Fetch churn data
     useEffect(() => {
-        const db = getFirestore(firebaseApp);
-        const storesRef = collection(db, 'stores');
-        const churnQuery = query(storesRef, where('subscriptionStatus', 'in', ['cancelled', 'expired']));
-        getDocs(churnQuery).then(snap => {
-            if (snap.size > 0) {
-                setChurnCount(snap.size);
-                setShowChurnAlert(true);
-            }
-        }).catch(() => { });
+        // RESET: Force 0 for clean start
+        setChurnCount(0);
+        setShowChurnAlert(false);
     }, []);
 
     const activeMilestoneData = milestones.find(m => m.id === activeMilestone);

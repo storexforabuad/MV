@@ -30,7 +30,7 @@ const marketingPlaybook = [
     },
     {
         channel: 'Instagram "Hunt & DM"',
-        tactic: 'Identify vendors with 1k-10k followers and offer a 14-day free trial.',
+        tactic: 'Identify vendors (Food, Fashion, Beauty) with 1k-10k followers and offer a 14-day free trial.',
         impact: 'High Conversion',
         impactColor: 'text-green-600 bg-green-100 dark:bg-green-900/30',
         icon: Instagram
@@ -43,8 +43,8 @@ const marketingPlaybook = [
         icon: MessageSquare
     },
     {
-        channel: 'Field Agents (Kano/Bauchi)',
-        tactic: 'Physical visits to major markets (Kantin Kwari, Wunti, ATBU) for on-the-spot setup.',
+        channel: 'Field Agents (Markets)',
+        tactic: 'Physical visits to Kantin Kwari (Fashion), Wunti/ATBU (General), and beauty hubs for on-the-spot setup.',
         impact: 'High Trust',
         impactColor: 'text-purple-600 bg-purple-100 dark:bg-purple-900/30',
         icon: MapPin
@@ -52,13 +52,13 @@ const marketingPlaybook = [
 ];
 
 const contentCalendar = [
-    { day: 'Mon', platform: 'Instagram', type: 'DM Outreach', action: 'Send 20 DMs to food vendors in Kano', color: 'text-pink-600 bg-pink-50 dark:bg-pink-900/20' },
-    { day: 'Tue', platform: 'WhatsApp', type: 'Referral Call', action: 'Call top 3 vendors for 2 referrals each', color: 'text-green-600 bg-green-50 dark:bg-green-900/20' },
-    { day: 'Wed', platform: 'Instagram', type: 'Story/Reel', action: 'Post a vendor success story or product demo', color: 'text-pink-600 bg-pink-50 dark:bg-pink-900/20' },
-    { day: 'Thu', platform: 'WhatsApp', type: 'Follow-up', action: 'Follow up on all unanswered DMs from Mon', color: 'text-green-600 bg-green-50 dark:bg-green-900/20' },
-    { day: 'Fri', platform: 'Instagram', type: 'DM Outreach', action: 'Send 20 more DMs — fashion/beauty focus', color: 'text-pink-600 bg-pink-50 dark:bg-pink-900/20' },
-    { day: 'Sat', platform: 'WhatsApp', type: 'Content', action: 'Share a "week in review" vendor win on status', color: 'text-green-600 bg-green-50 dark:bg-green-900/20' },
-    { day: 'Sun', platform: 'Rest', type: 'Recharge', action: 'Plan next week\'s outreach targets', color: 'text-slate-500 bg-slate-50 dark:bg-slate-800/50' },
+    { day: 'Mon', platform: 'Instagram', type: 'DM Outreach', action: 'Send 20 DMs to Food vendors', color: 'text-pink-600 bg-pink-50 dark:bg-pink-900/20' },
+    { day: 'Tue', platform: 'WhatsApp', type: 'Referral Call', action: 'Update referral status for Influencers', color: 'text-green-600 bg-green-50 dark:bg-green-900/20' },
+    { day: 'Wed', platform: 'Instagram', type: 'DM Outreach', action: 'Send 20 DMs to Fashion/Thrift vendors', color: 'text-pink-600 bg-pink-50 dark:bg-pink-900/20' },
+    { day: 'Thu', platform: 'WhatsApp', type: 'Follow-up', action: 'Follow up on all unanswered DMs', color: 'text-green-600 bg-green-50 dark:bg-green-900/20' },
+    { day: 'Fri', platform: 'Instagram', type: 'DM Outreach', action: 'Send 20 DMs to Beauty/Skincare vendors', color: 'text-pink-600 bg-pink-50 dark:bg-pink-900/20' },
+    { day: 'Sat', platform: 'WhatsApp', type: 'Content', action: 'Share "Fashion Saturday" vendor win on status', color: 'text-green-600 bg-green-50 dark:bg-green-900/20' },
+    { day: 'Sun', platform: 'Rest', type: 'Recharge', action: 'Identify next week\'s targets (Food & Fashion)', color: 'text-slate-500 bg-slate-50 dark:bg-slate-800/50' },
 ];
 
 const objections = [

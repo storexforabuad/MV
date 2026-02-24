@@ -24,6 +24,7 @@ import GlobalBroadcast from '@/components/superadmin/GlobalBroadcast';
 import BillingWatchdog from '@/components/superadmin/BillingWatchdog';
 import NotificationModal from '@/components/superadmin/NotificationModal';
 import { getPlatformStats } from '@/app/actions/superadminActions';
+import Link from 'next/link';
 
 export default function SuperAdminPage() {
     const [activeTab, setActiveTab] = useState('pulse');
@@ -97,17 +98,26 @@ export default function SuperAdminPage() {
                     )}
                 </div>
 
-                <button
-                    onClick={() => setIsNotifOpen(true)}
-                    className="w-12 h-12 rounded-2xl bg-white shadow-soft flex items-center justify-center text-slate-600 hover:text-indigo-600 transition-colors border border-slate-100 relative group"
-                >
-                    <Bell className={`w-6 h-6 ${pendingCount > 0 ? 'animate-swing' : ''}`} />
-                    {pendingCount > 0 && (
-                        <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-md animate-in fade-in zoom-in group-hover:scale-110 transition-transform">
-                            {pendingCount}
-                        </span>
-                    )}
-                </button>
+                <div className="flex items-center gap-2">
+                    <Link
+                        href="/devteam/growth"
+                        className="h-12 px-5 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 font-black uppercase tracking-widest text-[10px] flex items-center gap-2 border border-indigo-100 dark:border-indigo-800 hover:bg-indigo-100 transition-colors"
+                    >
+                        <TrendingUp className="w-4 h-4" /> Growth Portal
+                    </Link>
+
+                    <button
+                        onClick={() => setIsNotifOpen(true)}
+                        className="w-12 h-12 rounded-2xl bg-white shadow-soft flex items-center justify-center text-slate-600 hover:text-indigo-600 transition-colors border border-slate-100 relative group"
+                    >
+                        <Bell className={`w-6 h-6 ${pendingCount > 0 ? 'animate-swing' : ''}`} />
+                        {pendingCount > 0 && (
+                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-rose-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white shadow-md animate-in fade-in zoom-in group-hover:scale-110 transition-transform">
+                                {pendingCount}
+                            </span>
+                        )}
+                    </button>
+                </div>
             </header>
 
             {/* Main Content Area */}

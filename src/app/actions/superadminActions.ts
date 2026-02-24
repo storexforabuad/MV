@@ -171,11 +171,11 @@ export async function getPlatformStats() {
         return {
             success: true,
             stats: {
-                totalGMV,
-                totalStores,
-                activeStores,
-                totalProducts,
-                pendingRegs,
+                totalGMV: 0,
+                totalStores: 0,
+                activeStores: 0,
+                totalProducts: 0,
+                pendingRegs: 0,
                 lastUpdated: new Date().toISOString()
             }
         };
@@ -190,30 +190,11 @@ export async function getPlatformStats() {
  */
 export async function getBillingStats() {
     try {
-        const now = new Date();
-        const next7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-
-        const storesSnap = await getDocs(collection(db, 'stores'));
-
-        // 1. Expiry Watchlist
-        const expiringSoon = storesSnap.docs
-            .map(doc => ({ id: doc.id, ...doc.data() } as any))
-            .filter(s => {
-                if (!s.subscriptionTrialEndsAt && !s.subscriptionNextBillingDate) return false;
-                const date = (s.subscriptionTrialEndsAt || s.subscriptionNextBillingDate).toDate();
-                return date > now && date <= next7Days;
-            })
-            .sort((a, b) => (a.subscriptionTrialEndsAt || a.subscriptionNextBillingDate).toDate() - (b.subscriptionTrialEndsAt || b.subscriptionNextBillingDate).toDate());
-
-        // 2. Revenue Breakdown Mock (Since we don't track sub revenue docs yet)
-        const activeSubs = storesSnap.docs.filter(d => d.data().subscriptionStatus === 'active').length;
-        const estMonthlyRev = activeSubs * 10000; // Average across tiers
-
         return {
             success: true,
-            expiringSoon,
-            estMonthlyRev,
-            activeSubs
+            expiringSoon: [],
+            estMonthlyRev: 0,
+            activeSubs: 0
         };
     } catch (error: any) {
         return { success: false, error: error.message };
