@@ -7,10 +7,11 @@ import { useCart } from '@/lib/cartContext';
 import { StoreMeta } from '@/types/store';
 import Navbar from '@/components/layout/navbar';
 import { formatPrice } from '@/utils/price';
-import { ShoppingCart, Heart, Plus, PackageX, ExternalLink } from 'lucide-react';
+import { ShoppingCart, Heart, Plus, PackageX, ExternalLink, Eye, ChevronRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 
 interface SharedWishlistPageProps {
     params: { id: string };
@@ -18,6 +19,7 @@ interface SharedWishlistPageProps {
 
 export default function SharedWishlistPage({ params }: SharedWishlistPageProps) {
     const { id } = params;
+    const searchParams = useSearchParams();
     const [items, setItems] = useState<CartItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [storeMetas, setStoreMetas] = useState<{ [key: string]: StoreMeta }>({});
@@ -162,17 +164,20 @@ export default function SharedWishlistPage({ params }: SharedWishlistPageProps) 
                                         <div className="flex items-center justify-between mt-auto">
                                             <p className="text-xl font-black card-text-gradient">{formatPrice(item.price)}</p>
 
-                                            <div className="flex gap-2">
+                                            <div className="flex items-center bg-gray-50 dark:bg-gray-800/80 rounded-full p-1 border border-gray-100 dark:border-gray-700/50">
                                                 <Link
-                                                    href={item.storeId ? `/${item.storeId}/products/${item.id}` : `/bizcon/products/${item.id}`}
-                                                    className="p-2 rounded-full border border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-text-secondary"
+                                                    href={item.storeId ? `/${item.storeId}/products/${item.id}?fromWishlist=${id}` : `/bizcon/products/${item.id}?fromWishlist=${id}`}
+                                                    className="p-2 rounded-full hover:bg-white dark:hover:bg-gray-700 transition-all text-text-secondary hover:text-text-primary group/eye"
                                                     title="View product"
                                                 >
-                                                    <ExternalLink className="w-4 h-4" />
+                                                    <Eye className="w-5 h-5 group-hover/eye:scale-110 transition-transform" />
                                                 </Link>
+
+                                                <div className="w-[1px] h-4 bg-gray-200 dark:bg-gray-700 mx-1" />
+
                                                 <button
                                                     onClick={() => handleAddToCart(item)}
-                                                    className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-black dark:bg-white text-white dark:text-black text-xs font-bold hover:opacity-80 transition-all active:scale-95"
+                                                    className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-black dark:bg-white text-white dark:text-black text-xs font-bold hover:shadow-lg transition-all active:scale-95"
                                                 >
                                                     <Plus className="w-3 h-3" />
                                                     <span>Add</span>

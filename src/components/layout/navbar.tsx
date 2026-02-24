@@ -6,7 +6,7 @@ import { useVendor } from '@/context/VendorContext';
 import { ArrowLeft, ShoppingBag, Moon, Sun, Heart } from 'lucide-react';
 import { useCart } from '@/lib/cartContext';
 import { useTheme } from '@/lib/themeContext';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import PinEntryModal from '../modals/PinEntryModal';
 import { getAdminSession } from '@/lib/adminSession';
 import { createSuperAdminSession } from '@/lib/superadminSession';
@@ -26,6 +26,7 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
   const [isBouncing, setIsBouncing] = useState(false);
   const [prevTotalItems, setPrevTotalItems] = useState(state.totalItems);
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const router = useRouter();
   const isAdminRoute = pathname?.startsWith('/admin');
   const isStorefront = !isAdminRoute && !!pathname && pathname.split('/').length > 1 && pathname.split('/')[1].length > 0;
@@ -35,7 +36,8 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
   const isProductPage = pathname?.startsWith('/products/');
   const isCartPage = pathname === '/cart' || (pathSegments.length === 2 && pathSegments[1] === 'cart');
   const isDashboardPage = pathname?.startsWith('/dashboard/');
-  const showBackButton = isProductPage || isStoreProductPage || isCartPage || isDashboardPage;
+  const fromWishlistId = searchParams?.get('fromWishlist');
+  const showBackButton = isProductPage || isStoreProductPage || isCartPage || isDashboardPage || !!fromWishlistId;
 
   useEffect(() => {
     if (state.totalItems > prevTotalItems) {
@@ -46,6 +48,10 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
   }, [state.totalItems, prevTotalItems]);
 
   const handleBack = () => {
+    if (fromWishlistId) {
+      router.push(`/wishlist/${fromWishlistId}`);
+      return;
+    }
     if (showBackButton) {
       router.back();
     }
