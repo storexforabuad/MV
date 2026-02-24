@@ -29,6 +29,7 @@ import { getMessaging, onMessage } from 'firebase/messaging';
 import { app } from '@/lib/firebase';
 import toast from 'react-hot-toast';
 import HeroCarousel from '@/components/customer/HeroCarousel';
+import NeedAWebsiteModal from '@/components/customer/modals/NeedAWebsiteModal';
 
 const ProductGrid = dynamic(
   () => import('../../components/products/ProductGrid'),
@@ -116,6 +117,7 @@ export default function StorefrontPageClient({
   const [highlightOrderId, setHighlightOrderId] = useState<string | null>(null);
   const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
   const { customer } = useCustomer();
+  const [isNeedAWebsiteModalOpen, setIsNeedAWebsiteModalOpen] = useState(false);
 
   // Swipe gesture state
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
@@ -542,6 +544,7 @@ export default function StorefrontPageClient({
                 isSwipeTransitioning={isSwipeTransitioning}
                 isLoading={loading}
                 onCategoryChange={handleCategorySelect}
+                onNeedAWebsiteClick={() => setIsNeedAWebsiteModalOpen(true)}
               />
               {storeId && <BusinessCardModal open={aboutOpen} onClose={() => setAboutOpen(false)} storeMeta={storeMeta || undefined} />}
               {hasMore && (
@@ -549,6 +552,12 @@ export default function StorefrontPageClient({
                   {loading && <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>}
                 </div>
               )}
+              <NeedAWebsiteModal
+                isOpen={isNeedAWebsiteModalOpen}
+                onClose={() => setIsNeedAWebsiteModalOpen(false)}
+                storeId={storeId}
+                storeName={storeName}
+              />
             </>
           )}
         </div>

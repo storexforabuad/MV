@@ -24,7 +24,9 @@ import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
 import SizeSelector from '@/components/products/SizeSelector';
 import { SizePreferencesCache } from '@/lib/sizePreferencesCache';
 import SizeGuideModal from '@/components/products/SizeGuideModal';
-import NeedAWebsiteBanner from '@/components/customer/NeedAWebsiteBanner';
+import NeedAWebsiteModal from '@/components/customer/modals/NeedAWebsiteModal';
+import { motion } from 'framer-motion';
+import { Globe, Sparkles } from 'lucide-react';
 
 const ProductDetailSkeleton = dynamic(() => import('@/components/ProductDetailSkeleton'), { ssr: false });
 const AnimatedViewCount = dynamic(() => import('@/components/AnimatedViewCount'), {
@@ -52,6 +54,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
   const [selectedColor, setSelectedColor] = useState<FashionProduct['colors'][0] | null>(null);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
   const [highlightSizeSection, setHighlightSizeSection] = useState(false);
+  const [isNeedAWebsiteModalOpen, setIsNeedAWebsiteModalOpen] = useState(false);
   const sizeSectionRef = useRef<HTMLDivElement>(null);
 
   // Helper to trigger size section highlight
@@ -593,12 +596,54 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
 
                 {product.description && !isFoodBeverageProduct(product) && <p className="text-gray-600 dark:text-gray-300 mb-8">{product.description}</p>}
 
-                {/* Action Buttons */}
-                <div className="mt-8 -mx-4 sm:mx-0">
-                  <NeedAWebsiteBanner
-                    storeId={storeId}
-                  />
-                </div>
+                {/* Optimized Branded Footer */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  className="mt-12 mb-8 flex justify-center w-full relative"
+                >
+                  <button
+                    onClick={() => setIsNeedAWebsiteModalOpen(true)}
+                    className="w-full relative p-6 sm:p-8 rounded-[2rem] shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98] group bg-gradient-to-br from-[#1a1a40] via-[#2d1b4d] to-[#1a1a40] border border-amber-500/30"
+                  >
+                    {/* Promo Badge */}
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg shadow-amber-500/20 z-20 uppercase tracking-[0.2em] border border-amber-400/20">
+                      PROMO
+                    </div>
+
+                    {/* Shimmer Layer */}
+                    <div className="absolute inset-0 rounded-[2rem] overflow-hidden pointer-events-none">
+                      <div className="absolute inset-0 before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_4s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/5 before:to-transparent" />
+                    </div>
+
+                    {/* Subtle background glows */}
+                    <div className="absolute -top-10 -right-10 w-32 h-32 bg-amber-400/10 blur-[40px] rounded-full opacity-50 z-0" />
+                    <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500/10 blur-[40px] rounded-full opacity-50 z-0" />
+
+
+                    <div className="relative z-10 flex flex-col items-center text-center">
+                      <div className="flex items-center gap-2 mb-3">
+                        <div className="w-8 h-8 rounded-xl bg-amber-400/10 flex items-center justify-center border border-amber-400/20 group-hover:scale-110 transition-transform">
+                          <Globe className="w-4 h-4 text-amber-400" />
+                        </div>
+                        <span className="text-[10px] font-black text-amber-400/80 tracking-[0.2em] uppercase">
+                          Powered by <span className="text-amber-400">Bizconnect 2026</span>
+                        </span>
+                      </div>
+
+                      <div className="flex flex-col items-center gap-1.5">
+                        <p className="text-sm sm:text-base font-black text-white leading-tight tracking-tight">
+                          Get your professional website like {storeMeta?.name || 'this'}
+                        </p>
+                        <div className="flex items-center gap-2 text-amber-400 font-black text-[10px] uppercase tracking-widest mt-1 group-hover:gap-3 transition-all">
+                          Click to start <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                          <span>→</span>
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                </motion.div>
               </>
             )}
           </div>
@@ -617,6 +662,13 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
           </button>
         </div>
       )}
+
+      <NeedAWebsiteModal
+        isOpen={isNeedAWebsiteModalOpen}
+        onClose={() => setIsNeedAWebsiteModalOpen(false)}
+        storeId={storeId}
+        storeName={storeMeta?.name}
+      />
     </>
   );
 }

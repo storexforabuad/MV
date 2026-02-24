@@ -2,7 +2,7 @@
 import { memo, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Info, Phone, MessageCircle, Star, Clock, MapPin, Instagram, Gift, Search } from 'lucide-react';
+import { Info, Phone, MessageCircle, Star, Clock, MapPin, Instagram, Gift, Search, Globe, Sparkles } from 'lucide-react';
 import { Product } from '../../types/product';
 import { Order } from '../../hooks/useOrders';
 import { motion, LayoutGroup, AnimatePresence, Transition } from 'framer-motion';
@@ -112,6 +112,7 @@ interface ProductGridProps {
   isSwipeTransitioning?: boolean;
   isLoading?: boolean;
   onCategoryChange?: (categoryId: string) => void;
+  onNeedAWebsiteClick?: () => void;
 }
 
 const ProductGrid = memo(function ProductGrid({
@@ -130,7 +131,8 @@ const ProductGrid = memo(function ProductGrid({
   swipeDirection,
   isSwipeTransitioning,
   isLoading,
-  onCategoryChange
+  onCategoryChange,
+  onNeedAWebsiteClick
 }: ProductGridProps) {
   const router = useRouter();
   const { customer, promptLogin } = useCustomer();
@@ -334,6 +336,55 @@ const ProductGrid = memo(function ProductGrid({
           })
         )}
       </motion.div>
+
+      {/* Branded Footer */}
+      {!isLoading && sortedProducts.length > 0 && onNeedAWebsiteClick && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mt-12 mb-28 flex justify-center px-4 relative"
+        >
+          <button
+            onClick={onNeedAWebsiteClick}
+            className="w-full max-w-sm relative p-6 rounded-[2rem] shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98] group bg-gradient-to-br from-[#1a1a40] via-[#2d1b4d] to-[#1a1a40] border border-amber-500/30"
+          >
+            {/* Promo Badge */}
+            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg shadow-amber-500/20 z-20 uppercase tracking-[0.2em] border border-amber-400/20">
+              PROMO
+            </div>
+            {/* Shimmer Layer */}
+            <div className="absolute inset-0 rounded-[2rem] overflow-hidden pointer-events-none">
+              <div className="absolute inset-0 before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_4s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/5 before:to-transparent" />
+            </div>
+
+            {/* Subtle background glows */}
+            <div className="absolute -top-10 -right-10 w-32 h-32 bg-amber-400/10 blur-[40px] rounded-full opacity-50 z-0" />
+            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500/10 blur-[40px] rounded-full opacity-50 z-0" />
+
+            <div className="relative z-10 flex flex-col items-center text-center">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 rounded-xl bg-amber-400/10 flex items-center justify-center border border-amber-400/20 group-hover:scale-110 transition-transform">
+                  <Globe className="w-4 h-4 text-amber-400" />
+                </div>
+                <span className="text-[10px] font-black text-amber-400/80 tracking-[0.2em] uppercase">
+                  Powered by <span className="text-amber-400">Bizconnect 2026</span>
+                </span>
+              </div>
+
+              <div className="flex flex-col items-center gap-1.5">
+                <p className="text-sm sm:text-base font-black text-white leading-tight tracking-tight">
+                  Get your professional website like {storeMeta?.name || 'this'}
+                </p>
+                <div className="flex items-center gap-2 text-amber-400 font-black text-[10px] uppercase tracking-widest mt-1 group-hover:gap-3 transition-all">
+                  Click to start <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                  <span>→</span>
+                </div>
+              </div>
+            </div>
+          </button>
+        </motion.div>
+      )}
 
       <OrderSummaryModal
         isOpen={isOrderModalOpen}
