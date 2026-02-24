@@ -798,3 +798,31 @@ export async function getPopularCategories(): Promise<{ id: string; name: string
     return [];
   }
 }
+
+export async function saveSharedWishlist(items: any[]): Promise<string> {
+  assertDb();
+  try {
+    const sharedRef = collection(db, 'sharedWishlists');
+    const docRef = await addDoc(sharedRef, {
+      items,
+      createdAt: serverTimestamp(),
+    });
+    return docRef.id;
+  } catch (error) {
+    console.error('Error saving shared wishlist:', error);
+    throw error;
+  }
+}
+
+export async function getSharedWishlist(id: string): Promise<{ items: any[]; createdAt: Timestamp } | null> {
+  assertDb();
+  try {
+    const docRef = doc(db, 'sharedWishlists', id);
+    const snap = await getDoc(docRef);
+    if (!snap.exists()) return null;
+    return snap.data() as { items: any[]; createdAt: Timestamp };
+  } catch (error) {
+    console.error('Error fetching shared wishlist:', error);
+    return null;
+  }
+}

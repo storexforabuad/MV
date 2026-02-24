@@ -297,6 +297,11 @@ service cloud.firestore {
       allow read, write: if true;
     }
 
+    // --- Shared Wishlist Rules ---
+    match /sharedWishlists/{wishlistId} {
+      allow read, create: if true;
+    }
+
     // --- Other Collections ---
     match /stockNotifications/{notificationId} {
       allow read, write, create, update, delete: if true;

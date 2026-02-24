@@ -21,6 +21,11 @@ const CartItemComponent = dynamic(
   }
 );
 
+const WishlistShareButton = dynamic(
+  () => import('../../components/cart/WishlistShareButton'),
+  { ssr: false }
+);
+
 interface GroupedCart {
   [storeId: string]: CartItemType[];
 }
@@ -151,6 +156,10 @@ export default function CartPage() {
         storeId={currentStoreId || undefined}
       />
       <div className="min-h-screen mx-auto max-w-2xl px-3 sm:px-4 pb-8 pt-[calc(var(--navbar-height)+1.5rem)] sm:pt-[calc(var(--navbar-height)+2rem)]">
+        <div className="flex justify-between items-center mb-6 px-1">
+          <h1 className="text-2xl font-bold card-text-gradient">Your Wishlist</h1>
+          <WishlistShareButton items={state.items} />
+        </div>
         {Object.entries(groupedCart).map(([storeId, items]) => {
           const storeMeta = storeMetas[storeId];
           const totalAmount = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
