@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useVendor } from '@/context/VendorContext';
 import { ArrowLeft, ShoppingBag, Moon, Sun, Heart } from 'lucide-react';
 import { useCart } from '@/lib/cartContext';
@@ -20,7 +20,15 @@ interface NavbarProps {
   activeCategoryId?: string;
 }
 
-export default function Navbar({ storeId, storeName, scrollDirection = 'up', backButtonHref, activeCategoryId }: NavbarProps) {
+export default function Navbar(props: NavbarProps) {
+  return (
+    <Suspense fallback={<nav className="fixed top-0 z-50 w-full h-16 glassmorphic" />}>
+      <NavbarContent {...props} />
+    </Suspense>
+  );
+}
+
+function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonHref, activeCategoryId }: NavbarProps) {
   const { state } = useCart();
   const { theme, toggleTheme } = useTheme();
   const [isBouncing, setIsBouncing] = useState(false);
@@ -28,6 +36,7 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
+
   const isAdminRoute = pathname?.startsWith('/admin');
   const isStorefront = !isAdminRoute && !!pathname && pathname.split('/').length > 1 && pathname.split('/')[1].length > 0;
 
@@ -89,7 +98,7 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
       router.prefetch(`/admin/${storeId}`);
       router.prefetch(`/${storeId}`);
     }
-  }, [storeId]);
+  }, [storeId, isAdminRoute, router]);
 
   const tapCountRef = useRef(0);
 
@@ -199,7 +208,7 @@ export default function Navbar({ storeId, storeName, scrollDirection = 'up', bac
                     <ArrowLeft className="h-6 w-6 text-text-primary" />
                   </button>
                 )}
-                <span className="text-xl font-semibold card-text-gradient flex items-center gap-2">
+                <span className="text-xl font-semibold card-text-gradient flex items-center gap-2 text-nowrap">
                   {storeName || 'Store'}
                 </span>
               </>

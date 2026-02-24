@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { getSharedWishlist, getStoreMeta } from '@/lib/db';
 import { CartItem } from '@/lib/cartContext';
 import { useCart } from '@/lib/cartContext';
@@ -17,7 +17,22 @@ interface SharedWishlistPageProps {
     params: { id: string };
 }
 
-export default function SharedWishlistPage({ params }: SharedWishlistPageProps) {
+export default function SharedWishlistPage(props: SharedWishlistPageProps) {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="animate-pulse flex flex-col items-center gap-4">
+                    <div className="w-16 h-16 bg-gray-200 dark:bg-gray-800 rounded-full"></div>
+                    <div className="h-4 w-32 bg-gray-200 dark:bg-gray-800 rounded"></div>
+                </div>
+            </div>
+        }>
+            <SharedWishlistPageContent {...props} />
+        </Suspense>
+    );
+}
+
+function SharedWishlistPageContent({ params }: SharedWishlistPageProps) {
     const { id } = params;
     const searchParams = useSearchParams();
     const [items, setItems] = useState<CartItem[]>([]);
