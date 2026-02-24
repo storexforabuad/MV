@@ -628,7 +628,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                           <Globe className="w-4 h-4 text-amber-400" />
                         </div>
                         <span className="text-[10px] font-black text-amber-400/80 tracking-[0.2em] uppercase">
-                          Powered by <span className="text-amber-400">Bizconnect 2026</span>
+                          Powered by <span className="text-amber-400">Bizconnect™ 2026.</span>
                         </span>
                       </div>
 
