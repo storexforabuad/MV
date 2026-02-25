@@ -13,6 +13,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
+import NeedAWebsiteModal from '@/components/customer/modals/NeedAWebsiteModal';
 
 interface SharedWishlistPageProps {
     params: { id: string };
@@ -39,6 +40,7 @@ function SharedWishlistPageContent({ params }: SharedWishlistPageProps) {
     const [items, setItems] = useState<CartItem[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [storeMetas, setStoreMetas] = useState<{ [key: string]: StoreMeta }>({});
+    const [isNeedWebsiteModalOpen, setIsNeedWebsiteModalOpen] = useState(false);
     const { state, dispatch } = useCart();
 
     useEffect(() => {
@@ -137,6 +139,12 @@ function SharedWishlistPageContent({ params }: SharedWishlistPageProps) {
                     </button>
                 </div>
 
+                <NeedAWebsiteModal
+                    isOpen={isNeedWebsiteModalOpen}
+                    onClose={() => setIsNeedWebsiteModalOpen(false)}
+                    storeId="bizcon"
+                />
+
                 <div className="space-y-6">
                     {items.map((item, index) => {
                         const storeMeta = item.storeId ? storeMetas[item.storeId] : null;
@@ -221,13 +229,14 @@ function SharedWishlistPageContent({ params }: SharedWishlistPageProps) {
                 </div>
 
                 {/* Optimized Branded Footer */}
-                <motion.div
+                <motion.button
                     initial={{ opacity: 0, y: 20 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="mt-12 mb-8 flex justify-center w-full relative"
+                    onClick={() => setIsNeedWebsiteModalOpen(true)}
+                    className="mt-12 mb-8 flex justify-center w-full relative group text-left"
                 >
-                    <div className="w-full relative p-6 sm:p-8 rounded-[2rem] shadow-2xl group bg-gradient-to-br from-[#1a1a40] via-[#2d1b4d] to-[#1a1a40] border border-amber-500/30">
+                    <div className="w-full relative p-6 sm:p-8 rounded-[2rem] shadow-2xl bg-gradient-to-br from-[#1a1a40] via-[#2d1b4d] to-[#1a1a40] border border-amber-500/30">
                         {/* Promo Badge */}
                         <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg shadow-amber-500/20 z-20 uppercase tracking-[0.2em] border border-amber-400/20">
                             PROMO
@@ -256,17 +265,14 @@ function SharedWishlistPageContent({ params }: SharedWishlistPageProps) {
                                 <p className="text-sm sm:text-base font-black text-white leading-tight tracking-tight">
                                     Get a professional business website
                                 </p>
-                                <Link
-                                    href="https://tinyurl.com/bizconnet"
-                                    className="flex items-center gap-2 text-amber-400 font-black text-[10px] uppercase tracking-widest mt-1 group-hover:gap-3 transition-all"
-                                >
+                                <div className="flex items-center gap-2 text-amber-400 font-black text-[10px] uppercase tracking-widest mt-1 group-hover:gap-3 transition-all">
                                     Click to start <Sparkles className="w-3.5 h-3.5 animate-pulse" />
                                     <span>→</span>
-                                </Link>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </motion.div>
+                </motion.button>
             </div>
         </>
     );

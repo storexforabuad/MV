@@ -803,8 +803,9 @@ export async function saveSharedWishlist(items: any[]): Promise<string> {
   assertDb();
   try {
     const sharedRef = collection(db, 'sharedWishlists');
+    const sanitizedItems = stripUndefined(items);
     const docRef = await addDoc(sharedRef, {
-      items,
+      items: sanitizedItems,
       createdAt: serverTimestamp(),
     });
     return docRef.id;

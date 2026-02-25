@@ -7,6 +7,7 @@ import { getStoreMeta } from '../../lib/db';
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import NeedAWebsiteModal from '@/components/customer/modals/NeedAWebsiteModal';
 import { StoreMeta } from '../../types/store';
 import Navbar from '../../components/layout/navbar';
 import { useCustomer } from '@/context/CustomerContext';
@@ -40,6 +41,7 @@ export default function CartPage() {
   const [groupedCart, setGroupedCart] = useState<GroupedCart>({});
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [isNeedWebsiteModalOpen, setIsNeedWebsiteModalOpen] = useState(false);
   const [currentStoreId, setCurrentStoreId] = useState<string | null>(null);
 
   const { customer } = useCustomer();
@@ -157,6 +159,12 @@ export default function CartPage() {
         customer={customer}
         storeId={currentStoreId || undefined}
       />
+      <NeedAWebsiteModal
+        isOpen={isNeedWebsiteModalOpen}
+        onClose={() => setIsNeedWebsiteModalOpen(false)}
+        storeId={Object.keys(storeMetas)[0] || 'bizcon'}
+        storeName={Object.values(storeMetas)[0]?.name}
+      />
       <div className="min-h-screen mx-auto max-w-2xl px-3 sm:px-4 pb-8 pt-[calc(var(--navbar-height)+1.5rem)] sm:pt-[calc(var(--navbar-height)+2rem)] flex flex-col">
         <div className="flex justify-between items-center mb-6 px-1">
           <h1 className="text-2xl font-bold card-text-gradient">Your Wishlist</h1>
@@ -203,13 +211,14 @@ export default function CartPage() {
 
         {/* Optimized Branded Footer */}
         {Object.keys(storeMetas).length > 0 && (
-          <motion.div
+          <motion.button
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mt-12 mb-8 flex justify-center w-full relative"
+            onClick={() => setIsNeedWebsiteModalOpen(true)}
+            className="mt-12 mb-8 flex justify-center w-full relative group text-left"
           >
-            <div className="w-full relative p-6 sm:p-8 rounded-[2rem] shadow-2xl group bg-gradient-to-br from-[#1a1a40] via-[#2d1b4d] to-[#1a1a40] border border-amber-500/30">
+            <div className="w-full relative p-6 sm:p-8 rounded-[2rem] shadow-2xl bg-gradient-to-br from-[#1a1a40] via-[#2d1b4d] to-[#1a1a40] border border-amber-500/30">
               {/* Promo Badge */}
               <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg shadow-amber-500/20 z-20 uppercase tracking-[0.2em] border border-amber-400/20">
                 PROMO
@@ -238,17 +247,14 @@ export default function CartPage() {
                   <p className="text-sm sm:text-base font-black text-white leading-tight tracking-tight">
                     Get a professional business website like {Object.values(storeMetas)[0]?.name || 'this'}
                   </p>
-                  <Link
-                    href="https://tinyurl.com/bizconnet"
-                    className="flex items-center gap-2 text-amber-400 font-black text-[10px] uppercase tracking-widest mt-1 group-hover:gap-3 transition-all"
-                  >
+                  <div className="flex items-center gap-2 text-amber-400 font-black text-[10px] uppercase tracking-widest mt-1 group-hover:gap-3 transition-all">
                     Click to start <Sparkles className="w-3.5 h-3.5 animate-pulse" />
                     <span>→</span>
-                  </Link>
+                  </div>
                 </div>
               </div>
             </div>
-          </motion.div>
+          </motion.button>
         )}
       </div>
     </>
