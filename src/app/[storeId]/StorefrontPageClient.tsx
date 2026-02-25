@@ -496,9 +496,9 @@ export default function StorefrontPageClient({
         <div className="mt-2">
           <HeroCarousel storeMeta={storeMeta} />
         </div>
-        <NeedAWebsiteBanner
+        {/* <NeedAWebsiteBanner
           storeId={storeId}
-        />
+        /> */}
 
         {/* Store Closed Banner */}
         {storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false && (
