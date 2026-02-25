@@ -54,7 +54,7 @@ export default function WishlistShareButton({ items }: WishlistShareButtonProps)
         setIsSharing(true);
         try {
             const id = await saveSharedWishlist(items);
-            const url = `${window.location.origin}/wishlist/${id}`;
+            const url = `https://tinyurl.com/bizconnet/wishlist/${id}`;
             setShareUrl(url);
 
             if (navigator.share) {
