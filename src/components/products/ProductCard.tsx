@@ -308,7 +308,7 @@ export default function ProductCard({
           transform-gpu will-change-transform
           group-hover:shadow-[0_16px_24px_-8px_rgba(0,0,0,0.12),0_4px_12px_-4px_rgba(0,0,0,0.08)] dark:group-hover:shadow-xl dark:group-hover:shadow-white/15
           ${!isMobile ? 'group-hover:translate-y-[-4px]' : ''}
-          bg-white dark:bg-card-background border-2 border-transparent active:border-blue-500/50 active:ring-4 active:ring-blue-500/20"
+          bg-white dark:bg-card-background border-2 border-transparent"
           style={{
             transform: 'translate3d(0,0,0)',
             perspective: '1000px',

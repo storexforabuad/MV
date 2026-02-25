@@ -199,7 +199,7 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
           <div className="flex items-center gap-2">
             {showBackButton ? (
               <>
-                {backButtonHref ? (
+                {backButtonHref && !fromWishlistId ? (
                   <Link href={backButtonHref} className="p-2 rounded-lg hover:bg-card-hover transition-colors" aria-label="Go back">
                     <ArrowLeft className="h-6 w-6 text-text-primary" />
                   </Link>
