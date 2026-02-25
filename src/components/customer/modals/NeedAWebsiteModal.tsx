@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react';
 import { X, Globe, ArrowRight, AlertCircle, Check, CreditCard, Sparkles } from 'lucide-react';
 import { useWebsiteRegistrationModal } from '@/hooks/useWebsiteRegistrationModal';
+import { useModalBackNavigation } from '@/hooks/useModalBackNavigation';
 import CountryStateSelector from '@/components/shared/CountryStateSelector';
 import ProgressIndicator from '@/components/shared/ProgressIndicator';
 import { TIER_DETAILS, RAMADAN_PROMO_END_DATE, STORE_TYPES } from '@/config/countries';
@@ -19,6 +20,9 @@ interface NeedAWebsiteModalProps {
 const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsiteModalProps) => {
   const modal = useWebsiteRegistrationModal();
   const contentRef = useRef<HTMLDivElement>(null);
+
+  // Handle back button navigation
+  useModalBackNavigation(isOpen, onClose, 'need-a-website');
 
   // Scroll to top when screen changes
   useEffect(() => {

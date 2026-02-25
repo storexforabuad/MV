@@ -3,6 +3,7 @@
 import React, { useMemo, useEffect, Fragment, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { ShoppingCart, Package, X } from 'lucide-react';
+import { useModalBackNavigation } from '@/hooks/useModalBackNavigation';
 import { Order } from '../../../hooks/useOrders';
 import { OrderDetailCard } from '../cards/OrderDetailCard';
 import { StoreMeta } from '@/types/store';
@@ -50,6 +51,9 @@ const OrdersModal: React.FC<OrdersModalProps> = ({
 }) => {
   const [hasRequestedNotifications, setHasRequestedNotifications] = React.useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Handle back button navigation
+  useModalBackNavigation(isOpen, onClose, 'orders-modal');
 
   useEffect(() => {
     if (isOpen && orders.length > 0 && !hasRequestedNotifications && onNotificationRequest) {

@@ -4,11 +4,15 @@ import { Fragment, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { Phone, MessageCircle, Star, Clock, MapPin, Instagram, X, Navigation, BadgeCheck } from 'lucide-react';
 import Image from 'next/image';
+import { useModalBackNavigation } from '@/hooks/useModalBackNavigation';
 import { StoreMeta } from '../../types/store';
 import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 
 export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean; onClose: () => void; storeMeta?: StoreMeta }) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  // Handle back button navigation
+  useModalBackNavigation(open, onClose, 'business-card');
 
   if (!storeMeta) return null;
 

@@ -4,6 +4,7 @@ import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, ShoppingBag, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
+import { useModalBackNavigation } from '@/hooks/useModalBackNavigation';
 import { Product } from '@/types/product';
 import { formatPrice } from '@/utils/price';
 import { ensureProductType } from '@/utils/productHelpers';
@@ -23,6 +24,9 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
 }) => {
     const [query, setQuery] = useState('');
     const inputRef = useRef<HTMLInputElement>(null);
+
+    // Handle back button navigation
+    useModalBackNavigation(isOpen, onClose, 'search-overlay');
 
     useEffect(() => {
         if (isOpen) {
