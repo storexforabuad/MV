@@ -150,9 +150,9 @@ const ActivityPage: React.FC<ActivityPageProps> = ({
         onClick={openSocialModal}
         className="w-full relative overflow-hidden rounded-[2.5rem] p-8 text-white shadow-2xl transition-all hover:scale-[1.01] active:scale-[0.99] group"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 animate-gradient-slow group-hover:scale-110 transition-transform duration-500" />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 animate-gradient-slow group-hover:scale-110 transition-transform duration-500" />
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-pink-400/20 rounded-full -ml-16 -mb-16 blur-2xl" />
+        <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-400/20 rounded-full -ml-16 -mb-16 blur-2xl" />
 
         <div className="relative flex flex-col items-start gap-4">
           <div className="bg-white/20 backdrop-blur-md p-4 rounded-3xl shadow-lg border border-white/20">
@@ -161,15 +161,15 @@ const ActivityPage: React.FC<ActivityPageProps> = ({
 
           <div className="text-left w-full">
             <h2 className="text-3xl font-black tracking-tight drop-shadow-md">Social Hub</h2>
-            <p className="text-indigo-100 font-medium mt-1 text-lg opacity-90">Boom your sales everywhere</p>
+            <p className="text-blue-100 font-medium mt-1 text-lg opacity-90">Boom your sales everywhere</p>
           </div>
 
           <div className="flex items-center gap-3 mt-4 w-full">
             <div className="flex-1 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl py-3 px-4 flex items-center justify-between">
-              <span className="text-xs font-bold uppercase tracking-wider text-pink-100">Suggested</span>
+              <span className="text-xs font-bold uppercase tracking-wider text-blue-100">Suggested</span>
               <Megaphone className="h-4 w-4 text-white opacity-60" />
             </div>
-            <div className="bg-white text-indigo-600 p-3 rounded-full shadow-lg group-hover:translate-x-1 transition-transform">
+            <div className="bg-white text-blue-600 p-3 rounded-full shadow-lg group-hover:translate-x-1 transition-transform">
               <Plus className="h-6 w-6" strokeWidth={3} />
             </div>
           </div>
