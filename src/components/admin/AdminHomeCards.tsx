@@ -474,12 +474,16 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
       window.addEventListener('popstate', handlePopState);
       return () => {
         window.removeEventListener('popstate', handlePopState);
-        if (window.history.state && window.history.state.modalOpen) {
-          window.history.back();
+        // Refresh the admin page data when any modal is closed to sync state.
+        if (typeof onRefresh === 'function') {
+          // Add a small delay so React state has settled before we sync
+          setTimeout(() => {
+            onRefresh(false);
+          }, 200);
         }
       };
     }
-  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, isAdvertisingModalOpen, isEventsModalOpen, isAccountModalOpen, isWarehouseModalOpen, isWholesaleModalOpen, isCirclesModalOpen, setIsModalOpen]);
+  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, isAdvertisingModalOpen, isEventsModalOpen, isAccountModalOpen, isWarehouseModalOpen, isWholesaleModalOpen, isCirclesModalOpen, setIsModalOpen, onRefresh]);
 
   const handleOpenModal = (idx: number, card: typeof cardData[0]) => {
     if (isRefreshing) return; // Prevent opening modals during refresh
