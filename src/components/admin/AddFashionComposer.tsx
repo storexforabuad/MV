@@ -1003,7 +1003,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                         <div className="flex items-center gap-4">
                             <div>
                                 <h2 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-slate-100">
-                                    {currentStep === 4 ? 'Uploading...' : currentStep === 5 ? 'Success' : 'Add Fashion Product'}
+                                    {currentStep === 4 ? 'Uploading...' : currentStep === 5 ? 'Success' : 'Add Product'}
                                 </h2>
                                 <p className="text-xs text-slate-500 dark:text-slate-400">
                                     Step {Math.min(currentStep + 1, 4)} of 4

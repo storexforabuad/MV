@@ -1,12 +1,13 @@
-import React from 'react';
 import {
   HomeIcon as HomeIconOutline,
   BuildingStorefrontIcon as BuildingStorefrontIconOutline,
-  PlusIcon
+  PlusIcon,
+  BellIcon as BellIconOutline
 } from '@heroicons/react/24/outline';
 import {
   HomeIcon as HomeIconSolid,
-  BuildingStorefrontIcon as BuildingStorefrontIconSolid
+  BuildingStorefrontIcon as BuildingStorefrontIconSolid,
+  BellIcon as BellIconSolid
 } from '@heroicons/react/24/solid';
 import { Warehouse as WarehouseOutline } from 'lucide-react';
 import { useSpotlightContext } from '@/context/SpotlightContext';
@@ -24,6 +25,7 @@ interface MobileNavProps {
 const navItems = [
   { id: 'home', iconOutline: HomeIconOutline, iconSolid: HomeIconSolid, label: 'Home' },
   { id: 'add', iconOutline: PlusIcon, iconSolid: PlusIcon, label: 'Upload' },
+  { id: 'activity', iconOutline: BellIconOutline, iconSolid: BellIconSolid, label: 'Activity' },
 ];
 
 const MobileNav = ({ activeSection, setActiveSection, onAddProductClick, onManageProductsClick, onManageCategoriesClick, isModalOpen, isRefreshing }: MobileNavProps) => {
@@ -45,7 +47,7 @@ const MobileNav = ({ activeSection, setActiveSection, onAddProductClick, onManag
   };
 
   const HomeIconComponent = activeSection === 'home' ? HomeIconSolid : HomeIconOutline;
-  const StoreIconComponent = activeSection === 'warehouse' ? WarehouseOutline : WarehouseOutline;
+  const ActivityIconComponent = activeSection === 'activity' ? BellIconSolid : BellIconOutline;
 
   return (
     <nav
@@ -70,11 +72,17 @@ const MobileNav = ({ activeSection, setActiveSection, onAddProductClick, onManag
             </button>
           </div>
 
-          {/* Center spacer reserved for the floating + button */}
-          <div className="w-16 flex justify-center items-center" aria-hidden />
-
-          {/* Right side is intentionally left blank for a 2-tab layout */}
-          <div className="flex-1 flex justify-center items-center" aria-hidden />
+          {/* Right side - Activity button */}
+          <div className="flex-1 flex justify-center items-center">
+            <button
+              onClick={() => handleClick(navItems[2])}
+              className={`flex flex-col items-center justify-center h-14 w-14 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-1 focus:ring-offset-0 focus:ring-blue-400/50 ${activeSection === 'activity' ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-neutral-400'}`}
+              style={{ WebkitTapHighlightColor: 'transparent' }}
+            >
+              <ActivityIconComponent className="h-6 w-6" strokeWidth={activeSection === 'activity' ? 2 : 1.5} />
+              <span className={`text-xs font-medium mt-1 tracking-tight ${activeSection === 'activity' ? 'font-semibold' : 'font-normal'}`}>Activity</span>
+            </button>
+          </div>
         </div>
 
         {/* Centered + button */}

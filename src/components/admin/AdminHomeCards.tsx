@@ -28,7 +28,6 @@ import PayCommissionModal from './modals/PayCommissionModal';
 import ExpensesModal from './modals/ExpensesModal';
 import { AdvertisingModal } from './modals/AdvertisingModal';
 import { EventsModal } from './modals/EventsModal';
-import SubscriptionModal from './modals/SubscriptionModal';
 import WarehouseModal from './modals/WarehouseModal';
 // Import the customer components
 import { AdminCustomersCard } from './AdminCustomersCard';
@@ -75,6 +74,7 @@ interface AdminHomeCardsProps {
   deliveries: number;
   ambassadorTier?: string;
   ceoEmail?: string; // For subscription modal
+  onSubscriptionCardClick?: () => void;
 }
 
 const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferralBonus: number, handleClose: () => void }) => (
@@ -248,7 +248,7 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     icon: ShieldCheck,
     gradient: 'bg-gradient-to-br from-teal-500 via-emerald-600 to-green-700',
     text: 'text-white',
-    component: SubscriptionModal,
+    component: null, // Moved to AdminStorePageClient
     glowClass: 'dark:shadow-teal-500/30 shadow-teal-500/50',
     cardType: 'action',
   },
@@ -359,7 +359,6 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [isExpensesModalOpen, setIsExpensesModalOpen] = useState(false);
   const [isAdvertisingModalOpen, setIsAdvertisingModalOpen] = useState(false);
   const [isEventsModalOpen, setIsEventsModalOpen] = useState(false);
-  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [isAccountModalOpen, setIsAccountModalOpen] = useState(false);
   const [isWarehouseModalOpen, setIsWarehouseModalOpen] = useState(false);
   const [isWholesaleModalOpen, setIsWholesaleModalOpen] = useState(false);
@@ -448,7 +447,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const cardsToRender = cardData.filter(card => allowedCards.includes(card.label));
 
   useEffect(() => {
-    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen || isAdvertisingModalOpen || isEventsModalOpen || isSubscriptionModalOpen || isAccountModalOpen || isWarehouseModalOpen || isWholesaleModalOpen || isCirclesModalOpen;
+    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen || isAdvertisingModalOpen || isEventsModalOpen || isAccountModalOpen || isWarehouseModalOpen || isWholesaleModalOpen || isCirclesModalOpen;
     if (modalIsOpen) {
       window.history.pushState({ modalOpen: true }, '');
       const handlePopState = () => {
@@ -466,7 +465,6 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         setIsExpensesModalOpen(false);
         setIsAdvertisingModalOpen(false);
         setIsEventsModalOpen(false);
-        setIsSubscriptionModalOpen(false);
         setIsAccountModalOpen(false);
         setIsWarehouseModalOpen(false);
         setIsWholesaleModalOpen(false);
@@ -481,7 +479,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         }
       };
     }
-  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, isAdvertisingModalOpen, isEventsModalOpen, isSubscriptionModalOpen, isAccountModalOpen, isWarehouseModalOpen, isWholesaleModalOpen, isCirclesModalOpen, setIsModalOpen]);
+  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, isAdvertisingModalOpen, isEventsModalOpen, isAccountModalOpen, isWarehouseModalOpen, isWholesaleModalOpen, isCirclesModalOpen, setIsModalOpen]);
 
   const handleOpenModal = (idx: number, card: typeof cardData[0]) => {
     if (isRefreshing) return; // Prevent opening modals during refresh
@@ -489,7 +487,9 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     // Only trigger a silent refresh if data is older than 30 seconds
     const now = Date.now();
     if (now - lastSyncTimeRef.current > 30000) {
-      onRefresh(false);
+      if (typeof onRefresh === 'function') {
+        onRefresh(false);
+      }
       lastSyncTimeRef.current = now;
     }
 
@@ -510,7 +510,9 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     else if (label === 'Events') setIsEventsModalOpen(true);
     else if (label === 'Warehouse') setIsWarehouseModalOpen(true);
     else if (label === 'Wholesale') setIsWholesaleModalOpen(true);
-    else if (label === 'Subscription') setIsSubscriptionModalOpen(true);
+    else if (label === 'Subscription') {
+      if (props.onSubscriptionCardClick) props.onSubscriptionCardClick();
+    }
     else if (label === 'Settings') setIsAccountModalOpen(true);
     else if (label === 'Circles') setIsCirclesModalOpen(true);
     else setOpenModal(idx);
@@ -576,10 +578,6 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
-  const handleCloseSubscriptionModal = () => {
-    setIsSubscriptionModalOpen(false);
-    if (props.setIsModalOpen) props.setIsModalOpen(false);
-  }
 
   const handleCloseAccountModal = () => {
     setIsAccountModalOpen(false);
@@ -1003,17 +1001,6 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
       {isAdvertisingModalOpen && (<AdvertisingModal isOpen={isAdvertisingModalOpen} onClose={handleCloseAdvertisingModal} />)}
 
       {isEventsModalOpen && (<EventsModal isOpen={isEventsModalOpen} onClose={handleCloseEventsModal} />)}
-
-      {isSubscriptionModalOpen && (
-        <SubscriptionModal
-          handleClose={handleCloseSubscriptionModal}
-          storeId={storeId}
-          ceoEmail={props.ceoEmail}
-          storeName={props.storeName}
-          storeType={props.storeType}
-          onOpenAmbassadorHub={onAmbassadorCardClick}
-        />
-      )}
 
       {isAccountModalOpen && (
         <AccountModal

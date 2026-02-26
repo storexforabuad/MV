@@ -38,6 +38,7 @@ import AdminInvoicePanel from '../../../components/admin/AdminInvoicePanel';
 import InstallPrompt from '../../../components/InstallPrompt';
 import dynamic from 'next/dynamic';
 import PreviewSkeleton from '../../../components/admin/PreviewSkeleton';
+import ActivityPage from '../../../components/admin/ActivityPage';
 import { markOnboardingAsCompleted } from '../../../app/actions/onboardingActions';
 import { useSpotlightContext } from '@/context/SpotlightContext';
 import { Notification } from '../../../types/notification';
@@ -54,6 +55,8 @@ const ManageCategoriesModal = dynamic(() => import('../../../components/admin/Ma
 const AdminOrdersModal = dynamic(() => import('../../../components/admin/modals/AdminOrdersModal').then(mod => mod.AdminOrdersModal), { ssr: false });
 const AmbassadorHubModal = dynamic(() => import('../../../components/admin/modals/AmbassadorHubModal').then(mod => mod.AmbassadorHubModal), { ssr: false });
 const PostsComposerModal = dynamic(() => import('../../../components/admin/modals/PostsComposerModal'), { ssr: false });
+const SocialPostsModal = dynamic(() => import('../../../components/admin/modals/SocialPostsModal'), { ssr: false });
+const SubscriptionModal = dynamic(() => import('../../../components/admin/modals/SubscriptionModal'), { ssr: false });
 const LogoutConfirmationModal = dynamic(() => import('../../../components/admin/modals/LogoutConfirmationModal'), { ssr: false });
 
 interface Referral {
@@ -145,6 +148,8 @@ export default function AdminStorePageClient({
   const [isManageCategoriesModalOpen, setIsManageCategoriesModalOpen] = useState(false);
   const [isOrdersModalOpen, setIsOrdersModalOpen] = useState(false);
   const [isPostsModalOpen, setIsPostsModalOpen] = useState(false);
+  const [isSocialPostsModalOpen, setIsSocialPostsModalOpen] = useState(false);
+  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
   const [isAmbassadorHubModalOpen, setIsAmbassadorHubModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -215,10 +220,10 @@ export default function AdminStorePageClient({
       setIsOrdersModalOpen(true);
     } else if (notification.actionLabel === 'Update Stock') {
       setIsManageModalOpen(true);
-    } else if (notification.actionLabel === 'Upgrade Plan') {
-      // Navigate to subscription page or modal
-      // router.push(`/${storeId}/admin/subscription`);
-      toast.success("Redirecting to subscription...");
+    } else if (notification.actionLabel === 'Upgrade Plan' || notification.actionLabel === 'VIEW DETAILS') {
+      setIsSubscriptionModalOpen(true);
+    } else if (notification.actionLabel === 'Boost Post') {
+      setIsSocialPostsModalOpen(true);
     } else {
       toast.success(`Action: ${notification.actionLabel}`);
     }
@@ -459,7 +464,7 @@ export default function AdminStorePageClient({
     return <OnboardingFlow onComplete={handleOnboardingComplete} storeName={storeMeta?.name || ''} />;
   }
 
-  const isModalOpen = isComposerOpen || isManageModalOpen || isManageCategoriesModalOpen || isOrdersModalOpen || isPostsModalOpen || isAmbassadorHubModalOpen || isHomeCardModalOpen || isLogoutModalOpen;
+  const isModalOpen = isComposerOpen || isManageModalOpen || isManageCategoriesModalOpen || isOrdersModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isAmbassadorHubModalOpen || isHomeCardModalOpen || isLogoutModalOpen;
 
   const handleLogout = async () => {
     setIsLogoutModalOpen(true);
@@ -532,6 +537,7 @@ export default function AdminStorePageClient({
               deliveries={deliveriesCount}
               setIsModalOpen={setIsHomeCardModalOpen}
               ambassadorTier={ambassadorTier}
+              onSubscriptionCardClick={() => setIsSubscriptionModalOpen(true)}
             />
             <div className="mt-6">
               {storeMeta?.storeType === 'sports' && <AdminInvoicePanel storeId={storeId} />}
@@ -542,6 +548,22 @@ export default function AdminStorePageClient({
         {/* Warehouse View (Replaces Store Preview) */}
         <div className={`${activeSection !== 'warehouse' ? 'hidden' : ''} h-[calc(100vh-8rem)]`}>
           <WarehouseHub storeId={storeId} storeName={storeMeta?.name} />
+        </div>
+
+        {/* Activity Hub */}
+        <div className={`${activeSection !== 'activity' ? 'hidden' : ''} px-4`}>
+          <ActivityPage
+            storeId={storeId}
+            notifications={notifications}
+            onNotificationAction={handleNotificationAction}
+            onDismissNotification={handleDismissNotification}
+            openSocialModal={() => setIsSocialPostsModalOpen(true)}
+            openSubscriptionModal={() => setIsSubscriptionModalOpen(true)}
+            onAddProductClick={() => setIsComposerOpen(true)}
+            storeMeta={storeMeta}
+            products={products}
+            orders={orders}
+          />
         </div>
       </main>
 
@@ -643,6 +665,26 @@ export default function AdminStorePageClient({
         products={products}
         storeName={storeMeta?.name}
       />
+
+      <SocialPostsModal
+        isOpen={isSocialPostsModalOpen}
+        onClose={() => setIsSocialPostsModalOpen(false)}
+        storeId={storeId}
+        storeName={storeMeta?.name || ''}
+        products={products}
+        categories={categories}
+      />
+
+      {isSubscriptionModalOpen && (
+        <SubscriptionModal
+          handleClose={() => setIsSubscriptionModalOpen(false)}
+          storeId={storeId}
+          ceoEmail={storeMeta?.ceoEmail}
+          storeName={storeMeta?.name}
+          storeType={storeMeta?.storeType}
+          onOpenAmbassadorHub={() => setIsAmbassadorHubModalOpen(true)}
+        />
+      )}
 
       <LogoutConfirmationModal
         isOpen={isLogoutModalOpen}
