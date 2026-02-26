@@ -4,13 +4,13 @@ import { ThemeProvider } from '../../lib/themeContext'
 import ClientProviders from '../../components/ClientProviders'
 
 export const metadata: Metadata = {
-  title: "Control Center",
+  title: "Store Control Center",
   description: "Manage your store, products, and orders.",
   manifest: "/admin-manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Control Center",
+    title: "Store Control Center",
   },
   formatDetection: {
     telephone: false,

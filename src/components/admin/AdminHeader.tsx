@@ -16,7 +16,7 @@ const AdminHeader = ({ onLogout, isRefreshing, storeMeta }: AdminHeaderProps) =>
     <header className="sticky top-0 z-50 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl shadow-sm border-b border-slate-200 dark:border-slate-800 transition-all duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Control Center</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white tracking-tight">Store Control Center</h1>
           {isRefreshing && <SpinnerCircle className="w-5 h-5 text-indigo-500" />}
         </div>
         <div className="flex items-center gap-2">

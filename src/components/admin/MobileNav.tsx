@@ -1,11 +1,11 @@
 import {
-  HomeIcon as HomeIconOutline,
+  ChartBarSquareIcon as HomeIconOutline,
   BuildingStorefrontIcon as BuildingStorefrontIconOutline,
   PlusIcon,
   BellIcon as BellIconOutline
 } from '@heroicons/react/24/outline';
 import {
-  HomeIcon as HomeIconSolid,
+  ChartBarSquareIcon as HomeIconSolid,
   BuildingStorefrontIcon as BuildingStorefrontIconSolid,
   BellIcon as BellIconSolid
 } from '@heroicons/react/24/solid';
@@ -23,9 +23,9 @@ interface MobileNavProps {
 }
 
 const navItems = [
-  { id: 'home', iconOutline: HomeIconOutline, iconSolid: HomeIconSolid, label: 'Home' },
+  { id: 'home', iconOutline: HomeIconOutline, iconSolid: HomeIconSolid, label: 'Dashboard' },
   { id: 'add', iconOutline: PlusIcon, iconSolid: PlusIcon, label: 'Upload' },
-  { id: 'activity', iconOutline: BellIconOutline, iconSolid: BellIconSolid, label: 'Activity' },
+  { id: 'activity', iconOutline: BellIconOutline, iconSolid: BellIconSolid, label: 'Updates' },
 ];
 
 const MobileNav = ({ activeSection, setActiveSection, onAddProductClick, onManageProductsClick, onManageCategoriesClick, isModalOpen, isRefreshing }: MobileNavProps) => {
@@ -68,7 +68,7 @@ const MobileNav = ({ activeSection, setActiveSection, onAddProductClick, onManag
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               <HomeIconComponent className="h-6 w-6" strokeWidth={activeSection === 'home' ? 2 : 1.5} />
-              <span className={`text-xs font-medium mt-1 tracking-tight ${activeSection === 'home' ? 'font-semibold' : 'font-normal'}`}>Home</span>
+              <span className={`text-xs font-medium mt-1 tracking-tight ${activeSection === 'home' ? 'font-semibold' : 'font-normal'}`}>Dashboard</span>
             </button>
           </div>
 
@@ -80,7 +80,7 @@ const MobileNav = ({ activeSection, setActiveSection, onAddProductClick, onManag
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               <ActivityIconComponent className="h-6 w-6" strokeWidth={activeSection === 'activity' ? 2 : 1.5} />
-              <span className={`text-xs font-medium mt-1 tracking-tight ${activeSection === 'activity' ? 'font-semibold' : 'font-normal'}`}>Activity</span>
+              <span className={`text-xs font-medium mt-1 tracking-tight ${activeSection === 'activity' ? 'font-semibold' : 'font-normal'}`}>Updates</span>
             </button>
           </div>
         </div>
