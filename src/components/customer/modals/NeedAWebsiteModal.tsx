@@ -75,8 +75,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
       const tierDetails = TIER_DETAILS[modal.formData.planId as keyof typeof TIER_DETAILS];
       if (!tierDetails) throw new Error('Invalid plan selected');
 
-      // Apply 50% discount (Fake Discount Strategy - same as /register)
-      const finalPrice = tierDetails.price / 2;
+      const finalPrice = tierDetails.price;
       const amount = finalPrice * 100; // Convert to kobo
 
       const paystackConfig = {

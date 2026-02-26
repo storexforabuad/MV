@@ -165,7 +165,7 @@ export async function getReferralDashboardData(referralCode: string): Promise<Re
             const status = data.subscriptionStatus || 'trial';
             const tier = data.subscriptionTier as keyof typeof TIER_DETAILS;
             const tierInfo = TIER_DETAILS[tier];
-            const weeklyFee = tierInfo ? (tierInfo.price / 2) : 0; // Halved price as per logic in registration
+            const weeklyFee = tierInfo ? tierInfo.price : 0;
             const referralDate = (data.referralDate as Timestamp)?.toDate() || new Date();
             const isEligible = isWithinInterval(now, {
                 start: referralDate,

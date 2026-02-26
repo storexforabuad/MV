@@ -148,6 +148,7 @@ export default function AdminStorePageClient({
   const [isAmbassadorHubModalOpen, setIsAmbassadorHubModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [isPreviewLoading, setIsPreviewLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState<boolean | null>(false);
   const [uiVisible, setUiVisible] = useState(true);
@@ -160,6 +161,8 @@ export default function AdminStorePageClient({
   const [deliveriesCount, setDeliveriesCount] = useState(initialDeliveryOrders.length);
   const [isHomeCardModalOpen, setIsHomeCardModalOpen] = useState(false);
   const [ambassadorTier, setAmbassadorTier] = useState<string>('bronze');
+  const isFetchingRef = useRef(false);
+  const lastFetchTimeRef = useRef<number>(Date.now());
 
   const [highlightOrderId, setHighlightOrderId] = useState<string | null>(null);
 
@@ -234,7 +237,10 @@ export default function AdminStorePageClient({
   }, [orders]);
 
   const fetchData = useCallback(async (showRefresh = false) => {
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
     if (showRefresh) setIsRefreshing(true);
+    setIsSyncing(true);
     try {
       const [fetchedProducts, fetchedCategories, fetchedContacts, fetchedStoreMeta, fetchedReferrals, commissionData, revenueData, deliveryOrders] = await Promise.all([
         getProducts(storeId),
@@ -272,10 +278,17 @@ export default function AdminStorePageClient({
     } catch {
       // handle error
     } finally {
-      if (showRefresh) setIsRefreshing(false);
+      setIsRefreshing(false);
+      setIsSyncing(false);
       setLoading(false);
+      isFetchingRef.current = false;
+      lastFetchTimeRef.current = Date.now();
     }
   }, [storeId, refreshOrders]);
+
+  const handleManualRefresh = useCallback(() => fetchData(true), [fetchData]);
+  const handleSilentSync = useCallback((showOverlay = false) => fetchData(showOverlay), [fetchData]);
+  const handleReferralAdded = useCallback(() => fetchData(false), [fetchData]);
 
   useEffect(() => {
     if (!storeId) return;
@@ -285,12 +298,9 @@ export default function AdminStorePageClient({
       setAmbassadorTier((initialStoreMeta as any).ambassadorTier || 'bronze');
     }
 
-    // Force onboarding off and UI on for instant access
-    setShowOnboarding(false);
-    setUiVisible(true);
-
-    // Initial background sync
-    fetchData(true);
+    // Only perform silent background sync on mount if needed, 
+    // but avoid fetchData(true) which blocks the UI with an overlay.
+    // fetchData(false); 
   }, [storeId, initialStoreMeta, fetchData]);
 
 
@@ -358,7 +368,7 @@ export default function AdminStorePageClient({
   const handleUpdateProduct = async (productId: string, updatedData: Partial<Product>) => {
     try {
       await updateProduct(storeId, productId, updatedData);
-      await fetchData();
+      await handleManualRefresh();
     } catch (error) {
       console.error("Failed to update product:", error);
       throw error;
@@ -368,7 +378,7 @@ export default function AdminStorePageClient({
   const handleDeleteProduct = async (productId: string) => {
     try {
       await deleteProduct(storeId, productId);
-      fetchData();
+      handleManualRefresh();
     } catch (error) {
       console.error("Failed to delete product:", error);
     }
@@ -380,14 +390,14 @@ export default function AdminStorePageClient({
       setCategories(prev => [...prev, newCategory]);
     } catch (error) {
       console.error("Failed to add category:", error);
-      fetchData();
+      handleManualRefresh();
     }
   };
 
   const handleUpdateCategory = async (categoryId: string, name: string) => {
     try {
       await updateCategory(storeId, categoryId, name);
-      fetchData();
+      handleManualRefresh();
     } catch (error) {
       console.error("Failed to update category:", error);
     }
@@ -396,7 +406,7 @@ export default function AdminStorePageClient({
   const handleDeleteCategory = async (categoryId: string) => {
     try {
       await deleteCategory(storeId, categoryId);
-      fetchData();
+      handleManualRefresh();
     } catch (error) {
       console.error("Failed to delete category:", error);
     }
@@ -494,15 +504,15 @@ export default function AdminStorePageClient({
               setActiveSection={setActiveSection}
               storeLink={`/${storeId}`}
               storeType={storeMeta?.storeType}
-              onRefresh={() => fetchData(true)}
-              isRefreshing={isRefreshing}
+              onRefresh={handleSilentSync}
+              isRefreshing={isSyncing}
               totalProducts={products.length}
               totalCategories={categories.length}
               totalViews={products.reduce((sum, p) => sum + (p.views || 0), 0) + (storeMeta?.storePageViews || 0)}
               debtors={0}
               subscriptionStatus={storeMeta?.subscriptionStatus || 'trial'}
               referrals={referrals.length}
-              onReferralAdded={() => fetchData(true)}
+              onReferralAdded={handleReferralAdded}
               totalContacts={contacts.reduce((sum, region) => sum + (region.contacts?.length || 0), 0)}
               storeId={storeId}
               totalOrders={orders.length}
@@ -622,7 +632,7 @@ export default function AdminStorePageClient({
         isOpen={isAmbassadorHubModalOpen}
         onClose={() => setIsAmbassadorHubModalOpen(false)}
         storeId={storeId}
-        onReferralAdded={() => fetchData(true)}
+        onReferralAdded={handleReferralAdded}
       />
 
       <PostsComposerModal

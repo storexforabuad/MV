@@ -146,10 +146,10 @@ export const SUBSCRIPTION_CONFIG = {
 export const TIER_DETAILS = {
     basic: {
         name: 'Lite',
-        price: 1000, // Display price (will be halved to 500)
+        price: 500,
         period: 'week',
         description: 'Perfect for new and small vendors just starting their business empire.',
-        productLimit: 100,
+        productLimit: 20,
         color: 'blue',
         gradient: 'from-blue-500/10 to-cyan-500/10',
         border: 'border-blue-400/30',
@@ -161,10 +161,10 @@ export const TIER_DETAILS = {
     },
     pro: {
         name: 'Pro',
-        price: 2000, // Display price (will be halved to 1000)
+        price: 1000,
         period: 'week',
         description: 'Ideal for growing businesses looking to scale and reach more customers.',
-        productLimit: 500,
+        productLimit: 100,
         color: 'indigo',
         gradient: 'from-indigo-500/20 to-purple-600/20',
         border: 'border-indigo-400/50',
@@ -176,10 +176,10 @@ export const TIER_DETAILS = {
     },
     promax: {
         name: 'Max',
-        price: 7000, // Display price (will be halved to 3500)
+        price: 3500,
         period: 'week',
         description: 'The ultimate choice for wholesalers and big brands with high volume.',
-        productLimit: 2000,
+        productLimit: 1000,
         color: 'gold',
         gradient: 'from-amber-500/20 to-yellow-600/20',
         border: 'border-amber-500/50',

@@ -25,6 +25,10 @@ export async function getSubscriptionStatus(storeId: string) {
             paystackCustomerCode: data.paystackCustomerCode,
             planCode: data.subscriptionPlanCode,
             tier: data.subscriptionTier,
+            isInfluencer: data.isInfluencer,
+            isFreePlan: data.isFreePlan,
+            isWeeklyBilling: data.isWeeklyBilling,
+            createdAt: data.createdAt,
         };
     } catch (error) {
         console.error('Error getting subscription status:', error);

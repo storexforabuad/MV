@@ -1,6 +1,6 @@
 'use client';
 import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays, CheckCircle2, Briefcase, ShieldCheck, Clock, AlertCircle, ExternalLink, Warehouse, Settings, ArrowLeft } from 'lucide-react';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useVendor } from '@/context/VendorContext';
 import { motion, Variants } from 'framer-motion';
@@ -373,8 +373,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [bankAccountName, setBankAccountName] = useState<string | null>(null);
   const [bankAccountNumber, setBankAccountNumber] = useState<string | null>(null);
   const [bankName, setBankName] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
-  const { setIsModalOpen, onRefresh, uiVisible, onAnimationComplete, onOrdersCardClick, onProductsCardClick, storeId, onAmbassadorCardClick } = props;
+  const lastSyncTimeRef = useRef<number>(0);
+  const { setIsModalOpen, onRefresh, uiVisible, onAnimationComplete, onOrdersCardClick, onProductsCardClick, storeId, onAmbassadorCardClick, isRefreshing } = props;
   const { vendor, promptLogin } = useVendor();
 
   // Prefetch storefront route on mount so Back to Store is instant
@@ -484,7 +484,14 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, isAdvertisingModalOpen, isEventsModalOpen, isSubscriptionModalOpen, isAccountModalOpen, isWarehouseModalOpen, isWholesaleModalOpen, isCirclesModalOpen, setIsModalOpen]);
 
   const handleOpenModal = (idx: number, card: typeof cardData[0]) => {
-    if (props.isRefreshing) return; // Prevent opening modals during refresh
+    if (isRefreshing) return; // Prevent opening modals during refresh
+
+    // Only trigger a silent refresh if data is older than 30 seconds
+    const now = Date.now();
+    if (now - lastSyncTimeRef.current > 30000) {
+      onRefresh(false);
+      lastSyncTimeRef.current = now;
+    }
 
     const { label, subtitle } = card;
     if (label === 'BizConnect™') setIsBizconNetworkModalOpen(true);
@@ -670,29 +677,6 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     exit: { opacity: 0, scale: 0.95, y: 20, transition: { duration: 0.2, ease: 'easeOut' } }
   };
 
-  /**
-   * MetricCard Component - Moved outside to prevent forced re-mounting
-   */
-  const MetricCard = ({ icon: Icon, label, count, gradient, glowClass, onClick, inlineStyle }: { icon: React.ElementType; label: string; count: string | number; gradient: string; glowClass: string; onClick: () => void; inlineStyle?: React.CSSProperties }) => (
-    <motion.div variants={itemVariants} key={label} className="h-full">
-      <button
-        style={inlineStyle}
-        className={`dashboard-card relative flex flex-col items-center justify-center gap-3 rounded-[2rem] p-4 sm:p-5 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${gradient} text-white ${glowClass} w-full min-h-[140px] h-full`}
-        tabIndex={0}
-        type="button"
-        onClick={onClick}
-      >
-        <span className="card-blob" />
-        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white bg-opacity-20">
-          <Icon className="w-6 h-6" />
-        </div>
-        <div className="text-3xl font-bold drop-shadow">{count}</div>
-        <div className="text-sm font-medium text-center opacity-90">
-          {label === 'Manage Categories' ? 'Categories' : label === 'Manage Products' ? 'Products' : label}
-        </div>
-      </button>
-    </motion.div>
-  );
 
   return (
     <section className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 overflow-x-hidden">
@@ -737,15 +721,13 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         <button
           data-refresh-button
           onClick={async () => {
-            setRefreshing(true);
             await onRefresh(true);
-            setRefreshing(false);
           }}
-          disabled={refreshing}
+          disabled={isRefreshing}
           className="flex-1 bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 text-white font-bold py-3 px-4 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center dark:hover:shadow-lg dark:hover:shadow-blue-700/30"
         >
-          <RefreshCw className={`mr-2 h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
-          {refreshing ? 'Refreshing...' : 'Refresh'}
+          <RefreshCw className={`mr-2 h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+          {isRefreshing ? 'Refreshing...' : 'Refresh'}
         </button>
         {props.storeType === 'sports' && (
           <>

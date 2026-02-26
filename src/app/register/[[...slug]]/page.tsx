@@ -303,8 +303,7 @@ export default function RegisterPage({ params }: { params: { slug?: string[] } }
             }
 
             const tierDetails = TIER_DETAILS[formData.subscriptionTier as keyof typeof TIER_DETAILS];
-            // Apply 50% discount (Fake Discount Strategy)
-            const finalPrice = tierDetails.price / 2;
+            const finalPrice = tierDetails.price;
             const amount = finalPrice * 100; // Convert to kobo
 
             const paystackConfig = {
@@ -711,10 +710,8 @@ export default function RegisterPage({ params }: { params: { slug?: string[] } }
 
             {/* Path B: Paid Plans */}
             <div className="space-y-4">
-                {(['basic', 'pro', 'promax'] as const).map((tier) => {
+                {(['lite', 'pro', 'promax'] as const).map((tier) => {
                     const details = TIER_DETAILS[tier as keyof typeof TIER_DETAILS];
-                    // Fake Discount Logic: Display price is doubled in config, so we show it halved here
-                    const discountedPrice = details.price / 2;
 
                     return (
                         <div
@@ -733,8 +730,7 @@ export default function RegisterPage({ params }: { params: { slug?: string[] } }
                                 <p className="text-[10px] text-slate-400 line-clamp-2">{details.description}</p>
                             </div>
                             <div className="text-right flex-shrink-0">
-                                <span className="text-[10px] md:text-xs text-slate-500 line-through block">₦{details.price.toLocaleString()}</span>
-                                <span className="text-base md:text-lg font-black text-emerald-400">₦{discountedPrice.toLocaleString()}</span>
+                                <span className="text-base md:text-lg font-black text-emerald-400">₦{details.price.toLocaleString()}</span>
                                 <span className="text-[10px] text-slate-500 block">weekly</span>
                             </div>
                         </div>

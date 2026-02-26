@@ -63,8 +63,7 @@ const TierCard = ({
         </div>
         <div className="flex items-baseline gap-2 mb-4">
           <div className="flex flex-col">
-            <span className="text-[10px] font-bold text-slate-400 line-through decoration-emerald-500/50">₦{details.price.toLocaleString()}</span>
-            <span className="text-3xl font-black text-slate-900 dark:text-white">₦{(details.price / 2).toLocaleString()}</span>
+            <span className="text-3xl font-black text-slate-900 dark:text-white">₦{details.price.toLocaleString()}</span>
           </div>
           <span className="text-sm font-medium text-slate-500">/{details.period}</span>
         </div>
@@ -91,10 +90,10 @@ const TierCard = ({
       whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
       onClick={!disabled ? onSelect : undefined}
-      className={`relative h-[280px] sm:h-[320px] w-full rounded-[2.5rem] overflow-hidden border-2 transition-all cursor-pointer group ${isSelected
+      className={`relative h-[360px] sm:h-[400px] w-full rounded-[2.5rem] overflow-hidden border-2 transition-all cursor-pointer group ${isSelected
         ? isProMax ? 'border-amber-500 shadow-[0_0_30px_rgba(245,158,11,0.3)]' : 'border-white/40 shadow-2xl scale-[1.02]'
         : isProMax ? 'border-amber-500/30 hover:border-amber-500/60' : 'border-white/5 hover:border-white/20'
-        } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+        } ${disabled && !isSelected ? 'opacity-50 cursor-not-allowed' : ''}`}
     >
       {/* Background Image */}
       {details.image && (
@@ -111,17 +110,24 @@ const TierCard = ({
 
 
       {/* Content Overlay */}
-      <div className="absolute inset-0 p-4 sm:p-6 flex flex-col justify-end">
-        {/* Top Section: Name */}
-        <div className="flex items-center gap-2 mb-auto pt-2">
-          <h4 className={`text-3xl sm:text-4xl font-black tracking-tight drop-shadow-md ${isProMax ? 'text-amber-50' : 'text-white'}`}>
-            {details.name}
-          </h4>
-          {isSelected && <CheckCircle2 className={`w-5 h-5 drop-shadow-md ${isProMax ? 'text-amber-400' : 'text-white'}`} />}
+      <div className="absolute inset-0 p-6 sm:p-8 flex flex-col bg-gradient-to-t from-black/90 via-black/40 to-transparent">
+        {/* Top: Plan Name & Checkmark */}
+        <div className="flex items-start justify-between">
+          <div className="space-y-1">
+            <h4 className={`text-4xl sm:text-5xl font-black tracking-tighter drop-shadow-2xl leading-none ${isProMax ? 'text-amber-50' : 'text-white'}`}>
+              {details.name}
+              <span className="block text-lg sm:text-xl opacity-80 mt-1">Plan</span>
+            </h4>
+          </div>
+          {isSelected && (
+            <div className={`p-1.5 rounded-full backdrop-blur-md border ${isProMax ? 'bg-amber-500/20 border-amber-500/40 text-amber-400' : 'bg-white/20 border-white/40 text-white'}`}>
+              <CheckCircle2 className="w-5 h-5 sm:w-6 h-6" />
+            </div>
+          )}
         </div>
 
-        {/* Product Limit Badge */}
-        <div className="mb-auto mt-4">
+        {/* Middle: Product Limit Badge */}
+        <div className="mt-6">
           <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl backdrop-blur-md border ${isProMax
             ? 'bg-amber-500/20 border-amber-500/30 text-amber-100'
             : isPro
@@ -129,63 +135,69 @@ const TierCard = ({
               : 'bg-white/10 border-white/20 text-white/90'
             }`}>
             <Package className="w-4 h-4" />
-            <span className="text-xs font-bold">
+            <span className="text-[10px] sm:text-xs font-black uppercase tracking-wider">
               Up to {typeof details.productLimit === 'number' ? details.productLimit.toLocaleString() : details.productLimit} Products
             </span>
           </div>
         </div>
 
-        {/* Bottom Section: Price & Description */}
-        <div>
-          <div className="flex items-baseline gap-2 mb-1">
-            <div className="flex flex-col">
-              <span className={`text-base font-bold line-through drop-shadow-sm ${isProMax ? 'text-amber-200/80 decoration-amber-400' : 'text-white/80 decoration-white/60'}`}>
+        {/* Bottom: Price, Description, and Footer */}
+        <div className="mt-auto pt-6 space-y-4">
+          <div className="flex flex-col">
+            <div className="flex items-baseline gap-1">
+              <span className={`text-5xl sm:text-6xl font-black tracking-tighter drop-shadow-2xl ${isProMax ? 'text-amber-400' : 'text-white'}`}>
                 ₦{details.price.toLocaleString()}
               </span>
-              <span className={`text-4xl sm:text-5xl font-black tracking-tighter drop-shadow-xl ${isProMax ? 'text-amber-400' : 'text-white'}`}>
-                ₦{(details.price / 2).toLocaleString()}
-              </span>
+              <span className={`text-[10px] font-black uppercase tracking-widest ${isProMax ? 'text-amber-200/60' : 'text-white/60'}`}>/ week</span>
             </div>
+            <p className={`text-xs sm:text-sm font-bold leading-relaxed max-w-[280px] drop-shadow-md ${isProMax ? 'text-amber-100/80' : 'text-white/80'}`}>
+              {details.description}
+            </p>
           </div>
-          <p className={`text-xs sm:text-sm font-medium mt-2 leading-relaxed max-w-[320px] drop-shadow-md ${isProMax ? 'text-amber-100/80' : 'text-white/80'}`}>
-            {details.description}
-          </p>
-        </div>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (!disabled && !isLoading) {
-              // For upgrade/downgrade, first select this tier, then subscribe
-              if (actionType === 'upgrade' || actionType === 'downgrade') {
-                onSelect(); // Sets selectedTier to this card's tier
-                setTimeout(() => onSubscribe(), 50); // Delay to ensure state updates
-              } else if (isSelected) {
-                onSubscribe();
-              } else {
-                onSelect();
-              }
-            }
-          }}
-          disabled={isLoading}
-          className={`w-full py-3 rounded-xl font-black text-xs sm:text-sm transition-all backdrop-blur-md border flex items-center justify-center gap-2 ${actionType === 'upgrade'
-            ? 'bg-green-500 text-white border-green-500 hover:bg-green-600'
-            : actionType === 'downgrade'
-              ? 'bg-white/10 text-white border-white/30 hover:bg-white/20'
-              : isSelected
-                ? isProMax ? 'bg-amber-500 text-black border-amber-500' : 'bg-white text-black border-white'
-                : isProMax ? 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20' : 'bg-white/10 text-white border-white/20 hover:bg-white/20'
-            }`}
-        >
-          {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
-          {actionType === 'upgrade'
-            ? (isLoading ? 'Upgrading...' : 'Upgrade')
-            : actionType === 'downgrade'
-              ? (isLoading ? 'Downgrading...' : 'Downgrade')
-              : isSelected
-                ? (isLoading ? 'Initializing...' : 'Subscribe Now')
-                : 'Select Plan'}
-        </button>
+          {!(disabled && isSelected) ? (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!disabled && !isLoading) {
+                  if (actionType === 'upgrade' || actionType === 'downgrade') {
+                    onSelect();
+                    setTimeout(() => onSubscribe(), 50);
+                  } else if (isSelected) {
+                    onSubscribe();
+                  } else {
+                    onSelect();
+                  }
+                }
+              }}
+              disabled={isLoading}
+              className={`w-full py-3.5 rounded-2xl font-black text-xs sm:text-sm border shadow-xl flex items-center justify-center gap-2 transition-all active:scale-95 ${actionType === 'upgrade'
+                ? 'bg-green-500 text-white border-green-500 hover:bg-green-600'
+                : actionType === 'downgrade'
+                  ? 'bg-white/10 text-white border-white/30 hover:bg-white/20'
+                  : isSelected
+                    ? isProMax ? 'bg-amber-500 text-black border-amber-500' : 'bg-white text-black border-white shadow-white/20'
+                    : isProMax ? 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20' : 'bg-white/10 text-white border-white/20 hover:bg-white/20'
+                }`}
+            >
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+              {actionType === 'upgrade'
+                ? (isLoading ? 'Upgrading...' : 'Upgrade Now')
+                : actionType === 'downgrade'
+                  ? (isLoading ? 'Downgrading...' : 'Downgrade Plan')
+                  : isSelected
+                    ? (isLoading ? 'Initializing...' : 'Subscribe Now')
+                    : 'Select Plan'}
+            </button>
+          ) : (
+            <div className="pt-4 border-t border-white/10">
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 shadow-inner">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse shadow-[0_0_8px_rgba(74,222,128,0.5)]" />
+                <span className="text-[9px] font-black uppercase tracking-[0.15em] text-white/90">Maintained by Admin</span>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </motion.div>
   );
@@ -351,10 +363,31 @@ export default function SubscriptionModal({
     return undefined;
   };
 
-  const status: SubscriptionStatus = subscriptionData?.status || 'trial';
+  const isInfluencer = subscriptionData?.isInfluencer;
+  const isFreePlan = subscriptionData?.isFreePlan;
+  const isWeeklyBilling = subscriptionData?.isWeeklyBilling;
+  const storeCreatedAt = safeToDate(subscriptionData?.createdAt);
+
+  // Normalize tier ID to lowercase to match TIER_DETAILS keys
+  const rawTier = subscriptionData?.tier;
+  const normalizedTier = typeof rawTier === 'string' ? (rawTier.toLowerCase() as SubscriptionTier) : undefined;
+  const currentTier = normalizedTier || ((isInfluencer || isFreePlan) ? 'pro' : undefined);
+
+  // Force active status for influencer/free plans
+  const status: SubscriptionStatus = (isInfluencer || isFreePlan) ? 'active' : (subscriptionData?.status || 'trial');
   const statusDisplay = getStatusDisplay(status);
   const trialEndsAt = safeToDate(subscriptionData?.trialEndsAt);
-  const nextBillingDate = safeToDate(subscriptionData?.nextBillingDate);
+
+  // Robust calculation for weekly billing: createdAt + 1 week, or fallback to now + 1 week
+  const calculateNextWeeklyDate = (date: Date | undefined) => {
+    const baseDate = date || new Date();
+    return new Date(baseDate.getTime() + 7 * 24 * 60 * 60 * 1000);
+  };
+
+  const nextBillingDate = (isInfluencer || isFreePlan)
+    ? calculateNextWeeklyDate(storeCreatedAt)
+    : safeToDate(subscriptionData?.nextBillingDate);
+
   const trialExpired = trialEndsAt && isTrialExpired(trialEndsAt);
 
   const getDaysRemaining = (date: Date | undefined) => {
@@ -449,7 +482,7 @@ export default function SubscriptionModal({
                           }`} />
                         <span className="font-bold uppercase tracking-wider text-[9px] opacity-60">
                           {status === 'active'
-                            ? `Active Plan: ${subscriptionData?.tier ? TIER_DETAILS[subscriptionData.tier as keyof typeof TIER_DETAILS]?.name.toUpperCase() : 'ACTIVE'}`
+                            ? `Active Plan: ${currentTier ? TIER_DETAILS[currentTier as keyof typeof TIER_DETAILS]?.name.toUpperCase() : 'ACTIVE'}`
                             : 'Current Status'}
                         </span>
                       </div>
@@ -459,7 +492,7 @@ export default function SubscriptionModal({
                       <p className="mt-1 text-xs font-medium text-slate-600 dark:text-slate-400">
                         {status === 'trial' && !trialExpired && `${trialDaysRemaining} days remaining in your free trial`}
                         {status === 'trial' && trialExpired && <span className="text-red-600 dark:text-red-400 font-bold">Your free trial has ended. Access is restricted. Subscribe now to restore full access.</span>}
-                        {status === 'active' && 'Your subscription is active and auto-renews.'}
+                        {status === 'active' && (isInfluencer || isFreePlan ? 'Your subscription is active and auto-renews weekly.' : 'Your subscription is active and auto-renews.')}
                         {status === 'past_due' && `Payment failed. ${graceDaysRemaining} days of grace period remaining.`}
                         {status === 'cancelled' && 'Your subscription has been cancelled.'}
                         {status === 'expired' && <span className="text-red-600 dark:text-red-400 font-bold">Your subscription has expired. Access is restricted.</span>}
@@ -487,117 +520,116 @@ export default function SubscriptionModal({
                       </div>
                       <div>
                         <span className="text-[10px] font-black uppercase tracking-widest opacity-50">Payment</span>
-                        <p className="text-sm font-black text-slate-900 dark:text-white">Paystack</p>
+                        <p className="text-sm font-black text-slate-900 dark:text-white">
+                          {isInfluencer || isFreePlan ? "Muh'd Mustafa VI" : 'Paystack'}
+                        </p>
                       </div>
                     </div>
                   )}
                 </div>
               )}
 
-              {/* Ambassador Discount Section - Hide for active subscribers */}
-              {!isLegacyStore && status !== 'active' && (
-                <div className="mx-1 p-5 rounded-[2rem] bg-gradient-to-br from-indigo-600/10 via-slate-900/5 to-amber-500/10 border border-indigo-500/20 flex items-center justify-between shadow-xl backdrop-blur-sm">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600 to-amber-500 flex items-center justify-center shadow-2xl">
-                      <Sparkles className="w-6 h-6 text-white" />
-                    </div>
-                    <div>
-                      <h5 className="text-base font-black text-slate-900 dark:text-white tracking-tight">Ambassador Discount</h5>
-                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Exclusive 50% savings applied</p>
-                    </div>
-                  </div>
-                  <div className="relative w-14 h-7 bg-indigo-600 rounded-full p-1 cursor-not-allowed shadow-inner">
-                    <motion.div
-                      initial={false}
-                      animate={{ x: 28 }}
-                      className="w-5 h-5 bg-white rounded-full shadow-lg flex items-center justify-center"
-                    >
-                      <div className="w-2 h-2 bg-indigo-600 rounded-full" />
-                    </motion.div>
-                  </div>
-                </div>
-              )}
 
               {/* Plan Selection Section */}
-              <div className="space-y-8">
-                <div className="flex items-center justify-between px-1">
-                  <h4 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                    {isLegacyStore ? 'Your Plan' : status === 'active' ? 'Change Your Plan' : 'Choose Your Plan'}
-                  </h4>
-                  {!isLegacyStore && (
-                    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3">
-                      <button
-                        onClick={() => window.open('https://wa.me/2347032905036', '_blank')}
-                        className="text-[10px] text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-right sm:text-left"
-                      >
-                        Need monthly billing? <span className="font-bold underline decoration-dotted">Contact us</span>
-                      </button>
-                      <div className="bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-full border border-slate-200 dark:border-slate-800 shadow-sm">
-                        <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                          Weekly Billing
-                        </span>
+              {!(isInfluencer || isFreePlan) && (
+                <div className="space-y-8">
+                  <div className="flex items-center justify-between px-1">
+                    <h4 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
+                      {isLegacyStore ? 'Your Plan' : status === 'active' ? 'Plan Management' : 'Choose Your Plan'}
+                    </h4>
+                    {!isLegacyStore && (
+                      <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3">
+                        <button
+                          onClick={() => window.open('https://wa.me/2347032905036', '_blank')}
+                          className="text-[10px] text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-right sm:text-left"
+                        >
+                          Need monthly billing? <span className="font-bold underline decoration-dotted">Contact us</span>
+                        </button>
+                        <div className="bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-full border border-slate-200 dark:border-slate-800 shadow-sm">
+                          <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                            Weekly Billing
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
+                    )}
+                  </div>
 
-                <div className="grid grid-cols-1 gap-6">
-                  {isLegacyStore ? (
-                    <TierCard
-                      tier="general"
-                      details={TIER_DETAILS.general}
-                      isSelected={true}
-                      onSelect={() => { }}
-                      onSubscribe={handleSubscribe}
-                      isLoading={subscribing}
-                      disabled={status === 'active'}
-                      actionType="select"
-                    />
-                  ) : (
-                    <>
-                      {(['basic', 'pro', 'promax'] as const)
-                        .filter(t => status !== 'active' || t !== subscriptionData?.tier)
-                        .map(tierKey => {
-                          const tierPrices = { basic: 500, pro: 1000, promax: 3500 };
-                          const activeTierPrice = subscriptionData?.tier ? tierPrices[subscriptionData.tier as keyof typeof tierPrices] : 0;
-                          const cardAction = status !== 'active'
-                            ? 'select'
-                            : tierPrices[tierKey] > activeTierPrice
-                              ? 'upgrade'
-                              : 'downgrade';
+                  <div className="grid grid-cols-1 gap-6">
+                    {isLegacyStore ? (
+                      <TierCard
+                        tier="general"
+                        details={TIER_DETAILS.general}
+                        isSelected={true}
+                        onSelect={() => { }}
+                        onSubscribe={handleSubscribe}
+                        isLoading={subscribing}
+                        disabled={status === 'active'}
+                        actionType="select"
+                      />
+                    ) : (
+                      <>
+                        {(['basic', 'pro', 'promax'] as const)
+                          .map(tierKey => {
+                            const isCurrentTier = tierKey === subscriptionData?.tier;
+                            const tierPrices = { basic: 500, pro: 1000, promax: 3500 };
+                            const activeTierPrice = subscriptionData?.tier ? tierPrices[subscriptionData.tier as keyof typeof tierPrices] : 0;
 
-                          return (
-                            <TierCard
-                              key={tierKey}
-                              tier={tierKey}
-                              details={TIER_DETAILS[tierKey]}
-                              isSelected={selectedTier === tierKey}
-                              onSelect={() => setSelectedTier(tierKey)}
-                              onSubscribe={() => {
-                                if (status === 'active' && (cardAction === 'upgrade' || cardAction === 'downgrade')) {
-                                  handlePlanChangeRequest(tierKey, cardAction);
-                                } else {
-                                  setSelectedTier(tierKey);
-                                  setTimeout(() => handleSubscribe(), 50);
-                                }
-                              }}
-                              isLoading={subscribing && selectedTier === tierKey}
-                              disabled={false}
-                              actionType={cardAction}
-                            />
-                          );
-                        })}
-                    </>
-                  )}
+                            let cardAction: 'upgrade' | 'downgrade' | 'select' = 'select';
+                            if (status === 'active') {
+                              if (isCurrentTier) cardAction = 'select'; // Will show as selected
+                              else cardAction = tierPrices[tierKey] > activeTierPrice ? 'upgrade' : 'downgrade';
+                            }
+
+                            return (
+                              <TierCard
+                                key={tierKey}
+                                tier={tierKey}
+                                details={TIER_DETAILS[tierKey]}
+                                isSelected={selectedTier === tierKey || isCurrentTier}
+                                onSelect={() => setSelectedTier(tierKey)}
+                                onSubscribe={() => {
+                                  if (isCurrentTier) return;
+                                  if (status === 'active') {
+                                    handlePlanChangeRequest(tierKey, cardAction as 'upgrade' | 'downgrade');
+                                  } else {
+                                    setSelectedTier(tierKey);
+                                    setTimeout(() => handleSubscribe(), 50);
+                                  }
+                                }}
+                                isLoading={subscribing && selectedTier === tierKey}
+                                disabled={isCurrentTier}
+                                actionType={isCurrentTier ? undefined : cardAction}
+                              />
+                            );
+                          })}
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Influencer/Free Plan Specific View */}
+              {(isInfluencer || isFreePlan) && (
+                <div className="space-y-6">
+                  <h4 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight px-1">Current Plan</h4>
+                  <TierCard
+                    tier="pro"
+                    details={TIER_DETAILS.pro}
+                    isSelected={true}
+                    onSelect={() => { }}
+                    onSubscribe={() => { }}
+                    isLoading={false}
+                    disabled={true}
+                  />
+                </div>
+              )}
 
               {/* Billing Details - Only show for legacy/trial stores, not active (active show in status banner) */}
-              {showBillingDetails && status !== 'active' && (
+              {(showBillingDetails || isInfluencer || isFreePlan) && status !== 'active' && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="p-6 rounded-3xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm">
                     <div className="flex items-center gap-2 mb-2 opacity-40">
-                      <Calendar className="w-4 h-4" />
+                      <Clock className="w-4 h-4" />
                       <span className="text-[10px] font-black uppercase tracking-widest">
                         {status === 'trial' ? 'Trial Ends' : 'Next Billing'}
                       </span>
@@ -615,42 +647,16 @@ export default function SubscriptionModal({
                       <CreditCard className="w-4 h-4" />
                       <span className="text-[10px] font-black uppercase tracking-widest">Payment Method</span>
                     </div>
-                    <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">Paystack</p>
+                    <p className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">
+                      {isInfluencer || isFreePlan ? 'System Managed' : 'Paystack'}
+                    </p>
                   </div>
                 </div>
               )}
 
-              {/* Ambassador Hub Link Section */}
-              <div className="p-6 rounded-2xl border bg-indigo-50 dark:bg-indigo-900/20 border-indigo-100 dark:border-indigo-800/50 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-4 opacity-10">
-                  <Trophy size={60} className="text-indigo-600 dark:text-indigo-400 rotate-12" />
-                </div>
-
-                <div className="relative z-10">
-                  <div className="flex items-center gap-3 mb-3">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg">
-                      <Trophy className="w-5 h-5 text-white" />
-                    </div>
-                    <h4 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Ambassador Program</h4>
-                  </div>
-                  <p className="text-xs font-medium text-slate-600 dark:text-slate-400 leading-relaxed mb-4 max-w-md">
-                    Refer other businesses to earn bonuses and maintain your premium status!
-                  </p>
-                  <button
-                    onClick={() => {
-                      handleClose();
-                      if (onOpenAmbassadorHub) onOpenAmbassadorHub();
-                    }}
-                    className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-black text-[10px] hover:gap-4 transition-all"
-                  >
-                    Go to Ambassador Hub
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
 
               {/* Cancel Subscription Area */}
-              {status === 'active' && (
+              {status === 'active' && !(isInfluencer || isFreePlan) && (
                 <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800">
                   <button
                     onClick={handleCancelSubscription}
