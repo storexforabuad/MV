@@ -2,6 +2,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, Suspense, useRef } from 'react';
+import { AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 import { useVendor } from '@/context/VendorContext';
@@ -43,7 +44,6 @@ import { markOnboardingAsCompleted } from '../../../app/actions/onboardingAction
 import { useSpotlightContext } from '@/context/SpotlightContext';
 import { Notification } from '../../../types/notification';
 import { clearAdminSession } from '@/lib/adminSession';
-
 const OnboardingFlow = dynamic(() => import('../../../components/admin/onboarding/OnboardingFlow'), { ssr: false });
 const AddProductComposer = dynamic(() => import('../../../components/admin/AddProductComposer'), { ssr: false });
 const AddVehicleComposer = dynamic(() => import('../../../components/admin/AddVehicleComposer'), { ssr: false });
@@ -171,45 +171,139 @@ export default function AdminStorePageClient({
 
   const [highlightOrderId, setHighlightOrderId] = useState<string | null>(null);
 
-  // Mock Notifications
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: '1',
-      type: 'success',
-      title: 'New Order #1234',
-      message: 'Tunde just placed an order for ₦45,000.',
-      timestamp: Date.now() - 1000 * 60 * 5, // 5 mins ago
-      actionLabel: 'View Order',
-      isRead: false,
-    },
-    {
-      id: '2',
-      type: 'activity',
-      title: 'Product Trending 🔥',
-      message: "Your 'Blue Agbada' just hit 50 views today!",
-      timestamp: Date.now() - 1000 * 60 * 30, // 30 mins ago
-      actionLabel: 'Boost Post',
-      isRead: false,
-    },
-    {
-      id: '3',
-      type: 'action',
-      title: 'Low Stock Alert',
-      message: "Only 2 'Red Heels' left in Warehouse.",
-      timestamp: Date.now() - 1000 * 60 * 60 * 2, // 2 hours ago
-      actionLabel: 'Update Stock',
-      isRead: false,
-    },
-    {
-      id: '4',
-      type: 'critical',
-      title: 'Subscription Expiring',
-      message: 'Your trial ends in 2 days. Upgrade now to keep selling.',
-      timestamp: Date.now() - 1000 * 60 * 60 * 24, // 1 day ago
-      actionLabel: 'Upgrade Plan',
-      isRead: false,
+  // Real Notifications
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+
+  // Helper to generate notifications from real data
+  const generateNotifications = useCallback((
+    currentOrders: StoreOrder[],
+    currentProducts: Product[],
+    currentStoreMeta: StoreMeta | null
+  ) => {
+    const newNotifications: Notification[] = [];
+    const now = Date.now();
+
+    // 1. Order Notifications (Last 24 hours)
+    const recentOrders = currentOrders.filter(o => {
+      const orderDate = new Date(o.orderDate).getTime();
+      return (now - orderDate) < 24 * 60 * 60 * 1000;
+    }).slice(0, 3); // Max 3 recent orders
+
+    recentOrders.forEach(order => {
+      newNotifications.push({
+        id: `order-${order.id}`,
+        type: 'success',
+        title: `New Order`,
+        message: `${order.customerInfo?.name || 'A customer'} just placed an order.`,
+        timestamp: new Date(order.orderDate).getTime(),
+        actionLabel: 'View Order',
+        isRead: false,
+      });
+    });
+
+    // 2. Product Trending Notifications (High views)
+    const trendingProducts = currentProducts
+      .filter(p => (p.views || 0) > 20)
+      .sort((a, b) => (b.views || 0) - (a.views || 0))
+      .slice(0, 2);
+
+    trendingProducts.forEach(product => {
+      newNotifications.push({
+        id: `trending-${product.id}`,
+        type: 'activity',
+        title: 'Product Trending 🔥',
+        message: `Your '${product.name}' is getting a lot of attention!`,
+        timestamp: now - 3600000, // 1 hour ago roughly
+        actionLabel: 'Boost Post',
+        isRead: false,
+      });
+    });
+
+    // 3. Low Stock Notifications (if applicable for physical goods)
+    if (currentStoreMeta?.storeType !== 'digital-products' && currentStoreMeta?.storeType !== 'restaurant') {
+      const lowStockProducts = currentProducts.filter(p =>
+        p.productType === 'general' &&
+        (p as any).quantity !== undefined &&
+        (p as any).quantity <= 5 &&
+        !(p as any).soldOut
+      ).slice(0, 2);
+
+      lowStockProducts.forEach(product => {
+        newNotifications.push({
+          id: `stock-${product.id}`,
+          type: 'action',
+          title: 'Low Stock Alert',
+          message: `Only ${(product as any).quantity} '${product.name}' left.`,
+          timestamp: now - 7200000,
+          actionLabel: 'Update Stock',
+          isRead: false,
+        });
+      });
+      // 4. Subscription Notifications
+      if (currentStoreMeta) {
+        const isInfluencer = currentStoreMeta.isInfluencer;
+        const isFreePlan = currentStoreMeta.isFreePlan;
+        const status = currentStoreMeta.subscriptionStatus || 'trial';
+        const isTrial = status === 'trial';
+        const isActive = status === 'active';
+        const isPastDue = status === 'past_due' || status === 'expired';
+
+        // Use the correct properties from StoreMeta
+        const renewalTimestamp = currentStoreMeta.subscriptionNextBillingDate
+          ? (currentStoreMeta.subscriptionNextBillingDate as any).toMillis?.() || new Date(currentStoreMeta.subscriptionNextBillingDate as any).getTime()
+          : null;
+
+        const trialEndsTimestamp = currentStoreMeta.subscriptionTrialEndsAt
+          ? (currentStoreMeta.subscriptionTrialEndsAt as any).toMillis?.() || new Date(currentStoreMeta.subscriptionTrialEndsAt as any).getTime()
+          : null;
+
+        const formatShortDate = (timestamp: number | null) => {
+          if (!timestamp) return 'soon';
+          return new Date(timestamp).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        };
+
+        if (isInfluencer || isFreePlan || isActive) {
+          newNotifications.push({
+            id: 'sub-active',
+            type: 'success',
+            title: 'PREMIUM ACTIVE',
+            message: isTrial && trialEndsTimestamp
+              ? `Trial auto-renews on ${formatShortDate(trialEndsTimestamp)}.`
+              : renewalTimestamp
+                ? `Subscription auto-renews on ${formatShortDate(renewalTimestamp)}.`
+                : 'Your premium subscription is active.',
+            timestamp: now, // Pin to top
+            actionLabel: 'VIEW DETAILS',
+            isRead: false,
+          });
+        } else if (isPastDue) {
+          newNotifications.push({
+            id: 'sub-expired',
+            type: 'critical',
+            title: 'SUBSCRIPTION EXPIRED',
+            message: 'Your store is currently offline. Renew to keep selling.',
+            timestamp: now, // Pin to top
+            actionLabel: 'Upgrade Plan',
+            isRead: false,
+          });
+        } else if (isTrial) {
+          newNotifications.push({
+            id: 'sub-trial',
+            type: 'success',
+            title: 'TRIAL ACTIVE',
+            message: trialEndsTimestamp
+              ? `Your trial ends on ${formatShortDate(trialEndsTimestamp)}.`
+              : 'Your premium trial is active.',
+            timestamp: now, // Pin to top
+            actionLabel: 'VIEW DETAILS',
+            isRead: false,
+          });
+        }
+      }
     }
-  ]);
+
+    setNotifications(newNotifications.sort((a, b) => b.timestamp - a.timestamp));
+  }, []);
 
   const handleDismissNotification = (id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
@@ -238,8 +332,9 @@ export default function AdminStorePageClient({
     if (orders) {
       const { totalReferralBonus: calculatedBonus } = calculateCommissionAndBonus(orders);
       setTotalReferralBonus(calculatedBonus);
+      generateNotifications(orders, products, storeMeta);
     }
-  }, [orders]);
+  }, [orders, products, storeMeta, generateNotifications]);
 
   const fetchData = useCallback(async (showRefresh = false) => {
     if (isFetchingRef.current) return;
@@ -277,6 +372,8 @@ export default function AdminStorePageClient({
       }
 
       refreshOrders();
+      generateNotifications(initialOrders, fetchedProducts, fetchedStoreMeta as StoreMeta); // We use initialOrders initially because useStoreOrders sets asynchronously, but we can also use a returned value if we refactored.
+      // Better to wait for useStoreOrders effect or await the fetch. We'll generate them in the useEffect that watches orders.
 
       // UI state stability: We no longer toggle showOnboarding or uiVisible here
       // as it causes flickering during background refreshes.
@@ -509,8 +606,8 @@ export default function AdminStorePageClient({
               setActiveSection={setActiveSection}
               storeLink={`/${storeId}`}
               storeType={storeMeta?.storeType}
-              onRefresh={handleSilentSync}
-              isRefreshing={isSyncing}
+              onRefresh={handleManualRefresh}
+              isRefreshing={isRefreshing}
               totalProducts={products.length}
               totalCategories={categories.length}
               totalViews={products.reduce((sum, p) => sum + (p.views || 0), 0) + (storeMeta?.storePageViews || 0)}
@@ -675,16 +772,25 @@ export default function AdminStorePageClient({
         categories={categories}
       />
 
-      {isSubscriptionModalOpen && (
-        <SubscriptionModal
-          handleClose={() => setIsSubscriptionModalOpen(false)}
-          storeId={storeId}
-          ceoEmail={storeMeta?.ceoEmail}
-          storeName={storeMeta?.name}
-          storeType={storeMeta?.storeType}
-          onOpenAmbassadorHub={() => setIsAmbassadorHubModalOpen(true)}
-        />
-      )}
+      <AnimatePresence>
+        {isSubscriptionModalOpen && (
+          <SubscriptionModal
+            handleClose={() => {
+              setIsSubscriptionModalOpen(false);
+              setIsHomeCardModalOpen(false);
+            }}
+            storeId={storeId}
+            ceoEmail={storeMeta?.ceoEmail}
+            storeName={storeMeta?.name}
+            storeType={storeMeta?.storeType}
+            onOpenAmbassadorHub={() => {
+              setIsSubscriptionModalOpen(false);
+              setIsHomeCardModalOpen(false);
+              setIsAmbassadorHubModalOpen(true);
+            }}
+          />
+        )}
+      </AnimatePresence>
 
       <LogoutConfirmationModal
         isOpen={isLogoutModalOpen}
