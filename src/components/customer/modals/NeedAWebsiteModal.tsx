@@ -43,7 +43,8 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
     modal.formData.country &&
     modal.formData.state
   );
-  const isScreen4Valid = !!modal.formData.planId;
+  const isScreen4Valid = true; // Preview step always valid
+  const isScreen5Valid = !!modal.formData.planId;
 
   const handleClose = () => {
     modal.reset();
@@ -54,8 +55,9 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
     if (modal.currentScreen === 2 && !isScreen2Valid) return;
     if (modal.currentScreen === 3 && !isScreen3Valid) return;
     if (modal.currentScreen === 4 && !isScreen4Valid) return;
+    if (modal.currentScreen === 5 && !isScreen5Valid) return;
 
-    if (modal.currentScreen === 4) {
+    if (modal.currentScreen === 5) {
       handleInitiatePayment();
     } else {
       modal.nextScreen();
@@ -75,7 +77,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
       const tierDetails = TIER_DETAILS[modal.formData.planId as keyof typeof TIER_DETAILS];
       if (!tierDetails) throw new Error('Invalid plan selected');
 
-      const finalPrice = tierDetails.price;
+      const finalPrice = Math.round(tierDetails.price / 2); // 50% Ramadan discount
       const amount = finalPrice * 100; // Convert to kobo
 
       const paystackConfig = {
@@ -159,11 +161,11 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
             </button>
           </div>
 
-          {/* Progress bar only on screens 2-4 */}
-          {typeof modal.currentScreen === 'number' && modal.currentScreen >= 2 && modal.currentScreen <= 4 && (
+          {/* Progress bar only on screens 2-5 */}
+          {typeof modal.currentScreen === 'number' && modal.currentScreen >= 2 && modal.currentScreen <= 5 && (
             <ProgressIndicator
               currentStep={modal.currentScreen - 1}
-              totalSteps={3}
+              totalSteps={4}
             />
           )}
         </div>
@@ -290,8 +292,79 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
               </div>
             )}
 
-            {/* Screen 4: Subscription Plans */}
+            {/* Screen 4: Professional Identity Preview */}
             {modal.currentScreen === 4 && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-bold text-white mb-2">Review Your Professional Identity</h3>
+                  <p className="text-sm text-slate-400">Your store is almost ready to go live!</p>
+                </div>
+
+                {/* Store Link Preview - On Brand Style */}
+                <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6 space-y-4">
+                  <div className="flex items-center gap-2 text-amber-400">
+                    <Globe size={18} />
+                    <span className="text-xs font-black uppercase tracking-widest">Store Link Preview</span>
+                  </div>
+
+                  <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 flex items-center justify-between group cursor-pointer hover:border-amber-500/50 transition-all">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tight mb-1">Your Unique Web Address</p>
+                      <p className="text-amber-400 font-bold truncate">
+                        tinyurl.com/bizconnet/{modal.formData.businessName.toLowerCase().replace(/[^a-z0-9]/g, '-')}
+                      </p>
+                    </div>
+                    <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover:bg-amber-500 group-hover:text-white transition-all">
+                      <ArrowRight size={14} />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-800">
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tight mb-1">Category</p>
+                      <p className="text-white text-xs font-semibold truncate">
+                        {selectedStore?.label || 'General Store'}
+                      </p>
+                    </div>
+                    <div className="bg-slate-900/50 rounded-xl p-3 border border-slate-800">
+                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tight mb-1">Location</p>
+                      <p className="text-white text-xs font-semibold truncate">
+                        {modal.formData.state}, {modal.formData.country}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* What Happens Next */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-black text-slate-500 uppercase tracking-widest px-1">What Happens Next?</h4>
+                  <div className="space-y-2">
+                    {[
+                      { icon: CreditCard, text: "Choose a plan that fits your volume" },
+                      { icon: Check, text: "Secure payment via Paystack" },
+                      { icon: Sparkles, text: "Your website goes live instantly!" }
+                    ].map((step, i) => (
+                      <div key={i} className="flex items-center gap-3 p-3 bg-slate-800/30 rounded-xl border border-slate-700/30">
+                        <div className="w-6 h-6 rounded-lg bg-slate-700 flex items-center justify-center text-slate-400">
+                          <step.icon size={12} />
+                        </div>
+                        <span className="text-xs text-slate-300 font-medium">{step.text}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Trust Element */}
+                <div className="text-center pt-2">
+                  <p className="text-[10px] text-slate-500 font-medium">
+                    Joining <span className="text-amber-400 font-bold">5,000+ digital vendors</span> across Nigeria.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Screen 5: Subscription Plans (Previously Step 4) */}
+            {modal.currentScreen === 5 && (
               <div className="space-y-6">
                 <div className="relative overflow-hidden">
                   <div className="flex items-center gap-2 mb-2">
@@ -376,7 +449,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                     </p>
                   </div>
                   <p className="text-xs text-slate-400 leading-relaxed italic">
-                    Celebrate Ramadan by taking your business digital. Join <span className="text-amber-400 font-bold">500+ vendors</span> already selling online this season.
+                    Celebrate Ramadan by taking your business digital. Join <span className="text-amber-400 font-bold">5000+ vendors</span> already selling online this season.
                   </p>
                   <p className="text-[10px] text-slate-500 mt-2">
                     Weekly auto-renewing subscription. Cancel anytime.
@@ -498,12 +571,13 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
               disabled={
                 (modal.currentScreen === 2 && !isScreen2Valid) ||
                 (modal.currentScreen === 3 && !isScreen3Valid) ||
-                (modal.currentScreen === 4 && !isScreen4Valid) ||
+                (modal.currentScreen === 5 && !isScreen5Valid) ||
                 modal.loading
               }
               className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${((modal.currentScreen === 2 && !isScreen2Valid) ||
                 (modal.currentScreen === 3 && !isScreen3Valid) ||
                 (modal.currentScreen === 4 && !isScreen4Valid) ||
+                (modal.currentScreen === 5 && !isScreen5Valid) ||
                 modal.loading)
                 ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
                 : 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-900/30 hover:scale-[1.02] active:scale-[0.98]'
@@ -513,15 +587,17 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                 'Processing...'
               ) : modal.currentScreen === 2 ? (
                 <>Get Started</>
-              ) : modal.currentScreen === 4 ? (
+              ) : modal.currentScreen === 5 ? (
                 <>
                   Subscribe
                   <CreditCard size={18} />
                 </>
+              ) : modal.currentScreen === 4 ? (
+                <>Select Plan</>
               ) : (
                 <>Next</>
               )}
-              {!modal.loading && typeof modal.currentScreen === 'number' && modal.currentScreen < 4 && modal.currentScreen !== 4 && <ArrowRight size={16} />}
+              {!modal.loading && typeof modal.currentScreen === 'number' && modal.currentScreen < 5 && <ArrowRight size={16} />}
             </button>
           </div>
         )}

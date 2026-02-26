@@ -10,7 +10,7 @@ export interface RegistrationFormData {
   planId: string | null;
 }
 
-export type ModalScreen = 1 | 2 | 3 | 4 | 'success';
+export type ModalScreen = 1 | 2 | 3 | 4 | 5 | 'success';
 
 interface RegistrationState {
   currentScreen: ModalScreen;
@@ -54,12 +54,12 @@ function registrationReducer(
     case 'NEXT_SCREEN':
       return {
         ...state,
-        currentScreen: (Math.min(state.currentScreen === 'success' ? 4 : state.currentScreen + 1, 4)) as ModalScreen,
+        currentScreen: (state.currentScreen === 'success' ? 'success' : Math.min(state.currentScreen + 1, 5)) as ModalScreen,
       };
     case 'PREV_SCREEN':
       return {
         ...state,
-        currentScreen: (Math.max(state.currentScreen === 'success' ? 4 : state.currentScreen - 1, 1)) as ModalScreen,
+        currentScreen: (state.currentScreen === 'success' ? 5 : Math.max(state.currentScreen - 1, 1)) as ModalScreen,
       };
     case 'GO_TO_SCREEN':
       return {

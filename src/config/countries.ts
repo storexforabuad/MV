@@ -116,21 +116,21 @@ export { geography };
 export const TIER_DETAILS = {
   lite: {
     name: 'Lite',
-    price: 500,
+    price: 1000,
     period: 'week',
     productLimit: 20,
     featured: false,
   },
   pro: {
     name: 'Pro',
-    price: 1000,
+    price: 2000,
     period: 'week',
     productLimit: 100,
     featured: true,
   },
   max: {
     name: 'Max',
-    price: 3500,
+    price: 7000,
     period: 'week',
     productLimit: 1000,
     featured: false,
