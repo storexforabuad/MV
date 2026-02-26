@@ -561,7 +561,7 @@ export default function AdminStorePageClient({
     return <OnboardingFlow onComplete={handleOnboardingComplete} storeName={storeMeta?.name || ''} />;
   }
 
-  const isModalOpen = isComposerOpen || isManageModalOpen || isManageCategoriesModalOpen || isOrdersModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isAmbassadorHubModalOpen || isHomeCardModalOpen || isLogoutModalOpen;
+  const isModalOpen = isComposerOpen || isManageModalOpen || isManageCategoriesModalOpen || isOrdersModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isAmbassadorHubModalOpen || isHomeCardModalOpen || isLogoutModalOpen || isSubscriptionModalOpen;
 
   const handleLogout = async () => {
     setIsLogoutModalOpen(true);
