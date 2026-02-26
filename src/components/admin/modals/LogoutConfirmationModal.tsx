@@ -50,10 +50,10 @@ export default function LogoutConfirmationModal({ isOpen, onClose, onConfirm }: 
 
                                 {/* Content */}
                                 <h3 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-                                    Leaving so soon?
+                                    Confirm Logout
                                 </h3>
                                 <p className="text-slate-500 dark:text-slate-400 mb-8 leading-relaxed">
-                                    You'll need to whisper the secret ingredient to get back into the kitchen.
+                                    Are you sure you want to log out? You'll need to sign back in to access your store's admin dashboard.
                                 </p>
 
                                 {/* Actions */}

@@ -297,14 +297,14 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
               <div className="space-y-6">
                 <div>
                   <h3 className="text-lg font-bold text-white mb-2">Review Your Professional Identity</h3>
-                  <p className="text-sm text-slate-400">Your store is almost ready to go live!</p>
+                  <p className="text-sm text-slate-400">Your website is almost ready to go live!</p>
                 </div>
 
                 {/* Store Link Preview - On Brand Style */}
                 <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6 space-y-4">
                   <div className="flex items-center gap-2 text-amber-400">
                     <Globe size={18} />
-                    <span className="text-xs font-black uppercase tracking-widest">Store Link Preview</span>
+                    <span className="text-xs font-black uppercase tracking-widest">Website Link Preview</span>
                   </div>
 
                   <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 flex items-center justify-between group cursor-pointer hover:border-amber-500/50 transition-all">
