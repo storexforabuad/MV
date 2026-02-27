@@ -422,7 +422,7 @@ export default function SubscriptionModal({
   const showBillingDetails = isLegacyStore || status === 'active';
 
   return (
-    <AnimatePresence>
+    <>
       <motion.div
         className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
         initial="hidden" animate="visible" exit="exit"
@@ -749,6 +749,6 @@ export default function SubscriptionModal({
           </div>
         )}
       </AnimatePresence>
-    </AnimatePresence>
+    </>
   );
 }
