@@ -518,6 +518,13 @@ export default function AdminStorePageClient({
     // We no longer load the preview tab, replaced by warehouse
   }, [activeSection]);
 
+  // Reset scroll position when switching tabs
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+  }, [activeSection]);
+
   function handleOnboardingComplete() {
     setShowOnboarding(false);
     setIsTransitioning(true);
