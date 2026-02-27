@@ -606,7 +606,7 @@ export default function AdminStorePageClient({
               setActiveSection={setActiveSection}
               storeLink={`/${storeId}`}
               storeType={storeMeta?.storeType}
-              onRefresh={handleManualRefresh}
+              onRefresh={(showRefresh) => fetchData(showRefresh)}
               isRefreshing={isRefreshing}
               totalProducts={products.length}
               totalCategories={categories.length}
