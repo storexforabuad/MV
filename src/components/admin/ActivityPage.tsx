@@ -142,7 +142,7 @@ const ActivityPage: React.FC<ActivityPageProps> = ({
       variants={containerVariants}
       initial="hidden"
       animate="visible"
-      className="space-y-6 pb-28 pt-2"
+      className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 overflow-x-hidden space-y-6 pb-28 pt-2"
     >
       {/* Premium Social Power Card */}
       <motion.button

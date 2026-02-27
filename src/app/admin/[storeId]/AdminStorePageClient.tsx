@@ -648,7 +648,7 @@ export default function AdminStorePageClient({
         </div>
 
         {/* Activity Hub */}
-        <div className={`${activeSection !== 'activity' ? 'hidden' : ''} px-4`}>
+        <div className={`${activeSection !== 'activity' ? 'hidden' : ''}`}>
           <ActivityPage
             storeId={storeId}
             notifications={notifications}
