@@ -524,81 +524,122 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     if (props.setIsModalOpen && label !== 'Orders' && label !== 'Manage Products' && label !== 'Ambassador' && label !== 'Manage Categories') props.setIsModalOpen(true);
   };
 
+  const popHistoryIfExists = () => {
+    if (typeof window !== 'undefined' && window.history.state?.modalOpen) {
+      router.back();
+      return true;
+    }
+    return false;
+  };
+
   const handleCloseModal = () => {
+    if (popHistoryIfExists()) return;
     setOpenModal(null);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   };
 
   const handleCloseTipsModal = () => {
-    setIsTipsModalOpen(false);
     if (spotlightStep === 'tips') {
       completeSpotlight();
     }
+    if (popHistoryIfExists()) return;
+    setIsTipsModalOpen(false);
+    if (props.setIsModalOpen) props.setIsModalOpen(false);
+  };
+
+  const handleCloseCustomersModal = () => {
+    if (popHistoryIfExists()) return;
+    setIsCustomersModalOpen(false);
+    if (props.setIsModalOpen) props.setIsModalOpen(false);
+  };
+
+  const handleCloseViewsModal = () => {
+    if (popHistoryIfExists()) return;
+    setIsViewsModalOpen(false);
+    if (props.setIsModalOpen) props.setIsModalOpen(false);
+  };
+
+  const handleCloseShareModal = () => {
+    if (popHistoryIfExists()) return;
+    setIsShareModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   };
 
   const handleClosePostsModal = () => {
+    if (popHistoryIfExists()) return;
     setIsPostsModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
   const handleCloseSocialPostsModal = () => {
+    if (popHistoryIfExists()) return;
     setIsSocialPostsModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
   const handleCloseBizconNetworkModal = () => {
+    if (popHistoryIfExists()) return;
     setIsBizconNetworkModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
   const handleCloseDeliveriesHubModal = () => {
+    if (popHistoryIfExists()) return;
     setIsDeliveriesHubModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
   const handleCloseRevenueModal = () => {
+    if (popHistoryIfExists()) return;
     setIsRevenueModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
   const handleCloseCommissionModal = () => {
+    if (popHistoryIfExists()) return;
     setIsCommissionModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
   const handleCloseExpensesModal = () => {
+    if (popHistoryIfExists()) return;
     setIsExpensesModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
   const handleCloseAdvertisingModal = () => {
+    if (popHistoryIfExists()) return;
     setIsAdvertisingModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
   const handleCloseEventsModal = () => {
+    if (popHistoryIfExists()) return;
     setIsEventsModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
 
   const handleCloseAccountModal = () => {
+    if (popHistoryIfExists()) return;
     setIsAccountModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
   const handleCloseWarehouseModal = () => {
+    if (popHistoryIfExists()) return;
     setIsWarehouseModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
   const handleCloseWholesaleModal = () => {
+    if (popHistoryIfExists()) return;
     setIsWholesaleModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
   const handleCloseCirclesModal = () => {
+    if (popHistoryIfExists()) return;
     setIsCirclesModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
@@ -689,11 +730,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
       >
         <button
           onClick={() => {
-            if (window.history.length > 1) {
-              router.back();
-            } else {
-              router.push('/' + storeId);
-            }
+            router.push('/' + storeId);
           }}
           className="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white font-bold py-4 px-5 rounded-2xl shadow-sm hover:shadow-md transition-all flex items-center gap-4 group relative overflow-hidden"
         >
@@ -970,13 +1007,13 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
       {/* === MODAL RENDERERS === */}
 
-      <CustomersListModal storeId={props.storeId} isOpen={isCustomersModalOpen} onClose={() => { setIsCustomersModalOpen(false); if (props.setIsModalOpen) props.setIsModalOpen(false); }} />
+      <CustomersListModal storeId={props.storeId} isOpen={isCustomersModalOpen} onClose={handleCloseCustomersModal} />
 
       {isTipsModalOpen && (<TipsModal {...props as AdminHomeCardsProps & { handleClose: () => void; }} handleClose={handleCloseTipsModal} />)}
 
-      {isViewsModalOpen && (<TotalViewsModal storeId={storeId} isOpen={isViewsModalOpen} onClose={() => { setIsViewsModalOpen(false); if (props.setIsModalOpen) props.setIsModalOpen(false); }} />)}
+      {isViewsModalOpen && (<TotalViewsModal storeId={storeId} isOpen={isViewsModalOpen} onClose={handleCloseViewsModal} />)}
 
-      {isShareModalOpen && (<StoreLinkModal {...props} isOpen={isShareModalOpen} handleClose={() => { setIsShareModalOpen(false); if (props.setIsModalOpen) props.setIsModalOpen(false); }} />)}
+      {isShareModalOpen && (<StoreLinkModal {...props} isOpen={isShareModalOpen} handleClose={handleCloseShareModal} />)}
 
       {isPostsModalOpen && (<PostsComposerModal isOpen={isPostsModalOpen} onClose={handleClosePostsModal} storeId={props.storeId} contacts={props.contacts} products={props.products} storeName={props.storeName} />)}
 
