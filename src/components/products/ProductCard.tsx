@@ -123,7 +123,7 @@ export default function ProductCard({
     try {
       if (isInWishlist) {
         removeFromWishlist(product.id);
-        toast.success('Removed from wishlist', {
+        toast.success('Removed from cart', {
           duration: 2000,
           position: 'bottom-center',
           style: {
@@ -134,7 +134,7 @@ export default function ProductCard({
         });
       } else {
         addToWishlist(product);
-        toast.success('Added to wishlist', {
+        toast.success('Added to cart', {
           duration: 2000,
           position: 'bottom-center',
           style: {
@@ -164,7 +164,7 @@ export default function ProductCard({
         type: 'REMOVE_ITEM',
         payload: { id: product.id, selectedSize, selectedColor }
       });
-      toast.success('Removed from wishlist', {
+      toast.success('Removed from cart', {
         duration: 2000,
         position: 'bottom-center',
         style: {
@@ -178,7 +178,7 @@ export default function ProductCard({
         type: 'ADD_ITEM',
         payload: { ...product, quantity: 1, storeId: storeId || product.storeId, selectedSize, selectedColor }
       });
-      toast.success('Added to wishlist', {
+      toast.success('Added to cart', {
         duration: 2000,
         position: 'bottom-center',
         style: {
@@ -425,11 +425,11 @@ export default function ProductCard({
                   whileTap={{ scale: 0.95 }}
                 >
                   {isSingleView ? (
-                    <Heart
+                    <ShoppingCart
                       size={20}
                       className={`transition-all duration-200 ${isInCart
-                        ? 'fill-red-500 text-red-500'
-                        : 'text-red-500'
+                        ? 'fill-green-500 text-green-500'
+                        : 'text-green-500'
                         }`}
                     />
                   ) : (

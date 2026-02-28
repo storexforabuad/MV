@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useState, useRef, Suspense } from 'react';
 import { useVendor } from '@/context/VendorContext';
-import { ArrowLeft, ShoppingBag, Moon, Sun, Heart } from 'lucide-react';
+import { ArrowLeft, ShoppingBag, Moon, Sun, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/lib/cartContext';
 import { useTheme } from '@/lib/themeContext';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -256,7 +256,7 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
             {!isAdminRoute && (
               <Link href="/cart" className="relative group p-2">
                 <div className="relative">
-                  <Heart className={`h-7 w-7 text-text-primary transition-colors ${state.totalItems > 0 ? 'fill-current text-red-500' : ''}`} />
+                  <ShoppingCart className={`h-7 w-7 text-text-primary transition-colors ${state.totalItems > 0 ? 'fill-current text-text-primary' : ''}`} />
                   <span className={`absolute -top-1 -right-1 text-xs rounded-full h-5 w-5 flex items-center justify-center transition-all duration-300 ${isBouncing ? 'animate-badge-bounce' : ''} ${state.totalItems > 0 ? 'bg-red-500/80 text-white' : 'bg-gray-500/80 text-white'}`}>
                     {state.totalItems}
                   </span>

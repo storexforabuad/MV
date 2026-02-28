@@ -47,7 +47,7 @@ export default function WishlistShareButton({ items }: WishlistShareButtonProps)
 
     const handleShare = async () => {
         if (items.length === 0) {
-            toast.error('Your wishlist is empty!');
+            toast.error('Your cart is empty!');
             return;
         }
 
@@ -59,8 +59,8 @@ export default function WishlistShareButton({ items }: WishlistShareButtonProps)
 
             if (navigator.share) {
                 await navigator.share({
-                    title: 'My Wishlist',
-                    text: 'Check out the items I have hearted!',
+                    title: 'My Cart',
+                    text: 'Check out the items in my cart!',
                     url: url,
                 });
             } else if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -72,7 +72,7 @@ export default function WishlistShareButton({ items }: WishlistShareButtonProps)
                 fallbackCopyToClipboard(url);
             }
         } catch (error) {
-            console.error('Failed to share wishlist:', error);
+            console.error('Failed to share cart:', error);
             if (error instanceof Error && error.name !== 'AbortError') {
                 toast.error('Failed to generate share link.');
             }
@@ -109,7 +109,7 @@ export default function WishlistShareButton({ items }: WishlistShareButtonProps)
                 ) : (
                     <Share2 className="w-4 h-4 text-text-secondary group-hover:text-red-500 transition-colors" />
                 )}
-                <span className="text-sm font-medium text-text-primary">Share Wishlist</span>
+                <span className="text-sm font-medium text-text-primary">Share Cart</span>
             </button>
 
             {shareUrl && !navigator.share && (

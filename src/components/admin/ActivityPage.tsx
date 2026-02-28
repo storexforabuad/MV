@@ -18,7 +18,7 @@ import {
   Sparkles,
   Calendar
 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Notification } from '@/types/notification';
 import { StoreMeta } from '@/types/store';
 import { Product } from '@/types/product';
@@ -334,6 +334,33 @@ const ActivityPage: React.FC<ActivityPageProps> = ({
               </div>
             );
           })}
+
+          <AnimatePresence>
+            {completedPhases.length === 3 && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
+                className="p-5 sm:p-6 bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-2xl text-white text-center shadow-lg relative overflow-hidden mt-4"
+              >
+                <div className="absolute inset-0 bg-white/10 mix-blend-overlay pointer-events-none"></div>
+                <div className="relative z-10 flex flex-col items-center">
+                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3">
+                    <Sparkles className="w-6 h-6 text-white" />
+                  </div>
+                  <h4 className="text-lg sm:text-xl font-black tracking-tight mb-2">Launch Complete! 🚀</h4>
+                  <p className="text-xs sm:text-sm font-medium opacity-90 mb-5 max-w-sm mx-auto leading-relaxed">
+                    You've successfully completed the 3-day launch playbook. Keep the momentum going by sharing your store link daily!
+                  </p>
+                  <button
+                    onClick={openSocialModal}
+                    className="bg-white text-violet-700 hover:bg-violet-50 font-bold py-3 px-6 rounded-xl text-sm w-full sm:w-auto transition-all active:scale-[0.98] shadow-sm flex items-center justify-center gap-2 mx-auto"
+                  >
+                    <Share2 className="w-4 h-4" /> Share Store Link
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </motion.div>
 

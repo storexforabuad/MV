@@ -128,11 +128,11 @@ export default function CartPage() {
   if (state.items.length === 0) {
     return (
       <>
-        <Navbar storeName="Wishlist" />
+        <Navbar storeName="Cart" />
         <div className="min-h-[calc(100vh-var(--navbar-height))] pt-[calc(var(--navbar-height))] flex flex-col items-center justify-center px-4">
-          <h2 className="text-xl sm:text-2xl font-bold card-text-gradient">Your list is empty</h2>
+          <h2 className="text-xl sm:text-2xl font-bold card-text-gradient">Your cart is empty</h2>
           <p className="mt-2 text-sm sm:text-base text-text-secondary">
-            Start shopping by adding items to your list.
+            Start shopping by adding items to your cart.
           </p>
         </div>
       </>
@@ -141,7 +141,7 @@ export default function CartPage() {
 
   return (
     <>
-      <Navbar storeName="Wishlist" />
+      <Navbar storeName="Cart" />
       <CustomerLookupModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
@@ -167,7 +167,7 @@ export default function CartPage() {
       />
       <div className="min-h-screen mx-auto max-w-2xl px-3 sm:px-4 pb-8 pt-[calc(var(--navbar-height)+1.5rem)] sm:pt-[calc(var(--navbar-height)+2rem)] flex flex-col">
         <div className="flex justify-between items-center mb-6 px-1">
-          <h1 className="text-2xl font-bold card-text-gradient">Your Wishlist</h1>
+          <h1 className="text-2xl font-bold card-text-gradient">Your Cart</h1>
           <WishlistShareButton items={state.items} />
         </div>
 

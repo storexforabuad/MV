@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, Rocket, Megaphone, Flame, Smartphone, CheckCircle2, Copy } from 'lucide-react';
 import { Product } from '@/types/product';
@@ -15,6 +15,13 @@ interface LaunchGuideModalProps {
 
 export default function LaunchGuideModal({ isOpen, onClose, storeLink, products, onGoToActionPlan }: LaunchGuideModalProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const scrollRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = 0;
+    }
+  }, [currentSlide]);
 
   if (!isOpen) return null;
 
@@ -164,7 +171,7 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products,
         </div>
 
         {/* --- Main Scrollable Content --- */}
-        <main className="flex-grow w-full mx-auto overflow-y-auto overflow-x-hidden p-4 sm:p-8 flex flex-col justify-start min-h-0 hide-scrollbar scroll-smooth">
+        <main ref={scrollRef} className="flex-grow w-full mx-auto overflow-y-auto overflow-x-hidden p-4 sm:p-8 flex flex-col justify-start min-h-0 hide-scrollbar scroll-smooth">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentSlide}
@@ -244,21 +251,19 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products,
         {/* --- Footer Controls --- */}
         <footer className="relative flex-shrink-0 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 z-10 w-full flex justify-center">
           <div className="max-w-5xl w-full p-4 sm:p-6 flex items-center justify-between">
-            {currentSlide > 0 ? (
+            {currentSlide > 0 && (
               <button
                 onClick={prevSlide}
-                className="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-all focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
+                className="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-all focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 flex-shrink-0"
                 aria-label="Previous step"
               >
                 <ChevronLeft className="w-6 h-6" />
               </button>
-            ) : (
-              <div className="w-[66px]" /> // Spacer to keep Next button aligned right if no prev
             )}
 
             <button
               onClick={nextSlide}
-              className="flex-1 ml-4 bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-violet-500/25 transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-base outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 w-full"
+              className={`flex-1 ${currentSlide > 0 ? 'ml-4' : ''} bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-violet-500/25 transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-base outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 w-full`}
             >
               {currentSlide === slides.length - 1 ? 'Go to Action Plan' : (slide as any).actionText || 'Continue'}
               {currentSlide < slides.length - 1 && <ChevronRight className="w-5 h-5" />}

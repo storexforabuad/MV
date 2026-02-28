@@ -2,6 +2,8 @@
 
 import { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useParams } from 'next/navigation';
+import toast from 'react-hot-toast';
 
 type Category = {
   id: string;
@@ -16,11 +18,13 @@ interface CategoryBarProps {
   onActiveCategoryClick?: () => void;
   scrollDirection?: 'up' | 'down';
   storeType?: string | null;
+  storeId?: string; // Add optional storeId prop
 }
 
-export default function CategoryBar({ onCategorySelect, activeCategoryId, categories, onActiveCategoryClick, scrollDirection = 'up', storeType }: CategoryBarProps) {
+export default function CategoryBar({ onCategorySelect, activeCategoryId, categories, onActiveCategoryClick, scrollDirection = 'up', storeType, storeId }: CategoryBarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const params = useParams();
 
   const scrollToCategory = (categoryId: string) => {
     const button = buttonRefs.current.get(categoryId);
@@ -89,6 +93,41 @@ export default function CategoryBar({ onCategorySelect, activeCategoryId, catego
 
     const labelTextStyle = isActive ? 'text-text-primary' : 'text-text-secondary';
 
+    const pressTimer = useRef<NodeJS.Timeout | null>(null);
+
+    const handlePressStart = () => {
+      pressTimer.current = setTimeout(() => {
+        const finalStoreId = storeId || (params?.storeId as string) || 'bizcon';
+        const url = `https://tinyurl.com/bizconnet/${finalStoreId}?category=${category.id}`;
+        
+        navigator.clipboard.writeText(url)
+          .then(() => {
+            toast.success(`Link for ${category.name} copied!`, {
+              icon: '🔗',
+              style: {
+                borderRadius: '10px',
+                background: 'var(--card-background)',
+                color: 'var(--text-primary)',
+              },
+            });
+            if (typeof navigator !== 'undefined' && navigator.vibrate) {
+              navigator.vibrate(50);
+            }
+          })
+          .catch((err) => {
+            console.error('Failed to copy link:', err);
+            toast.error('Failed to copy link');
+          });
+      }, 600); // 600ms long press duration
+    };
+
+    const handlePressEnd = () => {
+      if (pressTimer.current) {
+        clearTimeout(pressTimer.current);
+        pressTimer.current = null;
+      }
+    };
+
     return (
       <motion.button
         ref={(el) => {
@@ -96,6 +135,15 @@ export default function CategoryBar({ onCategorySelect, activeCategoryId, catego
           else buttonRefs.current.delete(category.id);
         }}
         onClick={onClick}
+        onPointerDown={handlePressStart}
+        onPointerUp={handlePressEnd}
+        onPointerLeave={handlePressEnd}
+        onPointerCancel={handlePressEnd}
+        // Use context menu block to prevent mobile sharing overriding long press cleanly
+        onContextMenu={(e) => {
+          e.preventDefault();
+        }}
+        style={{ touchAction: 'pan-x pan-y', WebkitUserSelect: 'none', userSelect: 'none' }}
         className="flex flex-col items-center w-[72px] sm:w-[80px] flex-shrink-0"
         whileTap={{ scale: 0.95 }}
         transition={{ type: "spring", stiffness: 400, damping: 17 }}

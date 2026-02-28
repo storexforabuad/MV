@@ -458,8 +458,26 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const allowedCards = ['Launch', 'Share', 'Settings', 'Views', 'Manage Categories', 'Manage Products', 'Subscription', 'Circles'];
   const cardsToRender = cardData.filter(card => allowedCards.includes(card.label));
 
+  const previousModalState = useRef(false);
+  const onRefreshRef = useRef(onRefresh);
+
+  useEffect(() => {
+    onRefreshRef.current = onRefresh;
+  }, [onRefresh]);
+
   useEffect(() => {
     const modalIsOpen = openModal !== null || isTipsModalOpen || isLaunchGuideModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen || isAdvertisingModalOpen || isEventsModalOpen || isAccountModalOpen || isWarehouseModalOpen || isWholesaleModalOpen || isCirclesModalOpen;
+    
+    // Check if modal was literally JUST closed (transition from true to false)
+    if (previousModalState.current && !modalIsOpen) {
+      if (typeof onRefreshRef.current === 'function') {
+        setTimeout(() => {
+          onRefreshRef.current(false);
+        }, 200);
+      }
+    }
+    previousModalState.current = modalIsOpen;
+
     if (modalIsOpen) {
       window.history.pushState({ modalOpen: true }, '');
       const handlePopState = () => {
@@ -487,16 +505,9 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
       window.addEventListener('popstate', handlePopState);
       return () => {
         window.removeEventListener('popstate', handlePopState);
-        // Refresh the admin page data when any modal is closed to sync state.
-        if (typeof onRefresh === 'function') {
-          // Add a small delay so React state has settled before we sync
-          setTimeout(() => {
-            onRefresh(false);
-          }, 200);
-        }
       };
     }
-  }, [openModal, isTipsModalOpen, isLaunchGuideModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, isAdvertisingModalOpen, isEventsModalOpen, isAccountModalOpen, isWarehouseModalOpen, isWholesaleModalOpen, isCirclesModalOpen, setIsModalOpen, onRefresh]);
+  }, [openModal, isTipsModalOpen, isLaunchGuideModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, isAdvertisingModalOpen, isEventsModalOpen, isAccountModalOpen, isWarehouseModalOpen, isWholesaleModalOpen, isCirclesModalOpen, setIsModalOpen]);
 
   const handleOpenModal = (idx: number, card: typeof cardData[0]) => {
     if (isRefreshing) return; // Prevent opening modals during refresh

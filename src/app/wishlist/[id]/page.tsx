@@ -62,8 +62,8 @@ function SharedWishlistPageContent({ params }: SharedWishlistPageProps) {
                     setStoreMetas(metas);
                 }
             } catch (error) {
-                console.error('Error fetching shared wishlist:', error);
-                toast.error('Failed to load wishlist.');
+                console.error('Error fetching shared cart:', error);
+                toast.error('Failed to load shared cart.');
             } finally {
                 setIsLoading(false);
             }
@@ -86,7 +86,7 @@ function SharedWishlistPageContent({ params }: SharedWishlistPageProps) {
     if (isLoading) {
         return (
             <>
-                <Navbar storeName="Shared Wishlist" />
+                <Navbar storeName="Shared Cart" />
                 <div className="min-h-screen flex items-center justify-center">
                     <div className="animate-pulse flex flex-col items-center gap-4">
                         <div className="w-16 h-16 bg-gray-200 dark:bg-gray-800 rounded-full"></div>
@@ -100,14 +100,14 @@ function SharedWishlistPageContent({ params }: SharedWishlistPageProps) {
     if (items.length === 0) {
         return (
             <>
-                <Navbar storeName="Shared Wishlist" />
+                <Navbar storeName="Shared Cart" />
                 <div className="min-h-screen pt-[calc(var(--navbar-height)+4rem)] px-4 flex flex-col items-center text-center">
                     <div className="p-6 rounded-full bg-gray-50 dark:bg-gray-800/50 mb-6">
                         <PackageX className="w-12 h-12 text-gray-400" />
                     </div>
-                    <h1 className="text-2xl font-bold mb-2">Wishlist not found</h1>
+                    <h1 className="text-2xl font-bold mb-2">Cart not found</h1>
                     <p className="text-text-secondary max-w-xs mb-8">
-                        This wishlist might have expired or the link is incorrect.
+                        This shared cart might have expired or the link is incorrect.
                     </p>
                     <Link href="/" className="px-8 py-3 bg-[var(--button-success)] text-white rounded-full font-medium hover:bg-[var(--button-success-hover)] transition-all">
                         Go Shopping
@@ -119,13 +119,13 @@ function SharedWishlistPageContent({ params }: SharedWishlistPageProps) {
 
     return (
         <>
-            <Navbar storeName="Shared Wishlist" />
+            <Navbar storeName="Shared Cart" />
             <div className="min-h-screen mx-auto max-w-2xl px-4 pb-32 pt-[calc(var(--navbar-height)+2rem)]">
                 <div className="flex flex-col items-center text-center mb-10">
                     <div className="p-4 rounded-full bg-red-50 dark:bg-red-900/20 mb-4 ring-8 ring-red-50/50 dark:ring-red-900/10">
-                        <Heart className="w-8 h-8 text-red-500 fill-red-500 animate-pulse" />
+                        <ShoppingCart className="w-8 h-8 text-red-500 animate-pulse" />
                     </div>
-                    <h1 className="text-3xl font-bold card-text-gradient mb-2">A Gift List for You</h1>
+                    <h1 className="text-3xl font-bold card-text-gradient mb-2">A Gift Cart for You</h1>
                     <p className="text-text-secondary max-w-sm">
                         Someone shared these items with you. You can help them buy these products or add them to your own cart.
                     </p>
@@ -223,7 +223,7 @@ function SharedWishlistPageContent({ params }: SharedWishlistPageProps) {
 
                 <div className="mt-12 p-8 rounded-3xl bg-gradient-to-br from-purple-500/5 to-pink-500/5 border border-purple-500/10 text-center mb-16">
                     <p className="text-sm text-text-secondary italic mb-4">
-                        "Your wishlist is the map of your desires. Share it, and let the world help you find your way."
+                        "Your shared cart is the map of your desires. Share it, and let the world help you find your way."
                     </p>
                     <div className="w-12 h-1 bg-gradient-to-r from-purple-500 to-pink-500 mx-auto rounded-full" />
                 </div>
