@@ -1,5 +1,5 @@
 'use client';
-import { Tag, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays, CheckCircle2, Briefcase, ShieldCheck, Clock, AlertCircle, ExternalLink, Warehouse, Settings, ArrowLeft } from 'lucide-react';
+import { Tag, Rocket, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays, CheckCircle2, Briefcase, ShieldCheck, Clock, AlertCircle, ExternalLink, Warehouse, Settings, ArrowLeft } from 'lucide-react';
 import { Dispatch, SetStateAction, useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useVendor } from '@/context/VendorContext';
@@ -14,6 +14,7 @@ import { AmbassadorHubModal } from './modals/AmbassadorHubModal';
 import CirclesModal from './modals/CirclesModal';
 
 import TipsModal from './modals/TipsModal';
+import LaunchGuideModal from './modals/LaunchGuideModal';
 import AccountModal from './modals/AccountModal';
 import SpotlightTooltip from '../shared/SpotlightTooltip';
 import PostsComposerModal from './modals/PostsComposerModal';
@@ -97,6 +98,16 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     text: 'text-white',
     component: null,
     glowClass: 'dark:shadow-blue-500/30 shadow-blue-500/50',
+    cardType: 'action',
+  },
+  {
+    label: 'Launch',
+    subtitle: 'Guide',
+    icon: Rocket,
+    gradient: 'bg-gradient-to-br from-violet-500 via-purple-500 to-fuchsia-600',
+    text: 'text-white',
+    component: LaunchGuideModal,
+    glowClass: 'dark:shadow-purple-500/30 shadow-purple-500/50',
     cardType: 'action',
   },
   {
@@ -344,6 +355,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const { spotlightStep, completeSpotlight } = useSpotlightContext();
   const [openModal, setOpenModal] = useState<number | null>(null);
   const [isTipsModalOpen, setIsTipsModalOpen] = useState(false);
+  const [isLaunchGuideModalOpen, setIsLaunchGuideModalOpen] = useState(false);
   const [isViewsModalOpen, setIsViewsModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isCustomersModalOpen, setIsCustomersModalOpen] = useState(false);
@@ -443,16 +455,17 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const ordersIndex = cardData.findIndex(card => card.label === 'Orders');
 
   // Filter to show only specific cards
-  const allowedCards = ['Share', 'Settings', 'Views', 'Manage Categories', 'Manage Products', 'Subscription', 'Circles'];
+  const allowedCards = ['Launch', 'Share', 'Settings', 'Views', 'Manage Categories', 'Manage Products', 'Subscription', 'Circles'];
   const cardsToRender = cardData.filter(card => allowedCards.includes(card.label));
 
   useEffect(() => {
-    const modalIsOpen = openModal !== null || isTipsModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen || isAdvertisingModalOpen || isEventsModalOpen || isAccountModalOpen || isWarehouseModalOpen || isWholesaleModalOpen || isCirclesModalOpen;
+    const modalIsOpen = openModal !== null || isTipsModalOpen || isLaunchGuideModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen || isAdvertisingModalOpen || isEventsModalOpen || isAccountModalOpen || isWarehouseModalOpen || isWholesaleModalOpen || isCirclesModalOpen;
     if (modalIsOpen) {
       window.history.pushState({ modalOpen: true }, '');
       const handlePopState = () => {
         setOpenModal(null);
         setIsTipsModalOpen(false);
+        setIsLaunchGuideModalOpen(false);
         setIsCustomersModalOpen(false);
         setIsViewsModalOpen(false);
         setIsShareModalOpen(false);
@@ -483,7 +496,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         }
       };
     }
-  }, [openModal, isTipsModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, isAdvertisingModalOpen, isEventsModalOpen, isAccountModalOpen, isWarehouseModalOpen, isWholesaleModalOpen, isCirclesModalOpen, setIsModalOpen, onRefresh]);
+  }, [openModal, isTipsModalOpen, isLaunchGuideModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, isAdvertisingModalOpen, isEventsModalOpen, isAccountModalOpen, isWarehouseModalOpen, isWholesaleModalOpen, isCirclesModalOpen, setIsModalOpen, onRefresh]);
 
   const handleOpenModal = (idx: number, card: typeof cardData[0]) => {
     if (isRefreshing) return; // Prevent opening modals during refresh
@@ -499,6 +512,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
     const { label, subtitle } = card;
     if (label === 'BizConnect™') setIsBizconNetworkModalOpen(true);
+    else if (label === 'Launch') setIsLaunchGuideModalOpen(true);
     else if (label === 'Tips') setIsTipsModalOpen(true);
     else if (label === 'Views') setIsViewsModalOpen(true);
     else if (label === 'Share') setIsSocialPostsModalOpen(true);
@@ -544,6 +558,12 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     }
     if (popHistoryIfExists()) return;
     setIsTipsModalOpen(false);
+    if (props.setIsModalOpen) props.setIsModalOpen(false);
+  };
+
+  const handleCloseLaunchGuideModal = () => {
+    if (popHistoryIfExists()) return;
+    setIsLaunchGuideModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   };
 
@@ -1008,6 +1028,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
       {/* === MODAL RENDERERS === */}
 
       <CustomersListModal storeId={props.storeId} isOpen={isCustomersModalOpen} onClose={handleCloseCustomersModal} />
+
+      {isLaunchGuideModalOpen && (<LaunchGuideModal storeLink={props.storeLink} products={props.products} isOpen={isLaunchGuideModalOpen} onClose={handleCloseLaunchGuideModal} />)}
 
       {isTipsModalOpen && (<TipsModal {...props as AdminHomeCardsProps & { handleClose: () => void; }} handleClose={handleCloseTipsModal} />)}
 
