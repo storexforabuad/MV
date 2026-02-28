@@ -994,7 +994,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           if (card.cardType === 'action') {
             return (
               <motion.div key={card.label} variants={itemVariants} className={`relative h-full ${spotlightClasses}`}>
-                <button style={inlineStyle} className={`dashboard-card relative flex flex-row items-center justify-center gap-4 rounded-[2rem] p-4 sm:p-5 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.text} ${card.glowClass} w-full min-h-[140px] h-full`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card)}>
+                <button style={inlineStyle} className={`dashboard-card relative flex flex-row items-center justify-center gap-4 rounded-[2rem] p-4 sm:p-5 shadow-md transition hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] focus:outline-none overflow-hidden ${card.gradient || ''} ${card.text || ''} ${card.glowClass || ''} w-full min-h-[140px] h-full`} tabIndex={0} type="button" onClick={() => handleOpenModal(idx, card)}>
                   {isPostsCard && showPostsNotification && (<span className="absolute top-2 right-2 flex h-3 w-3"><span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span><span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span></span>)}
                   <span className="card-blob" />
                   <div className={`flex-shrink-0 flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white bg-opacity-20 shadow`}><Icon className={`w-6 h-6 sm:w-7 sm:h-7 drop-shadow ${card.isAiCard ? 'ai-icon-glow' : ''}`} /></div>
@@ -1029,7 +1029,36 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
       <CustomersListModal storeId={props.storeId} isOpen={isCustomersModalOpen} onClose={handleCloseCustomersModal} />
 
-      {isLaunchGuideModalOpen && (<LaunchGuideModal storeLink={props.storeLink} products={props.products} isOpen={isLaunchGuideModalOpen} onClose={handleCloseLaunchGuideModal} />)}
+      {isLaunchGuideModalOpen && (
+        <LaunchGuideModal 
+          storeLink={props.storeLink} 
+          products={props.products} 
+          isOpen={isLaunchGuideModalOpen} 
+          onClose={handleCloseLaunchGuideModal} 
+          onGoToActionPlan={() => {
+            handleCloseLaunchGuideModal();
+            if (props.setActiveSection) {
+              props.setActiveSection('activity');
+            }
+            setTimeout(() => {
+              const launchTrackerEl = document.getElementById('launch-tracker');
+              if (launchTrackerEl) {
+                const headerOffset = 100;
+                const elementPosition = launchTrackerEl.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.scrollY - headerOffset;
+                
+                window.scrollTo({
+                  top: offsetPosition,
+                  behavior: 'smooth'
+                });
+                
+                launchTrackerEl.classList.add('ring-4', 'ring-purple-500', 'ring-offset-2', 'ring-offset-background', 'transition-all', 'duration-1000', 'rounded-2xl');
+                setTimeout(() => launchTrackerEl.classList.remove('ring-4', 'ring-purple-500', 'ring-offset-2', 'ring-offset-background'), 2500);
+              }
+            }, 300);
+          }}
+        />
+      )}
 
       {isTipsModalOpen && (<TipsModal {...props as AdminHomeCardsProps & { handleClose: () => void; }} handleClose={handleCloseTipsModal} />)}
 

@@ -127,7 +127,7 @@ const ActivityPage: React.FC<ActivityPageProps> = ({
   };
 
   const topProduct = products.length > 0 ? products[0] : null;
-  const storeUrl = storeMeta?.storeLink || `https://bizconnect.com/${storeId}`;
+  const storeUrl = `https://tinyurl.com/bizconnet/${storeId}`;
   
   const phase1Copy = `We are upgrading how you shop with us! Something exciting is coming... 🫣📦\n\nNo more waiting hours for me to reply to your DMs before you can order. We are making life easier for you. Guess what it is? 👀`;
   
@@ -280,7 +280,7 @@ const ActivityPage: React.FC<ActivityPageProps> = ({
       </motion.div>
 
       {/* Interactive Launch Checklist */}
-      <motion.div variants={itemVariants} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[2rem] p-6 shadow-sm relative overflow-hidden">
+      <motion.div id="launch-tracker" variants={itemVariants} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[2rem] p-5 sm:p-6 shadow-sm relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-violet-500/5 rounded-full -mr-16 -mt-16 blur-2xl" />
         <div className="flex items-center justify-between mb-6 relative z-10">
           <div className="flex items-center gap-3">
@@ -312,13 +312,13 @@ const ActivityPage: React.FC<ActivityPageProps> = ({
             const isCompleted = completedPhases.includes(phase.id);
             return (
               <div key={phase.id} className={`p-4 rounded-2xl border transition-all ${isCompleted ? 'bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 opacity-60' : 'bg-white dark:bg-zinc-800 border-violet-100 dark:border-violet-900/50 shadow-sm'}`}>
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className={`font-black tracking-tight ${isCompleted ? 'line-through text-zinc-400' : 'text-zinc-900 dark:text-white'}`}>
+                <div className="flex items-start sm:items-center justify-between mb-3 gap-3">
+                  <h4 className={`font-black tracking-tight leading-tight pt-0.5 ${isCompleted ? 'line-through text-zinc-400' : 'text-zinc-900 dark:text-white'}`}>
                     {phase.title}
                   </h4>
                   <button
                     onClick={() => togglePhase(phase.id)}
-                    className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-colors ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'border-zinc-300 dark:border-zinc-600 text-transparent'}`}
+                    className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 border-2 transition-colors ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'border-zinc-300 dark:border-zinc-600 text-transparent'}`}
                   >
                     <CheckCircle2 className="w-4 h-4" />
                   </button>
@@ -326,7 +326,7 @@ const ActivityPage: React.FC<ActivityPageProps> = ({
                 {!isCompleted && (
                   <button
                     onClick={() => copyToClipboard(phase.copy)}
-                    className="w-full flex items-center justify-center gap-2 bg-violet-50 hover:bg-violet-100 dark:bg-violet-900/20 dark:hover:bg-violet-900/40 text-violet-700 dark:text-violet-300 py-2.5 rounded-xl text-xs font-bold uppercase tracking-widest transition-colors"
+                    className="w-full flex items-center justify-center gap-2 bg-violet-50 hover:bg-violet-100 dark:bg-violet-900/20 dark:hover:bg-violet-900/40 text-violet-700 dark:text-violet-300 py-3 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-widest transition-colors mb-2"
                   >
                     <Share2 className="w-4 h-4" /> Copy Caption
                   </button>
