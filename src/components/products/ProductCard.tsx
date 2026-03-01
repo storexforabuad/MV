@@ -362,8 +362,10 @@ export default function ProductCard({
             transform: 'translate3d(0,0,0)',
             perspective: '1000px',
             backfaceVisibility: 'hidden',
-            touchAction: 'manipulation',
+            userSelect: 'none',
+            WebkitUserSelect: 'none',
           }}
+          draggable="false"
           onPointerDown={handleImagePressStart}
           onPointerUp={handleImagePressEnd}
           onPointerLeave={handleImagePressEnd}
