@@ -485,6 +485,7 @@ export default function StorefrontPageClient({
         onActiveCategoryClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         scrollDirection={scrollDirection}
         storeType={storeMeta?.storeType}
+        storeId={storeId}
       />
       <CustomerLookupModal
         isOpen={isLoginModalOpen}

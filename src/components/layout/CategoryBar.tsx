@@ -2,7 +2,6 @@
 
 import { useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useParams } from 'next/navigation';
 import toast from 'react-hot-toast';
 
 type Category = {
@@ -11,6 +10,100 @@ type Category = {
   icon?: string;
 };
 
+// ─── Helpers (stable, outside any component) ────────────────────────────────
+
+const ICON_MAP: Record<string, string> = {
+  'Promo': '🔥',
+  'Popular': '💖',
+  'New Arrivals': '⭐',
+};
+
+const COLOR_MAP: Record<string, string> = {
+  'Promo': 'bg-[var(--badge-red-bg)] text-[var(--badge-red-text)]',
+  'Popular': 'bg-[var(--badge-pink-bg)] text-[var(--badge-pink-text)]',
+  'New Arrivals': 'bg-[var(--badge-blue-bg)] text-[var(--badge-blue-text)]',
+};
+
+function getIconForCategory(name: string) {
+  return ICON_MAP[name] || '🛍️';
+}
+
+function getCategoryColor(name: string): string | null {
+  return COLOR_MAP[name] || null;
+}
+
+// ─── CategoryButton — STABLE top-level component ─────────────────────────────
+// Defined outside CategoryBar so its function reference never changes between
+// CategoryBar re-renders. This prevents unnecessary unmount/remount cycles
+// which were breaking the long-press timer.
+
+interface CategoryButtonProps {
+  category: Category;
+  isActive: boolean;
+  storeId: string;
+  buttonRefSetter: (el: HTMLButtonElement | null, id: string) => void;
+  onClick: () => void;
+  onPressStart: (category: Category) => void;
+  onPressEnd: () => void;
+}
+
+function CategoryButton({
+  category,
+  isActive,
+  storeId,
+  buttonRefSetter,
+  onClick,
+  onPressStart,
+  onPressEnd,
+}: CategoryButtonProps) {
+  const specialColorStyle = getCategoryColor(category.name);
+  const iconContainerStyle = isActive && specialColorStyle
+    ? specialColorStyle
+    : 'bg-[var(--button-secondary)]';
+  const iconTextStyle = isActive && specialColorStyle ? '' : 'text-text-primary';
+  const labelTextStyle = isActive ? 'text-text-primary' : 'text-text-secondary';
+
+  return (
+    <motion.button
+      ref={(el) => buttonRefSetter(el, category.id)}
+      onClick={onClick}
+      onPointerDown={() => onPressStart(category)}
+      onPointerUp={onPressEnd}
+      onPointerLeave={onPressEnd}
+      onPointerCancel={onPressEnd}
+      onContextMenu={(e) => e.preventDefault()}
+      style={{ touchAction: 'manipulation', WebkitUserSelect: 'none', userSelect: 'none' }}
+      className="flex flex-col items-center w-[72px] sm:w-[80px] flex-shrink-0"
+      whileTap={{ scale: 0.95 }}
+      transition={{ type: 'spring', stiffness: 400, damping: 17 }}
+    >
+      <motion.div
+        className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mb-1 sm:mb-2
+          ${iconContainerStyle}
+          ${isActive
+            ? 'ring-[4px] ring-[var(--button-primary)] ring-offset-2 ring-offset-[var(--background)] shadow-[var(--shadow-lg)]'
+            : 'hover:ring-3 hover:ring-[var(--button-primary)] hover:ring-offset-1 hover:ring-offset-[var(--background)]'
+          }
+          transform transition-all duration-200 ease-out`}
+        animate={isActive ? { scale: [1, 1.1, 1.05] } : { scale: 1 }}
+        transition={{ duration: 0.3, ease: 'easeOut' }}
+        style={{ willChange: 'transform', backfaceVisibility: 'hidden' }}
+      >
+        <span className={`text-2xl ${iconTextStyle}`}>{getIconForCategory(category.name)}</span>
+      </motion.div>
+      <motion.span
+        className={`text-xs font-medium truncate max-w-[80px] text-center ${labelTextStyle}`}
+        animate={isActive ? { scale: [1, 1.05, 1] } : { scale: 1 }}
+        transition={{ duration: 0.3, delay: 0.1 }}
+      >
+        {category.name}
+      </motion.span>
+    </motion.button>
+  );
+}
+
+// ─── CategoryBar ─────────────────────────────────────────────────────────────
+
 interface CategoryBarProps {
   onCategorySelect: (categoryId: string) => void;
   activeCategoryId: string;
@@ -18,161 +111,90 @@ interface CategoryBarProps {
   onActiveCategoryClick?: () => void;
   scrollDirection?: 'up' | 'down';
   storeType?: string | null;
-  storeId?: string; // Add optional storeId prop
+  storeId?: string;
 }
 
-export default function CategoryBar({ onCategorySelect, activeCategoryId, categories, onActiveCategoryClick, scrollDirection = 'up', storeType, storeId }: CategoryBarProps) {
+export default function CategoryBar({
+  onCategorySelect,
+  activeCategoryId,
+  categories,
+  onActiveCategoryClick,
+  scrollDirection = 'up',
+  storeType,
+  storeId = 'bizcon',
+}: CategoryBarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
-  const params = useParams();
 
+  // ── Long-press state lives HERE (stable component, never remounts) ──────────
+  const pressTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const handlePressStart = (category: Category) => {
+    // Clear any lingering timer before starting a new one
+    if (pressTimer.current) clearTimeout(pressTimer.current);
+
+    pressTimer.current = setTimeout(() => {
+      pressTimer.current = null;
+      const url = `https://tinyurl.com/bizconnet/${storeId}?category=${category.id}`;
+
+      navigator.clipboard.writeText(url)
+        .then(() => {
+          toast.success(`Link for ${category.name} copied!`, {
+            icon: '🔗',
+            style: {
+              borderRadius: '10px',
+              background: 'var(--card-background)',
+              color: 'var(--text-primary)',
+            },
+          });
+          if (navigator.vibrate) navigator.vibrate(50);
+        })
+        .catch(() => toast.error('Failed to copy link'));
+    }, 600);
+  };
+
+  const handlePressEnd = () => {
+    if (pressTimer.current) {
+      clearTimeout(pressTimer.current);
+      pressTimer.current = null;
+    }
+  };
+
+  // ── Button ref setter (stable callback) ────────────────────────────────────
+  const buttonRefSetter = (el: HTMLButtonElement | null, id: string) => {
+    if (el) buttonRefs.current.set(id, el);
+    else buttonRefs.current.delete(id);
+  };
+
+  // ── Scroll active category into view ───────────────────────────────────────
   const scrollToCategory = (categoryId: string) => {
     const button = buttonRefs.current.get(categoryId);
     const container = containerRef.current;
-
     if (button && container) {
-      const containerWidth = container.offsetWidth;
-      const buttonLeft = button.offsetLeft;
-      const buttonWidth = button.offsetWidth;
-      const scrollLeft = buttonLeft - (containerWidth / 2) + (buttonWidth / 2);
-
+      const scrollLeft =
+        button.offsetLeft - container.offsetWidth / 2 + button.offsetWidth / 2;
       container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
     }
   };
 
   useEffect(() => {
     if (activeCategoryId && categories.length > 0) {
-      // Try multiple times to ensure buttons are rendered and measured
-      const attempts = [50, 200, 500, 1000];
-      attempts.forEach(delay => {
-        setTimeout(() => scrollToCategory(activeCategoryId), delay);
-      });
+      [50, 200, 500, 1000].forEach(delay =>
+        setTimeout(() => scrollToCategory(activeCategoryId), delay)
+      );
     }
   }, [activeCategoryId, categories.length]);
 
   const handleCategoryClick = (categoryId: string) => {
     scrollToCategory(categoryId);
-
     if (activeCategoryId === categoryId) {
-      if (onActiveCategoryClick) onActiveCategoryClick();
+      onActiveCategoryClick?.();
     } else {
       onCategorySelect(categoryId);
     }
   };
 
-  const getIconForCategory = (categoryName: string) => {
-    const iconMap: { [key: string]: string } = {
-      'Promo': '🔥',
-      'Popular': '💖',
-      'New Arrivals': '⭐',
-    };
-    return iconMap[categoryName] || '🛍️';
-  };
-
-  const getCategoryColor = (categoryName: string): string | null => {
-    const colorMap: { [key: string]: string } = {
-      'Promo': 'bg-[var(--badge-red-bg)] text-[var(--badge-red-text)]',
-      'Popular': 'bg-[var(--badge-pink-bg)] text-[var(--badge-pink-text)]',
-      'New Arrivals': 'bg-[var(--badge-blue-bg)] text-[var(--badge-blue-text)]',
-    };
-    return colorMap[categoryName] || null;
-  };
-
-  const CategoryButton = ({ category, onClick, isActive }: {
-    category: Category;
-    onClick: () => void;
-    isActive: boolean;
-  }) => {
-    const specialColorStyle = getCategoryColor(category.name);
-
-    const iconContainerStyle = isActive && specialColorStyle
-      ? specialColorStyle
-      : 'bg-[var(--button-secondary)]';
-
-    const iconTextStyle = isActive && specialColorStyle ? '' : 'text-text-primary';
-
-    const labelTextStyle = isActive ? 'text-text-primary' : 'text-text-secondary';
-
-    const pressTimer = useRef<NodeJS.Timeout | null>(null);
-
-    const handlePressStart = () => {
-      pressTimer.current = setTimeout(() => {
-        const finalStoreId = storeId || (params?.storeId as string) || 'bizcon';
-        const url = `https://tinyurl.com/bizconnet/${finalStoreId}?category=${category.id}`;
-        
-        navigator.clipboard.writeText(url)
-          .then(() => {
-            toast.success(`Link for ${category.name} copied!`, {
-              icon: '🔗',
-              style: {
-                borderRadius: '10px',
-                background: 'var(--card-background)',
-                color: 'var(--text-primary)',
-              },
-            });
-            if (typeof navigator !== 'undefined' && navigator.vibrate) {
-              navigator.vibrate(50);
-            }
-          })
-          .catch((err) => {
-            console.error('Failed to copy link:', err);
-            toast.error('Failed to copy link');
-          });
-      }, 600); // 600ms long press duration
-    };
-
-    const handlePressEnd = () => {
-      if (pressTimer.current) {
-        clearTimeout(pressTimer.current);
-        pressTimer.current = null;
-      }
-    };
-
-    return (
-      <motion.button
-        ref={(el) => {
-          if (el) buttonRefs.current.set(category.id, el);
-          else buttonRefs.current.delete(category.id);
-        }}
-        onClick={onClick}
-        onPointerDown={handlePressStart}
-        onPointerUp={handlePressEnd}
-        onPointerLeave={handlePressEnd}
-        onPointerCancel={handlePressEnd}
-        // Use context menu block to prevent mobile sharing overriding long press cleanly
-        onContextMenu={(e) => {
-          e.preventDefault();
-        }}
-        style={{ touchAction: 'pan-x pan-y', WebkitUserSelect: 'none', userSelect: 'none' }}
-        className="flex flex-col items-center w-[72px] sm:w-[80px] flex-shrink-0"
-        whileTap={{ scale: 0.95 }}
-        transition={{ type: "spring", stiffness: 400, damping: 17 }}
-      >
-        <motion.div
-          className={`w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mb-1 sm:mb-2
-            ${iconContainerStyle}
-            ${isActive
-              ? 'ring-[4px] ring-[var(--button-primary)] ring-offset-2 ring-offset-[var(--background)] shadow-[var(--shadow-lg)]'
-              : 'hover:ring-3 hover:ring-[var(--button-primary)] hover:ring-offset-1 hover:ring-offset-[var(--background)]'
-            }
-            transform transition-all duration-200 ease-out`}
-          animate={isActive ? { scale: [1, 1.1, 1.05] } : { scale: 1 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-          style={{ willChange: 'transform', backfaceVisibility: 'hidden' }}
-        >
-          <span className={`text-2xl sm:text-2xl ${iconTextStyle}`}>{getIconForCategory(category.name)}</span>
-        </motion.div>
-        <motion.span
-          className={`text-xs font-medium truncate max-w-[80px] text-center ${labelTextStyle}`}
-          animate={isActive ? { scale: [1, 1.05, 1] } : { scale: 1 }}
-          transition={{ duration: 0.3, delay: 0.1 }}
-        >
-          {category.name}
-        </motion.span>
-      </motion.button>
-    );
-  }
-
+  // ── Category lists ─────────────────────────────────────────────────────────
   const systemCategoriesAll: Category[] = [
     { id: 'promo', name: 'Promo' },
     { id: 'popular', name: 'Popular' },
@@ -183,23 +205,27 @@ export default function CategoryBar({ onCategorySelect, activeCategoryId, catego
     ? systemCategoriesAll.filter(c => c.name !== 'New Arrivals')
     : systemCategoriesAll;
 
-  const vendorCategories = categories.filter(c => !systemCategories.some(sc => sc.name === c.name));
+  const vendorCategories = categories.filter(
+    c => !systemCategories.some(sc => sc.name === c.name)
+  );
+
   return (
     <div
       className="category-bar-container glassmorphic is-sticky"
       style={{ top: scrollDirection === 'up' ? 'var(--navbar-height)' : '0' }}
     >
-      <div
-        ref={containerRef}
-        className="overflow-x-auto scrollbar-hide px-4 relative"
-      >
+      <div ref={containerRef} className="overflow-x-auto scrollbar-hide px-4 relative">
         <div className="flex gap-3 py-3 min-w-min justify-center items-center">
           {systemCategories.map(category => (
             <CategoryButton
               key={category.id}
               category={category}
-              onClick={() => handleCategoryClick(category.id)}
               isActive={activeCategoryId === category.id}
+              storeId={storeId}
+              buttonRefSetter={buttonRefSetter}
+              onClick={() => handleCategoryClick(category.id)}
+              onPressStart={handlePressStart}
+              onPressEnd={handlePressEnd}
             />
           ))}
 
@@ -207,12 +233,16 @@ export default function CategoryBar({ onCategorySelect, activeCategoryId, catego
             <div className="w-px h-10 bg-[var(--border-color)] opacity-60 mx-2" />
           )}
 
-          {vendorCategories.map((category) => (
+          {vendorCategories.map(category => (
             <CategoryButton
               key={category.id}
               category={category}
-              onClick={() => handleCategoryClick(category.id)}
               isActive={activeCategoryId === category.id}
+              storeId={storeId}
+              buttonRefSetter={buttonRefSetter}
+              onClick={() => handleCategoryClick(category.id)}
+              onPressStart={handlePressStart}
+              onPressEnd={handlePressEnd}
             />
           ))}
         </div>
