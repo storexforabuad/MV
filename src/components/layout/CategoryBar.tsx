@@ -140,11 +140,12 @@ export default function CategoryBar({
       navigator.clipboard.writeText(url)
         .then(() => {
           toast.success(`Link for ${category.name} copied!`, {
-            icon: '🔗',
+            duration: 2000,
+            position: 'bottom-center',
             style: {
-              borderRadius: '10px',
               background: 'var(--card-background)',
               color: 'var(--text-primary)',
+              border: '1px solid var(--border-color)',
             },
           });
           if (navigator.vibrate) navigator.vibrate(50);
