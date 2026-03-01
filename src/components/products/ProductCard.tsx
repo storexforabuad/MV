@@ -203,6 +203,7 @@ export default function ProductCard({
   const handlePrevImage = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    handleImagePressEnd(); // cancel any pending long press
     handleTrackInteraction();
     setDirection(-1);
     setCurrentImageIndex((prev) => (prev === 0 ? totalImages - 1 : prev - 1));
@@ -211,6 +212,7 @@ export default function ProductCard({
   const handleNextImage = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    handleImagePressEnd(); // cancel any pending long press
     handleTrackInteraction();
     setDirection(1);
     setCurrentImageIndex((prev) => (prev === totalImages - 1 ? 0 : prev + 1));
@@ -219,6 +221,7 @@ export default function ProductCard({
   const handleDotClick = (e: React.MouseEvent, index: number) => {
     e.preventDefault();
     e.stopPropagation();
+    handleImagePressEnd(); // cancel any pending long press
     setDirection(index > currentImageIndex ? 1 : -1);
     setCurrentImageIndex(index);
   };
@@ -264,6 +267,51 @@ export default function ProductCard({
     NavigationStore.saveState(activeCategoryId, window.scrollY);
   };
 
+  // ── Long-press on image to copy product link ─────────────────────────────
+  const imagePressTimer = useRef<NodeJS.Timeout | null>(null);
+  const imagePressStartPos = useRef<{ x: number; y: number } | null>(null);
+
+  const handleImagePressStart = (e: React.PointerEvent) => {
+    imagePressStartPos.current = { x: e.clientX, y: e.clientY };
+    if (imagePressTimer.current) clearTimeout(imagePressTimer.current);
+    imagePressTimer.current = setTimeout(() => {
+      imagePressTimer.current = null;
+      const finalStoreId = storeId || product.storeId || 'bizcon';
+      const url = `https://tinyurl.com/bizconnet/${finalStoreId}/products/${product.id}`;
+      navigator.clipboard.writeText(url)
+        .then(() => {
+          toast.success(`Link for "${product.name}" copied!`, {
+            duration: 2000,
+            position: 'bottom-center',
+            style: {
+              background: 'var(--card-background)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border-color)',
+            },
+          });
+          if (navigator.vibrate) navigator.vibrate(50);
+        })
+        .catch(() => toast.error('Failed to copy link'));
+    }, 600);
+  };
+
+  const handleImagePressEnd = () => {
+    if (imagePressTimer.current) {
+      clearTimeout(imagePressTimer.current);
+      imagePressTimer.current = null;
+    }
+    imagePressStartPos.current = null;
+  };
+
+  const handleImagePressMove = (e: React.PointerEvent) => {
+    if (!imagePressStartPos.current) return;
+    const dx = Math.abs(e.clientX - imagePressStartPos.current.x);
+    const dy = Math.abs(e.clientY - imagePressStartPos.current.y);
+    // Cancel long press if pointer moves more than 10px (carousel swipe)
+    if (dx > 10 || dy > 10) handleImagePressEnd();
+  };
+  // ─────────────────────────────────────────────────────────────────────────
+
   return (
     <Link href={productLink} passHref>
       <div
@@ -302,7 +350,8 @@ export default function ProductCard({
         }}
         style={{ WebkitTapHighlightColor: 'transparent' }}
       >
-        <div className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden
+        <div
+          className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden
           shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08),0_2px_6px_-1px_rgba(0,0,0,0.05)] dark:shadow-lg dark:shadow-white/10
           transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]
           transform-gpu will-change-transform
@@ -312,8 +361,15 @@ export default function ProductCard({
           style={{
             transform: 'translate3d(0,0,0)',
             perspective: '1000px',
-            backfaceVisibility: 'hidden'
+            backfaceVisibility: 'hidden',
+            touchAction: 'manipulation',
           }}
+          onPointerDown={handleImagePressStart}
+          onPointerUp={handleImagePressEnd}
+          onPointerLeave={handleImagePressEnd}
+          onPointerCancel={handleImagePressEnd}
+          onPointerMove={handleImagePressMove}
+          onContextMenu={(e) => e.preventDefault()}
         >
           {imageLoading && (
             <div className="absolute inset-0 bg-[var(--skeleton-background)] animate-pulse z-10" />
