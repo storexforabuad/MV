@@ -10,10 +10,9 @@ interface LaunchGuideModalProps {
   onClose: () => void;
   storeLink: string;
   products: Product[];
-  onGoToActionPlan?: () => void;
 }
 
-export default function LaunchGuideModal({ isOpen, onClose, storeLink, products, onGoToActionPlan }: LaunchGuideModalProps) {
+export default function LaunchGuideModal({ isOpen, onClose, storeLink, products }: LaunchGuideModalProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const scrollRef = useRef<HTMLElement>(null);
 
@@ -22,6 +21,38 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products,
       scrollRef.current.scrollTop = 0;
     }
   }, [currentSlide]);
+
+  const PHASE_STORAGE_KEY = `launch_playbook_progress_full_${storeLink || 'store'}`;
+  const [completedPhases, setCompletedPhases] = useState<string[]>([]);
+
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem(PHASE_STORAGE_KEY);
+        if (saved) {
+          setCompletedPhases(JSON.parse(saved));
+        }
+      }
+    } catch (e) {
+      console.error('Error loading playbook progress', e);
+    }
+  }, [PHASE_STORAGE_KEY]);
+
+  const togglePhase = (phaseId: string) => {
+    setCompletedPhases(prev => {
+      const isCompleted = prev.includes(phaseId);
+      const newPhases = isCompleted
+        ? prev.filter(id => id !== phaseId)
+        : [...prev, phaseId];
+      
+      try {
+        localStorage.setItem(PHASE_STORAGE_KEY, JSON.stringify(newPhases));
+      } catch (e) {
+        console.error('Error saving playbook progress', e);
+      }
+      return newPhases;
+    });
+  };
 
   if (!isOpen) return null;
 
@@ -99,16 +130,22 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products,
     }
   ];
 
+  const slide = slides[currentSlide];
+  const Icon = slide.icon;
+
+  const isSlidePhase = slide.id.startsWith('phase');
+  const isPhaseCompleted = isSlidePhase ? completedPhases.includes(slide.id) : true;
+
   const nextSlide = () => {
+    if (isSlidePhase && !isPhaseCompleted) {
+      toast.error('Please mark this phase as complete to continue.');
+      return;
+    }
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(prev => prev + 1);
     } else {
-      if (onGoToActionPlan) {
-        onGoToActionPlan();
-      } else {
-        onClose();
-        setTimeout(() => setCurrentSlide(0), 300);
-      }
+      onClose();
+      setTimeout(() => setCurrentSlide(0), 300);
     }
   };
 
@@ -122,9 +159,6 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products,
     navigator.clipboard.writeText(text);
     toast.success('Caption copied!');
   };
-
-  const slide = slides[currentSlide];
-  const Icon = slide.icon;
 
   const modalVariants = { 
     hidden: { opacity: 0, y: '100%' }, 
@@ -243,6 +277,30 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products,
                 </div>
               )}
 
+              {/* Task Completion Section */}
+              {isSlidePhase && (
+                <div className="w-full max-w-md mt-6 mb-2">
+                  <div className="w-full h-px bg-slate-200 dark:bg-slate-800 mb-6" />
+                  <button
+                    onClick={() => togglePhase(slide.id)}
+                    className={`w-full flex items-center justify-center gap-3 p-4 rounded-2xl border-2 transition-all font-black text-base sm:text-lg ${
+                      completedPhases.includes(slide.id)
+                        ? 'bg-green-50 dark:bg-green-900/20 border-green-500 text-green-600 dark:text-green-400'
+                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-violet-500 hover:text-violet-600 dark:hover:text-violet-400 shadow-sm'
+                    }`}
+                  >
+                    <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-colors shrink-0 ${
+                      completedPhases.includes(slide.id)
+                        ? 'bg-green-500 border-green-500 text-white'
+                        : 'border-slate-300 dark:border-slate-600 text-transparent'
+                    }`}>
+                      <CheckCircle2 className="w-4 h-4" strokeWidth={3} />
+                    </div>
+                    {completedPhases.includes(slide.id) ? 'Phase Completed!' : 'Mark as Complete'}
+                  </button>
+                </div>
+              )}
+
               </div>
             </motion.div>
           </AnimatePresence>
@@ -263,9 +321,14 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products,
 
             <button
               onClick={nextSlide}
-              className={`flex-1 ${currentSlide > 0 ? 'ml-4' : ''} bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-violet-500/25 transition-all active:scale-[0.98] flex items-center justify-center gap-2 text-base outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 w-full`}
+              disabled={isSlidePhase && !isPhaseCompleted}
+              className={`flex-1 ${currentSlide > 0 ? 'ml-4' : ''} ${
+                isSlidePhase && !isPhaseCompleted
+                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-slate-700'
+                  : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white shadow-lg shadow-violet-500/25 active:scale-[0.98]'
+              } font-bold py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-2 text-base outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 w-full`}
             >
-              {currentSlide === slides.length - 1 ? 'Go to Action Plan' : (slide as any).actionText || 'Continue'}
+              {currentSlide === slides.length - 1 ? 'Finish Guide' : (slide as any).actionText || 'Continue'}
               {currentSlide < slides.length - 1 && <ChevronRight className="w-5 h-5" />}
             </button>
           </div>

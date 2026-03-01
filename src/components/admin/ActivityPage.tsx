@@ -16,7 +16,10 @@ import {
   ArrowRight,
   TrendingDown,
   Sparkles,
-  Calendar
+  Calendar,
+  Flame,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Notification } from '@/types/notification';
@@ -94,54 +97,57 @@ const ActivityPage: React.FC<ActivityPageProps> = ({
     nextBillingDate.toLocaleDateString('en-NG', { month: 'short', day: 'numeric' }) :
     null;
 
-  // Launch Tracker Logic
-  const PHASE_STORAGE_KEY = `launch_playbook_progress_${storeId}`;
-  const [completedPhases, setCompletedPhases] = useState<number[]>([]);
+  // --- POWER TIPS STATE ---
+  const powerTips = [
+    {
+      id: "tip1",
+      icon: Megaphone,
+      color: "from-blue-500 to-indigo-500",
+      text: "Running a promo? Broadcast it to your customers using the Social Hub."
+    },
+    {
+      id: "tip2",
+      icon: Sparkles,
+      color: "from-amber-400 to-orange-500",
+      text: "Consistently add new products to keep returning customers engaged."
+    },
+    {
+      id: "tip3",
+      icon: Share2,
+      color: "from-emerald-400 to-teal-500",
+      text: "Share your store link on WhatsApp Status daily to drive organic traffic."
+    },
+    {
+      id: "tip4",
+      icon: Eye,
+      color: "from-pink-500 to-rose-500",
+      text: "Write detailed product descriptions to reduce customer questions."
+    },
+    {
+      id: "tip5",
+      icon: Flame,
+      color: "from-violet-500 to-purple-500",
+      text: "Use high-quality imagery to boost your conversion rates."
+    }
+  ];
+
+  const [currentTipIndex, setCurrentTipIndex] = useState(0);
 
   useEffect(() => {
-    const stored = localStorage.getItem(PHASE_STORAGE_KEY);
-    if (stored) {
-      try {
-        setCompletedPhases(JSON.parse(stored));
-      } catch (e) {}
-    }
-  }, [storeId]);
+    const timer = setInterval(() => {
+      setCurrentTipIndex((prev) => (prev + 1) % powerTips.length);
+    }, 8000);
+    return () => clearInterval(timer);
+  }, [powerTips.length]);
 
-  const togglePhase = (phaseNumber: number) => {
-    setCompletedPhases(prev => {
-      const updated = prev.includes(phaseNumber) 
-        ? prev.filter(p => p !== phaseNumber) 
-        : [...prev, phaseNumber];
-      localStorage.setItem(PHASE_STORAGE_KEY, JSON.stringify(updated));
-      return updated;
-    });
+  const nextTip = () => {
+    setCurrentTipIndex((prev) => (prev + 1) % powerTips.length);
   };
 
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      alert('Caption copied to clipboard!'); 
-    } catch (err) {
-      console.error('Failed to copy text', err);
-    }
+  const prevTip = () => {
+    setCurrentTipIndex((prev) => (prev - 1 + powerTips.length) % powerTips.length);
   };
-
-  const topProduct = products.length > 0 ? products[0] : null;
-  const storeUrl = `https://tinyurl.com/bizconnet/${storeId}`;
-  
-  const phase1Copy = `We are upgrading how you shop with us! Something exciting is coming... 🫣📦\n\nNo more waiting hours for me to reply to your DMs before you can order. We are making life easier for you. Guess what it is? 👀`;
-  
-  const phase2Copy = `🥳 OUR NEW DIGITAL CATALOG IS LIVE!!! 🛍️✨\n\nYou can now see everything we have in stock, check prices, and send your orders straight to my WhatsApp without any stress!\n\nClick here to check it out now 👉 ${storeUrl}`;
-  
-  const phase3Copy = topProduct 
-    ? `Last chance! 🚨 Our launch promo ends at midnight. If you've been eyeing the ${topProduct.name}, click the link, add it to your cart, and send it to my WhatsApp right now! 🛒💨 👉 ${storeUrl}/product/${topProduct.id}`
-    : `Wow! I love how neat the orders are coming into my WhatsApp! 🥺 Thank you for the love! The launch promo ends tomorrow. Browse the catalog and send in your orders here: ${storeUrl}`;
-
-  const launchPhases = [
-    { id: 1, title: 'Day 1: The Tease', copy: phase1Copy },
-    { id: 2, title: 'Day 2: Grand Opening', copy: phase2Copy },
-    { id: 3, title: 'Day 3: Social Proof', copy: phase3Copy },
-  ];
+  // --- END POWER TIPS STATE ---
 
   // Trending Products Logic
   const trendingProducts = [...products]
@@ -279,87 +285,51 @@ const ActivityPage: React.FC<ActivityPageProps> = ({
         )}
       </motion.div>
 
-      {/* Interactive Launch Checklist */}
-      <motion.div id="launch-tracker" variants={itemVariants} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[2rem] p-5 sm:p-6 shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-violet-500/5 rounded-full -mr-16 -mt-16 blur-2xl" />
-        <div className="flex items-center justify-between mb-6 relative z-10">
+      {/* Power Tips Section */}
+      <motion.div variants={itemVariants} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[2rem] p-5 sm:p-6 shadow-sm relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full -mr-16 -mt-16 blur-2xl pointer-events-none" />
+        
+        <div className="flex items-center justify-between mb-5 relative z-10">
           <div className="flex items-center gap-3">
-            <div className="bg-violet-100 dark:bg-violet-900/30 p-2.5 rounded-xl">
-              <Rocket className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+            <div className="bg-amber-100 dark:bg-amber-900/30 p-2.5 rounded-xl">
+              <Lightbulb className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             </div>
             <div>
-              <h3 className="text-sm font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Launch Tracker</h3>
-              <p className="text-xs font-bold text-violet-600 dark:text-violet-400">{completedPhases.length}/3 Phases Complete</p>
+              <h3 className="text-sm font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Power Tip</h3>
             </div>
           </div>
-          <div className="w-12 h-12 rounded-full border-4 border-violet-100 dark:border-violet-900/50 flex items-center justify-center relative">
-            <svg className="w-full h-full absolute -rotate-90" viewBox="0 0 36 36">
-              <path
-                className="text-violet-500"
-                strokeDasharray={`${(completedPhases.length / 3) * 100}, 100`}
-                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="4"
-              />
-            </svg>
-            <span className="text-xs font-black text-violet-600 dark:text-violet-400">{Math.round((completedPhases.length / 3) * 100)}%</span>
+          
+          <div className="flex items-center gap-1">
+            <button onClick={prevTip} className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <span className="text-xs font-bold text-zinc-400 w-8 text-center">{currentTipIndex + 1}/{powerTips.length}</span>
+            <button onClick={nextTip} className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
 
-        <div className="space-y-4 relative z-10">
-          {launchPhases.map((phase) => {
-            const isCompleted = completedPhases.includes(phase.id);
-            return (
-              <div key={phase.id} className={`p-4 rounded-2xl border transition-all ${isCompleted ? 'bg-zinc-50 dark:bg-zinc-800/50 border-zinc-200 dark:border-zinc-700 opacity-60' : 'bg-white dark:bg-zinc-800 border-violet-100 dark:border-violet-900/50 shadow-sm'}`}>
-                <div className="flex items-start sm:items-center justify-between mb-3 gap-3">
-                  <h4 className={`font-black tracking-tight leading-tight pt-0.5 ${isCompleted ? 'line-through text-zinc-400' : 'text-zinc-900 dark:text-white'}`}>
-                    {phase.title}
-                  </h4>
-                  <button
-                    onClick={() => togglePhase(phase.id)}
-                    className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 border-2 transition-colors ${isCompleted ? 'bg-green-500 border-green-500 text-white' : 'border-zinc-300 dark:border-zinc-600 text-transparent'}`}
-                  >
-                    <CheckCircle2 className="w-4 h-4" />
-                  </button>
-                </div>
-                {!isCompleted && (
-                  <button
-                    onClick={() => copyToClipboard(phase.copy)}
-                    className="w-full flex items-center justify-center gap-2 bg-violet-50 hover:bg-violet-100 dark:bg-violet-900/20 dark:hover:bg-violet-900/40 text-violet-700 dark:text-violet-300 py-3 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-widest transition-colors mb-2"
-                  >
-                    <Share2 className="w-4 h-4" /> Copy Caption
-                  </button>
-                )}
+        <div className="relative z-10 min-h-[80px]">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentTipIndex}
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={{ duration: 0.3 }}
+              className="flex items-start gap-4"
+            >
+              <div className={`mt-1 shrink-0 p-2 rounded-full bg-gradient-to-br ${powerTips[currentTipIndex].color}`}>
+                {(() => {
+                  const TipIcon = powerTips[currentTipIndex].icon;
+                  return <TipIcon className="w-4 h-4 text-white" />;
+                })()}
               </div>
-            );
-          })}
-
-          <AnimatePresence>
-            {completedPhases.length === 3 && (
-              <motion.div 
-                initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                animate={{ opacity: 1, height: 'auto', marginTop: 16 }}
-                className="p-5 sm:p-6 bg-gradient-to-br from-violet-600 to-fuchsia-600 rounded-2xl text-white text-center shadow-lg relative overflow-hidden mt-4"
-              >
-                <div className="absolute inset-0 bg-white/10 mix-blend-overlay pointer-events-none"></div>
-                <div className="relative z-10 flex flex-col items-center">
-                  <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mb-3">
-                    <Sparkles className="w-6 h-6 text-white" />
-                  </div>
-                  <h4 className="text-lg sm:text-xl font-black tracking-tight mb-2">Launch Complete! 🚀</h4>
-                  <p className="text-xs sm:text-sm font-medium opacity-90 mb-5 max-w-sm mx-auto leading-relaxed">
-                    You've successfully completed the 3-day launch playbook. Keep the momentum going by sharing your store link daily!
-                  </p>
-                  <button
-                    onClick={openSocialModal}
-                    className="bg-white text-violet-700 hover:bg-violet-50 font-bold py-3 px-6 rounded-xl text-sm w-full sm:w-auto transition-all active:scale-[0.98] shadow-sm flex items-center justify-center gap-2 mx-auto"
-                  >
-                    <Share2 className="w-4 h-4" /> Share Store Link
-                  </button>
-                </div>
-              </motion.div>
-            )}
+              <p className="text-sm sm:text-base font-bold text-zinc-700 dark:text-zinc-300 leading-relaxed">
+                "{powerTips[currentTipIndex].text}"
+              </p>
+            </motion.div>
           </AnimatePresence>
         </div>
       </motion.div>

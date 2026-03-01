@@ -1046,28 +1046,6 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           products={props.products} 
           isOpen={isLaunchGuideModalOpen} 
           onClose={handleCloseLaunchGuideModal} 
-          onGoToActionPlan={() => {
-            handleCloseLaunchGuideModal();
-            if (props.setActiveSection) {
-              props.setActiveSection('activity');
-            }
-            setTimeout(() => {
-              const launchTrackerEl = document.getElementById('launch-tracker');
-              if (launchTrackerEl) {
-                const headerOffset = 100;
-                const elementPosition = launchTrackerEl.getBoundingClientRect().top;
-                const offsetPosition = elementPosition + window.scrollY - headerOffset;
-                
-                window.scrollTo({
-                  top: offsetPosition,
-                  behavior: 'smooth'
-                });
-                
-                launchTrackerEl.classList.add('ring-4', 'ring-purple-500', 'ring-offset-2', 'ring-offset-background', 'transition-all', 'duration-1000', 'rounded-2xl');
-                setTimeout(() => launchTrackerEl.classList.remove('ring-4', 'ring-purple-500', 'ring-offset-2', 'ring-offset-background'), 2500);
-              }
-            }, 300);
-          }}
         />
       )}
 

@@ -348,12 +348,11 @@ export default function StorefrontPageClient({
     if (!searchParams) return;
     const categoryId = searchParams.get('category');
     if (categoryId) {
-      // Auto scroll to product grid
       setTimeout(() => {
         if (productGridRef.current) {
           productGridRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
-      }, 1200); // Give time for layout and images to load
+      }, 1200);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
