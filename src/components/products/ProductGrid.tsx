@@ -240,7 +240,6 @@ const ProductGrid = memo(function ProductGrid({
               onClick={handleOrdersClick}
               aria-label="Your Orders"
               text="Orders"
-              badgeCount={orders.length}
             />
             <GlassButton
               onClick={() => setIsSearchOverlayOpen(true)}
