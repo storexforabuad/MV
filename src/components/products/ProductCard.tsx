@@ -96,12 +96,8 @@ export default function ProductCard({
     (!isFashionProduct(product) || item.selectedColor === selectedColor)
   );
 
-  // Get images for carousel (fashion with color or general product)
+  // Get images for carousel (all images so user can swipe through colors on the card)
   const getCarouselImages = (): string[] => {
-    if (isFashionProduct(product) && selectedColor && product.colors) {
-      const colorData = product.colors.find(c => c.name === selectedColor || c.hex === selectedColor);
-      return colorData?.images || product.images || [];
-    }
     return product.images || [];
   };
 
