@@ -15,7 +15,10 @@ declare global {
 }
 
 const PWA_PROMPT_LAST_SHOWN_KEY = 'pwaPromptLastShown';
+const PWA_INSTALLED_KEY = 'pwaInstalled';
+const PWA_IOS_DISMISSED_KEY = 'pwaIosDismissed';
 const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
+const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
 
 export function useInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
@@ -37,26 +40,63 @@ export function useInstallPrompt() {
   const isOnRoadmap = pathname === '/devteam/roadmap';
   const isOnGrowthPortal = pathname === '/devteam/growth';
 
-  // 1. Effect for capturing the browser event. Runs only once.
+  // 1. Effect for capturing the browser event and checking standalone. Runs only once.
   useEffect(() => {
+    // Check if the app is already running in standalone mode (installed)
+    const isStandalone =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.matchMedia('(display-mode: fullscreen)').matches ||
+      window.matchMedia('(display-mode: minimal-ui)').matches ||
+      (window.navigator as any).standalone === true;
+
+    if (isStandalone) {
+      console.log('App is running in standalone mode. Skipping install prompt logic.');
+      localStorage.setItem(PWA_INSTALLED_KEY, 'true');
+      return;
+    }
+
     const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
       e.preventDefault();
       setDeferredPrompt(e);
       console.log('beforeinstallprompt event captured.');
     };
 
+    const handleAppInstalled = () => {
+      console.log('PWA was installed successfully!');
+      setShowPrompt(false);
+      localStorage.setItem(PWA_INSTALLED_KEY, 'true');
+    };
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
     };
   }, []);
 
   // 2. Effect for deciding WHEN to show the prompt.
   // This runs when the event is captured, or when the user navigates.
   useEffect(() => {
+    // If the app is already marked as installed, don't show the prompt.
+    if (typeof window !== 'undefined' && localStorage.getItem(PWA_INSTALLED_KEY) === 'true') {
+      return;
+    }
+
     // TEMPORARILY ALWAYS SHOW ON VALID ROUTES (Bypassing deferredPrompt check for testing)
     if (isOnStoreHomepage || isOnRoadmap || isOnGrowthPortal) {
+      // Check iOS specific dismissal cooldown
+      if (typeof window !== 'undefined' && isIos) {
+        const iosDismissedAt = localStorage.getItem(PWA_IOS_DISMISSED_KEY);
+        if (iosDismissedAt) {
+          const timeSinceDismissal = new Date().getTime() - parseInt(iosDismissedAt, 10);
+          if (timeSinceDismissal < THIRTY_DAYS) {
+            console.log('iOS prompt in cooldown (dismissed recently). Skipping.');
+            return;
+          }
+        }
+      }
       // const lastPrompted = localStorage.getItem(PWA_PROMPT_LAST_SHOWN_KEY);
       // const now = new Date().getTime();
 
@@ -72,9 +112,14 @@ export function useInstallPrompt() {
 
   const handleDismiss = useCallback(() => {
     setShowPrompt(false);
-    setShowIosInstructions(false);
+    if (showIosInstructions) {
+      setShowIosInstructions(false);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(PWA_IOS_DISMISSED_KEY, new Date().getTime().toString());
+      }
+    }
     console.log('PWA prompt UI dismissed by user.');
-  }, []);
+  }, [showIosInstructions]);
 
   const handleInstall = useCallback(() => {
     if (!deferredPrompt) {
