@@ -20,6 +20,15 @@ const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000;
 export function useInstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [showPrompt, setShowPrompt] = useState(false);
+  const [showIosInstructions, setShowIosInstructions] = useState(false);
+  const [isIos, setIsIos] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      setIsIos(/iphone|ipad|ipod/.test(userAgent));
+    }
+  }, []);
 
   const pathname = usePathname();
   const params = useParams();
@@ -63,13 +72,18 @@ export function useInstallPrompt() {
 
   const handleDismiss = useCallback(() => {
     setShowPrompt(false);
+    setShowIosInstructions(false);
     console.log('PWA prompt UI dismissed by user.');
   }, []);
 
   const handleInstall = useCallback(() => {
     if (!deferredPrompt) {
-      alert("Browser didn't provide install prompt. You can install via the browser menu (Share -> Add to Home Screen on iOS, or Install App menu in Chrome).");
-      setShowPrompt(false);
+      if (isIos) {
+        setShowIosInstructions(true);
+      } else {
+        alert("Browser didn't provide install prompt. You can install via the browser menu (Install App menu in Chrome).");
+        setShowPrompt(false);
+      }
       return;
     }
 
@@ -79,7 +93,7 @@ export function useInstallPrompt() {
       setShowPrompt(false);
     });
 
-  }, [deferredPrompt]);
+  }, [deferredPrompt, isIos]);
 
-  return { showPrompt, handleInstall, handleDismiss, isInstallAvailable: !!deferredPrompt };
+  return { showPrompt, handleInstall, handleDismiss, isInstallAvailable: !!deferredPrompt, isIos, showIosInstructions, setShowIosInstructions };
 }

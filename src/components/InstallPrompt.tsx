@@ -2,7 +2,7 @@
 
 import React, { Fragment, useEffect, useState, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { X, Zap, ShoppingCart, Package, Bell, Download, ChevronRight, ChevronLeft, Smartphone } from 'lucide-react';
+import { X, Zap, ShoppingCart, Package, Bell, Download, ChevronRight, ChevronLeft, Smartphone, Share, PlusSquare } from 'lucide-react';
 import { useInstallPrompt } from '../hooks/useInstallPrompt';
 import { usePathname, useParams } from 'next/navigation';
 import { getStoreMeta } from '../lib/db';
@@ -13,7 +13,7 @@ interface InstallPromptProps {
 }
 
 export default function InstallPrompt({ storeId: propStoreId }: InstallPromptProps) {
-  const { showPrompt, handleInstall, handleDismiss } = useInstallPrompt();
+  const { showPrompt, handleInstall, handleDismiss, isIos, showIosInstructions } = useInstallPrompt();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [direction, setDirection] = useState(0);
 
@@ -195,63 +195,104 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
               {/* Slide Content Area - Takes remaining space, allows scrolling if text is very long */}
               <div className="flex-grow relative w-full h-full bg-transparent overflow-hidden">
                 <AnimatePresence initial={false} custom={direction} mode="wait">
-                  <motion.div
-                    key={currentSlide}
-                    custom={direction}
-                    variants={slideVariants}
-                    initial="enter"
-                    animate="center"
-                    exit="exit"
-                    transition={{
-                      x: { type: "spring", stiffness: 300, damping: 30 },
-                      opacity: { duration: 0.2 }
-                    }}
-                    drag="x"
-                    dragConstraints={{ left: 0, right: 0 }}
-                    dragElastic={1}
-                    onDragEnd={(e, { offset, velocity }) => {
-                      const swipe = Math.abs(offset.x) * velocity.x;
-                      if (swipe < -10000) {
-                        paginate(1);
-                      } else if (swipe > 10000) {
-                        paginate(-1);
-                      }
-                    }}
-                    // Ensure the sliding container allows scrolling and clears the footer perfectly
-                    className="absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden pt-20 pb-[100px] px-6 flex flex-col items-center justify-center hide-scrollbar"
-                  >
+                  {showIosInstructions ? (
+                    <motion.div
+                      key="ios-instructions"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -20 }}
+                      className="absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden pt-12 pb-[100px] px-6 flex flex-col items-center justify-center hide-scrollbar"
+                    >
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center mb-6 shadow-sm">
+                        <Share className="w-8 h-8 sm:w-10 sm:h-10 text-blue-500" />
+                      </div>
+                      <h2 className="text-xl sm:text-3xl font-black text-gray-900 dark:text-white leading-[1.15] mb-6 text-center px-2">
+                        Add to Home Screen
+                      </h2>
 
-                    {slide.isCover ? (
-                      <div className="flex flex-col items-center justify-center text-center h-full pb-4">
-                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-[1.5rem] bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-6 shadow-xl shadow-gray-200 dark:shadow-none border border-gray-200 dark:border-gray-800">
-                          {slide.icon && <slide.icon className={`w-10 h-10 sm:w-12 sm:h-12 ${slide.color}`} />}
+                      <div className="w-full max-w-sm space-y-4 text-left">
+                        <div className="flex items-center gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
+                          <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-900 flex items-center justify-center shrink-0">
+                            <Share className="w-5 h-5 text-blue-500" />
+                          </div>
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            1. Tap the <strong className="text-gray-900 dark:text-white">Share</strong> button below.
+                          </p>
                         </div>
-                        <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white leading-tight mb-2">
-                          {slide.title}
-                        </h2>
-                        {slide.desc && (
-                          <p className="text-[14px] sm:text-base text-gray-500 dark:text-gray-400 font-medium max-w-[260px] mx-auto opacity-95">
+                        <div className="flex items-center gap-4 bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm border border-gray-100 dark:border-gray-800">
+                          <div className="w-10 h-10 rounded-lg bg-gray-100 dark:bg-gray-900 flex items-center justify-center shrink-0">
+                            <PlusSquare className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                          </div>
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            2. Scroll down and tap <strong className="text-gray-900 dark:text-white pb-1">Add to Home Screen</strong>.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-8 flex flex-col items-center animate-bounce">
+                        <span className="text-[13px] font-bold text-gray-400 dark:text-gray-500 mb-2 uppercase tracking-widest">Look Down</span>
+                        <div className="w-px h-8 bg-gradient-to-b from-gray-300 dark:from-gray-600 to-transparent"></div>
+                      </div>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key={currentSlide}
+                      custom={direction}
+                      variants={slideVariants}
+                      initial="enter"
+                      animate="center"
+                      exit="exit"
+                      transition={{
+                        x: { type: "spring", stiffness: 300, damping: 30 },
+                        opacity: { duration: 0.2 }
+                      }}
+                      drag="x"
+                      dragConstraints={{ left: 0, right: 0 }}
+                      dragElastic={1}
+                      onDragEnd={(e, { offset, velocity }) => {
+                        const swipe = Math.abs(offset.x) * velocity.x;
+                        if (swipe < -10000) {
+                          paginate(1);
+                        } else if (swipe > 10000) {
+                          paginate(-1);
+                        }
+                      }}
+                      // Ensure the sliding container allows scrolling and clears the footer perfectly
+                      className="absolute inset-0 w-full h-full overflow-y-auto overflow-x-hidden pt-20 pb-[100px] px-6 flex flex-col items-center justify-center hide-scrollbar"
+                    >
+
+                      {slide.isCover ? (
+                        <div className="flex flex-col items-center justify-center text-center h-full pb-4">
+                          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-[1.5rem] bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-6 shadow-xl shadow-gray-200 dark:shadow-none border border-gray-200 dark:border-gray-800">
+                            {slide.icon && <slide.icon className={`w-10 h-10 sm:w-12 sm:h-12 ${slide.color}`} />}
+                          </div>
+                          <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white leading-tight mb-2">
+                            {slide.title}
+                          </h2>
+                          {slide.desc && (
+                            <p className="text-[14px] sm:text-base text-gray-500 dark:text-gray-400 font-medium max-w-[260px] mx-auto opacity-95">
+                              {slide.desc}
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center w-full justify-center h-full">
+                          {/* Feature Icon */}
+                          <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl ${slide.bgColor} flex items-center justify-center mb-6 shadow-sm`}>
+                            {slide.icon && <slide.icon className={`w-8 h-8 sm:w-10 sm:h-10 ${slide.color}`} />}
+                          </div>
+                          {/* Feature Copy */}
+                          <h2 className="text-xl sm:text-3xl font-black text-gray-900 dark:text-white leading-[1.15] mb-3 whitespace-pre-line text-center px-2">
+                            {slide.title}
+                          </h2>
+                          <p className="text-[14px] sm:text-base text-gray-600 dark:text-gray-300 font-medium leading-[1.6] max-w-[280px] mx-auto text-center opacity-95">
                             {slide.desc}
                           </p>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="flex flex-col items-center w-full justify-center h-full">
-                        {/* Feature Icon */}
-                        <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl ${slide.bgColor} flex items-center justify-center mb-6 shadow-sm`}>
-                          {slide.icon && <slide.icon className={`w-8 h-8 sm:w-10 sm:h-10 ${slide.color}`} />}
                         </div>
-                        {/* Feature Copy */}
-                        <h2 className="text-xl sm:text-3xl font-black text-gray-900 dark:text-white leading-[1.15] mb-3 whitespace-pre-line text-center px-2">
-                          {slide.title}
-                        </h2>
-                        <p className="text-[14px] sm:text-base text-gray-600 dark:text-gray-300 font-medium leading-[1.6] max-w-[280px] mx-auto text-center opacity-95">
-                          {slide.desc}
-                        </p>
-                      </div>
-                    )}
+                      )}
 
-                  </motion.div>
+                    </motion.div>
+                  )}
                 </AnimatePresence>
               </div>
 
@@ -261,7 +302,7 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
                 <div className="h-6 w-full bg-gradient-to-t from-white dark:from-[#09090b] to-transparent pointer-events-none" />
                 <div className="px-6 pb-6 bg-white dark:bg-[#09090b]">
                   <div className="flex gap-3 h-[52px]">
-                    {currentSlide > 0 && (
+                    {!showIosInstructions && currentSlide > 0 && (
                       <button
                         onClick={() => paginate(-1)}
                         className="w-[52px] h-[52px] shrink-0 rounded-[1rem] flex items-center justify-center bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors"
@@ -270,13 +311,19 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
                       </button>
                     )}
 
-                    {currentSlide === displaySlides.length - 1 ? (
+                    {showIosInstructions || currentSlide === displaySlides.length - 1 ? (
                       <button
-                        onClick={handleInstall}
+                        onClick={showIosInstructions ? handleDismiss : handleInstall}
                         className="flex-1 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-[1rem] flex items-center justify-center gap-2 hover:bg-gray-800 dark:hover:bg-gray-100 transition-all font-bold text-[14px] sm:text-[15px] shadow-xl shadow-gray-200 dark:shadow-none active:scale-[0.98]"
                       >
-                        <Download className="w-4 h-4 sm:w-5 sm:h-5" />
-                        <span>Install App (5mb)</span>
+                        {showIosInstructions ? (
+                          <span>Got It</span>
+                        ) : (
+                          <>
+                            <Download className="w-4 h-4 sm:w-5 sm:h-5" />
+                            <span>{isIos ? 'Install App' : 'Install App (5mb)'}</span>
+                          </>
+                        )}
                       </button>
                     ) : (
                       <button

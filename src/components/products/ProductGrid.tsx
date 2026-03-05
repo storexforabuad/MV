@@ -344,44 +344,49 @@ const ProductGrid = memo(function ProductGrid({
           transition={{ delay: 0.5 }}
           className="mt-12 mb-28 flex justify-center px-4 relative"
         >
-          <button
-            onClick={onNeedAWebsiteClick}
-            className="w-full max-w-sm relative p-6 rounded-[2rem] shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98] group bg-gradient-to-br from-[#1a1a40] via-[#2d1b4d] to-[#1a1a40] border border-amber-500/30"
-          >
-            {/* Promo Badge */}
-            <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-amber-500 to-amber-600 text-white text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg shadow-amber-500/20 z-20 uppercase tracking-[0.2em] border border-amber-400/20">
-              PROMO
-            </div>
-            {/* Shimmer Layer */}
-            <div className="absolute inset-0 rounded-[2rem] overflow-hidden pointer-events-none">
-              <div className="absolute inset-0 before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_4s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/5 before:to-transparent" />
-            </div>
-
-            {/* Subtle background glows */}
-            <div className="absolute -top-10 -right-10 w-32 h-32 bg-amber-400/10 blur-[40px] rounded-full opacity-50 z-0" />
-            <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500/10 blur-[40px] rounded-full opacity-50 z-0" />
-
-            <div className="relative z-10 flex flex-col items-center text-center">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 rounded-xl bg-amber-400/10 flex items-center justify-center border border-amber-400/20 group-hover:scale-110 transition-transform">
-                  <Globe className="w-4 h-4 text-amber-400" />
+          {(() => {
+            const is420Hub = storeMeta?.id === '420-Hub' || storeMeta?.name === '420-Hub' || storeMeta?.name === '420 Hub';
+            return (
+              <button
+                onClick={onNeedAWebsiteClick}
+                className={`w-full max-w-sm relative p-6 rounded-[2rem] shadow-2xl transition-all hover:scale-[1.02] active:scale-[0.98] group border ${is420Hub ? 'bg-gradient-to-br from-zinc-950/90 via-black to-emerald-950/80 border-emerald-500/30' : 'bg-gradient-to-br from-[#1a1a40] via-[#2d1b4d] to-[#1a1a40] border-amber-500/30'}`}
+              >
+                {/* Promo Badge */}
+                <div className={`absolute -top-3 left-1/2 transform -translate-x-1/2 text-white text-[10px] font-black px-4 py-1.5 rounded-full shadow-lg z-20 uppercase tracking-[0.2em] border ${is420Hub ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-emerald-500/20 border-emerald-400/20' : 'bg-gradient-to-r from-amber-500 to-amber-600 shadow-amber-500/20 border-amber-400/20'}`}>
+                  PROMO
                 </div>
-                <span className="text-[10px] font-black text-amber-400/80 tracking-[0.2em] uppercase">
-                  Powered by <span className="text-amber-400">Bizconnect™ 2026.</span>
-                </span>
-              </div>
-
-              <div className="flex flex-col items-center gap-1.5">
-                <p className="text-sm sm:text-base font-black text-white leading-tight tracking-tight">
-                  Get your professional website like {storeMeta?.name || 'this'}
-                </p>
-                <div className="flex items-center gap-2 text-amber-400 font-black text-[10px] uppercase tracking-widest mt-1 group-hover:gap-3 transition-all">
-                  Click to start <Sparkles className="w-3.5 h-3.5 animate-pulse" />
-                  <span>→</span>
+                {/* Shimmer Layer */}
+                <div className="absolute inset-0 rounded-[2rem] overflow-hidden pointer-events-none">
+                  <div className="absolute inset-0 before:absolute before:inset-0 before:-translate-x-full before:animate-[shimmer_4s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/5 before:to-transparent" />
                 </div>
-              </div>
-            </div>
-          </button>
+
+                {/* Subtle background glows */}
+                <div className={`absolute -top-10 -right-10 w-32 h-32 blur-[40px] rounded-full opacity-50 z-0 ${is420Hub ? 'bg-emerald-400/10' : 'bg-amber-400/10'}`} />
+                <div className={`absolute -bottom-10 -left-10 w-32 h-32 blur-[40px] rounded-full opacity-50 z-0 ${is420Hub ? 'bg-emerald-600/10' : 'bg-purple-500/10'}`} />
+
+                <div className="relative z-10 flex flex-col items-center text-center">
+                  <div className="flex items-center gap-2 mb-3">
+                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center border group-hover:scale-110 transition-transform ${is420Hub ? 'bg-emerald-400/10 border-emerald-400/20' : 'bg-amber-400/10 border-amber-400/20'}`}>
+                      <Globe className={`w-4 h-4 ${is420Hub ? 'text-emerald-400' : 'text-amber-400'}`} />
+                    </div>
+                    <span className={`text-[10px] font-black tracking-[0.2em] uppercase ${is420Hub ? 'text-emerald-400/80' : 'text-amber-400/80'}`}>
+                      Powered by <span className={is420Hub ? 'text-emerald-400' : 'text-amber-400'}>Bizconnect™ 2026.</span>
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col items-center gap-1.5">
+                    <p className="text-sm sm:text-base font-black text-white leading-tight tracking-tight">
+                      Get your professional website like {storeMeta?.name || 'this'}
+                    </p>
+                    <div className={`flex items-center gap-2 font-black text-[10px] uppercase tracking-widest mt-1 group-hover:gap-3 transition-all ${is420Hub ? 'text-emerald-400' : 'text-amber-400'}`}>
+                      Click to start <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                      <span>→</span>
+                    </div>
+                  </div>
+                </div>
+              </button>
+            );
+          })()}
         </motion.div>
       )}
 
