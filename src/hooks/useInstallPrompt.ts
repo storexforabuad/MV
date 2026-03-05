@@ -46,17 +46,18 @@ export function useInstallPrompt() {
   // 2. Effect for deciding WHEN to show the prompt.
   // This runs when the event is captured, or when the user navigates.
   useEffect(() => {
-    if (deferredPrompt && (isOnStoreHomepage || isOnRoadmap || isOnGrowthPortal)) {
-      const lastPrompted = localStorage.getItem(PWA_PROMPT_LAST_SHOWN_KEY);
-      const now = new Date().getTime();
+    // TEMPORARILY ALWAYS SHOW ON VALID ROUTES (Bypassing deferredPrompt check for testing)
+    if (isOnStoreHomepage || isOnRoadmap || isOnGrowthPortal) {
+      // const lastPrompted = localStorage.getItem(PWA_PROMPT_LAST_SHOWN_KEY);
+      // const now = new Date().getTime();
 
-      if (!lastPrompted || (now - parseInt(lastPrompted, 10)) > TWENTY_FOUR_HOURS) {
-        setShowPrompt(true);
-        localStorage.setItem(PWA_PROMPT_LAST_SHOWN_KEY, now.toString());
-        console.log('Prompt conditions met. Showing prompt and starting 24-hour cooldown.');
-      } else {
-        console.log('Not showing prompt, within 24-hour cooldown.');
-      }
+      // if (!lastPrompted || (now - parseInt(lastPrompted, 10)) > TWENTY_FOUR_HOURS) {
+      setShowPrompt(true);
+      // localStorage.setItem(PWA_PROMPT_LAST_SHOWN_KEY, now.toString());
+      console.log('Prompt conditions met. Showing prompt (cooldown disabled, deferredPrompt check bypassed).');
+      // } else {
+      //   console.log('Not showing prompt, within 24-hour cooldown.');
+      // }
     }
   }, [deferredPrompt, isOnStoreHomepage, isOnRoadmap, isOnGrowthPortal]);
 
@@ -66,7 +67,11 @@ export function useInstallPrompt() {
   }, []);
 
   const handleInstall = useCallback(() => {
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+      alert("Browser didn't provide install prompt. You can install via the browser menu (Share -> Add to Home Screen on iOS, or Install App menu in Chrome).");
+      setShowPrompt(false);
+      return;
+    }
 
     deferredPrompt.prompt();
     deferredPrompt.userChoice.then((choiceResult) => {
