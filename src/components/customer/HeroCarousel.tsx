@@ -41,9 +41,10 @@ export default function HeroCarousel({ storeMeta }: HeroCarouselProps) {
     const [page, setPage] = useState(0);
     const [direction, setDirection] = useState(0);
 
+    const is420Hub = storeMeta?.id === '420-Hub' || storeMeta?.name === '420-Hub' || storeMeta?.name === '420 Hub';
     // Only show the second slide if it's a restaurant or fashion store
     const showWelcomeSlide = false;
-    const slideCount = 1;
+    const slideCount = 1; // Both normal and 420 Hub will just have 1 slide now
 
     const paginate = (newDirection: number) => {
         if (slideCount <= 1) return;
@@ -62,6 +63,52 @@ export default function HeroCarousel({ storeMeta }: HeroCarouselProps) {
         }, 8000);
         return () => clearInterval(timer);
     }, [page, slideCount]);
+
+    const CustomSmokeShopCard = () => {
+        return (
+            <div className="relative overflow-hidden rounded-[2.5rem] bg-zinc-950 border border-emerald-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col justify-center w-full h-full">
+                <div className="absolute inset-0 bg-black">
+                    {/* Add your generated image here later! */}
+                    <Image src="/images/smoke-shop-bg.png" fill priority className="object-cover opacity-50" alt="Smoke Shop Background" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/40 via-black/80 to-black" />
+                </div>
+
+                <div className="relative z-10 px-6 sm:px-8 py-6 sm:py-8 flex flex-col justify-center h-full items-start text-left gap-4">
+                    <div className="space-y-2 w-full">
+                        <div className="flex flex-wrap gap-2 items-center">
+                            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-sm">
+                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">
+                                    Premium Smoke Shop
+                                </span>
+                            </div>
+                        </div>
+
+                        <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-none break-words">
+                            Welcome to <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-emerald-600">
+                                {storeMeta?.name || '420-Hub'}
+                            </span>
+                        </h3>
+
+                        <p className="text-sm text-gray-300 max-w-xs sm:max-w-sm font-medium leading-relaxed line-clamp-3">
+                            Discover the finest collection of premium accessories and essentials. Quality you can trust.
+                        </p>
+                    </div>
+                </div>
+
+                {/* Powered by Bizconnet™ at the bottom right */}
+                <div className="absolute bottom-4 right-6 z-20">
+                    <span className="text-[10px] sm:text-xs font-semibold text-white/40 tracking-wider">
+                        Powered by <span className="text-emerald-500/80">Bizconnet™</span>
+                    </span>
+                </div>
+
+                {/* Decorative shine */}
+                <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-emerald-500/10 blur-[60px] rounded-full pointer-events-none" />
+            </div>
+        );
+    };
 
     const WelcomeCard = () => {
         const isFashion = storeMeta?.storeType === 'fashion';
@@ -152,11 +199,13 @@ export default function HeroCarousel({ storeMeta }: HeroCarouselProps) {
                     }}
                     className="absolute w-full h-full"
                 >
-                    {showWelcomeSlide && pageIndex === 0 ? (
-                        <WelcomeCard />
-                    ) : (
+                    {is420Hub ? (
+                        <CustomSmokeShopCard />
+                    ) : pageIndex === 0 ? (
                         <RamadanCountdown className="w-full h-full" storeName={storeMeta?.name} />
-                    )}
+                    ) : showWelcomeSlide && pageIndex === 1 ? (
+                        <WelcomeCard />
+                    ) : null}
                 </motion.div>
             </AnimatePresence>
 

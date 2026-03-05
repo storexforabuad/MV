@@ -11,6 +11,7 @@ import PinEntryModal from '../modals/PinEntryModal';
 import { getAdminSession } from '@/lib/adminSession';
 import { createSuperAdminSession } from '@/lib/superadminSession';
 import NavigationStore from '@/lib/navigationStore';
+import toast from 'react-hot-toast';
 
 interface NavbarProps {
   storeId?: string;
@@ -166,6 +167,41 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
     }
   };
 
+  // --- Long-press Store Link Sharing --- 
+  const pressTimer = useRef<NodeJS.Timeout | null>(null);
+
+  const handlePressStart = () => {
+    if (!storeId) return;
+    if (pressTimer.current) clearTimeout(pressTimer.current);
+
+    pressTimer.current = setTimeout(() => {
+      pressTimer.current = null;
+      const url = `https://tinyurl.com/bizconnet/${storeId}`;
+
+      navigator.clipboard.writeText(url)
+        .then(() => {
+          toast.success(`Link for ${storeName || 'Store'} copied!`, {
+            duration: 2000,
+            position: 'bottom-center',
+            style: {
+              background: 'var(--card-background)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border-color)',
+            },
+          });
+          if (navigator.vibrate) navigator.vibrate(50);
+        })
+        .catch(() => toast.error('Failed to copy link'));
+    }, 600);
+  };
+
+  const handlePressEnd = () => {
+    if (pressTimer.current) {
+      clearTimeout(pressTimer.current);
+      pressTimer.current = null;
+    }
+  };
+
   // --- SuperAdmin Secret Access ---
   const saTapCountRef = useRef(0);
   const saIdleResetRef = useRef<number | null>(null);
@@ -208,7 +244,15 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
                     <ArrowLeft className="h-6 w-6 text-text-primary" />
                   </button>
                 )}
-                <span className="text-xl font-semibold card-text-gradient flex items-center gap-2 text-nowrap">
+                <span
+                  className="text-xl font-semibold card-text-gradient flex items-center gap-2 text-nowrap cursor-pointer selection:bg-transparent"
+                  onPointerDown={handlePressStart}
+                  onPointerUp={handlePressEnd}
+                  onPointerLeave={handlePressEnd}
+                  onPointerCancel={handlePressEnd}
+                  onContextMenu={(e) => e.preventDefault()}
+                  style={{ touchAction: 'manipulation', WebkitUserSelect: 'none', userSelect: 'none' }}
+                >
                   {storeName || 'Store'}
                 </span>
               </>
@@ -217,9 +261,15 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
                 <ShoppingBag className="h-8 w-8 text-text-primary cursor-pointer" onClick={handleLogoTap} />
                 <button
                   onClick={handleTitleTap}
+                  onPointerDown={handlePressStart}
+                  onPointerUp={handlePressEnd}
+                  onPointerLeave={handlePressEnd}
+                  onPointerCancel={handlePressEnd}
+                  onContextMenu={(e) => e.preventDefault()}
                   aria-label="Store title"
-                  className="text-xl font-semibold flex items-center gap-2 premium-title-gradient hover:opacity-80 transition-opacity text-left"
+                  className="text-xl font-semibold flex items-center gap-2 premium-title-gradient hover:opacity-80 transition-opacity text-left selection:bg-transparent"
                   style={{
+                    touchAction: 'manipulation', WebkitUserSelect: 'none', userSelect: 'none',
                     ...(tapCount > 0
                       ? (() => {
                         const light = theme === 'light';
@@ -241,7 +291,15 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
             ) : (
               <div onClick={handleLogoTap} className="flex items-center gap-2 cursor-pointer">
                 <ShoppingBag className="h-8 w-8 text-text-primary" />
-                <span className="text-xl font-semibold flex items-center gap-2 premium-title-gradient">
+                <span
+                  className="text-xl font-semibold flex items-center gap-2 premium-title-gradient cursor-pointer selection:bg-transparent"
+                  onPointerDown={handlePressStart}
+                  onPointerUp={handlePressEnd}
+                  onPointerLeave={handlePressEnd}
+                  onPointerCancel={handlePressEnd}
+                  onContextMenu={(e) => e.preventDefault()}
+                  style={{ touchAction: 'manipulation', WebkitUserSelect: 'none', userSelect: 'none' }}
+                >
                   {storeName || 'Store'}
                 </span>
               </div>
