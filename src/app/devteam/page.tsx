@@ -44,7 +44,7 @@ export default function DevteamPage() {
   const [isResettingViews, setIsResettingViews] = useState(false); // State for reset views button
   const [isClearingStoreOrders, setIsClearingStoreOrders] = useState(false); // State for clear store orders
   const [isClearingAllOrders, setIsClearingAllOrders] = useState(false); // State for clear all orders
-  const [subscriptionFilter, setSubscriptionFilter] = useState<SubscriptionStatus | 'all'>('all'); // Subscription filter
+  const [subscriptionFilter, setSubscriptionFilter] = useState<SubscriptionStatus | 'all' | 'influencer'>('all'); // Subscription filter
   const [activeTab, setActiveTab] = useState<'dashboard' | 'admin' | 'registrations' | 'referrals'>('dashboard');
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
 
@@ -366,15 +366,25 @@ export default function DevteamPage() {
                   >
                     ⚫ Cancelled ({stores.filter(s => s.subscriptionStatus === 'cancelled').length})
                   </button>
+                  <button
+                    onClick={() => setSubscriptionFilter('influencer')}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${subscriptionFilter === 'influencer'
+                      ? 'bg-purple-600 text-white shadow-md'
+                      : 'bg-white dark:bg-slate-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700'
+                      }`}
+                  >
+                    ✨ Influencer ({stores.filter(s => s.isInfluencer).length})
+                  </button>
                 </div>
 
                 {/* Store Cards Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {stores
-                    .filter(store =>
-                      subscriptionFilter === 'all' ||
-                      (store.subscriptionStatus || 'trial') === subscriptionFilter
-                    )
+                    .filter(store => {
+                      if (subscriptionFilter === 'all') return true;
+                      if (subscriptionFilter === 'influencer') return store.isInfluencer === true;
+                      return (store.subscriptionStatus || 'trial') === subscriptionFilter;
+                    })
                     .map(store => (
                       <DevTeamStoreCard
                         key={store.id}
