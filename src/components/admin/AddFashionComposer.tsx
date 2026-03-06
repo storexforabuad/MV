@@ -10,7 +10,7 @@ import { compressImage } from '../../utils/imageCompression';
 import { applyWatermark } from '../../utils/watermark';
 import { formatPrice } from '../../utils/price';
 import CategorySelectorModal from './modals/CategorySelectorModal';
-import { NIGERIAN_SIZE_CHART, EUROPEAN_SHOE_CHART, NIGERIAN_CAP_SIZE_CHART, JALLAB_SIZE_CHART, FashionSizeCategory, getSizesForFashionCategory } from '../../utils/sizeUtils';
+import { NIGERIAN_SIZE_CHART, EUROPEAN_SHOE_CHART, NIGERIAN_CAP_SIZE_CHART, JALLAB_SIZE_CHART, INSENCE_SIZE_CHART, OIL_PERFUMES_SIZE_CHART, FashionSizeCategory, getSizesForFashionCategory } from '../../utils/sizeUtils';
 import {
     X,
     Shirt,
@@ -155,6 +155,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
     const [isUploading, setIsUploading] = useState(false);
     const [activeColorId, setActiveColorId] = useState<string | null>(null);
     const [highlightSizeSection, setHighlightSizeSection] = useState(false);
+    const sizeSectionRef = useRef<HTMLDivElement>(null);
 
     // Lock body scroll when open
     useEffect(() => {
@@ -308,21 +309,25 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
     };
 
     const handleColorImageUpload = (e: ChangeEvent<HTMLInputElement>, colorId: string) => {
-        if (e.target.files && e.target.files[0]) {
-            const newFile = e.target.files[0];
-            const newImageItem: ImageItem = {
-                id: Date.now().toString(),
-                file: newFile,
+        if (e.target.files && e.target.files.length > 0) {
+            const files = Array.from(e.target.files);
+            const newImageItems: ImageItem[] = files.map(file => ({
+                id: Date.now().toString() + Math.random().toString(36).substring(7),
+                file,
                 status: 'idle'
-            };
+            }));
 
             setProductData(prev => ({
                 ...prev,
-                colors: prev.colors.map(c => c.id === colorId ? { ...c, images: [newImageItem] } : c)
+                colors: prev.colors.map(c => c.id === colorId ? { ...c, images: [...c.images, ...newImageItems] } : c)
             }));
 
             // Start background upload immediately
-            startBackgroundUpload(newImageItem, colorId);
+            newImageItems.forEach(item => startBackgroundUpload(item, colorId));
+
+            setTimeout(() => {
+                sizeSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 300);
 
             // Reset input value
             e.target.value = '';
@@ -495,7 +500,11 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                             ? 'european-shoe' as const
                             : productData.sizeCategory === 'caps'
                                 ? 'nigerian-cap' as const
-                                : 'jallab-standard' as const
+                                : productData.sizeCategory === 'jallabs'
+                                    ? 'jallab-standard' as const
+                                    : productData.sizeCategory === 'insence'
+                                        ? 'insence-volume' as const
+                                        : 'oil-perfume-volume' as const
                 },
                 limitedStock: productData.limitedStock,
                 soldOut: productData.soldOut,
@@ -682,37 +691,31 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
 
                                         {/* Image Upload for Active Color */}
                                         <div>
-                                            <label className="text-xs text-slate-500 font-medium mb-2 block">Image for {activeColor.name || 'this color'}</label>
-                                            <div className="flex gap-3">
-                                                {activeColor.images.length > 0 ? (
-                                                    <div className="relative aspect-[3/4] w-32 rounded-lg overflow-hidden group shadow-sm bg-slate-200 dark:bg-slate-700">
-                                                        <Image src={URL.createObjectURL(activeColor.images[0].file)} alt="Preview" fill className="object-cover" />
+                                            <label className="text-xs text-slate-500 font-medium mb-2 block">Images for {activeColor.name || 'this color'}</label>
+                                            <div className="flex flex-wrap gap-3">
+                                                {activeColor.images.map((image, index) => (
+                                                    <div key={image.id} className="relative aspect-[3/4] w-32 rounded-lg overflow-hidden group shadow-sm bg-slate-200 dark:bg-slate-700">
+                                                        <Image src={URL.createObjectURL(image.file)} alt="Preview" fill className="object-cover" />
                                                         {/* Status Indicator */}
                                                         <div className="absolute top-1 left-1 z-10">
-                                                            {activeColor.images[0].status === 'uploading' && <Loader2 className="w-4 h-4 text-blue-500 animate-spin drop-shadow-md" />}
-                                                            {activeColor.images[0].status === 'compressing' && <Loader2 className="w-4 h-4 text-amber-500 animate-spin drop-shadow-md" />}
-                                                            {activeColor.images[0].status === 'success' && <CheckCircle2 className="w-4 h-4 text-green-500 drop-shadow-md" />}
-                                                            {activeColor.images[0].status === 'error' && <AlertCircle className="w-4 h-4 text-red-500 drop-shadow-md" />}
+                                                            {image.status === 'uploading' && <Loader2 className="w-4 h-4 text-blue-500 animate-spin drop-shadow-md" />}
+                                                            {image.status === 'compressing' && <Loader2 className="w-4 h-4 text-amber-500 animate-spin drop-shadow-md" />}
+                                                            {image.status === 'success' && <CheckCircle2 className="w-4 h-4 text-green-500 drop-shadow-md" />}
+                                                            {image.status === 'error' && <AlertCircle className="w-4 h-4 text-red-500 drop-shadow-md" />}
                                                         </div>
                                                         <button
-                                                            onClick={() => removeColorImage(activeColor.id, 0)}
+                                                            onClick={() => removeColorImage(activeColor.id, index)}
                                                             className="absolute top-1 right-1 bg-black/60 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-sm z-10"
                                                         >
                                                             <X className="w-3 h-3" />
                                                         </button>
-                                                        <label className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                                                            <ImagePlus className="w-5 h-5 text-white mb-1" />
-                                                            <span className="text-[10px] text-white font-bold uppercase tracking-wider">Change</span>
-                                                            <input type="file" accept="image/*" className="hidden" onChange={(e) => handleColorImageUpload(e, activeColor.id)} />
-                                                        </label>
                                                     </div>
-                                                ) : (
-                                                    <label className="aspect-[3/4] w-32 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors group bg-white dark:bg-slate-900">
-                                                        <ImagePlus className="w-6 h-6 text-slate-400 group-hover:text-blue-500 transition-colors" />
-                                                        <span className="text-xs text-slate-500 mt-2 font-medium">Add Image</span>
-                                                        <input type="file" accept="image/*" className="hidden" onChange={(e) => handleColorImageUpload(e, activeColor.id)} />
-                                                    </label>
-                                                )}
+                                                ))}
+                                                <label className="aspect-[3/4] w-32 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors group bg-white dark:bg-slate-900">
+                                                    <ImagePlus className="w-6 h-6 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                                                    <span className="text-xs text-slate-500 mt-2 font-medium">Add Image</span>
+                                                    <input type="file" accept="image/*" multiple className="hidden" onChange={(e) => handleColorImageUpload(e, activeColor.id)} />
+                                                </label>
                                             </div>
                                         </div>
                                     </motion.div>
@@ -740,7 +743,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                         </div>
 
                         {/* SIZES SECTION */}
-                        <div className={`space-y-4 pt-6 border-t border-slate-200 dark:border-slate-700 rounded-xl p-4 transition-all duration-300 ${highlightSizeSection
+                        <div ref={sizeSectionRef} className={`space-y-4 pt-6 border-t border-slate-200 dark:border-slate-700 rounded-xl p-4 transition-all duration-300 ${highlightSizeSection
                             ? 'bg-orange-50 dark:bg-orange-900/20 border-l-4 border-l-orange-500 shadow-lg'
                             : ''
                             }`}>
@@ -823,6 +826,30 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                         >
                                             Jallabs
                                         </button>
+                                        <button
+                                            onClick={() => {
+                                                handleProductChange('sizeCategory', 'insence');
+                                                handleProductChange('sizes', []);
+                                            }}
+                                            className={`flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'insence'
+                                                ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
+                                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
+                                                }`}
+                                        >
+                                            Insence
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                handleProductChange('sizeCategory', 'oil-perfumes');
+                                                handleProductChange('sizes', []);
+                                            }}
+                                            className={`flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'oil-perfumes'
+                                                ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
+                                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
+                                                }`}
+                                        >
+                                            Oil Perfumes
+                                        </button>
                                     </div>
 
                                     {/* Size Chips */}
@@ -851,7 +878,11 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                                     ? 'European shoe sizing'
                                                     : productData.sizeCategory === 'caps'
                                                         ? 'Nigerian cap sizing (circumference in inches)'
-                                                        : 'Jallab sizing (52-62)'
+                                                        : productData.sizeCategory === 'jallabs'
+                                                            ? 'Jallab sizing (52-62)'
+                                                            : productData.sizeCategory === 'insence'
+                                                                ? 'Insence sizing (volume)'
+                                                                : 'Oil perfumes sizing (volume)'
                                         }
                                     </p>
                                 </>
@@ -1102,7 +1133,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                 >
                                     <div className="flex justify-between items-center mb-4">
                                         <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100">
-                                            {productData.sizeCategory === 'clothing' ? 'Size Guide (UK/NG)' : productData.sizeCategory === 'shoes' ? 'Shoe Size Guide (EU)' : productData.sizeCategory === 'caps' ? 'Cap Size Guide (NG)' : 'Jallab Size Guide'}
+                                            {productData.sizeCategory === 'clothing' ? 'Size Guide (UK/NG)' : productData.sizeCategory === 'shoes' ? 'Shoe Size Guide (EU)' : productData.sizeCategory === 'caps' ? 'Cap Size Guide (NG)' : productData.sizeCategory === 'jallabs' ? 'Jallab Size Guide' : productData.sizeCategory === 'insence' ? 'Insence Size Guide' : 'Oil Perfumes Guide'}
                                         </h3>
                                         <button onClick={() => setSizeGuideOpen(false)} className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
                                             <X className="w-5 h-5 text-slate-500" />
@@ -1150,7 +1181,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                                     ))}
                                                 </div>
                                             </>
-                                        ) : (
+                                        ) : productData.sizeCategory === 'jallabs' ? (
                                             <>
                                                 <div className="grid grid-cols-1 gap-2 text-sm font-medium text-slate-500 border-b border-slate-200 dark:border-slate-700 pb-2">
                                                     <span>Jallab Size</span>
@@ -1163,11 +1194,37 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                                     ))}
                                                 </div>
                                             </>
+                                        ) : productData.sizeCategory === 'insence' ? (
+                                            <>
+                                                <div className="grid grid-cols-1 gap-2 text-sm font-medium text-slate-500 border-b border-slate-200 dark:border-slate-700 pb-2">
+                                                    <span>Insence Size</span>
+                                                </div>
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    {INSENCE_SIZE_CHART.map((item) => (
+                                                        <div key={item.size} className="text-sm text-slate-900 dark:text-slate-100 p-2 bg-slate-50 dark:bg-slate-800 rounded-lg text-center font-bold">
+                                                            {item.size}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <div className="grid grid-cols-1 gap-2 text-sm font-medium text-slate-500 border-b border-slate-200 dark:border-slate-700 pb-2">
+                                                    <span>Oil Perfume Size</span>
+                                                </div>
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    {OIL_PERFUMES_SIZE_CHART.map((item) => (
+                                                        <div key={item.size} className="text-sm text-slate-900 dark:text-slate-100 p-2 bg-slate-50 dark:bg-slate-800 rounded-lg text-center font-bold">
+                                                            {item.size}
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </>
                                         )}
                                     </div>
                                     <div className="mt-6 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg text-xs text-blue-700 dark:text-blue-300 flex gap-2">
                                         <Info className="w-4 h-4 flex-shrink-0" />
-                                        <p>{productData.sizeCategory === 'clothing' ? 'Measurements are in inches. This is a standard guide, actual fit may vary by style.' : productData.sizeCategory === 'shoes' ? 'Measure your foot length in cm to find your size. Sizes may vary by brand.' : productData.sizeCategory === 'caps' ? 'Measure the circumference of your head in inches to find your cap size.' : 'Jallab sizes range from 52-62. Choose based on your usual sizing.'}</p>
+                                        <p>{productData.sizeCategory === 'clothing' ? 'Measurements are in inches. This is a standard guide, actual fit may vary by style.' : productData.sizeCategory === 'shoes' ? 'Measure your foot length in cm to find your size. Sizes may vary by brand.' : productData.sizeCategory === 'caps' ? 'Measure the circumference of your head in inches to find your cap size.' : productData.sizeCategory === 'jallabs' ? 'Jallab sizes range from 52-62. Choose based on your usual sizing.' : productData.sizeCategory === 'insence' ? 'Standard insence sizes.' : 'Standard oil perfumes sizes.'}</p>
                                     </div>
                                 </motion.div>
                             </div>

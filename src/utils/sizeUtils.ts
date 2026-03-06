@@ -1,5 +1,5 @@
 // Fashion size category type
-export type FashionSizeCategory = 'clothing' | 'shoes' | 'caps' | 'jallabs';
+export type FashionSizeCategory = 'clothing' | 'shoes' | 'caps' | 'jallabs' | 'insence' | 'oil-perfumes';
 
 // Nigerian/UK Standard Clothing Sizes (6-20)
 export const NIGERIAN_SIZE_CHART = [
@@ -39,11 +39,24 @@ export const JALLAB_SIZE_CHART = [
     { size: '58' }, { size: '60' }, { size: '62' },
 ];
 
+// Insence Sizes
+export const INSENCE_SIZE_CHART = [
+    { size: '100ml' }, { size: '200ml' }, { size: '300ml' },
+    { size: '500ml' }, { size: '1ltr' },
+];
+
+// Oil Perfumes Sizes
+export const OIL_PERFUMES_SIZE_CHART = [
+    { size: '10ml' }, { size: '20ml' }, { size: '50ml' }, { size: '100ml' },
+];
+
 // Helper to get sizes for a given fashion category
 export const getSizesForFashionCategory = (category: FashionSizeCategory): string[] => {
     if (category === 'clothing') return NIGERIAN_SIZE_CHART.map(item => item.size);
     if (category === 'shoes') return EUROPEAN_SHOE_CHART.map(item => item.size);
     if (category === 'caps') return NIGERIAN_CAP_SIZE_CHART.map(item => item.size);
     if (category === 'jallabs') return JALLAB_SIZE_CHART.map(item => item.size);
+    if (category === 'insence') return INSENCE_SIZE_CHART.map(item => item.size);
+    if (category === 'oil-perfumes') return OIL_PERFUMES_SIZE_CHART.map(item => item.size);
     return [];
 };
