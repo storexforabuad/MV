@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { X, Globe, ArrowRight, AlertCircle, Check, CreditCard, Sparkles } from 'lucide-react';
 import { useWebsiteRegistrationModal } from '@/hooks/useWebsiteRegistrationModal';
 import { useModalBackNavigation } from '@/hooks/useModalBackNavigation';
@@ -23,6 +24,22 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
 
   const is420Hub = storeId === '420-Hub' || storeName === '420-Hub' || storeName === '420 Hub';
   const isStunnerStores = storeId?.toLowerCase().includes('stunner') || storeName?.toLowerCase().includes('stunner');
+
+  const [platformIndex, setPlatformIndex] = useState(0);
+  const platforms = [
+    { name: 'WhatsApp', color: 'text-green-400' },
+    { name: 'Instagram', color: 'text-pink-400' },
+    { name: 'TikTok', color: 'text-cyan-400' }
+  ];
+
+  useEffect(() => {
+    if (modal.currentScreen === 1) {
+      const interval = setInterval(() => {
+        setPlatformIndex((prev) => (prev + 1) % platforms.length);
+      }, 2500);
+      return () => clearInterval(interval);
+    }
+  }, [modal.currentScreen]);
 
   // Handle back button navigation
   useModalBackNavigation(isOpen, onClose, 'need-a-website');
@@ -177,6 +194,59 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
         <div ref={contentRef} className="flex-1 overflow-y-auto">
           <div className="p-6 pb-28">
             {/* (Value-prop screen removed; category selection is now first visible step) */}
+
+            {/* Screen 1: Cover Page */}
+            {modal.currentScreen === 1 && (
+              <div className="space-y-8 py-4">
+                <div className="text-center space-y-6">
+                  <div className="inline-block bg-amber-500/10 text-amber-500 font-black px-4 py-1.5 rounded-full text-[10px] sm:text-xs uppercase tracking-widest mb-2 border border-amber-500/20">
+                    50% OFF RAMADAN PROMO
+                  </div>
+
+                  <h1 className="text-3xl sm:text-4xl font-black text-white leading-[1.2] tracking-tight">
+                    Time to upgrade your<br />
+                    <div className="h-[1.2em] relative overflow-hidden inline-block w-full align-bottom">
+                      <AnimatePresence mode="popLayout">
+                        <motion.div
+                          key={platformIndex}
+                          initial={{ y: 40, opacity: 0 }}
+                          animate={{ y: 0, opacity: 1 }}
+                          exit={{ y: -40, opacity: 0 }}
+                          transition={{ duration: 0.4, ease: "easeOut" }}
+                          className={`absolute inset-0 w-full flex justify-center ${platforms[platformIndex].color}`}
+                        >
+                          {platforms[platformIndex].name}
+                        </motion.div>
+                      </AnimatePresence>
+                    </div><br />
+                    side hustle to a<br />
+                    business empire
+                  </h1>
+
+                  <p className="text-slate-300 text-sm sm:text-base max-w-[280px] mx-auto leading-relaxed">
+                    Get a professional website for <span className="line-through text-slate-500 decoration-slate-500">₦850,000</span> as little as <span className="font-bold text-amber-500">₦500/week</span> in minutes.
+                  </p>
+                </div>
+
+                <div className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-4 max-w-sm mx-auto">
+                  <div className="flex items-start gap-4">
+                    <div className="bg-amber-500/10 p-2 rounded-xl mt-0.5 shrink-0 border border-amber-500/20">
+                      <AlertCircle className="text-amber-500" size={20} />
+                    </div>
+                    <div className="text-left">
+                      <h4 className="font-bold text-amber-500 text-xs sm:text-sm mb-1 uppercase tracking-tight">Limited Slots Available</h4>
+                      <p className="text-xs text-slate-400 leading-relaxed">This Ramadan offer is exclusive and limited. Act now to secure your spot!</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-center pt-4">
+                  <p className="text-[10px] text-slate-500/70 font-medium tracking-wide flex flex-wrap items-center justify-center gap-1">
+                    Powered by BizconNet™ 2026 in partnership with Google, WhatsApp & Paystack.
+                  </p>
+                </div>
+              </div>
+            )}
 
             {/* Screen 2: Category Selection */}
             {modal.currentScreen === 2 && (
@@ -592,7 +662,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
             >
               {modal.loading ? (
                 'Processing...'
-              ) : modal.currentScreen === 2 ? (
+              ) : modal.currentScreen === 1 ? (
                 <>Get Started</>
               ) : modal.currentScreen === 5 ? (
                 <>
