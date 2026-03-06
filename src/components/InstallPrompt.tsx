@@ -2,7 +2,7 @@
 
 import React, { Fragment, useEffect, useState, useRef } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { X, Zap, ShoppingCart, Package, Bell, Download, ChevronRight, ChevronLeft, Smartphone, Share, PlusSquare } from 'lucide-react';
+import { X, Zap, ShoppingCart, Package, Bell, Download, ChevronRight, ChevronLeft, Smartphone, Share, PlusSquare, Sparkles } from 'lucide-react';
 import { useInstallPrompt } from '../hooks/useInstallPrompt';
 import { usePathname, useParams } from 'next/navigation';
 import { getStoreMeta } from '../lib/db';
@@ -48,8 +48,8 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
   };
   const displayStoreName = formatStoreName(storeName);
 
-  const titleText = isRoadmap ? 'Get Roadmap App' : isReferralDashboard ? 'Get Dashboard App' : isAdmin ? 'Control Center' : `Get ${displayStoreName} App`;
-  const subtitleText = isRoadmap ? 'Track your path to 10k vendors' : isReferralDashboard ? 'Track your referrals' : isAdmin ? 'Manage your store on the go' : 'Your Shopping Experience Upgraded!';
+  const titleText = isRoadmap ? 'Get Roadmap App' : isReferralDashboard ? 'Get Dashboard App' : isAdmin ? 'Control Center' : `Experience ${displayStoreName}`;
+  const subtitleText = isRoadmap ? 'Track your path to 10k vendors' : isReferralDashboard ? 'Track your referrals' : isAdmin ? 'Manage your store on the go' : 'Tap into a better, faster, and more premium shopping experience.';
 
   // Helper to extract clean initials for the Cover Page App Icon
   const getInitials = (name: string) => {
@@ -67,9 +67,9 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
   const slides = [
     {
       id: 'cover',
-      icon: Smartphone,
+      icon: Sparkles,
       color: 'text-gray-900 dark:text-white',
-      bgColor: 'bg-gray-100 dark:bg-gray-800',
+      bgColor: 'bg-gradient-to-br from-violet-100 to-cyan-100 dark:from-violet-500/20 dark:to-cyan-500/20',
       isCover: true,
       title: titleText,
       desc: subtitleText,
@@ -263,9 +263,14 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
 
                       {slide.isCover ? (
                         <div className="flex flex-col items-center justify-center text-center h-full pb-4">
-                          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-[1.5rem] bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-6 shadow-xl shadow-gray-200 dark:shadow-none border border-gray-200 dark:border-gray-800">
-                            {slide.icon && <slide.icon className={`w-10 h-10 sm:w-12 sm:h-12 ${slide.color}`} />}
-                          </div>
+                          <motion.div
+                            animate={{ y: [0, -6, 0] }}
+                            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+                            className={`w-20 h-20 sm:w-24 sm:h-24 rounded-[1.5rem] ${slide.bgColor || 'bg-gray-100 dark:bg-gray-800'} flex items-center justify-center mb-6 shadow-xl shadow-gray-200 dark:shadow-none border border-gray-200 dark:border-gray-800/60 inset-0 relative overflow-hidden`}
+                          >
+                            <div className="absolute inset-0 bg-gradient-to-br from-white/60 to-transparent dark:from-white/10 dark:to-transparent pointer-events-none" />
+                            {slide.icon && <slide.icon className={`w-10 h-10 sm:w-12 sm:h-12 ${slide.color} relative z-10`} />}
+                          </motion.div>
                           <h2 className="text-2xl sm:text-3xl font-black text-gray-900 dark:text-white leading-tight mb-2">
                             {slide.title}
                           </h2>
