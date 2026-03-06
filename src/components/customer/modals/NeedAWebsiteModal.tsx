@@ -22,6 +22,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
   const contentRef = useRef<HTMLDivElement>(null);
 
   const is420Hub = storeId === '420-Hub' || storeName === '420-Hub' || storeName === '420 Hub';
+  const isStunnerStores = storeId?.toLowerCase().includes('stunner') || storeName?.toLowerCase().includes('stunner');
 
   // Handle back button navigation
   useModalBackNavigation(isOpen, onClose, 'need-a-website');
@@ -147,11 +148,11 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       <div className="bg-slate-900 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md max-h-[90vh] overflow-hidden shadow-2xl border border-slate-700/50 animate-in slide-in-from-bottom-5 sm:zoom-in-95 flex flex-col">
         {/* Header - Sticky */}
-        <div className={`sticky top-0 px-6 py-4 border-b border-slate-700/50 flex-shrink-0 z-10 ${is420Hub ? 'bg-gradient-to-r from-zinc-950 to-emerald-950' : 'bg-gradient-to-r from-slate-900 to-blue-950'}`}>
+        <div className={`sticky top-0 px-6 py-4 border-b border-slate-700/50 flex-shrink-0 z-10 ${isStunnerStores ? 'bg-gradient-to-r from-zinc-950 to-violet-950' : is420Hub ? 'bg-gradient-to-r from-zinc-950 to-emerald-950' : 'bg-gradient-to-r from-slate-900 to-blue-950'}`}>
           <div className="flex items-center justify-between gap-3 mb-3">
             <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${is420Hub ? 'bg-emerald-400/10 border-emerald-400/20' : 'bg-amber-400/10 border-amber-400/20'}`}>
-                <Globe className={is420Hub ? 'text-emerald-400' : 'text-amber-400'} size={20} />
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${isStunnerStores ? 'bg-violet-500/10 border-violet-500/20' : is420Hub ? 'bg-emerald-400/10 border-emerald-400/20' : 'bg-amber-400/10 border-amber-400/20'}`}>
+                <Globe className={isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} size={20} />
               </div>
               <h2 className="text-xl font-bold text-white">Get Your Website</h2>
             </div>
@@ -193,13 +194,13 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                         key={store.id}
                         onClick={() => modal.updateForm({ storeType: store.id })}
                         className={`p-4 rounded-xl border-2 transition-all text-left ${isSelected
-                          ? is420Hub ? 'border-emerald-500 bg-emerald-500/20 text-white' : 'border-amber-500 bg-amber-500/20 text-white'
-                          : is420Hub ? 'border-zinc-800 bg-zinc-900/50 text-slate-300 hover:border-emerald-500/50' : 'border-slate-700 bg-slate-800/50 text-slate-300 hover:border-amber-500/50'
+                          ? isStunnerStores ? 'border-violet-500 bg-violet-500/20 text-white' : is420Hub ? 'border-emerald-500 bg-emerald-500/20 text-white' : 'border-amber-500 bg-amber-500/20 text-white'
+                          : isStunnerStores ? 'border-zinc-800 bg-zinc-900/50 text-slate-300 hover:border-violet-500/50' : is420Hub ? 'border-zinc-800 bg-zinc-900/50 text-slate-300 hover:border-emerald-500/50' : 'border-slate-700 bg-slate-800/50 text-slate-300 hover:border-amber-500/50'
                           }`}
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex items-start gap-3 flex-1">
-                            <div className={`mt-1 ${isSelected ? (is420Hub ? 'text-emerald-400' : 'text-amber-400') : 'text-slate-400'}`}>
+                            <div className={`mt-1 ${isSelected ? (isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400') : 'text-slate-400'}`}>
                               {store.icon && <store.icon size={20} />}
                             </div>
                             <div className="flex-1">
@@ -209,7 +210,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                           </div>
                           {isSelected && (
                             <div className="flex-shrink-0 mt-1">
-                              <Check className={is420Hub ? "text-emerald-400" : "text-amber-400"} size={20} />
+                              <Check className={isStunnerStores ? "text-cyan-400" : is420Hub ? "text-emerald-400" : "text-amber-400"} size={20} />
                             </div>
                           )}
                         </div>
@@ -246,7 +247,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                       value={modal.formData.businessName}
                       onChange={(e) => modal.updateForm({ businessName: e.target.value })}
                       placeholder="Your business name"
-                      className={`w-full px-4 py-3 bg-slate-800 border ${is420Hub ? 'border-zinc-700 focus:border-emerald-500 focus:ring-emerald-500/50' : 'border-slate-700 focus:border-amber-500 focus:ring-amber-500/50'} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-1 transition-colors`}
+                      className={`w-full px-4 py-3 bg-slate-800 border ${isStunnerStores ? 'border-zinc-700 focus:border-violet-500 focus:ring-violet-500/50' : is420Hub ? 'border-zinc-700 focus:border-emerald-500 focus:ring-emerald-500/50' : 'border-slate-700 focus:border-amber-500 focus:ring-amber-500/50'} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-1 transition-colors`}
                     />
                   </div>
 
@@ -264,7 +265,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                         modal.updateForm({ whatsapp: formatted });
                       }}
                       placeholder="08012345678"
-                      className={`w-full px-4 py-3 bg-slate-800 border ${is420Hub ? 'border-zinc-700 focus:border-emerald-500 focus:ring-emerald-500/50' : 'border-slate-700 focus:border-amber-500 focus:ring-amber-500/50'} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-1 transition-colors`}
+                      className={`w-full px-4 py-3 bg-slate-800 border ${isStunnerStores ? 'border-zinc-700 focus:border-violet-500 focus:ring-violet-500/50' : is420Hub ? 'border-zinc-700 focus:border-emerald-500 focus:ring-emerald-500/50' : 'border-slate-700 focus:border-amber-500 focus:ring-amber-500/50'} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-1 transition-colors`}
                     />
                     <p className="text-xs text-slate-500 mt-1">11 digits (e.g., 08012345678)</p>
                   </div>
@@ -279,7 +280,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                       value={modal.formData.email}
                       onChange={(e) => modal.updateForm({ email: e.target.value })}
                       placeholder="you@example.com"
-                      className={`w-full px-4 py-3 bg-slate-800 border ${is420Hub ? 'border-zinc-700 focus:border-emerald-500 focus:ring-emerald-500/50' : 'border-slate-700 focus:border-amber-500 focus:ring-amber-500/50'} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-1 transition-colors`}
+                      className={`w-full px-4 py-3 bg-slate-800 border ${isStunnerStores ? 'border-zinc-700 focus:border-violet-500 focus:ring-violet-500/50' : is420Hub ? 'border-zinc-700 focus:border-emerald-500 focus:ring-emerald-500/50' : 'border-slate-700 focus:border-amber-500 focus:ring-amber-500/50'} rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-1 transition-colors`}
                     />
                   </div>
 
@@ -304,19 +305,19 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
 
                 {/* Store Link Preview - On Brand Style */}
                 <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6 space-y-4">
-                  <div className={`flex items-center gap-2 ${is420Hub ? 'text-emerald-400' : 'text-amber-400'}`}>
+                  <div className={`flex items-center gap-2 ${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}`}>
                     <Globe size={18} />
                     <span className="text-xs font-black uppercase tracking-widest">Website Link Preview</span>
                   </div>
 
-                  <div className={`bg-slate-900 border border-slate-700 rounded-xl p-4 flex items-center justify-between group cursor-pointer transition-all ${is420Hub ? 'hover:border-emerald-500/50' : 'hover:border-amber-500/50'}`}>
+                  <div className={`bg-slate-900 border border-slate-700 rounded-xl p-4 flex items-center justify-between group cursor-pointer transition-all ${isStunnerStores ? 'hover:border-violet-500/50' : is420Hub ? 'hover:border-emerald-500/50' : 'hover:border-amber-500/50'}`}>
                     <div className="flex-1 min-w-0">
                       <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tight mb-1">Your Unique Web Address</p>
-                      <p className={`${is420Hub ? 'text-emerald-400' : 'text-amber-400'} font-bold truncate`}>
+                      <p className={`${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} font-bold truncate`}>
                         tinyurl.com/bizconnet/{modal.formData.businessName.toLowerCase().replace(/[^a-z0-9]/g, '-')}
                       </p>
                     </div>
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${is420Hub ? 'bg-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500' : 'bg-amber-500/10 text-amber-500 group-hover:bg-amber-500'} group-hover:text-white`}>
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isStunnerStores ? 'bg-violet-500/10 text-cyan-400 group-hover:bg-violet-500' : is420Hub ? 'bg-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500' : 'bg-amber-500/10 text-amber-500 group-hover:bg-amber-500'} group-hover:text-white`}>
                       <ArrowRight size={14} />
                     </div>
                   </div>
@@ -359,7 +360,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                 {/* Trust Element */}
                 <div className="text-center pt-2">
                   <p className="text-[10px] text-slate-500 font-medium">
-                    Joining <span className={`${is420Hub ? 'text-emerald-400' : 'text-amber-400'} font-bold`}>5,000+ digital vendors</span> across Nigeria.
+                    Joining <span className={`${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} font-bold`}>5,000+ digital vendors</span> across Nigeria.
                   </p>
                 </div>
               </div>
@@ -370,17 +371,17 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
               <div className="space-y-6">
                 <div className="relative overflow-hidden">
                   <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className={is420Hub ? "text-emerald-400" : "text-amber-400"} size={20} />
+                    <Sparkles className={isStunnerStores ? "text-cyan-400" : is420Hub ? "text-emerald-400" : "text-amber-400"} size={20} />
                     <h3 className="text-xl font-black text-white uppercase tracking-tighter">Ramadan Special Offer</h3>
                   </div>
                   <p className="text-sm text-slate-400 leading-relaxed">
-                    Get your professional business website live this season with our <span className={`${is420Hub ? 'text-emerald-400' : 'text-amber-400'} font-bold`}>limited-time 50% discount</span>.
+                    Get your professional business website live this season with our <span className={`${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} font-bold`}>limited-time 50% discount</span>.
                   </p>
                 </div>
 
-                <div className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg w-fit ${is420Hub ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-amber-500/10 border-amber-500/20'}`}>
-                  <div className={`w-2 h-2 rounded-full animate-pulse ${is420Hub ? 'bg-emerald-500' : 'bg-amber-500'}`} />
-                  <span className={`text-[10px] font-bold uppercase tracking-wider ${is420Hub ? 'text-emerald-400' : 'text-amber-400'}`}>Ramadan Exclusive • Go Live Today</span>
+                <div className={`flex items-center gap-2 px-3 py-1.5 border rounded-lg w-fit ${isStunnerStores ? 'bg-violet-500/10 border-violet-500/20' : is420Hub ? 'bg-emerald-500/10 border-emerald-500/20' : 'bg-amber-500/10 border-amber-500/20'}`}>
+                  <div className={`w-2 h-2 rounded-full animate-pulse ${isStunnerStores ? 'bg-cyan-400' : is420Hub ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                  <span className={`text-[10px] font-bold uppercase tracking-wider ${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}`}>Ramadan Exclusive • Go Live Today</span>
                 </div>
 
                 <div className="space-y-3">
@@ -392,18 +393,18 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                         key={tierId}
                         onClick={() => modal.updateForm({ planId: tierId })}
                         className={`relative w-full p-5 rounded-xl border transition-all text-left ${isSelected
-                          ? is420Hub ? 'border-emerald-500 bg-emerald-500/5 shadow-lg shadow-emerald-500/20' : 'border-amber-500 bg-amber-500/5 shadow-lg shadow-amber-500/20'
-                          : is420Hub ? 'border-slate-700 bg-slate-800/50 hover:border-emerald-500/50' : 'border-slate-700 bg-slate-800/50 hover:border-amber-500/50'
+                          ? isStunnerStores ? 'border-violet-500 bg-violet-500/5 shadow-lg shadow-violet-500/20' : is420Hub ? 'border-emerald-500 bg-emerald-500/5 shadow-lg shadow-emerald-500/20' : 'border-amber-500 bg-amber-500/5 shadow-lg shadow-amber-500/20'
+                          : isStunnerStores ? 'border-slate-700 bg-slate-800/50 hover:border-violet-500/50' : is420Hub ? 'border-slate-700 bg-slate-800/50 hover:border-emerald-500/50' : 'border-slate-700 bg-slate-800/50 hover:border-amber-500/50'
                           }`}
                       >
                         {tier.featured && !isSelected && (
-                          <div className={`absolute -top-3 left-1/2 transform -translate-x-1/2 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter ${is420Hub ? 'bg-gradient-to-r from-emerald-500 to-emerald-600' : 'bg-gradient-to-r from-amber-500 to-amber-600'}`}>
+                          <div className={`absolute -top-3 left-1/2 transform -translate-x-1/2 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-tighter ${isStunnerStores ? 'bg-gradient-to-r from-violet-500 to-violet-600' : is420Hub ? 'bg-gradient-to-r from-emerald-500 to-emerald-600' : 'bg-gradient-to-r from-amber-500 to-amber-600'}`}>
                             Most Popular
                           </div>
                         )}
 
                         {isSelected && (
-                          <div className={`absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center ${is420Hub ? 'bg-emerald-500' : 'bg-amber-500'}`}>
+                          <div className={`absolute top-3 right-3 w-6 h-6 rounded-full flex items-center justify-center ${isStunnerStores ? 'bg-violet-500' : is420Hub ? 'bg-emerald-500' : 'bg-amber-500'}`}>
                             <Check className="w-4 h-4 text-white" />
                           </div>
                         )}
@@ -416,11 +417,11 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                           <div className="mb-3">
                             <div className="flex items-center gap-2 mb-1">
                               <span className="text-sm text-slate-400 line-through">₦{tier.price.toLocaleString()}</span>
-                              <div className={`text-[10px] font-black px-2 py-0.5 rounded border uppercase ${is420Hub ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'}`}>
+                              <div className={`text-[10px] font-black px-2 py-0.5 rounded border uppercase ${isStunnerStores ? 'bg-violet-500/10 text-cyan-400 border-violet-500/20' : is420Hub ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border-amber-500/20'}`}>
                                 Special Ramadan Rate
                               </div>
                             </div>
-                            <div className={`text-2xl font-black ${is420Hub ? 'text-emerald-400' : 'text-amber-400'}`}>
+                            <div className={`text-2xl font-black ${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}`}>
                               ₦{promoPrice.toLocaleString()}
                               <span className="text-xs text-slate-400 font-normal ml-1 lowercase">/{tier.period}</span>
                             </div>
@@ -428,7 +429,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
 
                           <div className="space-y-2 text-left">
                             <div className="flex items-center gap-2">
-                              <div className={`w-1.5 h-1.5 rounded-full ${is420Hub ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                              <div className={`w-1.5 h-1.5 rounded-full ${isStunnerStores ? 'bg-cyan-400' : is420Hub ? 'bg-emerald-400' : 'bg-amber-400'}`} />
                               <span className="text-sm text-slate-300">
                                 {tier.productLimit.toLocaleString()} products
                               </span>
@@ -441,17 +442,17 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                 </div>
 
                 {/* Value Prop Messaging */}
-                <div className={`border rounded-xl p-4 space-y-3 ${is420Hub ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-amber-500/5 border-amber-500/20'}`}>
+                <div className={`border rounded-xl p-4 space-y-3 ${isStunnerStores ? 'bg-violet-500/5 border-violet-500/20' : is420Hub ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-amber-500/5 border-amber-500/20'}`}>
                   <div className="flex items-center gap-2">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${is420Hub ? 'bg-emerald-500/20' : 'bg-amber-500/20'}`}>
-                      <Sparkles className={is420Hub ? 'text-emerald-400' : 'text-amber-400'} size={16} />
+                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${isStunnerStores ? 'bg-violet-500/20' : is420Hub ? 'bg-emerald-500/20' : 'bg-amber-500/20'}`}>
+                      <Sparkles className={isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} size={16} />
                     </div>
                     <p className="text-sm font-bold text-white uppercase tracking-tight">
                       Celebrate Ramadan Digitally
                     </p>
                   </div>
                   <p className="text-xs text-slate-400 leading-relaxed italic">
-                    Celebrate Ramadan by taking your business digital. Join <span className={`${is420Hub ? 'text-emerald-400' : 'text-amber-400'} font-bold`}>5000+ vendors</span> already selling online this season.
+                    Celebrate Ramadan by taking your business digital. Join <span className={`${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} font-bold`}>5000+ vendors</span> already selling online this season.
                   </p>
                   <p className="text-[10px] text-slate-500 mt-2">
                     Weekly auto-renewing subscription. Cancel anytime.
@@ -464,21 +465,21 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
             {modal.currentScreen === 'success' && (
               <div className="text-center py-8 space-y-6">
                 {/* Animated Checkmark */}
-                <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto border shadow-lg animate-pulse ${is420Hub ? 'bg-gradient-to-r from-emerald-400 to-emerald-500 border-emerald-300/50 shadow-emerald-900/50' : 'bg-gradient-to-r from-amber-400 to-amber-500 border-amber-300/50 shadow-amber-900/50'}`}>
+                <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto border shadow-lg animate-pulse ${isStunnerStores ? 'bg-gradient-to-r from-violet-400 to-violet-500 border-violet-300/50 shadow-violet-900/50' : is420Hub ? 'bg-gradient-to-r from-emerald-400 to-emerald-500 border-emerald-300/50 shadow-emerald-900/50' : 'bg-gradient-to-r from-amber-400 to-amber-500 border-amber-300/50 shadow-amber-900/50'}`}>
                   <Check className="text-white" size={32} />
                 </div>
 
                 {/* Success Message */}
                 <div>
-                  <h3 className={`text-2xl font-bold text-white mb-2 underline ${is420Hub ? 'decoration-emerald-500/30' : 'decoration-amber-500/30'}`}>Welcome Aboard!</h3>
-                  <p className="text-slate-300 text-sm px-4 leading-relaxed italic">Congratulations! You've successfully secured the <span className={`${is420Hub ? 'text-emerald-400' : 'text-amber-400'} font-black uppercase tracking-tight`}>Ramadan Special</span> offer for your business.</p>
+                  <h3 className={`text-2xl font-bold text-white mb-2 underline ${isStunnerStores ? 'decoration-cyan-500/30' : is420Hub ? 'decoration-emerald-500/30' : 'decoration-amber-500/30'}`}>Welcome Aboard!</h3>
+                  <p className="text-slate-300 text-sm px-4 leading-relaxed italic">Congratulations! You've successfully secured the <span className={`${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} font-black uppercase tracking-tight`}>Ramadan Special</span> offer for your business.</p>
                 </div>
 
                 {/* Full Business Details */}
                 <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-4 space-y-3 text-left">
                   {/* Business Name */}
                   <div className="flex items-start gap-3">
-                    <Check className={`${is420Hub ? 'text-emerald-400' : 'text-amber-400'} flex-shrink-0 mt-0.5`} size={18} />
+                    <Check className={`${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} flex-shrink-0 mt-0.5`} size={18} />
                     <div>
                       <p className="text-xs font-semibold text-white">Business Name</p>
                       <p className="text-xs text-slate-400 mt-0.5">{modal.formData.businessName}</p>
@@ -488,11 +489,11 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                   {/* Store Type */}
                   {selectedStore && (
                     <div className="flex items-start gap-3">
-                      <Check className={`${is420Hub ? 'text-emerald-400' : 'text-amber-400'} flex-shrink-0 mt-0.5`} size={18} />
+                      <Check className={`${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} flex-shrink-0 mt-0.5`} size={18} />
                       <div>
                         <p className="text-xs font-semibold text-white">Category</p>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <selectedStore.icon size={14} className={is420Hub ? 'text-emerald-400' : 'text-amber-400'} />
+                          <selectedStore.icon size={14} className={isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} />
                           <p className="text-xs text-slate-400">{selectedStore.label}</p>
                         </div>
                       </div>
@@ -501,7 +502,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
 
                   {/* Email */}
                   <div className="flex items-start gap-3">
-                    <Check className={`${is420Hub ? 'text-emerald-400' : 'text-amber-400'} flex-shrink-0 mt-0.5`} size={18} />
+                    <Check className={`${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} flex-shrink-0 mt-0.5`} size={18} />
                     <div>
                       <p className="text-xs font-semibold text-white">Email</p>
                       <p className="text-xs text-slate-400 mt-0.5">{modal.formData.email}</p>
@@ -510,7 +511,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
 
                   {/* WhatsApp */}
                   <div className="flex items-start gap-3">
-                    <Check className={`${is420Hub ? 'text-emerald-400' : 'text-amber-400'} flex-shrink-0 mt-0.5`} size={18} />
+                    <Check className={`${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} flex-shrink-0 mt-0.5`} size={18} />
                     <div>
                       <p className="text-xs font-semibold text-white">WhatsApp</p>
                       <p className="text-xs text-slate-400 mt-0.5">+234{modal.formData.whatsapp}</p>
@@ -519,7 +520,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
 
                   {/* Location */}
                   <div className="flex items-start gap-3">
-                    <Check className={`${is420Hub ? 'text-emerald-400' : 'text-amber-400'} flex-shrink-0 mt-0.5`} size={18} />
+                    <Check className={`${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} flex-shrink-0 mt-0.5`} size={18} />
                     <div>
                       <p className="text-xs font-semibold text-white">Location</p>
                       <p className="text-xs text-slate-400 mt-0.5">{modal.formData.state}, {modal.formData.country}</p>
@@ -529,10 +530,10 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                   {/* Plan */}
                   {selectedTierDetails && (
                     <div className="flex items-start gap-3">
-                      <Check className={`${is420Hub ? 'text-emerald-400' : 'text-amber-400'} flex-shrink-0 mt-0.5`} size={18} />
+                      <Check className={`${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} flex-shrink-0 mt-0.5`} size={18} />
                       <div>
                         <p className="text-xs font-semibold text-white">Plan</p>
-                        <p className={`text-xs ${is420Hub ? 'text-emerald-400' : 'text-amber-400'} mt-0.5 font-semibold`}>₦{Math.round(selectedTierDetails.price / 2)}/week (Special Rate)</p>
+                        <p className={`text-xs ${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} mt-0.5 font-semibold`}>₦{Math.round(selectedTierDetails.price / 2)}/week (Special Rate)</p>
                       </div>
                     </div>
                   )}
@@ -542,12 +543,12 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                 <div className="space-y-2 pt-4">
                   <button
                     onClick={() => handleClose()}
-                    className={`w-full text-white font-bold py-3 rounded-xl shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] ${is420Hub ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-emerald-900/30' : 'bg-gradient-to-r from-amber-500 to-amber-600 shadow-amber-900/30'}`}
+                    className={`w-full text-white font-bold py-3 rounded-xl shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] ${isStunnerStores ? 'bg-gradient-to-r from-violet-500 to-violet-600 shadow-violet-900/30' : is420Hub ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 shadow-emerald-900/30' : 'bg-gradient-to-r from-amber-500 to-amber-600 shadow-amber-900/30'}`}
                   >
                     Continue Shopping
                   </button>
                   <button
-                    className={`w-full font-semibold py-2 transition-colors text-sm ${is420Hub ? 'text-emerald-400 hover:text-emerald-300' : 'text-amber-400 hover:text-amber-300'}`}
+                    className={`w-full font-semibold py-2 transition-colors text-sm ${isStunnerStores ? 'text-cyan-400 hover:text-cyan-300' : is420Hub ? 'text-emerald-400 hover:text-emerald-300' : 'text-amber-400 hover:text-amber-300'}`}
                   >
                     Chat with Admin
                   </button>
@@ -582,9 +583,11 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                 (modal.currentScreen === 5 && !isScreen5Valid) ||
                 modal.loading)
                 ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                : is420Hub
-                  ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-900/30 hover:scale-[1.02] active:scale-[0.98]'
-                  : 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-900/30 hover:scale-[1.02] active:scale-[0.98]'
+                : isStunnerStores
+                  ? 'bg-gradient-to-r from-violet-500 to-violet-600 text-white shadow-lg shadow-violet-900/30 hover:scale-[1.02] active:scale-[0.98]'
+                  : is420Hub
+                    ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-900/30 hover:scale-[1.02] active:scale-[0.98]'
+                    : 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-900/30 hover:scale-[1.02] active:scale-[0.98]'
                 }`}
             >
               {modal.loading ? (
