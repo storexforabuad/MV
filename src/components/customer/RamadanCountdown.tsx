@@ -266,7 +266,7 @@ export default function RamadanCountdown({ className, storeName }: { className?:
                     <div className="absolute bottom-3 right-4 z-20">
                         <div className="bg-black/30 backdrop-blur-md rounded-xl sm:rounded-[1rem] border border-white/10 px-2 py-0.5 sm:px-2.5 sm:py-1 shadow-lg flex items-center gap-1">
                             <span className="text-[7px] sm:text-[9px] text-white/70 font-medium tracking-tight">Powered by</span>
-                            <span className="text-[8px] sm:text-[10px] font-bold text-amber-400">BizConnet&trade;</span>
+                            <span className="text-[8px] sm:text-[10px] font-bold text-amber-400">BizconNet&trade;</span>
                         </div>
                     </div>
                     <div className="absolute top-4 left-6 opacity-30"><Moon className="w-12 h-12 text-amber-400 rotate-12" /></div>
@@ -337,7 +337,7 @@ export default function RamadanCountdown({ className, storeName }: { className?:
                     <div className="absolute bottom-3 right-4 z-20">
                         <div className="bg-black/30 backdrop-blur-md rounded-xl sm:rounded-[1rem] border border-white/10 px-2 py-0.5 sm:px-2.5 sm:py-1 shadow-lg flex items-center gap-1">
                             <span className="text-[7px] sm:text-[9px] text-white/70 font-medium tracking-tight">Powered by</span>
-                            <span className="text-[8px] sm:text-[10px] font-bold text-amber-400">BizConnect&trade;</span>
+                            <span className="text-[8px] sm:text-[10px] font-bold text-amber-400">BizconNet&trade;</span>
                         </div>
                     </div>
 
@@ -527,7 +527,7 @@ export default function RamadanCountdown({ className, storeName }: { className?:
                 <div className="absolute bottom-3 right-4 z-20">
                     <div className="bg-black/30 backdrop-blur-md rounded-xl sm:rounded-[1rem] border border-white/10 px-2 py-0.5 sm:px-2.5 sm:py-1 shadow-lg flex items-center gap-1">
                         <span className="text-[7px] sm:text-[9px] text-white/70 font-medium tracking-tight">Powered by</span>
-                        <span className="text-[8px] sm:text-[10px] font-bold text-amber-400">BizConnect&trade;</span>
+                        <span className="text-[8px] sm:text-[10px] font-bold text-amber-400">BizconNet&trade;</span>
                     </div>
                 </div>
                 <div className="absolute top-4 left-6 opacity-30"><Moon className="w-12 h-12 text-amber-400 rotate-12" /></div>

@@ -777,13 +777,13 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                     </div>
 
                                     {/* Size Category Toggle */}
-                                    <div className="flex flex-wrap gap-2">
+                                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide max-w-full">
                                         <button
                                             onClick={() => {
                                                 handleProductChange('sizeCategory', 'clothing');
                                                 handleProductChange('sizes', []);
                                             }}
-                                            className={`flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'clothing'
+                                            className={`flex-shrink-0 whitespace-nowrap px-4 py-3 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'clothing'
                                                 ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
                                                 : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
                                                 }`}
@@ -795,7 +795,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                                 handleProductChange('sizeCategory', 'shoes');
                                                 handleProductChange('sizes', []);
                                             }}
-                                            className={`flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'shoes'
+                                            className={`flex-shrink-0 whitespace-nowrap px-4 py-3 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'shoes'
                                                 ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
                                                 : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
                                                 }`}
@@ -807,7 +807,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                                 handleProductChange('sizeCategory', 'caps');
                                                 handleProductChange('sizes', []);
                                             }}
-                                            className={`flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'caps'
+                                            className={`flex-shrink-0 whitespace-nowrap px-4 py-3 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'caps'
                                                 ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
                                                 : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
                                                 }`}
@@ -819,7 +819,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                                 handleProductChange('sizeCategory', 'jallabs');
                                                 handleProductChange('sizes', []);
                                             }}
-                                            className={`flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'jallabs'
+                                            className={`flex-shrink-0 whitespace-nowrap px-4 py-3 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'jallabs'
                                                 ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
                                                 : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
                                                 }`}
@@ -831,7 +831,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                                 handleProductChange('sizeCategory', 'insence');
                                                 handleProductChange('sizes', []);
                                             }}
-                                            className={`flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'insence'
+                                            className={`flex-shrink-0 whitespace-nowrap px-4 py-3 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'insence'
                                                 ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
                                                 : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
                                                 }`}
@@ -843,7 +843,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                                 handleProductChange('sizeCategory', 'oil-perfumes');
                                                 handleProductChange('sizes', []);
                                             }}
-                                            className={`flex-1 py-3 px-4 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'oil-perfumes'
+                                            className={`flex-shrink-0 whitespace-nowrap px-4 py-3 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'oil-perfumes'
                                                 ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
                                                 : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
                                                 }`}
@@ -896,14 +896,14 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                 const commissionAmount = (productData.isPromo ? productData.promoPrice || 0 : productData.price || 0) * (productData.commission / 100);
                 return (
                     <motion.div key={2} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-                        <FloatingLabelInput label="Price (₦)" type="number" value={productData.price} onChange={(e) => handleProductChange('price', parseFloat(e.target.value) || 0)} />
+                        <FloatingLabelInput label="Price (₦)" type="number" value={productData.price === 0 ? '' : productData.price} onChange={(e) => handleProductChange('price', parseFloat(e.target.value) || 0)} />
 
                         <div className="space-y-4">
                             <ModernToggle label="Run a Promotion?" description="Set a discounted price for this item" checked={productData.isPromo} onChange={checked => handleProductChange('isPromo', checked)} />
                             <AnimatePresence>
                                 {productData.isPromo && (
                                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-                                        <FloatingLabelInput label="Promo Price (₦)" type="number" value={productData.promoPrice || ''} onChange={(e) => handleProductChange('promoPrice', parseFloat(e.target.value) || 0)} />
+                                        <FloatingLabelInput label="Promo Price (₦)" type="number" value={(productData.promoPrice === undefined || productData.promoPrice === 0) ? '' : productData.promoPrice} onChange={(e) => handleProductChange('promoPrice', parseFloat(e.target.value) || 0)} />
                                     </motion.div>
                                 )}
                             </AnimatePresence>
