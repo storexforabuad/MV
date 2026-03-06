@@ -371,7 +371,7 @@ const ProductGrid = memo(function ProductGrid({
                       <Globe className={`w-4 h-4 ${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}`} />
                     </div>
                     <span className={`text-[10px] font-black tracking-[0.2em] uppercase ${isStunnerStores ? 'text-violet-400/80' : is420Hub ? 'text-emerald-400/80' : 'text-amber-400/80'}`}>
-                      Powered by <span className={isStunnerStores ? 'text-violet-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}>Bizconnect™ 2026.</span>
+                      Powered by <span className={isStunnerStores ? 'text-violet-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}>BizconNet™ 2026.</span>
                     </span>
                   </div>
 

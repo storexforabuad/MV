@@ -58,7 +58,7 @@ export const EventsModal = ({ isOpen, onClose }: EventsModalProps) => {
 
                             <div className="max-w-md mx-auto space-y-6">
                                 <p className="text-base text-slate-600 dark:text-slate-300 leading-relaxed">
-                                    Prepare your store for the most anticipated event of the year! Join thousands of vendors at the <strong>BizConnect™Ramadan 2026 Trade Fair & Pop-up</strong>.
+                                    Prepare your store for the most anticipated event of the year! Join thousands of vendors at the <strong>BizconNet™Ramadan 2026 Trade Fair & Pop-up</strong>.
                                 </p>
 
                                 <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl p-6 border border-indigo-100 dark:border-indigo-800/50 relative overflow-hidden">

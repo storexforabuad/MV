@@ -171,7 +171,7 @@ export default function PaymentFlowPage({
         {/* Secure Payment Option */}
         <div className="bg-green-50/50 dark:bg-green-900/10 rounded-xl p-6 border border-green-100 dark:border-green-800/50 shadow-sm">
           <div className="text-[10px] font-extrabold text-green-600 dark:text-green-400 uppercase tracking-widest mb-4">
-            BizConnect™CHECKOUT
+            BizconNet™CHECKOUT
           </div>
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg text-green-600 dark:text-green-400">

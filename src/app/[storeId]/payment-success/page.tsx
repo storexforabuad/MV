@@ -196,7 +196,7 @@ export default function PaymentSuccessPage() {
             </div>
 
             <div className="absolute bottom-4 text-center text-xs text-gray-400">
-                Secured by <span className="font-bold text-gray-500">BizConnect™</span>
+                Secured by <span className="font-bold text-gray-500">BizconNet™</span>
             </div>
         </div>
     );

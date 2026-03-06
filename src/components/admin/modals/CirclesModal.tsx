@@ -74,7 +74,7 @@ export default function CirclesModal({ isOpen, onClose, storeId }: CirclesModalP
     };
 
     const handleShareWhatsApp = () => {
-        const message = `Hey! I'm inviting you to get a business website with BizConnect™. Use my link to get a LIFETIME 50% discount on your subscription: ${referralLink}`;
+        const message = `Hey! I'm inviting you to get a business website with BizconNet™. Use my link to get a LIFETIME 50% discount on your subscription: ${referralLink}`;
         window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
     };
 

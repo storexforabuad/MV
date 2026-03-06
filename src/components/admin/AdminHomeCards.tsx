@@ -85,14 +85,14 @@ const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferral
     <p className="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-pink-500">
       ₦{totalReferralBonus.toFixed(2)}
     </p>
-    <p className="text-sm text-text-secondary mt-2">This is 100% of the BizConnect™App Commission paid out as bonuses to referrers.</p>
+    <p className="text-sm text-text-secondary mt-2">This is 100% of the BizconNet™App Commission paid out as bonuses to referrers.</p>
     <button onClick={handleClose} className="mt-6 bg-blue-500 text-white font-bold py-2 px-4 rounded-lg">Close</button>
   </div>
 );
 
 const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.ElementType | null, glowClass: string, isAiCard?: boolean, colspan?: number, isWholesaleCard?: boolean, cardType?: 'metric' | 'action' }[] = [
   {
-    label: 'BizConnect™',
+    label: 'BizconNet™',
     icon: Globe,
     gradient: 'bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800',
     text: 'text-white',
@@ -467,7 +467,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
   useEffect(() => {
     const modalIsOpen = openModal !== null || isTipsModalOpen || isLaunchGuideModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen || isAdvertisingModalOpen || isEventsModalOpen || isAccountModalOpen || isWarehouseModalOpen || isWholesaleModalOpen || isCirclesModalOpen;
-    
+
     // Check if modal was literally JUST closed (transition from true to false)
     if (previousModalState.current && !modalIsOpen) {
       if (typeof onRefreshRef.current === 'function') {
@@ -522,7 +522,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     }
 
     const { label, subtitle } = card;
-    if (label === 'BizConnect™') setIsBizconNetworkModalOpen(true);
+    if (label === 'BizconNet™') setIsBizconNetworkModalOpen(true);
     else if (label === 'Launch') setIsLaunchGuideModalOpen(true);
     else if (label === 'Tips') setIsTipsModalOpen(true);
     else if (label === 'Views') setIsViewsModalOpen(true);
@@ -1001,7 +1001,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             return <MetricCard key={card.label} icon={Icon} label={card.label} count={metricValue} gradient={card.gradient} glowClass={card.glowClass} onClick={() => handleOpenModal(idx, card)} inlineStyle={inlineStyle} />;
           }
 
-          // Render action cards (BizConnect™, Tips, Share, Settings, Subscription, Warehouse, Events)
+          // Render action cards (BizconNet™, Tips, Share, Settings, Subscription, Warehouse, Events)
           if (card.cardType === 'action') {
             return (
               <motion.div key={card.label} variants={itemVariants} className={`relative h-full ${spotlightClasses}`}>
@@ -1041,11 +1041,11 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
       <CustomersListModal storeId={props.storeId} isOpen={isCustomersModalOpen} onClose={handleCloseCustomersModal} />
 
       {isLaunchGuideModalOpen && (
-        <LaunchGuideModal 
-          storeLink={props.storeLink} 
-          products={props.products} 
-          isOpen={isLaunchGuideModalOpen} 
-          onClose={handleCloseLaunchGuideModal} 
+        <LaunchGuideModal
+          storeLink={props.storeLink}
+          products={props.products}
+          isOpen={isLaunchGuideModalOpen}
+          onClose={handleCloseLaunchGuideModal}
         />
       )}
 

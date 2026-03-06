@@ -259,7 +259,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                     let watermarkText = '';
                     if (instagramHandle) {
                         const cleanHandle = instagramHandle.startsWith('@') ? instagramHandle : `@${instagramHandle}`;
-                        watermarkText = `${cleanHandle} | BizConnect™Verified`;
+                        watermarkText = `${cleanHandle} | BizconNet™Verified`;
                     } else {
                         const formattedName = storeName
                             .replace(/\./g, ' ')
@@ -267,7 +267,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                             .filter(Boolean)
                             .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
                             .join(' ');
-                        watermarkText = `${formattedName} | BizConnect™Verified`;
+                        watermarkText = `${formattedName} | BizconNet™Verified`;
                     }
                     processedFile = await applyWatermark(processedFile, watermarkText);
                 } catch (err) {
@@ -428,7 +428,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                             let watermarkText = '';
                             if (instagramHandle) {
                                 const cleanHandle = instagramHandle.startsWith('@') ? instagramHandle : `@${instagramHandle}`;
-                                watermarkText = `${cleanHandle} | BizConnect™Verified`;
+                                watermarkText = `${cleanHandle} | BizconNet™Verified`;
                             } else {
                                 const formattedName = storeName
                                     .replace(/\./g, ' ')
@@ -436,7 +436,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                     .filter(Boolean)
                                     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
                                     .join(' ');
-                                watermarkText = `${formattedName} | BizConnect™Verified`;
+                                watermarkText = `${formattedName} | BizconNet™Verified`;
                             }
                             processedFile = await applyWatermark(processedFile, watermarkText);
                         } catch (err) {
