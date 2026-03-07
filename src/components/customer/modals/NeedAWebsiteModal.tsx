@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Globe, ArrowRight, AlertCircle, Check, CreditCard, Sparkles } from 'lucide-react';
+import { X, Globe, ArrowRight, AlertCircle, Check, CreditCard, Sparkles, Package, Link, MessageCircle } from 'lucide-react';
 import { useWebsiteRegistrationModal } from '@/hooks/useWebsiteRegistrationModal';
 import { useModalBackNavigation } from '@/hooks/useModalBackNavigation';
 import CountryStateSelector from '@/components/shared/CountryStateSelector';
@@ -226,6 +226,21 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                   <p className="text-slate-300 text-sm sm:text-base max-w-[280px] mx-auto leading-relaxed">
                     Get a professional Webapp for <span className="line-through text-slate-500 decoration-slate-500">₦850,000</span> as little as <span className="font-bold text-amber-500">₦500/week</span> in minutes.
                   </p>
+                </div>
+
+                <div className="flex flex-col gap-4 w-full px-4 sm:px-8 my-8">
+                  {[
+                    { icon: Package, text: "Upload and manage up to 1,000 products easily" },
+                    { icon: Link, text: "One professional store link for your social media bio" },
+                    { icon: MessageCircle, text: 'Receive perfectly organized, ready-to-pay orders on WhatsApp. No more "How much?" DMs.' }
+                  ].map((benefit, i) => (
+                    <div key={i} className="flex items-start gap-3 text-left">
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${isStunnerStores ? 'bg-cyan-500/10 text-cyan-400' : is420Hub ? 'bg-emerald-500/10 text-emerald-400' : 'bg-amber-500/10 text-amber-500'}`}>
+                        <benefit.icon className="w-3.5 h-3.5" />
+                      </div>
+                      <span className="text-sm font-medium text-slate-300 leading-snug">{benefit.text}</span>
+                    </div>
+                  ))}
                 </div>
 
                 <div className="bg-amber-500/5 border border-amber-500/20 rounded-2xl p-4 max-w-sm mx-auto">
