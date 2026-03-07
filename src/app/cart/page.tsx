@@ -41,6 +41,7 @@ export default function CartPage() {
   const [groupedCart, setGroupedCart] = useState<GroupedCart>({});
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [isNeedWebsiteModalOpen, setIsNeedWebsiteModalOpen] = useState(false);
   const [currentStoreId, setCurrentStoreId] = useState<string | null>(null);
 
   const { customer } = useCustomer();

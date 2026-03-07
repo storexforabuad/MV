@@ -53,6 +53,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
   // Fashion-specific state
   const [selectedColor, setSelectedColor] = useState<FashionProduct['colors'][0] | null>(null);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
+  const [highlightSizeSection, setHighlightSizeSection] = useState(false);
   const [isNeedAWebsiteModalOpen, setIsNeedAWebsiteModalOpen] = useState(false);
   const sizeSectionRef = useRef<HTMLDivElement>(null);
 
