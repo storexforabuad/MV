@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Globe, ArrowRight, AlertCircle, Check, CreditCard, Sparkles, Package, Link, MessageCircle } from 'lucide-react';
+import { X, Globe, ArrowRight, AlertCircle, Check, CreditCard, Sparkles, Package, Share2, MessageCircle } from 'lucide-react';
 import { useWebsiteRegistrationModal } from '@/hooks/useWebsiteRegistrationModal';
 import { useModalBackNavigation } from '@/hooks/useModalBackNavigation';
 import CountryStateSelector from '@/components/shared/CountryStateSelector';
@@ -223,15 +223,17 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                     business empire
                   </h1>
 
-                  <p className="text-slate-300 text-sm sm:text-base max-w-[280px] mx-auto leading-relaxed">
-                    Get a professional Webapp for <span className="line-through text-slate-500 decoration-slate-500">₦850,000</span> as little as <span className="font-bold text-amber-500">₦500/week</span> in minutes.
+                  <p className="text-slate-300 text-sm sm:text-base max-w-[320px] mx-auto leading-relaxed">
+                    Get a professional Webapp for <span className="line-through text-slate-500 decoration-amber-500 pr-1">₦850,000</span>
+                    <br className="hidden sm:block" />
+                    as little as <span className="font-bold text-amber-500">₦500/week</span> in minutes.
                   </p>
                 </div>
 
                 <div className="flex flex-col gap-4 w-full px-4 sm:px-8 my-8">
                   {[
                     { icon: Package, text: "Upload and manage up to 1,000 products easily" },
-                    { icon: Link, text: "One professional store link for your social media bio" },
+                    { icon: Share2, text: "Get a unique .com link to share & put on your social media bio" },
                     { icon: MessageCircle, text: 'Receive perfectly organized, ready-to-pay orders on WhatsApp. No more "How much?" DMs.' }
                   ].map((benefit, i) => (
                     <div key={i} className="flex items-start gap-3 text-left">
