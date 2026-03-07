@@ -73,7 +73,7 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
 
   const phase3Copy = `TOMORROW IS THE DAY! ⏰ Our new digital store opens in exactly 24 hours. To celebrate, I’m doing something crazy—the first 10 people to order through the new site tomorrow will get a special gift/discount! Set your alarms! 🎁💨`;
 
-  const phase4Copy = `WE ARE LIVE!!! 🛍️✨ You can now see everything we have in stock, check prices, and send your orders straight to my WhatsApp in seconds!\n\nThe Launch Promo is officially active. Click here to check it out now 👉 ${tinyUrl}`;
+  const phase4Copy = `WE ARE LIVE!!! 🛍️✨ You can now see everything we have in stock, check prices, and send your orders straight to my WhatsApp in seconds!\n\nThe Launch Promo is officially active. Tap here to check it out now 👉 ${tinyUrl}`;
 
   const phase5Copy = `Wow! I am blown away by the love! 🥺 My WhatsApp is blowing up with neat, organized orders. Thank you to everyone who has shopped via the new link! If you haven't checked it out yet, what are you waiting for? 👉 ${tinyUrl}`;
 
@@ -343,13 +343,13 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
                     <button
                       onClick={() => togglePhase(slide.id)}
                       className={`w-full flex items-center justify-center gap-3 p-4 rounded-2xl border-2 transition-all font-black text-base sm:text-lg ${completedPhases.includes(slide.id)
-                          ? 'bg-green-50 dark:bg-green-900/20 border-green-500 text-green-600 dark:text-green-400'
-                          : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-violet-500 hover:text-violet-600 dark:hover:text-violet-400 shadow-sm'
+                        ? 'bg-green-50 dark:bg-green-900/20 border-green-500 text-green-600 dark:text-green-400'
+                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-violet-500 hover:text-violet-600 dark:hover:text-violet-400 shadow-sm'
                         }`}
                     >
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-colors shrink-0 ${completedPhases.includes(slide.id)
-                          ? 'bg-green-500 border-green-500 text-white'
-                          : 'border-slate-300 dark:border-slate-600 text-transparent'
+                        ? 'bg-green-500 border-green-500 text-white'
+                        : 'border-slate-300 dark:border-slate-600 text-transparent'
                         }`}>
                         <CheckCircle2 className="w-4 h-4" strokeWidth={3} />
                       </div>
@@ -380,8 +380,8 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
               onClick={nextSlide}
               disabled={isSlidePhase && !isPhaseCompleted}
               className={`flex-1 ${currentSlide > 0 ? 'ml-4' : ''} ${isSlidePhase && !isPhaseCompleted
-                  ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-slate-700'
-                  : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white shadow-lg shadow-violet-500/25 active:scale-[0.98]'
+                ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-slate-700'
+                : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white shadow-lg shadow-violet-500/25 active:scale-[0.98]'
                 } font-bold py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-2 text-base outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 w-full`}
             >
               {currentSlide === slides.length - 1 ? 'Finish Guide' : (slide as any).actionText || 'Continue'}

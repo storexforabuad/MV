@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import NeedAWebsiteModal from '@/components/customer/modals/NeedAWebsiteModal';
 
 interface SharedWishlistPageProps {
@@ -257,16 +257,19 @@ function SharedWishlistPageContent({ params }: SharedWishlistPageProps) {
                                     <Globe className="w-4 h-4 text-amber-400" />
                                 </div>
                                 <span className="text-[10px] font-black text-amber-400/80 tracking-[0.2em] uppercase">
-                                    Powered by <span className="text-amber-400">BizconNet™ 2026.</span>
+                                    POWERED BY <span className="text-amber-400">BIZCONNET™ 2026.</span>
                                 </span>
                             </div>
 
-                            <div className="flex flex-col items-center gap-1.5">
-                                <p className="text-sm sm:text-base font-black text-white leading-tight tracking-tight">
-                                    Get a professional business website
+                            <div className="flex flex-col items-center gap-1 text-center w-full">
+                                <p className="text-sm sm:text-base font-bold text-white tracking-tight">
+                                    Get your professional website like
                                 </p>
-                                <div className="flex items-center gap-2 text-amber-400 font-black text-[10px] uppercase tracking-widest mt-1 group-hover:gap-3 transition-all">
-                                    Click to start <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                                <p className="text-base sm:text-xl font-black text-white tracking-tight">
+                                    Alaniq INT
+                                </p>
+                                <div className="flex items-center gap-2 text-amber-400 font-black text-[10px] uppercase tracking-widest mt-2 group-hover:gap-3 transition-all">
+                                    Tap to start <Sparkles className="w-3.5 h-3.5 animate-pulse" />
                                     <span>→</span>
                                 </div>
                             </div>

@@ -25,7 +25,7 @@ import SizeSelector from '@/components/products/SizeSelector';
 import { SizePreferencesCache } from '@/lib/sizePreferencesCache';
 import SizeGuideModal from '@/components/products/SizeGuideModal';
 import NeedAWebsiteModal from '@/components/customer/modals/NeedAWebsiteModal';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Globe, Sparkles } from 'lucide-react';
 
 const ProductDetailSkeleton = dynamic(() => import('@/components/ProductDetailSkeleton'), { ssr: false });
@@ -53,7 +53,6 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
   // Fashion-specific state
   const [selectedColor, setSelectedColor] = useState<FashionProduct['colors'][0] | null>(null);
   const [isSizeGuideOpen, setIsSizeGuideOpen] = useState(false);
-  const [highlightSizeSection, setHighlightSizeSection] = useState(false);
   const [isNeedAWebsiteModalOpen, setIsNeedAWebsiteModalOpen] = useState(false);
   const sizeSectionRef = useRef<HTMLDivElement>(null);
 
@@ -631,16 +630,19 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                               <Globe className={`w-4 h-4 ${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}`} />
                             </div>
                             <span className={`text-[10px] font-black tracking-[0.2em] uppercase ${isStunnerStores ? 'text-violet-400/80' : is420Hub ? 'text-emerald-400/80' : 'text-amber-400/80'}`}>
-                              Powered by <span className={isStunnerStores ? 'text-violet-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}>BizconNet™ 2026.</span>
+                              POWERED BY <span className={isStunnerStores ? 'text-violet-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}>BIZCONNET™ 2026.</span>
                             </span>
                           </div>
 
-                          <div className="flex flex-col items-center gap-1.5">
-                            <p className="text-sm sm:text-base font-black text-white leading-tight tracking-tight">
-                              Get your professional website like {storeMeta?.name || 'this'}
+                          <div className="flex flex-col items-center gap-1 text-center w-full">
+                            <p className="text-sm sm:text-base font-bold text-white tracking-tight">
+                              Get your professional business website & app like
                             </p>
-                            <div className={`flex items-center gap-2 font-black text-[10px] uppercase tracking-widest mt-1 group-hover:gap-3 transition-all ${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}`}>
-                              Click to start <Sparkles className="w-3.5 h-3.5 animate-pulse" />
+                            <p className="text-base sm:text-xl font-black text-white tracking-tight">
+                              {storeMeta?.name || 'this'}
+                            </p>
+                            <div className={`flex items-center gap-2 font-black text-[10px] uppercase tracking-widest mt-2 group-hover:gap-3 transition-all ${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}`}>
+                              Tap to start <Sparkles className="w-3.5 h-3.5 animate-pulse" />
                               <span>→</span>
                             </div>
                           </div>

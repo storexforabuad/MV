@@ -171,7 +171,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${isStunnerStores ? 'bg-violet-500/10 border-violet-500/20' : is420Hub ? 'bg-emerald-400/10 border-emerald-400/20' : 'bg-amber-400/10 border-amber-400/20'}`}>
                 <Globe className={isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} size={20} />
               </div>
-              <h2 className="text-xl font-bold text-white">Get Your Website</h2>
+              <h2 className="text-xl font-bold text-white">Get Your Webapp</h2>
             </div>
             <button
               onClick={handleClose}
@@ -241,9 +241,22 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                 </div>
 
                 <div className="text-center pt-4">
-                  <p className="text-[10px] text-slate-500/70 font-medium tracking-wide flex flex-wrap items-center justify-center gap-1">
-                    Powered by BizconNet™ 2026 in partnership with Google, WhatsApp & Paystack.
-                  </p>
+                  <div className="text-[10px] text-slate-500/70 font-medium tracking-wide flex flex-wrap items-center justify-center gap-1">
+                    <span>Powered by <span className={`font-black tracking-tight ${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}`}>BizconNet™</span> 2026</span>
+                    <span className="flex flex-wrap items-center justify-center gap-1">
+                      in partnership with
+                      <span className="flex items-center font-bold ml-0.5 text-[11px] tracking-tight">
+                        <span className="text-[#4285F4]">G</span><span className="text-[#EA4335]">o</span><span className="text-[#FBBC05]">o</span><span className="text-[#4285F4]">g</span><span className="text-[#34A853]">l</span><span className="text-[#EA4335]">e</span>,
+                      </span>
+                      <span className="font-bold text-[#25D366] text-[11px] tracking-tight">
+                        WhatsApp
+                      </span>
+                      <span className="px-0.5 text-slate-400">&amp;</span>
+                      <span className="font-bold text-[#00C3F7] text-[11px] tracking-tight">
+                        Paystack.
+                      </span>
+                    </span>
+                  </div>
                 </div>
               </div>
             )}
@@ -445,7 +458,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                     <h3 className="text-xl font-black text-white uppercase tracking-tighter">Ramadan Special Offer</h3>
                   </div>
                   <p className="text-sm text-slate-400 leading-relaxed">
-                    Get your professional business website live this season with our <span className={`${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} font-bold`}>limited-time 50% discount</span>.
+                    Get your professional business Webapp live this season with our <span className={`${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} font-bold`}>limited-time 50% discount</span>.
                   </p>
                 </div>
 
@@ -663,7 +676,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
               {modal.loading ? (
                 'Processing...'
               ) : modal.currentScreen === 1 ? (
-                <>Get Started</>
+                <>Continue</>
               ) : modal.currentScreen === 5 ? (
                 <>
                   Subscribe
