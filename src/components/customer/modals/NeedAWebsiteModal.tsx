@@ -696,7 +696,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                 <>Continue</>
               ) : modal.currentScreen === 5 ? (
                 <>
-                  Subscribe
+                  Register
                   <CreditCard size={18} />
                 </>
               ) : modal.currentScreen === 4 ? (
