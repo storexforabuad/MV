@@ -224,7 +224,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                   </h1>
 
                   <p className="text-slate-300 text-sm sm:text-base max-w-[280px] mx-auto leading-relaxed">
-                    Get a professional website for <span className="line-through text-slate-500 decoration-slate-500">₦850,000</span> as little as <span className="font-bold text-amber-500">₦500/week</span> in minutes.
+                    Get a professional Webapp for <span className="line-through text-slate-500 decoration-slate-500">₦850,000</span> as little as <span className="font-bold text-amber-500">₦500/week</span> in minutes.
                   </p>
                 </div>
 
@@ -309,7 +309,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
               <div className="space-y-6">
                 <div>
                   <h3 className="text-lg font-bold text-white mb-2">Tell Us About Your Business</h3>
-                  <p className="text-sm text-slate-400">We'll use this to set up your website</p>
+                  <p className="text-sm text-slate-400">We'll use this to set up your Webapp</p>
                 </div>
 
                 {modal.error && (
@@ -383,14 +383,14 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
               <div className="space-y-6">
                 <div>
                   <h3 className="text-lg font-bold text-white mb-2">Review Your Professional Identity</h3>
-                  <p className="text-sm text-slate-400">Your website is almost ready to go live!</p>
+                  <p className="text-sm text-slate-400">Your Webapp is almost ready to go live!</p>
                 </div>
 
                 {/* Store Link Preview - On Brand Style */}
                 <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6 space-y-4">
                   <div className={`flex items-center gap-2 ${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}`}>
                     <Globe size={18} />
-                    <span className="text-xs font-black uppercase tracking-widest">Website Link Preview</span>
+                    <span className="text-xs font-black uppercase tracking-widest">Webapp Link Preview</span>
                   </div>
 
                   <div className={`bg-slate-900 border border-slate-700 rounded-xl p-4 flex items-center justify-between group cursor-pointer transition-all ${isStunnerStores ? 'hover:border-violet-500/50' : is420Hub ? 'hover:border-emerald-500/50' : 'hover:border-amber-500/50'}`}>
@@ -428,7 +428,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                     {[
                       { icon: CreditCard, text: "Choose a plan that fits your volume" },
                       { icon: Check, text: "Secure payment via Paystack" },
-                      { icon: Sparkles, text: "Your website goes live instantly!" }
+                      { icon: Sparkles, text: "Your Webapp goes live instantly!" }
                     ].map((step, i) => (
                       <div key={i} className="flex items-center gap-3 p-3 bg-slate-800/30 rounded-xl border border-slate-700/30">
                         <div className="w-6 h-6 rounded-lg bg-slate-700 flex items-center justify-center text-slate-400">
@@ -443,7 +443,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                 {/* Trust Element */}
                 <div className="text-center pt-2">
                   <p className="text-[10px] text-slate-500 font-medium">
-                    Joining <span className={`${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} font-bold`}>5,000+ digital vendors</span> across Nigeria.
+                    Joining <span className={`${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} font-bold`}>5,000+ digital vendors</span> across Nigeria & Africa.
                   </p>
                 </div>
               </div>
