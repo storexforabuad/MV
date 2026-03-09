@@ -43,7 +43,7 @@ interface CategoryButtonProps {
   storeId: string;
   buttonRefSetter: (el: HTMLButtonElement | null, id: string) => void;
   onClick: () => void;
-  onPressStart: (category: Category) => void;
+  onPressStart: (category: Category, isContextMenu?: boolean) => void;
   onPressEnd: () => void;
 }
 
@@ -69,7 +69,7 @@ function CategoryButton({
       onClick={onClick}
       onContextMenu={(e) => {
         e.preventDefault();
-        onPressStart(category);
+        onPressStart(category, true);
       }}
       onTouchStart={(e) => {
         // Store initial touch coordinates to calculate slop
@@ -156,34 +156,42 @@ export default function CategoryBar({
   const pressTimer = useRef<NodeJS.Timeout | null>(null);
   const isCopyingRef = useRef(false);
 
-  const handlePressStart = (category: Category) => {
+  const executeCopy = (category: Category) => {
+    // Prevent double firing if contextMenu and touch timer both resolve
+    if (isCopyingRef.current) return;
+    isCopyingRef.current = true;
+    setTimeout(() => { isCopyingRef.current = false; }, 2000);
+
+    const url = `https://tinyurl.com/bizconnet/${storeId}?category=${category.id}`;
+
+    navigator.clipboard.writeText(url)
+      .then(() => {
+        toast.success(`Link for ${category.name} copied!`, {
+          duration: 2000,
+          position: 'bottom-center',
+          style: {
+            background: 'var(--card-background)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-color)',
+          },
+        });
+        if (navigator.vibrate) navigator.vibrate(50);
+      })
+      .catch(() => toast.error('Failed to copy link'));
+  };
+
+  const handlePressStart = (category: Category, isContextMenu = false) => {
     // Clear any lingering timer before starting a new one
     if (pressTimer.current) clearTimeout(pressTimer.current);
 
+    if (isContextMenu) {
+      executeCopy(category);
+      return;
+    }
+
     pressTimer.current = setTimeout(() => {
       pressTimer.current = null;
-
-      // Prevent double firing if contextMenu and touch timer both resolve
-      if (isCopyingRef.current) return;
-      isCopyingRef.current = true;
-      setTimeout(() => { isCopyingRef.current = false; }, 1000);
-
-      const url = `https://tinyurl.com/bizconnet/${storeId}?category=${category.id}`;
-
-      navigator.clipboard.writeText(url)
-        .then(() => {
-          toast.success(`Link for ${category.name} copied!`, {
-            duration: 2000,
-            position: 'bottom-center',
-            style: {
-              background: 'var(--card-background)',
-              color: 'var(--text-primary)',
-              border: '1px solid var(--border-color)',
-            },
-          });
-          if (navigator.vibrate) navigator.vibrate(50);
-        })
-        .catch(() => toast.error('Failed to copy link'));
+      executeCopy(category);
     }, 600);
   };
 

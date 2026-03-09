@@ -268,32 +268,41 @@ export default function ProductCard({
   const imagePressStartPos = useRef<{ x: number; y: number } | null>(null);
   const isCopyingRef = useRef(false);
 
-  const handleImagePressStart = (e: React.TouchEvent | React.PointerEvent | React.MouseEvent, clientX: number, clientY: number) => {
+  const executeCopy = () => {
+    if (isCopyingRef.current) return;
+    isCopyingRef.current = true;
+    setTimeout(() => { isCopyingRef.current = false; }, 2000);
+
+    const finalStoreId = storeId || product.storeId || 'bizcon';
+    const url = `https://tinyurl.com/bizconnet/${finalStoreId}/products/${product.id}`;
+    navigator.clipboard.writeText(url)
+      .then(() => {
+        toast.success(`Link for "${product.name}" copied!`, {
+          duration: 2000,
+          position: 'bottom-center',
+          style: {
+            background: 'var(--card-background)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-color)',
+          },
+        });
+        if (navigator.vibrate) navigator.vibrate(50);
+      })
+      .catch(() => toast.error('Failed to copy link'));
+  };
+
+  const handleImagePressStart = (e: React.TouchEvent | React.PointerEvent | React.MouseEvent, clientX: number, clientY: number, isContextMenu = false) => {
     imagePressStartPos.current = { x: clientX, y: clientY };
     if (imagePressTimer.current) clearTimeout(imagePressTimer.current);
+
+    if (isContextMenu) {
+      executeCopy();
+      return;
+    }
+
     imagePressTimer.current = setTimeout(() => {
       imagePressTimer.current = null;
-
-      if (isCopyingRef.current) return;
-      isCopyingRef.current = true;
-      setTimeout(() => { isCopyingRef.current = false; }, 1000);
-
-      const finalStoreId = storeId || product.storeId || 'bizcon';
-      const url = `https://tinyurl.com/bizconnet/${finalStoreId}/products/${product.id}`;
-      navigator.clipboard.writeText(url)
-        .then(() => {
-          toast.success(`Link for "${product.name}" copied!`, {
-            duration: 2000,
-            position: 'bottom-center',
-            style: {
-              background: 'var(--card-background)',
-              color: 'var(--text-primary)',
-              border: '1px solid var(--border-color)',
-            },
-          });
-          if (navigator.vibrate) navigator.vibrate(50);
-        })
-        .catch(() => toast.error('Failed to copy link'));
+      executeCopy();
     }, 600);
   };
 
@@ -373,7 +382,7 @@ export default function ProductCard({
           draggable="false"
           onContextMenu={(e) => {
             e.preventDefault();
-            handleImagePressStart(e, e.clientX, e.clientY);
+            handleImagePressStart(e, e.clientX, e.clientY, true);
           }}
           onTouchStart={(e) => {
             if (e.touches.length > 0) {

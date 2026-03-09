@@ -171,34 +171,42 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
   const pressTimer = useRef<NodeJS.Timeout | null>(null);
   const isCopyingRef = useRef(false);
 
-  const handlePressStart = () => {
+  const executeCopy = () => {
+    // Prevent double firing if contextMenu and touch timer both resolve
+    if (isCopyingRef.current) return;
+    isCopyingRef.current = true;
+    setTimeout(() => { isCopyingRef.current = false; }, 2000);
+
+    const url = `https://tinyurl.com/bizconnet/${storeId}`;
+
+    navigator.clipboard.writeText(url)
+      .then(() => {
+        toast.success(`Link for ${storeName || 'Store'} copied!`, {
+          duration: 2000,
+          position: 'bottom-center',
+          style: {
+            background: 'var(--card-background)',
+            color: 'var(--text-primary)',
+            border: '1px solid var(--border-color)',
+          },
+        });
+        if (navigator.vibrate) navigator.vibrate(50);
+      })
+      .catch(() => toast.error('Failed to copy link'));
+  };
+
+  const handlePressStart = (isContextMenu = false) => {
     if (!storeId) return;
     if (pressTimer.current) clearTimeout(pressTimer.current);
 
+    if (isContextMenu) {
+      executeCopy();
+      return;
+    }
+
     pressTimer.current = setTimeout(() => {
       pressTimer.current = null;
-
-      // Prevent double firing if contextMenu and touch timer both resolve
-      if (isCopyingRef.current) return;
-      isCopyingRef.current = true;
-      setTimeout(() => { isCopyingRef.current = false; }, 1000);
-
-      const url = `https://tinyurl.com/bizconnet/${storeId}`;
-
-      navigator.clipboard.writeText(url)
-        .then(() => {
-          toast.success(`Link for ${storeName || 'Store'} copied!`, {
-            duration: 2000,
-            position: 'bottom-center',
-            style: {
-              background: 'var(--card-background)',
-              color: 'var(--text-primary)',
-              border: '1px solid var(--border-color)',
-            },
-          });
-          if (navigator.vibrate) navigator.vibrate(50);
-        })
-        .catch(() => toast.error('Failed to copy link'));
+      executeCopy();
     }, 600);
   };
 
@@ -255,7 +263,7 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
                   className="text-xl font-semibold card-text-gradient flex items-center gap-2 text-nowrap cursor-pointer selection:bg-transparent"
                   onContextMenu={(e) => {
                     e.preventDefault();
-                    handlePressStart();
+                    handlePressStart(true);
                   }}
                   onTouchStart={(e) => {
                     if (e.touches.length > 0) {
@@ -291,7 +299,7 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
                   onClick={handleTitleTap}
                   onContextMenu={(e) => {
                     e.preventDefault();
-                    handlePressStart();
+                    handlePressStart(true);
                   }}
                   onTouchStart={(e) => {
                     if (e.touches.length > 0) {
@@ -344,7 +352,7 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
                   className="text-xl font-semibold flex items-center gap-2 premium-title-gradient cursor-pointer selection:bg-transparent"
                   onContextMenu={(e) => {
                     e.preventDefault();
-                    handlePressStart();
+                    handlePressStart(true);
                   }}
                   onTouchStart={(e) => {
                     if (e.touches.length > 0) {
