@@ -1,7 +1,7 @@
 'use client';
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight, Rocket, Megaphone, Flame, Smartphone, CheckCircle2, Copy, Lightbulb, Eye, Clock, TrendingUp, AlertCircle, Heart } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Rocket, Megaphone, Flame, Smartphone, CheckCircle2, Copy, Lightbulb, Eye, Clock, TrendingUp, AlertCircle, Heart, Star, List } from 'lucide-react';
 import { Product } from '@/types/product';
 import toast from 'react-hot-toast';
 
@@ -23,7 +23,7 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
     }
   }, [currentSlide]);
 
-  const PHASE_STORAGE_KEY = `launch_playbook_progress_2day_${storeLink || 'store'}`;
+  const PHASE_STORAGE_KEY = `launch_playbook_progress_5day_${storeLink || 'store'}`;
   const [completedPhases, setCompletedPhases] = useState<string[]>([]);
 
   useEffect(() => {
@@ -82,6 +82,18 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
     phase3: {
       en: `Wow! I am blown away by the love! 🥺 My WhatsApp is blowing up with neat, organized orders!\n\nThese items have been flying off the shelves 🔥 Order here: ${topProductUrl}`,
       ha: `Wow! Lallai na gamsu da irin wannan ƙauna! 🥺 WhatsApp dina ya cika da oder a tsare gwanin sha'awa! Ina Godiya\n\nWadannan kayayyakin suna ta fita gadan-gadan 🔥 Yi odarku a nan: ${topProductUrl}`,
+    },
+    phase4: {
+      en: `It makes me so happy seeing you guys enjoy the new site! 🥰 For those who haven't tried it yet, it’s super easy. Just click the link, pick what you want, and hit order via Whatsapp! No more waiting for me to be online. Try it yourself: ${tinyUrl}`,
+      ha: `Yana sa ni farin ciki sossai ganin yadda kuke jin dadin sabon website dinmu! 🥰 Ga wadanda ba su gwada ba tukuna, abu ne mai sauƙi. Kawai danna link din, zaɓi abin da kuke so, sannan ku tura gami da order zuwa Whatsapp! Ba sai kun jira ina online ba. Gwada da kanku: ${tinyUrl}`,
+    },
+    phase5: {
+      en: `Did you know we have a whole section just for our bestselling categories? 🤩 You don’t need to scroll endlessly anymore. I've organized everything so you can find exactly what you need in seconds. Browse the collection here: ${tinyUrl}`,
+      ha: `Shin kun san muna da sashe na musamman don rabe raben kayayyakinmu? 🤩 Ba sai kun sha wahalar neman kaya ba yanzu. Na tsara komai ta yadda za ku iya samun abin da kuke buƙata a cikin daƙiƙa kaɗan. Duba kayayyakin a nan: ${tinyUrl}`,
+    },
+    phase6: {
+      en: `We are open 24/7! 🏪 Did you know you don't even need to ask me if we are available? Save our store link to your phone so you can shop our latest arrivals anytime, anywhere. Thank you for an amazing launch week! ❤️ ${tinyUrl}`,
+      ha: `A buɗe muke 24/7! 🏪 Shin kun san ba kwa buƙatar tambayata ko muna available? Ku ajiye link din shagonmu a kan wayarku don ku iya siyan sababbin kayayyakinmu a kowane lokaci, a ko'ina. Mun gode sossai da kuka sanya wannan satin ya zama abin tarihi! ❤️ ${tinyUrl}`,
     }
   };
 
@@ -90,12 +102,12 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
       id: 'intro',
       icon: Rocket,
       iconColor: 'bg-gradient-to-br from-violet-500 to-purple-600',
-      title: 'The 48-Hour Launch Playbook',
-      description: 'Launch your digital store in just 2 days. From uploading products to your first rapid-fire orders.',
+      title: 'The 5-Day Launch Playbook',
+      description: 'Launch your digital store and build momentum in just 5 days. From uploading products to securing loyal customers.',
       highlights: [
         'Fast-track your setup',
         'Build immediate hype',
-        'Open for business in 48 hours'
+        'Open for business 24/7'
       ],
       actionText: 'Start the Guide',
     },
@@ -140,7 +152,7 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
     {
       id: 'phase4',
       icon: Heart,
-      iconColor: 'bg-gradient-to-br from-violet-500 to-purple-600',
+      iconColor: 'bg-gradient-to-br from-pink-500 to-rose-600',
       title: 'Day 2: Social Proof & Rush',
       description: 'Prove that people are shopping and highlight the best-selling items from the day.',
       copyText: copies.phase3[language],
@@ -148,6 +160,45 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
         'Post a screenshot of incoming orders',
         'Mention low stock to build urgency',
         'Redirect DMs directly to product/category links (e.g., instead of sending pictures, reply: "See all options here: [Category Link]")'
+      ]
+    },
+    {
+      id: 'phase5',
+      icon: Star,
+      iconColor: 'bg-gradient-to-br from-yellow-400 to-amber-500',
+      title: 'Day 3: The "How-To"',
+      description: 'Educate latecomers on how easy the new system is, and share early positive feedback to build trust.',
+      copyText: copies.phase4[language],
+      tips: [
+        'Post a screen recording searching and adding to cart',
+        'Share a screenshot of a happy customer review',
+        'Highlight that they no longer have to wait for your reply'
+      ]
+    },
+    {
+      id: 'phase6',
+      icon: List,
+      iconColor: 'bg-gradient-to-br from-sky-400 to-blue-500',
+      title: 'Day 4: Category Spotlight',
+      description: 'Drive traffic to specific, high-margin, or complex categories rather than just the home page.',
+      copyText: copies.phase5[language],
+      tips: [
+        'Pick one specific product category (e.g., Perfumes)',
+        'Post a carousel showcasing items only from that category',
+        'Use the direct Category Link on your status'
+      ]
+    },
+    {
+      id: 'phase7',
+      icon: Smartphone,
+      iconColor: 'bg-gradient-to-br from-violet-500 to-purple-600',
+      title: 'Day 5: The "24/7 Store"',
+      description: 'Turn launch traffic into returning customers by getting them to install/bookmark the site.',
+      copyText: copies.phase6[language],
+      tips: [
+        'Post a quick tutorial on how to "Add to Home Screen"',
+        'Emphasize that they can shop 24/7, even when you are asleep',
+        'Celebrate the end of the Launch Week'
       ]
     }
   ];
