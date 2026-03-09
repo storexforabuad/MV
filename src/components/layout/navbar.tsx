@@ -169,6 +169,7 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
 
   // --- Long-press Store Link Sharing --- 
   const pressTimer = useRef<NodeJS.Timeout | null>(null);
+  const isCopyingRef = useRef(false);
 
   const handlePressStart = () => {
     if (!storeId) return;
@@ -176,6 +177,12 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
 
     pressTimer.current = setTimeout(() => {
       pressTimer.current = null;
+
+      // Prevent double firing if contextMenu and touch timer both resolve
+      if (isCopyingRef.current) return;
+      isCopyingRef.current = true;
+      setTimeout(() => { isCopyingRef.current = false; }, 1000);
+
       const url = `https://tinyurl.com/bizconnet/${storeId}`;
 
       navigator.clipboard.writeText(url)
@@ -246,12 +253,33 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
                 )}
                 <span
                   className="text-xl font-semibold card-text-gradient flex items-center gap-2 text-nowrap cursor-pointer selection:bg-transparent"
-                  onPointerDown={handlePressStart}
-                  onPointerUp={handlePressEnd}
-                  onPointerLeave={handlePressEnd}
-                  onPointerCancel={handlePressEnd}
-                  onContextMenu={(e) => e.preventDefault()}
-                  style={{ touchAction: 'manipulation', WebkitUserSelect: 'none', userSelect: 'none', WebkitTouchCallout: 'none' }}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    handlePressStart();
+                  }}
+                  onTouchStart={(e) => {
+                    if (e.touches.length > 0) {
+                      const touch = e.touches[0];
+                      (e.currentTarget as any)._touchStartX = touch.clientX;
+                      (e.currentTarget as any)._touchStartY = touch.clientY;
+                    }
+                    handlePressStart();
+                  }}
+                  onTouchEnd={handlePressEnd}
+                  onTouchCancel={handlePressEnd}
+                  onTouchMove={(e) => {
+                    if (e.touches.length > 0) {
+                      const touch = e.touches[0];
+                      const startX = (e.currentTarget as any)._touchStartX;
+                      const startY = (e.currentTarget as any)._touchStartY;
+                      if (startX !== undefined && startY !== undefined) {
+                        const dx = Math.abs(touch.clientX - startX);
+                        const dy = Math.abs(touch.clientY - startY);
+                        if (dx > 10 || dy > 10) handlePressEnd();
+                      }
+                    }
+                  }}
+                  style={{ touchAction: 'pan-y', WebkitUserSelect: 'none', userSelect: 'none', WebkitTouchCallout: 'none', WebkitTapHighlightColor: 'transparent' }}
                 >
                   {storeName || 'Store'}
                 </span>
@@ -261,15 +289,36 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
                 <ShoppingBag className="h-8 w-8 text-text-primary cursor-pointer" onClick={handleLogoTap} />
                 <button
                   onClick={handleTitleTap}
-                  onPointerDown={handlePressStart}
-                  onPointerUp={handlePressEnd}
-                  onPointerLeave={handlePressEnd}
-                  onPointerCancel={handlePressEnd}
-                  onContextMenu={(e) => e.preventDefault()}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    handlePressStart();
+                  }}
+                  onTouchStart={(e) => {
+                    if (e.touches.length > 0) {
+                      const touch = e.touches[0];
+                      (e.currentTarget as any)._touchStartX = touch.clientX;
+                      (e.currentTarget as any)._touchStartY = touch.clientY;
+                    }
+                    handlePressStart();
+                  }}
+                  onTouchEnd={handlePressEnd}
+                  onTouchCancel={handlePressEnd}
+                  onTouchMove={(e) => {
+                    if (e.touches.length > 0) {
+                      const touch = e.touches[0];
+                      const startX = (e.currentTarget as any)._touchStartX;
+                      const startY = (e.currentTarget as any)._touchStartY;
+                      if (startX !== undefined && startY !== undefined) {
+                        const dx = Math.abs(touch.clientX - startX);
+                        const dy = Math.abs(touch.clientY - startY);
+                        if (dx > 10 || dy > 10) handlePressEnd();
+                      }
+                    }
+                  }}
                   aria-label="Store title"
                   className="text-xl font-semibold flex items-center gap-2 premium-title-gradient hover:opacity-80 transition-opacity text-left selection:bg-transparent"
                   style={{
-                    touchAction: 'manipulation', WebkitUserSelect: 'none', userSelect: 'none', WebkitTouchCallout: 'none',
+                    touchAction: 'pan-y', WebkitUserSelect: 'none', userSelect: 'none', WebkitTouchCallout: 'none', WebkitTapHighlightColor: 'transparent',
                     ...(tapCount > 0
                       ? (() => {
                         const light = theme === 'light';
@@ -293,12 +342,33 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
                 <ShoppingBag className="h-8 w-8 text-text-primary" />
                 <span
                   className="text-xl font-semibold flex items-center gap-2 premium-title-gradient cursor-pointer selection:bg-transparent"
-                  onPointerDown={handlePressStart}
-                  onPointerUp={handlePressEnd}
-                  onPointerLeave={handlePressEnd}
-                  onPointerCancel={handlePressEnd}
-                  onContextMenu={(e) => e.preventDefault()}
-                  style={{ touchAction: 'manipulation', WebkitUserSelect: 'none', userSelect: 'none', WebkitTouchCallout: 'none' }}
+                  onContextMenu={(e) => {
+                    e.preventDefault();
+                    handlePressStart();
+                  }}
+                  onTouchStart={(e) => {
+                    if (e.touches.length > 0) {
+                      const touch = e.touches[0];
+                      (e.currentTarget as any)._touchStartX = touch.clientX;
+                      (e.currentTarget as any)._touchStartY = touch.clientY;
+                    }
+                    handlePressStart();
+                  }}
+                  onTouchEnd={handlePressEnd}
+                  onTouchCancel={handlePressEnd}
+                  onTouchMove={(e) => {
+                    if (e.touches.length > 0) {
+                      const touch = e.touches[0];
+                      const startX = (e.currentTarget as any)._touchStartX;
+                      const startY = (e.currentTarget as any)._touchStartY;
+                      if (startX !== undefined && startY !== undefined) {
+                        const dx = Math.abs(touch.clientX - startX);
+                        const dy = Math.abs(touch.clientY - startY);
+                        if (dx > 10 || dy > 10) handlePressEnd();
+                      }
+                    }
+                  }}
+                  style={{ touchAction: 'pan-y', WebkitUserSelect: 'none', userSelect: 'none', WebkitTouchCallout: 'none', WebkitTapHighlightColor: 'transparent' }}
                 >
                   {storeName || 'Store'}
                 </span>

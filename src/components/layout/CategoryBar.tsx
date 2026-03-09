@@ -67,12 +67,38 @@ function CategoryButton({
     <motion.button
       ref={(el) => buttonRefSetter(el, category.id)}
       onClick={onClick}
-      onPointerDown={() => onPressStart(category)}
-      onPointerUp={onPressEnd}
-      onPointerLeave={onPressEnd}
-      onPointerCancel={onPressEnd}
-      onContextMenu={(e) => e.preventDefault()}
-      style={{ touchAction: 'manipulation', WebkitUserSelect: 'none', userSelect: 'none', WebkitTouchCallout: 'none' }}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        onPressStart(category);
+      }}
+      onTouchStart={(e) => {
+        // Store initial touch coordinates to calculate slop
+        if (e.touches.length > 0) {
+          const touch = e.touches[0];
+          (e.currentTarget as any)._touchStartX = touch.clientX;
+          (e.currentTarget as any)._touchStartY = touch.clientY;
+        }
+        onPressStart(category);
+      }}
+      onTouchEnd={onPressEnd}
+      onTouchCancel={onPressEnd}
+      onTouchMove={(e) => {
+        // Implement slop: if finger moves more than 10px, cancel the press
+        if (e.touches.length > 0) {
+          const touch = e.touches[0];
+          const startX = (e.currentTarget as any)._touchStartX;
+          const startY = (e.currentTarget as any)._touchStartY;
+
+          if (startX !== undefined && startY !== undefined) {
+            const dx = Math.abs(touch.clientX - startX);
+            const dy = Math.abs(touch.clientY - startY);
+            if (dx > 10 || dy > 10) {
+              onPressEnd();
+            }
+          }
+        }
+      }}
+      style={{ touchAction: 'pan-y', WebkitUserSelect: 'none', userSelect: 'none', WebkitTouchCallout: 'none', WebkitTapHighlightColor: 'transparent' }}
       className="flex flex-col items-center w-[72px] sm:w-[80px] flex-shrink-0"
       whileTap={{ scale: 0.95 }}
       transition={{ type: 'spring', stiffness: 400, damping: 17 }}
@@ -128,6 +154,7 @@ export default function CategoryBar({
 
   // ── Long-press state lives HERE (stable component, never remounts) ──────────
   const pressTimer = useRef<NodeJS.Timeout | null>(null);
+  const isCopyingRef = useRef(false);
 
   const handlePressStart = (category: Category) => {
     // Clear any lingering timer before starting a new one
@@ -135,6 +162,12 @@ export default function CategoryBar({
 
     pressTimer.current = setTimeout(() => {
       pressTimer.current = null;
+
+      // Prevent double firing if contextMenu and touch timer both resolve
+      if (isCopyingRef.current) return;
+      isCopyingRef.current = true;
+      setTimeout(() => { isCopyingRef.current = false; }, 1000);
+
       const url = `https://tinyurl.com/bizconnet/${storeId}?category=${category.id}`;
 
       navigator.clipboard.writeText(url)

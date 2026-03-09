@@ -266,12 +266,18 @@ export default function ProductCard({
   // ── Long-press on image to copy product link ─────────────────────────────
   const imagePressTimer = useRef<NodeJS.Timeout | null>(null);
   const imagePressStartPos = useRef<{ x: number; y: number } | null>(null);
+  const isCopyingRef = useRef(false);
 
-  const handleImagePressStart = (e: React.PointerEvent) => {
-    imagePressStartPos.current = { x: e.clientX, y: e.clientY };
+  const handleImagePressStart = (e: React.TouchEvent | React.PointerEvent, clientX: number, clientY: number) => {
+    imagePressStartPos.current = { x: clientX, y: clientY };
     if (imagePressTimer.current) clearTimeout(imagePressTimer.current);
     imagePressTimer.current = setTimeout(() => {
       imagePressTimer.current = null;
+
+      if (isCopyingRef.current) return;
+      isCopyingRef.current = true;
+      setTimeout(() => { isCopyingRef.current = false; }, 1000);
+
       const finalStoreId = storeId || product.storeId || 'bizcon';
       const url = `https://tinyurl.com/bizconnet/${finalStoreId}/products/${product.id}`;
       navigator.clipboard.writeText(url)
@@ -299,10 +305,10 @@ export default function ProductCard({
     imagePressStartPos.current = null;
   };
 
-  const handleImagePressMove = (e: React.PointerEvent) => {
+  const handleImagePressMove = (clientX: number, clientY: number) => {
     if (!imagePressStartPos.current) return;
-    const dx = Math.abs(e.clientX - imagePressStartPos.current.x);
-    const dy = Math.abs(e.clientY - imagePressStartPos.current.y);
+    const dx = Math.abs(clientX - imagePressStartPos.current.x);
+    const dy = Math.abs(clientY - imagePressStartPos.current.y);
     // Cancel long press if pointer moves more than 10px (carousel swipe)
     if (dx > 10 || dy > 10) handleImagePressEnd();
   };
@@ -361,14 +367,26 @@ export default function ProductCard({
             userSelect: 'none',
             WebkitUserSelect: 'none',
             WebkitTouchCallout: 'none',
+            WebkitTapHighlightColor: 'transparent',
+            touchAction: 'pan-y pan-x',
           }}
           draggable="false"
-          onPointerDown={handleImagePressStart}
-          onPointerUp={handleImagePressEnd}
-          onPointerLeave={handleImagePressEnd}
-          onPointerCancel={handleImagePressEnd}
-          onPointerMove={handleImagePressMove}
-          onContextMenu={(e) => e.preventDefault()}
+          onContextMenu={(e) => {
+            e.preventDefault();
+            handleImagePressStart(e, e.clientX, e.clientY);
+          }}
+          onTouchStart={(e) => {
+            if (e.touches.length > 0) {
+              handleImagePressStart(e, e.touches[0].clientX, e.touches[0].clientY);
+            }
+          }}
+          onTouchEnd={handleImagePressEnd}
+          onTouchCancel={handleImagePressEnd}
+          onTouchMove={(e) => {
+            if (e.touches.length > 0) {
+              handleImagePressMove(e.touches[0].clientX, e.touches[0].clientY);
+            }
+          }}
         >
           {imageLoading && (
             <div className="absolute inset-0 bg-[var(--skeleton-background)] animate-pulse z-10" />
