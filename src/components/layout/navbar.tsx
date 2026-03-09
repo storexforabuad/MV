@@ -219,13 +219,6 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
     }, 300);
   };
 
-  const handlePressEnd = () => {
-    if (pressTimer.current) {
-      clearTimeout(pressTimer.current);
-      pressTimer.current = null;
-    }
-  };
-
   // --- SuperAdmin Secret Access ---
   const saTapCountRef = useRef(0);
   const saIdleResetRef = useRef<number | null>(null);
