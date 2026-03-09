@@ -72,7 +72,7 @@ function CategoryButton({
       onPointerLeave={onPressEnd}
       onPointerCancel={onPressEnd}
       onContextMenu={(e) => e.preventDefault()}
-      style={{ touchAction: 'manipulation', WebkitUserSelect: 'none', userSelect: 'none' }}
+      style={{ touchAction: 'manipulation', WebkitUserSelect: 'none', userSelect: 'none', WebkitTouchCallout: 'none' }}
       className="flex flex-col items-center w-[72px] sm:w-[80px] flex-shrink-0"
       whileTap={{ scale: 0.95 }}
       transition={{ type: 'spring', stiffness: 400, damping: 17 }}

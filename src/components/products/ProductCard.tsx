@@ -360,6 +360,7 @@ export default function ProductCard({
             backfaceVisibility: 'hidden',
             userSelect: 'none',
             WebkitUserSelect: 'none',
+            WebkitTouchCallout: 'none',
           }}
           draggable="false"
           onPointerDown={handleImagePressStart}

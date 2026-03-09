@@ -635,7 +635,7 @@ export default function RegisterPage({ params }: { params: { slug?: string[] } }
 
                 <div className="space-y-3 mb-6">
                     {[
-                        'Your Own Website & App',
+                        'Your Own Website',
                         'Sell Up to 200 Products',
                         'Weekly Business Reports',
                         'Reliable Delivery Network',

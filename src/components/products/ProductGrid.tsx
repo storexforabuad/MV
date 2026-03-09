@@ -377,7 +377,7 @@ const ProductGrid = memo(function ProductGrid({
 
                   <div className="flex flex-col items-center gap-1 text-center w-full">
                     <p className="text-sm sm:text-base font-bold text-white tracking-tight">
-                      Get your professional website & app like
+                      Get your professional Website like
                     </p>
                     <p className="text-base sm:text-xl font-black text-white tracking-tight">
                       {storeMeta?.name || 'this'}

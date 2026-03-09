@@ -1,9 +1,7 @@
-'use client';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Moon, Sparkles, Star, Download } from 'lucide-react';
+import { Moon, Sparkles, Star } from 'lucide-react';
 import Image from 'next/image';
-import html2canvas from 'html2canvas';
 
 interface TimeLeft {
     days: number;
@@ -165,65 +163,15 @@ function useRingSize() {
     return size;
 }
 
-export default function RamadanCountdown({ className, storeName }: { className?: string; storeName?: string }) {
+export default function RamadanCountdown({ className, storeName, onNeedAWebsiteClick }: { className?: string; storeName?: string; onNeedAWebsiteClick?: () => void }) {
     const [now, setNow] = useState<Date | null>(null);
     const ringSize = useRingSize();
-    const cardRef = useRef<HTMLDivElement>(null);
-    const [isDownloading, setIsDownloading] = useState(false);
-    const [showDownloadPrompt, setShowDownloadPrompt] = useState(false);
-    const downloadPromptTimerRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         setNow(new Date());
         const timer = setInterval(() => setNow(new Date()), 1000);
         return () => clearInterval(timer);
     }, []);
-
-    // Auto-dismiss download prompt
-    useEffect(() => {
-        if (showDownloadPrompt) {
-            if (downloadPromptTimerRef.current) clearTimeout(downloadPromptTimerRef.current);
-            downloadPromptTimerRef.current = setTimeout(() => {
-                setShowDownloadPrompt(false);
-            }, 5000);
-        }
-        return () => {
-            if (downloadPromptTimerRef.current) clearTimeout(downloadPromptTimerRef.current);
-        };
-    }, [showDownloadPrompt]);
-
-    const handleDownload = useCallback(async (e?: React.MouseEvent) => {
-        if (e) e.stopPropagation();
-        if (!cardRef.current || isDownloading) return;
-
-        setShowDownloadPrompt(false);
-        setIsDownloading(true);
-        try {
-            const canvas = await html2canvas(cardRef.current, {
-                backgroundColor: '#1e1b4b', // indigo-950
-                scale: 3, // High-res for WhatsApp status
-                useCORS: true,
-                logging: false,
-                borderRadius: '2.5rem',
-            } as any);
-            canvas.toBlob((blob) => {
-                if (!blob) return;
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                const day = now ? getCurrentDay(now) : 1;
-                a.href = url;
-                a.download = `ramadan-day-${day}.png`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            }, 'image/png');
-        } catch (err) {
-            console.error('Download failed:', err);
-        } finally {
-            setTimeout(() => setIsDownloading(false), 1500);
-        }
-    }, [isDownloading, now]);
 
     if (!now) return null;
 
@@ -246,7 +194,7 @@ export default function RamadanCountdown({ className, storeName }: { className?:
         if (!timeLeft) return null;
 
         return (
-            <div className={className}>
+            <div className={`cursor-pointer ${className || ''}`} onClick={() => onNeedAWebsiteClick?.()}>
                 <div className="relative overflow-hidden rounded-[2.5rem] bg-indigo-950 border border-amber-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] h-full flex flex-col justify-center">
                     <div className="absolute inset-0">
                         <Image src="/images/events/ramadan_2026_new.png" alt="Ramadan Background" fill priority className="object-cover opacity-40 scale-110" />
@@ -313,11 +261,8 @@ export default function RamadanCountdown({ className, storeName }: { className?:
         const greeting = getTimeGreeting(now.getHours());
 
         return (
-            <div className={className}>
-                <div
-                    ref={cardRef}
-                    className="relative overflow-hidden rounded-[2.5rem] bg-indigo-950 border border-amber-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] h-full flex flex-col justify-center transition-all duration-300"
-                >
+            <div className={`cursor-pointer ${className || ''}`} onClick={() => onNeedAWebsiteClick?.()}>
+                <div className="relative overflow-hidden rounded-[2.5rem] bg-indigo-950 border border-amber-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] h-full flex flex-col justify-center transition-all duration-300">
                     {/* Background */}
                     <div className="absolute inset-0">
                         <Image src="/images/events/ramadan_2026_new.png" alt="Ramadan Background" fill priority className="object-cover opacity-30 scale-110" />
@@ -432,70 +377,8 @@ export default function RamadanCountdown({ className, storeName }: { className?:
                         </div>
                     </div>
 
-                    {/* Download prompt overlay */}
-                    <AnimatePresence>
-                        {showDownloadPrompt && (
-                            <motion.div
-                                data-html2canvas-ignore="true"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="absolute inset-0 z-30 bg-black/60 backdrop-blur-md rounded-[2.5rem] flex flex-col items-center justify-center p-6 text-center gap-4"
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    setShowDownloadPrompt(false);
-                                }}
-                            >
-                                <motion.div
-                                    initial={{ scale: 0.9, y: 10 }}
-                                    animate={{ scale: 1, y: 0 }}
-                                    className="flex flex-col items-center gap-3"
-                                >
-                                    <button
-                                        onClick={handleDownload}
-                                        className="w-16 h-16 rounded-full bg-amber-400 flex items-center justify-center shadow-lg shadow-amber-400/20 active:scale-95 transition-transform"
-                                    >
-                                        <Download className="w-8 h-8 text-black" />
-                                    </button>
-                                    <div className="space-y-1">
-                                        <p className="text-white font-black text-sm uppercase tracking-wider">
-                                            WhatsApp Status
-                                        </p>
-                                        <p className="text-amber-200/60 text-[10px] font-medium">
-                                            Tap to download
-                                        </p>
-                                    </div>
-                                </motion.div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
-                    {/* Saving overlay */}
-                    <AnimatePresence>
-                        {isDownloading && (
-                            <motion.div
-                                data-html2canvas-ignore="true"
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                exit={{ opacity: 0 }}
-                                className="absolute inset-0 z-40 bg-black/50 backdrop-blur-sm rounded-[2.5rem] flex items-center justify-center"
-                            >
-                                <div className="flex items-center gap-2 bg-black/40 rounded-full px-4 py-2 border border-amber-400/20">
-                                    <motion.div
-                                        animate={{ rotate: 360 }}
-                                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                                    >
-                                        <Download className="w-4 h-4 text-amber-400" />
-                                    </motion.div>
-                                    <span className="text-xs font-bold text-amber-400">Saving...</span>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-
                     {/* Shine animation */}
                     <motion.div
-                        data-html2canvas-ignore="true"
                         className="absolute inset-0 bg-gradient-to-r from-transparent via-white/8 to-transparent -skew-x-12"
                         animate={{ x: ['-150%', '250%'] }}
                         transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", repeatDelay: 4 }}
@@ -507,7 +390,7 @@ export default function RamadanCountdown({ className, storeName }: { className?:
 
     // ── Post-Ramadan: Eid Mubarak ──
     return (
-        <div className={className}>
+        <div className={`cursor-pointer ${className || ''}`} onClick={() => onNeedAWebsiteClick?.()}>
             <div className="relative overflow-hidden rounded-[2.5rem] bg-indigo-950 border border-amber-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] h-full flex flex-col justify-center">
                 <div className="absolute inset-0">
                     <Image src="/images/events/ramadan_2026_new.png" alt="Eid Background" fill priority className="object-cover opacity-25 scale-110" />

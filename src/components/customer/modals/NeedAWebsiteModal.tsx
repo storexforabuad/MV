@@ -84,7 +84,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
     }
   };
 
-  const handleInitiatePayment = async () => {
+  const handleInitiatePayment = () => {
     modal.setLoading(true);
     try {
       // Check if Paystack is loaded
@@ -163,7 +163,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="bg-slate-900 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md max-h-[90vh] overflow-hidden shadow-2xl border border-slate-700/50 animate-in slide-in-from-bottom-5 sm:zoom-in-95 flex flex-col">
+      <div className="bg-slate-900 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md max-h-[90vh] overflow-hidden shadow-2xl border border-slate-700/50 animate-in slide-in-from-bottom-5 sm:zoom-in-95 flex flex-col relative">
         {/* Header - Sticky */}
         <div className={`sticky top-0 px-6 py-4 border-b border-slate-700/50 flex-shrink-0 z-10 ${isStunnerStores ? 'bg-gradient-to-r from-zinc-950 to-violet-950' : is420Hub ? 'bg-gradient-to-r from-zinc-950 to-emerald-950' : 'bg-gradient-to-r from-slate-900 to-blue-950'}`}>
           <div className="flex items-center justify-between gap-3 mb-3">
@@ -171,7 +171,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
               <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${isStunnerStores ? 'bg-violet-500/10 border-violet-500/20' : is420Hub ? 'bg-emerald-400/10 border-emerald-400/20' : 'bg-amber-400/10 border-amber-400/20'}`}>
                 <Globe className={isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} size={20} />
               </div>
-              <h2 className="text-xl font-bold text-white">Get Your Webapp</h2>
+              <h2 className="text-xl font-bold text-white">Get Your Website</h2>
             </div>
             <button
               onClick={handleClose}
@@ -191,7 +191,10 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
         </div>
 
         {/* Content - Scrollable */}
-        <div ref={contentRef} className="flex-1 overflow-y-auto">
+        <div
+          ref={contentRef}
+          className={`flex-1 overflow-y-auto transition-opacity duration-300 ${modal.loading ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+        >
           <div className="p-6 pb-28">
             {/* (Value-prop screen removed; category selection is now first visible step) */}
 
@@ -224,7 +227,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                   </h1>
 
                   <p className="text-slate-300 text-sm sm:text-base max-w-[320px] mx-auto leading-relaxed">
-                    Get a professional Webapp for <span className="line-through text-slate-500 decoration-amber-500 pr-1">₦850,000</span>
+                    Get a professional Website for <span className="line-through text-slate-500 decoration-amber-500 pr-1">₦850,000</span>
                     <br className="hidden sm:block" />
                     as little as <span className="font-bold text-amber-500">₦500/week</span> in minutes.
                   </p>
@@ -326,7 +329,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
               <div className="space-y-6">
                 <div>
                   <h3 className="text-lg font-bold text-white mb-2">Tell Us About Your Business</h3>
-                  <p className="text-sm text-slate-400">We'll use this to set up your Webapp</p>
+                  <p className="text-sm text-slate-400">We'll use this to set up your Website</p>
                 </div>
 
                 {modal.error && (
@@ -400,14 +403,14 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
               <div className="space-y-6">
                 <div>
                   <h3 className="text-lg font-bold text-white mb-2">Review Your Professional Identity</h3>
-                  <p className="text-sm text-slate-400">Your Webapp is almost ready to go live!</p>
+                  <p className="text-sm text-slate-400">Your Website is almost ready to go live!</p>
                 </div>
 
                 {/* Store Link Preview - On Brand Style */}
                 <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6 space-y-4">
                   <div className={`flex items-center gap-2 ${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}`}>
                     <Globe size={18} />
-                    <span className="text-xs font-black uppercase tracking-widest">Webapp Link Preview</span>
+                    <span className="text-xs font-black uppercase tracking-widest">Website Link Preview</span>
                   </div>
 
                   <div className={`bg-slate-900 border border-slate-700 rounded-xl p-4 flex items-center justify-between group cursor-pointer transition-all ${isStunnerStores ? 'hover:border-violet-500/50' : is420Hub ? 'hover:border-emerald-500/50' : 'hover:border-amber-500/50'}`}>
@@ -445,7 +448,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                     {[
                       { icon: CreditCard, text: "Choose a plan that fits your volume" },
                       { icon: Check, text: "Secure payment via Paystack" },
-                      { icon: Sparkles, text: "Your Webapp goes live instantly!" }
+                      { icon: Sparkles, text: "Your Website goes live instantly!" }
                     ].map((step, i) => (
                       <div key={i} className="flex items-center gap-3 p-3 bg-slate-800/30 rounded-xl border border-slate-700/30">
                         <div className="w-6 h-6 rounded-lg bg-slate-700 flex items-center justify-center text-slate-400">
@@ -475,7 +478,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                     <h3 className="text-xl font-black text-white uppercase tracking-tighter">Ramadan Special Offer</h3>
                   </div>
                   <p className="text-sm text-slate-400 leading-relaxed">
-                    Get your professional business Webapp live this season with our <span className={`${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} font-bold`}>limited-time 50% discount</span>.
+                    Get your professional business Website live this season with our <span className={`${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} font-bold`}>limited-time 50% discount</span>.
                   </p>
                 </div>
 
@@ -671,24 +674,17 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
             )}
             <button
               onClick={handleNextScreen}
-              disabled={
-                (modal.currentScreen === 2 && !isScreen2Valid) ||
-                (modal.currentScreen === 3 && !isScreen3Valid) ||
-                (modal.currentScreen === 5 && !isScreen5Valid) ||
-                modal.loading
-              }
               className={`flex-1 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${((modal.currentScreen === 2 && !isScreen2Valid) ||
                 (modal.currentScreen === 3 && !isScreen3Valid) ||
                 (modal.currentScreen === 4 && !isScreen4Valid) ||
-                (modal.currentScreen === 5 && !isScreen5Valid) ||
-                modal.loading)
+                (modal.currentScreen === 5 && !isScreen5Valid))
                 ? 'bg-slate-700 text-slate-500 cursor-not-allowed'
                 : isStunnerStores
                   ? 'bg-gradient-to-r from-violet-500 to-violet-600 text-white shadow-lg shadow-violet-900/30 hover:scale-[1.02] active:scale-[0.98]'
                   : is420Hub
                     ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white shadow-lg shadow-emerald-900/30 hover:scale-[1.02] active:scale-[0.98]'
                     : 'bg-gradient-to-r from-amber-500 to-amber-600 text-white shadow-lg shadow-amber-900/30 hover:scale-[1.02] active:scale-[0.98]'
-                }`}
+                } ${modal.loading ? 'pointer-events-none opacity-50' : ''}`}
             >
               {modal.loading ? (
                 'Processing...'

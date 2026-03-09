@@ -494,7 +494,7 @@ export default function StorefrontPageClient({
       />
       <div className="pt-52 pb-safe-area-inset-bottom">
         <div className="mt-2">
-          <HeroCarousel storeMeta={storeMeta} />
+          <HeroCarousel storeMeta={storeMeta} onNeedAWebsiteClick={() => setIsNeedAWebsiteModalOpen(true)} />
         </div>
         {/* <NeedAWebsiteBanner
           storeId={storeId}

@@ -251,7 +251,7 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
                   onPointerLeave={handlePressEnd}
                   onPointerCancel={handlePressEnd}
                   onContextMenu={(e) => e.preventDefault()}
-                  style={{ touchAction: 'manipulation', WebkitUserSelect: 'none', userSelect: 'none' }}
+                  style={{ touchAction: 'manipulation', WebkitUserSelect: 'none', userSelect: 'none', WebkitTouchCallout: 'none' }}
                 >
                   {storeName || 'Store'}
                 </span>
@@ -269,7 +269,7 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
                   aria-label="Store title"
                   className="text-xl font-semibold flex items-center gap-2 premium-title-gradient hover:opacity-80 transition-opacity text-left selection:bg-transparent"
                   style={{
-                    touchAction: 'manipulation', WebkitUserSelect: 'none', userSelect: 'none',
+                    touchAction: 'manipulation', WebkitUserSelect: 'none', userSelect: 'none', WebkitTouchCallout: 'none',
                     ...(tapCount > 0
                       ? (() => {
                         const light = theme === 'light';
@@ -298,7 +298,7 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
                   onPointerLeave={handlePressEnd}
                   onPointerCancel={handlePressEnd}
                   onContextMenu={(e) => e.preventDefault()}
-                  style={{ touchAction: 'manipulation', WebkitUserSelect: 'none', userSelect: 'none' }}
+                  style={{ touchAction: 'manipulation', WebkitUserSelect: 'none', userSelect: 'none', WebkitTouchCallout: 'none' }}
                 >
                   {storeName || 'Store'}
                 </span>
