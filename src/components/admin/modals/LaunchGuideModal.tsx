@@ -73,15 +73,15 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
   const copies = {
     phase1: {
       en: `I know how frustrating it can be waiting for me to reply to DMs when you just want to place an order. 😩 I've been working on something huge behind the scenes to make shopping with us 10x faster and easier. Can you guess what it is? 👀🔥 We officially go live TOMORROW! 🚀`,
-      ha: `Na san yadda yake da ɓata rai jiran in ba da amsa a DM alhali kuna son yin oda ne kawai. 😩 Na kasance ina aikin wani babban abu a ɓoye wanda zai sa yin siyayya da mu ya fi sauri da sauƙi har sau 10. Ko za ku iya hasashen menene? 👀🔥 A hukumance za mu ƙaddamar GOBE! 🚀`,
+      ha: `Na san yadda abin yake da takaici jiran reply a DM alhali kuna son yin oda ne kawai. 😩 Na kasance ina aikin wani babban abu a ɓoye wanda zai sa yin siyayya da mu ya fi sauri da sauƙi sossai. Ko za ku iya hasashen menene? 👀🔥 InshaAllahu za mu ƙaddamar GOBE! 🚀`,
     },
     phase2: {
-      en: `WE ARE LIVE!!! 🛍️✨ You can now see everything we have in stock and check prices instantly!\n\nTo celebrate our grand opening, we are running a massive X% STOREWIDE PROMO DISCOUNT for the next 24 hours only! Tap here: ${tinyUrl}`,
-      ha: `MUN BUDE!!! 🛍️✨ Yanzu za ku iya ganin duk kayan da muke da su da kuma duba farashinsu nan take!\n\nDon murnar bude sabon tsarinmu, muna gabatar da babban RAGIN FARASHI NA X% a kan dukkan kayayyakinmu na tsawon awanni 24 kacal masu zuwa! Danna nan a shiga: ${tinyUrl}`,
+      en: `WE ARE LIVE!!! 🛍️✨ You can now see everything we have in stock and check prices instantly!\n\nTo celebrate our grand opening, we are running a massive 10% STOREWIDE PROMO DISCOUNT for the next 24 hours only! Tap here: ${tinyUrl}`,
+      ha: `MUN BUDE!!! 🛍️✨ Yanzu za ku iya ganin duk kayan da muke da su da kuma duba farashinsu nan take!\n\nDon murnar bude sabon website dinmu, muna gabatar da babban RAGIN FARASHI NA 10% a kan dukkan kayayyakinmu na tsawon awanni 24 kacal masu zuwa! Danna nan a shiga: ${tinyUrl}`,
     },
     phase3: {
       en: `Wow! I am blown away by the love! 🥺 My WhatsApp is blowing up with neat, organized orders!\n\nThese items have been flying off the shelves 🔥 Order here: ${topProductUrl}`,
-      ha: `Wow! Lallai na gamsu da irin wannan ƙauna! 🥺 WhatsApp dina ya cika da tumakin ododi a tsare gwanin sha'awa!\n\nWadannan kayayyakin suna ta fita gadan-gadan 🔥 Yi odarku a nan: ${topProductUrl}`,
+      ha: `Wow! Lallai na gamsu da irin wannan ƙauna! 🥺 WhatsApp dina ya cika da oder a tsare gwanin sha'awa! Ina Godiya\n\nWadannan kayayyakin suna ta fita gadan-gadan 🔥 Yi odarku a nan: ${topProductUrl}`,
     }
   };
 
