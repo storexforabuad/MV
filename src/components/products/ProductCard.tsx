@@ -313,15 +313,11 @@ export default function ProductCard({
     }
     imagePressStartPos.current = null;
   };
-
-  const handleImagePressMove = (clientX: number, clientY: number) => {
-    if (!imagePressStartPos.current) return;
-    const dx = Math.abs(clientX - imagePressStartPos.current.x);
-    const dy = Math.abs(clientY - imagePressStartPos.current.y);
-    // Cancel long press if pointer moves more than 10px (carousel swipe)
-    if (dx > 10 || dy > 10) handleImagePressEnd();
-  };
   // ─────────────────────────────────────────────────────────────────────────
+
+  // ── Double Tap state ────────────────────────────────────────────────────
+  const lastClickTimeRef = useRef<number>(0);
+  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   return (
     <Link href={productLink} passHref>
@@ -330,34 +326,51 @@ export default function ProductCard({
         className="relative group h-full"
         onMouseLeave={() => setIsHovered(false)}
         onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+
           if (isSoldOut) {
-            e.preventDefault();
-            e.stopPropagation();
             toast.error('Product is sold out', { duration: 2000, position: 'bottom-center' });
             if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
             return;
           }
-          if (isSingleView) {
-            e.preventDefault();
-            e.stopPropagation();
-            if (onOrderClick && !isSoldOut) {
-              // Intelligent Color Mapping: Pre-select color based on current visible image
-              let finalSelectedColor = selectedColor;
-              if (isFashionProduct(product) && product.colors) {
-                const colorMatch = product.colors.find(c => c.images?.includes(displayImage));
-                if (colorMatch) {
-                  finalSelectedColor = colorMatch.name;
-                }
-              }
 
-              onOrderClick(product, finalSelectedColor, selectedSize);
-              handleTrackInteraction();
-              // Haptic feedback
-              if (navigator.vibrate) navigator.vibrate(20);
-            }
-          } else {
-            handleClick();
+          const now = Date.now();
+          const timeSinceLastClick = now - lastClickTimeRef.current;
+
+          // DOUBLE TAP DETECTED
+          if (timeSinceLastClick < 300) {
+            if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+            lastClickTimeRef.current = 0; // Reset
+            executeCopy();
+            return;
           }
+
+          // FIRST TAP DELAY LOGIC
+          lastClickTimeRef.current = now;
+          if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+
+          clickTimeoutRef.current = setTimeout(() => {
+            if (isSingleView) {
+              if (onOrderClick && !isSoldOut) {
+                // Intelligent Color Mapping: Pre-select color based on current visible image
+                let finalSelectedColor = selectedColor;
+                if (isFashionProduct(product) && product.colors) {
+                  const colorMatch = product.colors.find(c => c.images?.includes(displayImage));
+                  if (colorMatch) {
+                    finalSelectedColor = colorMatch.name;
+                  }
+                }
+                onOrderClick(product, finalSelectedColor, selectedSize);
+                handleTrackInteraction();
+                // Haptic feedback
+                if (navigator.vibrate) navigator.vibrate(20);
+              }
+            } else {
+              handleClick();
+              window.location.href = productLink;
+            }
+          }, 300);
         }}
         style={{ WebkitTapHighlightColor: 'transparent' }}
       >
@@ -373,29 +386,8 @@ export default function ProductCard({
             transform: 'translate3d(0,0,0)',
             perspective: '1000px',
             backfaceVisibility: 'hidden',
-            userSelect: 'none',
-            WebkitUserSelect: 'none',
-            WebkitTouchCallout: 'none',
-            WebkitTapHighlightColor: 'transparent',
-            touchAction: 'pan-y pan-x',
           }}
           draggable="false"
-          onContextMenu={(e) => {
-            e.preventDefault();
-            handleImagePressStart(e, e.clientX, e.clientY, true);
-          }}
-          onTouchStart={(e) => {
-            if (e.touches.length > 0) {
-              handleImagePressStart(e, e.touches[0].clientX, e.touches[0].clientY);
-            }
-          }}
-          onTouchEnd={handleImagePressEnd}
-          onTouchCancel={handleImagePressEnd}
-          onTouchMove={(e) => {
-            if (e.touches.length > 0) {
-              handleImagePressMove(e.touches[0].clientX, e.touches[0].clientY);
-            }
-          }}
         >
           {imageLoading && (
             <div className="absolute inset-0 bg-[var(--skeleton-background)] animate-pulse z-10" />

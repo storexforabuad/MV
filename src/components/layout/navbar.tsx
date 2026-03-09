@@ -167,9 +167,10 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
     }
   };
 
-  // --- Long-press Store Link Sharing --- 
-  const pressTimer = useRef<NodeJS.Timeout | null>(null);
+  // --- Double-Tap Store Link Sharing --- 
   const isCopyingRef = useRef(false);
+  const lastClickTimeRef = useRef<number>(0);
+  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const executeCopy = () => {
     // Prevent double firing if contextMenu and touch timer both resolve
@@ -195,19 +196,27 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
       .catch(() => toast.error('Failed to copy link'));
   };
 
-  const handlePressStart = (isContextMenu = false) => {
+  const handleDoubleTapSpace = () => {
     if (!storeId) return;
-    if (pressTimer.current) clearTimeout(pressTimer.current);
 
-    if (isContextMenu) {
+    const now = Date.now();
+    const timeSinceLastClick = now - lastClickTimeRef.current;
+
+    // DOUBLE TAP DETECTED
+    if (timeSinceLastClick < 300) {
+      if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+      lastClickTimeRef.current = 0; // Reset
       executeCopy();
       return;
     }
 
-    pressTimer.current = setTimeout(() => {
-      pressTimer.current = null;
-      executeCopy();
-    }, 600);
+    // FIRST TAP DELAY LOGIC
+    lastClickTimeRef.current = now;
+    if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+
+    clickTimeoutRef.current = setTimeout(() => {
+      // Allow the single tap to do nothing in the empty space
+    }, 300);
   };
 
   const handlePressEnd = () => {
@@ -246,8 +255,15 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
   return (
     <nav className={`fixed top-0 z-50 w-full transition-transform duration-300 ${scrollDirection === 'down' ? '-translate-y-full' : 'translate-y-0'} glassmorphic`}>
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-        <div className="flex h-16 justify-between">
-          <div className="flex items-center gap-2">
+        <div className="flex h-16 justify-between items-center relative">
+
+          {/* Invisible Double-Tap Space Wrapper */}
+          <div
+            className="absolute inset-0 z-0"
+            onClick={handleDoubleTapSpace}
+          />
+
+          <div className="flex items-center gap-2 relative z-10 pointer-events-auto">
             {showBackButton ? (
               <>
                 {backButtonHref && !fromWishlistId ? (
@@ -259,36 +275,7 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
                     <ArrowLeft className="h-6 w-6 text-text-primary" />
                   </button>
                 )}
-                <span
-                  className="text-xl font-semibold card-text-gradient flex items-center gap-2 text-nowrap cursor-pointer selection:bg-transparent"
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    handlePressStart(true);
-                  }}
-                  onTouchStart={(e) => {
-                    if (e.touches.length > 0) {
-                      const touch = e.touches[0];
-                      (e.currentTarget as any)._touchStartX = touch.clientX;
-                      (e.currentTarget as any)._touchStartY = touch.clientY;
-                    }
-                    handlePressStart();
-                  }}
-                  onTouchEnd={handlePressEnd}
-                  onTouchCancel={handlePressEnd}
-                  onTouchMove={(e) => {
-                    if (e.touches.length > 0) {
-                      const touch = e.touches[0];
-                      const startX = (e.currentTarget as any)._touchStartX;
-                      const startY = (e.currentTarget as any)._touchStartY;
-                      if (startX !== undefined && startY !== undefined) {
-                        const dx = Math.abs(touch.clientX - startX);
-                        const dy = Math.abs(touch.clientY - startY);
-                        if (dx > 10 || dy > 10) handlePressEnd();
-                      }
-                    }
-                  }}
-                  style={{ touchAction: 'pan-y', WebkitUserSelect: 'none', userSelect: 'none', WebkitTouchCallout: 'none', WebkitTapHighlightColor: 'transparent' }}
-                >
+                <span className="text-xl font-semibold card-text-gradient flex items-center gap-2 text-nowrap select-none">
                   {storeName || 'Store'}
                 </span>
               </>
@@ -297,36 +284,9 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
                 <ShoppingBag className="h-8 w-8 text-text-primary cursor-pointer" onClick={handleLogoTap} />
                 <button
                   onClick={handleTitleTap}
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    handlePressStart(true);
-                  }}
-                  onTouchStart={(e) => {
-                    if (e.touches.length > 0) {
-                      const touch = e.touches[0];
-                      (e.currentTarget as any)._touchStartX = touch.clientX;
-                      (e.currentTarget as any)._touchStartY = touch.clientY;
-                    }
-                    handlePressStart();
-                  }}
-                  onTouchEnd={handlePressEnd}
-                  onTouchCancel={handlePressEnd}
-                  onTouchMove={(e) => {
-                    if (e.touches.length > 0) {
-                      const touch = e.touches[0];
-                      const startX = (e.currentTarget as any)._touchStartX;
-                      const startY = (e.currentTarget as any)._touchStartY;
-                      if (startX !== undefined && startY !== undefined) {
-                        const dx = Math.abs(touch.clientX - startX);
-                        const dy = Math.abs(touch.clientY - startY);
-                        if (dx > 10 || dy > 10) handlePressEnd();
-                      }
-                    }
-                  }}
                   aria-label="Store title"
-                  className="text-xl font-semibold flex items-center gap-2 premium-title-gradient hover:opacity-80 transition-opacity text-left selection:bg-transparent"
+                  className="text-xl font-semibold flex items-center gap-2 premium-title-gradient hover:opacity-80 transition-opacity text-left select-none"
                   style={{
-                    touchAction: 'pan-y', WebkitUserSelect: 'none', userSelect: 'none', WebkitTouchCallout: 'none', WebkitTapHighlightColor: 'transparent',
                     ...(tapCount > 0
                       ? (() => {
                         const light = theme === 'light';
@@ -348,36 +308,7 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
             ) : (
               <div onClick={handleLogoTap} className="flex items-center gap-2 cursor-pointer">
                 <ShoppingBag className="h-8 w-8 text-text-primary" />
-                <span
-                  className="text-xl font-semibold flex items-center gap-2 premium-title-gradient cursor-pointer selection:bg-transparent"
-                  onContextMenu={(e) => {
-                    e.preventDefault();
-                    handlePressStart(true);
-                  }}
-                  onTouchStart={(e) => {
-                    if (e.touches.length > 0) {
-                      const touch = e.touches[0];
-                      (e.currentTarget as any)._touchStartX = touch.clientX;
-                      (e.currentTarget as any)._touchStartY = touch.clientY;
-                    }
-                    handlePressStart();
-                  }}
-                  onTouchEnd={handlePressEnd}
-                  onTouchCancel={handlePressEnd}
-                  onTouchMove={(e) => {
-                    if (e.touches.length > 0) {
-                      const touch = e.touches[0];
-                      const startX = (e.currentTarget as any)._touchStartX;
-                      const startY = (e.currentTarget as any)._touchStartY;
-                      if (startX !== undefined && startY !== undefined) {
-                        const dx = Math.abs(touch.clientX - startX);
-                        const dy = Math.abs(touch.clientY - startY);
-                        if (dx > 10 || dy > 10) handlePressEnd();
-                      }
-                    }
-                  }}
-                  style={{ touchAction: 'pan-y', WebkitUserSelect: 'none', userSelect: 'none', WebkitTouchCallout: 'none', WebkitTapHighlightColor: 'transparent' }}
-                >
+                <span className="text-xl font-semibold flex items-center gap-2 premium-title-gradient select-none">
                   {storeName || 'Store'}
                 </span>
               </div>
@@ -385,9 +316,7 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
           </div>
 
           <div className="flex items-center gap-4">
-            <button onClick={toggleTheme} className="p-3 rounded-lg hover:bg-card-hover transition-colors" aria-label="Toggle theme">
-              {theme === 'light' ? <Moon className="w-5 h-5 text-text-primary" /> : <Sun className="w-5 h-5 text-text-primary" />}
-            </button>
+
 
             {!isAdminRoute && (
               <Link href="/cart" className="relative group p-2">

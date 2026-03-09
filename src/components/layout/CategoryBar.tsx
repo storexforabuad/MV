@@ -63,42 +63,35 @@ function CategoryButton({
   const iconTextStyle = isActive && specialColorStyle ? '' : 'text-text-primary';
   const labelTextStyle = isActive ? 'text-text-primary' : 'text-text-secondary';
 
+  const lastClickTimeRef = useRef<number>(0);
+  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
   return (
     <motion.button
       ref={(el) => buttonRefSetter(el, category.id)}
-      onClick={onClick}
-      onContextMenu={(e) => {
+      onClick={(e) => {
         e.preventDefault();
-        onPressStart(category, true);
-      }}
-      onTouchStart={(e) => {
-        // Store initial touch coordinates to calculate slop
-        if (e.touches.length > 0) {
-          const touch = e.touches[0];
-          (e.currentTarget as any)._touchStartX = touch.clientX;
-          (e.currentTarget as any)._touchStartY = touch.clientY;
-        }
-        onPressStart(category);
-      }}
-      onTouchEnd={onPressEnd}
-      onTouchCancel={onPressEnd}
-      onTouchMove={(e) => {
-        // Implement slop: if finger moves more than 10px, cancel the press
-        if (e.touches.length > 0) {
-          const touch = e.touches[0];
-          const startX = (e.currentTarget as any)._touchStartX;
-          const startY = (e.currentTarget as any)._touchStartY;
 
-          if (startX !== undefined && startY !== undefined) {
-            const dx = Math.abs(touch.clientX - startX);
-            const dy = Math.abs(touch.clientY - startY);
-            if (dx > 10 || dy > 10) {
-              onPressEnd();
-            }
-          }
+        const now = Date.now();
+        const timeSinceLastClick = now - lastClickTimeRef.current;
+
+        // DOUBLE TAP DETECTED
+        if (timeSinceLastClick < 300) {
+          if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+          lastClickTimeRef.current = 0; // Reset
+          onPressStart(category, true); // Fire the copy logic
+          return;
         }
+
+        // FIRST TAP DELAY LOGIC
+        lastClickTimeRef.current = now;
+        if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
+
+        clickTimeoutRef.current = setTimeout(() => {
+          onClick();
+        }, 300);
       }}
-      style={{ touchAction: 'pan-y', WebkitUserSelect: 'none', userSelect: 'none', WebkitTouchCallout: 'none', WebkitTapHighlightColor: 'transparent' }}
+      style={{ touchAction: 'pan-y', WebkitUserSelect: 'none', userSelect: 'none', WebkitTapHighlightColor: 'transparent' }}
       className="flex flex-col items-center w-[72px] sm:w-[80px] flex-shrink-0"
       whileTap={{ scale: 0.95 }}
       transition={{ type: 'spring', stiffness: 400, damping: 17 }}
@@ -229,11 +222,7 @@ export default function CategoryBar({
 
   const handleCategoryClick = (categoryId: string) => {
     scrollToCategory(categoryId);
-    if (activeCategoryId === categoryId) {
-      onActiveCategoryClick?.();
-    } else {
-      onCategorySelect(categoryId);
-    }
+    onCategorySelect(categoryId);
   };
 
   // ── Category lists ─────────────────────────────────────────────────────────
