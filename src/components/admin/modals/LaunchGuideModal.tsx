@@ -14,6 +14,7 @@ interface LaunchGuideModalProps {
 
 export default function LaunchGuideModal({ isOpen, onClose, storeLink, products }: LaunchGuideModalProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [language, setLanguage] = useState<'en' | 'ha'>('en');
   const scrollRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -67,12 +68,22 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
   }
   const tinyUrl = `https://tinyurl.com/bizconnet/${storeId}`;
 
-  const phase1Copy = `I know how frustrating it can be waiting for me to reply to DMs when you just want to place an order. 😩 I've been working on something huge behind the scenes to make shopping with us 10x faster and easier. Can you guess what it is? 👀🔥 We officially go live TOMORROW! 🚀`;
-
-  const phase2Copy = `WE ARE LIVE!!! 🛍️✨ You can now see everything we have in stock and check prices instantly!\n\nTo celebrate our grand opening, we are running a massive % STOREWIDE PROMO DISCOUNT for the next 24 hours only! Tap here: ${tinyUrl}`;
-
   const topProductUrl = topProduct ? `${tinyUrl}/product/${topProduct.id}` : tinyUrl;
-  const phase3Copy = `Wow! I am blown away by the love! 🥺 My WhatsApp is blowing up with neat, organized orders!\n\nThese items have been flying off the shelves 🔥 Order here: ${topProductUrl}`;
+
+  const copies = {
+    phase1: {
+      en: `I know how frustrating it can be waiting for me to reply to DMs when you just want to place an order. 😩 I've been working on something huge behind the scenes to make shopping with us 10x faster and easier. Can you guess what it is? 👀🔥 We officially go live TOMORROW! 🚀`,
+      ha: `Na san yadda yake da ɓata rai jiran in ba da amsa a DM alhali kuna son yin oda ne kawai. 😩 Na kasance ina aikin wani babban abu a ɓoye wanda zai sa yin siyayya da mu ya fi sauri da sauƙi har sau 10. Ko za ku iya hasashen menene? 👀🔥 A hukumance za mu ƙaddamar GOBE! 🚀`,
+    },
+    phase2: {
+      en: `WE ARE LIVE!!! 🛍️✨ You can now see everything we have in stock and check prices instantly!\n\nTo celebrate our grand opening, we are running a massive X% STOREWIDE PROMO DISCOUNT for the next 24 hours only! Tap here: ${tinyUrl}`,
+      ha: `MUN BUDE!!! 🛍️✨ Yanzu za ku iya ganin duk kayan da muke da su da kuma duba farashinsu nan take!\n\nDon murnar bude sabon tsarinmu, muna gabatar da babban RAGIN FARASHI NA X% a kan dukkan kayayyakinmu na tsawon awanni 24 kacal masu zuwa! Danna nan a shiga: ${tinyUrl}`,
+    },
+    phase3: {
+      en: `Wow! I am blown away by the love! 🥺 My WhatsApp is blowing up with neat, organized orders!\n\nThese items have been flying off the shelves 🔥 Order here: ${topProductUrl}`,
+      ha: `Wow! Lallai na gamsu da irin wannan ƙauna! 🥺 WhatsApp dina ya cika da tumakin ododi a tsare gwanin sha'awa!\n\nWadannan kayayyakin suna ta fita gadan-gadan 🔥 Yi odarku a nan: ${topProductUrl}`,
+    }
+  };
 
   const slides = [
     {
@@ -106,7 +117,7 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
       iconColor: 'bg-gradient-to-br from-amber-400 to-orange-500',
       title: 'Day 1: The Tease',
       description: 'Build anticipation. Tell your audience that a faster, easier way to shop is coming tomorrow.',
-      copyText: phase1Copy,
+      copyText: copies.phase1[language],
       tips: [
         'Post a text-only story on WhatsApp/IG',
         'Show a blurred 2-second sneak peek if possible',
@@ -119,7 +130,7 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
       iconColor: 'bg-gradient-to-br from-orange-500 to-red-500',
       title: 'Day 2: Grand Opening',
       description: 'The store is live! Drop the link everywhere and remove all friction to buying. Include a special launch incentive!',
-      copyText: phase2Copy,
+      copyText: copies.phase2[language],
       tips: [
         'Update all social media bios with link',
         'Post a screen-recording showing how to order',
@@ -132,7 +143,7 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
       iconColor: 'bg-gradient-to-br from-violet-500 to-purple-600',
       title: 'Day 2: Social Proof & Rush',
       description: 'Prove that people are shopping and highlight the best-selling items from the day.',
-      copyText: phase3Copy,
+      copyText: copies.phase3[language],
       tips: [
         'Post a screenshot of incoming orders',
         'Mention low stock to build urgency',
@@ -149,7 +160,7 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
 
   const nextSlide = () => {
     if (isSlidePhase && !isPhaseCompleted) {
-      toast.error('Please mark this phase as complete to continue.');
+      toast.error(language === 'en' ? 'Please mark this phase as complete to continue.' : 'Da fatan za a yi alama a matsayin wanda aka kammala don ci gaba.');
       return;
     }
     if (currentSlide < slides.length - 1) {
@@ -168,7 +179,7 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success('Caption copied!');
+    toast.success(language === 'en' ? 'Caption copied!' : 'An kwafi kalaman!');
   };
 
   const modalVariants = {
@@ -237,6 +248,24 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
                   {slide.description}
                 </p>
 
+                {/* Language Toggle for Intro Phase */}
+                {slide.id === 'intro' && (
+                  <div className="flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-[1.25rem] mb-10 border border-slate-200 dark:border-slate-700 mx-auto shadow-inner">
+                    <button
+                      onClick={() => setLanguage('en')}
+                      className={`px-8 py-3 rounded-xl font-bold text-[15px] transition-all duration-300 ${language === 'en' ? 'bg-white dark:bg-slate-700 text-violet-600 dark:text-violet-400 shadow-md ring-1 ring-slate-900/5 dark:ring-white/10' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                    >
+                      English
+                    </button>
+                    <button
+                      onClick={() => setLanguage('ha')}
+                      className={`px-8 py-3 rounded-xl font-bold text-[15px] transition-all duration-300 ${language === 'ha' ? 'bg-white dark:bg-slate-700 text-violet-600 dark:text-violet-400 shadow-md ring-1 ring-slate-900/5 dark:ring-white/10' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                    >
+                      Hausa
+                    </button>
+                  </div>
+                )}
+
                 {/* Highlights for Intro */}
                 {slide.highlights && (
                   <div className="w-full max-w-md space-y-4 mb-8 text-left bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
@@ -274,12 +303,14 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
                 {slide.copyText && (
                   <div className="w-full max-w-md text-left">
                     <div className="flex items-center justify-between mb-3 px-2">
-                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Suggested Caption</span>
+                      <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+                        {language === 'en' ? 'Suggested Caption' : 'Kalaman Shawarwari'}
+                      </span>
                       <button
                         onClick={() => copyToClipboard(slide.copyText!)}
                         className="text-violet-600 dark:text-violet-400 flex items-center gap-1.5 text-xs font-bold hover:opacity-80 transition-opacity uppercase tracking-wider bg-violet-50 dark:bg-violet-900/20 px-3 py-1.5 rounded-full"
                       >
-                        <Copy className="w-3.5 h-3.5" /> Copy
+                        <Copy className="w-3.5 h-3.5" /> {language === 'en' ? 'Copy' : 'Kwafa'}
                       </button>
                     </div>
                     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm">
@@ -305,7 +336,10 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
                         }`}>
                         <CheckCircle2 className="w-4 h-4" strokeWidth={3} />
                       </div>
-                      {completedPhases.includes(slide.id) ? 'Phase Completed!' : 'Mark as Complete'}
+                      {completedPhases.includes(slide.id)
+                        ? (language === 'en' ? 'Phase Completed!' : 'An Kammala!')
+                        : (language === 'en' ? 'Mark as Complete' : 'Kammala Matakin')
+                      }
                     </button>
                   </div>
                 )}
@@ -336,7 +370,9 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
                 : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white shadow-lg shadow-violet-500/25 active:scale-[0.98]'
                 } font-bold py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-2 text-base outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 w-full`}
             >
-              {currentSlide === slides.length - 1 ? 'Finish Guide' : (slide as any).actionText || 'Continue'}
+              {currentSlide === slides.length - 1
+                ? (language === 'en' ? 'Finish Guide' : 'Kammala Jagora')
+                : (language === 'en' ? ((slide as any).actionText || 'Continue') : ((slide as any).actionText === 'Start the Guide' ? 'Fara Jagora' : 'Ci gaba'))}
               {currentSlide < slides.length - 1 && <ChevronRight className="w-5 h-5" />}
             </button>
           </div>
