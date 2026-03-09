@@ -268,7 +268,7 @@ export default function ProductCard({
   const imagePressStartPos = useRef<{ x: number; y: number } | null>(null);
   const isCopyingRef = useRef(false);
 
-  const handleImagePressStart = (e: React.TouchEvent | React.PointerEvent, clientX: number, clientY: number) => {
+  const handleImagePressStart = (e: React.TouchEvent | React.PointerEvent | React.MouseEvent, clientX: number, clientY: number) => {
     imagePressStartPos.current = { x: clientX, y: clientY };
     if (imagePressTimer.current) clearTimeout(imagePressTimer.current);
     imagePressTimer.current = setTimeout(() => {
