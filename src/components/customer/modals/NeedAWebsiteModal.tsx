@@ -262,18 +262,18 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
 
                 <div className="text-center pt-4">
                   <div className="text-[10px] text-slate-500/70 font-medium tracking-wide flex flex-wrap items-center justify-center gap-1">
-                    <span>Powered by <span className={`font-black tracking-tight ${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}`}>BizconNet™</span> 2026</span>
+                    <span>Powered by <span className={`font-black tracking-tight ${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}`}>BizConNet™</span> 2026</span>
                     <span className="flex flex-wrap items-center justify-center gap-1">
                       in partnership with
                       <span className="flex items-center font-bold ml-0.5 text-[11px] tracking-tight">
-                        <span className="text-[#4285F4]">G</span><span className="text-[#EA4335]">o</span><span className="text-[#FBBC05]">o</span><span className="text-[#4285F4]">g</span><span className="text-[#34A853]">l</span><span className="text-[#EA4335]">e</span>,
+                        <span className="text-[#4285F4]">G</span><span className="text-[#EA4335]">o</span><span className="text-[#FBBC05]">o</span><span className="text-[#4285F4]">g</span><span className="text-[#34A853]">l</span><span className="text-[#EA4335]">e</span>
                       </span>
                       <span className="font-bold text-[#25D366] text-[11px] tracking-tight">
                         WhatsApp
                       </span>
-                      <span className="px-0.5 text-slate-400">&amp;</span>
+                      {/* <span className="px-0.5 text-slate-400">&amp;</span> */}
                       <span className="font-bold text-[#00C3F7] text-[11px] tracking-tight">
-                        Paystack.
+                        Paystack
                       </span>
                     </span>
                   </div>
@@ -689,7 +689,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
               {modal.loading ? (
                 'Processing...'
               ) : modal.currentScreen === 1 ? (
-                <>Continue</>
+                <>Get started</>
               ) : modal.currentScreen === 5 ? (
                 <>
                   Register
