@@ -22,7 +22,7 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
     }
   }, [currentSlide]);
 
-  const PHASE_STORAGE_KEY = `launch_playbook_progress_7day_${storeLink || 'store'}`;
+  const PHASE_STORAGE_KEY = `launch_playbook_progress_2day_${storeLink || 'store'}`;
   const [completedPhases, setCompletedPhases] = useState<string[]>([]);
 
   useEffect(() => {
@@ -67,81 +67,59 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
   }
   const tinyUrl = `https://tinyurl.com/bizconnet/${storeId}`;
 
-  const phase1Copy = `I know how frustrating it can be waiting for me to reply to DMs when you just want to place an order. 😩 I've been working on something huge behind the scenes to make shopping with us 10x faster and easier. Can you guess what it is? 👀🔥`;
+  const phase1Copy = `I know how frustrating it can be waiting for me to reply to DMs when you just want to place an order. 😩 I've been working on something huge behind the scenes to make shopping with us 10x faster and easier. Can you guess what it is? 👀🔥 We officially go live TOMORROW! 🚀`;
 
-  const phase2Copy = `You guys guessed it! We are finally moving to a fully digital catalog! 🥳 No more scrolling through hundreds of pictures or waiting for prices. I’m loading up all the products right now. We officially go live in 2 days! 🚀`;
-
-  const phase3Copy = `TOMORROW IS THE DAY! ⏰ Our new digital store opens in exactly 24 hours. To celebrate, I’m doing something crazy—the first 10 people to order through the new site tomorrow will get a special gift/discount! Set your alarms! 🎁💨`;
-
-  const phase4Copy = `WE ARE LIVE!!! 🛍️✨ You can now see everything we have in stock, check prices, and send your orders straight to my WhatsApp in seconds!\n\nThe Launch Promo is officially active. Tap here to check it out now 👉 ${tinyUrl}`;
-
-  const phase5Copy = `Wow! I am blown away by the love! 🥺 My WhatsApp is blowing up with neat, organized orders. Thank you to everyone who has shopped via the new link! If you haven't checked it out yet, what are you waiting for? 👉 ${tinyUrl}`;
+  const phase2Copy = `WE ARE LIVE!!! 🛍️✨ You can now see everything we have in stock and check prices instantly!\n\nTo celebrate our grand opening, we are running a massive % STOREWIDE PROMO DISCOUNT for the next 24 hours only! Tap here: ${tinyUrl}`;
 
   const topProductUrl = topProduct ? `${tinyUrl}/product/${topProduct.id}` : tinyUrl;
-  const phase6Copy = `These 3 items have been flying off the shelves since we launched the new site! 📦🔥 We only have a few left in stock. Also, reminder: Our special launch promo ends TOMORROW night! Don't miss out. Order directly here: ${topProductUrl}`;
-
-  const phase7Copy = `Last chance! 🚨 Our official launch promo ends at midnight tonight! If you've been eyeing anything, now is the time to click the link, add it to your cart, and send it in! Thank you for an amazing opening week! 🛒💨 👉 ${tinyUrl}`;
+  const phase3Copy = `Wow! I am blown away by the love! 🥺 My WhatsApp is blowing up with neat, organized orders!\n\nThese items have been flying off the shelves 🔥 Order here: ${topProductUrl}`;
 
   const slides = [
     {
       id: 'intro',
       icon: Rocket,
       iconColor: 'bg-gradient-to-br from-violet-500 to-purple-600',
-      title: 'The 7-Day Launch Playbook',
-      description: 'Get your first 10-50 orders in a week by following this proven strategy across WhatsApp, Instagram, and Facebook.',
+      title: 'The 48-Hour Launch Playbook',
+      description: 'Launch your digital store in just 2 days. From uploading products to your first rapid-fire orders.',
       highlights: [
-        'Stop sending loose product pictures',
-        'Automate your order collection',
-        'Build massive hype before you open'
+        'Fast-track your setup',
+        'Build immediate hype',
+        'Open for business in 48 hours'
       ],
       actionText: 'Start the Guide',
     },
     {
       id: 'phase1',
-      icon: Lightbulb,
+      icon: CheckCircle2,
       iconColor: 'bg-gradient-to-br from-yellow-400 to-amber-500',
-      title: 'Day 1: The Hook',
-      description: 'Address the current pain points of ordering and announce that a massive upgrade is coming.',
-      copyText: phase1Copy,
+      title: 'Day 1: Setup & Inventory',
+      description: 'Before announcing anything, get your digital "shelves" stocked. You don\'t need everything—just your top products to start.',
       tips: [
-        'Post a text-only story on WhatsApp/IG',
-        'Ask an engaging question about waiting times',
-        'Do not mention the website yet'
+        'Upload your best 10-20 products',
+        'Ensure quality images, precise prices, and accurate stock',
+        'Keep the store link private for now'
       ]
     },
     {
       id: 'phase2',
-      icon: Eye,
+      icon: Lightbulb,
       iconColor: 'bg-gradient-to-br from-amber-400 to-orange-500',
-      title: 'Day 2: Sneak Peek',
-      description: 'Validate their guesses and show a blurred or quick behind-the-scenes look at you setting up the digital catalog.',
-      copyText: phase2Copy,
+      title: 'Day 1: The Tease',
+      description: 'Build anticipation. Tell your audience that a faster, easier way to shop is coming tomorrow.',
+      copyText: phase1Copy,
       tips: [
-        'Show a quick 2-second boomerang of your screen',
-        'Make sure your products/inventory are updated',
-        'Announce the exact launch date'
+        'Post a text-only story on WhatsApp/IG',
+        'Show a blurred 2-second sneak peek if possible',
+        'Do not share the link yet'
       ]
     },
     {
       id: 'phase3',
-      icon: Clock,
-      iconColor: 'bg-gradient-to-br from-pink-400 to-rose-500',
-      title: 'Day 3: The Countdown',
-      description: 'Build high urgency. Announce that the store goes live tomorrow and tease a special launch-day promo.',
-      copyText: phase3Copy,
-      tips: [
-        'Post a countdown sticker on IG Stories',
-        'Tease a "Launch Day Only" discount',
-        'Tell them to turn on post notifications'
-      ]
-    },
-    {
-      id: 'phase4',
       icon: Flame,
       iconColor: 'bg-gradient-to-br from-orange-500 to-red-500',
-      title: 'Day 4: Grand Opening',
-      description: 'The store is live! Drop the link everywhere and remove all friction to buying.',
-      copyText: phase4Copy,
+      title: 'Day 2: Grand Opening',
+      description: 'The store is live! Drop the link everywhere and remove all friction to buying. Include a special launch incentive!',
+      copyText: phase2Copy,
       tips: [
         'Update all social media bios with link',
         'Post a screen-recording showing how to order',
@@ -149,42 +127,16 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
       ]
     },
     {
-      id: 'phase5',
+      id: 'phase4',
       icon: Heart,
-      iconColor: 'bg-gradient-to-br from-sky-400 to-blue-500',
-      title: 'Day 5: Social Proof',
-      description: 'Show that people are actively using the site to build trust and convert skeptics.',
-      copyText: phase5Copy,
+      iconColor: 'bg-gradient-to-br from-violet-500 to-purple-600',
+      title: 'Day 2: Social Proof & Rush',
+      description: 'Prove that people are shopping and highlight the best-selling items from the day.',
+      copyText: phase3Copy,
       tips: [
         'Post a screenshot of incoming orders',
-        'Share a review or reaction from a customer',
-        'Redirect all new inquiries to the site link'
-      ]
-    },
-    {
-      id: 'phase6',
-      icon: TrendingUp,
-      iconColor: 'bg-gradient-to-br from-violet-500 to-purple-600',
-      title: 'Day 6: Spotlight',
-      description: 'Highlight the best-selling items from the last 48 hours to create product-specific FOMO.',
-      copyText: phase6Copy,
-      tips: [
-        'Post a carousel/video of top 3 bestsellers',
-        'Mention low stock on popular items',
-        'Remind them promo ends tomorrow'
-      ]
-    },
-    {
-      id: 'phase7',
-      icon: AlertCircle,
-      iconColor: 'bg-gradient-to-br from-fuchsia-500 to-pink-600',
-      title: 'Day 7: Last Call',
-      description: 'The absolute final push. Create high urgency as the launch window and promotional offers close.',
-      copyText: phase7Copy,
-      tips: [
-        'Post a "Last Chance" graphic',
-        'Send a final broadcast message 6 hours before close',
-        'Celebrate the successful launch week'
+        'Mention low stock to build urgency',
+        'Redirect DMs directly to product/category links (e.g., instead of sending pictures, reply: "See all options here: [Category Link]")'
       ]
     }
   ];
