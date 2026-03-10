@@ -337,7 +337,7 @@ const ProductGrid = memo(function ProductGrid({
       </motion.div>
 
       {/* Branded Footer */}
-      {!isLoading && sortedProducts.length > 0 && onNeedAWebsiteClick && (
+      {!isLoading && sortedProducts.length > 0 && onNeedAWebsiteClick && false && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
