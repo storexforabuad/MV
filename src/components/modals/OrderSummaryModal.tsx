@@ -517,7 +517,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                   id="special-instructions"
                                   rows={3}
                                   className="block w-full rounded-xl border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 dark:bg-gray-900 dark:border-gray-700 dark:text-white sm:text-sm p-3"
-                                  placeholder="E.g. No onions, extra sauce..."
+                                  placeholder="E.g. No onions, less sugar..."
                                   value={specialInstructions}
                                   onChange={(e) => setSpecialInstructions(e.target.value)}
                                 />
