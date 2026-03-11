@@ -492,22 +492,25 @@ export default function ProductCard({
                     }
                   }}
                   disabled={isSoldOut}
-                  className="flex-shrink-0 p-3 rounded-full card-glass shadow-lg flex items-center justify-center disabled:opacity-50"
+                  className="flex-shrink-0 px-3 py-2 rounded-full card-glass shadow-lg flex items-center justify-center gap-1.5 disabled:opacity-50"
                   aria-label={isSingleView ? "Add to cart" : "Place order"}
                   type="button"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
+                  <span className={`text-sm font-bold ${isInCart ? 'text-green-500' : 'text-green-500 dark:text-green-400'}`}>
+                    {isInCart ? 'Added' : 'Add'}
+                  </span>
                   {isSingleView ? (
                     <ShoppingCart
-                      size={20}
+                      size={18}
                       className={`transition-all duration-200 ${isInCart
                         ? 'fill-green-500 text-green-500'
                         : 'text-green-500'
                         }`}
                     />
                   ) : (
-                    <ShoppingCart size={20} className="text-green-500 dark:text-green-400" />
+                    <ShoppingCart size={18} className={`transition-all duration-200 ${isInCart ? 'fill-green-500 text-green-500' : 'text-green-500 dark:text-green-400'}`} />
                   )}
                 </motion.button>
               </motion.div>
