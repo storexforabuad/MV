@@ -12,6 +12,7 @@ import { getAdminSession } from '@/lib/adminSession';
 import { createSuperAdminSession } from '@/lib/superadminSession';
 import NavigationStore from '@/lib/navigationStore';
 import toast from 'react-hot-toast';
+import { refreshAdminCache } from '@/app/actions/cacheActions';
 
 interface NavbarProps {
   storeId?: string;
@@ -141,6 +142,12 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
 
     tapCountRef.current += 1;
     setTapCount(Math.min(tapCountRef.current, 3));
+
+    // Trigger Server-Side Cache Invalidation precisely on the FIRST tap
+    // This allows network latency to resolve while the user finishes their 2nd/3rd taps and PIN entry
+    if (tapCountRef.current === 1 && storeId) {
+      refreshAdminCache(storeId).catch(err => console.error("Cache pre-fetch failed:", err));
+    }
 
     try {
       if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {

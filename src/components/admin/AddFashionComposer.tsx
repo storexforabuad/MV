@@ -156,6 +156,18 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
     const [activeColorId, setActiveColorId] = useState<string | null>(null);
     const [highlightSizeSection, setHighlightSizeSection] = useState(false);
     const sizeSectionRef = useRef<HTMLDivElement>(null);
+    const sizeCategoryContainerRef = useRef<HTMLDivElement>(null);
+    const sizeCategoryButtonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+
+    const scrollToSizeCategory = (categoryId: string) => {
+        const button = sizeCategoryButtonRefs.current.get(categoryId);
+        const container = sizeCategoryContainerRef.current;
+        if (button && container) {
+            const scrollLeft =
+                button.offsetLeft - container.offsetWidth / 2 + button.offsetWidth / 2;
+            container.scrollTo({ left: scrollLeft, behavior: 'smooth' });
+        }
+    };
 
     // Lock body scroll when open
     useEffect(() => {
@@ -504,7 +516,9 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                     ? 'jallab-standard' as const
                                     : productData.sizeCategory === 'insence'
                                         ? 'insence-volume' as const
-                                        : 'oil-perfume-volume' as const
+                                        : productData.sizeCategory === 'waist-beads'
+                                            ? 'waist-beads-inches' as const
+                                            : 'oil-perfume-volume' as const
                 },
                 limitedStock: productData.limitedStock,
                 soldOut: productData.soldOut,
@@ -755,6 +769,11 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                 onChange={checked => {
                                     handleProductChange('hasSizes', checked);
                                     if (!checked) handleProductChange('sizes', []); // Clear sizes if toggle is turned off
+                                    if (checked) {
+                                        setTimeout(() => {
+                                            sizeSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                                        }, 100);
+                                    }
                                 }}
                             />
 
@@ -777,79 +796,35 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                     </div>
 
                                     {/* Size Category Toggle */}
-                                    <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide max-w-full">
-                                        <button
-                                            onClick={() => {
-                                                handleProductChange('sizeCategory', 'clothing');
-                                                handleProductChange('sizes', []);
-                                            }}
-                                            className={`flex-shrink-0 whitespace-nowrap px-4 py-3 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'clothing'
-                                                ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
-                                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
-                                                }`}
-                                        >
-                                            Clothing
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                handleProductChange('sizeCategory', 'shoes');
-                                                handleProductChange('sizes', []);
-                                            }}
-                                            className={`flex-shrink-0 whitespace-nowrap px-4 py-3 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'shoes'
-                                                ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
-                                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
-                                                }`}
-                                        >
-                                            Shoes
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                handleProductChange('sizeCategory', 'caps');
-                                                handleProductChange('sizes', []);
-                                            }}
-                                            className={`flex-shrink-0 whitespace-nowrap px-4 py-3 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'caps'
-                                                ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
-                                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
-                                                }`}
-                                        >
-                                            Caps
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                handleProductChange('sizeCategory', 'jallabs');
-                                                handleProductChange('sizes', []);
-                                            }}
-                                            className={`flex-shrink-0 whitespace-nowrap px-4 py-3 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'jallabs'
-                                                ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
-                                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
-                                                }`}
-                                        >
-                                            Jallabs
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                handleProductChange('sizeCategory', 'insence');
-                                                handleProductChange('sizes', []);
-                                            }}
-                                            className={`flex-shrink-0 whitespace-nowrap px-4 py-3 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'insence'
-                                                ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
-                                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
-                                                }`}
-                                        >
-                                            Insence
-                                        </button>
-                                        <button
-                                            onClick={() => {
-                                                handleProductChange('sizeCategory', 'oil-perfumes');
-                                                handleProductChange('sizes', []);
-                                            }}
-                                            className={`flex-shrink-0 whitespace-nowrap px-4 py-3 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === 'oil-perfumes'
-                                                ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
-                                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
-                                                }`}
-                                        >
-                                            Oil Perfumes
-                                        </button>
+                                    <div ref={sizeCategoryContainerRef} className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide max-w-full">
+                                        {[
+                                            { id: 'clothing', label: 'Clothing' },
+                                            { id: 'shoes', label: 'Shoes' },
+                                            { id: 'caps', label: 'Caps' },
+                                            { id: 'jallabs', label: 'Jallabs' },
+                                            { id: 'insence', label: 'Insence' },
+                                            { id: 'oil-perfumes', label: 'Oil Perfumes' },
+                                            { id: 'waist-beads', label: 'Waist Beads' },
+                                        ].map((category) => (
+                                            <button
+                                                key={category.id}
+                                                ref={(el) => {
+                                                    if (el) sizeCategoryButtonRefs.current.set(category.id, el);
+                                                    else sizeCategoryButtonRefs.current.delete(category.id);
+                                                }}
+                                                onClick={() => {
+                                                    handleProductChange('sizeCategory', category.id);
+                                                    handleProductChange('sizes', []);
+                                                    scrollToSizeCategory(category.id);
+                                                }}
+                                                className={`flex-shrink-0 whitespace-nowrap px-4 py-3 rounded-xl border-2 font-semibold text-sm flex items-center justify-center gap-2 transition-all ${productData.sizeCategory === category.id
+                                                    ? 'bg-purple-50 dark:bg-purple-900/30 border-purple-500 text-purple-700 dark:text-purple-300'
+                                                    : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-400'
+                                                    }`}
+                                            >
+                                                {category.label}
+                                            </button>
+                                        ))}
                                     </div>
 
                                     {/* Size Chips */}
@@ -882,7 +857,9 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                                             ? 'Jallab sizing (52-62)'
                                                             : productData.sizeCategory === 'insence'
                                                                 ? 'Insence sizing (volume)'
-                                                                : 'Oil perfumes sizing (volume)'
+                                                                : productData.sizeCategory === 'waist-beads'
+                                                                    ? 'Waist beads sizing (inches)'
+                                                                    : 'Oil perfumes sizing (volume)'
                                         }
                                     </p>
                                 </>

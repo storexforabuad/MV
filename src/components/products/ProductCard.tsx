@@ -375,7 +375,7 @@ export default function ProductCard({
         style={{ WebkitTapHighlightColor: 'transparent' }}
       >
         <div
-          className="relative aspect-[3/4] w-full rounded-2xl overflow-hidden
+          className="relative aspect-[3/4] w-full rounded-[32px] overflow-hidden
           shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08),0_2px_6px_-1px_rgba(0,0,0,0.05)] dark:shadow-lg dark:shadow-white/10
           transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]
           transform-gpu will-change-transform
@@ -404,7 +404,7 @@ export default function ProductCard({
           )}
 
           {!isSoldOut && (
-            <div className="absolute top-2 left-2 z-10 flex flex-col items-start gap-2">
+            <div className="absolute top-[18px] left-[18px] z-10 flex flex-col items-start gap-2">
               {isLimitedStock && (
                 <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
                   <span className="product-badge bg-[var(--badge-yellow-bg)] text-[var(--badge-yellow-text)] shadow-sm whitespace-nowrap">
@@ -474,7 +474,7 @@ export default function ProductCard({
 
           {/* Floating Action Buttons - Only show when NOT sold out */}
           {!isSoldOut && (
-            <div className={`absolute inset-0 flex flex-col items-end justify-between p-3 transition-opacity duration-300 ${isMobile
+            <div className={`absolute inset-0 flex flex-col items-end justify-between p-[14px] transition-opacity duration-300 ${isMobile
               ? 'opacity-100 pointer-events-auto'
               : 'opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto'
               }`}>
@@ -534,7 +534,7 @@ export default function ProductCard({
               {/* Left Arrow */}
               <motion.button
                 onClick={handlePrevImage}
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 z-20 p-2.5 rounded-full card-glass shadow-lg flex items-center justify-center"
+                className="absolute left-[14px] top-1/2 transform -translate-y-1/2 z-20 p-2.5 rounded-full card-glass shadow-lg flex items-center justify-center"
                 aria-label="Previous image"
                 type="button"
                 whileHover={{ scale: 1.05 }}
@@ -546,7 +546,7 @@ export default function ProductCard({
               {/* Right Arrow */}
               <motion.button
                 onClick={handleNextImage}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 z-30 p-2.5 rounded-full card-glass shadow-lg flex items-center justify-center"
+                className="absolute right-[14px] top-1/2 transform -translate-y-1/2 z-30 p-2.5 rounded-full card-glass shadow-lg flex items-center justify-center"
                 aria-label="Next image"
                 type="button"
                 whileHover={{ scale: 1.05 }}
@@ -559,7 +559,7 @@ export default function ProductCard({
 
           {/* Carousel Dots - Bottom Center - Only show when NOT sold out */}
           {!isSoldOut && hasMultipleImages && (
-            <div className={`absolute bottom-3 left-1/2 transform -translate-x-1/2 flex gap-0.5 z-10 transition-opacity duration-300 ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+            <div className={`absolute bottom-[18px] left-1/2 transform -translate-x-1/2 flex gap-0.5 z-10 transition-opacity duration-300 ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
               }`}>
               {carouselImages.map((_, index) => (
                 <span

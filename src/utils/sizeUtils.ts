@@ -1,5 +1,5 @@
 // Fashion size category type
-export type FashionSizeCategory = 'clothing' | 'shoes' | 'caps' | 'jallabs' | 'insence' | 'oil-perfumes';
+export type FashionSizeCategory = 'clothing' | 'shoes' | 'caps' | 'jallabs' | 'insence' | 'oil-perfumes' | 'waist-beads';
 
 // Nigerian/UK Standard Clothing Sizes (6-20)
 export const NIGERIAN_SIZE_CHART = [
@@ -50,6 +50,14 @@ export const OIL_PERFUMES_SIZE_CHART = [
     { size: '10ml' }, { size: '20ml' }, { size: '50ml' }, { size: '100ml' },
 ];
 
+// Waist Beads Sizes (inches)
+export const WAIST_BEADS_SIZE_CHART = [
+    { size: '24' }, { size: '26' }, { size: '28' }, { size: '30' },
+    { size: '32' }, { size: '34' }, { size: '36' }, { size: '38' },
+    { size: '40' }, { size: '42' }, { size: '44' }, { size: '46' },
+    { size: '48' }, { size: '50' },
+];
+
 // Helper to get sizes for a given fashion category
 export const getSizesForFashionCategory = (category: FashionSizeCategory): string[] => {
     if (category === 'clothing') return NIGERIAN_SIZE_CHART.map(item => item.size);
@@ -58,5 +66,6 @@ export const getSizesForFashionCategory = (category: FashionSizeCategory): strin
     if (category === 'jallabs') return JALLAB_SIZE_CHART.map(item => item.size);
     if (category === 'insence') return INSENCE_SIZE_CHART.map(item => item.size);
     if (category === 'oil-perfumes') return OIL_PERFUMES_SIZE_CHART.map(item => item.size);
+    if (category === 'waist-beads') return WAIST_BEADS_SIZE_CHART.map(item => item.size);
     return [];
 };
