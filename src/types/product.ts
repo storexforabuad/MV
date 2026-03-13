@@ -171,6 +171,7 @@ export interface FoodBeverageProduct extends BaseProduct {
   // Availability
   available: boolean;
   soldOut?: boolean;
+  limitedStock?: boolean;
   categoryId?: string;
   category?: string;
 }
