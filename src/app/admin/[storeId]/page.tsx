@@ -55,18 +55,25 @@ export default async function AdminStorePage({ params }: PageProps) {
         fetchStoreOrders(storeId)
     ]);
 
+    // Helper to serialize objects with hidden methods/prototypes (like Firestore Timestamps)
+    // so they can be safely passed to Client Components
+    const serializeData = <T,>(data: T): T => {
+        if (!data) return data;
+        return JSON.parse(JSON.stringify(data));
+    };
+
     return (
         <AdminStorePageClient
             storeId={storeId}
-            initialProducts={products}
-            initialCategories={categories}
-            initialContacts={contacts}
-            initialStoreMeta={storeMeta}
-            initialReferrals={referrals}
-            initialCommissionAnalytics={commissionAnalytics}
-            initialRevenueAnalytics={revenueAnalytics}
-            initialDeliveryOrders={deliveryOrders}
-            initialOrders={orders}
+            initialProducts={serializeData(products)}
+            initialCategories={serializeData(categories)}
+            initialContacts={serializeData(contacts)}
+            initialStoreMeta={serializeData(storeMeta)}
+            initialReferrals={serializeData(referrals)}
+            initialCommissionAnalytics={serializeData(commissionAnalytics)}
+            initialRevenueAnalytics={serializeData(revenueAnalytics)}
+            initialDeliveryOrders={serializeData(deliveryOrders)}
+            initialOrders={serializeData(orders)}
         />
     );
 }
