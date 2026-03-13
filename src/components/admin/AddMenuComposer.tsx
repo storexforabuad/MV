@@ -61,7 +61,12 @@ interface BatchMenuProduct {
     temperature: 'hot' | 'cold' | 'room-temp';
     isAlcoholic: boolean;
     isVegetarian: boolean;
+    isVegetarian: boolean;
     ingredients: string; // Comma separated for input
+
+    // New Fields
+    requiresPrepTime: boolean;
+    limitedStock: boolean;
 }
 
 interface AddMenuComposerProps {
@@ -183,8 +188,11 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                     spiciness: template?.spiciness || 'mild',
                     temperature: template?.temperature || 'hot',
                     isAlcoholic: template?.isAlcoholic || false,
+                    isAlcoholic: template?.isAlcoholic || false,
                     isVegetarian: template?.isVegetarian || false,
                     ingredients: template?.ingredients || '',
+                    requiresPrepTime: template?.requiresPrepTime || false,
+                    limitedStock: template?.limitedStock || false,
                 };
                 return baseProduct;
             });
@@ -228,6 +236,8 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                     isAlcoholic: templateProduct.isAlcoholic,
                     isVegetarian: templateProduct.isVegetarian,
                     ingredients: templateProduct.ingredients,
+                    requiresPrepTime: templateProduct.requiresPrepTime,
+                    limitedStock: templateProduct.limitedStock,
                 };
             });
         };
@@ -319,6 +329,7 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                         preparationTime: productData.preparationTime,
                         isVegetarian: productData.isVegetarian,
                         ingredients: productData.ingredients.split(',').map(i => i.trim()).filter(i => i),
+                        limitedStock: productData.limitedStock,
                         ...(productData.subtype === 'dish' && { spiciness: productData.spiciness }),
                         ...(productData.subtype === 'drink' && { temperature: productData.temperature, isAlcoholic: productData.isAlcoholic }),
                     };
@@ -471,7 +482,32 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                                         </div>
                                     </div>
 
-                                    <FloatingLabelInput label="Prep Time (mins)" type="number" value={activeProduct.preparationTime} onChange={(e: ChangeEvent<HTMLInputElement>) => handleProductChange(activeProductIndex, 'preparationTime', parseInt(e.target.value) || 0)} />
+                                    <div className="space-y-4">
+                                        <ModernToggle
+                                            label="Requires Preparation?"
+                                            description="Customer needs to wait for this item to be prepared"
+                                            checked={activeProduct.requiresPrepTime}
+                                            onChange={checked => {
+                                                handleProductChange(activeProductIndex, 'requiresPrepTime', checked);
+                                                if (!checked) handleProductChange(activeProductIndex, 'preparationTime', 0);
+                                            }}
+                                        />
+                                        <AnimatePresence>
+                                            {activeProduct.requiresPrepTime && (
+                                                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                                                    <FloatingLabelInput
+                                                        label="Prep Time (mins)"
+                                                        type="number"
+                                                        value={activeProduct.preparationTime === 0 ? '' : activeProduct.preparationTime}
+                                                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                                                            const val = e.target.value;
+                                                            handleProductChange(activeProductIndex, 'preparationTime', val === '' ? 0 : parseInt(val));
+                                                        }}
+                                                    />
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
+                                    </div>
 
                                     {activeProduct.subtype === 'dish' && (
                                         <div>
@@ -525,20 +561,37 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
 
                             {currentStep === 3 && (
                                 <motion.div key="pricing" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
-                                    <FloatingLabelInput label="Price (₦)" type="number" value={activeProduct.price} onChange={(e: ChangeEvent<HTMLInputElement>) => handleProductChange(activeProductIndex, 'price', parseFloat(e.target.value) || 0)} />
+                                    <FloatingLabelInput
+                                        label="Price (₦)"
+                                        type="number"
+                                        value={activeProduct.price === 0 ? '' : activeProduct.price}
+                                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                                            const val = e.target.value;
+                                            handleProductChange(activeProductIndex, 'price', val === '' ? 0 : parseFloat(val));
+                                        }}
+                                    />
 
                                     <div className="space-y-4">
                                         <ModernToggle label="Run a Promotion?" description="Set a discounted price" checked={activeProduct.isPromo} onChange={checked => handleProductChange(activeProductIndex, 'isPromo', checked)} />
                                         <AnimatePresence>
                                             {activeProduct.isPromo && (
                                                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-                                                    <FloatingLabelInput label="Promo Price (₦)" type="number" value={activeProduct.promoPrice || ''} onChange={(e: ChangeEvent<HTMLInputElement>) => handleProductChange(activeProductIndex, 'promoPrice', parseFloat(e.target.value) || 0)} />
+                                                    <FloatingLabelInput
+                                                        label="Promo Price (₦)"
+                                                        type="number"
+                                                        value={!activeProduct.promoPrice ? '' : activeProduct.promoPrice}
+                                                        onChange={(e: ChangeEvent<HTMLInputElement>) => {
+                                                            const val = e.target.value;
+                                                            handleProductChange(activeProductIndex, 'promoPrice', val === '' ? 0 : parseFloat(val));
+                                                        }}
+                                                    />
                                                 </motion.div>
                                             )}
                                         </AnimatePresence>
                                     </div>
 
-                                    <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+                                    <div className="pt-4 space-y-4 border-t border-slate-200 dark:border-slate-700">
+                                        <ModernToggle label="Limited Stock" description="Show low stock warning" checked={activeProduct.limitedStock} onChange={checked => handleProductChange(activeProductIndex, 'limitedStock', checked)} />
                                         <ModernToggle label="Mark as Sold Out" description="Temporarily unavailable" checked={activeProduct.soldOut} onChange={checked => handleProductChange(activeProductIndex, 'soldOut', checked)} />
                                     </div>
                                 </motion.div>
@@ -601,7 +654,7 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
 
     return (
         <Transition.Root show={isOpen} as={Fragment}>
-            <Dialog as="div" className="relative z-40" onClose={handleClose}>
+            <Dialog as="div" className="relative z-[60]" onClose={handleClose}>
                 <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
                     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity" />
                 </Transition.Child>

@@ -422,6 +422,35 @@ export default function ProductCard({
             </div>
           )}
 
+          {/* Food Overlays on Bottom Left */}
+          {!isSoldOut && isFoodBeverageProduct(product) && (
+            <div className="absolute bottom-[14px] left-[14px] z-10 flex flex-wrap max-w-[calc(100%-80px)] gap-1.5">
+              {product.temperature && (
+                <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                  <span className="product-badge bg-white/90 dark:bg-black/60 backdrop-blur text-slate-700 dark:text-slate-200 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10">
+                    {product.temperature === 'hot' ? '☕ Hot' : '❄️ Cold'}
+                  </span>
+                </div>
+              )}
+              {product.preparationTime !== undefined && (
+                <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                  <span className="product-badge bg-white/90 dark:bg-black/60 backdrop-blur text-slate-700 dark:text-slate-200 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10">
+                    {product.preparationTime === 0 ? '✅ Ready' : `⏱️ ${product.preparationTime}m`}
+                  </span>
+                </div>
+              )}
+              {product.spiciness && product.spiciness !== 'mild' && (
+                <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                  <span className="product-badge bg-red-500/10 dark:bg-red-500/20 backdrop-blur text-red-600 dark:text-red-400 shadow-sm font-semibold flex items-center gap-1 border border-red-500/20 dark:border-red-500/30">
+                    {product.spiciness === 'medium' && '🌶️ Med'}
+                    {product.spiciness === 'hot' && '🔥 Hot'}
+                    {product.spiciness === 'extra-hot' && '🤯 X-Hot'}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
           <AnimatePresence initial={false} custom={direction} mode="popLayout">
             <motion.div
               key={currentImageIndex}
@@ -594,34 +623,6 @@ export default function ProductCard({
                 </span>
               )}
             </p>
-            {isFoodBeverageProduct(product) && (
-              <div className="flex flex-wrap gap-1 mt-1">
-                {product.spiciness && product.spiciness !== 'mild' && (
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-100 dark:border-red-800">
-                    {product.spiciness === 'medium' && '🌶️ Med'}
-                    {product.spiciness === 'hot' && '🔥 Hot'}
-                    {product.spiciness === 'extra-hot' && '🤯 X-Hot'}
-                  </span>
-                )}
-                {product.temperature && (
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-100 dark:border-blue-800">
-                    {product.temperature === 'hot' && '☕ Hot'}
-                    {product.temperature === 'cold' && '❄️ Cold'}
-                  </span>
-                )}
-                {product.preparationTime !== undefined && (
-                  product.preparationTime === 0 ? (
-                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400 border border-green-100 dark:border-green-800">
-                      ✅ Ready
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400 border border-gray-200 dark:border-gray-700">
-                      ⏱️ {product.preparationTime}m
-                    </span>
-                  )
-                )}
-              </div>
-            )}
           </div>
         </div>
       </div>
