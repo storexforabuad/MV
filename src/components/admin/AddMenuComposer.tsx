@@ -61,7 +61,6 @@ interface BatchMenuProduct {
     temperature: 'hot' | 'cold' | 'room-temp';
     isAlcoholic: boolean;
     isVegetarian: boolean;
-    isVegetarian: boolean;
     ingredients: string; // Comma separated for input
 
     // New Fields
@@ -187,7 +186,6 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                     preparationTime: template?.preparationTime || 0,
                     spiciness: template?.spiciness || 'mild',
                     temperature: template?.temperature || 'hot',
-                    isAlcoholic: template?.isAlcoholic || false,
                     isAlcoholic: template?.isAlcoholic || false,
                     isVegetarian: template?.isVegetarian || false,
                     ingredients: template?.ingredients || '',
