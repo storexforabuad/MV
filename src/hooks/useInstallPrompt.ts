@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { usePathname, useParams } from 'next/navigation';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -25,6 +25,7 @@ export function useInstallPrompt() {
   const [showPrompt, setShowPrompt] = useState(false);
   const [showIosInstructions, setShowIosInstructions] = useState(false);
   const [isIos, setIsIos] = useState(false);
+  const sessionDismissed = useRef(false);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -84,8 +85,13 @@ export function useInstallPrompt() {
       return;
     }
 
-    // TEMPORARILY ALWAYS SHOW ON VALID ROUTES (Bypassing deferredPrompt check for testing)
+    // 3. SHOW PROMPT LOGIC
     if (isOnStoreHomepage || isOnRoadmap || isOnGrowthPortal) {
+      if (sessionDismissed.current) {
+        console.log('Prompt session-dismissed. Skipping.');
+        return;
+      }
+
       // Check iOS specific dismissal cooldown
       if (typeof window !== 'undefined' && isIos) {
         const iosDismissedAt = localStorage.getItem(PWA_IOS_DISMISSED_KEY);
@@ -97,21 +103,28 @@ export function useInstallPrompt() {
           }
         }
       }
-      // const lastPrompted = localStorage.getItem(PWA_PROMPT_LAST_SHOWN_KEY);
-      // const now = new Date().getTime();
 
-      // if (!lastPrompted || (now - parseInt(lastPrompted, 10)) > TWENTY_FOUR_HOURS) {
-      setShowPrompt(true);
-      // localStorage.setItem(PWA_PROMPT_LAST_SHOWN_KEY, now.toString());
-      console.log('Prompt conditions met. Showing prompt (cooldown disabled, deferredPrompt check bypassed).');
-      // } else {
-      //   console.log('Not showing prompt, within 24-hour cooldown.');
-      // }
+      const lastPrompted = localStorage.getItem(PWA_PROMPT_LAST_SHOWN_KEY);
+      const now = new Date().getTime();
+
+      if (!lastPrompted || (now - parseInt(lastPrompted, 10)) > TWENTY_FOUR_HOURS) {
+        setShowPrompt(true);
+        console.log('Prompt conditions met. Showing prompt.');
+      } else {
+        console.log('Not showing prompt, within 24-hour cooldown.');
+      }
     }
   }, [deferredPrompt, isOnStoreHomepage, isOnRoadmap, isOnGrowthPortal]);
 
   const handleDismiss = useCallback(() => {
     setShowPrompt(false);
+    sessionDismissed.current = true;
+
+    if (typeof window !== 'undefined') {
+      const now = new Date().getTime();
+      localStorage.setItem(PWA_PROMPT_LAST_SHOWN_KEY, now.toString());
+    }
+
     if (showIosInstructions) {
       setShowIosInstructions(false);
       if (typeof window !== 'undefined') {
