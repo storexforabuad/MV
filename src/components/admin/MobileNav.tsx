@@ -64,7 +64,7 @@ const MobileNav = ({ activeSection, setActiveSection, onAddProductClick, onManag
             {/* Home button (left) - icon + label */}
             <button
               onClick={() => handleClick(navItems[0])}
-              className={`flex flex-col items-center justify-center h-14 w-14 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-1 focus:ring-offset-0 focus:ring-blue-400/50 ${activeSection === 'home' ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-neutral-400'}`}
+              className={`flex flex-col items-center justify-center h-14 w-14 rounded-lg transition-colors duration-200 focus:outline-none ${activeSection === 'home' ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-neutral-400'}`}
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               <HomeIconComponent className="h-6 w-6" strokeWidth={activeSection === 'home' ? 2 : 1.5} />
@@ -76,7 +76,7 @@ const MobileNav = ({ activeSection, setActiveSection, onAddProductClick, onManag
           <div className="flex-1 flex justify-center items-center">
             <button
               onClick={() => handleClick(navItems[2])}
-              className={`flex flex-col items-center justify-center h-14 w-14 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-1 focus:ring-offset-0 focus:ring-blue-400/50 ${activeSection === 'activity' ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-neutral-400'}`}
+              className={`flex flex-col items-center justify-center h-14 w-14 rounded-lg transition-colors duration-200 focus:outline-none ${activeSection === 'activity' ? 'text-gray-900 dark:text-white' : 'text-gray-500 dark:text-neutral-400'}`}
               style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               <ActivityIconComponent className="h-6 w-6" strokeWidth={activeSection === 'activity' ? 2 : 1.5} />
@@ -89,7 +89,7 @@ const MobileNav = ({ activeSection, setActiveSection, onAddProductClick, onManag
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10">
           <button
             onClick={() => handleClick(navItems[1])}
-            className="w-16 h-16 bg-neutral-800 dark:bg-neutral-100 rounded-full shadow-lg flex items-center justify-center text-white dark:text-black focus:outline-none focus:ring-2 focus:ring-offset-4 focus:ring-offset-background dark:focus:ring-offset-zinc-800 focus:ring-neutral-500 transition-transform duration-200 ease-in-out hover:scale-105 active:scale-95"
+            className="w-16 h-16 bg-neutral-800 dark:bg-neutral-100 rounded-full shadow-lg flex items-center justify-center text-white dark:text-black focus:outline-none transition-transform duration-200 ease-in-out hover:scale-105 active:scale-95"
             aria-label="Add product"
           >
             <PlusIcon className="h-7 w-7" strokeWidth={2.2} />
