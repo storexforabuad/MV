@@ -1,6 +1,6 @@
 'use client';
 import { Tag, Rocket, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays, CheckCircle2, Briefcase, ShieldCheck, Clock, AlertCircle, ExternalLink, Warehouse, Settings, ArrowLeft } from 'lucide-react';
-import { Dispatch, SetStateAction, useEffect, useState, useRef } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useVendor } from '@/context/VendorContext';
 import { motion, Variants } from 'framer-motion';
@@ -327,6 +327,51 @@ const modalVariants: Variants = {
 };
 
 /**
+ * AnimatedNumber - Smoothly counts from 0 to the target value
+ */
+const AnimatedNumber = ({ value, duration = 800 }: { value: number | string; duration?: number }) => {
+  const [displayValue, setDisplayValue] = useState<string>('0');
+  const reducedMotion = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+
+  useEffect(() => {
+    const raw = String(value);
+    // Extract prefix (e.g. "₦"), numeric part, and suffix (e.g. "K", "M")
+    const match = raw.match(/^([^\d]*?)([\d.]+)(.*)$/);
+    if (!match || reducedMotion) {
+      setDisplayValue(raw);
+      return;
+    }
+
+    const [, prefix, numStr, suffix] = match;
+    const target = parseFloat(numStr);
+    if (isNaN(target) || target === 0) {
+      setDisplayValue(raw);
+      return;
+    }
+
+    const isDecimal = numStr.includes('.');
+    const decimalPlaces = isDecimal ? (numStr.split('.')[1]?.length || 0) : 0;
+    let startTime: number | null = null;
+    let rafId: number;
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      // easeOutExpo for a satisfying deceleration
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = eased * target;
+      setDisplayValue(`${prefix}${isDecimal ? current.toFixed(decimalPlaces) : Math.round(current)}${suffix}`);
+      if (progress < 1) rafId = requestAnimationFrame(animate);
+    };
+
+    rafId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafId);
+  }, [value, duration, reducedMotion]);
+
+  return <>{displayValue}</>;
+};
+
+/**
  * MetricCard Component - Moved outside to prevent forced re-mounting
  */
 const MetricCard = ({ icon: Icon, label, count, gradient, glowClass, onClick, inlineStyle }: { icon: React.ElementType; label: string; count: string | number; gradient: string; glowClass: string; onClick: () => void; inlineStyle?: React.CSSProperties }) => (
@@ -342,7 +387,7 @@ const MetricCard = ({ icon: Icon, label, count, gradient, glowClass, onClick, in
       <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white bg-opacity-20">
         <Icon className="w-6 h-6" />
       </div>
-      <div className="text-3xl font-bold drop-shadow">{count}</div>
+      <div className="text-3xl font-bold drop-shadow"><AnimatedNumber value={count} /></div>
       <div className="text-sm font-medium text-center opacity-90">
         {label === 'Manage Categories' ? 'Categories' : label === 'Manage Products' ? 'Products' : label}
       </div>
@@ -727,20 +772,21 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+    visible: { opacity: 1, transition: { staggerChildren: 0.06, delayChildren: 0.15 } }
   };
 
   const itemVariants: Variants = {
-    hidden: { opacity: 0, y: 30, scale: 0.95 },
+    hidden: { opacity: 0, y: 40, scale: 0.85, rotate: -2 },
     visible: {
       opacity: 1,
       y: 0,
       scale: 1,
+      rotate: 0,
       transition: {
         type: "spring",
-        stiffness: 100,
-        damping: 15,
-        mass: 1
+        stiffness: 260,
+        damping: 20,
+        mass: 0.8
       }
     }
   };
@@ -755,8 +801,9 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   return (
     <section className="w-full max-w-7xl mx-auto px-2 sm:px-6 lg:px-8 overflow-x-hidden">
       <motion.div
-        initial={{ opacity: 0, y: -10 }}
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 24 }}
         className="mb-4"
       >
         <button
@@ -787,7 +834,12 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         </button>
       </motion.div>
 
-      <div className="mb-4 flex items-center gap-2">
+      <motion.div
+        initial={{ opacity: 0, y: -15 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 24, delay: 0.08 }}
+        className="mb-4 flex items-center gap-2"
+      >
         <button
           data-refresh-button
           onClick={async () => {
@@ -830,11 +882,11 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             </button>
           </>
         )}
-      </div>
+      </motion.div>
       <motion.div
         className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-4"
         variants={containerVariants}
-        initial={false}
+        initial="hidden"
         animate={uiVisible ? 'visible' : 'hidden'}
         onAnimationComplete={() => onAnimationComplete?.()}
       >
@@ -914,7 +966,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                   <div className="flex items-center justify-center w-12 h-12 rounded-full bg-white bg-opacity-20">
                     <Star className="w-6 h-6 drop-shadow" />
                   </div>
-                  <div className="text-3xl font-bold drop-shadow">{props.referrals}</div>
+                  <div className="text-3xl font-bold drop-shadow"><AnimatedNumber value={props.referrals} /></div>
                   <div className="text-sm font-medium text-center opacity-90">Ambassador</div>
                 </button>
               </motion.div>
@@ -970,7 +1022,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                   </div>
 
                   {/* Active Partners Count */}
-                  <div className="text-3xl font-bold">{wholesaleStats.activePartners}</div>
+                  <div className="text-3xl font-bold"><AnimatedNumber value={wholesaleStats.activePartners} /></div>
 
                   {/* Card Label */}
                   <div className="text-sm font-medium text-center opacity-90">Wholesale</div>
