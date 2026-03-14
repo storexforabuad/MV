@@ -153,6 +153,7 @@ export default function AdminStorePageClient({
   const [isAmbassadorHubModalOpen, setIsAmbassadorHubModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [initialSyncDone, setInitialSyncDone] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
   const [isPreviewLoading, setIsPreviewLoading] = useState(true);
   const [showOnboarding, setShowOnboarding] = useState<boolean | null>(false);
@@ -402,7 +403,7 @@ export default function AdminStorePageClient({
 
     // Silent background sync on mount to guarantee fresh data,
     // especially when the PWA service worker serves a cached page shell.
-    fetchData(false);
+    fetchData(false).finally(() => setInitialSyncDone(true));
   }, [storeId, initialStoreMeta, fetchData]);
 
 
@@ -558,7 +559,7 @@ export default function AdminStorePageClient({
     toast.success('Wait for refresh to complete');
   };
 
-  if (showOnboarding === null) return <AdminSkeleton />;
+  if (showOnboarding === null || !initialSyncDone) return <AdminSkeleton />;
 
   if (isTransitioning) {
     return <AdminSkeleton />;
