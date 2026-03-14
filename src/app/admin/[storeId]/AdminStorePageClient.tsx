@@ -143,6 +143,8 @@ export default function AdminStorePageClient({
   const [storeMeta, setStoreMeta] = useState<StoreMeta | null>(initialStoreMeta);
   const [loading, setLoading] = useState(false);
   const [activeSection, setActiveSection] = useState('home');
+  const [activityVisitCount, setActivityVisitCount] = useState(0);
+  const [homeVisitCount, setHomeVisitCount] = useState(0);
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [isManageModalOpen, setIsManageModalOpen] = useState(false);
   const [isManageCategoriesModalOpen, setIsManageCategoriesModalOpen] = useState(false);
@@ -519,10 +521,16 @@ export default function AdminStorePageClient({
     // We no longer load the preview tab, replaced by warehouse
   }, [activeSection]);
 
-  // Reset scroll position when switching tabs
+  // Reset scroll position when switching tabs & trigger activity animation
   useEffect(() => {
     if (typeof window !== 'undefined') {
       window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+    if (activeSection === 'activity') {
+      setActivityVisitCount(c => c + 1);
+    }
+    if (activeSection === 'home') {
+      setHomeVisitCount(c => c + 1);
     }
   }, [activeSection]);
 
@@ -608,6 +616,7 @@ export default function AdminStorePageClient({
         <div className={`${activeSection !== 'home' ? 'hidden' : ''}`}>
           <div className={`mb-8 transition-opacity duration-500 ${uiVisible ? 'opacity-100' : 'opacity-0'}`}>
             <AdminHomeCards
+              key={homeVisitCount}
               products={products}
               categories={categories}
               contacts={contacts}
@@ -658,6 +667,7 @@ export default function AdminStorePageClient({
         {/* Activity Hub */}
         <div className={`${activeSection !== 'activity' ? 'hidden' : ''}`}>
           <ActivityPage
+            key={activityVisitCount}
             storeId={storeId}
             notifications={notifications}
             onNotificationAction={handleNotificationAction}

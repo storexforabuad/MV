@@ -21,7 +21,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { Notification } from '@/types/notification';
 import { StoreMeta } from '@/types/store';
 import { Product } from '@/types/product';
@@ -39,6 +39,50 @@ interface ActivityPageProps {
   products: Product[];
   orders: StoreOrder[];
 }
+
+/**
+ * AnimatedNumber - Smoothly counts from 0 to the target value.
+ * Defined at module scope to avoid React anti-pattern of nested component definitions.
+ */
+const AnimatedNumber = ({ value, duration = 800 }: { value: number | string; duration?: number }) => {
+  const [displayValue, setDisplayValue] = useState<string>('0');
+  const reducedMotion = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches;
+
+  useEffect(() => {
+    const raw = String(value);
+    const match = raw.match(/^([^\d]*?)([\d.]+)(.*)$/);
+    if (!match || reducedMotion) {
+      setDisplayValue(raw);
+      return;
+    }
+
+    const [, prefix, numStr, suffix] = match;
+    const target = parseFloat(numStr);
+    if (isNaN(target) || target === 0) {
+      setDisplayValue(raw);
+      return;
+    }
+
+    const isDecimal = numStr.includes('.');
+    const decimalPlaces = isDecimal ? (numStr.split('.')[1]?.length || 0) : 0;
+    let startTime: number | null = null;
+    let rafId: number;
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const progress = Math.min((timestamp - startTime) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const current = eased * target;
+      setDisplayValue(`${prefix}${isDecimal ? current.toFixed(decimalPlaces) : Math.round(current)}${suffix}`);
+      if (progress < 1) rafId = requestAnimationFrame(animate);
+    };
+
+    rafId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(rafId);
+  }, [value, duration, reducedMotion]);
+
+  return <>{displayValue}</>;
+};
 
 const ActivityPage: React.FC<ActivityPageProps> = ({
   storeId,
@@ -155,14 +199,25 @@ const ActivityPage: React.FC<ActivityPageProps> = ({
     .slice(0, 3)
     .filter(p => (p.views || 0) > 0);
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
+    visible: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.1 } }
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" as const } }
+  const itemVariants: Variants = {
+    hidden: { opacity: 0, y: 40, scale: 0.9, rotate: -1 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      scale: 1,
+      rotate: 0,
+      transition: {
+        type: "spring",
+        stiffness: 260,
+        damping: 20,
+        mass: 0.8
+      }
+    }
   };
 
   // Notification Refinement Logic
@@ -226,14 +281,14 @@ const ActivityPage: React.FC<ActivityPageProps> = ({
         <div className="bg-gradient-to-br from-emerald-400 to-teal-600 rounded-[2rem] p-5 text-white shadow-lg relative overflow-hidden">
           <div className="absolute inset-0 bg-white/5 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent opacity-50" />
           <Eye className="h-6 w-6 mb-3 opacity-80" />
-          <p className="text-2xl font-black">{totalViews.toLocaleString()}</p>
+          <p className="text-2xl font-black"><AnimatedNumber value={totalViews} /></p>
           <p className="text-xs font-bold uppercase tracking-widest opacity-80 mt-1">Total Reach</p>
         </div>
 
         <div className="bg-gradient-to-br from-amber-400 to-orange-600 rounded-[2rem] p-5 text-white shadow-lg relative overflow-hidden">
           <div className="absolute inset-0 bg-white/5 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent opacity-50" />
           <TrendingUp className="h-6 w-6 mb-3 opacity-80" />
-          <p className="text-2xl font-black">{todayOrders}</p>
+          <p className="text-2xl font-black"><AnimatedNumber value={todayOrders} /></p>
           <p className="text-xs font-bold uppercase tracking-widest opacity-80 mt-1">Orders Today</p>
         </div>
       </motion.div>
@@ -288,7 +343,7 @@ const ActivityPage: React.FC<ActivityPageProps> = ({
       {/* Power Tips Section */}
       <motion.div variants={itemVariants} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-[2rem] p-5 sm:p-6 shadow-sm relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full -mr-16 -mt-16 blur-2xl pointer-events-none" />
-        
+
         <div className="flex items-center justify-between mb-5 relative z-10">
           <div className="flex items-center gap-3">
             <div className="bg-amber-100 dark:bg-amber-900/30 p-2.5 rounded-xl">
@@ -298,7 +353,7 @@ const ActivityPage: React.FC<ActivityPageProps> = ({
               <h3 className="text-sm font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400">Power Tip</h3>
             </div>
           </div>
-          
+
           <div className="flex items-center gap-1">
             <button onClick={prevTip} className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
               <ChevronLeft className="w-4 h-4" />
