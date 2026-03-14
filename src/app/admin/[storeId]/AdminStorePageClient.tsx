@@ -400,9 +400,9 @@ export default function AdminStorePageClient({
       setAmbassadorTier((initialStoreMeta as any).ambassadorTier || 'bronze');
     }
 
-    // Only perform silent background sync on mount if needed, 
-    // but avoid fetchData(true) which blocks the UI with an overlay.
-    // fetchData(false); 
+    // Silent background sync on mount to guarantee fresh data,
+    // especially when the PWA service worker serves a cached page shell.
+    fetchData(false);
   }, [storeId, initialStoreMeta, fetchData]);
 
 
