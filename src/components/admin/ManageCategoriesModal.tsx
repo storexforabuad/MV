@@ -39,9 +39,9 @@ const EditableCategoryRow = ({ onSave, onCancel, categoryName = '' }: { onSave: 
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="Enter category name"
-        className="flex-1 bg-transparent border-b border-orange-500 focus:ring-0 focus:outline-none text-gray-900 dark:text-gray-100" />
+        className="flex-1 bg-transparent border-b border-orange-500 focus:ring-0 focus:outline-none text-gray-900 dark:text-zinc-100" />
       <button onClick={() => onSave(name)} className="px-3 py-1 text-sm font-semibold text-white bg-orange-600 rounded-md hover:bg-orange-700">Save</button>
-      <button onClick={onCancel} className="px-3 py-1 text-sm font-semibold text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md">Cancel</button>
+      <button onClick={onCancel} className="px-3 py-1 text-sm font-semibold text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:-zinc-800 rounded-md">Cancel</button>
     </div>
   );
 };
@@ -56,10 +56,10 @@ const CategoryRow = ({
   onDeleteRequest: (category: EnrichedCategory) => void
 }) => {
   return (
-    <div className={`flex items-center gap-4 p-3 rounded-lg transition-colors hover:bg-gray-100 dark:hover:bg-gray-800`}>
+    <div className={`flex items-center gap-4 p-3 rounded-lg transition-colors hover:bg-gray-100 dark:-zinc-800`}>
       <div className="flex-1 overflow-hidden">
-        <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">{category.name}</p>
-        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
+        <p className="font-semibold text-gray-900 dark:text-zinc-100 truncate">{category.name}</p>
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-zinc-400">
           <div className="flex items-center gap-1">
             <CubeIcon className="w-4 h-4" />
             <span>{category.productCount} products</span>
@@ -71,12 +71,12 @@ const CategoryRow = ({
         </div>
       </div>
       <Menu as="div" className="relative flex-shrink-0">
-        <Menu.Button className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700">
-          <EllipsisVerticalIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+        <Menu.Button className="p-2 rounded-full hover:bg-gray-200 dark:-zinc-700">
+          <EllipsisVerticalIcon className="w-5 h-5 text-gray-500 dark:text-zinc-400" />
         </Menu.Button>
         <Transition as={Fragment} enter="transition ease-out duration-100" enterFrom="transform opacity-0 scale-95" enterTo="transform opacity-100 scale-100" leave="transition ease-in duration-75" leaveFrom="transform opacity-100 scale-100" leaveTo="transform opacity-0 scale-95">
-          <Menu.Items className="absolute right-0 w-48 mt-2 origin-top-right bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-700 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20">
-            <div className="px-1 py-1 "><Menu.Item>{({ active }) => (<button onClick={() => onEdit(category)} className={`${active ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Edit</button>)}</Menu.Item></div>
+          <Menu.Items className="absolute right-0 w-48 mt-2 origin-top-right bg-white dark:bg-zinc-800 divide-y divide-gray-100 dark:divide-zinc-700 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20">
+            <div className="px-1 py-1 "><Menu.Item>{({ active }) => (<button onClick={() => onEdit(category)} className={`${active ? 'bg-gray-100 dark:bg-zinc-700 text-gray-900 dark:text-zinc-100' : 'text-gray-700 dark:text-zinc-300'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Edit</button>)}</Menu.Item></div>
             <div className="px-1 py-1"><Menu.Item>{({ active }) => (<button onClick={() => onDeleteRequest(category)} className={`${active ? 'bg-red-500 text-white' : 'text-red-500'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Delete</button>)}</Menu.Item></div>
           </Menu.Items>
         </Transition>
@@ -86,7 +86,7 @@ const CategoryRow = ({
 };
 
 const SortButton = ({ label, value, activeSort, onClick }: { label: string, value: SortType, activeSort: SortType, onClick: (sort: SortType) => void }) => (
-  <button onClick={() => onClick(value)} className={`flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-full transition-colors whitespace-nowrap ${activeSort === value ? 'bg-orange-600 text-white shadow-md' : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700'}`}>
+  <button onClick={() => onClick(value)} className={`flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-full transition-colors whitespace-nowrap ${activeSort === value ? 'bg-orange-600 text-white shadow-md' : 'bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 hover:bg-gray-200 dark:-zinc-700'}`}>
     {label}
   </button>
 )
@@ -166,16 +166,16 @@ const ManageCategoriesModal: React.FC<ManageCategoriesModalProps> = ({ isOpen, o
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+            className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-zinc-900 text-slate-900 dark:text-white"
             initial="hidden" animate="visible" exit="exit"
             variants={modalVariants}
             transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
           >
             {/* Header */}
-            <header className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 dark:border-slate-700 flex-shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
+            <header className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 dark:border-zinc-700 flex-shrink-0 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-lg">
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">Manage Categories</h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400">Organize your products</p>
+                <p className="text-xs text-slate-500 dark:text-zinc-400">Organize your products</p>
               </div>
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg">
                 <Tag className="w-6 h-6 text-white" />
@@ -183,15 +183,15 @@ const ManageCategoriesModal: React.FC<ManageCategoriesModalProps> = ({ isOpen, o
             </header>
 
             {/* Sticky Search & Sort */}
-            <div className="sticky top-0 z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm p-4 border-b border-gray-200 dark:border-slate-700">
+            <div className="sticky top-0 z-10 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm p-4 border-b border-gray-200 dark:border-zinc-700">
               <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <MagnifyingGlassIcon className="pointer-events-none absolute top-3.5 left-4 h-5 w-5 text-gray-400 dark:text-gray-500" />
-                  <input type="text" placeholder="Search categories..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="block w-full rounded-lg border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 py-3 pl-11 pr-4 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-blue-500 focus:ring-0 sm:text-sm" />
+                  <MagnifyingGlassIcon className="pointer-events-none absolute top-3.5 left-4 h-5 w-5 text-gray-400 dark:text-zinc-500" />
+                  <input type="text" placeholder="Search categories..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="block w-full rounded-lg border-2 border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 py-3 pl-11 pr-4 text-gray-900 dark:text-zinc-100 placeholder:text-gray-500 dark:-zinc-400 focus:border-blue-500 focus:ring-0 sm:text-sm" />
                 </div>
                 <button
                   onClick={() => setIsAddingCategory(true)}
-                  className="px-4 py-2 text-sm font-semibold rounded-lg transition-colors bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 hover:bg-gray-200 dark:hover:bg-gray-700">
+                  className="px-4 py-2 text-sm font-semibold rounded-lg transition-colors bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-zinc-100 hover:bg-gray-200 dark:-zinc-700">
                   <PlusIcon className="h-5 w-5" />
                 </button>
               </div>
@@ -212,13 +212,13 @@ const ManageCategoriesModal: React.FC<ManageCategoriesModalProps> = ({ isOpen, o
                     <CategoryRow key={c.id} category={c} onEdit={() => setEditingCategoryId(c.id)} onDeleteRequest={setCategoryToDelete} />
                 ))}
                 {sortedAndFilteredCategories.length === 0 && !isAddingCategory && (
-                  <div className="text-center py-16"><p className="font-semibold text-gray-900 dark:text-gray-100">No categories found</p><p className="text-gray-500 dark:text-gray-400 mt-1">Try adjusting your search or filters.</p></div>
+                  <div className="text-center py-16"><p className="font-semibold text-gray-900 dark:text-zinc-100">No categories found</p><p className="text-gray-500 dark:text-zinc-400 mt-1">Try adjusting your search or filters.</p></div>
                 )}
               </div>
             </main>
 
             {/* Footer */}
-            <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900">
+            <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900">
               <motion.button
                 onClick={handleClose}
                 className="w-full bg-gradient-to-r from-orange-600 to-red-600 hover:from-orange-700 hover:to-red-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"

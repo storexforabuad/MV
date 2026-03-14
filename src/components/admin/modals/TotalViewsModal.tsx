@@ -20,18 +20,18 @@ const TotalViewsModal: React.FC<TotalViewsModalProps> = ({
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
+          className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-zinc-950 text-slate-900 dark:text-white"
           initial="hidden" animate="visible" exit="exit"
           variants={modalVariants}
           transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
         >
           {/* --- Header --- */}
-          <header className="flex-shrink-0 flex items-center justify-between w-full max-w-5xl mx-auto p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
+          <header className="flex-shrink-0 flex items-center justify-between w-full max-w-5xl mx-auto p-4 sm:p-6 border-b border-slate-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-lg">
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
                 Store Analytics
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Track your views</p>
+              <p className="text-xs text-slate-500 dark:text-zinc-400">Track your views</p>
             </div>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-sky-400 to-blue-500 flex items-center justify-center shadow-lg">
               <Eye className="w-6 h-6 text-white" />
@@ -48,7 +48,7 @@ const TotalViewsModal: React.FC<TotalViewsModalProps> = ({
           </main>
 
           {/* --- Footer --- */}
-          <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-slate-700">
+          <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-zinc-700">
             <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent dark:from-slate-950 dark:to-transparent pointer-events-none" />
             <div className="relative max-w-5xl mx-auto">
               <motion.button

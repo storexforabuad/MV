@@ -95,10 +95,10 @@ export default function CirclesModal({ isOpen, onClose, storeId }: CirclesModalP
                 animate={{ y: 0 }}
                 exit={{ y: '100%' }}
                 transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                className="relative w-full sm:max-w-2xl bg-white dark:bg-black border border-slate-200 dark:border-slate-800 sm:rounded-[40px] rounded-t-[40px] max-h-[92vh] flex flex-col overflow-hidden text-slate-900 dark:text-white font-sans shadow-2xl"
+                className="relative w-full sm:max-w-2xl bg-white dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 sm:rounded-[40px] rounded-t-[40px] max-h-[92vh] flex flex-col overflow-hidden text-slate-900 dark:text-white font-sans shadow-2xl"
             >
                 {/* Header */}
-                <header className="px-6 py-6 pb-4 flex-shrink-0 border-b border-slate-100 dark:border-slate-800/50 relative overflow-hidden">
+                <header className="px-6 py-6 pb-4 flex-shrink-0 border-b border-slate-100 dark:border-zinc-800/50 relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-[100px] -mr-32 -mt-32" />
                     <div className="relative z-10 flex items-start justify-between">
                         <div className="flex items-center gap-3">
@@ -109,10 +109,10 @@ export default function CirclesModal({ isOpen, onClose, storeId }: CirclesModalP
                                 <h1 className="text-xl font-black tracking-tight leading-tight">
                                     Your Circle
                                 </h1>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Referral Network Dashboard</p>
+                                <p className="text-xs text-slate-500 dark:text-zinc-400 font-medium">Referral Network Dashboard</p>
                             </div>
                         </div>
-                        <button onClick={onClose} className="w-10 h-10 bg-slate-100 dark:bg-slate-900 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                        <button onClick={onClose} className="w-10 h-10 bg-slate-100 dark:bg-zinc-900 rounded-full flex items-center justify-center text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white transition-colors">
                             <X className="w-5 h-5" />
                         </button>
                     </div>
@@ -130,18 +130,18 @@ export default function CirclesModal({ isOpen, onClose, storeId }: CirclesModalP
                                 <motion.div
                                     whileTap={{ scale: 0.98 }}
                                     onClick={() => setSelectedModal('tier')}
-                                    className="bg-slate-100/50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 backdrop-blur-sm cursor-pointer hover:border-emerald-500/30 transition-colors group relative overflow-hidden"
+                                    className="bg-slate-100/50 dark:bg-zinc-900/40 border border-slate-200 dark:border-zinc-800 rounded-3xl p-5 backdrop-blur-sm cursor-pointer hover:border-emerald-500/30 transition-colors group relative overflow-hidden"
                                 >
                                     <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-[40px]" />
                                     <div className="relative z-10">
                                         <div className="flex items-center justify-between mb-3">
-                                            <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Tier Progress</div>
+                                            <div className="text-xs font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">Tier Progress</div>
                                             <div className="text-xs font-black text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                                                 {data.tier.commissionPercentage}% Commission
                                                 <ChevronRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
                                             </div>
                                         </div>
-                                        <div className="h-2 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden mb-3">
+                                        <div className="h-2 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden mb-3">
                                             <motion.div
                                                 initial={{ width: 0 }}
                                                 animate={{ width: `${data.tier.progress}%` }}
@@ -153,7 +153,7 @@ export default function CirclesModal({ isOpen, onClose, storeId }: CirclesModalP
                                                 {data.tier.name} Tier
                                             </span>
                                             {data.tier.nextTierThreshold && (
-                                                <span className="text-slate-500 dark:text-slate-400">
+                                                <span className="text-slate-500 dark:text-zinc-400">
                                                     Add <span className="text-slate-900 dark:text-white font-black">{data.tier.nextTierThreshold - data.summary.activeStores}</span> more active stores to level up
                                                 </span>
                                             )}
@@ -172,7 +172,7 @@ export default function CirclesModal({ isOpen, onClose, storeId }: CirclesModalP
                                     <div className="flex gap-2">
                                         <button
                                             onClick={handleCopyLink}
-                                            className="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 active:scale-95 transition-all text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800"
+                                            className="flex-1 bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 py-3 rounded-2xl text-xs font-bold flex items-center justify-center gap-2 active:scale-95 transition-all text-slate-900 dark:text-white hover:bg-slate-50 dark:-zinc-800"
                                         >
                                             {copySuccess ? <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" /> : <Copy className="w-4 h-4 text-slate-400" />}
                                             {copySuccess ? 'Copied!' : 'Copy Link'}
@@ -223,16 +223,16 @@ export default function CirclesModal({ isOpen, onClose, storeId }: CirclesModalP
 
                             {/* Tabs */}
                             <div className="px-6 mb-4">
-                                <div className="flex bg-slate-100 dark:bg-slate-900 p-1 rounded-2xl border border-slate-200 dark:border-slate-800 select-none">
+                                <div className="flex bg-slate-100 dark:bg-zinc-900 p-1 rounded-2xl border border-slate-200 dark:border-zinc-800 select-none">
                                     <button
                                         onClick={() => setActiveTab('stores')}
-                                        className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'stores' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-md' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                                        className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'stores' ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-md' : 'text-slate-500 hover:text-slate-700 dark:-zinc-300'}`}
                                     >
                                         Stores
                                     </button>
                                     <button
                                         onClick={() => setActiveTab('registrations')}
-                                        className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'registrations' ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-md' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                                        className={`flex-1 py-2.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'registrations' ? 'bg-white dark:bg-zinc-800 text-slate-900 dark:text-white shadow-md' : 'text-slate-500 hover:text-slate-700 dark:-zinc-300'}`}
                                     >
                                         Pending
                                     </button>
@@ -311,7 +311,7 @@ function SummaryCard({ label, value, icon: Icon, color, subLabel, onClick }: any
         <motion.div
             whileTap={{ scale: 0.95 }}
             onClick={onClick}
-            className={`p-4 rounded-3xl border ${colors[color]} bg-white dark:bg-slate-900/40 backdrop-blur-sm cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-900/60 transition-colors group px-4`}
+            className={`p-4 rounded-3xl border ${colors[color]} bg-white dark:bg-zinc-900/40 backdrop-blur-sm cursor-pointer hover:bg-slate-50 dark:-zinc-900/60 transition-colors group px-4`}
         >
             <div className="flex items-center justify-between mb-2">
                 <Icon className="w-5 h-5 opacity-80 group-hover:scale-110 transition-transform" />
@@ -327,13 +327,13 @@ function SummaryCard({ label, value, icon: Icon, color, subLabel, onClick }: any
 function StoreCard({ store, formatCurrency }: { store: ReferralStoreStats, formatCurrency: any }) {
     const [isExpanded, setIsExpanded] = useState(false);
     return (
-        <div className="bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 rounded-3xl overflow-hidden">
-            <div className="p-4 flex items-center gap-4 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-colors" onClick={() => setIsExpanded(!isExpanded)}>
-                <div className="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 relative overflow-hidden flex-shrink-0 border border-slate-200 dark:border-slate-700">
+        <div className="bg-slate-50 dark:bg-zinc-900/60 border border-slate-200 dark:border-zinc-800 rounded-3xl overflow-hidden">
+            <div className="p-4 flex items-center gap-4 cursor-pointer hover:bg-slate-100 dark:-zinc-800/50 transition-colors" onClick={() => setIsExpanded(!isExpanded)}>
+                <div className="w-12 h-12 rounded-2xl bg-white dark:bg-zinc-800 relative overflow-hidden flex-shrink-0 border border-slate-200 dark:border-zinc-700">
                     {store.logo ? (
                         <Image src={store.logo || '/placeholder.png'} alt={store.name} fill className="object-cover" />
                     ) : (
-                        <Store className="w-6 h-6 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-600" />
+                        <Store className="w-6 h-6 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-slate-400 dark:text-zinc-600" />
                     )}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -352,10 +352,10 @@ function StoreCard({ store, formatCurrency }: { store: ReferralStoreStats, forma
                             <div className="text-[9px] text-slate-500 font-bold uppercase mt-0.5">Weekly</div>
                         </>
                     ) : (
-                        <div className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">No Comm.</div>
+                        <div className="text-[10px] font-bold text-slate-400 dark:text-zinc-500 uppercase">No Comm.</div>
                     )}
                 </div>
-                <ChevronRight className={`w-4 h-4 text-slate-400 dark:text-slate-600 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
+                <ChevronRight className={`w-4 h-4 text-slate-400 dark:text-zinc-600 transition-transform ${isExpanded ? 'rotate-90' : ''}`} />
             </div>
 
             <AnimatePresence>
@@ -376,11 +376,11 @@ function StoreCard({ store, formatCurrency }: { store: ReferralStoreStats, forma
                         )}
 
                         <div className="grid grid-cols-2 gap-3">
-                            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-2xl">
+                            <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-3 rounded-2xl">
                                 <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Views</div>
                                 <div className="text-lg font-black text-slate-900 dark:text-white">{store.weeklyPerformance.views.current.toLocaleString()}</div>
                             </div>
-                            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-3 rounded-2xl">
+                            <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 p-3 rounded-2xl">
                                 <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">Orders</div>
                                 <div className="text-lg font-black text-slate-900 dark:text-white">{store.weeklyPerformance.orders.current.toLocaleString()}</div>
                             </div>
@@ -420,15 +420,15 @@ function StoreCard({ store, formatCurrency }: { store: ReferralStoreStats, forma
 
 function RegistrationCard({ reg }: { reg: ReferralRegistration }) {
     return (
-        <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 flex items-center gap-4">
-            <div className="w-10 h-10 rounded-full bg-white dark:bg-slate-800 flex items-center justify-center border border-slate-200 dark:border-slate-700">
-                <Users className="w-5 h-5 text-slate-400 dark:text-slate-500" />
+        <div className="bg-slate-50 dark:bg-zinc-900/40 border border-slate-200 dark:border-zinc-800 rounded-3xl p-4 flex items-center gap-4">
+            <div className="w-10 h-10 rounded-full bg-white dark:bg-zinc-800 flex items-center justify-center border border-slate-200 dark:border-zinc-700">
+                <Users className="w-5 h-5 text-slate-400 dark:text-zinc-500" />
             </div>
             <div className="flex-1 min-w-0">
                 <h3 className="font-bold text-slate-900 dark:text-white truncate text-sm">{reg.businessName}</h3>
                 <div className="flex items-center gap-2 mt-0.5">
                     <span className="text-[10px] text-slate-500 font-medium capitalize">{reg.storeType}</span>
-                    <span className="text-[10px] text-slate-400 dark:text-slate-600">•</span>
+                    <span className="text-[10px] text-slate-400 dark:text-zinc-600">•</span>
                     <span className="text-[10px] text-slate-500">{new Date(reg.createdAt).toLocaleDateString()}</span>
                 </div>
             </div>
@@ -467,9 +467,9 @@ function DashboardModal({ type, initialData, onClose, formatCurrency }: any) {
                 initial={{ y: '100%' }}
                 animate={{ y: 0 }}
                 exit={{ y: '100%' }}
-                className="relative w-full sm:max-w-md bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 sm:rounded-[32px] rounded-t-[32px] overflow-hidden shadow-2xl flex flex-col max-h-[85vh]"
+                className="relative w-full sm:max-w-md bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 sm:rounded-[32px] rounded-t-[32px] overflow-hidden shadow-2xl flex flex-col max-h-[85vh]"
             >
-                <div className="p-6 pb-4 flex items-center justify-between flex-shrink-0 border-b border-slate-100 dark:border-slate-800/50">
+                <div className="p-6 pb-4 flex items-center justify-between flex-shrink-0 border-b border-slate-100 dark:border-zinc-800/50">
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center border border-emerald-500/20">
                             {type === 'tier' ? <Trophy className="w-5 h-5 text-emerald-600 dark:text-emerald-400" /> :
@@ -488,7 +488,7 @@ function DashboardModal({ type, initialData, onClose, formatCurrency }: any) {
                             </h2>
                         </div>
                     </div>
-                    <button onClick={onClose} className="w-8 h-8 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors">
+                    <button onClick={onClose} className="w-8 h-8 bg-slate-100 dark:bg-zinc-800 rounded-full flex items-center justify-center text-slate-500 dark:text-zinc-400 hover:text-slate-900 dark:hover:text-white transition-colors">
                         <X className="w-4 h-4" />
                     </button>
                 </div>
@@ -501,7 +501,7 @@ function DashboardModal({ type, initialData, onClose, formatCurrency }: any) {
                             { name: 'Elite', commission: 30, range: '11+ Stores' }].map((t) => {
                                 const isCurrent = initialData.tier.name === t.name;
                                 return (
-                                    <div key={t.name} className={`p-4 rounded-2xl border transition-all ${isCurrent ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30' : 'bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-slate-800'}`}>
+                                    <div key={t.name} className={`p-4 rounded-2xl border transition-all ${isCurrent ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-200 dark:border-emerald-500/30' : 'bg-slate-50 dark:bg-zinc-800/30 border-slate-200 dark:border-zinc-800'}`}>
                                         <div className="flex items-center justify-between mb-2">
                                             <h3 className={`text-sm font-black uppercase tracking-tight ${isCurrent ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}`}>{t.name}</h3>
                                             {isCurrent && <span className="text-[9px] font-black bg-emerald-500 text-white px-2 py-0.5 rounded-full uppercase">Current</span>}
@@ -511,7 +511,7 @@ function DashboardModal({ type, initialData, onClose, formatCurrency }: any) {
                                                 <div className="text-xl font-black text-slate-900 dark:text-white">{t.commission}%</div>
                                             </div>
                                             <div className="text-right">
-                                                <div className="text-xs font-bold text-slate-500 dark:text-slate-300">{t.range}</div>
+                                                <div className="text-xs font-bold text-slate-500 dark:text-zinc-300">{t.range}</div>
                                             </div>
                                         </div>
                                     </div>
@@ -563,7 +563,7 @@ function StatBox({ label, value, icon: Icon, color }: any) {
     };
 
     return (
-        <div className={`p-4 rounded-3xl border ${colors[color]} bg-white dark:bg-slate-900/40`}>
+        <div className={`p-4 rounded-3xl border ${colors[color]} bg-white dark:bg-zinc-900/40`}>
             <div className="flex items-center gap-2 mb-2">
                 <Icon className="w-4 h-4 opacity-60" />
             </div>

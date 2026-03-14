@@ -242,33 +242,33 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
   return (
     <AnimatePresence>
       <motion.div
-        className="fixed inset-0 z-[200] flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white"
+        className="fixed inset-0 z-[200] flex flex-col bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-white"
         initial="hidden" animate="visible" exit="exit"
         variants={modalVariants}
         transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
       >
         {/* --- Header --- */}
-        <header className="flex-shrink-0 flex items-center justify-center w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg z-10 relative">
+        <header className="flex-shrink-0 flex items-center justify-center w-full border-b border-slate-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-lg z-10 relative">
           <div className="flex items-center justify-between w-full max-w-5xl mx-auto p-4 sm:p-6">
             <div>
               <h2 className="text-xl sm:text-2xl font-black tracking-tight text-slate-900 dark:text-white">
                 Launch Guide
               </h2>
-              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-1">
+              <p className="text-xs font-semibold text-slate-500 dark:text-zinc-400 uppercase tracking-widest mt-1">
                 Step {currentSlide + 1} of {slides.length}
               </p>
             </div>
             <button
               onClick={() => { onClose(); setTimeout(() => setCurrentSlide(0), 300); }}
-              className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 flex items-center justify-center transition-colors shadow-sm"
+              className="w-10 h-10 rounded-full bg-slate-100 dark:bg-zinc-800 hover:bg-slate-200 dark:-zinc-700 flex items-center justify-center transition-colors shadow-sm"
             >
-              <X className="w-5 h-5 text-slate-500 dark:text-slate-400" />
+              <X className="w-5 h-5 text-slate-500 dark:text-zinc-400" />
             </button>
           </div>
         </header>
 
         {/* --- Progress Bar --- */}
-        <div className="w-full h-1 bg-slate-200 dark:bg-slate-800">
+        <div className="w-full h-1 bg-slate-200 dark:bg-zinc-800">
           <motion.div
             className="h-full bg-violet-500"
             initial={{ width: 0 }}
@@ -295,22 +295,22 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
                   {slide.title}
                 </h2>
 
-                <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 font-medium leading-relaxed mb-8 max-w-xl">
+                <p className="text-base sm:text-lg text-slate-600 dark:text-zinc-300 font-medium leading-relaxed mb-8 max-w-xl">
                   {slide.description}
                 </p>
 
                 {/* Language Toggle for Intro Phase */}
                 {slide.id === 'intro' && (
-                  <div className="flex bg-slate-100 dark:bg-slate-800 p-1.5 rounded-[1.25rem] mb-10 border border-slate-200 dark:border-slate-700 mx-auto shadow-inner">
+                  <div className="flex bg-slate-100 dark:bg-zinc-800 p-1.5 rounded-[1.25rem] mb-10 border border-slate-200 dark:border-zinc-700 mx-auto shadow-inner">
                     <button
                       onClick={() => setLanguage('en')}
-                      className={`px-8 py-3 rounded-xl font-bold text-[15px] transition-all duration-300 ${language === 'en' ? 'bg-white dark:bg-slate-700 text-violet-600 dark:text-violet-400 shadow-md ring-1 ring-slate-900/5 dark:ring-white/10' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                      className={`px-8 py-3 rounded-xl font-bold text-[15px] transition-all duration-300 ${language === 'en' ? 'bg-white dark:bg-zinc-700 text-violet-600 dark:text-violet-400 shadow-md ring-1 ring-slate-900/5 dark:ring-white/10' : 'text-slate-500 hover:text-slate-700 dark:-zinc-300'}`}
                     >
                       English
                     </button>
                     <button
                       onClick={() => setLanguage('ha')}
-                      className={`px-8 py-3 rounded-xl font-bold text-[15px] transition-all duration-300 ${language === 'ha' ? 'bg-white dark:bg-slate-700 text-violet-600 dark:text-violet-400 shadow-md ring-1 ring-slate-900/5 dark:ring-white/10' : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'}`}
+                      className={`px-8 py-3 rounded-xl font-bold text-[15px] transition-all duration-300 ${language === 'ha' ? 'bg-white dark:bg-zinc-700 text-violet-600 dark:text-violet-400 shadow-md ring-1 ring-slate-900/5 dark:ring-white/10' : 'text-slate-500 hover:text-slate-700 dark:-zinc-300'}`}
                     >
                       Hausa
                     </button>
@@ -319,13 +319,13 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
 
                 {/* Highlights for Intro */}
                 {slide.highlights && (
-                  <div className="w-full max-w-md space-y-4 mb-8 text-left bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-sm">
+                  <div className="w-full max-w-md space-y-4 mb-8 text-left bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-6 shadow-sm">
                     {slide.highlights.map((highlight, idx) => (
                       <div key={idx} className="flex items-start gap-4">
                         <div className="mt-0.5 bg-green-100 dark:bg-green-900/30 p-1 rounded-full shrink-0">
                           <CheckCircle2 className="w-4 h-4 text-green-600 dark:text-green-400" strokeWidth={3} />
                         </div>
-                        <span className="text-[15px] font-semibold text-slate-700 dark:text-slate-200 leading-snug">{highlight}</span>
+                        <span className="text-[15px] font-semibold text-slate-700 dark:text-zinc-200 leading-snug">{highlight}</span>
                       </div>
                     ))}
                   </div>
@@ -343,7 +343,7 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
                           <div className="w-6 h-6 rounded-full bg-violet-200 dark:bg-violet-800/50 flex items-center justify-center shrink-0 text-xs font-black text-violet-700 dark:text-violet-300">
                             {idx + 1}
                           </div>
-                          <span className="text-[14px] font-semibold text-slate-700 dark:text-slate-300 leading-snug pt-0.5">{tip}</span>
+                          <span className="text-[14px] font-semibold text-slate-700 dark:text-zinc-300 leading-snug pt-0.5">{tip}</span>
                         </div>
                       ))}
                     </div>
@@ -364,8 +364,8 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
                         <Copy className="w-3.5 h-3.5" /> {language === 'en' ? 'Copy' : 'Kwafa'}
                       </button>
                     </div>
-                    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-sm">
-                      <p className="text-[13px] font-medium text-slate-600 dark:text-slate-400 whitespace-pre-wrap leading-relaxed">{slide.copyText}</p>
+                    <div className="bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-3xl p-5 shadow-sm">
+                      <p className="text-[13px] font-medium text-slate-600 dark:text-zinc-400 whitespace-pre-wrap leading-relaxed">{slide.copyText}</p>
                     </div>
                   </div>
                 )}
@@ -373,17 +373,17 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
                 {/* Task Completion Section */}
                 {isSlidePhase && (
                   <div className="w-full max-w-md mt-6 mb-2">
-                    <div className="w-full h-px bg-slate-200 dark:bg-slate-800 mb-6" />
+                    <div className="w-full h-px bg-slate-200 dark:bg-zinc-800 mb-6" />
                     <button
                       onClick={() => togglePhase(slide.id)}
                       className={`w-full flex items-center justify-center gap-3 p-4 rounded-2xl border-2 transition-all font-black text-base sm:text-lg ${completedPhases.includes(slide.id)
                         ? 'bg-green-50 dark:bg-green-900/20 border-green-500 text-green-600 dark:text-green-400'
-                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-violet-500 hover:text-violet-600 dark:hover:text-violet-400 shadow-sm'
+                        : 'bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-700 text-slate-700 dark:text-zinc-300 hover:border-violet-500 hover:text-violet-600 dark:hover:text-violet-400 shadow-sm'
                         }`}
                     >
                       <div className={`w-6 h-6 rounded-full flex items-center justify-center border-2 transition-colors shrink-0 ${completedPhases.includes(slide.id)
                         ? 'bg-green-500 border-green-500 text-white'
-                        : 'border-slate-300 dark:border-slate-600 text-transparent'
+                        : 'border-slate-300 dark:border-zinc-600 text-transparent'
                         }`}>
                         <CheckCircle2 className="w-4 h-4" strokeWidth={3} />
                       </div>
@@ -401,12 +401,12 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
         </main>
 
         {/* --- Footer Controls --- */}
-        <footer className="relative flex-shrink-0 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 z-10 w-full flex justify-center">
+        <footer className="relative flex-shrink-0 border-t border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 z-10 w-full flex justify-center">
           <div className="max-w-5xl w-full p-4 sm:p-6 flex items-center justify-between">
             {currentSlide > 0 && (
               <button
                 onClick={prevSlide}
-                className="p-4 rounded-2xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-all focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 flex-shrink-0"
+                className="p-4 rounded-2xl border border-slate-200 dark:border-zinc-700 text-slate-600 dark:text-zinc-400 hover:bg-slate-50 dark:-zinc-800 hover:text-slate-900 dark:hover:text-white transition-all focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 flex-shrink-0"
                 aria-label="Previous step"
               >
                 <ChevronLeft className="w-6 h-6" />
@@ -417,7 +417,7 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
               onClick={nextSlide}
               disabled={isSlidePhase && !isPhaseCompleted}
               className={`flex-1 ${currentSlide > 0 ? 'ml-4' : ''} ${isSlidePhase && !isPhaseCompleted
-                ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-slate-700'
+                ? 'bg-slate-100 dark:bg-zinc-800 text-slate-400 dark:text-zinc-500 cursor-not-allowed border border-slate-200 dark:border-zinc-700'
                 : 'bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white shadow-lg shadow-violet-500/25 active:scale-[0.98]'
                 } font-bold py-4 px-6 rounded-2xl transition-all flex items-center justify-center gap-2 text-base outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900 w-full`}
             >

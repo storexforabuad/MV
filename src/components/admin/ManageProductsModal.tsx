@@ -49,7 +49,7 @@ const ProductRow = React.memo(({
   const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   return (
-    <div className={`flex items-start gap-4 p-3 rounded-lg transition-colors ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-gray-50 dark:hover:bg-gray-800/50'}`}>
+    <div className={`flex items-start gap-4 p-3 rounded-lg transition-colors ${isSelected ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-gray-50 dark:-zinc-800/50'}`}>
       {isSelectMode && (
         <div className="flex items-center justify-center h-16">
           <input
@@ -69,8 +69,8 @@ const ProductRow = React.memo(({
         />
       </div>
       <div className="flex-1 overflow-hidden">
-        <p className="font-semibold text-gray-900 dark:text-gray-100 truncate">{product.name}</p>
-        <p className="text-sm text-gray-500 dark:text-gray-400 -mt-0.5">{categoryName}</p>
+        <p className="font-semibold text-gray-900 dark:text-zinc-100 truncate">{product.name}</p>
+        <p className="text-sm text-gray-500 dark:text-zinc-400 -mt-0.5">{categoryName}</p>
 
         <div className="mt-2 flex items-baseline gap-2">
           {product.onPromo && product.originalPrice ? (
@@ -79,11 +79,11 @@ const ProductRow = React.memo(({
               <p className="text-sm text-gray-400 line-through">{formatPrice(product.originalPrice)}</p>
             </>
           ) : (
-            <p className="text-lg font-bold text-gray-900 dark:text-gray-100">{formatPrice(product.price)}</p>
+            <p className="text-lg font-bold text-gray-900 dark:text-zinc-100">{formatPrice(product.price)}</p>
           )}
         </div>
 
-        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-gray-400">
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-zinc-400">
           <div>
             {isGeneralProduct(product) && product.soldOut ?
               <span className="px-2 py-0.5 text-xs font-medium text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-400 rounded-full">Sold Out</span> :
@@ -95,19 +95,19 @@ const ProductRow = React.memo(({
               <div className="flex items-center gap-2 mt-1">
                 <div className="flex -space-x-1">
                   {product.colors.slice(0, 3).map((color, i) => (
-                    <div key={i} className="w-4 h-4 rounded-full border border-white dark:border-gray-800" style={{ backgroundColor: color.hex }} title={color.name} />
+                    <div key={i} className="w-4 h-4 rounded-full border border-white dark:border-zinc-800" style={{ backgroundColor: color.hex }} title={color.name} />
                   ))}
                   {product.colors.length > 3 && (
-                    <div className="w-4 h-4 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center text-[8px] font-bold border border-white dark:border-gray-800">+{product.colors.length - 3}</div>
+                    <div className="w-4 h-4 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center text-[8px] font-bold border border-white dark:border-zinc-800">+{product.colors.length - 3}</div>
                   )}
                 </div>
                 {product.sizes && product.sizes.length > 0 ? (
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                  <span className="text-xs text-gray-500 dark:text-zinc-400">
                     {product.sizes.length} sizes
                     {product.soldOutSizes && product.soldOutSizes.length > 0 && ` (${product.sizes.length - product.soldOutSizes.length} avail)`}
                   </span>
                 ) : (
-                  <span className="text-xs text-gray-500 dark:text-gray-400">No sizes</span>
+                  <span className="text-xs text-gray-500 dark:text-zinc-400">No sizes</span>
                 )}
                 {product.soldOut && <span className="px-2 py-0.5 text-xs font-medium text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-400 rounded-full">Sold Out</span>}
               </div>
@@ -140,13 +140,13 @@ const ProductRow = React.memo(({
                 calculateMenuPosition(menuButtonRef.current);
               }
             }}
-            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+            className="p-2 rounded-full hover:bg-gray-100 dark:-zinc-700 transition-colors">
             <EllipsisVerticalIcon className="w-5 h-5 text-gray-400" />
           </Menu.Button>
           <Transition as={Fragment} enter="transition ease-out duration-100" enterFrom="transform opacity-0 scale-95" enterTo="transform opacity-100 scale-100" leave="transition ease-in duration-75" leaveFrom="transform opacity-100 scale-100" leaveTo="transform opacity-0 scale-95">
             <Menu.Items
-              className={`absolute right-0 w-48 divide-y divide-gray-100 dark:divide-gray-700 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20 bg-white dark:bg-gray-800 ${menuPosition === 'top' ? 'bottom-full origin-bottom mb-1' : 'origin-top mt-2'}`}>
-              <div className="px-1 py-1 "><Menu.Item>{({ active }) => (<button onClick={() => onEdit(product)} className={`${active ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Edit</button>)}</Menu.Item><Menu.Item>{({ active }) => (<button className={`${active ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100' : 'text-gray-700 dark:text-gray-300'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Duplicate</button>)}</Menu.Item></div>
+              className={`absolute right-0 w-48 divide-y divide-gray-100 dark:divide-zinc-700 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20 bg-white dark:bg-zinc-800 ${menuPosition === 'top' ? 'bottom-full origin-bottom mb-1' : 'origin-top mt-2'}`}>
+              <div className="px-1 py-1 "><Menu.Item>{({ active }) => (<button onClick={() => onEdit(product)} className={`${active ? 'bg-gray-100 dark:bg-zinc-700 text-gray-900 dark:text-zinc-100' : 'text-gray-700 dark:text-zinc-300'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Edit</button>)}</Menu.Item><Menu.Item>{({ active }) => (<button className={`${active ? 'bg-gray-100 dark:bg-zinc-700 text-gray-900 dark:text-zinc-100' : 'text-gray-700 dark:text-zinc-300'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Duplicate</button>)}</Menu.Item></div>
               <div className="px-1 py-1"><Menu.Item>{({ active }) => (<button onClick={() => onDeleteRequest(product)} className={`${active ? 'bg-red-500 text-white' : 'text-red-500'} group flex rounded-md items-center w-full px-2 py-2 text-sm`}>Delete</button>)}</Menu.Item></div>
             </Menu.Items>
           </Transition>
@@ -165,11 +165,11 @@ const FilterChip = ({ label, value, activeFilter, onClick, count }: { label: str
       onClick={() => onClick(value)}
       className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-semibold rounded-full transition-all whitespace-nowrap border ${isActive
         ? 'bg-blue-600 border-blue-600 text-white shadow-md'
-        : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+        : 'bg-white dark:bg-zinc-800 border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 hover:bg-gray-50 dark:-zinc-700'
         }`}
     >
       {label}
-      <span className={`text-[10px] sm:text-xs font-bold flex items-center justify-center min-w-[16px] h-4 sm:min-w-[20px] sm:h-5 px-1 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}`}>
+      <span className={`text-[10px] sm:text-xs font-bold flex items-center justify-center min-w-[16px] h-4 sm:min-w-[20px] sm:h-5 px-1 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-gray-100 dark:bg-zinc-700 text-gray-600 dark:text-zinc-400'}`}>
         {count}
       </span>
     </button>
@@ -302,38 +302,38 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
+            className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-zinc-900 text-slate-900 dark:text-white"
             initial="hidden" animate="visible" exit="exit"
             variants={modalVariants}
             transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
           >
-            <header className="px-4 py-3 flex justify-between items-center border-b border-gray-200 dark:border-gray-700 flex-shrink-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg">
+            <header className="px-4 py-3 flex justify-between items-center border-b border-gray-200 dark:border-zinc-700 flex-shrink-0 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-lg">
               <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-zinc-100">
                   Manage Products
                 </h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Inventory & Stock</p>
+                <p className="text-xs text-gray-500 dark:text-zinc-400">Inventory & Stock</p>
               </div>
               <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-800 rounded-xl flex items-center justify-center shadow-lg">
                 <Archive className="w-6 h-6 text-white" />
               </div>
             </header>
 
-            <div className="flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 p-4">
+            <div className="flex-shrink-0 bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-700 p-4">
               <div className="flex gap-2">
                 <div className="relative flex-1">
-                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+                  <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-zinc-500" />
                   <input
                     type="text"
                     placeholder="Search products..."
                     value={searchQuery}
                     onChange={e => setSearchQuery(e.target.value)}
-                    className="w-full bg-gray-100 dark:bg-gray-800 rounded-xl pl-10 pr-10 py-2.5 text-[15px] text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-500/50 focus:bg-white dark:focus:bg-gray-700 transition-all"
+                    className="w-full bg-gray-100 dark:bg-zinc-800 rounded-xl pl-10 pr-10 py-2.5 text-[15px] text-gray-900 dark:text-zinc-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/50 dark:focus:ring-blue-500/50 focus:bg-white dark:-zinc-700 transition-all"
                   />
                   {searchQuery && (
                     <button
                       onClick={() => setSearchQuery('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:-zinc-300"
                     >
                       <XMarkIcon className="w-4 h-4" />
                     </button>
@@ -346,7 +346,7 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
                   }}
                   className={`px-4 py-2 text-sm font-semibold rounded-xl transition-all active:scale-95 ${isSelectMode
                     ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
-                    : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
+                    : 'bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-200 dark:-zinc-700'
                     }`}>
                   {isSelectMode ? 'Cancel' : 'Select'}
                 </button>
@@ -359,10 +359,10 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
               </div>
             </div>
 
-            <main className="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-gray-900/50">
+            <main className="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-zinc-900/50">
               {isSelectMode && (
                 <div className="mb-2 px-2">
-                  <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-white dark:hover:bg-gray-800 transition-colors cursor-pointer">
+                  <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-white dark:-zinc-800 transition-colors cursor-pointer">
                     <input
                       type="checkbox"
                       onChange={handleSelectAll}
@@ -375,7 +375,7 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
                       }}
                       className="h-5 w-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                     />
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Select All</span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-zinc-300">Select All</span>
                   </label>
                 </div>
               )}
@@ -383,7 +383,7 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
                 {visibleProducts.length > 0 ? (
                   <>
                     {visibleProducts.map(p => (
-                      <div key={p.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700">
+                      <div key={p.id} className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-700">
                         <ProductRow
                           product={p}
                           categoryName={p.categoryId ? categoryMap[p.categoryId] : 'Uncategorized'}
@@ -403,20 +403,20 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
                   </>
                 ) : (
                   <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <div className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4">
+                    <div className="w-16 h-16 bg-gray-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-4">
                       <MagnifyingGlassIcon className="w-8 h-8 text-gray-400" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">No products found</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Try adjusting your search or filters.</p>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">No products found</h3>
+                    <p className="text-sm text-gray-500 dark:text-zinc-400 mt-1">Try adjusting your search or filters.</p>
                   </div>
                 )}
               </div>
             </main>
 
-            <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 z-20">
+            <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 z-20">
               {isSelectMode ? (
                 <div className="flex justify-between items-center">
-                  <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                  <p className="text-sm font-medium text-gray-600 dark:text-zinc-400">
                     {selectedProducts.length} selected
                   </p>
                   <button

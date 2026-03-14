@@ -46,11 +46,11 @@ const ProductCardItem = memo(({
         <motion.button
 
             onClick={() => onSelect(product)}
-            className="group relative flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden hover:shadow-md transition-all text-left p-0 w-full"
+            className="group relative flex flex-col bg-white dark:bg-zinc-800 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-700 overflow-hidden hover:shadow-md transition-all text-left p-0 w-full"
             whileHover={{ y: -4 }}
             whileTap={{ scale: 0.98 }}
         >
-            <div className="aspect-[3/4] relative overflow-hidden bg-gray-100 dark:bg-gray-700 w-full">
+            <div className="aspect-[3/4] relative overflow-hidden bg-gray-100 dark:bg-zinc-700 w-full">
                 <Image
                     src={product.images[0] || 'https://placehold.co/400'}
                     alt={product.name}
@@ -59,9 +59,9 @@ const ProductCardItem = memo(({
                     sizes="(max-width: 640px) 50vw, 33vw"
                 />
                 {scoreData && (
-                    <div className="absolute top-2 left-2 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-semibold shadow-sm flex items-center gap-1">
+                    <div className="absolute top-2 left-2 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-sm px-2 py-1 rounded-lg text-xs font-semibold shadow-sm flex items-center gap-1">
                         <span>{scoreData.emoji}</span>
-                        <span className="capitalize text-gray-900 dark:text-gray-100">{scoreData.reason.replace('-', ' ')}</span>
+                        <span className="capitalize text-gray-900 dark:text-zinc-100">{scoreData.reason.replace('-', ' ')}</span>
                     </div>
                 )}
 
@@ -91,14 +91,14 @@ const ProductCardItem = memo(({
             </div>
 
             <div className="p-3 flex flex-col flex-1">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 line-clamp-2 mb-1.5 leading-tight">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-zinc-100 line-clamp-2 mb-1.5 leading-tight">
                     {product.name}
                 </h3>
                 <p className="text-lg font-bold text-purple-600 dark:text-purple-400 mb-2">
                     ₦{product.price.toLocaleString()}
                 </p>
 
-                <div className="mt-auto flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
+                <div className="mt-auto flex items-center gap-2 text-xs text-gray-500 dark:text-zinc-400">
                     <span className="flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
                         {product.views || 0} views
@@ -396,7 +396,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                             transition={{ duration: 0.3, ease: [0.25, 1, 0.5, 1] }}
                             className="w-full max-w-md mx-auto"
                         >
-                            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                            <div className="bg-white dark:bg-zinc-800 rounded-2xl shadow-2xl border border-gray-200 dark:border-zinc-700 overflow-hidden">
                                 {/* Success Header */}
                                 <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-3 flex items-center gap-3">
                                     <div className="w-8 h-8 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center flex-shrink-0">
@@ -425,7 +425,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                             <Send className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <p className="text-gray-900 dark:text-gray-100 text-sm font-medium leading-relaxed">
+                                            <p className="text-gray-900 dark:text-zinc-100 text-sm font-medium leading-relaxed">
                                                 You may now visit <span className="font-bold text-purple-600 dark:text-purple-400">{platformText}</span> and post your product.
                                             </p>
                                         </div>
@@ -525,8 +525,8 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
             </div>
 
             {/* Dynamic Category Link Selection */}
-            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 p-3 shadow-sm">
-                <label className="block text-[11px] font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-2">
+            <div className="bg-white dark:bg-zinc-800 rounded-xl border border-gray-100 dark:border-zinc-700 p-3 shadow-sm">
+                <label className="block text-[11px] font-bold text-gray-500 dark:text-zinc-400 uppercase tracking-widest mb-2">
                     Generate Link for Category
                 </label>
                 <div className="relative">
@@ -535,7 +535,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                             <select
                                 value={selectedLinkCategoryId}
                                 onChange={(e) => setSelectedLinkCategoryId(e.target.value)}
-                                className="w-full bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500/20 appearance-none cursor-pointer"
+                                className="w-full bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-gray-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-purple-500/20 appearance-none cursor-pointer"
                             >
                                 <option value="">🏠 All Products</option>
                                 <option value="promo">🏷️ Promo / Clearance</option>
@@ -617,11 +617,11 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                 </div>
             ) : (
                 <div className="py-16 text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                        <SparklesIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center">
+                        <SparklesIcon className="w-8 h-8 text-gray-400 dark:text-zinc-500" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">No Products Available</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Add products to see suggestions</p>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100 mb-1">No Products Available</h3>
+                    <p className="text-sm text-gray-500 dark:text-zinc-400">Add products to see suggestions</p>
                 </div>
             )}
         </div>
@@ -632,18 +632,18 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
         <div className="p-4 space-y-4">
             {/* iOS-style Search Bar */}
             <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-gray-500" />
+                <MagnifyingGlassIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 dark:text-zinc-500" />
                 <input
                     type="text"
                     placeholder="Search products"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full bg-gray-100 dark:bg-gray-800 rounded-xl pl-10 pr-10 py-2.5 text-[15px] text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:focus:ring-gray-600 focus:bg-white dark:focus:bg-gray-700 transition-all"
+                    className="w-full bg-gray-100 dark:bg-zinc-800 rounded-xl pl-10 pr-10 py-2.5 text-[15px] text-gray-900 dark:text-zinc-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 dark:-zinc-600 focus:bg-white dark:-zinc-700 transition-all"
                 />
                 {searchTerm && (
                     <button
                         onClick={() => setSearchTerm('')}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:-zinc-300"
                     >
                         <XMarkIcon className="w-4 h-4" />
                     </button>
@@ -678,11 +678,11 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                 </>
             ) : (
                 <div className="py-16 text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                        <CubeIcon className="w-8 h-8 text-gray-400 dark:text-gray-500" />
+                    <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center">
+                        <CubeIcon className="w-8 h-8 text-gray-400 dark:text-zinc-500" />
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">No Products Found</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Try a different search term</p>
+                    <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100 mb-1">No Products Found</h3>
+                    <p className="text-sm text-gray-500 dark:text-zinc-400">Try a different search term</p>
                 </div>
             )}
         </div>
@@ -693,14 +693,14 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
         if (!selectedProduct) {
             return (
                 <div className="flex flex-col items-center justify-center h-full py-16 text-center px-6">
-                    <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                        <PencilSquareIcon className="w-10 h-10 text-gray-400 dark:text-gray-500" />
+                    <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-100 dark:bg-zinc-800 flex items-center justify-center">
+                        <PencilSquareIcon className="w-10 h-10 text-gray-400 dark:text-zinc-500" />
                     </div>
-                    <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">No Product Selected</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Select a product from Suggested or All Products</p>
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-zinc-100 mb-2">No Product Selected</h3>
+                    <p className="text-sm text-gray-500 dark:text-zinc-400 mb-6">Select a product from Suggested or All Products</p>
                     <button
                         onClick={() => setCurrentTab('suggested')}
-                        className="px-6 py-3 bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white font-medium rounded-xl hover:bg-gray-300 dark:hover:bg-gray-600 active:scale-95 transition-all"
+                        className="px-6 py-3 bg-gray-200 dark:bg-zinc-700 text-gray-900 dark:text-white font-medium rounded-xl hover:bg-gray-300 dark:-zinc-600 active:scale-95 transition-all"
                     >
                         Browse Suggested Products
                     </button>
@@ -711,9 +711,9 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
         return (
             <div className="flex flex-col h-full">
                 {/* Selected Product Preview */}
-                <div className="p-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
-                    <div className="flex items-center gap-3 bg-white dark:bg-gray-800 rounded-xl p-3 shadow-sm">
-                        <div className="relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-gray-700">
+                <div className="p-4 bg-gray-50 dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-700 flex-shrink-0">
+                    <div className="flex items-center gap-3 bg-white dark:bg-zinc-800 rounded-xl p-3 shadow-sm">
+                        <div className="relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-zinc-700">
                             <Image
                                 src={selectedProduct.images[0] || 'https://placehold.co/400'}
                                 alt={selectedProduct.name}
@@ -723,7 +723,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                             />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold text-[15px] text-gray-900 dark:text-gray-100 truncate mb-0.5">{selectedProduct.name}</h4>
+                            <h4 className="font-semibold text-[15px] text-gray-900 dark:text-zinc-100 truncate mb-0.5">{selectedProduct.name}</h4>
                             <p className="text-lg font-bold text-purple-600 dark:text-purple-400">₦{selectedProduct.price.toLocaleString()}</p>
                         </div>
                         <button
@@ -731,7 +731,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                 setSelectedProduct(null);
                                 setCurrentTab('suggested');
                             }}
-                            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 active:scale-90 transition-all p-1"
+                            className="text-gray-400 dark:text-zinc-500 hover:text-gray-600 dark:-zinc-300 active:scale-90 transition-all p-1"
                         >
                             <XMarkIcon className="w-6 h-6" />
                         </button>
@@ -739,10 +739,10 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                 </div>
 
                 {/* Scrollable Content */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-6 bg-white dark:bg-gray-900">
+                <div className="flex-1 overflow-y-auto p-4 space-y-6 bg-white dark:bg-zinc-900">
                     {/* Platform Selection - Muted Chips */}
                     <div>
-                        <label className="block text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wide">
+                        <label className="block text-[13px] font-semibold text-gray-700 dark:text-zinc-300 mb-3 uppercase tracking-wide">
                             Select Platforms
                         </label>
                         <div className="flex flex-wrap gap-2">
@@ -754,7 +754,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                         onClick={() => togglePlatform(platform.name)}
                                         className={`px-4 py-2.5 rounded-full text-[15px] font-medium transition-all flex items-center gap-2 border-2 ${isSelected
                                             ? 'border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/20 text-purple-900 dark:text-purple-100'
-                                            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-750'
+                                            : 'border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:-zinc-750'
                                             }`}
 
                                         whileTap={{ scale: 0.95 }}
@@ -770,7 +770,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
 
                     {/* Template Selection - Stacked Cards */}
                     <div>
-                        <label className="block text-[13px] font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-wide">
+                        <label className="block text-[13px] font-semibold text-gray-700 dark:text-zinc-300 mb-3 uppercase tracking-wide">
                             Caption Style
                         </label>
                         <div className="grid grid-cols-2 gap-2">
@@ -793,7 +793,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                         // Added relative, h-28 for uniform height, and text-center
                                         className={`relative w-full h-28 p-2 rounded-xl text-center transition-all border-2 ${isSelected
                                             ? 'border-purple-500 dark:border-purple-400 bg-purple-50 dark:bg-purple-900/20 shadow-sm'
-                                            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-750'
+                                            : 'border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 hover:bg-gray-50 dark:-zinc-750'
                                             }`}
                                         whileTap={{ scale: 0.98 }}
                                     >
@@ -801,10 +801,10 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                         <div className="flex flex-col h-full items-center justify-center">
                                             <span className="text-2xl">{icons[template.id as keyof typeof icons]}</span>
                                             <div className="mt-1.5">
-                                                <div className={`font-semibold text-[13px] leading-tight ${isSelected ? 'text-purple-900 dark:text-purple-100' : 'text-gray-900 dark:text-gray-100'}`}>
+                                                <div className={`font-semibold text-[13px] leading-tight ${isSelected ? 'text-purple-900 dark:text-purple-100' : 'text-gray-900 dark:text-zinc-100'}`}>
                                                     {template.name}
                                                 </div>
-                                                <div className={`text-xs mt-0.5 capitalize ${isSelected ? 'text-purple-700 dark:text-purple-300' : 'text-gray-500 dark:text-gray-400'}`}>
+                                                <div className={`text-xs mt-0.5 capitalize ${isSelected ? 'text-purple-700 dark:text-purple-300' : 'text-gray-500 dark:text-zinc-400'}`}>
                                                     {template.style} tone
                                                 </div>
                                             </div>
@@ -821,7 +821,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                     {/* Caption Editor */}
                     <div>
                         <div className="flex justify-between items-center mb-3">
-                            <label className="text-[13px] font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">
+                            <label className="text-[13px] font-semibold text-gray-700 dark:text-zinc-300 uppercase tracking-wide">
                                 Caption
                             </label>
                             {!isEditingCaption ? (
@@ -848,14 +848,14 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                 <textarea
                                     value={customCaption || finalCaption}
                                     onChange={(e) => setCustomCaption(e.target.value)}
-                                    className="w-full bg-white dark:bg-gray-800 border-2 border-purple-200 dark:border-purple-900/30 rounded-xl px-4 py-3 text-[15px] text-gray-900 dark:text-gray-100 leading-relaxed focus:outline-none focus:ring-2 focus:ring-purple-400 dark:focus:ring-purple-600 focus:border-transparent transition-all resize-none"
+                                    className="w-full bg-white dark:bg-zinc-800 border-2 border-purple-200 dark:border-purple-900/30 rounded-xl px-4 py-3 text-[15px] text-gray-900 dark:text-zinc-100 leading-relaxed focus:outline-none focus:ring-2 focus:ring-purple-400 dark:focus:ring-purple-600 focus:border-transparent transition-all resize-none"
                                     rows={10}
                                     placeholder="Your caption will appear here..."
                                     autoFocus
                                 />
                             ) : (
                                 <div
-                                    className="w-full bg-gray-50 dark:bg-gray-800/50 border-2 border-transparent rounded-xl px-4 py-3 text-sm text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap break-words cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                                    className="w-full bg-gray-50 dark:bg-zinc-800/50 border-2 border-transparent rounded-xl px-4 py-3 text-sm text-gray-800 dark:text-zinc-200 leading-relaxed whitespace-pre-wrap break-words cursor-pointer hover:bg-gray-100 dark:-zinc-800 transition-colors"
                                     onClick={() => setIsEditingCaption(true)}
                                 >
                                     {finalCaption}
@@ -864,10 +864,10 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
 
                             {isEditingCaption && (
                                 <div className="flex justify-between items-center mt-2 text-xs">
-                                    <span className="text-gray-500 dark:text-gray-400">{finalCaption.length} characters</span>
+                                    <span className="text-gray-500 dark:text-zinc-400">{finalCaption.length} characters</span>
                                     <button
                                         onClick={() => setCustomCaption(generatedCaption)}
-                                        className="text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium active:scale-95 transition-all"
+                                        className="text-gray-600 dark:text-zinc-400 hover:text-gray-800 dark:-zinc-200 font-medium active:scale-95 transition-all"
                                     >
                                         Reset to Original
                                     </button>
@@ -892,18 +892,18 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: '100vh' }}
                         transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
-                        className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-900 md:bg-transparent md:dark:bg-transparent md:justify-center md:items-center"
+                        className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-zinc-900 md:bg-transparent md:dark:bg-transparent md:justify-center md:items-center"
                     >
                         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity hidden md:block" onClick={handleClose} />
 
                         <div className="relative w-full h-full md:h-[90vh] md:max-w-2xl md:rounded-2xl flex flex-col overflow-hidden bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-950 shadow-2xl z-10">
                             {/* iOS-style Header with blur */}
-                            <div className="px-4 py-3 flex justify-between items-center border-b border-gray-200 dark:border-gray-700 flex-shrink-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg">
+                            <div className="px-4 py-3 flex justify-between items-center border-b border-gray-200 dark:border-zinc-700 flex-shrink-0 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-lg">
                                 <div>
-                                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-gray-100">
+                                    <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-zinc-100">
                                         Social Posts
                                     </h3>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">Share Content</p>
+                                    <p className="text-xs text-gray-500 dark:text-zinc-400">Share Content</p>
                                 </div>
                                 <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg">
                                     <Send className="w-6 h-6 text-white" />
@@ -911,11 +911,11 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                             </div>
 
                             {/* iOS Segmented Control Tabs */}
-                            <div className="px-4 py-3 flex-shrink-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-                                <div className="bg-gray-100 dark:bg-gray-800 p-1 rounded-xl flex relative">
+                            <div className="px-4 py-3 flex-shrink-0 bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-700">
+                                <div className="bg-gray-100 dark:bg-zinc-800 p-1 rounded-xl flex relative">
                                     {/* Sliding background */}
                                     <motion.div
-                                        className="absolute top-1 bottom-1 bg-white dark:bg-gray-700 rounded-lg shadow-sm"
+                                        className="absolute top-1 bottom-1 bg-white dark:bg-zinc-700 rounded-lg shadow-sm"
                                         initial={false}
                                         animate={{
                                             left: currentTab === 'suggested' ? '0.25rem' : currentTab === 'all' ? 'calc(33.333% + 0.125rem)' : 'calc(66.666% + 0rem)',
@@ -935,7 +935,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                             <button
                                                 key={tab.id}
                                                 onClick={() => setCurrentTab(tab.id)}
-                                                className={`flex-1 py-2 px-3 text-center font-semibold text-[13px] transition-all z-10 flex items-center justify-center gap-1.5 rounded-lg ${isActive ? 'text-gray-900 dark:text-gray-100' : 'text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200'
+                                                className={`flex-1 py-2 px-3 text-center font-semibold text-[13px] transition-all z-10 flex items-center justify-center gap-1.5 rounded-lg ${isActive ? 'text-gray-900 dark:text-zinc-100' : 'text-gray-600 dark:text-zinc-400 hover:text-gray-800 dark:-zinc-200'
                                                     }`}
                                             >
                                                 <Icon className="w-4 h-4" />
@@ -966,7 +966,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
 
                             {/* Footer */}
                             {/* Footer */}
-                            <footer className="relative mt-auto flex-shrink-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+                            <footer className="relative mt-auto flex-shrink-0 p-4 border-t border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900">
                                 <div className="absolute top-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent dark:from-gray-900 dark:to-transparent pointer-events-none" />
                                 <div className="relative max-w-3xl mx-auto h-[56px] flex items-center justify-center"> {/* A fixed height container prevents layout jumps */}
                                     <AnimatePresence mode="wait">
@@ -1039,7 +1039,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                 ease: [0.25, 1, 0.5, 1],
                                 opacity: { duration: 0.2 }
                             }}
-                            className="relative w-full md:max-w-md md:rounded-2xl rounded-t-3xl overflow-hidden bg-white dark:bg-gray-900 text-left shadow-2xl border-t md:border border-gray-200 dark:border-gray-700 pointer-events-auto"
+                            className="relative w-full md:max-w-md md:rounded-2xl rounded-t-3xl overflow-hidden bg-white dark:bg-zinc-900 text-left shadow-2xl border-t md:border border-gray-200 dark:border-zinc-700 pointer-events-auto"
                         >
                             {/* Modal Content */}
                             <div className="p-6 md:p-8">
@@ -1054,35 +1054,35 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                 </h3>
 
                                 {/* Description */}
-                                <p className="text-sm text-center text-gray-600 dark:text-gray-300 mb-6">
+                                <p className="text-sm text-center text-gray-600 dark:text-zinc-300 mb-6">
                                     This will:
                                 </p>
 
                                 {/* Action List */}
                                 <div className="space-y-3 mb-6">
-                                    <div className="flex items-start gap-3 bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                                    <div className="flex items-start gap-3 bg-gray-50 dark:bg-zinc-800 rounded-xl p-4">
                                         <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mt-0.5">
                                             <CheckIcon className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
                                         </div>
                                         <div className="flex-1">
-                                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                            <p className="text-sm font-medium text-gray-900 dark:text-zinc-100">
                                                 Copy caption to clipboard
                                             </p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                            <p className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">
                                                 Ready to paste anywhere
                                             </p>
                                         </div>
                                     </div>
 
-                                    <div className="flex items-start gap-3 bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                                    <div className="flex items-start gap-3 bg-gray-50 dark:bg-zinc-800 rounded-xl p-4">
                                         <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mt-0.5">
                                             <CheckIcon className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
                                         </div>
                                         <div className="flex-1">
-                                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                            <p className="text-sm font-medium text-gray-900 dark:text-zinc-100">
                                                 Download product image
                                             </p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                            <p className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">
                                                 Saved to your device
                                             </p>
                                         </div>
@@ -1090,16 +1090,16 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                 </div>
 
                                 {/* Checkbox */}
-                                <label className="flex items-center gap-3 cursor-pointer group mb-6 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                <label className="flex items-center gap-3 cursor-pointer group mb-6 p-3 rounded-xl hover:bg-gray-50 dark:-zinc-800 transition-colors">
                                     <div className="relative flex items-center">
                                         <input
                                             type="checkbox"
                                             checked={dontShowAgain}
                                             onChange={(e) => setDontShowAgain(e.target.checked)}
-                                            className="w-5 h-5 rounded border-2 border-gray-300 dark:border-gray-600 text-purple-600 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 cursor-pointer transition-all"
+                                            className="w-5 h-5 rounded border-2 border-gray-300 dark:border-zinc-600 text-purple-600 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 cursor-pointer transition-all"
                                         />
                                     </div>
-                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 select-none">
+                                    <span className="text-sm font-medium text-gray-700 dark:text-zinc-300 select-none">
                                         Don't show this again
                                     </span>
                                 </label>
@@ -1108,7 +1108,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                 <div className="flex gap-3">
                                     <button
                                         onClick={() => setShowConfirmModal(false)}
-                                        className="flex-1 px-6 py-3.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-[0.98] transition-all"
+                                        className="flex-1 px-6 py-3.5 rounded-xl bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 font-semibold hover:bg-gray-200 dark:-zinc-700 active:scale-[0.98] transition-all"
                                     >
                                         Cancel
                                     </button>
@@ -1122,7 +1122,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                             </div>
 
                             {/* Bottom Safe Area for Mobile */}
-                            <div className="h-8 md:hidden bg-white dark:bg-gray-900" />
+                            <div className="h-8 md:hidden bg-white dark:bg-zinc-900" />
                         </motion.div>
                     </div>
                 )}
@@ -1149,7 +1149,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                 ease: [0.25, 1, 0.5, 1],
                                 opacity: { duration: 0.2 }
                             }}
-                            className="relative w-full md:max-w-md md:rounded-2xl rounded-t-3xl overflow-hidden bg-white dark:bg-gray-900 text-left shadow-2xl border-t md:border border-gray-200 dark:border-gray-700 pointer-events-auto"
+                            className="relative w-full md:max-w-md md:rounded-2xl rounded-t-3xl overflow-hidden bg-white dark:bg-zinc-900 text-left shadow-2xl border-t md:border border-gray-200 dark:border-zinc-700 pointer-events-auto"
                         >
                             {/* Modal Content */}
                             <div className="p-6 md:p-8">
@@ -1164,35 +1164,35 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                 </h3>
 
                                 {/* Description */}
-                                <p className="text-sm text-center text-gray-600 dark:text-gray-300 mb-6">
+                                <p className="text-sm text-center text-gray-600 dark:text-zinc-300 mb-6">
                                     This will:
                                 </p>
 
                                 {/* Action List */}
                                 <div className="space-y-3 mb-6">
-                                    <div className="flex items-start gap-3 bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                                    <div className="flex items-start gap-3 bg-gray-50 dark:bg-zinc-800 rounded-xl p-4">
                                         <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mt-0.5">
                                             <CheckIcon className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
                                         </div>
                                         <div className="flex-1">
-                                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                            <p className="text-sm font-medium text-gray-900 dark:text-zinc-100">
                                                 Copy caption to clipboard
                                             </p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                            <p className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">
                                                 Ready to paste anywhere
                                             </p>
                                         </div>
                                     </div>
 
-                                    <div className="flex items-start gap-3 bg-gray-50 dark:bg-gray-800 rounded-xl p-4">
+                                    <div className="flex items-start gap-3 bg-gray-50 dark:bg-zinc-800 rounded-xl p-4">
                                         <div className="flex-shrink-0 w-5 h-5 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mt-0.5">
                                             <CheckIcon className="w-3.5 h-3.5 text-green-600 dark:text-green-400" />
                                         </div>
                                         <div className="flex-1">
-                                            <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                            <p className="text-sm font-medium text-gray-900 dark:text-zinc-100">
                                                 Download product image
                                             </p>
-                                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                                            <p className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5">
                                                 Saved to your device
                                             </p>
                                         </div>
@@ -1200,17 +1200,17 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                 </div>
 
                                 {/* Checkbox */}
-                                <label className="flex items-center gap-3 cursor-pointer group mb-6 p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                                <label className="flex items-center gap-3 cursor-pointer group mb-6 p-3 rounded-xl hover:bg-gray-50 dark:-zinc-800 transition-colors">
                                     <div className="relative flex items-center">
                                         <input
                                             type="checkbox"
                                             checked={dontShowAgain}
                                             onChange={(e) => setDontShowAgain(e.target.checked)}
                                             disabled={isProcessing}
-                                            className="w-5 h-5 rounded border-2 border-gray-300 dark:border-gray-600 text-purple-600 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                            className="w-5 h-5 rounded border-2 border-gray-300 dark:border-zinc-600 text-purple-600 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900 cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                         />
                                     </div>
-                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 select-none">
+                                    <span className="text-sm font-medium text-gray-700 dark:text-zinc-300 select-none">
                                         Don't show this again
                                     </span>
                                 </label>
@@ -1220,7 +1220,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                     <button
                                         onClick={() => setShowConfirmModal(false)}
                                         disabled={isProcessing}
-                                        className="flex-1 px-6 py-3.5 rounded-xl bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-200 dark:hover:bg-gray-700 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="flex-1 px-6 py-3.5 rounded-xl bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-zinc-300 font-semibold hover:bg-gray-200 dark:-zinc-700 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
                                         Cancel
                                     </button>
@@ -1242,7 +1242,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                             </div>
 
                             {/* Bottom Safe Area for Mobile */}
-                            <div className="h-8 md:hidden bg-white dark:bg-gray-900" />
+                            <div className="h-8 md:hidden bg-white dark:bg-zinc-900" />
                         </motion.div>
                     </div>
                 )}
@@ -1263,7 +1263,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95 }}
-                            className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white dark:bg-gray-900 p-6 text-left align-middle shadow-xl transition-all border border-gray-200 dark:border-gray-700 pointer-events-auto"
+                            className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white dark:bg-zinc-900 p-6 text-left align-middle shadow-xl transition-all border border-gray-200 dark:border-zinc-700 pointer-events-auto"
                         >
                             <h3 className="text-lg font-bold leading-6 text-gray-900 dark:text-white mb-4">
                                 {activeShareModal === 'link' ? 'Share Store Link' : 'Share with Caption'}
@@ -1271,8 +1271,8 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
 
                             <div className="mt-2">
                                 {activeShareModal === 'link' ? (
-                                    <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                                        <p className="text-sm text-gray-600 dark:text-gray-300 break-all font-mono">
+                                    <div className="bg-gray-50 dark:bg-zinc-800 rounded-xl p-4 border border-gray-200 dark:border-zinc-700">
+                                        <p className="text-sm text-gray-600 dark:text-zinc-300 break-all font-mono">
                                             {`https://tinyurl.com/bizconnet/${storeId}${selectedLinkCategoryId ? `?category=${selectedLinkCategoryId}` : ''}`}
                                         </p>
                                     </div>
@@ -1281,7 +1281,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                         value={shareMessage}
                                         onChange={(e) => setShareMessage(e.target.value)}
                                         rows={6}
-                                        className="w-full bg-gray-50 dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 text-sm text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                                        className="w-full bg-gray-50 dark:bg-zinc-800 rounded-xl p-4 border border-gray-200 dark:border-zinc-700 text-sm text-gray-900 dark:text-zinc-100 focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
                                     />
                                 )}
                             </div>

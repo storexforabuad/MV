@@ -64,9 +64,9 @@ function SecuritySection({
       {hasExistingPin && !changingPin ? (
         // Masked display — PIN is already set
         <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Admin Access PIN</label>
+          <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">Admin Access PIN</label>
           <div className="flex items-center gap-3">
-            <div className="flex gap-3 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3">
+            <div className="flex gap-3 bg-slate-50 dark:bg-zinc-900 border border-slate-200 dark:border-zinc-800 rounded-xl px-4 py-3">
               {[...Array(4)].map((_, i) => (
                 <div key={i} className="w-2.5 h-2.5 rounded-full bg-indigo-500" />
               ))}
@@ -90,7 +90,7 @@ function SecuritySection({
         // New PIN entry with confirmation
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">
               {hasExistingPin ? 'New PIN' : 'Admin Access PIN'}
             </label>
             <div className="relative max-w-[200px]">
@@ -100,7 +100,7 @@ function SecuritySection({
                 maxLength={4}
                 value={newPin}
                 onChange={e => handlePinChange(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                className="w-full p-3.5 pl-10 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all tracking-[1em] text-lg font-bold"
+                className="w-full p-3.5 pl-10 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all tracking-[1em] text-lg font-bold"
                 placeholder="••••"
               />
               <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -108,7 +108,7 @@ function SecuritySection({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Confirm PIN</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">Confirm PIN</label>
             <div className="relative max-w-[200px]">
               <input
                 type="password"
@@ -116,11 +116,11 @@ function SecuritySection({
                 maxLength={4}
                 value={confirmPin}
                 onChange={e => handleConfirmChange(e.target.value.replace(/\D/g, '').slice(0, 4))}
-                className={`w-full p-3.5 pl-10 bg-slate-50 dark:bg-slate-950 border rounded-xl focus:ring-2 outline-none transition-all tracking-[1em] text-lg font-bold ${pinError
+                className={`w-full p-3.5 pl-10 bg-slate-50 dark:bg-zinc-950 border rounded-xl focus:ring-2 outline-none transition-all tracking-[1em] text-lg font-bold ${pinError
                   ? 'border-red-400 focus:ring-red-400'
                   : newPin && confirmPin && newPin === confirmPin && newPin.length === 4
                     ? 'border-green-400 focus:ring-green-400'
-                    : 'border-slate-200 dark:border-slate-800 focus:ring-indigo-500'
+                    : 'border-slate-200 dark:border-zinc-800 focus:ring-indigo-500'
                   }`}
                 placeholder="••••"
               />
@@ -138,7 +138,7 @@ function SecuritySection({
             <button
               type="button"
               onClick={() => { setChangingPin(false); setNewPin(''); setConfirmPin(''); }}
-              className="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+              className="text-sm text-slate-500 hover:text-slate-700 dark:-zinc-300"
             >
               Cancel
             </button>
@@ -295,16 +295,16 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-50 flex flex-col bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white sm:p-4 md:p-6"
+          className="fixed inset-0 z-50 flex flex-col bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-white sm:p-4 md:p-6"
           initial="hidden" animate="visible" exit="exit"
           variants={modalVariants}
           transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
         >
-          <div className="flex-grow flex flex-col sm:flex-row bg-white dark:bg-slate-900 sm:rounded-2xl sm:shadow-2xl overflow-hidden max-w-6xl mx-auto w-full h-full sm:h-[90vh] sm:max-h-[800px]">
+          <div className="flex-grow flex flex-col sm:flex-row bg-white dark:bg-zinc-900 sm:rounded-2xl sm:shadow-2xl overflow-hidden max-w-6xl mx-auto w-full h-full sm:h-[90vh] sm:max-h-[800px]">
 
             {/* --- Sidebar Navigation --- */}
-            <aside className="w-full sm:w-64 bg-slate-50 dark:bg-slate-900/50 border-b sm:border-b-0 sm:border-r border-slate-200 dark:border-slate-800 flex-shrink-0 flex flex-col">
-              <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <aside className="w-full sm:w-64 bg-slate-50 dark:bg-zinc-900/50 border-b sm:border-b-0 sm:border-r border-slate-200 dark:border-zinc-800 flex-shrink-0 flex flex-col">
+              <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-zinc-800 flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-bold text-slate-900 dark:text-white">Account Details</h2>
                   <p className="text-xs text-slate-500">Manage Account Details</p>
@@ -322,8 +322,8 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
                       key={section.id}
                       onClick={() => setActiveSection(section.id)}
                       className={`flex items-center justify-center sm:justify-start gap-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 sm:w-full ${isActive
-                        ? 'bg-white dark:bg-slate-800 text-indigo-600 dark:text-indigo-400 shadow-sm ring-1 ring-slate-200 dark:ring-slate-700 px-3 py-2 sm:p-3'
-                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 hover:text-slate-900 dark:hover:text-slate-200 p-2 sm:p-3'
+                        ? 'bg-white dark:bg-zinc-800 text-indigo-600 dark:text-indigo-400 shadow-sm ring-1 ring-slate-200 dark:-zinc-700 px-3 py-2 sm:p-3'
+                        : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:-zinc-800/50 hover:text-slate-900 dark:-zinc-200 p-2 sm:p-3'
                         }`}
                     >
                       <section.icon className={`w-5 h-5 ${isActive ? 'text-indigo-500' : 'text-slate-400'}`} />
@@ -348,14 +348,14 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
             </aside>
 
             {/* --- Main Content --- */}
-            <main className="flex-grow flex flex-col min-w-0 bg-white dark:bg-slate-900 relative">
+            <main className="flex-grow flex flex-col min-w-0 bg-white dark:bg-zinc-900 relative">
               {/* Header for Desktop */}
-              <div className="hidden sm:flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800">
+              <div className="hidden sm:flex items-center justify-between p-6 border-b border-slate-100 dark:border-zinc-800">
                 <div>
                   <h3 className="text-xl font-bold text-slate-900 dark:text-white">{sections.find(s => s.id === activeSection)?.label}</h3>
                   <p className="text-sm text-slate-500">Update your information below</p>
                 </div>
-                <button onClick={handleClose} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                <button onClick={handleClose} className="p-2 rounded-full hover:bg-slate-100 dark:-zinc-800 transition-colors">
                   <X className="w-6 h-6 text-slate-400" />
                 </button>
               </div>
@@ -372,40 +372,40 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
                     {activeSection === 'business' && (
                       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <div>
-                          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Store Name <span className="text-xs text-slate-400 font-normal ml-1">(Read-only)</span></label>
+                          <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">Store Name <span className="text-xs text-slate-400 font-normal ml-1">(Read-only)</span></label>
                           <input
                             value={formData.name || ''}
                             readOnly
-                            className="w-full p-3.5 bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-500 cursor-not-allowed"
+                            className="w-full p-3.5 bg-slate-100 dark:bg-zinc-800/50 border border-slate-200 dark:border-zinc-800 rounded-xl text-slate-500 cursor-not-allowed"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Business Description</label>
+                          <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">Business Description</label>
                           <textarea
                             value={formData.businessDescription || ''}
                             onChange={e => updateField('businessDescription', e.target.value)}
-                            className="w-full p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all min-h-[120px]"
+                            className="w-full p-3.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all min-h-[120px]"
                             placeholder="Tell customers what your business is about..."
                           />
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">WhatsApp Number</label>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">WhatsApp Number</label>
                             <input
                               value={formData.whatsapp || ''}
                               onChange={e => updateField('whatsapp', e.target.value)}
-                              className="w-full p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                              className="w-full p-3.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                               placeholder="e.g. +234..."
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Instagram Handle</label>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">Instagram Handle</label>
                             <div className="relative">
                               <span className="absolute left-3.5 top-3.5 text-slate-400">@</span>
                               <input
                                 value={formData.businessInstagram || ''}
                                 onChange={e => updateField('businessInstagram', e.target.value)}
-                                className="w-full p-3.5 pl-8 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                className="w-full p-3.5 pl-8 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                 placeholder="username"
                               />
                             </div>
@@ -418,43 +418,43 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
                     {activeSection === 'ceo' && (
                       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <div>
-                          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">CEO Full Name</label>
+                          <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">CEO Full Name</label>
                           <input
                             value={formData.ceoName || ''}
                             onChange={e => updateField('ceoName', e.target.value)}
-                            className="w-full p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                            className="w-full p-3.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                             placeholder="e.g. John Doe"
                           />
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Email Address</label>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">Email Address</label>
                             <input
                               value={formData.ceoEmail || ''}
                               onChange={e => updateField('ceoEmail', e.target.value)}
-                              className="w-full p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                              className="w-full p-3.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                               placeholder="john@example.com"
                               type="email"
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Phone Number</label>
+                            <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">Phone Number</label>
                             <input
                               value={formData.ceoPhone || ''}
                               onChange={e => updateField('ceoPhone', e.target.value)}
-                              className="w-full p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                              className="w-full p-3.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                               placeholder="e.g. 080..."
                             />
                           </div>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">CEO Instagram</label>
+                          <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">CEO Instagram</label>
                           <div className="relative">
                             <span className="absolute left-3.5 top-3.5 text-slate-400">@</span>
                             <input
                               value={formData.ceoInstagram || ''}
                               onChange={e => updateField('ceoInstagram', e.target.value)}
-                              className="w-full p-3.5 pl-8 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                              className="w-full p-3.5 pl-8 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                               placeholder="username"
                             />
                           </div>
@@ -465,7 +465,7 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
                     {/* --- Address Section --- */}
                     {activeSection === 'address' && (
                       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-950 rounded-xl border border-slate-200 dark:border-slate-800">
+                        <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-zinc-950 rounded-xl border border-slate-200 dark:border-zinc-800">
                           <div>
                             <h4 className="font-medium text-slate-900 dark:text-white">Physical Shop</h4>
                             <p className="text-xs text-slate-500">Do you have a physical store location?</p>
@@ -477,7 +477,7 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
                               onChange={e => updateField('hasPhysicalShop', e.target.checked)}
                               className="sr-only peer"
                             />
-                            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-indigo-600"></div>
+                            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:-zinc-600 peer-checked:bg-indigo-600"></div>
                           </label>
                         </div>
 
@@ -485,51 +485,51 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
                           <div className="space-y-4 pt-2">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                               <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Shop Number</label>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">Shop Number</label>
                                 <input
                                   value={formData.shopNumber || ''}
                                   onChange={e => updateField('shopNumber', e.target.value)}
-                                  className="w-full p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                  className="w-full p-3.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                   placeholder="e.g. Shop B24"
                                 />
                               </div>
                               <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Plaza/Building Name</label>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">Plaza/Building Name</label>
                                 <input
                                   value={formData.plazaBuildingName || ''}
                                   onChange={e => updateField('plazaBuildingName', e.target.value)}
-                                  className="w-full p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                  className="w-full p-3.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                   placeholder="e.g. Emab Plaza"
                                 />
                               </div>
                             </div>
                             <div>
-                              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Street Address</label>
+                              <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">Street Address</label>
                               <input
                                 value={formData.streetAddress || ''}
                                 onChange={e => updateField('streetAddress', e.target.value)}
-                                className="w-full p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                className="w-full p-3.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                 placeholder="e.g. 123 Adetokunbo Ademola Crescent"
                               />
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                               <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Country</label>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">Country</label>
                                 <select
                                   value={formData.country || ''}
                                   onChange={handleCountryChange}
-                                  className="w-full p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                  className="w-full p-3.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                                 >
                                   <option value="">Select your country</option>
                                   {geography.map(c => <option key={c.name} value={c.name}>{c.flag} {c.name}</option>)}
                                 </select>
                               </div>
                               <div>
-                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">State</label>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">State</label>
                                 <select
                                   value={formData.state || ''}
                                   onChange={e => updateField('state', e.target.value)}
-                                  className="w-full p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                  className="w-full p-3.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                   disabled={!formData.country}
                                 >
                                   <option value="">Select state/province</option>
@@ -551,27 +551,27 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
                           </p>
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Account Name</label>
+                          <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">Account Name</label>
                           <input
                             value={formData.bankAccountName || ''}
                             onChange={e => updateField('bankAccountName', e.target.value)}
-                            className="w-full p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                            className="w-full p-3.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                             placeholder="e.g. John Doe"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Account Number</label>
+                          <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">Account Number</label>
                           <input
                             value={formData.bankAccountNumber || ''}
                             onChange={e => updateField('bankAccountNumber', e.target.value)}
-                            className="w-full p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                            className="w-full p-3.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                             placeholder="e.g. 0123456789"
                             type="text"
                             inputMode="numeric"
                           />
                         </div>
                         <div>
-                          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Bank Name</label>
+                          <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">Bank Name</label>
                           <select
                             value={formData.bankCode || ''}
                             onChange={e => {
@@ -582,7 +582,7 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
                                 bankName: selectedBank?.name || ''
                               }));
                             }}
-                            className="w-full p-3.5 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:opacity-50"
+                            className="w-full p-3.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all disabled:opacity-50"
                             disabled={fetchingBanks}
                           >
                             <option value="">{fetchingBanks ? 'Loading banks...' : 'Select your bank'}</option>
@@ -604,10 +604,10 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
               </div>
 
               {/* --- Footer --- */}
-              <div className="p-4 sm:p-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex gap-4 sticky bottom-0 z-10">
+              <div className="p-4 sm:p-6 border-t border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 flex gap-4 sticky bottom-0 z-10">
                 <button
                   onClick={handleClose}
-                  className="flex-1 sm:flex-none bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold py-3.5 px-6 rounded-xl transition-all hover:bg-slate-200 dark:hover:bg-slate-700"
+                  className="flex-1 sm:flex-none bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 font-bold py-3.5 px-6 rounded-xl transition-all hover:bg-slate-200 dark:-zinc-700"
                 >
                   Cancel
                 </button>

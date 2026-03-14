@@ -569,7 +569,7 @@ export default function ProductCard({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <ChevronLeft size={20} className="text-[var(--text-primary)]" />
+                <ChevronLeft size={20} className="text-slate-800" />
               </motion.button>
 
               {/* Right Arrow */}
@@ -581,7 +581,7 @@ export default function ProductCard({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <ChevronRight size={20} className="text-[var(--text-primary)]" />
+                <ChevronRight size={20} className="text-slate-800" />
               </motion.button>
             </>
           )}

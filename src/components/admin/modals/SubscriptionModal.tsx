@@ -52,7 +52,7 @@ const TierCard = ({
         onClick={!disabled ? onSelect : undefined}
         className={`relative p-6 rounded-[2rem] border-2 transition-all cursor-pointer overflow-hidden ${isSelected
           ? 'bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500 shadow-xl'
-          : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'
+          : 'bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800'
           } ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <div className="flex items-center justify-between mb-4">
@@ -67,7 +67,7 @@ const TierCard = ({
           </div>
           <span className="text-sm font-medium text-slate-500">/{details.period}</span>
         </div>
-        <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 leading-relaxed">
+        <p className="text-sm text-slate-600 dark:text-zinc-400 mb-6 leading-relaxed">
           {details.description}
         </p>
         <button
@@ -76,7 +76,7 @@ const TierCard = ({
             if (!disabled && !isLoading) onSubscribe();
           }}
           disabled={isLoading}
-          className={`w-full py-3 rounded-xl font-black transition-all flex items-center justify-center gap-2 ${isSelected ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'}`}
+          className={`w-full py-3 rounded-xl font-black transition-all flex items-center justify-center gap-2 ${isSelected ? 'bg-emerald-600 text-white' : 'bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-400'}`}
         >
           {isLoading && isSelected ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
           {isSelected ? (isLoading ? 'Initializing...' : 'Subscribe Now') : 'Select Plan'}
@@ -424,19 +424,19 @@ export default function SubscriptionModal({
   return (
     <>
       <motion.div
-        className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-950 text-slate-900 dark:text-white"
+        className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-zinc-950 text-slate-900 dark:text-white"
         initial="hidden" animate="visible" exit="exit"
         variants={modalVariants}
         transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
       >
         {/* --- Header --- */}
-        <header className="flex-shrink-0 flex items-center justify-between w-full max-w-5xl mx-auto p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg relative z-10">
+        <header className="flex-shrink-0 flex items-center justify-between w-full max-w-5xl mx-auto p-4 sm:p-6 border-b border-slate-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-lg relative z-10">
           <div>
             <h2 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
               Subscription
               {!isLegacyStore && <Sparkles className="w-5 h-5 text-amber-500 animate-pulse" />}
             </h2>
-            <p className="text-xs font-medium text-slate-500 dark:text-slate-400">Manage your plan & billing</p>
+            <p className="text-xs font-medium text-slate-500 dark:text-zinc-400">Manage your plan & billing</p>
           </div>
           <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg ${status === 'active' ? 'bg-gradient-to-br from-green-500 to-emerald-600' :
             status === 'trial' ? 'bg-gradient-to-br from-blue-500 to-indigo-600' :
@@ -489,7 +489,7 @@ export default function SubscriptionModal({
                       <h3 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                         {statusDisplay.label}
                       </h3>
-                      <p className="mt-1 text-xs font-medium text-slate-600 dark:text-slate-400">
+                      <p className="mt-1 text-xs font-medium text-slate-600 dark:text-zinc-400">
                         {status === 'trial' && !trialExpired && `${trialDaysRemaining} days remaining in your free trial`}
                         {status === 'trial' && trialExpired && <span className="text-red-600 dark:text-red-400 font-bold">Your free trial has ended. Access is restricted. Subscribe now to restore full access.</span>}
                         {status === 'active' && (isInfluencer || isFreePlan ? 'Your subscription is active and auto-renews weekly.' : 'Your subscription is active and auto-renews.')}
@@ -502,7 +502,7 @@ export default function SubscriptionModal({
                       <button
                         onClick={handleSubscribe}
                         disabled={subscribing}
-                        className="whitespace-nowrap px-6 py-3 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black hover:scale-[1.02] transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 text-xs"
+                        className="whitespace-nowrap px-6 py-3 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-zinc-900 font-black hover:scale-[1.02] transition-all shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 text-xs"
                       >
                         {subscribing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5 fill-current" />}
                         {status === 'past_due' ? 'Retry Payment' : 'Activate Plan'}
@@ -541,12 +541,12 @@ export default function SubscriptionModal({
                       <div className="flex flex-col sm:flex-row items-end sm:items-center gap-3">
                         <button
                           onClick={() => window.open('https://wa.me/2347032905036', '_blank')}
-                          className="text-[10px] text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-right sm:text-left"
+                          className="text-[10px] text-slate-500 dark:text-zinc-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors text-right sm:text-left"
                         >
                           Need monthly billing? <span className="font-bold underline decoration-dotted">Contact us</span>
                         </button>
-                        <div className="bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-full border border-slate-200 dark:border-slate-800 shadow-sm">
-                          <span className="text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                        <div className="bg-slate-100 dark:bg-zinc-800 px-4 py-2 rounded-full border border-slate-200 dark:border-zinc-800 shadow-sm">
+                          <span className="text-[10px] font-black text-slate-500 dark:text-zinc-400 uppercase tracking-widest">
                             Weekly Billing
                           </span>
                         </div>
@@ -627,7 +627,7 @@ export default function SubscriptionModal({
               {/* Billing Details - Only show for legacy/trial stores, not active (active show in status banner) */}
               {(showBillingDetails || isInfluencer || isFreePlan) && status !== 'active' && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="p-6 rounded-3xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm">
+                  <div className="p-6 rounded-3xl border bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 shadow-sm">
                     <div className="flex items-center gap-2 mb-2 opacity-40">
                       <Clock className="w-4 h-4" />
                       <span className="text-[10px] font-black uppercase tracking-widest">
@@ -642,7 +642,7 @@ export default function SubscriptionModal({
                     </p>
                   </div>
 
-                  <div className="p-6 rounded-3xl border bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-sm">
+                  <div className="p-6 rounded-3xl border bg-white dark:bg-zinc-900 border-slate-200 dark:border-zinc-800 shadow-sm">
                     <div className="flex items-center gap-2 mb-2 opacity-40">
                       <CreditCard className="w-4 h-4" />
                       <span className="text-[10px] font-black uppercase tracking-widest">Payment Method</span>
@@ -657,7 +657,7 @@ export default function SubscriptionModal({
 
               {/* Cancel Subscription Area */}
               {status === 'active' && !(isInfluencer || isFreePlan) && (
-                <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-800">
+                <div className="mt-8 pt-8 border-t border-slate-200 dark:border-zinc-800">
                   <button
                     onClick={handleCancelSubscription}
                     disabled={cancelling}
@@ -676,12 +676,12 @@ export default function SubscriptionModal({
         </main>
 
         {/* --- Footer --- */}
-        <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-6 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 z-20">
+        <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-6 border-t border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 z-20">
           <div className="max-w-5xl mx-auto">
             {(!trialExpired && status !== 'expired') ? (
               <motion.button
                 onClick={handleClose}
-                className="w-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white font-black py-4 px-8 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-[0.98] text-base tracking-tight"
+                className="w-full bg-slate-100 dark:bg-zinc-800 text-slate-900 dark:text-white font-black py-4 px-8 rounded-xl transition-all duration-300 shadow-sm hover:shadow-md hover:scale-[1.01] active:scale-[0.98] text-base tracking-tight"
                 whileTap={{ scale: 0.98 }}
               >
                 Close
@@ -689,7 +689,7 @@ export default function SubscriptionModal({
             ) : (
               <div className="text-center">
                 <p className="text-sm text-red-500 font-bold mb-2">Subscription Required to Continue</p>
-                <button disabled className="w-full bg-slate-100 dark:bg-slate-800 text-slate-400 font-black py-4 px-8 rounded-xl cursor-not-allowed opacity-50">
+                <button disabled className="w-full bg-slate-100 dark:bg-zinc-800 text-slate-400 font-black py-4 px-8 rounded-xl cursor-not-allowed opacity-50">
                   Close
                 </button>
               </div>
@@ -713,7 +713,7 @@ export default function SubscriptionModal({
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-slate-800"
+              className="relative w-full max-w-md bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl overflow-hidden border border-slate-200 dark:border-zinc-800"
             >
               <div className="p-6 sm:p-8">
                 <div className="flex items-center justify-center w-16 h-16 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 mb-6 mx-auto">
@@ -724,7 +724,7 @@ export default function SubscriptionModal({
                   Confirm {pendingPlanChange.action === 'upgrade' ? 'Upgrade' : 'Downgrade'}
                 </h3>
 
-                <p className="text-slate-600 dark:text-slate-400 text-center text-sm mb-8 leading-relaxed">
+                <p className="text-slate-600 dark:text-zinc-400 text-center text-sm mb-8 leading-relaxed">
                   You are about to change your plan to <span className="font-bold text-slate-900 dark:text-white">{TIER_DETAILS[pendingPlanChange.tier as keyof typeof TIER_DETAILS]?.name.toUpperCase()}</span>.
                   <br /><br />
                   <span className="text-indigo-600 dark:text-indigo-400 font-bold">Important:</span> To complete this change, you will need to pay for the new plan. Your current subscription will be replaced by this new one immediately upon successful payment.
@@ -739,7 +739,7 @@ export default function SubscriptionModal({
                   </button>
                   <button
                     onClick={cancelPlanChange}
-                    className="w-full py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-bold rounded-2xl transition-all active:scale-[0.98]"
+                    className="w-full py-4 bg-slate-100 dark:bg-zinc-800 text-slate-600 dark:text-zinc-300 font-bold rounded-2xl transition-all active:scale-[0.98]"
                   >
                     Cancel
                   </button>
