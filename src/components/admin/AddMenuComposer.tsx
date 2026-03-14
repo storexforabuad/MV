@@ -206,60 +206,64 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
     };
 
     const handleProductChange = (index: number, field: string | Partial<BatchMenuProduct>, value?: any) => {
-        let newBatchProducts = batchProducts.map((p, i) => {
-            if (i !== index) return p;
-            if (typeof field === 'string') {
-                return { ...p, [field]: value };
-            }
-            return { ...p, ...field };
-        });
-        const changedProduct = newBatchProducts[index];
-
-        const applyTemplate = (templateProduct: BatchMenuProduct, products: BatchMenuProduct[]): BatchMenuProduct[] => {
-            return products.map(p => {
-                if (p.id === templateProduct.id) return p;
-                return {
-                    ...p,
-                    name: templateProduct.name,
-                    price: templateProduct.price,
-                    isPromo: templateProduct.isPromo,
-                    promoPrice: templateProduct.promoPrice,
-                    commission: templateProduct.commission,
-                    categoryId: templateProduct.categoryId,
-                    soldOut: templateProduct.soldOut,
-                    subtype: templateProduct.subtype,
-                    preparationTime: templateProduct.preparationTime,
-                    spiciness: templateProduct.spiciness,
-                    temperature: templateProduct.temperature,
-                    isAlcoholic: templateProduct.isAlcoholic,
-                    isVegetarian: templateProduct.isVegetarian,
-                    ingredients: templateProduct.ingredients,
-                    requiresPrepTime: templateProduct.requiresPrepTime,
-                    limitedStock: templateProduct.limitedStock,
-                };
-            });
-        };
-
-        if (field === 'useAsTemplate') {
-            if (value === true) {
-                const newTemplate = { ...changedProduct, useAsTemplate: true };
-                setTemplate(newTemplate);
-                newBatchProducts = newBatchProducts.map((p, i) =>
-                    i === index ? newTemplate : { ...p, useAsTemplate: false }
-                );
-                newBatchProducts = applyTemplate(newTemplate, newBatchProducts);
-            } else {
-                if (template?.id === changedProduct.id) {
-                    setTemplate(null);
+        setBatchProducts(prev => {
+            const newBatchProducts = prev.map((p, i) => {
+                if (i !== index) return p;
+                if (typeof field === 'string') {
+                    return { ...p, [field]: value };
                 }
-            }
-        } else if (template && template.id === changedProduct.id) {
-            const updatedTemplate = { ...changedProduct };
-            setTemplate(updatedTemplate);
-            newBatchProducts = applyTemplate(updatedTemplate, newBatchProducts);
-        }
+                return { ...p, ...field };
+            });
+            const changedProduct = newBatchProducts[index];
 
-        setBatchProducts(newBatchProducts);
+            const applyTemplate = (templateProduct: BatchMenuProduct, products: BatchMenuProduct[]): BatchMenuProduct[] => {
+                return products.map(p => {
+                    if (p.id === templateProduct.id) return p;
+                    return {
+                        ...p,
+                        name: templateProduct.name,
+                        price: templateProduct.price,
+                        isPromo: templateProduct.isPromo,
+                        promoPrice: templateProduct.promoPrice,
+                        commission: templateProduct.commission,
+                        categoryId: templateProduct.categoryId,
+                        soldOut: templateProduct.soldOut,
+                        subtype: templateProduct.subtype,
+                        preparationTime: templateProduct.preparationTime,
+                        spiciness: templateProduct.spiciness,
+                        temperature: templateProduct.temperature,
+                        isAlcoholic: templateProduct.isAlcoholic,
+                        isVegetarian: templateProduct.isVegetarian,
+                        ingredients: templateProduct.ingredients,
+                        requiresPrepTime: templateProduct.requiresPrepTime,
+                        limitedStock: templateProduct.limitedStock,
+                    };
+                });
+            };
+
+            let finalProducts = newBatchProducts;
+
+            if (field === 'useAsTemplate') {
+                if (value === true) {
+                    const newTemplate = { ...changedProduct, useAsTemplate: true };
+                    setTemplate(newTemplate);
+                    finalProducts = finalProducts.map((p, i) =>
+                        i === index ? newTemplate : { ...p, useAsTemplate: false }
+                    );
+                    finalProducts = applyTemplate(newTemplate, finalProducts);
+                } else {
+                    if (template?.id === changedProduct.id) {
+                        setTemplate(null);
+                    }
+                }
+            } else if (template && template.id === changedProduct.id) {
+                const updatedTemplate = { ...changedProduct };
+                setTemplate(updatedTemplate);
+                finalProducts = applyTemplate(updatedTemplate, finalProducts);
+            }
+
+            return finalProducts;
+        });
     };
 
     const handleSubmit = async () => {
@@ -486,8 +490,10 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                                             description="Customer needs to wait for this item to be prepared"
                                             checked={activeProduct.requiresPrepTime}
                                             onChange={checked => {
-                                                handleProductChange(activeProductIndex, 'requiresPrepTime', checked);
-                                                if (!checked) handleProductChange(activeProductIndex, 'preparationTime', 0);
+                                                handleProductChange(activeProductIndex, {
+                                                    requiresPrepTime: checked,
+                                                    ...(!checked ? { preparationTime: 0 } : {})
+                                                });
                                             }}
                                         />
                                         <AnimatePresence>
@@ -660,8 +666,8 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                 <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
                     <div className="flex min-h-full items-stretch justify-center text-center md:items-center md:px-2 lg:px-4">
                         <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-full md:translate-y-0 md:scale-95" enterTo="opacity-100 translate-y-0 md:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 md:scale-100" leaveTo="opacity-0 translate-y-full md:translate-y-0 md:scale-95">
-                            <Dialog.Panel className="relative flex w-full max-w-lg transform text-left text-base transition md:my-8">
-                                <div className="relative flex w-full flex-col overflow-hidden md:rounded-3xl bg-white dark:bg-slate-900 shadow-2xl">
+                            <Dialog.Panel className="relative flex w-full max-w-lg transform text-left text-base transition md:my-8 h-[100dvh] md:h-auto md:max-h-[90vh]">
+                                <div className="relative flex w-full h-full flex-col overflow-hidden md:rounded-3xl bg-white dark:bg-slate-900 shadow-2xl">
                                     {/* Header */}
                                     <div className="p-4 sm:p-6 flex justify-between items-center border-b border-slate-100 dark:border-slate-800">
                                         <div>
@@ -690,7 +696,7 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                                     )}
 
                                     {/* Content */}
-                                    <div className="flex-1 bg-white dark:bg-slate-900">
+                                    <div className="flex-1 overflow-y-auto bg-white dark:bg-slate-900">
                                         <AnimatePresence mode="wait">
                                             {renderStepContent()}
                                         </AnimatePresence>
