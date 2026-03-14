@@ -80,14 +80,14 @@ interface AddMenuComposerProps {
 // --- HELPER COMPONENTS ---
 
 const ModernToggle: React.FC<{ checked: boolean; onChange: (checked: boolean) => void; label: string; description?: string }> = ({ checked, onChange, label, description }) => (
-    <label className="flex items-center cursor-pointer justify-between w-full py-3 px-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700">
+    <label className="flex items-center cursor-pointer justify-between w-full py-3 px-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-200 dark:border-zinc-700">
         <div className="flex flex-col">
-            <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">{label}</span>
-            {description && <span className="text-xs text-slate-500 dark:text-slate-400">{description}</span>}
+            <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{label}</span>
+            {description && <span className="text-xs text-zinc-500 dark:text-zinc-400">{description}</span>}
         </div>
         <div className="relative">
             <input type="checkbox" className="sr-only" checked={checked} onChange={(e) => onChange(e.target.checked)} />
-            <div className={`block w-12 h-7 rounded-full transition-colors ${checked ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-600'}`}></div>
+            <div className={`block w-12 h-7 rounded-full transition-colors ${checked ? 'bg-blue-600' : 'bg-zinc-200 dark:bg-zinc-600'}`}></div>
             <div className={`dot absolute left-1 top-1 bg-white w-5 h-5 rounded-full transition-transform ${checked ? 'translate-x-5' : ''}`}></div>
         </div>
     </label>
@@ -100,9 +100,9 @@ const FloatingLabelInput: React.FC<{ label: string, value: string | number, onCh
             value={value}
             onChange={onChange}
             placeholder={placeholder}
-            className="block w-full px-4 py-3.5 text-base text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 peer transition-all"
+            className="block w-full px-4 py-3.5 text-base text-zinc-900 dark:text-zinc-100 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 peer transition-all"
         />
-        <label className="absolute text-sm text-slate-500 dark:text-slate-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-slate-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-3">
+        <label className="absolute text-sm text-zinc-500 dark:text-zinc-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-zinc-900 px-2 peer-focus:px-2 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-3">
             {label}
         </label>
     </div>
@@ -367,12 +367,12 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                 return (
                     <MotionDiv key={0} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="p-4 sm:p-6">
                         <input type="file" accept="image/*" multiple onChange={handleFileChange} ref={fileInputRef} className="hidden" />
-                        <div onClick={() => fileInputRef.current?.click()} className="cursor-pointer w-full flex flex-col items-center justify-center py-16 px-6 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border-2 border-dashed border-slate-300 dark:border-slate-600 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors duration-300 group">
+                        <div onClick={() => fileInputRef.current?.click()} className="cursor-pointer w-full flex flex-col items-center justify-center py-16 px-6 rounded-2xl bg-zinc-50 dark:bg-zinc-800/50 border-2 border-dashed border-zinc-300 dark:border-zinc-600 text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors duration-300 group">
                             <div className="w-16 h-16 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                 <ImagePlus className="w-8 h-8 text-blue-500" />
                             </div>
-                            <span className="font-semibold text-xl text-slate-900 dark:text-slate-100">Tap to upload photos</span>
-                            <span className="text-sm text-slate-500 dark:text-slate-400 mt-2">Select multiple images to batch upload</span>
+                            <span className="font-semibold text-xl text-zinc-900 dark:text-zinc-100">Tap to upload photos</span>
+                            <span className="text-sm text-zinc-500 dark:text-zinc-400 mt-2">Select multiple images to batch upload</span>
                         </div>
                         <div className="mt-6">
                             <ProductUploadTips />
@@ -388,7 +388,7 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
 
                 return (
                     <MotionDiv key={1} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                        <div className="relative w-full h-64 sm:h-80 bg-slate-100 dark:bg-slate-800">
+                        <div className="relative w-full h-64 sm:h-80 bg-zinc-100 dark:bg-zinc-800">
                             <AnimatePresence mode="wait">
                                 <motion.div
                                     key={activeProduct.id}
@@ -442,11 +442,11 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                                 <motion.div key="details" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
                                     <FloatingLabelInput label="Item Name" value={activeProduct.name} onChange={(e: ChangeEvent<HTMLInputElement>) => handleProductChange(activeProductIndex, 'name', e.target.value)} />
 
-                                    <button onClick={() => setCategorySelectorOpen(true)} className="w-full text-left p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-500 transition-colors group">
-                                        <span className="block text-xs text-slate-500 dark:text-slate-400 mb-1">Category</span>
+                                    <button onClick={() => setCategorySelectorOpen(true)} className="w-full text-left p-4 bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-700 hover:border-blue-500 transition-colors group">
+                                        <span className="block text-xs text-zinc-500 dark:text-zinc-400 mb-1">Category</span>
                                         <div className="flex justify-between items-center">
-                                            <span className={`text-base font-medium ${activeProduct.categoryId ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400'}`}>{categoryName}</span>
-                                            <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                                            <span className={`text-base font-medium ${activeProduct.categoryId ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-400'}`}>{categoryName}</span>
+                                            <ChevronRight className="w-5 h-5 text-zinc-400 group-hover:text-blue-500 transition-colors" />
                                         </div>
                                     </button>
 
@@ -465,7 +465,7 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                                 <motion.div key="specs" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
                                     {/* Item Type */}
                                     <div>
-                                        <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 block">Item Type</label>
+                                        <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-3 block">Item Type</label>
                                         <div className="grid grid-cols-3 gap-3">
                                             {(['dish', 'drink', 'snack'] as const).map(type => (
                                                 <button
@@ -473,7 +473,7 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                                                     onClick={() => handleProductChange(activeProductIndex, 'subtype', type)}
                                                     className={`py-3 px-2 rounded-xl border-2 font-medium text-sm transition-all flex flex-col items-center gap-2 ${activeProduct.subtype === type
                                                         ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-500 text-blue-700 dark:text-blue-300'
-                                                        : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300'}`}
+                                                        : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300'}`}
                                                 >
                                                     {type === 'dish' && <UtensilsCrossed className="w-5 h-5" />}
                                                     {type === 'drink' && <Beer className="w-5 h-5" />}
@@ -515,7 +515,7 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
 
                                     {activeProduct.subtype === 'dish' && (
                                         <div>
-                                            <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 block">Spiciness Level</label>
+                                            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-3 block">Spiciness Level</label>
                                             <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                                                 {(['mild', 'medium', 'hot', 'extra-hot'] as const).map(level => (
                                                     <button
@@ -523,7 +523,7 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                                                         onClick={() => handleProductChange(activeProductIndex, 'spiciness', level)}
                                                         className={`flex-none px-4 py-2.5 rounded-full border text-sm font-medium transition-all ${activeProduct.spiciness === level
                                                             ? 'bg-red-50 dark:bg-red-900/30 border-red-500 text-red-700 dark:text-red-400'
-                                                            : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'}`}
+                                                            : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400'}`}
                                                     >
                                                         {level === 'mild' && '😌 Mild'}
                                                         {level === 'medium' && '🌶️ Medium'}
@@ -538,7 +538,7 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                                     {activeProduct.subtype === 'drink' && (
                                         <div className="space-y-6">
                                             <div>
-                                                <label className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3 block">Temperature</label>
+                                                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-3 block">Temperature</label>
                                                 <div className="grid grid-cols-3 gap-3">
                                                     {(['hot', 'cold', 'room-temp'] as const).map(temp => (
                                                         <button
@@ -546,7 +546,7 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                                                             onClick={() => handleProductChange(activeProductIndex, 'temperature', temp)}
                                                             className={`py-3 px-2 rounded-xl border-2 font-medium text-sm transition-all ${activeProduct.temperature === temp
                                                                 ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-500 text-blue-700 dark:text-blue-300'
-                                                                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:border-slate-300'}`}
+                                                                : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-300'}`}
                                                         >
                                                             {temp === 'hot' && '☕ Hot'}
                                                             {temp === 'cold' && '❄️ Cold'}
@@ -594,7 +594,7 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                                         </AnimatePresence>
                                     </div>
 
-                                    <div className="pt-4 space-y-4 border-t border-slate-200 dark:border-slate-700">
+                                    <div className="pt-4 space-y-4 border-t border-zinc-200 dark:border-zinc-700">
                                         <ModernToggle label="Limited Stock" description="Show low stock warning" checked={activeProduct.limitedStock} onChange={checked => handleProductChange(activeProductIndex, 'limitedStock', checked)} />
                                         <ModernToggle label="Mark as Sold Out" description="Temporarily unavailable" checked={activeProduct.soldOut} onChange={checked => handleProductChange(activeProductIndex, 'soldOut', checked)} />
                                     </div>
@@ -608,19 +608,19 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                 return (
                     <MotionDiv key={4} initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-6">
                         <div className="text-center mb-6">
-                            <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100">Uploading Menu Items</h3>
-                            <p className="text-slate-500 dark:text-slate-400">Please wait while we process your images</p>
+                            <h3 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">Uploading Menu Items</h3>
+                            <p className="text-zinc-500 dark:text-zinc-400">Please wait while we process your images</p>
                         </div>
 
                         <div className="space-y-3 max-h-80 overflow-y-auto pr-2">
                             {uploadProgress.map(p => (
-                                <div key={p.id} className="flex items-center gap-4 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700">
-                                    <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-slate-200 dark:bg-slate-700 flex-shrink-0">
+                                <div key={p.id} className="flex items-center gap-4 p-3 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-100 dark:border-zinc-700">
+                                    <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-zinc-200 dark:bg-zinc-700 flex-shrink-0">
                                         <Image src={p.imageUrl || URL.createObjectURL(batchProducts.find(prod => prod.id === p.id)!.file)} alt={p.fileName} fill className="object-cover" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-slate-900 dark:text-slate-100 truncate">{p.fileName}</p>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400">{p.statusText}</p>
+                                        <p className="font-semibold text-zinc-900 dark:text-zinc-100 truncate">{p.fileName}</p>
+                                        <p className="text-xs text-zinc-500 dark:text-zinc-400">{p.statusText}</p>
                                     </div>
                                     <div className="flex-shrink-0">
                                         {p.status === 'uploading' && <Loader2 className="w-5 h-5 text-blue-500 animate-spin" />}
@@ -642,9 +642,9 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                         <div className="w-20 h-20 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-6">
                             <CheckCircle2 className="w-10 h-10 text-green-600 dark:text-green-400" />
                         </div>
-                        <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-2">Menu Updated!</h3>
-                        <p className="text-slate-600 dark:text-slate-400 mb-6">
-                            <span className="font-semibold text-slate-900 dark:text-slate-100">{successes}</span> item(s) added successfully.
+                        <h3 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">Menu Updated!</h3>
+                        <p className="text-zinc-600 dark:text-zinc-400 mb-6">
+                            <span className="font-semibold text-zinc-900 dark:text-zinc-100">{successes}</span> item(s) added successfully.
                             {failures > 0 && <span className="block text-red-500 mt-1">{failures} item(s) failed to upload.</span>}
                         </p>
                     </MotionDiv>
@@ -667,25 +667,25 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                     <div className="flex min-h-full items-stretch justify-center text-center md:items-center md:px-2 lg:px-4">
                         <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-full md:translate-y-0 md:scale-95" enterTo="opacity-100 translate-y-0 md:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 md:scale-100" leaveTo="opacity-0 translate-y-full md:translate-y-0 md:scale-95">
                             <Dialog.Panel className="relative flex w-full max-w-lg transform text-left text-base transition md:my-8 h-[100dvh] md:h-auto md:max-h-[90vh]">
-                                <div className="relative flex w-full h-full flex-col overflow-hidden md:rounded-3xl bg-white dark:bg-slate-900 shadow-2xl">
+                                <div className="relative flex w-full h-full flex-col overflow-hidden md:rounded-3xl bg-white dark:bg-zinc-900 shadow-2xl">
                                     {/* Header */}
-                                    <div className="p-4 sm:p-6 flex justify-between items-center border-b border-slate-100 dark:border-slate-800">
+                                    <div className="p-4 sm:p-6 flex justify-between items-center border-b border-zinc-100 dark:border-zinc-800">
                                         <div>
-                                            <Dialog.Title as="h3" className="text-xl font-bold text-slate-900 dark:text-slate-100">
+                                            <Dialog.Title as="h3" className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
                                                 {currentStep === 4 ? 'Uploading...' : currentStep === 5 ? 'Summary' : 'Add Menu Item'}
                                             </Dialog.Title>
                                             {currentStep < 4 && (
-                                                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Step {currentStep + 1} of {STEPS.length}</p>
+                                                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">Step {currentStep + 1} of {STEPS.length}</p>
                                             )}
                                         </div>
-                                        <button onClick={handleClose} className="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                                            <X className="h-6 w-6 text-slate-400 dark:text-slate-500" />
+                                        <button onClick={handleClose} className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
+                                            <X className="h-6 w-6 text-zinc-400 dark:text-zinc-500" />
                                         </button>
                                     </div>
 
                                     {/* Progress Bar */}
                                     {currentStep > 0 && currentStep < 4 && (
-                                        <div className="w-full bg-slate-100 dark:bg-slate-800 h-1">
+                                        <div className="w-full bg-zinc-100 dark:bg-zinc-800 h-1">
                                             <motion.div
                                                 className="bg-blue-600 h-1"
                                                 initial={{ width: '0%' }}
@@ -696,19 +696,19 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                                     )}
 
                                     {/* Content */}
-                                    <div className="flex-1 overflow-y-auto bg-white dark:bg-slate-900">
+                                    <div className="flex-1 overflow-y-auto bg-white dark:bg-zinc-900">
                                         <AnimatePresence mode="wait">
                                             {renderStepContent()}
                                         </AnimatePresence>
                                     </div>
 
                                     {/* Footer */}
-                                    <div className="p-4 sm:p-6 flex justify-between sm:justify-end gap-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-sm">
+                                    <div className="p-4 sm:p-6 flex justify-between sm:justify-end gap-3 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-900/50 backdrop-blur-sm">
                                         {currentStep === 0 && (
-                                            <button onClick={handleClose} className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 py-3 px-4 text-sm font-semibold text-slate-700 dark:text-slate-300 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">Cancel</button>
+                                            <button onClick={handleClose} className="w-full rounded-xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 py-3 px-4 text-sm font-semibold text-zinc-700 dark:text-zinc-300 shadow-sm hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors">Cancel</button>
                                         )}
                                         {currentStep > 0 && currentStep < 4 && (
-                                            <button onClick={() => setCurrentStep(s => s - 1)} className="px-6 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">Back</button>
+                                            <button onClick={() => setCurrentStep(s => s - 1)} className="px-6 py-3 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors">Back</button>
                                         )}
                                         {currentStep > 0 && currentStep < 3 && (
                                             <button onClick={() => setCurrentStep(s => s + 1)} className="flex-1 sm:flex-none px-8 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20">Next</button>
@@ -720,7 +720,7 @@ const AddMenuComposer: React.FC<AddMenuComposerProps> = ({ isOpen, onClose, stor
                                         )}
                                         {currentStep === 5 && (
                                             <>
-                                                <button onClick={handleClose} className="px-6 py-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">Done</button>
+                                                <button onClick={handleClose} className="px-6 py-3 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors">Done</button>
                                                 <button onClick={resetState} className="flex-1 sm:flex-none px-8 py-3 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors shadow-lg shadow-blue-600/20">Add More</button>
                                             </>
                                         )}

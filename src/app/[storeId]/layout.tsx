@@ -66,7 +66,7 @@ export default function StoreLayout({
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-950">
+            <div className="min-h-screen flex items-center justify-center bg-white dark:bg-zinc-950">
                 <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
             </div>
         );
@@ -74,15 +74,15 @@ export default function StoreLayout({
 
     if (!isStoreAvailable) {
         return (
-            <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 dark:bg-slate-950 p-6 text-center">
-                <div className="w-20 h-20 bg-slate-200 dark:bg-slate-800 rounded-full flex items-center justify-center mb-6">
-                    <Store className="w-10 h-10 text-slate-400" />
-                    <div className="absolute bg-red-500 rounded-full p-1.5 translate-x-6 translate-y-6 border-4 border-slate-50 dark:border-slate-950">
+            <div className="min-h-screen flex flex-col items-center justify-center bg-zinc-50 dark:bg-zinc-950 p-6 text-center">
+                <div className="w-20 h-20 bg-zinc-200 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-6">
+                    <Store className="w-10 h-10 text-zinc-400" />
+                    <div className="absolute bg-red-500 rounded-full p-1.5 translate-x-6 translate-y-6 border-4 border-zinc-50 dark:border-zinc-950">
                         <Lock className="w-4 h-4 text-white" />
                     </div>
                 </div>
-                <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Store Unavailable</h1>
-                <p className="text-slate-500 dark:text-slate-400 max-w-md">
+                <h1 className="text-2xl font-bold text-zinc-900 dark:text-white mb-2">Store Unavailable</h1>
+                <p className="text-zinc-500 dark:text-zinc-400 max-w-md">
                     This store is currently unavailable. Please check back later or contact the store owner.
                 </p>
             </div>
