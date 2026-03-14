@@ -30,6 +30,7 @@ import { app } from '@/lib/firebase';
 import toast from 'react-hot-toast';
 import HeroCarousel from '@/components/customer/HeroCarousel';
 import NeedAWebsiteModal from '@/components/customer/modals/NeedAWebsiteModal';
+import InstallPrompt from '@/components/InstallPrompt';
 
 const ProductGrid = dynamic(
   () => import('../../components/products/ProductGrid'),
@@ -562,6 +563,7 @@ export default function StorefrontPageClient({
           )}
         </div>
       </div>
+      <InstallPrompt storeId={storeId} />
     </div>
   );
 }
