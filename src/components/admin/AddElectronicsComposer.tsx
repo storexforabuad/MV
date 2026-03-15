@@ -1,11 +1,12 @@
 'use client';
-import React, { useState, ChangeEvent, KeyboardEvent, useMemo } from 'react';
+import React, { useState, useEffect, ChangeEvent, KeyboardEvent, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Plus, Trash2, ChevronRight, ChevronLeft, CheckCircle2, AlertCircle, Smartphone, Laptop, Battery, Sun, Headphones, Watch, Gamepad2, Cable, Package } from 'lucide-react';
+import { Camera, Plus, Trash2, ChevronRight, ChevronLeft, CheckCircle2, AlertCircle, Smartphone, Laptop, Battery, Sun, Headphones, Watch, Gamepad2, Cable, Package, Loader2 } from 'lucide-react';
 import Image from 'next/image';
 import { db } from '../../lib/firebase';
 import { collection, addDoc, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
 import { XMarkIcon } from '@heroicons/react/24/solid';
+import { X } from 'lucide-react';
 import { compressImage } from '../../utils/imageCompression';
 import { uploadImageToCloudinary } from '../../lib/cloudinaryClient';
 import { ProductCache } from '../../lib/productCache';
@@ -133,6 +134,16 @@ export default function AddElectronicsComposer({
     const [boxItemInput, setBoxItemInput] = useState('');
     const [cloudName] = useState('dfoiugbva');
     const [uploadPreset] = useState('unsigned_preset');
+
+    // Lock body scroll when open
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'auto';
+        }
+        return () => { document.body.style.overflow = 'auto'; };
+    }, [isOpen]);
 
     // --- Core Operations ---
     const activeProduct = products[activeProductIndex];
@@ -350,7 +361,8 @@ export default function AddElectronicsComposer({
     };
 
     // --- Rendering ---
-    if (!isOpen) return null;
+    const STEPS = [{ name: 'Photos' }, { name: 'Details' }, { name: 'Tech' }, { name: 'Warranty' }, { name: 'Pricing' }];
+    const modalVariants = { hidden: { opacity: 0, y: '100%' }, visible: { opacity: 1, y: 0 }, exit: { opacity: 0, y: '100%' } };
 
     const renderStepContent = () => {
         if (!activeProduct && currentStep > 0) return null;
@@ -358,7 +370,7 @@ export default function AddElectronicsComposer({
         switch (currentStep) {
             case 0: // Upload
                 return (
-                    <motion.div key="upload" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                    <motion.div key={0} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
                         {products.length > 0 && (
                             <div className="flex gap-4 overflow-x-auto pb-4 snap-x">
                                 {products.map((p, idx) => (
@@ -406,19 +418,13 @@ export default function AddElectronicsComposer({
                             </div>
                         )}
 
-                        {products.length > 0 && (
-                            <div className="pt-6">
-                                <button onClick={() => setCurrentStep(1)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all active:scale-[0.98]">
-                                    Proceed to Details
-                                </button>
-                            </div>
-                        )}
+
                     </motion.div>
                 );
 
             case 1: // Basic Details
                 return (
-                    <motion.div key="basic" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                    <motion.div key={1} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
                         <FloatingLabelInput label="Gadget Title" value={activeProduct.name} onChange={(e) => handleProductChange(activeProductIndex, 'name', e.target.value)} placeholder="e.g. iPhone 15 Pro Max 256GB" />
 
                         <div>
@@ -469,7 +475,7 @@ export default function AddElectronicsComposer({
 
             case 2: // Specs
                 return (
-                    <motion.div key="specs" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                    <motion.div key={2} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
 
                         {/* Condition */}
                         <div>
@@ -561,7 +567,7 @@ export default function AddElectronicsComposer({
 
             case 3: // Warranty & Extras
                 return (
-                    <motion.div key="warranty" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                    <motion.div key={3} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
 
                         <div className="bg-white dark:bg-zinc-900 p-1 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
                             <ModernToggle label="Includes Warranty?" checked={activeProduct.warranty} onChange={c => handleProductChange(activeProductIndex, 'warranty', c)} />
@@ -615,7 +621,7 @@ export default function AddElectronicsComposer({
 
             case 4: // Pricing
                 return (
-                    <motion.div key="pricing" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                    <motion.div key={4} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
                         <FloatingLabelInput label="Current Selling Price" type="number" prefix="₦" value={activeProduct.price === 0 ? '' : activeProduct.price} onChange={(e) => handleProductChange(activeProductIndex, 'price', e.target.value === '' ? 0 : parseFloat(e.target.value))} />
 
                         <div className="bg-white dark:bg-zinc-900 p-1 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
@@ -685,13 +691,9 @@ export default function AddElectronicsComposer({
                         <h2 className="text-3xl font-black text-zinc-900 dark:text-white mb-2">
                             {hasErrors ? 'Almost There!' : 'All Done!'}
                         </h2>
-                        <p className="text-zinc-500 dark:text-zinc-400 text-lg mb-8">
+                        <p className="text-zinc-500 dark:text-zinc-400 text-lg">
                             {hasErrors ? 'Some items failed to upload.' : 'Your gadgets are now live.'}
                         </p>
-                        <div className="flex gap-4 pt-4">
-                            <button onClick={onClose} className="flex-1 py-4 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white font-bold rounded-2xl hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">Close</button>
-                            <button onClick={() => { setProducts([]); setCurrentStep(0); setActiveProductIndex(0); }} className="flex-1 py-4 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30">Add More</button>
-                        </div>
                     </motion.div>
                 );
 
@@ -711,87 +713,141 @@ export default function AddElectronicsComposer({
     };
 
     return (
-        <>
-            <AnimatePresence>
-                {isOpen && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex flex-col sm:items-center justify-end sm:justify-center">
-                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+        <AnimatePresence>
+            {isOpen && (
+                <motion.div
+                    className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-zinc-950 text-zinc-900 dark:text-white"
+                    initial="hidden" animate="visible" exit="exit"
+                    variants={modalVariants}
+                    transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+                >
+                    {/* --- Header --- */}
+                    <header className="flex-shrink-0 flex items-center justify-between w-full max-w-5xl mx-auto p-4 sm:p-6 border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-lg z-10 sticky top-0">
+                        <div className="flex items-center gap-4">
+                            <div>
+                                <h2 className="text-lg sm:text-xl font-bold text-zinc-900 dark:text-zinc-100">
+                                    {currentStep === 5 ? 'Uploading...' : currentStep === 6 ? 'Success' : 'Add Gadgets'}
+                                </h2>
+                                <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                                    {currentStep < 5 ? `Step ${currentStep + 1} of ${STEPS.length}` : ''}
+                                    {products.length > 1 && currentStep > 0 && currentStep < 5 ? ` · Item ${activeProductIndex + 1} of ${products.length}` : ''}
+                                </p>
+                            </div>
+                        </div>
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg">
+                            <Smartphone className="w-6 h-6 text-white" />
+                        </div>
+                    </header>
 
-                        <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} className="relative w-full sm:w-[500px] h-[90vh] sm:h-[85vh] bg-white dark:bg-zinc-950 rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl flex flex-col overflow-hidden border border-zinc-200 dark:border-zinc-800">
+                    {/* --- Progress Bar --- */}
+                    {currentStep < 5 && (
+                        <div className="w-full bg-zinc-100 dark:bg-zinc-800 h-1">
+                            <motion.div
+                                className="bg-gradient-to-r from-blue-500 to-cyan-500 h-1"
+                                initial={{ width: '0%' }}
+                                animate={{ width: `${((currentStep + 1) / STEPS.length) * 100}%` }}
+                                transition={{ ease: "easeInOut", duration: 0.5 }}
+                            />
+                        </div>
+                    )}
 
-                            {/* Header */}
-                            {currentStep < 5 && (
-                                <div className="flex-shrink-0 px-6 pt-6 pb-4 flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800/50 bg-white dark:bg-zinc-950 z-10">
-                                    <div>
-                                        <h2 className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
-                                            {currentStep === 0 && 'Add Gadgets'}
-                                            {currentStep === 1 && 'Basic Details'}
-                                            {currentStep === 2 && 'Tech Specs'}
-                                            {currentStep === 3 && 'Warranty & Extras'}
-                                            {currentStep === 4 && 'Pricing'}
-                                        </h2>
-                                        {products.length > 1 && currentStep > 0 && (
-                                            <p className="text-xs font-semibold text-blue-600 mt-1 uppercase tracking-wider">Item {activeProductIndex + 1} of {products.length}</p>
-                                        )}
-                                    </div>
-                                    <button onClick={onClose} className="w-10 h-10 bg-zinc-100 dark:bg-zinc-900 rounded-full flex items-center justify-center text-zinc-500 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors">
-                                        <XMarkIcon className="w-6 h-6" />
+                    {/* --- Main Scrollable Content --- */}
+                    <main className="flex-grow w-full max-w-5xl mx-auto overflow-y-auto p-4 sm:p-6 scrollbar-hide">
+                        <AnimatePresence mode="wait">
+                            {renderStepContent()}
+                        </AnimatePresence>
+                    </main>
+
+                    {/* --- Footer --- */}
+                    <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-6 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 z-10">
+                        <div className="absolute bottom-full left-0 right-0 h-12 bg-gradient-to-t from-white dark:from-zinc-950 to-transparent pointer-events-none" />
+                        <div className="max-w-5xl mx-auto flex gap-4">
+                            {/* Step 0: Cancel + Next (or just Cancel if no images) */}
+                            {currentStep === 0 && (
+                                <>
+                                    <button onClick={onClose} className="flex-1 py-3.5 rounded-xl border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 font-semibold hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors">
+                                        Cancel
                                     </button>
-                                </div>
+                                    {products.length > 0 && activeProduct?.images?.length > 0 && (
+                                        <button onClick={() => setCurrentStep(1)} className="flex-1 py-3.5 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg">
+                                            Next <ChevronRight className="w-5 h-5" />
+                                        </button>
+                                    )}
+                                </>
                             )}
 
-                            {/* Content Area */}
-                            <div className="flex-1 overflow-y-auto p-6 pb-12 scrollbar-hide bg-white dark:bg-zinc-950">
-                                {renderStepContent()}
-                            </div>
+                            {/* Steps 1-3: Back + Next */}
+                            {currentStep > 0 && currentStep < 4 && (
+                                <>
+                                    <button onClick={() => setCurrentStep(s => s - 1)} className="flex-1 py-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-semibold hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors flex items-center justify-center gap-2">
+                                        <ChevronLeft className="w-5 h-5" /> Back
+                                    </button>
+                                    <button
+                                        onClick={() => setCurrentStep(s => s + 1)}
+                                        disabled={!isStepValid()}
+                                        className="flex-1 py-3.5 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
+                                    >
+                                        Next <ChevronRight className="w-5 h-5" />
+                                    </button>
+                                </>
+                            )}
 
-                            {/* Footer Navigation */}
-                            {currentStep > 0 && currentStep < 5 && (
-                                <div className="flex-shrink-0 p-6 border-t border-zinc-100 dark:border-zinc-800/50 bg-white dark:bg-zinc-950 z-10 flex gap-3">
-                                    <button onClick={() => setCurrentStep(prev => prev - 1)} className="w-14 h-14 rounded-2xl bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 flex items-center justify-center hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors">
-                                        <ChevronLeft className="w-6 h-6" />
+                            {/* Step 4: Back + Upload */}
+                            {currentStep === 4 && (
+                                <>
+                                    <button onClick={() => setCurrentStep(s => s - 1)} className="flex-1 py-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-semibold hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors flex items-center justify-center gap-2">
+                                        <ChevronLeft className="w-5 h-5" /> Back
                                     </button>
                                     <button
                                         onClick={() => {
-                                            if (currentStep === 4) {
-                                                if (activeProductIndex < products.length - 1) {
-                                                    setActiveProductIndex(prev => prev + 1);
-                                                    setCurrentStep(1);
-                                                } else {
-                                                    startProcessing();
-                                                }
+                                            if (activeProductIndex < products.length - 1) {
+                                                setActiveProductIndex(prev => prev + 1);
+                                                setCurrentStep(1);
                                             } else {
-                                                setCurrentStep(prev => prev + 1);
+                                                startProcessing();
                                             }
                                         }}
                                         disabled={!isStepValid()}
-                                        className="flex-1 h-14 rounded-2xl bg-blue-600 disabled:bg-blue-300 dark:disabled:bg-blue-900 text-white font-bold flex items-center justify-center gap-2 transition-all hover:bg-blue-700 shadow-lg shadow-blue-500/20"
+                                        className="flex-1 py-3.5 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
                                     >
-                                        {(currentStep === 4 && activeProductIndex === products.length - 1) ? 'Upload Products' : 'Next Step'} <ChevronRight className="w-5 h-5" />
+                                        {activeProductIndex === products.length - 1 ? 'Upload Products' : 'Next Item'} <ChevronRight className="w-5 h-5" />
                                     </button>
-                                </div>
+                                </>
                             )}
 
-                            {currentStep === 0 && products.length > 0 && activeProduct?.images?.length > 0 && (
-                                <div className="p-6 border-t border-zinc-100 dark:border-zinc-800/50 bg-white dark:bg-zinc-950 flex justify-center">
-                                    <button onClick={createNewDraftFromTemplate} className="flex items-center gap-2 text-blue-600 font-bold px-4 py-2 hover:bg-blue-50 rounded-lg transition-colors">
-                                        <Plus className="w-5 h-5" /> Add Another Item to Batch
+                            {/* Step 6 (Success): Close + Add Another */}
+                            {currentStep === 6 && (
+                                <>
+                                    <button onClick={onClose} className="flex-1 py-3.5 rounded-xl bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-semibold hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">
+                                        Close
                                     </button>
-                                </div>
+                                    <button onClick={() => { setProducts([]); setCurrentStep(0); setActiveProductIndex(0); }} className="flex-1 py-3.5 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold hover:opacity-90 transition-opacity shadow-lg">
+                                        Add Another
+                                    </button>
+                                </>
                             )}
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+                        </div>
+                    </footer>
 
-            <CategorySelectorModal
-                isOpen={isCategorySelectorOpen}
-                onClose={() => setCategorySelectorOpen(false)}
-                categories={categories}
-                selectedCategoryId={activeProduct?.categoryId}
-                onSelect={(catId) => { handleProductChange(activeProductIndex, 'categoryId', catId); setCategorySelectorOpen(false); }}
-                onAddCategory={onAddCategory}
-            />
-        </>
+                    {/* Batch add button (floating above footer on step 0) */}
+                    {currentStep === 0 && products.length > 0 && activeProduct?.images?.length > 0 && (
+                        <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 pb-2 -mt-2">
+                            <button onClick={createNewDraftFromTemplate} className="flex items-center justify-center gap-2 text-blue-600 dark:text-blue-400 font-bold px-4 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors w-full">
+                                <Plus className="w-5 h-5" /> Add Another Item to Batch
+                            </button>
+                        </div>
+                    )}
+
+                    <CategorySelectorModal
+                        isOpen={isCategorySelectorOpen}
+                        onClose={() => setCategorySelectorOpen(false)}
+                        categories={categories}
+                        selectedCategoryId={activeProduct?.categoryId}
+                        onSelect={(catId) => { handleProductChange(activeProductIndex, 'categoryId', catId); setCategorySelectorOpen(false); }}
+                        onAddCategory={onAddCategory}
+                    />
+                </motion.div>
+            )}
+        </AnimatePresence>
     );
 }
