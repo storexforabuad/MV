@@ -177,6 +177,45 @@ export interface FoodBeverageProduct extends BaseProduct {
 }
 
 // ==========================================
+// ELECTRONICS PRODUCT (New)
+// ==========================================
+export interface ElectronicsProduct extends BaseProduct {
+  productType: 'electronics';
+
+  // Core Specs
+  brand: string;
+  condition: 'brand-new' | 'open-box' | 'used-good' | 'used-fair' | 'refurbished';
+
+  // Subtype Specifics
+  subtype: 'phone' | 'tablet' | 'laptop' | 'powerbank' | 'solar' | 'audio' | 'accessory' | 'smartwatch' | 'gaming' | 'other';
+
+  storage?: string;
+  ram?: string;
+  color?: string;
+
+  // Technical Specs
+  network?: '3G' | '4G' | '5G';
+  simType?: 'single' | 'dual' | 'esim';
+  os?: string;
+  imeiVerification?: 'verified' | 'unverified' | 'n/a';
+  packageContents?: string;
+
+  // Warranty & Packaging
+  warranty: boolean;
+  warrantyDuration?: string;
+  warrantyType?: 'seller' | 'manufacturer';
+  whatsInBox?: string[];
+
+  // Availability
+  available: boolean;
+  soldOut?: boolean;
+  limitedStock?: boolean;
+  quantity: number;
+  categoryId?: string;
+  category?: string;
+}
+
+// ==========================================
 // MASTER UNION TYPE
 // ==========================================
-export type Product = GeneralProduct | VehicleProduct | LivestockProduct | FashionProduct | FoodBeverageProduct;
+export type Product = GeneralProduct | VehicleProduct | LivestockProduct | FashionProduct | FoodBeverageProduct | ElectronicsProduct;

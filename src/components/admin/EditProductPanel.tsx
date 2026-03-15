@@ -2,7 +2,7 @@
 import React, { useState, useEffect, Fragment, useMemo, ChangeEvent } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon, ChevronRightIcon, TrashIcon } from '@heroicons/react/24/solid';
-import { Product, FashionProduct } from '../../types/product';
+import { Product, FashionProduct, ElectronicsProduct } from '../../types/product';
 import { motion, AnimatePresence } from 'framer-motion';
 import CategorySelectorModal from './modals/CategorySelectorModal';
 import ModernSwitch from '../common/ModernSwitch';
@@ -28,6 +28,14 @@ interface ProductFormState extends Omit<Product, 'price' | 'originalPrice'> {
   soldOutSizes?: string[];
   availableSizes?: string[];
   sizeOption?: 'baby-clothes' | 'kids-shoes' | 'adult-shoes';
+
+  // Electronics
+  brand?: string;
+  condition?: ElectronicsProduct['condition'];
+  storage?: string;
+  ram?: string;
+  warranty?: boolean;
+  warrantyDuration?: string;
 }
 
 const StyledInput: React.FC<{ id: string, label: string, value: string | number, onChange: (e: ChangeEvent<HTMLInputElement>) => void, type?: string, placeholder?: string }> = ({ id, label, value, onChange, type = 'text', placeholder = '' }) => (
@@ -113,6 +121,20 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
       }
       payload.price = basePrice;
       payload.originalPrice = undefined;
+    }
+
+    // Handle Electronics
+    if (formState.productType === 'electronics') {
+      (payload as any).brand = formState.brand;
+      (payload as any).condition = formState.condition;
+      (payload as any).storage = formState.storage;
+      (payload as any).ram = formState.ram;
+      (payload as any).warranty = formState.warranty;
+      if (formState.warranty) {
+        (payload as any).warrantyDuration = formState.warrantyDuration;
+      } else {
+        (payload as any).warrantyDuration = null; // Clear if turned off
+      }
     }
 
     // Ensure sizes are synced
@@ -383,6 +405,71 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                                 );
                               })}
                             </div>
+                          </div>
+                        )}
+
+                        {formState.productType === 'electronics' && (
+                          <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Electronics Details</h3>
+
+                            <StyledInput
+                              id="brand"
+                              label="Brand"
+                              value={(formState as any).brand ?? ''}
+                              onChange={(e) => handleInputChange('brand' as any, e.target.value)}
+                            />
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Condition</label>
+                              <select
+                                value={(formState as any).condition ?? 'brand-new'}
+                                onChange={(e) => handleInputChange('condition' as any, e.target.value)}
+                                className="w-full p-3 bg-gray-100 dark:bg-gray-800 rounded-lg border-transparent text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
+                              >
+                                <option value="brand-new">Brand New</option>
+                                <option value="open-box">Open Box</option>
+                                <option value="used-good">Used (Good)</option>
+                                <option value="used-fair">Used (Fair)</option>
+                                <option value="refurbished">Refurbished</option>
+                              </select>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                              <StyledInput
+                                id="storage"
+                                label="Storage (e.g. 128GB)"
+                                value={(formState as any).storage ?? ''}
+                                onChange={(e) => handleInputChange('storage' as any, e.target.value)}
+                              />
+                              <StyledInput
+                                id="ram"
+                                label="RAM (e.g. 8GB)"
+                                value={(formState as any).ram ?? ''}
+                                onChange={(e) => handleInputChange('ram' as any, e.target.value)}
+                              />
+                            </div>
+
+                            <div className="space-y-3 pt-2">
+                              <ModernSwitch
+                                label="Includes Warranty"
+                                checked={(formState as any).warranty || false}
+                                onChange={(checked) => handleInputChange('warranty' as any, checked)}
+                              />
+                              <AnimatePresence>
+                                {(formState as any).warranty && (
+                                  <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
+                                    <StyledInput
+                                      id="warrantyDuration"
+                                      label="Warranty Duration"
+                                      placeholder="e.g. 6 months"
+                                      value={(formState as any).warrantyDuration ?? ''}
+                                      onChange={(e) => handleInputChange('warrantyDuration' as any, e.target.value)}
+                                    />
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+
                           </div>
                         )}
 

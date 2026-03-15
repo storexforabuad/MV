@@ -5,9 +5,9 @@ import Image from 'next/image';
 import dynamic from 'next/dynamic';
 import { useParams, useRouter } from 'next/navigation';
 import { getProductById, incrementProductViews, getStoreMeta, getCategories } from '@/lib/db';
-import { Heart, ShoppingCart, Share2, PackageX, Search, Info, Gift } from 'lucide-react';
+
 import { useCart } from '@/lib/cartContext';
-import { Product, FashionProduct, FoodBeverageProduct } from '@/types/product';
+import { Product, FashionProduct, FoodBeverageProduct, ElectronicsProduct } from '@/types/product';
 import { Category } from '@/types/category';
 import { StoreMeta } from '@/types/store';
 import { calculateDiscount, formatPrice } from '@/utils/price';
@@ -19,14 +19,18 @@ import CustomerLookupModal from '@/components/customer/CustomerLookupModal';
 import OrderSummaryModal from '@/components/modals/OrderSummaryModal';
 import toast from 'react-hot-toast';
 import VehicleDetailPage from '@/components/products/VehicleDetailPage';
-import { ensureProductType, isFashionProduct, isGeneralProduct, isVehicleProduct, isFoodBeverageProduct, isLivestockProduct } from '@/utils/productHelpers';
+import { ensureProductType, isFashionProduct, isGeneralProduct, isVehicleProduct, isFoodBeverageProduct, isLivestockProduct, isElectronicsProduct } from '@/utils/productHelpers';
 import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
 import SizeSelector from '@/components/products/SizeSelector';
 import { SizePreferencesCache } from '@/lib/sizePreferencesCache';
 import SizeGuideModal from '@/components/products/SizeGuideModal';
 import NeedAWebsiteModal from '@/components/customer/modals/NeedAWebsiteModal';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Globe, Sparkles } from 'lucide-react';
+import {
+  Heart, ShoppingCart, Share2, PackageX, Search, Info, Gift,
+  ChevronLeft, ChevronRight, ShieldCheck, Cpu, Database, Network,
+  Smartphone, Activity, Check, Code, Package, Fingerprint, Globe, Sparkles
+} from 'lucide-react';
 
 const ProductDetailSkeleton = dynamic(() => import('@/components/ProductDetailSkeleton'), { ssr: false });
 const AnimatedViewCount = dynamic(() => import('@/components/AnimatedViewCount'), {
@@ -594,7 +598,134 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                   </div>
                 )}
 
-                {product.description && !isFoodBeverageProduct(product) && <p className="text-gray-600 dark:text-gray-300 mb-8">{product.description}</p>}
+                {/* ELECTRONICS PRODUCT UI */}
+                {isElectronicsProduct(product) && (() => {
+                  const elecProduct = product as ElectronicsProduct;
+                  return (
+                    <div className="mb-8 space-y-4">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        Tech Specs
+                      </h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {elecProduct.brand && (
+                          <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                            <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                              <Smartphone className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Brand</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{elecProduct.brand}</p>
+                            </div>
+                          </div>
+                        )}
+                        {elecProduct.condition && (
+                          <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${elecProduct.condition === 'brand-new' ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}`}>
+                              <Activity className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Condition</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5 capitalize">{elecProduct.condition.replace('-', ' ')}</p>
+                            </div>
+                          </div>
+                        )}
+                        {elecProduct.storage && (
+                          <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                            <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                              <Database className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Storage</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{elecProduct.storage}</p>
+                            </div>
+                          </div>
+                        )}
+                        {elecProduct.ram && (
+                          <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                            <div className="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-900/40 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
+                              <Cpu className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Memory</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{elecProduct.ram}</p>
+                            </div>
+                          </div>
+                        )}
+                        {elecProduct.os && (
+                          <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                            <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center text-orange-600 dark:text-orange-400">
+                              <Code className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">OS</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{elecProduct.os}</p>
+                            </div>
+                          </div>
+                        )}
+                        {elecProduct.network && (
+                          <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                            <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                              <Network className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Network</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{elecProduct.network}</p>
+                            </div>
+                          </div>
+                        )}
+                        {elecProduct.packageContents && (
+                          <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                            <div className="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900/40 flex items-center justify-center text-yellow-600 dark:text-yellow-400">
+                              <Package className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Box</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{elecProduct.packageContents}</p>
+                            </div>
+                          </div>
+                        )}
+                        {elecProduct.imeiVerification && (
+                          <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                            <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center text-red-600 dark:text-red-400">
+                              <Fingerprint className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">IMEI Status</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5 capitalize">{elecProduct.imeiVerification}</p>
+                            </div>
+                          </div>
+                        )}
+                        {elecProduct.warranty && elecProduct.warrantyDuration && (
+                          <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                            <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                              <ShieldCheck className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Warranty</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{elecProduct.warrantyDuration}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {product.description && !isFoodBeverageProduct(product) && (
+                  <div className={`mb-8 ${isElectronicsProduct(product) ? 'p-6 rounded-[2rem] bg-gray-50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-700/50' : ''}`}>
+                    {isElectronicsProduct(product) && (
+                      <div className="flex items-center gap-2 mb-4">
+                        <div className="w-10 h-10 rounded-2xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-gray-600 dark:text-gray-300 border border-gray-100 dark:border-gray-700">
+                          <Info className="w-5 h-5" />
+                        </div>
+                        <h3 className="text-base font-bold text-gray-900 dark:text-white">Unit Condition & Notes</h3>
+                      </div>
+                    )}
+                    <p className={`text-gray-600 dark:text-gray-300 leading-relaxed ${isElectronicsProduct(product) ? 'text-[15px]' : ''}`}>
+                      {product.description}
+                    </p>
+                  </div>
+                )}
 
                 {/* Optimized Branded Footer */}
                 <motion.div
@@ -635,13 +766,10 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                             </span>
                           </div>
 
-                          <div className="flex flex-col items-center gap-1 text-center w-full">
-                            <p className="text-sm sm:text-base font-bold text-white tracking-tight">
-                              Get your professional business Website like
-                            </p>
-                            <p className="text-base sm:text-xl font-black text-white tracking-tight">
-                              {storeMeta?.name || 'this'}
-                            </p>
+                          <div className="flex flex-col items-center gap-1 text-center w-full px-2">
+                            <h3 className="text-sm sm:text-base md:text-lg font-bold text-white tracking-tight leading-snug">
+                              Get your professional business Website like <span className="font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-white/70">{storeMeta?.name || 'this'}</span>
+                            </h3>
                             <div className={`flex items-center gap-2 font-black text-[10px] uppercase tracking-widest mt-2 group-hover:gap-3 transition-all ${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}`}>
                               Tap to start <Sparkles className="w-3.5 h-3.5 animate-pulse" />
                               <span>→</span>

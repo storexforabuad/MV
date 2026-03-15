@@ -13,6 +13,7 @@ import { Loader2, MessageSquare, ExternalLink, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast';
 import { getCustomerDetails } from '@/app/actions/customerActions';
 import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
+import { isElectronicsProduct } from '@/utils/productHelpers';
 import { saveModalState, getModalState, clearModalState } from '@/lib/paymentModalStorage';
 import { requestCustomerNotificationPermission } from '@/lib/requestCustomerNotifications';
 import PaymentFlowPage from './PaymentFlowPage';
@@ -72,11 +73,10 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
       setShowSizeError(false);
       setImageLoading({});
 
-      // Restore modal state from localStorage if payment flow is enabled
       if (isPaymentFlowEnabled && storeId) {
         const savedState = getModalState(storeId);
         if (savedState) {
-          setCurrentPage(savedState.currentPage);
+          setCurrentPage(savedState.currentPage === 3 ? 1 : savedState.currentPage);
           if (savedState.evidenceUrl) {
             setUploadedEvidence({
               url: savedState.evidenceUrl,
@@ -370,6 +370,14 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                                       {item.selectedColor && (
                                         <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
                                           {item.selectedColor}
+                                        </span>
+                                      )}
+                                      {isElectronicsProduct(item as any) && (item as any).condition && (
+                                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium border ${(item as any).condition === 'brand-new'
+                                          ? 'bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 border-indigo-100 dark:border-indigo-800'
+                                          : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'
+                                          }`}>
+                                          {(item as any).condition === 'brand-new' ? 'Brand New' : (item as any).condition.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
                                         </span>
                                       )}
                                       {item.selectedSize && (

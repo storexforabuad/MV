@@ -8,13 +8,14 @@ import { Product } from '@/types/product';
 import { StoreMeta } from '@/types/store';
 import { Customer } from '@/types/customer';
 import { formatPrice } from '@/utils/price';
-import { Minus, Plus, Loader2, MessageSquare, ExternalLink, AlertCircle } from 'lucide-react';
+import { Minus, Plus, Loader2, MessageSquare, ExternalLink, AlertCircle, Smartphone, Activity, Database, Cpu, Network, ShieldCheck, Package, Fingerprint, Info, Code } from 'lucide-react';
+import { ElectronicsProduct } from '@/types/product';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOrders } from '@/hooks/useOrders';
 import toast from 'react-hot-toast';
 import { useParams } from 'next/navigation';
 import { getCustomerDetails } from '@/app/actions/customerActions';
-import { isFoodBeverageProduct, isFashionProduct } from '@/utils/productHelpers';
+import { isFoodBeverageProduct, isFashionProduct, isElectronicsProduct } from '@/utils/productHelpers';
 import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
 import { saveModalState, getModalState, clearModalState } from '@/lib/paymentModalStorage';
 import { requestCustomerNotificationPermission } from '@/lib/requestCustomerNotifications';
@@ -43,7 +44,7 @@ interface OrderSummaryModalProps {
 }
 
 export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta, customer: initialCustomer, selectedSize, selectedColor, initialQuantity = 1, openedFrom }: OrderSummaryModalProps) {
-  const [currentPage, setCurrentPage] = useState<1 | 2>(1);
+  const [currentPage, setCurrentPage] = useState<1 | 2 | 3>(1);
   const [quantity, setQuantity] = useState(initialQuantity);
   const [deliveryMethod, setDeliveryMethod] = useState('home');
   const [customer, setCustomer] = useState<Customer | null>(initialCustomer);
@@ -80,7 +81,14 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   useEffect(() => {
     if (isOpen) {
       setQuantity(initialQuantity);
-      setCurrentPage(1);
+
+      // Shortcut: skip specs page if opening from product details
+      if (product && isElectronicsProduct(product) && openedFrom === 'productDetails') {
+        setCurrentPage(2);
+      } else {
+        setCurrentPage(1);
+      }
+
       setSelectedSpiciness('medium');
       setSpecialInstructions('');
       setUploadedEvidence(undefined);
@@ -171,6 +179,10 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
   if (!product) return null;
 
+  const isElectronics = isElectronicsProduct(product);
+  const summaryPageNum = isElectronics ? 2 : 1;
+  const paymentPageNum = isElectronics ? 3 : 2;
+
   const hasSizes = (p: any) => {
     return (p.sizes && p.sizes.length > 0) || (p.sizeOption && p.sizeOption.length > 0);
   };
@@ -202,7 +214,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
     }
 
     if (hasPlacedOrder && !isPaymentFlowEnabled) {
-      setCurrentPage(2);
+      setCurrentPage(paymentPageNum as any);
       return;
     }
 
@@ -284,7 +296,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
         if (shouldShowWhatsAppPreview(storeMeta.storeType)) {
           setWhatsappMessage(message);
           setHasPlacedOrder(true);
-          setCurrentPage(2);
+          setCurrentPage(paymentPageNum as any);
         } else {
           window.open(whatsappUrl, '_blank');
           // Small delay to ensure the redirect is triggered before closing the modal
@@ -302,16 +314,16 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   };
 
   const handleBackToSummary = () => {
-    setCurrentPage(1);
+    setCurrentPage(summaryPageNum as any);
     if (storeId) {
-      saveModalState(storeId, 1, uploadedEvidence?.url, uploadedEvidence?.fileName);
+      saveModalState(storeId, summaryPageNum, uploadedEvidence?.url, uploadedEvidence?.fileName);
     }
   };
 
   const handleProceedToPayment = () => {
-    setCurrentPage(2);
+    setCurrentPage(paymentPageNum as any);
     if (storeId) {
-      saveModalState(storeId, 2, uploadedEvidence?.url, uploadedEvidence?.fileName);
+      saveModalState(storeId, paymentPageNum, uploadedEvidence?.url, uploadedEvidence?.fileName);
     }
   };
 
@@ -336,7 +348,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                   {/* Header */}
                   <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-modal-background">
                     <h3 className="text-lg font-semibold leading-6 text-gray-900 dark:text-white">
-                      {currentPage === 1 ? 'Order Summary' : (isPaymentFlowEnabled ? 'Payment' : 'WhatsApp Preview')}
+                      {currentPage === 1 && isElectronics ? 'Product Specifications' : currentPage === summaryPageNum ? 'Order Summary' : (isPaymentFlowEnabled ? 'Payment' : 'WhatsApp Preview')}
                     </h3>
                     <button
                       type="button"
@@ -364,7 +376,133 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                   {/* Main Content */}
                   <div ref={scrollContainerRef} className="flex-grow overflow-y-auto p-4 sm:p-6">
                     <div className="max-w-3xl mx-auto w-full">
-                      {currentPage === 1 && (
+                      {/* Page 1 (Electronics Specs - "Device Passport") */}
+                      {currentPage === 1 && isElectronics && (() => {
+                        const elecProduct = product as ElectronicsProduct;
+                        return (
+                          <div className="pt-2 sm:pt-4 space-y-6">
+                            {/* Product Header Card */}
+                            <div className="flex items-center space-x-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50">
+                              <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-white dark:bg-gray-900 shadow-sm border border-gray-100 dark:border-gray-800">
+                                <Image src={currentProductImage} alt={product.name} fill className="object-cover" />
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{product.name}</h4>
+                                {elecProduct.brand && <p className="text-sm font-medium text-gray-500 mt-0.5">{elecProduct.brand}</p>}
+                                <p className="text-sm font-bold text-green-600 dark:text-green-400 mt-1">{formatPrice(product.price)}</p>
+                              </div>
+                            </div>
+
+                            {/* Device Passport Grid */}
+                            <div className="grid grid-cols-2 gap-3">
+                              {elecProduct.condition && (
+                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${elecProduct.condition === 'brand-new' ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}`}>
+                                    <Activity className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Condition</span>
+                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white capitalize">{elecProduct.condition.replace('-', ' ')}</p>
+                                  </div>
+                                </div>
+                              )}
+                              {elecProduct.storage && (
+                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                    <Database className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Storage</span>
+                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.storage}</p>
+                                  </div>
+                                </div>
+                              )}
+                              {elecProduct.ram && (
+                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-900/40 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
+                                    <Cpu className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Memory</span>
+                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.ram}</p>
+                                  </div>
+                                </div>
+                              )}
+                              {elecProduct.os && (
+                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center text-orange-600 dark:text-orange-400">
+                                    <Code className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">OS</span>
+                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.os}</p>
+                                  </div>
+                                </div>
+                              )}
+                              {elecProduct.network && (
+                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                    <Network className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Network</span>
+                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.network}</p>
+                                  </div>
+                                </div>
+                              )}
+                              {elecProduct.packageContents && (
+                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900/40 flex items-center justify-center text-yellow-600 dark:text-yellow-400">
+                                    <Package className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Box Items</span>
+                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white line-clamp-1">{elecProduct.packageContents}</p>
+                                  </div>
+                                </div>
+                              )}
+                              {elecProduct.imeiVerification && (
+                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center text-red-600 dark:text-red-400">
+                                    <Fingerprint className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Verification</span>
+                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white capitalize">{elecProduct.imeiVerification}</p>
+                                  </div>
+                                </div>
+                              )}
+                              {elecProduct.warranty && elecProduct.warrantyDuration && (
+                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                                    <ShieldCheck className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Warranty</span>
+                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.warrantyDuration}</p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Vendor Notes Section (Description) */}
+                            {product.description && (
+                              <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/20 border border-gray-100 dark:border-gray-700/50">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Info className="w-3.5 h-3.5 text-gray-400" />
+                                  <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Notes from Vendor</span>
+                                </div>
+                                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed italic">
+                                  "{product.description}"
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
+
+                      {/* Summary Page */}
+                      {currentPage === summaryPageNum && (
                         <div className="pt-4 sm:pt-8">
                           {/* Product Details */}
                           <div className="flex items-center space-x-4">
@@ -573,8 +711,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                         </div>
                       )}
 
-                      {/* Page 2 content */}
-                      {currentPage === 2 && isPaymentFlowEnabled && storeMeta && (
+                      {/* Page 3 content */}
+                      {currentPage === paymentPageNum && isPaymentFlowEnabled && storeMeta && (
                         <div className="h-full">
                           <PaymentFlowPage
                             storeMeta={storeMeta}
@@ -594,7 +732,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                         </div>
                       )}
 
-                      {currentPage === 2 && !isPaymentFlowEnabled && storeMeta && (
+                      {currentPage === paymentPageNum && !isPaymentFlowEnabled && storeMeta && (
                         <div className="h-full">
                           <WhatsAppPreviewPage
                             message={whatsappMessage}
@@ -616,40 +754,59 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                   {/* Footer */}
                   <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-modal-background p-4 sm:px-6">
                     <div className="max-w-3xl mx-auto w-full">
-                      {currentPage === 1 ? (
+                      {currentPage === 1 && isElectronics ? (
                         <button
                           type="button"
-                          className={`w-full rounded-xl border border-transparent px-6 py-4 text-base font-bold text-white shadow-lg transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
-                            ${hasSizes(product) && !interactiveSelectedSize
-                              ? 'bg-gray-400 dark:bg-gray-700 cursor-not-allowed'
-                              : 'bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2'}`}
-                          onClick={() => {
-                            if (hasSizes(product) && !interactiveSelectedSize) {
-                              setShowSizeError(true);
-                              sizeSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                              // Haptic feedback for error
-                              if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
-                              return;
-                            }
-                            isPaymentFlowEnabled ? handleProceedToPayment() : handlePlaceOrder();
-                          }}
-                          disabled={isPlacingOrder || (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false)}
+                          className="w-full rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 shadow-lg transition-all active:scale-[0.98]"
+                          onClick={() => setCurrentPage(2)}
                         >
-                          {isPlacingOrder ? (
-                            <span className="flex items-center justify-center gap-2"><Loader2 className="h-5 w-5 animate-spin" />Processing...</span>
-                          ) : (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false) ? (
-                            'Store Closed'
-                          ) : hasSizes(product) && !interactiveSelectedSize ? (
-                            'Select Size to Continue'
-                          ) : (
-                            'Order via Whatsapp'
-                          )}
+                          Next
                         </button>
-                      ) : currentPage === 2 && isPaymentFlowEnabled ? (
+                      ) : currentPage === summaryPageNum ? (
+                        <div className="flex gap-3">
+                          {isElectronics && (
+                            <button
+                              type="button"
+                              className="w-1/3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold py-4 px-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-[0.98]"
+                              onClick={() => setCurrentPage(1)}
+                            >
+                              Back
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            className={`${isElectronics ? 'w-2/3' : 'w-full'} rounded-xl border border-transparent px-6 py-4 text-base font-bold text-white shadow-lg transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+                              ${hasSizes(product) && !interactiveSelectedSize
+                                ? 'bg-gray-400 dark:bg-gray-700 cursor-not-allowed'
+                                : 'bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2'}`}
+                            onClick={() => {
+                              if (hasSizes(product) && !interactiveSelectedSize) {
+                                setShowSizeError(true);
+                                sizeSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                // Haptic feedback for error
+                                if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
+                                return;
+                              }
+                              isPaymentFlowEnabled ? handleProceedToPayment() : handlePlaceOrder();
+                            }}
+                            disabled={isPlacingOrder || (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false)}
+                          >
+                            {isPlacingOrder ? (
+                              <span className="flex items-center justify-center gap-2"><Loader2 className="h-5 w-5 animate-spin" />Processing...</span>
+                            ) : (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false) ? (
+                              'Store Closed'
+                            ) : hasSizes(product) && !interactiveSelectedSize ? (
+                              'Select Size to Continue'
+                            ) : (
+                              'Order via Whatsapp'
+                            )}
+                          </button>
+                        </div>
+                      ) : currentPage === paymentPageNum && isPaymentFlowEnabled ? (
                         <div className="flex flex-col gap-3">
                           {/* Footer actions are now handled within PaymentFlowPage for better UX */}
                         </div>
-                      ) : currentPage === 2 && !isPaymentFlowEnabled ? (
+                      ) : currentPage === paymentPageNum && !isPaymentFlowEnabled ? (
                         <button
                           type="button"
                           className="w-full bg-[#25D366] hover:bg-[#20bd5b] text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-green-500/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50"

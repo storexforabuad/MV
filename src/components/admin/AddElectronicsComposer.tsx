@@ -1,0 +1,797 @@
+'use client';
+import React, { useState, ChangeEvent, KeyboardEvent, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Camera, Plus, Trash2, ChevronRight, ChevronLeft, CheckCircle2, AlertCircle, Smartphone, Laptop, Battery, Sun, Headphones, Watch, Gamepad2, Cable, Package } from 'lucide-react';
+import Image from 'next/image';
+import { db } from '../../lib/firebase';
+import { collection, addDoc, serverTimestamp, doc, updateDoc, increment } from 'firebase/firestore';
+import { XMarkIcon } from '@heroicons/react/24/solid';
+import { compressImage } from '../../utils/imageCompression';
+import { uploadImageToCloudinary } from '../../lib/cloudinaryClient';
+import { ProductCache } from '../../lib/productCache';
+import CategorySelectorModal from './modals/CategorySelectorModal';
+
+// --- Shared Helper Components (from AddMenuComposer/others) ---
+
+const ModernToggle = ({ label, description, checked, onChange }: { label: string, description?: string, checked: boolean, onChange: (c: boolean) => void }) => (
+    <label className="flex items-center cursor-pointer justify-between w-full p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm transition-all hover:border-blue-200 dark:hover:border-blue-900/50">
+        <div className="flex flex-col flex-1 pr-4">
+            <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{label}</span>
+            {description && <span className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{description}</span>}
+        </div>
+        <div className="relative shrink-0">
+            <input type="checkbox" className="sr-only" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+            <div className={`block w-12 h-7 rounded-full transition-colors ${checked ? 'bg-blue-600' : 'bg-zinc-200 dark:bg-zinc-700'}`}></div>
+            <div className={`dot absolute left-1 top-1 bg-white w-5 h-5 rounded-full shadow-sm transition-transform ${checked ? 'translate-x-5' : ''}`}></div>
+        </div>
+    </label>
+);
+
+const FloatingLabelInput = ({ label, type = "text", value, onChange, placeholder = "", prefix = "" }: { label: string, type?: string, value: string | number, onChange: (e: ChangeEvent<HTMLInputElement>) => void, placeholder?: string, prefix?: string }) => (
+    <div className="relative">
+        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <span className="text-zinc-500 dark:text-zinc-400 sm:text-sm">{prefix}</span>
+        </div>
+        <input
+            type={type}
+            value={value}
+            onChange={onChange}
+            className={`block w-full rounded-xl border-0 py-4 ${prefix ? 'pl-8' : 'pl-4'} pr-4 text-zinc-900 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-800/50 ring-1 ring-inset ring-zinc-200 dark:ring-zinc-700 placeholder:text-transparent focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 transition-all peer`}
+            placeholder={placeholder || label}
+        />
+        <label className="absolute left-4 -top-2.5 bg-white dark:bg-zinc-900 px-1 text-xs font-medium text-blue-600 dark:text-blue-400 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-zinc-500 peer-placeholder-shown:top-4 peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-blue-600">{label}</label>
+    </div>
+);
+
+// --- Core Data Structures ---
+
+export interface BatchElectronicsProduct {
+    id: string; // temp local id
+    name: string;
+    description: string;
+    images: { file: File, preview: string, compressed?: Blob, url?: string, isMain?: boolean }[];
+    price: number;
+    isPromo: boolean;
+    promoPrice: number;
+    categoryId: string;
+    quantity: number;
+    limitedStock: boolean;
+    soldOut: boolean;
+
+    // Electronics Specifics
+    brand: string;
+    condition: 'brand-new' | 'open-box' | 'used-good' | 'used-fair' | 'refurbished';
+    subtype: 'phone' | 'tablet' | 'laptop' | 'powerbank' | 'solar' | 'audio' | 'accessory' | 'smartwatch' | 'gaming' | 'other';
+
+    storage: string;
+    ram: string;
+    color: string;
+    network: '3G' | '4G' | '5G' | '';
+    os: string;
+    imeiVerified: boolean;
+
+    warranty: boolean;
+    warrantyDuration: string;
+    whatsInBox: string[]; // array of tags
+
+    useAsTemplate: boolean;
+    uploadStatus: 'idle' | 'compressing' | 'uploading' | 'saving' | 'success' | 'error';
+    uploadProgress: number;
+    errorMessage?: string;
+}
+
+const PREFILLED_BRANDS = ['Apple', 'Samsung', 'Tecno', 'Infinix', 'Xiaomi', 'Nokia', 'Itel', 'Oppo', 'Vivo'];
+const CONDITIONS = [
+    { value: 'brand-new', label: '🆕 Brand New' },
+    { value: 'open-box', label: '✨ Open Box' },
+    { value: 'used-good', label: '👍 Used (Good)' },
+    { value: 'used-fair', label: '⚠️ Used (Fair)' },
+    { value: 'refurbished', label: '🔧 Refurbished' },
+];
+
+const SUBTYPES = [
+    { value: 'phone', label: 'Phone', icon: Smartphone },
+    { value: 'tablet', label: 'Tablet', icon: Smartphone }, // Generic mobile for tablet
+    { value: 'laptop', label: 'Laptop', icon: Laptop },
+    { value: 'powerbank', label: 'Power Bank', icon: Battery },
+    { value: 'solar', label: 'Solar', icon: Sun },
+    { value: 'audio', label: 'Audio', icon: Headphones },
+    { value: 'accessory', label: 'Accessory', icon: Cable },
+    { value: 'smartwatch', label: 'Watch', icon: Watch },
+    { value: 'gaming', label: 'Gaming', icon: Gamepad2 },
+    { value: 'other', label: 'Other', icon: Package },
+];
+
+const STORAGE_OPTIONS = ['32GB', '64GB', '128GB', '256GB', '512GB', '1TB', '2TB'];
+const RAM_OPTIONS = ['2GB', '3GB', '4GB', '6GB', '8GB', '12GB', '16GB', '32GB'];
+const NETWORK_OPTIONS = ['3G', '4G', '5G'];
+const WARRANTY_DURATIONS = ['1 week', '2 weeks', '1 month', '3 months', '6 months', '1 year', '2 years'];
+
+
+export default function AddElectronicsComposer({
+    storeId,
+    isOpen,
+    onClose,
+    categories,
+    onAddCategory,
+    onProductAdded
+}: {
+    storeId: string;
+    isOpen: boolean;
+    onClose: () => void;
+    categories: { id: string; name: string }[];
+    onAddCategory: (name: string) => Promise<void>;
+    onProductAdded?: () => void;
+}) {
+    // --- State ---
+    const [products, setProducts] = useState<BatchElectronicsProduct[]>([]);
+    const [activeProductIndex, setActiveProductIndex] = useState<number>(0);
+    const [currentStep, setCurrentStep] = useState<number>(0);
+    const [isCategorySelectorOpen, setCategorySelectorOpen] = useState(false);
+
+    const [customBrand, setCustomBrand] = useState('');
+    const [boxItemInput, setBoxItemInput] = useState('');
+    const [cloudName] = useState('dfoiugbva');
+    const [uploadPreset] = useState('unsigned_preset');
+
+    // --- Core Operations ---
+    const activeProduct = products[activeProductIndex];
+
+    const handleProductChange = (index: number, field: keyof BatchElectronicsProduct, value: any) => {
+        setProducts(prev => {
+            const next = [...prev];
+            next[index] = { ...next[index], [field]: value };
+            return next;
+        });
+    };
+
+    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files?.length) return;
+        const newFiles = Array.from(e.target.files);
+
+        if (products.length === 0) {
+            // First time upload, create first product
+            const newProduct: BatchElectronicsProduct = {
+                id: Math.random().toString(36).substr(2, 9),
+                name: '',
+                description: '',
+                images: newFiles.map((file, i) => ({ file, preview: URL.createObjectURL(file), isMain: i === 0 })),
+                price: 0,
+                isPromo: false,
+                promoPrice: 0,
+                categoryId: categories[0]?.id || '',
+                quantity: 1,
+                limitedStock: false,
+                soldOut: false,
+                brand: '',
+                condition: 'brand-new',
+                subtype: 'phone',
+                storage: '',
+                ram: '',
+                color: '',
+                network: '',
+                os: '',
+                imeiVerified: false,
+                warranty: false,
+                warrantyDuration: '',
+                whatsInBox: [],
+                useAsTemplate: false,
+                uploadStatus: 'idle',
+                uploadProgress: 0,
+            };
+            setProducts([newProduct]);
+            setCurrentStep(1);
+            setActiveProductIndex(0);
+        } else {
+            // Add images to active product
+            const newImages: { file: File, preview: string, isMain?: boolean }[] = newFiles.map(file => ({ file, preview: URL.createObjectURL(file) }));
+            const currentImages = activeProduct.images || [];
+            if (currentImages.length === 0 && newImages.length > 0) newImages[0].isMain = true;
+            handleProductChange(activeProductIndex, 'images', [...currentImages, ...newImages]);
+        }
+    };
+
+    const setMainImage = (prodIndex: number, imgIndex: number) => {
+        const prod = products[prodIndex];
+        const newImages = prod.images.map((img, i) => ({ ...img, isMain: i === imgIndex }));
+        handleProductChange(prodIndex, 'images', newImages);
+    };
+
+    const removeImage = (prodIndex: number, imgIndex: number) => {
+        const prod = products[prodIndex];
+        let newImages = [...prod.images];
+        const removedWasMain = newImages[imgIndex].isMain;
+        URL.revokeObjectURL(newImages[imgIndex].preview);
+        newImages.splice(imgIndex, 1);
+
+        if (removedWasMain && newImages.length > 0) {
+            newImages[0].isMain = true;
+        }
+        handleProductChange(prodIndex, 'images', newImages);
+    };
+
+    const createNewDraftFromTemplate = () => {
+        const template = products.find(p => p.useAsTemplate) || activeProduct || products[0];
+        if (!template) return;
+
+        const newProduct: BatchElectronicsProduct = {
+            ...template,
+            id: Math.random().toString(36).substr(2, 9),
+            images: [],
+            name: '',
+            useAsTemplate: false,
+            uploadStatus: 'idle',
+            uploadProgress: 0,
+        };
+        setProducts(prev => [...prev, newProduct]);
+        setActiveProductIndex(products.length);
+        setCurrentStep(0);
+    };
+
+    // --- Form Handlers ---
+    const addBoxItem = (e: KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter' && boxItemInput.trim()) {
+            e.preventDefault();
+            const current = activeProduct.whatsInBox || [];
+            if (!current.includes(boxItemInput.trim())) {
+                handleProductChange(activeProductIndex, 'whatsInBox', [...current, boxItemInput.trim()]);
+            }
+            setBoxItemInput('');
+        }
+    };
+
+    const removeBoxItem = (itemToRemove: string) => {
+        const current = activeProduct.whatsInBox || [];
+        handleProductChange(activeProductIndex, 'whatsInBox', current.filter(i => i !== itemToRemove));
+    };
+
+    const activeCategoryName = useMemo(() => {
+        if (!activeProduct?.categoryId) return 'Uncategorized';
+        return categories.find(c => c.id === activeProduct.categoryId)?.name || 'Uncategorized';
+    }, [activeProduct?.categoryId, categories]);
+
+    // --- Upload Process ---
+    const startProcessing = async () => {
+        setCurrentStep(5);
+
+        for (let i = 0; i < products.length; i++) {
+            const product = products[i];
+
+            if (product.uploadStatus === 'success') continue;
+            handleProductChange(i, 'uploadStatus', 'compressing');
+
+            try {
+                // 1. Compression
+                const processedImages = [];
+                for (let j = 0; j < product.images.length; j++) {
+                    const img = product.images[j];
+                    const compressed = await compressImage(img.file);
+                    processedImages.push({ ...img, compressed });
+                }
+                handleProductChange(i, 'uploadProgress', 30);
+
+                // 2. Upload to Cloudinary
+                handleProductChange(i, 'uploadStatus', 'uploading');
+                const uploadedUrls = [];
+                for (let j = 0; j < processedImages.length; j++) {
+                    const item = processedImages[j];
+                    if (item.compressed) {
+                        const url = await uploadImageToCloudinary(item.compressed, storeId);
+                        uploadedUrls.push({ url, isMain: item.isMain });
+                    }
+                }
+                handleProductChange(i, 'uploadProgress', 70);
+
+                // Sort main image first
+                uploadedUrls.sort((a, b) => (a.isMain === b.isMain) ? 0 : a.isMain ? -1 : 1);
+                const finalUrls = uploadedUrls.map(u => u.url);
+
+                // 3. Save to Firebase
+                handleProductChange(i, 'uploadStatus', 'saving');
+
+                const productData = {
+                    storeId,
+                    name: product.name.trim(),
+                    description: product.description.trim() || product.name.trim(),
+                    price: product.isPromo ? product.promoPrice : product.price,
+                    originalPrice: product.isPromo ? product.price : undefined,
+                    images: finalUrls,
+                    views: 0,
+                    createdAt: serverTimestamp(),
+
+                    productType: 'electronics',
+                    subtype: product.subtype,
+                    brand: product.brand,
+                    condition: product.condition,
+
+                    storage: product.storage,
+                    ram: product.ram,
+                    color: product.color,
+                    network: product.network,
+                    os: product.os,
+                    imeiVerified: product.imeiVerified,
+
+                    warranty: product.warranty,
+                    warrantyDuration: product.warranty ? product.warrantyDuration : undefined,
+                    whatsInBox: product.whatsInBox,
+
+                    available: true,
+                    soldOut: product.soldOut,
+                    limitedStock: product.limitedStock,
+                    quantity: product.quantity,
+                    categoryId: product.categoryId,
+                    category: activeCategoryName,
+                };
+
+                // Fix price logic: if promo, price becomes promoPrice, and originalPrice is the base price.
+                if (product.isPromo && product.promoPrice > 0 && product.promoPrice < product.price) {
+                    productData.price = product.promoPrice;
+                    productData.originalPrice = product.price;
+                }
+
+                await addDoc(collection(db, 'stores', storeId, 'products'), productData);
+                await updateDoc(doc(db, 'stores', storeId), { productCount: increment(1) });
+
+                handleProductChange(i, 'uploadStatus', 'success');
+                handleProductChange(i, 'uploadProgress', 100);
+
+            } catch (err: any) {
+                console.error("Error processing product", err);
+                handleProductChange(i, 'uploadStatus', 'error');
+                handleProductChange(i, 'errorMessage', err.message);
+            }
+        }
+
+        ProductCache.clear();
+        setCurrentStep(6);
+        if (onProductAdded) {
+            onProductAdded();
+        }
+    };
+
+    // --- Rendering ---
+    if (!isOpen) return null;
+
+    const renderStepContent = () => {
+        if (!activeProduct && currentStep > 0) return null;
+
+        switch (currentStep) {
+            case 0: // Upload
+                return (
+                    <motion.div key="upload" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                        {products.length > 0 && (
+                            <div className="flex gap-4 overflow-x-auto pb-4 snap-x">
+                                {products.map((p, idx) => (
+                                    <button
+                                        key={p.id}
+                                        onClick={() => setActiveProductIndex(idx)}
+                                        className={`relative flex-none w-24 h-24 rounded-2xl border-2 overflow-hidden snap-center transition-all ${activeProductIndex === idx ? 'border-blue-500 ring-4 ring-blue-500/20 shadow-lg' : 'border-zinc-200 dark:border-zinc-800 opacity-60 hover:opacity-100'}`}
+                                    >
+                                        <Image src={p.images[0]?.preview || '/placeholder.png'} alt="Preview" fill className="object-cover" />
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+
+                        <div className="relative group">
+                            <input type="file" multiple accept="image/jpeg, image/png, image/webp" onChange={handleImageUpload} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                            <div className="border-3 border-dashed border-zinc-300 dark:border-zinc-700 rounded-[2rem] p-12 text-center group-hover:border-blue-500 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/10 transition-all bg-zinc-50 dark:bg-zinc-800/50">
+                                <div className="w-20 h-20 bg-white dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm group-hover:scale-110 transition-transform">
+                                    <Camera className="w-10 h-10 text-zinc-400 group-hover:text-blue-500" />
+                                </div>
+                                <p className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">Tap to upload device photos</p>
+                                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-2">Add clear shots of front, back, and any wear/tear.</p>
+                            </div>
+                        </div>
+
+                        {activeProduct?.images?.length > 0 && (
+                            <div className="mt-8">
+                                <h4 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mb-4 tracking-wide">Device Images</h4>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                    {activeProduct.images.map((img, idx) => (
+                                        <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden group shadow-sm border border-zinc-200 dark:border-zinc-800">
+                                            <Image src={img.preview} alt="Upload" fill className="object-cover" />
+                                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                                                {!img.isMain && (
+                                                    <button onClick={() => setMainImage(activeProductIndex, idx)} className="px-3 py-1.5 bg-white text-zinc-900 text-xs font-bold rounded-full hover:scale-105 transition-transform shadow-lg">Main</button>
+                                                )}
+                                                <button onClick={() => removeImage(activeProductIndex, idx)} className="p-2 bg-red-500 text-white rounded-full hover:scale-105 transition-transform shadow-lg"><Trash2 className="w-4 h-4" /></button>
+                                            </div>
+                                            {img.isMain && (
+                                                <span className="absolute top-2 left-2 px-2 py-1 bg-blue-600 text-white text-[10px] uppercase font-bold tracking-wider rounded-full shadow-md">Cover</span>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {products.length > 0 && (
+                            <div className="pt-6">
+                                <button onClick={() => setCurrentStep(1)} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition-all active:scale-[0.98]">
+                                    Proceed to Details
+                                </button>
+                            </div>
+                        )}
+                    </motion.div>
+                );
+
+            case 1: // Basic Details
+                return (
+                    <motion.div key="basic" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                        <FloatingLabelInput label="Gadget Title" value={activeProduct.name} onChange={(e) => handleProductChange(activeProductIndex, 'name', e.target.value)} placeholder="e.g. iPhone 15 Pro Max 256GB" />
+
+                        <div>
+                            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2 block pl-1">Store Category</label>
+                            <button onClick={() => setCategorySelectorOpen(true)} className="w-full bg-white dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 rounded-xl p-4 flex justify-between items-center hover:border-blue-400 transition-colors">
+                                <span className={`font-medium ${activeProduct.categoryId ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-400'}`}>{activeProduct.categoryId ? activeCategoryName : 'Select Category...'}</span>
+                                <ChevronRight className="text-zinc-400 w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div>
+                            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-3 block pl-1">Brand</label>
+                            <div className="flex flex-wrap gap-2 mb-3">
+                                {PREFILLED_BRANDS.map(brand => (
+                                    <button
+                                        key={brand}
+                                        onClick={() => { handleProductChange(activeProductIndex, 'brand', brand); setCustomBrand(''); }}
+                                        className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeProduct.brand === brand ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'}`}
+                                    >
+                                        {brand}
+                                    </button>
+                                ))}
+                            </div>
+                            <FloatingLabelInput
+                                label="Other Brand"
+                                value={activeProduct.brand && !PREFILLED_BRANDS.includes(activeProduct.brand) ? activeProduct.brand : customBrand}
+                                onChange={(e) => {
+                                    setCustomBrand(e.target.value);
+                                    handleProductChange(activeProductIndex, 'brand', e.target.value);
+                                }}
+                                placeholder="Type brand name..."
+                            />
+                        </div>
+
+                        <div className="relative">
+                            <textarea
+                                value={activeProduct.description}
+                                onChange={(e) => handleProductChange(activeProductIndex, 'description', e.target.value)}
+                                rows={4}
+                                className="block w-full rounded-xl border-0 py-4 pl-4 pr-4 text-zinc-900 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-800/50 ring-1 ring-inset ring-zinc-200 dark:ring-zinc-700 focus:ring-2 focus:ring-blue-600 sm:text-sm sm:leading-6 placeholder:text-zinc-400"
+                                placeholder="Describe Key Features (Optional)"
+                            />
+                        </div>
+
+                        <ModernToggle label="Use as Template" description="Apply these details to all other items you upload next" checked={activeProduct.useAsTemplate} onChange={c => handleProductChange(activeProductIndex, 'useAsTemplate', c)} />
+                    </motion.div>
+                );
+
+            case 2: // Specs
+                return (
+                    <motion.div key="specs" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+
+                        {/* Condition */}
+                        <div>
+                            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-3 block pl-1">Item Condition</label>
+                            <div className="grid grid-cols-2 gap-3">
+                                {CONDITIONS.map(cond => (
+                                    <button
+                                        key={cond.value}
+                                        onClick={() => handleProductChange(activeProductIndex, 'condition', cond.value)}
+                                        className={`py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all flex items-center justify-center ${activeProduct.condition === cond.value ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500 text-indigo-700 dark:text-indigo-400 shadow-sm' : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'}`}
+                                    >
+                                        {cond.label}
+                                    </button>
+                                ))}
+                            </div>
+                            {activeProduct.condition !== 'brand-new' && (
+                                <p className="text-xs text-amber-600 dark:text-amber-400 mt-2 px-1 flex items-center gap-1">
+                                    <AlertCircle size={12} /> Be sure to describe any wear and tear in the product description.
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Subtype */}
+                        <div>
+                            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-3 block pl-1">Device Type</label>
+                            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide snap-x">
+                                {SUBTYPES.map(type => {
+                                    const Icon = type.icon;
+                                    return (
+                                        <button
+                                            key={type.value}
+                                            onClick={() => handleProductChange(activeProductIndex, 'subtype', type.value)}
+                                            className={`flex-none px-4 py-3 rounded-xl border flex items-center gap-2 transition-all snap-center ${activeProduct.subtype === type.value ? 'bg-blue-600 border-blue-600 text-white shadow-md' : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'}`}
+                                        >
+                                            <Icon size={16} />
+                                            <span className="font-semibold text-sm">{type.label}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Conditional Comboboxes for Phones/Laptops/Tablets */}
+                        {['phone', 'tablet', 'laptop'].includes(activeProduct.subtype) && (
+                            <div className="space-y-5 bg-zinc-50 dark:bg-zinc-800/30 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+
+                                <div>
+                                    <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 block mb-2">Storage Capacity</label>
+                                    <div className="flex flex-wrap gap-2 mb-2">
+                                        {STORAGE_OPTIONS.map(opt => (
+                                            <button key={opt} onClick={() => handleProductChange(activeProductIndex, 'storage', opt)} className={`px-3 py-1.5 rounded-md text-xs font-medium border ${activeProduct.storage === opt ? 'bg-blue-100 dark:bg-blue-900/40 border-blue-500 text-blue-700 dark:text-blue-300' : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400'}`}>{opt}</button>
+                                        ))}
+                                    </div>
+                                    <input type="text" placeholder="Or type custom storage..." value={activeProduct.storage} onChange={(e) => handleProductChange(activeProductIndex, 'storage', e.target.value)} className="w-full text-sm p-2 rounded-lg border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 focus:ring-blue-500" />
+                                </div>
+
+                                <div>
+                                    <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 block mb-2">RAM</label>
+                                    <div className="flex flex-wrap gap-2 mb-2">
+                                        {RAM_OPTIONS.map(opt => (
+                                            <button key={opt} onClick={() => handleProductChange(activeProductIndex, 'ram', opt)} className={`px-3 py-1.5 rounded-md text-xs font-medium border ${activeProduct.ram === opt ? 'bg-blue-100 dark:bg-blue-900/40 border-blue-500 text-blue-700 dark:text-blue-300' : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400'}`}>{opt}</button>
+                                        ))}
+                                    </div>
+                                    <input type="text" placeholder="Or type custom RAM..." value={activeProduct.ram} onChange={(e) => handleProductChange(activeProductIndex, 'ram', e.target.value)} className="w-full text-sm p-2 rounded-lg border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 focus:ring-blue-500" />
+                                </div>
+
+                                {activeProduct.subtype === 'phone' && (
+                                    <>
+                                        <div>
+                                            <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 block mb-2">Network</label>
+                                            <div className="flex gap-2">
+                                                {NETWORK_OPTIONS.map(opt => (
+                                                    <button key={opt} onClick={() => handleProductChange(activeProductIndex, 'network', opt)} className={`flex-1 py-1.5 rounded-md text-xs font-medium border ${activeProduct.network === opt ? 'bg-blue-100 dark:bg-blue-900/40 border-blue-500 text-blue-700 dark:text-blue-300' : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400'}`}>{opt}</button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="pt-2">
+                                            <ModernToggle label="IMEI Verified?" description="Builds trust for used phones" checked={activeProduct.imeiVerified} onChange={c => handleProductChange(activeProductIndex, 'imeiVerified', c)} />
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        )}
+
+                        <FloatingLabelInput label="Color (Optional)" value={activeProduct.color} onChange={(e) => handleProductChange(activeProductIndex, 'color', e.target.value)} placeholder="e.g. Midnight Black" />
+
+                    </motion.div>
+                );
+
+            case 3: // Warranty & Extras
+                return (
+                    <motion.div key="warranty" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+
+                        <div className="bg-white dark:bg-zinc-900 p-1 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
+                            <ModernToggle label="Includes Warranty?" checked={activeProduct.warranty} onChange={c => handleProductChange(activeProductIndex, 'warranty', c)} />
+                            <AnimatePresence>
+                                {activeProduct.warranty && (
+                                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                                        <div className="p-4 pt-0 space-y-4 border-t border-zinc-100 dark:border-zinc-800 mt-2">
+                                            <div>
+                                                <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 block">Warranty Duration</label>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {WARRANTY_DURATIONS.map(dur => (
+                                                        <button key={dur} onClick={() => handleProductChange(activeProductIndex, 'warrantyDuration', dur)} className={`px-3 py-1.5 rounded-lg border text-sm transition-colors ${activeProduct.warrantyDuration === dur ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-500 text-blue-700 dark:text-blue-300' : 'bg-zinc-50 dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400'}`}>{dur}</button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
+                        <div>
+                            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2 block pl-1">What's in the Box?</label>
+                            <p className="text-xs text-zinc-400 mb-3 pl-1">Type an item and press Enter. (e.g., Phone, Charger, Case)</p>
+
+                            <div className="flex flex-wrap gap-2 mb-3">
+                                {activeProduct.whatsInBox?.map(item => (
+                                    <div key={item} className="flex items-center gap-1 bg-zinc-100 dark:bg-zinc-800 px-3 py-1.5 rounded-full border border-zinc-200 dark:border-zinc-700">
+                                        <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">{item}</span>
+                                        <button onClick={() => removeBoxItem(item)} className="text-zinc-400 hover:text-red-500"><XMarkIcon className="w-4 h-4" /></button>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <FloatingLabelInput label="Add item..." value={boxItemInput} onChange={(e) => setBoxItemInput(e.target.value)} />
+                            {/* Hidden enter handler, input handles it via onKeyDown conceptually, but let's wire it directly: */}
+                            <div className="hidden">
+                                {/* Simple hack to bind keydown to state change since FloatingLabelInput doesn't expose it directly in this simplified version. We'll just rely on a button below instead for safety. */}
+                            </div>
+                            <button onClick={() => {
+                                if (boxItemInput.trim()) {
+                                    const current = activeProduct.whatsInBox || [];
+                                    if (!current.includes(boxItemInput.trim())) handleProductChange(activeProductIndex, 'whatsInBox', [...current, boxItemInput.trim()]);
+                                    setBoxItemInput('');
+                                }
+                            }} className="mt-2 text-sm text-blue-600 font-semibold px-2 py-1 bg-blue-50 rounded-lg">+ Add Item</button>
+                        </div>
+
+                    </motion.div>
+                );
+
+            case 4: // Pricing
+                return (
+                    <motion.div key="pricing" initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="space-y-6">
+                        <FloatingLabelInput label="Current Selling Price" type="number" prefix="₦" value={activeProduct.price === 0 ? '' : activeProduct.price} onChange={(e) => handleProductChange(activeProductIndex, 'price', e.target.value === '' ? 0 : parseFloat(e.target.value))} />
+
+                        <div className="bg-white dark:bg-zinc-900 p-1 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
+                            <ModernToggle label="Run a Promotion?" description="Set a discounted price" checked={activeProduct.isPromo} onChange={c => handleProductChange(activeProductIndex, 'isPromo', c)} />
+                            <AnimatePresence>
+                                {activeProduct.isPromo && (
+                                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                                        <div className="p-4 pt-0 mt-2">
+                                            <FloatingLabelInput label="Promo Price" type="number" prefix="₦" value={activeProduct.promoPrice === 0 ? '' : activeProduct.promoPrice} onChange={(e) => handleProductChange(activeProductIndex, 'promoPrice', e.target.value === '' ? 0 : parseFloat(e.target.value))} />
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+
+                        <div className="flex gap-4">
+                            <div className="flex-1">
+                                <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2 block pl-1">Quantity Available</label>
+                                <div className="flex items-center gap-2 bg-zinc-50 dark:bg-zinc-800 rounded-xl p-2 border border-zinc-200 dark:border-zinc-700">
+                                    <button onClick={() => handleProductChange(activeProductIndex, 'quantity', Math.max(1, activeProduct.quantity - 1))} className="w-10 h-10 rounded-lg bg-white dark:bg-zinc-700 shadow-sm flex items-center justify-center font-bold text-xl hover:bg-zinc-100 dark:hover:bg-zinc-600 transition-colors">-</button>
+                                    <input type="number" value={activeProduct.quantity} onChange={(e) => handleProductChange(activeProductIndex, 'quantity', Math.max(1, parseInt(e.target.value) || 1))} className="flex-1 text-center bg-transparent border-none font-bold text-lg focus:ring-0" />
+                                    <button onClick={() => handleProductChange(activeProductIndex, 'quantity', activeProduct.quantity + 1)} className="w-10 h-10 rounded-lg bg-white dark:bg-zinc-700 shadow-sm flex items-center justify-center font-bold text-xl hover:bg-zinc-100 dark:hover:bg-zinc-600 transition-colors">+</button>
+                                </div>
+                                {activeProduct.condition !== 'brand-new' && activeProduct.quantity > 1 && (
+                                    <p className="text-xs text-orange-500 mt-2 flex items-center gap-1"><AlertCircle size={12} /> Used items are usually single quantity.</p>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="space-y-2 border-t border-zinc-200 dark:border-zinc-800 pt-4">
+                            <ModernToggle label="Limited Stock Warning" checked={activeProduct.limitedStock} onChange={c => handleProductChange(activeProductIndex, 'limitedStock', c)} />
+                            <ModernToggle label="Mark as Sold Out" checked={activeProduct.soldOut} onChange={c => handleProductChange(activeProductIndex, 'soldOut', c)} />
+                        </div>
+                    </motion.div>
+                );
+
+            case 5: // Processing
+                return (
+                    <motion.div key="processing" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="py-12 flex flex-col items-center justify-center space-y-6">
+                        <div className="w-20 h-20 border-4 border-zinc-100 dark:border-zinc-800 border-t-blue-600 rounded-full animate-spin"></div>
+                        <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Processing Uploads</h3>
+
+                        <div className="w-full max-w-sm space-y-4">
+                            {products.map((p, i) => (
+                                <div key={p.id} className="bg-zinc-50 dark:bg-zinc-800/50 p-4 rounded-2xl">
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="font-medium text-sm text-zinc-700 dark:text-zinc-300 truncate max-w-[150px]">{p.name || `Item ${i + 1}`}</span>
+                                        <span className="text-xs font-bold uppercase text-zinc-500">{p.uploadStatus}</span>
+                                    </div>
+                                    <div className="h-2 bg-zinc-200 dark:bg-zinc-700 rounded-full overflow-hidden">
+                                        <div className={`h-full transition-all duration-300 ${p.uploadStatus === 'error' ? 'bg-red-500' : p.uploadStatus === 'success' ? 'bg-green-500' : 'bg-blue-600'}`} style={{ width: `${p.uploadProgress}%` }}></div>
+                                    </div>
+                                    {p.errorMessage && <p className="text-xs text-red-500 mt-2">{p.errorMessage}</p>}
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
+                );
+
+            case 6: // Success
+                const hasErrors = products.some(p => p.uploadStatus === 'error');
+                return (
+                    <motion.div key="success" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="py-16 text-center space-y-6">
+                        <div className={`w-24 h-24 mx-auto rounded-full flex items-center justify-center ${hasErrors ? 'bg-orange-100 text-orange-600' : 'bg-green-100 text-green-600'}`}>
+                            {hasErrors ? <AlertCircle className="w-12 h-12" /> : <CheckCircle2 className="w-12 h-12" />}
+                        </div>
+                        <h2 className="text-3xl font-black text-zinc-900 dark:text-white mb-2">
+                            {hasErrors ? 'Almost There!' : 'All Done!'}
+                        </h2>
+                        <p className="text-zinc-500 dark:text-zinc-400 text-lg mb-8">
+                            {hasErrors ? 'Some items failed to upload.' : 'Your gadgets are now live.'}
+                        </p>
+                        <div className="flex gap-4 pt-4">
+                            <button onClick={onClose} className="flex-1 py-4 bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-white font-bold rounded-2xl hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors">Close</button>
+                            <button onClick={() => { setProducts([]); setCurrentStep(0); setActiveProductIndex(0); }} className="flex-1 py-4 bg-blue-600 text-white font-bold rounded-2xl hover:bg-blue-700 transition-colors shadow-lg shadow-blue-500/30">Add More</button>
+                        </div>
+                    </motion.div>
+                );
+
+            default: return null;
+        }
+    };
+
+    // --- Validation ---
+    const isStepValid = () => {
+        if (!activeProduct) return false;
+        if (currentStep === 0) return activeProduct.images.length > 0;
+        if (currentStep === 1) return activeProduct.name.trim().length > 0 && activeProduct.brand.trim().length > 0 && activeProduct.categoryId;
+        if (currentStep === 2) return true; // condition/subtype have defaults
+        if (currentStep === 3) return !activeProduct.warranty || (activeProduct.warranty && activeProduct.warrantyDuration);
+        if (currentStep === 4) return activeProduct.price > 0 && (!activeProduct.isPromo || (activeProduct.promoPrice > 0 && activeProduct.promoPrice < activeProduct.price));
+        return true;
+    };
+
+    return (
+        <>
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex flex-col sm:items-center justify-end sm:justify-center">
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+
+                        <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 300 }} className="relative w-full sm:w-[500px] h-[90vh] sm:h-[85vh] bg-white dark:bg-zinc-950 rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl flex flex-col overflow-hidden border border-zinc-200 dark:border-zinc-800">
+
+                            {/* Header */}
+                            {currentStep < 5 && (
+                                <div className="flex-shrink-0 px-6 pt-6 pb-4 flex items-center justify-between border-b border-zinc-100 dark:border-zinc-800/50 bg-white dark:bg-zinc-950 z-10">
+                                    <div>
+                                        <h2 className="text-xl font-bold text-zinc-900 dark:text-white flex items-center gap-2">
+                                            {currentStep === 0 && 'Add Gadgets'}
+                                            {currentStep === 1 && 'Basic Details'}
+                                            {currentStep === 2 && 'Tech Specs'}
+                                            {currentStep === 3 && 'Warranty & Extras'}
+                                            {currentStep === 4 && 'Pricing'}
+                                        </h2>
+                                        {products.length > 1 && currentStep > 0 && (
+                                            <p className="text-xs font-semibold text-blue-600 mt-1 uppercase tracking-wider">Item {activeProductIndex + 1} of {products.length}</p>
+                                        )}
+                                    </div>
+                                    <button onClick={onClose} className="w-10 h-10 bg-zinc-100 dark:bg-zinc-900 rounded-full flex items-center justify-center text-zinc-500 hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors">
+                                        <XMarkIcon className="w-6 h-6" />
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* Content Area */}
+                            <div className="flex-1 overflow-y-auto p-6 pb-12 scrollbar-hide bg-white dark:bg-zinc-950">
+                                {renderStepContent()}
+                            </div>
+
+                            {/* Footer Navigation */}
+                            {currentStep > 0 && currentStep < 5 && (
+                                <div className="flex-shrink-0 p-6 border-t border-zinc-100 dark:border-zinc-800/50 bg-white dark:bg-zinc-950 z-10 flex gap-3">
+                                    <button onClick={() => setCurrentStep(prev => prev - 1)} className="w-14 h-14 rounded-2xl bg-zinc-100 dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 flex items-center justify-center hover:bg-zinc-200 dark:hover:bg-zinc-800 transition-colors">
+                                        <ChevronLeft className="w-6 h-6" />
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            if (currentStep === 4) {
+                                                if (activeProductIndex < products.length - 1) {
+                                                    setActiveProductIndex(prev => prev + 1);
+                                                    setCurrentStep(1);
+                                                } else {
+                                                    startProcessing();
+                                                }
+                                            } else {
+                                                setCurrentStep(prev => prev + 1);
+                                            }
+                                        }}
+                                        disabled={!isStepValid()}
+                                        className="flex-1 h-14 rounded-2xl bg-blue-600 disabled:bg-blue-300 dark:disabled:bg-blue-900 text-white font-bold flex items-center justify-center gap-2 transition-all hover:bg-blue-700 shadow-lg shadow-blue-500/20"
+                                    >
+                                        {(currentStep === 4 && activeProductIndex === products.length - 1) ? 'Upload Products' : 'Next Step'} <ChevronRight className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            )}
+
+                            {currentStep === 0 && products.length > 0 && activeProduct?.images?.length > 0 && (
+                                <div className="p-6 border-t border-zinc-100 dark:border-zinc-800/50 bg-white dark:bg-zinc-950 flex justify-center">
+                                    <button onClick={createNewDraftFromTemplate} className="flex items-center gap-2 text-blue-600 font-bold px-4 py-2 hover:bg-blue-50 rounded-lg transition-colors">
+                                        <Plus className="w-5 h-5" /> Add Another Item to Batch
+                                    </button>
+                                </div>
+                            )}
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            <CategorySelectorModal
+                isOpen={isCategorySelectorOpen}
+                onClose={() => setCategorySelectorOpen(false)}
+                categories={categories}
+                selectedCategoryId={activeProduct?.categoryId}
+                onSelect={(catId) => { handleProductChange(activeProductIndex, 'categoryId', catId); setCategorySelectorOpen(false); }}
+                onAddCategory={onAddCategory}
+            />
+        </>
+    );
+}

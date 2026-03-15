@@ -18,7 +18,8 @@ import {
   isVehicleProduct,
   isFashionProduct,
   isLivestockProduct,
-  isFoodBeverageProduct
+  isFoodBeverageProduct,
+  isElectronicsProduct
 } from '../../utils/productHelpers';
 
 
@@ -239,10 +240,11 @@ export default function ProductCard({
     if (isVehicleProduct(product)) return !product.available;
     if (isLivestockProduct(product)) return !product.available || !!product.soldOut;
     if (isFoodBeverageProduct(product)) return !product.available || !!product.soldOut;
+    if (isElectronicsProduct(product)) return !product.available || !!product.soldOut;
     return false;
   })();
 
-  const isLimitedStock = (isGeneralProduct(product) || isFashionProduct(product) || isLivestockProduct(product))
+  const isLimitedStock = (isGeneralProduct(product) || isFashionProduct(product) || isLivestockProduct(product) || isElectronicsProduct(product))
     ? !!product.limitedStock
     : false;
 
@@ -405,7 +407,7 @@ export default function ProductCard({
 
           {!isSoldOut && (
             <div className="absolute top-[18px] left-[18px] z-10 flex flex-col items-start gap-2">
-              {isLimitedStock && (
+              {isLimitedStock && !isElectronicsProduct(product) && (
                 <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
                   <span className="product-badge bg-[var(--badge-yellow-bg)] text-[var(--badge-yellow-text)] shadow-sm whitespace-nowrap">
                     Limited Stock
@@ -416,6 +418,33 @@ export default function ProductCard({
                 <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
                   <span className="product-badge bg-[var(--badge-green-bg)] text-[var(--badge-green-text)] shadow-sm whitespace-nowrap">
                     {discount}% OFF
+                  </span>
+                </div>
+              )}
+              {isElectronicsProduct(product) && product.brand && (
+                <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                  <span className="product-badge bg-white/90 dark:bg-black/60 backdrop-blur text-slate-700 dark:text-slate-200 shadow-sm whitespace-nowrap border border-white/20 dark:border-white/10 uppercase font-bold tracking-widest text-[10px]">
+                    {product.brand}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Electronics Top Right Overlay */}
+          {!isSoldOut && isElectronicsProduct(product) && (product.condition || isLimitedStock) && (
+            <div className="absolute top-[18px] right-[18px] z-10 flex flex-col items-end gap-2">
+              {isLimitedStock && (
+                <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                  <span className="product-badge bg-[var(--badge-yellow-bg)] text-[var(--badge-yellow-text)] shadow-sm whitespace-nowrap text-[10px]">
+                    Limited Stock
+                  </span>
+                </div>
+              )}
+              {product.condition && (
+                <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                  <span className={`product-badge shadow-sm whitespace-nowrap text-[11px] font-bold tracking-wide border border-white/20 ${product.condition === 'brand-new' ? 'bg-indigo-500/90 text-white' : 'bg-white/90 dark:bg-zinc-800/90 text-zinc-800 dark:text-zinc-200 backdrop-blur'}`}>
+                    {product.condition === 'brand-new' ? '🆕 BRAND NEW' : (product.condition.replace('-', ' ').toUpperCase())}
                   </span>
                 </div>
               )}
@@ -445,6 +474,26 @@ export default function ProductCard({
                     {product.spiciness === 'medium' && '🌶️ Med'}
                     {product.spiciness === 'hot' && '🔥 Hot'}
                     {product.spiciness === 'extra-hot' && '🤯 X-Hot'}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Electronics Bottom Left Overlay */}
+          {!isSoldOut && isElectronicsProduct(product) && (product.storage || product.ram) && (
+            <div className="absolute bottom-[14px] left-[14px] z-10 flex flex-col gap-1.5 max-w-[calc(100%-80px)]">
+              {product.storage && (
+                <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                  <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1">
+                    💾 {product.storage}
+                  </span>
+                </div>
+              )}
+              {product.ram && (
+                <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                  <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1">
+                    ⚡ {product.ram}
                   </span>
                 </div>
               )}
