@@ -191,6 +191,7 @@ export interface ElectronicsProduct extends BaseProduct {
 
   storage?: string;
   ram?: string;
+  batteryCapacity?: string;
   color?: string;
 
   // Technical Specs

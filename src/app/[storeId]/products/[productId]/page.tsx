@@ -28,7 +28,7 @@ import NeedAWebsiteModal from '@/components/customer/modals/NeedAWebsiteModal';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Heart, ShoppingCart, Share2, PackageX, Search, Info, Gift,
-  ChevronLeft, ChevronRight, ShieldCheck, Cpu, Database, Network,
+  ChevronLeft, ChevronRight, ShieldCheck, Battery, Cpu, Database, Network,
   Smartphone, Activity, Check, Code, Package, Fingerprint, Globe, Sparkles
 } from 'lucide-react';
 
@@ -629,6 +629,17 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                             </div>
                           </div>
                         )}
+                        {elecProduct.batteryCapacity && (
+                          <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                            <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-600 dark:text-green-400">
+                              <Battery className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Battery</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{elecProduct.batteryCapacity}</p>
+                            </div>
+                          </div>
+                        )}
                         {elecProduct.storage && (
                           <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
                             <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
@@ -684,14 +695,17 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                             </div>
                           </div>
                         )}
-                        {elecProduct.imeiVerification && (
+                        {(elecProduct.imeiVerification || (elecProduct as any).imeiVerified !== undefined) && (
                           <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
                             <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center text-red-600 dark:text-red-400">
                               <Fingerprint className="w-4 h-4" />
                             </div>
                             <div>
                               <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">IMEI Status</p>
-                              <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5 capitalize">{elecProduct.imeiVerification}</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5 capitalize">
+                                {elecProduct.imeiVerification ? (elecProduct.imeiVerification === 'verified' ? '✅ Verified' : 'Not Verified') :
+                                  ((elecProduct as any).imeiVerified ? '✅ Verified' : 'Not Verified')}
+                              </p>
                             </div>
                           </div>
                         )}

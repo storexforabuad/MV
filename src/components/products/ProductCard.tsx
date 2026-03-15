@@ -443,8 +443,19 @@ export default function ProductCard({
               )}
               {product.condition && (
                 <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
-                  <span className={`product-badge shadow-sm whitespace-nowrap text-[11px] font-bold tracking-wide border border-white/20 ${product.condition === 'brand-new' ? 'bg-indigo-500/90 text-white' : 'bg-white/90 dark:bg-zinc-800/90 text-zinc-800 dark:text-zinc-200 backdrop-blur'}`}>
-                    {product.condition === 'brand-new' ? '🆕 BRAND NEW' : (product.condition.replace('-', ' ').toUpperCase())}
+                  <span className={`product-badge shadow-sm whitespace-nowrap text-[10px] font-bold tracking-wide border border-white/20 px-2 py-0.5 rounded-lg ${product.condition === 'brand-new' ? 'bg-green-500 text-white' :
+                      product.condition === 'open-box' ? 'bg-blue-500 text-white' :
+                        product.condition === 'used-good' ? 'bg-amber-500 text-white' :
+                          product.condition === 'used-fair' ? 'bg-orange-500 text-white' :
+                            product.condition === 'refurbished' ? 'bg-purple-500 text-white' :
+                              'bg-white/90 dark:bg-zinc-800/90 text-zinc-800 dark:text-zinc-200 backdrop-blur'
+                    }`}>
+                    {product.condition === 'brand-new' && '✨ BRAND NEW'}
+                    {product.condition === 'open-box' && '📦 OPEN BOX'}
+                    {product.condition === 'used-good' && '👍 USED GOOD'}
+                    {product.condition === 'used-fair' && '⚠️ USED FAIR'}
+                    {product.condition === 'refurbished' && '🔄 REFURBISHED'}
+                    {!['brand-new', 'open-box', 'used-good', 'used-fair', 'refurbished'].includes(product.condition) && product.condition.replace('-', ' ').toUpperCase()}
                   </span>
                 </div>
               )}

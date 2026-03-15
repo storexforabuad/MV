@@ -8,7 +8,7 @@ import { Product } from '@/types/product';
 import { StoreMeta } from '@/types/store';
 import { Customer } from '@/types/customer';
 import { formatPrice } from '@/utils/price';
-import { Minus, Plus, Loader2, MessageSquare, ExternalLink, AlertCircle, Smartphone, Activity, Database, Cpu, Network, ShieldCheck, Package, Fingerprint, Info, Code } from 'lucide-react';
+import { Minus, Plus, Loader2, MessageSquare, ExternalLink, AlertCircle, Smartphone, Activity, Database, Cpu, Network, ShieldCheck, Package, Fingerprint, Info, Code, Battery } from 'lucide-react';
 import { ElectronicsProduct } from '@/types/product';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOrders } from '@/hooks/useOrders';
@@ -406,6 +406,17 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                   </div>
                                 </div>
                               )}
+                              {elecProduct.batteryCapacity && (
+                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-600 dark:text-green-400">
+                                    <Battery className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Battery</span>
+                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.batteryCapacity}</p>
+                                  </div>
+                                </div>
+                              )}
                               {elecProduct.storage && (
                                 <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
                                   <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
@@ -461,14 +472,17 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                   </div>
                                 </div>
                               )}
-                              {elecProduct.imeiVerification && (
+                              {(elecProduct.imeiVerification || (elecProduct as any).imeiVerified !== undefined) && (
                                 <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
                                   <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center text-red-600 dark:text-red-400">
                                     <Fingerprint className="w-4 h-4" />
                                   </div>
                                   <div>
                                     <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Verification</span>
-                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white capitalize">{elecProduct.imeiVerification}</p>
+                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white capitalize">
+                                      {elecProduct.imeiVerification ? (elecProduct.imeiVerification === 'verified' ? '✅ Verified' : 'Not Verified') :
+                                        ((elecProduct as any).imeiVerified ? '✅ Verified' : 'Not Verified')}
+                                    </p>
                                   </div>
                                 </div>
                               )}
