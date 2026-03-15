@@ -119,8 +119,15 @@ const SUBTYPES = [
 
 const STORAGE_OPTIONS = ['32GB', '64GB', '128GB', '256GB', '512GB', '1TB', '2TB'];
 const RAM_OPTIONS = ['2GB', '3GB', '4GB', '6GB', '8GB', '12GB', '16GB', '32GB'];
-const BATTERY_OPTIONS = ['3000mAh', '4000mAh', '4500mAh', '5000mAh', '5500mAh', '6000mAh'];
-const OS_OPTIONS = ['iOS', 'Android', 'Other'];
+const BATTERY_OPTIONS = ['3000mAh', '4000mAh', '4500mAh', '5000mAh', '5500mAh', '6000mAh', '8000mAh', '10000mAh'];
+const getOSOptions = (subtype: string) => {
+    switch (subtype) {
+        case 'phone': return ['iOS', 'Android', 'Other'];
+        case 'tablet': return ['iPadOS', 'Android', 'Windows', 'Other'];
+        case 'laptop': return ['Windows', 'macOS', 'ChromeOS', 'Linux', 'Other'];
+        default: return ['iOS', 'Android', 'Windows', 'Other'];
+    }
+};
 const NETWORK_OPTIONS = ['3G', '4G', '5G'];
 const WARRANTY_DURATIONS = ['1 week', '2 weeks', '1 month', '3 months', '6 months', '1 year', '2 years'];
 
@@ -612,7 +619,7 @@ export default function AddElectronicsComposer({
                                     <input type="text" placeholder="Or type custom RAM..." value={activeProduct.ram} onChange={(e) => handleProductChange(activeProductIndex, 'ram', e.target.value)} className="w-full text-sm p-2 rounded-lg border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 focus:ring-blue-500" />
                                 </div>
 
-                                {activeProduct.subtype === 'phone' && (
+                                {['phone', 'tablet'].includes(activeProduct.subtype) && (
                                     <>
                                         <div>
                                             <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 block mb-2">Network</label>
@@ -635,7 +642,7 @@ export default function AddElectronicsComposer({
                         <div ref={osRef}>
                             <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2 block pl-1">Operating System</label>
                             <div className="flex flex-wrap gap-2 mb-2">
-                                {OS_OPTIONS.map(opt => (
+                                {getOSOptions(activeProduct.subtype).map(opt => (
                                     <button key={opt} onClick={() => handleProductChange(activeProductIndex, 'os', opt)} className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${activeProduct.os === opt ? 'bg-blue-600 text-white shadow-md' : 'bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700'}`}>{opt}</button>
                                 ))}
                             </div>
