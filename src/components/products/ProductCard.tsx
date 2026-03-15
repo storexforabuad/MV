@@ -444,11 +444,11 @@ export default function ProductCard({
               {product.condition && (
                 <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
                   <span className={`product-badge shadow-sm whitespace-nowrap text-[10px] font-bold tracking-wide border border-white/20 px-2 py-0.5 rounded-lg ${product.condition === 'brand-new' ? 'bg-green-500 text-white' :
-                      product.condition === 'open-box' ? 'bg-blue-500 text-white' :
-                        product.condition === 'used-good' ? 'bg-amber-500 text-white' :
-                          product.condition === 'used-fair' ? 'bg-orange-500 text-white' :
-                            product.condition === 'refurbished' ? 'bg-purple-500 text-white' :
-                              'bg-white/90 dark:bg-zinc-800/90 text-zinc-800 dark:text-zinc-200 backdrop-blur'
+                    product.condition === 'open-box' ? 'bg-blue-500 text-white' :
+                      product.condition === 'used-good' ? 'bg-amber-500 text-white' :
+                        product.condition === 'used-fair' ? 'bg-orange-500 text-white' :
+                          product.condition === 'refurbished' ? 'bg-purple-500 text-white' :
+                            'bg-white/90 dark:bg-zinc-800/90 text-zinc-800 dark:text-zinc-200 backdrop-blur'
                     }`}>
                     {product.condition === 'brand-new' && '✨ BRAND NEW'}
                     {product.condition === 'open-box' && '📦 OPEN BOX'}
@@ -492,22 +492,129 @@ export default function ProductCard({
           )}
 
           {/* Electronics Bottom Left Overlay */}
-          {!isSoldOut && isElectronicsProduct(product) && (product.storage || product.ram) && (
+          {!isSoldOut && isElectronicsProduct(product) && (
             <div className="absolute bottom-[14px] left-[14px] z-10 flex flex-col gap-1.5 max-w-[calc(100%-80px)]">
-              {product.storage && (
-                <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
-                  <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1">
-                    💾 {product.storage}
-                  </span>
-                </div>
-              )}
-              {product.ram && (
-                <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
-                  <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1">
-                    ⚡ {product.ram}
-                  </span>
-                </div>
-              )}
+              {(() => {
+                switch (product.subtype) {
+                  case 'powerbank':
+                    return (
+                      <>
+                        {product.batteryCapacity && (
+                          <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                            <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1">
+                              🔋 {product.batteryCapacity}
+                            </span>
+                          </div>
+                        )}
+                        {product.powerOutput && (
+                          <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                            <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1">
+                              ⚡ {product.powerOutput}
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    );
+                  case 'audio':
+                    return (
+                      <>
+                        {product.audioStyle && (
+                          <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                            <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1">
+                              🎧 {product.audioStyle}
+                            </span>
+                          </div>
+                        )}
+                        {product.anc && (
+                          <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                            <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1">
+                              🔇 ANC
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    );
+                  case 'smartwatch':
+                    return (
+                      <>
+                        {product.watchBatteryLife && (
+                          <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                            <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1">
+                              🔋 {product.watchBatteryLife}
+                            </span>
+                          </div>
+                        )}
+                        {product.connectivity && (
+                          <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                            <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1">
+                              📶 {product.connectivity}
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    );
+                  case 'gaming':
+                    return (
+                      <>
+                        {product.gamingCategory && (
+                          <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                            <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1">
+                              🎮 {product.gamingCategory}
+                            </span>
+                          </div>
+                        )}
+                        {product.gamingPlatform && (
+                          <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                            <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1 truncate max-w-[100px]">
+                              🕹️ {product.gamingPlatform}
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    );
+                  case 'accessory':
+                    return (
+                      <>
+                        {product.accessoryType && (
+                          <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                            <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1">
+                              🔌 {product.accessoryType}
+                            </span>
+                          </div>
+                        )}
+                        {product.connectivity && (
+                          <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                            <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1">
+                              🔗 {product.connectivity}
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    );
+                  case 'phone':
+                  case 'tablet':
+                  case 'laptop':
+                  default:
+                    return (
+                      <>
+                        {product.storage && (
+                          <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                            <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1">
+                              💾 {product.storage}
+                            </span>
+                          </div>
+                        )}
+                        {product.ram && (
+                          <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                            <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1">
+                              ⚡ {product.ram}
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    );
+                }
+              })()}
             </div>
           )}
 

@@ -85,6 +85,26 @@ export interface BatchElectronicsProduct {
     os: string;
     imeiVerified: boolean;
 
+    // Audio-specific
+    audioStyle: string;
+    anc: boolean;
+
+    // Power Bank-specific
+    powerOutput: string;
+
+    // Accessory-specific
+    accessoryType: string;
+    compatibleWith: string;
+    connectivity: string;
+
+    // Smartwatch-specific
+    watchBatteryLife: string;
+    watchFeatures: string[];
+
+    // Gaming-specific
+    gamingCategory: string;
+    gamingPlatform: string;
+
     warranty: boolean;
     warrantyDuration: string;
     whatsInBox: string[]; // array of tags
@@ -95,7 +115,44 @@ export interface BatchElectronicsProduct {
     errorMessage?: string;
 }
 
-const PREFILLED_BRANDS = ['Apple', 'Samsung', 'Tecno', 'Infinix', 'Xiaomi', 'Nokia', 'Itel', 'Oppo', 'Vivo'];
+const getBrandOptions = (subtype: string) => {
+    switch (subtype) {
+        case 'powerbank':
+            return ['Oraimo', 'Itel', 'New Age', 'Anker', 'Romoss', 'Samsung', 'Xiaomi', 'Baseus'];
+        case 'phone':
+        case 'tablet':
+            return ['Apple', 'Samsung', 'Tecno', 'Infinix', 'Xiaomi', 'Oppo', 'Vivo', 'Nokia', 'Google'];
+        case 'laptop':
+            return ['Apple', 'HP', 'Dell', 'Lenovo', 'ASUS', 'Acer', 'Microsoft', 'MSI', 'Samsung', 'Alienware'];
+        case 'accessory':
+            return ['Apple', 'Samsung', 'Oraimo', 'Anker', 'Baseus', 'Ugreen', 'Belkin', 'Spigen'];
+        case 'audio':
+            return ['Apple', 'Sony', 'JBL', 'Bose', 'Samsung', 'Sennheiser', 'Beats', 'Oraimo'];
+        case 'smartwatch':
+            return ['Apple', 'Samsung', 'Garmin', 'Fitbit', 'Huawei', 'Xiaomi', 'Amazfit', 'Oraimo'];
+        case 'gaming':
+            return ['Sony', 'Microsoft', 'Nintendo', 'Razer', 'Logitech', 'SteelSeries', 'Asus ROG', 'HyperX'];
+        default:
+            return ['Apple', 'Samsung', 'Sony', 'LG', 'Panasonic', 'Philips', 'Anker', 'Oraimo'];
+    }
+};
+
+const getBatteryOptions = (subtype: string) => {
+    if (subtype === 'powerbank') {
+        return ['5000mAh', '10000mAh', '15000mAh', '20000mAh', '30000mAh', '40000mAh', '50000mAh'];
+    }
+    return ['3000mAh', '4000mAh', '4500mAh', '5000mAh', '5500mAh', '6000mAh', '8000mAh', '10000mAh'];
+};
+
+const POWER_OUTPUT_OPTIONS = ['5W', '10W', '18W Quick Charge', '20W', '22.5W', '33W', '45W', '65W', '100W'];
+const AUDIO_STYLES = ['In-Ear', 'Over-Ear', 'On-Ear', 'Earbuds (TWS)', 'Speaker', 'Soundbar', 'Other'];
+const ACCESSORY_TYPES = ['Case & Cover', 'Cable', 'Charger & Adapter', 'Screen Protector', 'Power Strip', 'Hub / Dock', 'Stand & Mount', 'Stylus', 'Memory Card', 'Other'];
+const CONNECTIVITY_OPTIONS = ['Bluetooth', 'Wi-Fi', 'USB-C', 'Lightning', '3.5mm Jack', 'HDMI', 'USB-A', 'Wireless (RF)'];
+const WATCH_BATTERY_OPTIONS = ['1 day', '2 days', '5 days', '7 days', '10 days', '14 days', '18 days', '21 days', '30 days'];
+const WATCH_FEATURES = ['Heart Rate', 'SpO2 (Blood Oxygen)', 'GPS', 'Sleep Tracking', 'Step Counter', 'Calorie Tracking', 'NFC / Payments', 'Bluetooth Calls', 'ECG', 'Fall Detection'];
+const GAMING_CATEGORIES = ['Controller / Gamepad', 'Gaming Headset', 'Game Console', 'Gaming Keyboard', 'Gaming Mouse', 'Gaming Chair', 'Gaming Monitor', 'Other'];
+const GAMING_PLATFORMS = ['PS5', 'PS4', 'Xbox Series X/S', 'Xbox One', 'Nintendo Switch', 'PC', 'Mobile', 'Multi-Platform'];
+
 const CONDITIONS = [
     { value: 'brand-new', label: '🆕 Brand New' },
     { value: 'open-box', label: '✨ Open Box' },
@@ -106,10 +163,9 @@ const CONDITIONS = [
 
 const SUBTYPES = [
     { value: 'phone', label: 'Phone', icon: Smartphone },
-    { value: 'tablet', label: 'Tablet', icon: Smartphone }, // Generic mobile for tablet
+    { value: 'tablet', label: 'Tablet', icon: Smartphone },
     { value: 'laptop', label: 'Laptop', icon: Laptop },
     { value: 'powerbank', label: 'Power Bank', icon: Battery },
-    { value: 'solar', label: 'Solar', icon: Sun },
     { value: 'audio', label: 'Audio', icon: Headphones },
     { value: 'accessory', label: 'Accessory', icon: Cable },
     { value: 'smartwatch', label: 'Watch', icon: Watch },
@@ -229,6 +285,16 @@ export default function AddElectronicsComposer({
                 network: '',
                 os: '',
                 imeiVerified: false,
+                audioStyle: '',
+                anc: false,
+                powerOutput: '',
+                accessoryType: '',
+                compatibleWith: '',
+                connectivity: '',
+                watchBatteryLife: '',
+                watchFeatures: [],
+                gamingCategory: '',
+                gamingPlatform: '',
                 warranty: false,
                 warrantyDuration: '',
                 whatsInBox: [],
@@ -369,9 +435,29 @@ export default function AddElectronicsComposer({
                     os: product.os,
                     imeiVerified: product.imeiVerified,
 
+                    // Audio-specific
+                    audioStyle: product.audioStyle || null,
+                    anc: product.anc || false,
+
+                    // Power Bank-specific
+                    powerOutput: product.powerOutput || null,
+
                     warranty: product.warranty,
                     warrantyDuration: product.warranty ? product.warrantyDuration : null,
                     whatsInBox: product.whatsInBox,
+
+                    // Accessory-specific
+                    accessoryType: product.accessoryType || null,
+                    compatibleWith: product.compatibleWith || null,
+                    connectivity: product.connectivity || null,
+
+                    // Smartwatch-specific
+                    watchBatteryLife: product.watchBatteryLife || null,
+                    watchFeatures: product.watchFeatures?.length ? product.watchFeatures : null,
+
+                    // Gaming-specific
+                    gamingCategory: product.gamingCategory || null,
+                    gamingPlatform: product.gamingPlatform || null,
 
                     available: true,
                     soldOut: product.soldOut,
@@ -508,7 +594,7 @@ export default function AddElectronicsComposer({
                         <div ref={brandRef}>
                             <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-3 block pl-1">Brand</label>
                             <div className="flex flex-wrap gap-2 mb-3">
-                                {PREFILLED_BRANDS.map(brand => (
+                                {getBrandOptions(activeProduct.subtype).map(brand => (
                                     <button
                                         key={brand}
                                         onClick={() => { handleProductChange(activeProductIndex, 'brand', brand); setCustomBrand(''); }}
@@ -520,7 +606,7 @@ export default function AddElectronicsComposer({
                             </div>
                             <FloatingLabelInput
                                 label="Other Brand"
-                                value={activeProduct.brand && !PREFILLED_BRANDS.includes(activeProduct.brand) ? activeProduct.brand : customBrand}
+                                value={activeProduct.brand && !getBrandOptions(activeProduct.subtype).includes(activeProduct.brand) ? activeProduct.brand : customBrand}
                                 onChange={(e) => {
                                     setCustomBrand(e.target.value);
                                     handleProductChange(activeProductIndex, 'brand', e.target.value);
@@ -581,7 +667,7 @@ export default function AddElectronicsComposer({
                                 <div ref={batteryRef}>
                                     <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 block mb-2">Battery Capacity</label>
                                     <div className="flex flex-wrap gap-2 mb-2" id="batteryContainer">
-                                        {BATTERY_OPTIONS.map(opt => (
+                                        {getBatteryOptions(activeProduct.subtype).map(opt => (
                                             <button key={opt} onClick={(e) => {
                                                 handleProductChange(activeProductIndex, 'batteryCapacity', opt);
                                                 scrollToCenter(document.getElementById('batteryContainer')!, e.currentTarget);
@@ -637,7 +723,140 @@ export default function AddElectronicsComposer({
                             </div>
                         )}
 
+                        {/* Power Bank Specs */}
+                        {activeProduct.subtype === 'powerbank' && (
+                            <div className="space-y-5 bg-zinc-50 dark:bg-zinc-800/30 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+                                <div>
+                                    <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 block mb-2">Battery Capacity</label>
+                                    <div className="flex flex-wrap gap-2 mb-2">
+                                        {getBatteryOptions('powerbank').map(opt => (
+                                            <button key={opt} onClick={() => handleProductChange(activeProductIndex, 'batteryCapacity', opt)} className={`px-3 py-1.5 rounded-md text-xs font-medium border ${activeProduct.batteryCapacity === opt ? 'bg-blue-100 dark:bg-blue-900/40 border-blue-500 text-blue-700 dark:text-blue-300' : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400'}`}>{opt}</button>
+                                        ))}
+                                    </div>
+                                    <input type="text" placeholder="Or type custom capacity..." value={activeProduct.batteryCapacity} onChange={(e) => handleProductChange(activeProductIndex, 'batteryCapacity', e.target.value)} className="w-full text-sm p-2 rounded-lg border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 focus:ring-blue-500" />
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 block mb-2">Output Power (Charging Speed)</label>
+                                    <div className="flex flex-wrap gap-2 mb-2">
+                                        {POWER_OUTPUT_OPTIONS.map(opt => (
+                                            <button key={opt} onClick={() => handleProductChange(activeProductIndex, 'powerOutput', opt)} className={`px-3 py-1.5 rounded-md text-xs font-medium border ${activeProduct.powerOutput === opt ? 'bg-orange-100 dark:bg-orange-900/40 border-orange-500 text-orange-700 dark:text-orange-300' : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400'}`}>{opt}</button>
+                                        ))}
+                                    </div>
+                                    <input type="text" placeholder="Or type custom output..." value={activeProduct.powerOutput} onChange={(e) => handleProductChange(activeProductIndex, 'powerOutput', e.target.value)} className="w-full text-sm p-2 rounded-lg border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 focus:ring-blue-500" />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Audio Specs */}
+                        {activeProduct.subtype === 'audio' && (
+                            <div className="space-y-4 bg-zinc-50 dark:bg-zinc-800/30 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+                                <div>
+                                    <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 block mb-2">Audio Style</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {AUDIO_STYLES.map(opt => (
+                                            <button key={opt} onClick={() => handleProductChange(activeProductIndex, 'audioStyle', opt)} className={`px-3 py-1.5 rounded-md text-xs font-medium border ${activeProduct.audioStyle === opt ? 'bg-purple-100 dark:bg-purple-900/40 border-purple-500 text-purple-700 dark:text-purple-300' : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400'}`}>{opt}</button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <ModernToggle label="Active Noise Cancellation (ANC)" description="Does this product support ANC?" checked={activeProduct.anc} onChange={c => handleProductChange(activeProductIndex, 'anc', c)} />
+                            </div>
+                        )}
+
+                        {/* Accessory Specs */}
+                        {activeProduct.subtype === 'accessory' && (
+                            <div className="space-y-4 bg-zinc-50 dark:bg-zinc-800/30 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+                                <div>
+                                    <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 block mb-2">Accessory Type</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {ACCESSORY_TYPES.map(opt => (
+                                            <button key={opt} onClick={() => handleProductChange(activeProductIndex, 'accessoryType', opt)} className={`px-3 py-1.5 rounded-md text-xs font-medium border ${activeProduct.accessoryType === opt ? 'bg-teal-100 dark:bg-teal-900/40 border-teal-500 text-teal-700 dark:text-teal-300' : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400'}`}>{opt}</button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 block mb-2">Connectivity</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {CONNECTIVITY_OPTIONS.map(opt => (
+                                            <button key={opt} onClick={() => handleProductChange(activeProductIndex, 'connectivity', opt)} className={`px-3 py-1.5 rounded-md text-xs font-medium border ${activeProduct.connectivity === opt ? 'bg-teal-100 dark:bg-teal-900/40 border-teal-500 text-teal-700 dark:text-teal-300' : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400'}`}>{opt}</button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <FloatingLabelInput label="Compatible With (Optional)" value={activeProduct.compatibleWith} onChange={(e) => handleProductChange(activeProductIndex, 'compatibleWith', e.target.value)} placeholder="e.g. iPhone 15 Pro, Samsung Galaxy S24" />
+                            </div>
+                        )}
+
+                        {/* Smartwatch / Watch Specs */}
+                        {activeProduct.subtype === 'smartwatch' && (
+                            <div className="space-y-4 bg-zinc-50 dark:bg-zinc-800/30 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+                                <div>
+                                    <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 block mb-2">Battery Life</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {WATCH_BATTERY_OPTIONS.map(opt => (
+                                            <button key={opt} onClick={() => handleProductChange(activeProductIndex, 'watchBatteryLife', opt)} className={`px-3 py-1.5 rounded-md text-xs font-medium border ${activeProduct.watchBatteryLife === opt ? 'bg-emerald-100 dark:bg-emerald-900/40 border-emerald-500 text-emerald-700 dark:text-emerald-300' : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400'}`}>{opt}</button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 block mb-2">Health & Fitness Features</label>
+                                    <p className="text-xs text-zinc-400 mb-2">Tap to toggle — select all that apply</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {WATCH_FEATURES.map(feat => {
+                                            const selected = activeProduct.watchFeatures?.includes(feat);
+                                            return (
+                                                <button key={feat} onClick={() => {
+                                                    const current = activeProduct.watchFeatures || [];
+                                                    const updated = selected ? current.filter(f => f !== feat) : [...current, feat];
+                                                    handleProductChange(activeProductIndex, 'watchFeatures', updated);
+                                                }} className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-all ${selected ? 'bg-emerald-100 dark:bg-emerald-900/40 border-emerald-500 text-emerald-700 dark:text-emerald-300' : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400'}`}>{feat}</button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 block mb-2">Connectivity</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {['Bluetooth', 'Wi-Fi', 'LTE / Cellular', 'NFC'].map(opt => (
+                                            <button key={opt} onClick={() => handleProductChange(activeProductIndex, 'connectivity', opt)} className={`px-3 py-1.5 rounded-md text-xs font-medium border ${activeProduct.connectivity === opt ? 'bg-emerald-100 dark:bg-emerald-900/40 border-emerald-500 text-emerald-700 dark:text-emerald-300' : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400'}`}>{opt}</button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Gaming Specs */}
+                        {activeProduct.subtype === 'gaming' && (
+                            <div className="space-y-4 bg-zinc-50 dark:bg-zinc-800/30 p-4 rounded-2xl border border-zinc-100 dark:border-zinc-800">
+                                <div>
+                                    <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 block mb-2">Gaming Category</label>
+                                    <div className="flex flex-wrap gap-2">
+                                        {GAMING_CATEGORIES.map(opt => (
+                                            <button key={opt} onClick={() => handleProductChange(activeProductIndex, 'gamingCategory', opt)} className={`px-3 py-1.5 rounded-md text-xs font-medium border ${activeProduct.gamingCategory === opt ? 'bg-rose-100 dark:bg-rose-900/40 border-rose-500 text-rose-700 dark:text-rose-300' : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400'}`}>{opt}</button>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-300 block mb-2">Compatible Platform</label>
+                                    <p className="text-xs text-zinc-400 mb-2">Tap to toggle — select all that apply</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {GAMING_PLATFORMS.map(platform => {
+                                            const selected = activeProduct.gamingPlatform?.includes(platform);
+                                            return (
+                                                <button key={platform} onClick={() => {
+                                                    // Store as comma-separated string for simplicity
+                                                    const current = activeProduct.gamingPlatform ? activeProduct.gamingPlatform.split(', ').filter(Boolean) : [];
+                                                    const updated = selected ? current.filter(p => p !== platform) : [...current, platform];
+                                                    handleProductChange(activeProductIndex, 'gamingPlatform', updated.join(', '));
+                                                }} className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-all ${selected ? 'bg-rose-100 dark:bg-rose-900/40 border-rose-500 text-rose-700 dark:text-rose-300' : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400'}`}>{platform}</button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         <FloatingLabelInput label="Color (Optional)" value={activeProduct.color} onChange={(e) => handleProductChange(activeProductIndex, 'color', e.target.value)} placeholder="e.g. Midnight Black" />
+
+
 
                         <div ref={osRef}>
                             <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2 block pl-1">Operating System</label>

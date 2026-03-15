@@ -187,7 +187,7 @@ export interface ElectronicsProduct extends BaseProduct {
   condition: 'brand-new' | 'open-box' | 'used-good' | 'used-fair' | 'refurbished';
 
   // Subtype Specifics
-  subtype: 'phone' | 'tablet' | 'laptop' | 'powerbank' | 'solar' | 'audio' | 'accessory' | 'smartwatch' | 'gaming' | 'other';
+  subtype: 'phone' | 'tablet' | 'laptop' | 'powerbank' | 'audio' | 'accessory' | 'smartwatch' | 'gaming' | 'other';
 
   storage?: string;
   ram?: string;
@@ -200,6 +200,26 @@ export interface ElectronicsProduct extends BaseProduct {
   os?: string;
   imeiVerification?: 'verified' | 'unverified' | 'n/a';
   packageContents?: string;
+
+  // Audio-specific
+  audioStyle?: string; // e.g. In-Ear, Over-Ear, Earbuds, Speaker, Soundbar
+  anc?: boolean; // Active Noise Cancellation
+
+  // Power Bank-specific
+  powerOutput?: string; // e.g. 10W, 20W Fast Charge, 65W
+
+  // Accessory-specific
+  accessoryType?: string; // e.g. Case, Cable, Charger, Screen Protector
+  compatibleWith?: string; // e.g. iPhone 15, Samsung Galaxy S24
+  connectivity?: string; // e.g. USB-C, Bluetooth
+
+  // Smartwatch-specific
+  watchBatteryLife?: string; // e.g. "7 days", "14 days"
+  watchFeatures?: string[]; // e.g. ["Heart Rate", "GPS", "SpO2"]
+
+  // Gaming-specific
+  gamingCategory?: string; // e.g. Controller, Headset, Console
+  gamingPlatform?: string; // e.g. PS5, Xbox, PC, Nintendo Switch
 
   // Warranty & Packaging
   warranty: boolean;

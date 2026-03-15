@@ -8,7 +8,7 @@ import { Product } from '@/types/product';
 import { StoreMeta } from '@/types/store';
 import { Customer } from '@/types/customer';
 import { formatPrice } from '@/utils/price';
-import { Minus, Plus, Loader2, MessageSquare, ExternalLink, AlertCircle, Smartphone, Activity, Database, Cpu, Network, ShieldCheck, Package, Fingerprint, Info, Code, Battery } from 'lucide-react';
+import { Minus, Plus, Loader2, MessageSquare, ExternalLink, AlertCircle, Smartphone, Activity, Database, Cpu, Network, ShieldCheck, Package, Fingerprint, Info, Code, Battery, Headphones, VolumeX, Gamepad2, Zap, Watch, Cable, Link } from 'lucide-react';
 import { ElectronicsProduct } from '@/types/product';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOrders } from '@/hooks/useOrders';
@@ -395,6 +395,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
                             {/* Device Passport Grid */}
                             <div className="grid grid-cols-2 gap-3">
+                              {/* Common: Condition */}
                               {elecProduct.condition && (
                                 <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
                                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${elecProduct.condition === 'brand-new' ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'}`}>
@@ -406,84 +407,275 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                   </div>
                                 </div>
                               )}
-                              {elecProduct.batteryCapacity && (
-                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
-                                  <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-600 dark:text-green-400">
-                                    <Battery className="w-4 h-4" />
-                                  </div>
-                                  <div>
-                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Battery</span>
-                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.batteryCapacity}</p>
-                                  </div>
-                                </div>
-                              )}
-                              {elecProduct.storage && (
-                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
-                                  <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-                                    <Database className="w-4 h-4" />
-                                  </div>
-                                  <div>
-                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Storage</span>
-                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.storage}</p>
-                                  </div>
-                                </div>
-                              )}
-                              {elecProduct.ram && (
-                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
-                                  <div className="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-900/40 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
-                                    <Cpu className="w-4 h-4" />
-                                  </div>
-                                  <div>
-                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Memory</span>
-                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.ram}</p>
-                                  </div>
-                                </div>
-                              )}
-                              {elecProduct.os && (
-                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
-                                  <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center text-orange-600 dark:text-orange-400">
-                                    <Code className="w-4 h-4" />
-                                  </div>
-                                  <div>
-                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">OS</span>
-                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.os}</p>
-                                  </div>
-                                </div>
-                              )}
-                              {elecProduct.network && (
-                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
-                                  <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
-                                    <Network className="w-4 h-4" />
-                                  </div>
-                                  <div>
-                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Network</span>
-                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.network}</p>
-                                  </div>
-                                </div>
-                              )}
+
+                              {/* Dynamic Fields by Subtype */}
+                              {(() => {
+                                switch (elecProduct.subtype) {
+                                  case 'powerbank':
+                                    return (
+                                      <>
+                                        {elecProduct.batteryCapacity && (
+                                          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-600 dark:text-green-400">
+                                              <Battery className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Capacity</span>
+                                              <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.batteryCapacity}</p>
+                                            </div>
+                                          </div>
+                                        )}
+                                        {elecProduct.powerOutput && (
+                                          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                              <Zap className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Output</span>
+                                              <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.powerOutput}</p>
+                                            </div>
+                                          </div>
+                                        )}
+                                      </>
+                                    );
+                                  case 'audio':
+                                    return (
+                                      <>
+                                        {elecProduct.audioStyle && (
+                                          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                                              <Headphones className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Style</span>
+                                              <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.audioStyle}</p>
+                                            </div>
+                                          </div>
+                                        )}
+                                        {elecProduct.anc && (
+                                          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                                              <VolumeX className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Noise Cancellation</span>
+                                              <p className="font-bold text-[13px] text-gray-900 dark:text-white">Active (ANC)</p>
+                                            </div>
+                                          </div>
+                                        )}
+                                        {elecProduct.batteryCapacity && (
+                                          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-600 dark:text-green-400">
+                                              <Battery className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Battery</span>
+                                              <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.batteryCapacity}</p>
+                                            </div>
+                                          </div>
+                                        )}
+                                      </>
+                                    );
+                                  case 'smartwatch':
+                                    return (
+                                      <>
+                                        {elecProduct.watchBatteryLife && (
+                                          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-600 dark:text-green-400">
+                                              <Battery className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Battery Life</span>
+                                              <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.watchBatteryLife}</p>
+                                            </div>
+                                          </div>
+                                        )}
+                                        {elecProduct.connectivity && (
+                                          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                              <Network className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Connectivity</span>
+                                              <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.connectivity}</p>
+                                            </div>
+                                          </div>
+                                        )}
+                                        {elecProduct.os && (
+                                          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center text-orange-600 dark:text-orange-400">
+                                              <Code className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">OS</span>
+                                              <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.os}</p>
+                                            </div>
+                                          </div>
+                                        )}
+                                      </>
+                                    );
+                                  case 'gaming':
+                                    return (
+                                      <>
+                                        {elecProduct.gamingCategory && (
+                                          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/40 flex items-center justify-center text-rose-600 dark:text-rose-400">
+                                              <Gamepad2 className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Category</span>
+                                              <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.gamingCategory}</p>
+                                            </div>
+                                          </div>
+                                        )}
+                                        {elecProduct.gamingPlatform && (
+                                          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                                              <Cpu className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Platform</span>
+                                              <p className="font-bold text-[13px] text-gray-900 dark:text-white truncate" title={elecProduct.gamingPlatform}>{elecProduct.gamingPlatform}</p>
+                                            </div>
+                                          </div>
+                                        )}
+                                        {elecProduct.storage && (
+                                          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                              <Database className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Storage</span>
+                                              <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.storage}</p>
+                                            </div>
+                                          </div>
+                                        )}
+                                      </>
+                                    );
+                                  case 'accessory':
+                                    return (
+                                      <>
+                                        {elecProduct.accessoryType && (
+                                          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900/40 flex items-center justify-center text-teal-600 dark:text-teal-400">
+                                              <Cable className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Type</span>
+                                              <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.accessoryType}</p>
+                                            </div>
+                                          </div>
+                                        )}
+                                        {elecProduct.connectivity && (
+                                          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-900/40 flex items-center justify-center text-sky-600 dark:text-sky-400">
+                                              <Link className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Connectivity</span>
+                                              <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.connectivity}</p>
+                                            </div>
+                                          </div>
+                                        )}
+                                        {elecProduct.compatibleWith && (
+                                          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2 col-span-2">
+                                            <div className="flex items-center gap-2 mb-1">
+                                              <Smartphone className="w-4 h-4 text-emerald-500" />
+                                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Compatible With</span>
+                                            </div>
+                                            <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.compatibleWith}</p>
+                                          </div>
+                                        )}
+                                      </>
+                                    );
+                                  case 'phone':
+                                  case 'tablet':
+                                  case 'laptop':
+                                  default:
+                                    return (
+                                      <>
+                                        {elecProduct.batteryCapacity && (
+                                          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-600 dark:text-green-400">
+                                              <Battery className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Battery</span>
+                                              <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.batteryCapacity}</p>
+                                            </div>
+                                          </div>
+                                        )}
+                                        {elecProduct.storage && (
+                                          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                              <Database className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Storage</span>
+                                              <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.storage}</p>
+                                            </div>
+                                          </div>
+                                        )}
+                                        {elecProduct.ram && (
+                                          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-900/40 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
+                                              <Cpu className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Memory</span>
+                                              <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.ram}</p>
+                                            </div>
+                                          </div>
+                                        )}
+                                        {elecProduct.os && (
+                                          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900/40 flex items-center justify-center text-orange-600 dark:text-orange-400">
+                                              <Code className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">OS</span>
+                                              <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.os}</p>
+                                            </div>
+                                          </div>
+                                        )}
+                                        {elecProduct.network && (
+                                          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                              <Network className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Network</span>
+                                              <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.network}</p>
+                                            </div>
+                                          </div>
+                                        )}
+                                        {(elecProduct.imeiVerification || (elecProduct as any).imeiVerified !== undefined) && (
+                                          <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                            <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center text-red-600 dark:text-red-400">
+                                              <Fingerprint className="w-4 h-4" />
+                                            </div>
+                                            <div>
+                                              <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Verification</span>
+                                              <p className="font-bold text-[13px] text-gray-900 dark:text-white capitalize">
+                                                {elecProduct.imeiVerification ? (elecProduct.imeiVerification === 'verified' ? '✅ Verified' : 'Not Verified') :
+                                                  ((elecProduct as any).imeiVerified ? '✅ Verified' : 'Not Verified')}
+                                              </p>
+                                            </div>
+                                          </div>
+                                        )}
+                                      </>
+                                    );
+                                }
+                              })()}
+
+                              {/* Common: Box Items & Warranty */}
                               {elecProduct.packageContents && (
-                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
-                                  <div className="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900/40 flex items-center justify-center text-yellow-600 dark:text-yellow-400">
-                                    <Package className="w-4 h-4" />
-                                  </div>
-                                  <div>
+                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2 col-span-2">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <Package className="w-4 h-4 text-yellow-500" />
                                     <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Box Items</span>
-                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white line-clamp-1">{elecProduct.packageContents}</p>
                                   </div>
-                                </div>
-                              )}
-                              {(elecProduct.imeiVerification || (elecProduct as any).imeiVerified !== undefined) && (
-                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
-                                  <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center text-red-600 dark:text-red-400">
-                                    <Fingerprint className="w-4 h-4" />
-                                  </div>
-                                  <div>
-                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Verification</span>
-                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white capitalize">
-                                      {elecProduct.imeiVerification ? (elecProduct.imeiVerification === 'verified' ? '✅ Verified' : 'Not Verified') :
-                                        ((elecProduct as any).imeiVerified ? '✅ Verified' : 'Not Verified')}
-                                    </p>
-                                  </div>
+                                  <p className="font-bold text-[13px] text-gray-900 dark:text-white">{elecProduct.packageContents}</p>
                                 </div>
                               )}
                               {elecProduct.warranty && elecProduct.warrantyDuration && (
@@ -497,6 +689,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                   </div>
                                 </div>
                               )}
+
                             </div>
 
                             {/* Vendor Notes Section (Description) */}
