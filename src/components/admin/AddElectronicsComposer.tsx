@@ -28,21 +28,34 @@ const ModernToggle = ({ label, description, checked, onChange }: { label: string
     </label>
 );
 
-const FloatingLabelInput = ({ label, type = "text", value, onChange, placeholder = "", prefix = "" }: { label: string, type?: string, value: string | number, onChange: (e: ChangeEvent<HTMLInputElement>) => void, placeholder?: string, prefix?: string }) => (
-    <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <span className="text-zinc-500 dark:text-zinc-400 sm:text-sm">{prefix}</span>
+const FloatingLabelInput = ({ label, type = "text", value, onChange, placeholder = "", prefix = "", id }: { label: string, type?: string, value: string | number, onChange: (e: ChangeEvent<HTMLInputElement>) => void, placeholder?: string, prefix?: string, id?: string }) => {
+    const defaultId = `input-${label.toLowerCase().replace(/\s+/g, '-')}`;
+    const inputId = id || defaultId;
+
+    return (
+        <div className="relative">
+            {prefix && (
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span className="text-zinc-500 dark:text-zinc-400 sm:text-sm">{prefix}</span>
+                </div>
+            )}
+            <input
+                id={inputId}
+                type={type}
+                value={value}
+                onChange={onChange}
+                className={`block w-full rounded-xl border-0 py-4 ${prefix ? 'pl-8' : 'pl-4'} pr-4 text-zinc-900 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-800/50 ring-1 ring-inset ring-zinc-200 dark:ring-zinc-700 placeholder:text-transparent focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 transition-all peer`}
+                placeholder={placeholder || label}
+            />
+            <label
+                htmlFor={inputId}
+                className="absolute left-4 -top-2.5 bg-white dark:bg-zinc-900 px-1 text-xs font-medium text-blue-600 dark:text-blue-400 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-zinc-500 peer-placeholder-shown:top-4 peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-blue-600 pointer-events-none"
+            >
+                {label}
+            </label>
         </div>
-        <input
-            type={type}
-            value={value}
-            onChange={onChange}
-            className={`block w-full rounded-xl border-0 py-4 ${prefix ? 'pl-8' : 'pl-4'} pr-4 text-zinc-900 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-800/50 ring-1 ring-inset ring-zinc-200 dark:ring-zinc-700 placeholder:text-transparent focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 transition-all peer`}
-            placeholder={placeholder || label}
-        />
-        <label className="absolute left-4 -top-2.5 bg-white dark:bg-zinc-900 px-1 text-xs font-medium text-blue-600 dark:text-blue-400 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-zinc-500 peer-placeholder-shown:top-4 peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-blue-600">{label}</label>
-    </div>
-);
+    );
+};
 
 // --- Core Data Structures ---
 
@@ -704,12 +717,12 @@ export default function AddElectronicsComposer({
                             </AnimatePresence>
                         </div>
 
-                        <div className="max-w-xs">
+                        <div className="w-full max-w-xs">
                             <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2 block pl-1">Quantity Available</label>
-                            <div className="flex items-center gap-2 bg-zinc-50 dark:bg-zinc-800 rounded-xl p-2 border border-zinc-200 dark:border-zinc-700">
-                                <button onClick={() => handleProductChange(activeProductIndex, 'quantity', Math.max(1, activeProduct.quantity - 1))} className="w-10 h-10 rounded-lg bg-white dark:bg-zinc-700 shadow-sm flex items-center justify-center font-bold text-xl hover:bg-zinc-100 dark:hover:bg-zinc-600 transition-colors">-</button>
-                                <input type="number" value={activeProduct.quantity} onChange={(e) => handleProductChange(activeProductIndex, 'quantity', Math.max(1, parseInt(e.target.value) || 1))} className="flex-1 text-center bg-transparent border-none font-bold text-lg focus:ring-0" />
-                                <button onClick={() => handleProductChange(activeProductIndex, 'quantity', activeProduct.quantity + 1)} className="w-10 h-10 rounded-lg bg-white dark:bg-zinc-700 shadow-sm flex items-center justify-center font-bold text-xl hover:bg-zinc-100 dark:hover:bg-zinc-600 transition-colors">+</button>
+                            <div className="flex items-center gap-2 bg-zinc-50 dark:bg-zinc-800 rounded-xl p-2 border border-zinc-200 dark:border-zinc-700 w-full overflow-hidden">
+                                <button onClick={() => handleProductChange(activeProductIndex, 'quantity', Math.max(1, activeProduct.quantity - 1))} className="w-10 h-10 rounded-lg bg-white dark:bg-zinc-700 shadow-sm flex-shrink-0 flex items-center justify-center font-bold text-xl hover:bg-zinc-100 dark:hover:bg-zinc-600 transition-colors">-</button>
+                                <input type="number" value={activeProduct.quantity} onChange={(e) => handleProductChange(activeProductIndex, 'quantity', Math.max(1, parseInt(e.target.value) || 1))} className="flex-1 min-w-0 text-center bg-transparent border-none font-bold text-lg focus:ring-0" />
+                                <button onClick={() => handleProductChange(activeProductIndex, 'quantity', activeProduct.quantity + 1)} className="w-10 h-10 rounded-lg bg-white dark:bg-zinc-700 shadow-sm flex-shrink-0 flex items-center justify-center font-bold text-xl hover:bg-zinc-100 dark:hover:bg-zinc-600 transition-colors">+</button>
                             </div>
                             {activeProduct.condition !== 'brand-new' && activeProduct.quantity > 1 && (
                                 <p className="text-xs text-orange-500 mt-2 flex items-center gap-1"><AlertCircle size={12} /> Used items are usually single quantity.</p>
