@@ -31,6 +31,8 @@ const SPICINESS_LEVELS = [
   { value: 'extra-hot', label: '🤯 Extra Hot', color: 'bg-red-100 text-red-800 border-red-200' },
 ];
 
+const DEFAULT_PRODUCT_IMAGE = '/default_product_800x800.png';
+
 interface OrderSummaryModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -61,7 +63,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   // Interactive color and size selection state
   const [interactiveSelectedColor, setInteractiveSelectedColor] = useState<string | undefined>(selectedColor);
   const [interactiveSelectedSize, setInteractiveSelectedSize] = useState<string | undefined>(selectedSize);
-  const [currentProductImage, setCurrentProductImage] = useState<string>(product?.images?.[0] || '');
+  const [currentProductImage, setCurrentProductImage] = useState<string>(product?.images?.[0] || DEFAULT_PRODUCT_IMAGE);
 
   const hasPushedState = useRef(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -166,9 +168,15 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
       const colorData = (product as any).colors.find((c: any) => c.name === interactiveSelectedColor || c.hex === interactiveSelectedColor);
       if (colorData && colorData.images && colorData.images.length > 0) {
         setCurrentProductImage(colorData.images[0]);
+      } else if (product.images && product.images.length > 0) {
+        setCurrentProductImage(product.images[0]);
+      } else {
+        setCurrentProductImage(DEFAULT_PRODUCT_IMAGE);
       }
     } else if (product && product.images && product.images.length > 0) {
       setCurrentProductImage(product.images[0]);
+    } else {
+      setCurrentProductImage(DEFAULT_PRODUCT_IMAGE);
     }
   }, [interactiveSelectedColor, product]);
 
@@ -393,7 +401,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             {/* Product Header Card */}
                             <div className="flex items-center space-x-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50">
                               <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-white dark:bg-gray-900 shadow-sm border border-gray-100 dark:border-gray-800">
-                                <Image src={currentProductImage} alt={product.name} fill className="object-cover" />
+                                <Image src={currentProductImage} alt={product.name} fill sizes="80px" className="object-cover" />
                               </div>
                               <div className="flex-1">
                                 <h4 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{product.name}</h4>
@@ -725,7 +733,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             {/* Product Header Card */}
                             <div className="flex items-center space-x-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50">
                               <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-white dark:bg-gray-900 shadow-sm border border-gray-100 dark:border-gray-800">
-                                <Image src={currentProductImage} alt={product.name} fill className="object-cover" />
+                                <Image src={currentProductImage} alt={product.name} fill sizes="80px" className="object-cover" />
                               </div>
                               <div className="flex-1">
                                 <h4 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{product.name}</h4>

@@ -105,7 +105,8 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted, onR
                       <Image
                         src={imageUrl}
                         alt={product.name}
-                        layout="fill"
+                        fill
+                        sizes="48px"
                         className="object-cover rounded-md"
                       />
                     )}
