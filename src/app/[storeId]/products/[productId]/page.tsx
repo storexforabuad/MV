@@ -36,7 +36,7 @@ import {
   ChevronLeft, ChevronRight, ShieldCheck, Battery, Cpu, Database, Network,
   Smartphone, Activity, Check, Code, Package, Fingerprint, Globe, Sparkles,
   Headphones, VolumeX, Gamepad2, Zap, Watch, Cable, Link,
-  Sun, RefreshCw, Layers, Gauge
+  Sun, RefreshCw, Layers, Gauge, Monitor, Wifi
 } from 'lucide-react';
 
 const ProductDetailSkeleton = dynamic(() => import('@/components/ProductDetailSkeleton'), { ssr: false });
