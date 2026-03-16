@@ -14,6 +14,7 @@ import { Product } from '@/types/product';
 import { Customer } from '@/types/customer';
 import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 import { CartItem } from '@/lib/cartContext';
+import { isSolarProduct } from '@/utils/productHelpers';
 
 interface OrderDetailCardProps {
   order: Order;
@@ -137,6 +138,21 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted, onR
                           {(product as any).temperature === 'room-temp' && '🌡️ Room'}
                         </span>
                       )}
+                      {isSolarProduct(product as any) && (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-100 dark:border-amber-800">
+                          {(() => {
+                            const s = product as any;
+                            switch (s.subtype) {
+                              case 'panel': return `☀️ ${s.wattage}`;
+                              case 'inverter': return `🔄 ${s.inverterCapacity}`;
+                              case 'battery': return `🔋 ${s.batteryCapacity}`;
+                              case 'controller': return `🎛️ ${s.controllerAmperage}`;
+                              case 'appliance': return `⚡ ${s.powerRating}`;
+                              default: return 'Solar';
+                            }
+                          })()}
+                        </span>
+                      )}
                     </div>
                     {((product as any).specialInstructions) && (
                       <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-800 rounded text-xs text-yellow-800 dark:text-yellow-200">
@@ -151,12 +167,14 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted, onR
             })}
           </div>
 
-          {order.orderNotes && (
-            <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-700">
-              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Special Instructions</p>
-              <p className="text-sm text-gray-700 dark:text-gray-300 italic">"{order.orderNotes}"</p>
-            </div>
-          )}
+          {
+            order.orderNotes && (
+              <div className="mt-4 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg border border-gray-100 dark:border-gray-700">
+                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Special Instructions</p>
+                <p className="text-sm text-gray-700 dark:text-gray-300 italic">"{order.orderNotes}"</p>
+              </div>
+            )
+          }
 
           <div className="mt-4 pt-4 border-t border-border-color flex justify-between items-center">
             <p className="font-semibold text-text-secondary">Total</p>

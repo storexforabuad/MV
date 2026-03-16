@@ -13,7 +13,7 @@ import { Loader2, MessageSquare, ExternalLink, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast';
 import { getCustomerDetails } from '@/app/actions/customerActions';
 import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
-import { isElectronicsProduct } from '@/utils/productHelpers';
+import { isElectronicsProduct, isSolarProduct } from '@/utils/productHelpers';
 import { saveModalState, getModalState, clearModalState } from '@/lib/paymentModalStorage';
 import { requestCustomerNotificationPermission } from '@/lib/requestCustomerNotifications';
 import PaymentFlowPage from './PaymentFlowPage';
@@ -29,9 +29,10 @@ interface CartOrderSummaryModalProps {
   storeMeta: StoreMeta | null;
   customer: Customer | null;
   storeId?: string;
+  isReorder?: boolean;
 }
 
-export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess, cartItems, storeMeta, customer: initialCustomer, storeId: passedStoreId }: CartOrderSummaryModalProps) {
+export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess, cartItems, storeMeta, customer: initialCustomer, storeId: passedStoreId, isReorder = false }: CartOrderSummaryModalProps) {
   const [currentPage, setCurrentPage] = useState<1 | 2>(1);
   const [deliveryMethod, setDeliveryMethod] = useState('home');
   const [customer, setCustomer] = useState<Customer | null>(initialCustomer);
@@ -222,11 +223,19 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
             colorText +
             sizeText +
             `🔢 *Quantity:* ${item.quantity} ${unitText}\n` +
+            (isSolarProduct(item as any) ? (
+              ((item as any).subtype === 'solar-panels' ? `☀️ *Panel Specs:* ${(item as any).wattage}${(item as any).cellType ? ` (${(item as any).cellType})` : ''}${(item as any).efficiencyRating ? `, Efficiency: ${(item as any).efficiencyRating}` : ''}\n` : '') +
+              ((item as any).subtype === 'inverters' ? `🔄 *Inverter Specs:* ${(item as any).powerCapacity}${(item as any).inverterType ? ` (${(item as any).inverterType})` : ''}${(item as any).systemVoltage ? `, System: ${(item as any).systemVoltage}` : ''}\n` : '') +
+              ((item as any).subtype === 'batteries' ? `🔋 *Battery:* ${(item as any).batteryCapacity}${(item as any).batteryChemistry ? ` (${(item as any).batteryChemistry})` : ''}${(item as any).lifeCycles ? `, cycles: ${(item as any).lifeCycles}` : ''}\n` : '') +
+              ((item as any).subtype === 'charge-controllers' ? `🎛️ *Controller:* ${(item as any).maxCurrentRating}${(item as any).controllerType ? ` (${(item as any).controllerType})` : ''}\n` : '') +
+              ((item as any).subtype === 'dc-appliances' || (item as any).subtype === 'ac-appliances' ? `⚡ *Power:* ${(item as any).powerConsumption}${(item as any).energyStarRating ? ` (${(item as any).energyStarRating})` : ''}\n` : '') +
+              ((item as any).subtype === 'solar-kits' ? `📦 *Kit Capacity:* ${(item as any).totalSystemCapacity}${(item as any).estimatedDailyYield ? ` (Yield: ${(item as any).estimatedDailyYield})` : ''}\n` : '')
+            ) : '') +
             `*Subtotal:* ${formatPrice(item.price * item.quantity)}`;
         }).join('\n\n');
 
-        const message = `🛍️ *New Cart Order*\n\n` +
-          `Hello! I would like to order the following items:\n\n` +
+        const message = `🛍️ *${isReorder ? 'Reorder Request' : 'New Cart Order'}*\n\n` +
+          `Hello! I would like to ${isReorder ? 'reorder' : 'order'} the following items:\n\n` +
           `${itemsSummary}\n\n` +
           `--------------------\n` +
           `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n` +
@@ -378,6 +387,21 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                                           : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700'
                                           }`}>
                                           {(item as any).condition === 'brand-new' ? 'Brand New' : (item as any).condition.replace('-', ' ').replace(/\b\w/g, (l: string) => l.toUpperCase())}
+                                        </span>
+                                      )}
+                                      {isSolarProduct(item as any) && (
+                                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 border border-amber-100 dark:border-amber-800">
+                                          {(() => {
+                                            const s = item as any;
+                                            switch (s.subtype) {
+                                              case 'panel': return `☀️ ${s.wattage}`;
+                                              case 'inverter': return `🔄 ${s.inverterCapacity}`;
+                                              case 'battery': return `🔋 ${s.batteryCapacity}`;
+                                              case 'controller': return `🎛️ ${s.controllerAmperage}`;
+                                              case 'appliance': return `⚡ ${s.powerRating}`;
+                                              default: return 'Solar Product';
+                                            }
+                                          })()}
                                         </span>
                                       )}
                                       {item.selectedSize && (

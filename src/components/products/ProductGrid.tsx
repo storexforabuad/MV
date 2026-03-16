@@ -150,6 +150,7 @@ const ProductGrid = memo(function ProductGrid({
   // Reorder state
   const [isReorderModalOpen, setIsReorderModalOpen] = useState(false);
   const [reorderItems, setReorderItems] = useState<CartItem[]>([]);
+  const [isReorder, setIsReorder] = useState(false);
 
   // Search state
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState(false);
@@ -169,10 +170,12 @@ const ProductGrid = memo(function ProductGrid({
       setOrderModalColor(orderItems[0].selectedColor);
       setOrderModalSize(orderItems[0].selectedSize);
       setOrderModalQuantity(orderItems[0].quantity);
+      setIsReorder(true);
       setIsOrderModalOpen(true);
     } else {
       // Use CartOrderSummaryModal for multi-item reorders
       setReorderItems(orderItems);
+      setIsReorder(true);
       setIsReorderModalOpen(true);
     }
   };
@@ -181,6 +184,7 @@ const ProductGrid = memo(function ProductGrid({
     setOrderModalProduct(product);
     setOrderModalColor(selectedColor);
     setOrderModalSize(selectedSize);
+    setIsReorder(false);
     setIsOrderModalOpen(true);
   };
 
@@ -404,6 +408,7 @@ const ProductGrid = memo(function ProductGrid({
         selectedColor={orderModalColor}
         initialQuantity={orderModalQuantity}
         openedFrom="productCard"
+        isReorder={isReorder}
       />
 
       {storeMeta && (
@@ -415,6 +420,7 @@ const ProductGrid = memo(function ProductGrid({
           storeMeta={storeMeta}
           customer={customer}
           storeId={storeId}
+          isReorder={isReorder}
         />
       )}
     </LayoutGroup>

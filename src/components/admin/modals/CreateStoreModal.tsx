@@ -346,6 +346,7 @@ export default function CreateStoreModal({
                   <option value="electronics">📱 Electronics (Gadgets, Devices)</option>
                   <option value="livestock">🐟 Livestock (Fishery & Aquaculture)</option>
                   <option value="automotive">🚗 Automotive (Car Dealership)</option>
+                  <option value="solar">☀️ Solar & Renewable Energy</option>
                   <option value="social-commerce">🌐 Social Commerce</option>
                   <option value="digital-products">💻 Digital Products</option>
                   <option value="consultancy">🎓 Consultancy</option>

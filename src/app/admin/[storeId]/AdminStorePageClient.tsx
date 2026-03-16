@@ -50,6 +50,7 @@ const AddLivestockComposer = dynamic(() => import('../../../components/admin/Add
 const AddFashionComposer = dynamic(() => import('../../../components/admin/AddFashionComposer'), { ssr: false });
 const AddMenuComposer = dynamic(() => import('../../../components/admin/AddMenuComposer'), { ssr: false });
 const AddElectronicsComposer = dynamic(() => import('../../../components/admin/AddElectronicsComposer'), { ssr: false });
+const AddSolarProductComposer = dynamic(() => import('../../../components/admin/AddSolarProductComposer'), { ssr: false });
 const ManageProductsModal = dynamic(() => import('../../../components/admin/ManageProductsModal'), { ssr: false });
 const ManageCategoriesModal = dynamic(() => import('../../../components/admin/ManageCategoriesModal'), { ssr: false });
 const AdminOrdersModal = dynamic(() => import('../../../components/admin/modals/AdminOrdersModal').then(mod => mod.AdminOrdersModal), { ssr: false });
@@ -718,6 +719,15 @@ export default function AdminStorePageClient({
         />
       ) : storeMeta?.storeType === 'electronics' ? (
         <AddElectronicsComposer
+          isOpen={isComposerOpen}
+          onClose={() => setIsComposerOpen(false)}
+          storeId={storeId}
+          categories={categories}
+          onProductAdded={() => fetchData()}
+          onAddCategory={handleAddCategory}
+        />
+      ) : storeMeta?.storeType === 'solar' ? (
+        <AddSolarProductComposer
           isOpen={isComposerOpen}
           onClose={() => setIsComposerOpen(false)}
           storeId={storeId}

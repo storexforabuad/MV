@@ -237,6 +237,74 @@ export interface ElectronicsProduct extends BaseProduct {
 }
 
 // ==========================================
+// SOLAR PRODUCT (New)
+// ==========================================
+export interface SolarProduct extends BaseProduct {
+  productType: 'solar';
+
+  // Core Info
+  brand: string;
+  condition: 'brand-new' | 'open-box' | 'used-good' | 'used-fair' | 'refurbished';
+
+  // Subtype
+  subtype: 'solar-panels' | 'inverters' | 'batteries' | 'charge-controllers' | 'dc-appliances' | 'ac-appliances' | 'solar-kits' | 'accessories';
+
+  // --- Tech Specs (Dynamic based on subtype) ---
+
+  // A. Solar Panels
+  wattage?: string; // e.g. 550W
+  cellType?: string; // e.g. Monocrystalline, Polycrystalline, Thin-Film
+  nominalVoltage?: string; // e.g. 12V, 24V
+  efficiencyRating?: string; // e.g. 21%
+  frameDimensions?: string;
+
+  // B. Inverters
+  powerCapacity?: string; // e.g. 1kVA, 5kVA, 10kW
+  inverterType?: string; // e.g. Pure Sine Wave, Modified Sine Wave, Hybrid, Grid-Tied, Microinverter
+  systemVoltage?: string; // e.g. 12V, 24V, 48V, 96V
+  smartFeatures?: boolean;
+
+  // C. Batteries
+  batteryCapacity?: string; // e.g. 100Ah, 200Ah, 5kWh
+  batteryChemistry?: string; // e.g. Lithium Iron Phosphate (LiFePO4), Lithium-Ion, Tubular/Tall Tubular, Sealed Lead Acid (SLA), Gel
+  lifeCycles?: string; // e.g. 2000, 6000 cycles
+  depthOfDischarge?: string; // e.g. 80%, 100%
+
+  // D. Charge Controllers
+  controllerType?: string; // e.g. MPPT, PWM
+  maxCurrentRating?: string; // e.g. 20A, 40A, 60A, 100A
+  maxPvInputVoltage?: string; // Voc
+
+  // E. Solar-Compatible DC Appliances / F. Energy Efficient AC Appliances
+  applianceCategory?: string; // e.g. TV, Fan, Fridge/Freezer, Lighting, Water Pump, Inverter AC
+  operatingVoltage?: string; // e.g. 12V DC, 24V DC, 48V DC, 220V AC
+  powerConsumption?: string; // Watts/Amps
+  directSolarConnect?: boolean; // DC appliances
+  energyStarRating?: string; // e.g. 1-Star to 5-Star
+  inverterCompressor?: boolean;
+
+  // G. Solar Kits & Bundles
+  totalSystemCapacity?: string; // e.g. 1kW Off-Grid Kit
+  estimatedDailyYield?: string; // kWh/day
+  componentsIncluded?: string[];
+  installationIncluded?: boolean;
+
+  // Warranty & Packaging
+  warranty: boolean;
+  warrantyDuration?: string;
+  whatsInBox?: string[];
+
+  // Availability & Specs
+  available: boolean;
+  soldOut?: boolean;
+  limitedStock?: boolean;
+  quantity: number;
+  bulkPurchasing?: boolean;
+  categoryId?: string;
+  category?: string;
+}
+
+// ==========================================
 // MASTER UNION TYPE
 // ==========================================
-export type Product = GeneralProduct | VehicleProduct | LivestockProduct | FashionProduct | FoodBeverageProduct | ElectronicsProduct;
+export type Product = GeneralProduct | VehicleProduct | LivestockProduct | FashionProduct | FoodBeverageProduct | ElectronicsProduct | SolarProduct;

@@ -19,7 +19,12 @@ import CustomerLookupModal from '@/components/customer/CustomerLookupModal';
 import OrderSummaryModal from '@/components/modals/OrderSummaryModal';
 import toast from 'react-hot-toast';
 import VehicleDetailPage from '@/components/products/VehicleDetailPage';
-import { ensureProductType, isFashionProduct, isGeneralProduct, isVehicleProduct, isFoodBeverageProduct, isLivestockProduct, isElectronicsProduct } from '@/utils/productHelpers';
+import {
+  ensureProductType, isFashionProduct, isGeneralProduct, isVehicleProduct, isFoodBeverageProduct,
+  isLivestockProduct,
+  isElectronicsProduct,
+  isSolarProduct
+} from '@/utils/productHelpers';
 import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
 import SizeSelector from '@/components/products/SizeSelector';
 import { SizePreferencesCache } from '@/lib/sizePreferencesCache';
@@ -30,7 +35,8 @@ import {
   Heart, ShoppingCart, Share2, PackageX, Search, Info, Gift,
   ChevronLeft, ChevronRight, ShieldCheck, Battery, Cpu, Database, Network,
   Smartphone, Activity, Check, Code, Package, Fingerprint, Globe, Sparkles,
-  Headphones, VolumeX, Gamepad2, Zap, Watch, Cable, Link
+  Headphones, VolumeX, Gamepad2, Zap, Watch, Cable, Link,
+  Sun, RefreshCw, Layers, Gauge
 } from 'lucide-react';
 
 const ProductDetailSkeleton = dynamic(() => import('@/components/ProductDetailSkeleton'), { ssr: false });
@@ -922,9 +928,286 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                   );
                 })()}
 
+                {/* SOLAR PRODUCT UI */}
+                {isSolarProduct(product) && (() => {
+                  const s = product;
+                  return (
+                    <div className="mb-8 space-y-4">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        Technical Specifications
+                      </h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {/* Subtype specific fields */}
+                        {s.subtype === 'solar-panels' && (
+                          <>
+                            {s.wattage && (
+                              <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                  <Sun className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Wattage</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{s.wattage}</p>
+                                </div>
+                              </div>
+                            )}
+                            {s.cellType && (
+                              <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                  <Layers className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Cell Type</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5 capitalize">{s.cellType}</p>
+                                </div>
+                              </div>
+                            )}
+                            {s.efficiencyRating && (
+                              <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-600 dark:text-green-400">
+                                  <Zap className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Efficiency</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{s.efficiencyRating}</p>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
+
+                        {s.subtype === 'inverters' && (
+                          <>
+                            {s.powerCapacity && (
+                              <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                                  <RefreshCw className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Capacity</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{s.powerCapacity}</p>
+                                </div>
+                              </div>
+                            )}
+                            {s.inverterType && (
+                              <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                                  <Activity className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Type</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{s.inverterType}</p>
+                                </div>
+                              </div>
+                            )}
+                            {s.systemVoltage && (
+                              <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                  <Zap className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">System Voltage</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{s.systemVoltage}</p>
+                                </div>
+                              </div>
+                            )}
+                            {s.smartFeatures && (
+                              <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-600 dark:text-green-400">
+                                  <Wifi className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Smart Features</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">WiFi Monitoring</p>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
+
+                        {s.subtype === 'batteries' && (
+                          <>
+                            {s.batteryCapacity && (
+                              <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-600 dark:text-green-400">
+                                  <Battery className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Capacity</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{s.batteryCapacity}</p>
+                                </div>
+                              </div>
+                            )}
+                            {s.batteryChemistry && (
+                              <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                                  <Fingerprint className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Chemistry</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5 capitalize">{s.batteryChemistry}</p>
+                                </div>
+                              </div>
+                            )}
+                            {s.lifeCycles && (
+                              <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                  <RefreshCw className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Life Cycles</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{s.lifeCycles}</p>
+                                </div>
+                              </div>
+                            )}
+                            {s.depthOfDischarge && (
+                              <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center text-red-600 dark:text-red-400">
+                                  <Activity className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">D.O.D</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{s.depthOfDischarge}</p>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
+
+                        {s.subtype === 'charge-controllers' && (
+                          <>
+                            {s.controllerType && (
+                              <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                  <Code className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Tech Type</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{s.controllerType}</p>
+                                </div>
+                              </div>
+                            )}
+                            {s.maxCurrentRating && (
+                              <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                  <Gauge className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Max Current</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{s.maxCurrentRating}</p>
+                                </div>
+                              </div>
+                            )}
+                            {s.maxPvInputVoltage && (
+                              <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                                  <Zap className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Max PV Input</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{s.maxPvInputVoltage}</p>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
+
+                        {(s.subtype === 'dc-appliances' || s.subtype === 'ac-appliances') && (
+                          <>
+                            {s.applianceCategory && (
+                              <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                  <Monitor className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Appliance</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{s.applianceCategory}</p>
+                                </div>
+                              </div>
+                            )}
+                            {s.powerConsumption && (
+                              <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                  <Zap className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Consumption</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{s.powerConsumption}</p>
+                                </div>
+                              </div>
+                            )}
+                            {s.operatingVoltage && (
+                              <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                                  <Activity className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Voltage</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{s.operatingVoltage}</p>
+                                </div>
+                              </div>
+                            )}
+                            {s.energyStarRating && (
+                              <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-600 dark:text-green-400">
+                                  <Sparkles className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Energy Rating</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{s.energyStarRating}</p>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
+
+                        {s.subtype === 'solar-kits' && (
+                          <>
+                            {s.totalSystemCapacity && (
+                              <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                  <Package className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Kit Capacity</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{s.totalSystemCapacity}</p>
+                                </div>
+                              </div>
+                            )}
+                            {s.estimatedDailyYield && (
+                              <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-600 dark:text-green-400">
+                                  <Zap className="w-4 h-4" />
+                                </div>
+                                <div className="flex-1">
+                                  <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Est. Yield</p>
+                                  <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{s.estimatedDailyYield}</p>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
+
+                        {/* Common: Warranty */}
+                        {s.warranty && s.warrantyDuration && (
+                          <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                            <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                              <ShieldCheck className="w-4 h-4" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Warranty</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{s.warrantyDuration}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 {product.description && !isFoodBeverageProduct(product) && (
-                  <div className={`mb-8 ${isElectronicsProduct(product) ? 'p-6 rounded-[2rem] bg-gray-50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-700/50' : ''}`}>
-                    {isElectronicsProduct(product) && (
+                  <div className={`mb-8 ${(isElectronicsProduct(product) || isSolarProduct(product)) ? 'p-6 rounded-[2rem] bg-gray-50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-700/50' : ''}`}>
+                    {(isElectronicsProduct(product) || isSolarProduct(product)) && (
                       <div className="flex items-center gap-2 mb-4">
                         <div className="w-10 h-10 rounded-2xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-gray-600 dark:text-gray-300 border border-gray-100 dark:border-gray-700">
                           <Info className="w-5 h-5" />
@@ -932,7 +1215,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                         <h3 className="text-base font-bold text-gray-900 dark:text-white">Unit Condition & Notes</h3>
                       </div>
                     )}
-                    <p className={`text-gray-600 dark:text-gray-300 leading-relaxed ${isElectronicsProduct(product) ? 'text-[15px]' : ''}`}>
+                    <p className={`text-gray-600 dark:text-gray-300 leading-relaxed ${(isElectronicsProduct(product) || isSolarProduct(product)) ? 'text-[15px]' : ''}`}>
                       {product.description}
                     </p>
                   </div>

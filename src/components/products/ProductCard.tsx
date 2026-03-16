@@ -19,7 +19,8 @@ import {
   isFashionProduct,
   isLivestockProduct,
   isFoodBeverageProduct,
-  isElectronicsProduct
+  isElectronicsProduct,
+  isSolarProduct
 } from '../../utils/productHelpers';
 
 
@@ -241,10 +242,11 @@ export default function ProductCard({
     if (isLivestockProduct(product)) return !product.available || !!product.soldOut;
     if (isFoodBeverageProduct(product)) return !product.available || !!product.soldOut;
     if (isElectronicsProduct(product)) return !product.available || !!product.soldOut;
+    if (isSolarProduct(product)) return !product.available || !!product.soldOut;
     return false;
   })();
 
-  const isLimitedStock = (isGeneralProduct(product) || isFashionProduct(product) || isLivestockProduct(product) || isElectronicsProduct(product))
+  const isLimitedStock = (isGeneralProduct(product) || isFashionProduct(product) || isLivestockProduct(product) || isElectronicsProduct(product) || isSolarProduct(product))
     ? !!product.limitedStock
     : false;
 
@@ -406,60 +408,58 @@ export default function ProductCard({
           )}
 
           {!isSoldOut && (
-            <div className="absolute top-[18px] left-[18px] z-10 flex flex-col items-start gap-2">
-              {isLimitedStock && !isElectronicsProduct(product) && (
-                <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
-                  <span className="product-badge bg-[var(--badge-yellow-bg)] text-[var(--badge-yellow-text)] shadow-sm whitespace-nowrap">
-                    Limited Stock
-                  </span>
-                </div>
-              )}
-              {discount && (
-                <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
-                  <span className="product-badge bg-[var(--badge-green-bg)] text-[var(--badge-green-text)] shadow-sm whitespace-nowrap">
-                    {discount}% OFF
-                  </span>
-                </div>
-              )}
-              {isElectronicsProduct(product) && product.brand && (
-                <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
-                  <span className="product-badge bg-white/90 dark:bg-black/60 backdrop-blur text-slate-700 dark:text-slate-200 shadow-sm whitespace-nowrap border border-white/20 dark:border-white/10 uppercase font-bold tracking-widest text-[10px]">
-                    {product.brand}
-                  </span>
-                </div>
-              )}
-            </div>
-          )}
+            <>
+              {/* Top Left: Discount + Limited Stock */}
+              <div className="absolute top-[18px] left-[18px] z-10 flex flex-col items-start gap-2">
+                {discount && (
+                  <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                    <span className="product-badge bg-[var(--badge-green-bg)] text-[var(--badge-green-text)] shadow-sm whitespace-nowrap">
+                      {discount}% OFF
+                    </span>
+                  </div>
+                )}
+                {isLimitedStock && (
+                  <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                    <span className="product-badge bg-[var(--badge-yellow-bg)] text-[var(--badge-yellow-text)] shadow-sm whitespace-nowrap">
+                      Limited
+                    </span>
+                  </div>
+                )}
+              </div>
 
-          {/* Electronics Top Right Overlay */}
-          {!isSoldOut && isElectronicsProduct(product) && (product.condition || isLimitedStock) && (
-            <div className="absolute top-[18px] right-[18px] z-10 flex flex-col items-end gap-2">
-              {isLimitedStock && (
-                <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
-                  <span className="product-badge bg-[var(--badge-yellow-bg)] text-[var(--badge-yellow-text)] shadow-sm whitespace-nowrap text-[10px]">
-                    Limited Stock
-                  </span>
+              {/* Top Right: Brand + Condition */}
+              {(isElectronicsProduct(product) || isSolarProduct(product)) && (
+                <div className="absolute top-[18px] right-[18px] z-10 flex flex-col items-end gap-2">
+                  {/* Brand Badge */}
+                  {product.brand && (
+                    <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                      <span className="product-badge bg-white/90 dark:bg-black/60 backdrop-blur text-slate-700 dark:text-slate-200 shadow-sm whitespace-nowrap border border-white/20 dark:border-white/10 uppercase font-bold tracking-widest text-[10px]">
+                        {product.brand}
+                      </span>
+                    </div>
+                  )}
+                  {/* Condition Badge */}
+                  {product.condition && (
+                    <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                      <span className={`product-badge shadow-sm whitespace-nowrap text-[10px] font-bold tracking-wide border border-white/20 px-2 py-0.5 rounded-lg ${product.condition === 'brand-new' ? 'bg-green-500 text-white' :
+                        product.condition === 'open-box' ? 'bg-blue-500 text-white' :
+                          product.condition === 'used-good' ? 'bg-amber-500 text-white' :
+                            product.condition === 'used-fair' ? 'bg-orange-500 text-white' :
+                              product.condition === 'refurbished' ? 'bg-purple-500 text-white' :
+                                'bg-white/90 dark:bg-zinc-800/90 text-zinc-800 dark:text-zinc-200 backdrop-blur'
+                        }`}>
+                        {product.condition === 'brand-new' && '✨ BRAND NEW'}
+                        {product.condition === 'open-box' && '📦 OPEN BOX'}
+                        {product.condition === 'used-good' && '👍 CLEAN'}
+                        {product.condition === 'used-fair' && '⚠️ GOOD'}
+                        {product.condition === 'refurbished' && '🔄 REFURB'}
+                        {!['brand-new', 'open-box', 'used-good', 'used-fair', 'refurbished'].includes(product.condition) && product.condition.replace('-', ' ').toUpperCase()}
+                      </span>
+                    </div>
+                  )}
                 </div>
               )}
-              {product.condition && (
-                <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
-                  <span className={`product-badge shadow-sm whitespace-nowrap text-[10px] font-bold tracking-wide border border-white/20 px-2 py-0.5 rounded-lg ${product.condition === 'brand-new' ? 'bg-green-500 text-white' :
-                    product.condition === 'open-box' ? 'bg-blue-500 text-white' :
-                      product.condition === 'used-good' ? 'bg-amber-500 text-white' :
-                        product.condition === 'used-fair' ? 'bg-orange-500 text-white' :
-                          product.condition === 'refurbished' ? 'bg-purple-500 text-white' :
-                            'bg-white/90 dark:bg-zinc-800/90 text-zinc-800 dark:text-zinc-200 backdrop-blur'
-                    }`}>
-                    {product.condition === 'brand-new' && '✨ BRAND NEW'}
-                    {product.condition === 'open-box' && '📦 OPEN BOX'}
-                    {product.condition === 'used-good' && '👍 USED GOOD'}
-                    {product.condition === 'used-fair' && '⚠️ USED FAIR'}
-                    {product.condition === 'refurbished' && '🔄 REFURBISHED'}
-                    {!['brand-new', 'open-box', 'used-good', 'used-fair', 'refurbished'].includes(product.condition) && product.condition.replace('-', ' ').toUpperCase()}
-                  </span>
-                </div>
-              )}
-            </div>
+            </>
           )}
 
           {/* Food Overlays on Bottom Left */}
@@ -613,6 +613,79 @@ export default function ProductCard({
                         )}
                       </>
                     );
+                }
+              })()}
+            </div>
+          )}
+
+          {/* Solar Bottom Left Overlay */}
+          {!isSoldOut && isSolarProduct(product) && (
+            <div className="absolute bottom-[14px] left-[14px] z-10 flex flex-col gap-1.5 max-w-[calc(100%-80px)]">
+              {(() => {
+                const s = product;
+                switch (s.subtype) {
+                  case 'solar-panels':
+                    return s.wattage && (
+                      <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                        <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1">
+                          ☀️ {s.wattage}
+                        </span>
+                      </div>
+                    );
+                  case 'inverters':
+                    return s.powerCapacity && (
+                      <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                        <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1">
+                          🔄 {s.powerCapacity}
+                        </span>
+                      </div>
+                    );
+                  case 'batteries':
+                    return (
+                      <>
+                        {s.batteryCapacity && (
+                          <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                            <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1">
+                              🔋 {s.batteryCapacity}
+                            </span>
+                          </div>
+                        )}
+                        {s.batteryChemistry && (
+                          <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                            <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1">
+                              🧪 {s.batteryChemistry}
+                            </span>
+                          </div>
+                        )}
+                      </>
+                    );
+                  case 'charge-controllers':
+                    return s.maxCurrentRating && (
+                      <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                        <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1">
+                          🎛️ {s.maxCurrentRating}
+                        </span>
+                      </div>
+                    );
+                  case 'dc-appliances':
+                  case 'ac-appliances':
+                    return s.powerConsumption && (
+                      <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                        <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1">
+                          ⚡ {s.powerConsumption}
+                        </span>
+                      </div>
+                    );
+                  case 'solar-kits':
+                    return s.totalSystemCapacity && (
+                      <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                        <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-semibold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2 py-1">
+                          📦 {s.totalSystemCapacity}
+                        </span>
+                      </div>
+                    );
+                  default:
+                    return null;
                 }
               })()}
             </div>

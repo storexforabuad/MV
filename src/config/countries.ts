@@ -9,6 +9,7 @@ import {
   Building2,
   Sparkles,
   Wrench,
+  Sun,
 } from 'lucide-react';
 
 export type StoreType =
@@ -22,7 +23,8 @@ export type StoreType =
   | 'artist'
   | 'beauty'
   | 'home-services'
-  | 'digital-products';
+  | 'digital-products'
+  | 'solar';
 
 export const STORE_TYPES: Array<{
   id: StoreType;
@@ -79,6 +81,13 @@ export const STORE_TYPES: Array<{
       icon: Building2,
       description: 'Property listings, rentals, and real estate services.',
       color: 'from-slate-700 to-slate-900',
+    },
+    {
+      id: 'solar',
+      label: 'Solar & Renewable Energy',
+      icon: Sun,
+      description: 'Solar panels, inverters, batteries, and renewable tech.',
+      color: 'from-yellow-400 to-amber-600',
     },
     {
       id: 'artist',

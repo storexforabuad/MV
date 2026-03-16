@@ -8,14 +8,14 @@ import { Product } from '@/types/product';
 import { StoreMeta } from '@/types/store';
 import { Customer } from '@/types/customer';
 import { formatPrice } from '@/utils/price';
-import { Minus, Plus, Loader2, MessageSquare, ExternalLink, AlertCircle, Smartphone, Activity, Database, Cpu, Network, ShieldCheck, Package, Fingerprint, Info, Code, Battery, Headphones, VolumeX, Gamepad2, Zap, Watch, Cable, Link } from 'lucide-react';
+import { Minus, Plus, Loader2, MessageSquare, ExternalLink, AlertCircle, Smartphone, Activity, Database, Cpu, Network, ShieldCheck, Package, Fingerprint, Info, Code, Battery, Headphones, VolumeX, Gamepad2, Zap, Watch, Cable, Link, Sun, Layers, RefreshCw, Gauge, Monitor, Wifi } from 'lucide-react';
 import { ElectronicsProduct } from '@/types/product';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOrders } from '@/hooks/useOrders';
 import toast from 'react-hot-toast';
 import { useParams } from 'next/navigation';
 import { getCustomerDetails } from '@/app/actions/customerActions';
-import { isFoodBeverageProduct, isFashionProduct, isElectronicsProduct } from '@/utils/productHelpers';
+import { isFoodBeverageProduct, isFashionProduct, isElectronicsProduct, isSolarProduct } from '@/utils/productHelpers';
 import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
 import { saveModalState, getModalState, clearModalState } from '@/lib/paymentModalStorage';
 import { requestCustomerNotificationPermission } from '@/lib/requestCustomerNotifications';
@@ -43,7 +43,7 @@ interface OrderSummaryModalProps {
   openedFrom?: 'productDetails' | 'productCard';
 }
 
-export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta, customer: initialCustomer, selectedSize, selectedColor, initialQuantity = 1, openedFrom }: OrderSummaryModalProps) {
+export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta, customer: initialCustomer, selectedSize, selectedColor, initialQuantity = 1, openedFrom, isReorder = false }: OrderSummaryModalProps) {
   const [currentPage, setCurrentPage] = useState<1 | 2 | 3>(1);
   const [quantity, setQuantity] = useState(initialQuantity);
   const [deliveryMethod, setDeliveryMethod] = useState('home');
@@ -83,7 +83,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
       setQuantity(initialQuantity);
 
       // Shortcut: skip specs page if opening from product details
-      if (product && isElectronicsProduct(product) && openedFrom === 'productDetails') {
+      if (product && (isElectronicsProduct(product) || isSolarProduct(product)) && openedFrom === 'productDetails') {
         setCurrentPage(2);
       } else {
         setCurrentPage(1);
@@ -180,8 +180,9 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   if (!product) return null;
 
   const isElectronics = isElectronicsProduct(product);
-  const summaryPageNum = isElectronics ? 2 : 1;
-  const paymentPageNum = isElectronics ? 3 : 2;
+  const isSolar = isSolarProduct(product);
+  const summaryPageNum = (isElectronics || isSolar) ? 2 : 1;
+  const paymentPageNum = (isElectronics || isSolar) ? 3 : 2;
 
   const hasSizes = (p: any) => {
     return (p.sizes && p.sizes.length > 0) || (p.sizeOption && p.sizeOption.length > 0);
@@ -274,8 +275,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
         // toast.success('Order placed! Redirecting to WhatsApp...');
 
         const productUrl = `https://tinyurl.com/bizconnet/${storeId}/products/${product.id}`;
-        const message = `🛍️ *New Order Request*\n\n` +
-          `Hello! I would like to order this item:\n\n` +
+        const message = `🛍️ *${isReorder ? 'Reorder Request' : 'New Order Request'}*\n\n` +
+          `Hello! I would like to ${isReorder ? 'reorder' : 'order'} this item:\n\n` +
           `*${product.name.trim()}*\n` +
           `🔗 *Product Link:* ${productUrl}\n` +
           `🔢 *Quantity:* ${quantity} ${product.productType === 'livestock' ? ((product as any).priceUnit === 'kg' ? 'kg' : 'pcs') : ''}\n` +
@@ -283,6 +284,14 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
           (interactiveSelectedSize ? `📏 *Size:* ${interactiveSelectedSize}\n` : '') +
           (isFoodBeverageProduct(product) ? `🌶️ *Spiciness:* ${SPICINESS_LEVELS.find(s => s.value === selectedSpiciness)?.label}\n` : '') +
           (isFoodBeverageProduct(product) && specialInstructions ? `📝 *Note:* ${specialInstructions}\n` : '') +
+          (isSolarProduct(product) ? (
+            (product.subtype === 'solar-panels' ? `☀️ *Panel Specs:* ${product.wattage}${product.cellType ? ` (${product.cellType})` : ''}${product.efficiencyRating ? `, Efficiency: ${product.efficiencyRating}` : ''}\n` : '') +
+            (product.subtype === 'inverters' ? `🔄 *Inverter Specs:* ${product.powerCapacity}${product.inverterType ? ` (${product.inverterType})` : ''}${product.systemVoltage ? `, System: ${product.systemVoltage}` : ''}\n` : '') +
+            (product.subtype === 'batteries' ? `🔋 *Battery:* ${product.batteryCapacity}${product.batteryChemistry ? ` (${product.batteryChemistry})` : ''}${product.lifeCycles ? `, cycles: ${product.lifeCycles}` : ''}\n` : '') +
+            (product.subtype === 'charge-controllers' ? `🎛️ *Controller:* ${product.maxCurrentRating}${product.controllerType ? ` (${product.controllerType})` : ''}\n` : '') +
+            (product.subtype === 'dc-appliances' || product.subtype === 'ac-appliances' ? `⚡ *Power:* ${product.powerConsumption}${product.energyStarRating ? ` (${product.energyStarRating})` : ''}\n` : '') +
+            (product.subtype === 'solar-kits' ? `📦 *Kit Capacity:* ${product.totalSystemCapacity}${product.estimatedDailyYield ? ` (Yield: ${product.estimatedDailyYield})` : ''}\n` : '')
+          ) : '') +
           `💰 *Price:* ${formatPrice(product.price)}\n` +
           `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n` +
           `${deliveryMethod === 'home' ? (customer?.deliveryAddress?.street ? `📍 *To:* ${customer.deliveryAddress.street}\n` : '📍 *Address:* (Please provide your address below)\n') : ''}` +
@@ -348,7 +357,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                   {/* Header */}
                   <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-modal-background">
                     <h3 className="text-lg font-semibold leading-6 text-gray-900 dark:text-white">
-                      {currentPage === 1 && isElectronics ? 'Product Specifications' : currentPage === summaryPageNum ? 'Order Summary' : (isPaymentFlowEnabled ? 'Payment' : 'WhatsApp Preview')}
+                      {currentPage === 1 && (isElectronics || isSolar) ? 'Product Specifications' : currentPage === summaryPageNum ? 'Order Summary' : (isPaymentFlowEnabled ? 'Payment' : 'WhatsApp Preview')}
                     </h3>
                     <button
                       type="button"
@@ -701,6 +710,187 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                 </div>
                                 <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed italic">
                                   "{product.description}"
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
+
+                      {/* Page 1 (Solar Specs) */}
+                      {currentPage === 1 && isSolar && (() => {
+                        const s = product as any;
+                        return (
+                          <div className="pt-2 sm:pt-4 space-y-6">
+                            {/* Product Header Card */}
+                            <div className="flex items-center space-x-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50">
+                              <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-white dark:bg-gray-900 shadow-sm border border-gray-100 dark:border-gray-800">
+                                <Image src={currentProductImage} alt={product.name} fill className="object-cover" />
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{product.name}</h4>
+                                <p className="text-sm font-bold text-amber-600 dark:text-amber-400 mt-1">{formatPrice(product.price)}</p>
+                              </div>
+                            </div>
+
+                            {/* Tech Specs Grid */}
+                            <div className="grid grid-cols-2 gap-3">
+                              {s.subtype === 'solar-panels' && (
+                                <>
+                                  {s.wattage && (
+                                    <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                      <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                        <Sun className="w-4 h-4" />
+                                      </div>
+                                      <div>
+                                        <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Wattage</span>
+                                        <p className="font-bold text-[13px] text-gray-900 dark:text-white">{s.wattage}</p>
+                                      </div>
+                                    </div>
+                                  )}
+                                  {s.cellType && (
+                                    <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                      <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                        <Layers className="w-4 h-4" />
+                                      </div>
+                                      <div>
+                                        <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Cell Type</span>
+                                        <p className="font-bold text-[13px] text-gray-900 dark:text-white capitalize">{s.cellType}</p>
+                                      </div>
+                                    </div>
+                                  )}
+                                </>
+                              )}
+
+                              {s.subtype === 'inverters' && (
+                                <>
+                                  {s.powerCapacity && (
+                                    <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                      <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                                        <RefreshCw className="w-4 h-4" />
+                                      </div>
+                                      <div>
+                                        <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Capacity</span>
+                                        <p className="font-bold text-[13px] text-gray-900 dark:text-white">{s.powerCapacity}</p>
+                                      </div>
+                                    </div>
+                                  )}
+                                  {s.inverterType && (
+                                    <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                      <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                                        <Activity className="w-4 h-4" />
+                                      </div>
+                                      <div>
+                                        <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Type</span>
+                                        <p className="font-bold text-[13px] text-gray-900 dark:text-white">{s.inverterType}</p>
+                                      </div>
+                                    </div>
+                                  )}
+                                </>
+                              )}
+
+                              {s.subtype === 'batteries' && (
+                                <>
+                                  {s.batteryCapacity && (
+                                    <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                      <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-600 dark:text-green-400">
+                                        <Battery className="w-4 h-4" />
+                                      </div>
+                                      <div>
+                                        <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Capacity</span>
+                                        <p className="font-bold text-[13px] text-gray-900 dark:text-white">{s.batteryCapacity}</p>
+                                      </div>
+                                    </div>
+                                  )}
+                                  {s.batteryChemistry && (
+                                    <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                      <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                                        <Fingerprint className="w-4 h-4" />
+                                      </div>
+                                      <div>
+                                        <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Chemistry</span>
+                                        <p className="font-bold text-[13px] text-gray-900 dark:text-white capitalize">{s.batteryChemistry}</p>
+                                      </div>
+                                    </div>
+                                  )}
+                                </>
+                              )}
+
+                              {s.subtype === 'charge-controllers' && (
+                                <>
+                                  {s.maxCurrentRating && (
+                                    <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                      <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                        <Gauge className="w-4 h-4" />
+                                      </div>
+                                      <div>
+                                        <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Max Current</span>
+                                        <p className="font-bold text-[13px] text-gray-900 dark:text-white">{s.maxCurrentRating}</p>
+                                      </div>
+                                    </div>
+                                  )}
+                                </>
+                              )}
+
+                              {(s.subtype === 'dc-appliances' || s.subtype === 'ac-appliances') && (
+                                <>
+                                  {s.powerConsumption && (
+                                    <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                      <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                        <Zap className="w-4 h-4" />
+                                      </div>
+                                      <div>
+                                        <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Consumption</span>
+                                        <p className="font-bold text-[13px] text-gray-900 dark:text-white">{s.powerConsumption}</p>
+                                      </div>
+                                    </div>
+                                  )}
+                                </>
+                              )}
+
+                              {s.subtype === 'solar-kits' && (
+                                <>
+                                  {s.totalSystemCapacity && (
+                                    <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                      <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                        <Package className="w-4 h-4" />
+                                      </div>
+                                      <div>
+                                        <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Kit Capacity</span>
+                                        <p className="font-bold text-[13px] text-gray-900 dark:text-white">{s.totalSystemCapacity}</p>
+                                      </div>
+                                    </div>
+                                  )}
+                                </>
+                              )}
+
+                              {/* Common Warranty */}
+                              {s.warranty && s.warrantyDuration && (
+                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                                    <ShieldCheck className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Warranty</span>
+                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white">{s.warrantyDuration}</p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Description */}
+                            {product.description && (
+                              <div className="p-6 rounded-[2rem] bg-gray-50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-700/50">
+                                {(isElectronicsProduct(product) || isSolarProduct(product)) && (
+                                  <div className="flex items-center gap-2 mb-4">
+                                    <div className="w-8 h-8 rounded-2xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-gray-600 dark:text-gray-300 border border-gray-100 dark:border-gray-700">
+                                      <Info className="w-4 h-4" />
+                                    </div>
+                                    <h3 className="text-sm font-bold text-gray-900 dark:text-white">Unit Condition & Notes</h3>
+                                  </div>
+                                )}
+                                <p className={`text-gray-600 dark:text-gray-300 leading-relaxed ${(isElectronicsProduct(product) || isSolarProduct(product)) ? 'text-sm' : 'text-sm italic'}`}>
+                                  {isElectronicsProduct(product) || isSolarProduct(product) ? product.description : `"${product.description}"`}
                                 </p>
                               </div>
                             )}
