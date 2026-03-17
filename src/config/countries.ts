@@ -51,7 +51,7 @@ export const STORE_TYPES: Array<{
       id: 'fashion',
       label: 'Fashion',
       icon: Shirt,
-      description: 'Clothing brands, boutiques, textile retailers, and designers.',
+      description: 'Clothing brands, boutiques, textile retailers, and RTW.',
       color: 'from-pink-500 to-rose-500',
     },
     {
@@ -65,14 +65,14 @@ export const STORE_TYPES: Array<{
       id: 'automotive',
       label: 'Automotive',
       icon: Car,
-      description: 'Car dealerships, spare parts, and auto services.',
+      description: 'Car, bike, truck dealerships and other auto services.',
       color: 'from-slate-500 to-gray-500',
     },
     {
       id: 'electronics',
       label: 'Electronics',
       icon: Laptop,
-      description: 'Phones, solar equipment, gadgets, and electronic accessories.',
+      description: 'Phones, consoles, laptops, home appliances and accessories.',
       color: 'from-blue-400 to-indigo-600',
     },
     {

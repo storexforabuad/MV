@@ -290,7 +290,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                 </div>
 
                 <div className="grid grid-cols-1 gap-4">
-                  {STORE_TYPES.map((store) => {
+                  {STORE_TYPES.filter(store => !['home-services', 'digital-products', 'real-estate', 'artist', 'livestock', 'general'].includes(store.id)).map((store) => {
                     const isSelected = modal.formData.storeType === store.id;
                     return (
                       <button
