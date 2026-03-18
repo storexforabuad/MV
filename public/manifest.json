@@ -4,8 +4,8 @@
     "description": "Premium Platform Management Dashboard",
     "start_url": "/superadmin",
     "display": "standalone",
-    "background_color": "#0f172a",
-    "theme_color": "#6366f1",
+    "background_color": "#000000",
+    "theme_color": "#000000",
     "orientation": "portrait",
     "icons": [
         {
