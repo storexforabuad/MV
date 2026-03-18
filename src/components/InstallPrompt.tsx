@@ -66,37 +66,37 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
     {
       icon: Zap,
       color: 'text-amber-500',
-      bgColor: 'bg-amber-100 dark:bg-amber-500/10',
+      bgColor: 'bg-amber-500/10',
       title: 'Order Instantly',
       desc: 'Browse catalogs and place orders 24/7 without delays.'
     },
     {
       icon: ShoppingCart,
       color: 'text-blue-500',
-      bgColor: 'bg-blue-100 dark:bg-blue-500/10',
+      bgColor: 'bg-blue-500/10',
       title: 'Save & Share Carts',
       desc: 'Build lists for later or share carts with family and friends.'
     },
     {
       icon: Package,
       color: 'text-emerald-500',
-      bgColor: 'bg-emerald-100 dark:bg-emerald-500/10',
+      bgColor: 'bg-emerald-500/10',
       title: 'Track Purchases',
       desc: 'Keep a full history and status of all your orders.'
     },
     {
       icon: Bell,
       color: 'text-violet-500',
-      bgColor: 'bg-violet-100 dark:bg-violet-500/10',
+      bgColor: 'bg-violet-500/10',
       title: 'Real-time Alerts',
       desc: 'Get notified for flash sales, restocks, and new arrivals.'
     }
   ];
 
   const adminFeatures = [
-    { icon: ShoppingCart, color: 'text-emerald-500', bgColor: 'bg-emerald-100 dark:bg-emerald-500/10', title: 'Instant Orders', desc: 'Get push notifications for new sales.' },
-    { icon: Zap, color: 'text-blue-500', bgColor: 'bg-blue-100 dark:bg-blue-500/10', title: 'Traffic Insights', desc: 'Monitor your store views and trends.' },
-    { icon: Package, color: 'text-violet-500', bgColor: 'bg-violet-100 dark:bg-violet-500/10', title: 'Full Control', desc: 'Manage inventory and settings on the go.' }
+    { icon: ShoppingCart, color: 'text-emerald-500', bgColor: 'bg-emerald-500/10', title: 'Instant Orders', desc: 'Get push notifications for new sales.' },
+    { icon: Zap, color: 'text-blue-500', bgColor: 'bg-blue-500/10', title: 'Traffic Insights', desc: 'Monitor your store views and trends.' },
+    { icon: Package, color: 'text-violet-500', bgColor: 'bg-violet-500/10', title: 'Full Control', desc: 'Manage inventory and settings on the go.' }
   ];
 
   const displayFeatures = isAdmin ? adminFeatures : features;
@@ -127,31 +127,31 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative w-full transform overflow-hidden rounded-t-[2.5rem] bg-white dark:bg-modal-background text-left align-middle shadow-2xl transition-all flex flex-col max-h-[92vh] sm:max-w-md sm:rounded-2xl sm:max-h-[85vh]">
+              <Dialog.Panel className="relative w-full transform overflow-hidden rounded-t-[2.5rem] bg-white dark:bg-modal-background text-left align-middle shadow-2xl transition-all flex flex-col max-h-[70vh] sm:max-w-md sm:rounded-2xl sm:max-h-[85vh]">
 
                 {/* Mobile Handle Bar */}
-                <div className="flex-shrink-0 pt-4 pb-2 flex justify-center sm:hidden">
+                <div className="flex-shrink-0 pt-4 pb-1 flex justify-center sm:hidden">
                   <div className="w-12 h-1.5 rounded-full bg-gray-200 dark:bg-gray-800" />
                 </div>
 
                 {/* Header */}
-                <div className="flex-shrink-0 px-6 pt-2 pb-4 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-white font-bold shadow-lg">
+                <div className="flex-shrink-0 px-6 pt-3 pb-5 flex items-center justify-between border-b border-gray-100 dark:border-gray-800/50">
+                  <div className="flex items-center gap-4">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-white font-extrabold text-xl shadow-lg ring-4 ring-violet-500/10">
                       {storeInitials}
                     </div>
-                    <div>
-                      <h2 className="text-xl font-black text-gray-900 dark:text-white leading-tight">
+                    <div className="flex flex-col">
+                      <h2 className="text-xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight">
                         {titleText}
                       </h2>
-                      <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                      <p className="text-[13px] font-medium text-gray-500 dark:text-gray-400 mt-0.5">
                         {subtitleText}
                       </p>
                     </div>
                   </div>
                   <button
                     type="button"
-                    className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
+                    className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-all shadow-sm active:scale-90"
                     onClick={handleDismiss}
                   >
                     <X className="h-5 w-5" />
@@ -159,66 +159,66 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
                 </div>
 
                 {/* Main Content Area - Scrollable */}
-                <div className="flex-grow overflow-y-auto px-6 py-4 hide-scrollbar">
+                <div className="flex-grow overflow-y-auto px-6 py-6 hide-scrollbar space-y-6">
                   {showIosInstructions ? (
-                    <div className="space-y-6 pb-4">
-                      <div className="flex flex-col items-center text-center space-y-4 py-4">
-                        <div className="w-16 h-16 rounded-2xl bg-blue-100 dark:bg-blue-500/10 flex items-center justify-center shadow-inner">
+                    <div className="space-y-6">
+                      <div className="flex flex-col items-center text-center space-y-4">
+                        <div className="w-16 h-16 rounded-[2rem] bg-blue-500/10 flex items-center justify-center shadow-inner">
                           <Share className="w-8 h-8 text-blue-500" />
                         </div>
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">
+                        <h3 className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
                           Add to Home Screen
                         </h3>
                       </div>
 
                       <div className="space-y-4">
-                        <div className="flex items-center gap-4 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
-                          <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm">
-                            <Share className="w-5 h-5 text-blue-500" />
+                        <div className="flex items-center gap-5 bg-gray-50 dark:bg-gray-900/50 p-5 rounded-3xl border border-gray-100 dark:border-gray-800/50">
+                          <div className="w-12 h-12 rounded-2xl bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm shrink-0">
+                            <Share className="w-6 h-6 text-blue-500" />
                           </div>
-                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            1. Tap the <strong className="text-gray-900 dark:text-white">Share</strong> button in your browser.
+                          <p className="text-[15px] font-medium text-gray-700 dark:text-gray-300 leading-relaxed">
+                            1. Tap the <strong className="text-gray-900 dark:text-white font-bold">Share</strong> button in your browser toolbar.
                           </p>
                         </div>
-                        <div className="flex items-center gap-4 bg-gray-50 dark:bg-gray-900/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-800">
-                          <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm">
-                            <PlusSquare className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                        <div className="flex items-center gap-5 bg-gray-50 dark:bg-gray-900/50 p-5 rounded-3xl border border-gray-100 dark:border-gray-800/50">
+                          <div className="w-12 h-12 rounded-2xl bg-white dark:bg-gray-800 flex items-center justify-center shadow-sm shrink-0">
+                            <PlusSquare className="w-6 h-6 text-gray-600 dark:text-gray-400" />
                           </div>
-                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                            2. Select <strong className="text-gray-900 dark:text-white">Add to Home Screen</strong> from the menu.
+                          <p className="text-[15px] font-medium text-gray-700 dark:text-gray-300 leading-relaxed">
+                            2. Find and tap <strong className="text-gray-900 dark:text-white font-bold">Add to Home Screen</strong>.
                           </p>
                         </div>
                       </div>
 
-                      <div className="pt-4 flex flex-col items-center animate-bounce opacity-50">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">Look for the button below</span>
-                        <div className="w-px h-10 bg-gradient-to-b from-gray-300 dark:from-gray-700 to-transparent mt-2" />
+                      <div className="pt-6 flex flex-col items-center animate-bounce opacity-40">
+                        <span className="text-[11px] font-bold text-gray-400 uppercase tracking-[0.3em]">Follow below</span>
+                        <div className="w-px h-12 bg-gradient-to-b from-gray-300 dark:from-gray-700 to-transparent mt-3" />
                       </div>
                     </div>
                   ) : (
-                    <div className="space-y-4 pb-4">
+                    <div className="space-y-6">
                       {/* Premium Banner */}
-                      <div className="bg-gradient-to-r from-violet-500/10 to-cyan-500/10 rounded-2xl p-4 border border-violet-500/20 flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-violet-500 flex items-center justify-center text-white shrink-0 shadow-lg shadow-violet-500/20">
-                          <Sparkles className="w-5 h-5" />
+                      <div className="bg-gradient-to-br from-violet-500/10 via-violet-500/5 to-cyan-500/5 rounded-3xl p-5 border border-violet-500/10 flex items-center gap-5 shadow-sm">
+                        <div className="w-12 h-12 rounded-2xl bg-violet-500 flex items-center justify-center text-white shrink-0 shadow-lg shadow-violet-500/30">
+                          <Sparkles className="w-6 h-6" />
                         </div>
-                        <p className="text-sm font-bold text-violet-700 dark:text-violet-300">
-                          Unlock the full premium experience.
+                        <p className="text-[15px] font-bold text-violet-800 dark:text-violet-300 leading-snug">
+                          Upgrade to the full premium shopping experience.
                         </p>
                       </div>
 
                       {/* Feature Items */}
-                      <div className="grid grid-cols-1 gap-3">
+                      <div className="space-y-3">
                         {displayFeatures.map((feature, idx) => (
-                          <div key={idx} className="flex items-start gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-900/50 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors group">
-                            <div className={`w-12 h-12 rounded-xl ${feature.bgColor} flex items-center justify-center shrink-0 transition-transform group-hover:scale-110`}>
-                              <feature.icon className={`w-6 h-6 ${feature.color}`} />
+                          <div key={idx} className="flex items-center gap-5 p-5 rounded-[2rem] bg-white dark:bg-gray-900/30 border border-gray-100 dark:border-gray-800/60 hover:border-violet-500/30 transition-all group shadow-sm hover:shadow-md">
+                            <div className={`w-14 h-14 rounded-2xl ${feature.bgColor} flex items-center justify-center shrink-0 transition-all group-hover:scale-110 ring-4 ring-transparent group-hover:ring-violet-500/5`}>
+                              <feature.icon className={`w-7 h-7 ${feature.color}`} />
                             </div>
-                            <div className="pt-0.5">
-                              <h3 className="font-bold text-gray-900 dark:text-white leading-tight">
+                            <div className="flex flex-col">
+                              <h3 className="font-bold text-gray-900 dark:text-white text-[16px]">
                                 {feature.title}
                               </h3>
-                              <p className="text-[13px] text-gray-500 dark:text-gray-400 mt-1 leading-snug">
+                              <p className="text-[13.5px] text-gray-500 dark:text-gray-400 mt-1 leading-snug font-medium">
                                 {feature.desc}
                               </p>
                             </div>
@@ -227,27 +227,25 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
                       </div>
 
                       {/* App Stats */}
-                      <div className="flex justify-center gap-8 py-4 border-t border-gray-100 dark:border-gray-800 mt-2">
-                        <div className="text-center">
-                          <p className="text-lg font-black text-gray-900 dark:text-white">4.9</p>
-                          <div className="flex items-center gap-0.5 justify-center mb-1">
+                      <div className="flex items-center justify-around py-6 border-t border-gray-100 dark:border-gray-800/60">
+                        <div className="flex flex-col items-center">
+                          <span className="text-xl font-black text-gray-900 dark:text-white">4.9</span>
+                          <div className="flex items-center gap-0.5 mt-1">
                             {[1, 2, 3, 4, 5].map(i => <Star key={i} className="w-2.5 h-2.5 fill-amber-400 text-amber-400" />)}
                           </div>
-                          <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Rating</p>
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">Rating</span>
                         </div>
-                        <div className="text-center border-x border-gray-100 dark:border-gray-800 px-8">
-                          <p className="text-lg font-black text-gray-900 dark:text-white">5MB</p>
-                          <div className="h-3 mb-1 flex items-center justify-center">
-                            <Smartphone className="w-3 h-3 text-gray-400" />
-                          </div>
-                          <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Size</p>
+                        <div className="h-10 w-px bg-gray-100 dark:bg-gray-800/60" />
+                        <div className="flex flex-col items-center">
+                          <span className="text-xl font-black text-gray-900 dark:text-white">5MB</span>
+                          <Smartphone className="w-4 h-4 text-gray-400 mt-1" />
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">Size</span>
                         </div>
-                        <div className="text-center">
-                          <p className="text-lg font-black text-gray-900 dark:text-white">100k+</p>
-                          <div className="h-3 mb-1 flex items-center justify-center">
-                            <Download className="w-3 h-3 text-gray-400" />
-                          </div>
-                          <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wider">Users</p>
+                        <div className="h-10 w-px bg-gray-100 dark:bg-gray-800/60" />
+                        <div className="flex flex-col items-center">
+                          <span className="text-xl font-black text-gray-900 dark:text-white">100k+</span>
+                          <Download className="w-4 h-4 text-gray-400 mt-1" />
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">Users</span>
                         </div>
                       </div>
                     </div>
@@ -255,22 +253,22 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
                 </div>
 
                 {/* Fixed Footer */}
-                <div className="flex-shrink-0 p-6 bg-white dark:bg-modal-background border-t border-gray-100 dark:border-gray-800">
+                <div className="flex-shrink-0 p-6 bg-white dark:bg-[#09090b] border-t border-gray-100 dark:border-gray-800/60">
                   <button
                     onClick={showIosInstructions ? handleDismiss : handleInstall}
-                    className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 py-4 rounded-xl font-black text-lg flex items-center justify-center gap-3 shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all"
+                    className="w-full bg-gray-900 dark:bg-white text-white dark:text-gray-900 h-[60px] rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-2xl hover:brightness-110 active:scale-[0.98] transition-all"
                   >
                     {showIosInstructions ? (
                       <span>Got It</span>
                     ) : (
                       <>
-                        <Download className="w-5 h-5" />
+                        <Download className="w-6 h-6" />
                         <span>Install App</span>
                       </>
                     )}
                   </button>
                   {!showIosInstructions && (
-                    <p className="text-[11px] text-center text-gray-400 mt-3 font-medium uppercase tracking-widest">
+                    <p className="text-[11px] text-center text-gray-400 mt-4 font-bold uppercase tracking-[0.3em] opacity-60">
                       Fast • Secure • Premium
                     </p>
                   )}
