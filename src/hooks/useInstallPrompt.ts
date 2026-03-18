@@ -71,9 +71,19 @@ export function useInstallPrompt() {
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
     window.addEventListener('appinstalled', handleAppInstalled);
 
+    // Add listener for manual trigger (e.g. triple tap in navbar)
+    const handleManualTrigger = () => {
+      if (localStorage.getItem(PWA_INSTALLED_KEY) !== 'true') {
+        setShowPrompt(true);
+        console.log('PWA prompt manually triggered.');
+      }
+    };
+    window.addEventListener('trigger-pwa-install', handleManualTrigger);
+
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       window.removeEventListener('appinstalled', handleAppInstalled);
+      window.removeEventListener('trigger-pwa-install', handleManualTrigger);
     };
   }, []);
 

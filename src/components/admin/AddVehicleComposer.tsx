@@ -115,13 +115,13 @@ const FloatingLabelInput = ({ label, type = "text", value, onChange, placeholder
                     type={type}
                     value={value}
                     onChange={onChange}
-                    className={`block w-full rounded-xl border-0 py-4 ${prefix ? 'pl-8' : 'pl-4'} pr-4 text-zinc-900 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-800/50 ring-1 ring-inset ring-zinc-200 dark:ring-zinc-700 placeholder:text-transparent focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 transition-all peer`}
+                    className={`block w-full rounded-xl border-0 py-4 ${prefix ? 'pl-8' : 'pl-4'} pr-4 text-zinc-900 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-800/50 ring-1 ring-inset ring-zinc-200 dark:ring-zinc-700 placeholder:text-zinc-400 focus:ring-2 focus:ring-inset focus:ring-blue-600 sm:text-sm sm:leading-6 transition-all peer`}
                     placeholder={placeholder || label}
                 />
             )}
             <label
                 htmlFor={inputId}
-                className="absolute left-4 -top-2.5 bg-white dark:bg-zinc-950 px-1 text-xs font-medium text-blue-600 dark:text-blue-400 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-zinc-500 peer-placeholder-shown:top-4 peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-blue-600 pointer-events-none"
+                className="absolute left-4 -top-2.5 bg-white dark:bg-zinc-950 px-1 text-xs font-medium text-blue-600 dark:text-blue-400 transition-all peer-placeholder-shown:text-[13px] sm:peer-placeholder-shown:text-base peer-placeholder-shown:text-zinc-500 peer-placeholder-shown:top-4 peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-blue-600 pointer-events-none"
             >
                 {label}
             </label>
@@ -375,7 +375,7 @@ const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose
                         {/* Image Preview Strip */}
                         <div className="flex gap-4 overflow-x-auto pb-4 snap-x">
                             {vehicleData.files.map((item, i) => (
-                                <div key={item.id} className="relative flex-none w-24 h-24 rounded-2xl border-2 border-zinc-200 dark:border-zinc-800 overflow-hidden group snap-center shadow-sm">
+                                <div key={item.id} className="relative flex-none w-24 h-24 rounded-2xl border-2 border-zinc-200 dark:border-zinc-800 overflow-hidden snap-center shadow-sm">
                                     <Image src={URL.createObjectURL(item.file)} alt="preview" fill className="object-cover" />
 
                                     {/* Status Overlay */}
@@ -386,15 +386,16 @@ const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose
                                         {item.status === 'error' && <AlertCircle className="w-3 h-3 text-red-500" />}
                                     </div>
 
-                                    {/* Hover Delete Action */}
-                                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                        <button
-                                            onClick={() => removeFile(i)}
-                                            className="p-2 bg-red-500 text-white rounded-full hover:scale-110 transition-transform shadow-lg"
-                                        >
-                                            <Trash2 className="w-4 h-4" />
-                                        </button>
-                                    </div>
+                                    {/* Delete Button - Red circle with white X at top-right */}
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            removeFile(i);
+                                        }}
+                                        className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg z-10"
+                                    >
+                                        <X className="w-3.5 h-3.5 stroke-[3px]" />
+                                    </button>
                                 </div>
                             ))}
                             <button
@@ -406,12 +407,12 @@ const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
-                            <FloatingLabelInput label="Make (e.g. Toyota)" value={vehicleData.make} onChange={(e) => handleChange('make', e.target.value)} />
-                            <FloatingLabelInput label="Model (e.g. Camry)" value={vehicleData.model} onChange={(e) => handleChange('model', e.target.value)} />
+                            <FloatingLabelInput label="Make" value={vehicleData.make} onChange={(e) => handleChange('make', e.target.value)} placeholder="e.g. Toyota" />
+                            <FloatingLabelInput label="Model" value={vehicleData.model} onChange={(e) => handleChange('model', e.target.value)} placeholder="e.g. Camry" />
                         </div>
                         <div className="grid grid-cols-2 gap-4">
                             <FloatingLabelInput label="Year" type="number" value={vehicleData.year} onChange={(e) => handleChange('year', parseInt(e.target.value))} />
-                            <FloatingLabelInput label="Mileage (km)" type="number" value={vehicleData.mileage} onChange={(e) => handleChange('mileage', parseInt(e.target.value))} />
+                            <FloatingLabelInput label="Mileage (km)" type="number" value={vehicleData.mileage === 0 ? '' : vehicleData.mileage} onChange={(e) => handleChange('mileage', parseInt(e.target.value) || 0)} />
                         </div>
 
                         <div>
@@ -503,13 +504,14 @@ const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose
                 );
 
             case 3: // Pricing Step
-                const commissionAmount = (vehicleData.price || 0) * (vehicleData.commission / 100);
                 return (
                     <motion.div key={3} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
                         <FloatingLabelInput label="Price" type="number" prefix="₦" value={vehicleData.price === 0 ? '' : vehicleData.price} onChange={(e) => handleChange('price', parseFloat(e.target.value) || 0)} />
 
                         <FloatingLabelInput label="Description / Seller Notes" as="textarea" value={vehicleData.description} onChange={(e) => handleChange('description', e.target.value)} placeholder="Any faults? Key features?..." />
 
+                        {/* Commission Section Hidden by user request */}
+                        {/* 
                         <div className="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
                             <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-4 block">Commission + Referral Bonus</label>
                             <div className="space-y-6">
@@ -523,12 +525,12 @@ const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose
                                         <div className="text-xs text-zinc-500 uppercase tracking-tighter">Bonus Amount</div>
                                     </div>
                                 </div>
-                                <input
-                                    type="range"
+                                <input 
+                                    type="range" 
                                     min="2" max="15" step="0.5"
-                                    value={vehicleData.commission}
-                                    onChange={e => handleChange('commission', parseFloat(e.target.value))}
-                                    className="w-full h-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-blue-600"
+                                    value={vehicleData.commission} 
+                                    onChange={e => handleChange('commission', parseFloat(e.target.value))} 
+                                    className="w-full h-2 bg-zinc-200 dark:bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-blue-600" 
                                 />
                                 <div className="flex justify-between text-[10px] font-bold text-zinc-400 uppercase tracking-widest px-1">
                                     <span>Standard (2%)</span>
@@ -536,6 +538,7 @@ const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose
                                 </div>
                             </div>
                         </div>
+                        */}
                     </motion.div>
                 );
 
@@ -610,9 +613,6 @@ const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg">
                                 <Car className="w-6 h-6 text-white" />
                             </div>
-                            <button onClick={handleClose} className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors">
-                                <X className="w-6 h-6 text-zinc-500" />
-                            </button>
                         </div>
                     </header>
 
@@ -657,7 +657,7 @@ const AddVehicleComposer: React.FC<AddVehicleComposerProps> = ({ isOpen, onClose
                                         disabled={isUploading}
                                         className="flex-1 py-3.5 rounded-xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold hover:opacity-90 transition-opacity flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
                                     >
-                                        {currentStep === 3 ? (isUploading ? 'Uploading...' : 'Upload Vehicle') : 'Next'} <ChevronRight className="w-5 h-5" />
+                                        {currentStep === 3 ? (isUploading ? 'Uploading...' : 'Upload') : 'Next'} <ChevronRight className="w-5 h-5" />
                                     </button>
                                 </>
                             )}

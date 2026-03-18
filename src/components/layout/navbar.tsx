@@ -186,8 +186,9 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
     setTimeout(() => { isCopyingRef.current = false; }, 2000);
 
     const url = `https://tinyurl.com/bizconnet/${storeId}`;
+    const caption = `Check out ${storeName || 'this store'} Online Store: ${url}`;
 
-    navigator.clipboard.writeText(url)
+    navigator.clipboard.writeText(caption)
       .then(() => {
         toast.success(`Link for ${storeName || 'Store'} copied!`, {
           duration: 2000,
@@ -203,27 +204,28 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
       .catch(() => toast.error('Failed to copy link'));
   };
 
-  const handleDoubleTapSpace = () => {
+  const tapCountSpaceRef = useRef(0);
+  const idleResetSpaceRef = useRef<NodeJS.Timeout | null>(null);
+
+  const handleTapSpace = () => {
     if (!storeId) return;
 
-    const now = Date.now();
-    const timeSinceLastClick = now - lastClickTimeRef.current;
+    if (idleResetSpaceRef.current) clearTimeout(idleResetSpaceRef.current);
+    tapCountSpaceRef.current += 1;
 
-    // DOUBLE TAP DETECTED
-    if (timeSinceLastClick < 300) {
-      if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
-      lastClickTimeRef.current = 0; // Reset
+    if (tapCountSpaceRef.current === 2) {
       executeCopy();
+    } else if (tapCountSpaceRef.current >= 3) {
+      // Trigger PWA Install
+      window.dispatchEvent(new CustomEvent('trigger-pwa-install'));
+      if (navigator.vibrate) navigator.vibrate([30, 50, 30]);
+      tapCountSpaceRef.current = 0;
       return;
     }
 
-    // FIRST TAP DELAY LOGIC
-    lastClickTimeRef.current = now;
-    if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
-
-    clickTimeoutRef.current = setTimeout(() => {
-      // Allow the single tap to do nothing in the empty space
-    }, 300);
+    idleResetSpaceRef.current = setTimeout(() => {
+      tapCountSpaceRef.current = 0;
+    }, 400);
   };
 
   // --- SuperAdmin Secret Access ---
@@ -257,10 +259,10 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
         <div className="flex h-16 justify-between items-center relative">
 
-          {/* Invisible Double-Tap Space Wrapper */}
+          {/* Invisible Gesture Space Wrapper */}
           <div
             className="absolute inset-0 z-0"
-            onClick={handleDoubleTapSpace}
+            onClick={handleTapSpace}
           />
 
           <div className="flex items-center gap-2 relative z-10 pointer-events-auto">

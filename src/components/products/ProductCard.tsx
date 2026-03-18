@@ -279,7 +279,9 @@ export default function ProductCard({
 
     const finalStoreId = storeId || product.storeId || 'bizcon';
     const url = `https://tinyurl.com/bizconnet/${finalStoreId}/products/${product.id}`;
-    navigator.clipboard.writeText(url)
+    const caption = `Check out ${product.name} at ${storeMeta?.name || 'our store'} Online Store: ${url}`;
+
+    navigator.clipboard.writeText(caption)
       .then(() => {
         toast.success(`Link for "${product.name}" copied!`, {
           duration: 2000,

@@ -91,7 +91,7 @@ function CategoryButton({
           onClick();
         }, 300);
       }}
-      style={{ touchAction: 'pan-y', WebkitUserSelect: 'none', userSelect: 'none', WebkitTapHighlightColor: 'transparent' }}
+      style={{ touchAction: 'auto', WebkitUserSelect: 'none', userSelect: 'none', WebkitTapHighlightColor: 'transparent' }}
       className="flex flex-col items-center w-[72px] sm:w-[80px] flex-shrink-0"
       whileTap={{ scale: 0.95 }}
       transition={{ type: 'spring', stiffness: 400, damping: 17 }}
@@ -131,6 +131,7 @@ interface CategoryBarProps {
   scrollDirection?: 'up' | 'down';
   storeType?: string | null;
   storeId?: string;
+  storeName?: string;
 }
 
 export default function CategoryBar({
@@ -141,6 +142,7 @@ export default function CategoryBar({
   scrollDirection = 'up',
   storeType,
   storeId = 'bizcon',
+  storeName,
 }: CategoryBarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
@@ -156,8 +158,9 @@ export default function CategoryBar({
     setTimeout(() => { isCopyingRef.current = false; }, 2000);
 
     const url = `https://tinyurl.com/bizconnet/${storeId}?category=${category.id}`;
+    const caption = `Check out the ${category.name} category at ${storeName || 'our store'} Online Store: ${url}`;
 
-    navigator.clipboard.writeText(url)
+    navigator.clipboard.writeText(caption)
       .then(() => {
         toast.success(`Link for ${category.name} copied!`, {
           duration: 2000,

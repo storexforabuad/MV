@@ -487,6 +487,7 @@ export default function StorefrontPageClient({
         scrollDirection={scrollDirection}
         storeType={storeMeta?.storeType}
         storeId={storeId}
+        storeName={storeName}
       />
       <CustomerLookupModal
         isOpen={isLoginModalOpen}
