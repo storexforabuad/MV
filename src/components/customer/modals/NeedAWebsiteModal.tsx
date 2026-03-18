@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Globe, ArrowRight, AlertCircle, Check, CreditCard, Sparkles, Package, Share2, MessageCircle } from 'lucide-react';
+import { X, Globe, ArrowRight, AlertCircle, Check, CreditCard, Sparkles, Package, Share2, MessageCircle, Store } from 'lucide-react';
 import { useWebsiteRegistrationModal } from '@/hooks/useWebsiteRegistrationModal';
 import { useModalBackNavigation } from '@/hooks/useModalBackNavigation';
 import CountryStateSelector from '@/components/shared/CountryStateSelector';
@@ -10,6 +10,7 @@ import ProgressIndicator from '@/components/shared/ProgressIndicator';
 import { TIER_DETAILS, RAMADAN_PROMO_END_DATE, STORE_TYPES } from '@/config/countries';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
+import { getStoreMeta } from '@/lib/db';
 
 interface NeedAWebsiteModalProps {
   isOpen: boolean;
@@ -21,6 +22,17 @@ interface NeedAWebsiteModalProps {
 const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsiteModalProps) => {
   const modal = useWebsiteRegistrationModal();
   const contentRef = useRef<HTMLDivElement>(null);
+  const [storeMeta, setStoreMeta] = useState<any | null>(null);
+
+  useEffect(() => {
+    const fetchStoreMeta = async () => {
+      if (storeId) {
+        const meta = await getStoreMeta(storeId);
+        setStoreMeta(meta);
+      }
+    };
+    fetchStoreMeta();
+  }, [storeId]);
 
   const is420Hub = storeId === '420-Hub' || storeName === '420-Hub' || storeName === '420 Hub';
   const isStunnerStores = storeId?.toLowerCase().includes('stunner') || storeName?.toLowerCase().includes('stunner');
@@ -168,8 +180,12 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
         <div className={`sticky top-0 px-6 py-4 border-b border-slate-700/50 flex-shrink-0 z-10 ${isStunnerStores ? 'bg-gradient-to-r from-zinc-950 to-violet-950' : is420Hub ? 'bg-gradient-to-r from-zinc-950 to-emerald-950' : 'bg-gradient-to-r from-slate-900 to-blue-950'}`}>
           <div className="flex items-center justify-between gap-3 mb-3">
             <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${isStunnerStores ? 'bg-violet-500/10 border-violet-500/20' : is420Hub ? 'bg-emerald-400/10 border-emerald-400/20' : 'bg-amber-400/10 border-amber-400/20'}`}>
-                <Globe className={isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} size={20} />
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center border overflow-hidden ${isStunnerStores ? 'bg-violet-500/10 border-violet-500/20' : is420Hub ? 'bg-emerald-400/10 border-emerald-400/20' : 'bg-amber-400/10 border-amber-400/20'}`}>
+                {storeMeta?.logo && typeof storeMeta.logo === 'string' && storeMeta.logo.startsWith('http') ? (
+                  <img src={storeMeta.logo} alt={storeName || 'Store Logo'} className="w-full h-full object-cover" />
+                ) : (
+                  <Globe className={isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} size={20} />
+                )}
               </div>
               <h2 className="text-xl font-bold text-white">Get Your Website</h2>
             </div>

@@ -1,13 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/db';
 import { toast } from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Briefcase, Loader2, User, MapPin, CreditCard, Store, ChevronRight, X, Lock } from 'lucide-react';
 import { StoreMeta } from '@/types/store';
 import { geography } from '../../../config/geography';
+import { uploadImageToCloudinary } from "../../../lib/cloudinaryClient";
+import { compressImage } from "../../../utils/imageCompression";
+import Image from "next/image";
+import { Briefcase, Loader2, User, MapPin, CreditCard, Store, ChevronRight, X, Lock, ImagePlus } from 'lucide-react';
 
 interface AccountModalProps {
   isOpen: boolean;
@@ -161,6 +164,9 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
   const [initialData, setInitialData] = useState<Partial<StoreMeta>>({});
   const [banks, setBanks] = useState<{ name: string; code: string }[]>([]);
   const [fetchingBanks, setFetchingBanks] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!storeId || !isOpen) return;
@@ -209,10 +215,40 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
     return () => { mounted = false; };
   }, [storeId, isOpen]);
 
+  useEffect(() => {
+    if (formData.logo) {
+      setLogoPreview(formData.logo);
+    }
+  }, [formData.logo]);
+
+  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSave = async () => {
     if (!storeId) return;
     setLoading(true);
     try {
+      let finalLogo = formData.logo;
+
+      if (logoFile) {
+        try {
+          const compressedFile = await compressImage(logoFile);
+          finalLogo = await uploadImageToCloudinary(compressedFile, 'stores');
+        } catch (err) {
+          console.error('Logo upload failed', err);
+          toast.error('Logo upload failed, but other changes will be saved');
+        }
+      }
+
       const ref = doc(db, 'stores', storeId);
       // Filter out undefined values to avoid Firestore errors
       const dataToUpdate = Object.entries(formData).reduce((acc, [key, value]) => {
@@ -222,7 +258,17 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
         return acc;
       }, {} as any);
 
+      if (finalLogo) {
+        dataToUpdate.logo = finalLogo;
+      }
+
       await updateDoc(ref, dataToUpdate);
+
+      // Update local state with new logo and other changes
+      const updatedFormData = { ...formData, logo: finalLogo };
+      setFormData(updatedFormData);
+      setInitialData(updatedFormData);
+      setLogoFile(null); // Clear pending file as it's now saved
 
       // Trigger Paystack Subaccount creation/update if bank details changed
       if (
@@ -256,9 +302,8 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
         }
       }
 
-      setInitialData(formData); // Update initial data after successful save
+      // State already updated above with updatedFormData
       toast.success('Account details saved successfully');
-      handleClose();
     } catch (err) {
       console.error('Failed to save account details', err);
       toast.error('Failed to save changes');
@@ -277,7 +322,7 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
   };
 
   // Check if form is dirty (has changes)
-  const isDirty = JSON.stringify(formData) !== JSON.stringify(initialData);
+  const isDirty = JSON.stringify(formData) !== JSON.stringify(initialData) || !!logoFile;
 
   const modalVariants = { hidden: { opacity: 0, y: '100%' }, visible: { opacity: 1, y: 0 }, exit: { opacity: 0, y: '100%' } };
 
@@ -295,15 +340,15 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className="fixed inset-0 z-50 flex flex-col bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-white sm:p-4 md:p-6"
+          className="fixed inset-0 z-50 flex flex-col bg-slate-50 dark:bg-zinc-950 text-slate-900 dark:text-white sm:p-4 md:p-6 h-[100dvh] sm:h-auto overflow-hidden"
           initial="hidden" animate="visible" exit="exit"
           variants={modalVariants}
           transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
         >
-          <div className="flex-grow flex flex-col sm:flex-row bg-white dark:bg-zinc-900 sm:rounded-2xl sm:shadow-2xl overflow-hidden max-w-6xl mx-auto w-full h-full sm:h-[90vh] sm:max-h-[800px]">
+          <div className="flex-grow flex flex-col sm:flex-row bg-white dark:bg-zinc-900 sm:rounded-2xl sm:shadow-2xl overflow-hidden max-w-6xl mx-auto w-full h-full sm:h-[90vh] sm:max-h-[800px] min-h-0 sm:min-h-0">
 
             {/* --- Sidebar Navigation --- */}
-            <aside className="w-full sm:w-64 bg-slate-50 dark:bg-zinc-900/50 border-b sm:border-b-0 sm:border-r border-slate-200 dark:border-zinc-800 flex-shrink-0 flex flex-col">
+            <aside className="w-full sm:w-64 bg-slate-50 dark:bg-zinc-900/50 border-b sm:border-b-0 sm:border-r border-slate-200 dark:border-zinc-800 flex-shrink-0 flex flex-col min-h-0">
               <div className="p-4 sm:p-6 border-b border-slate-200 dark:border-zinc-800 flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-bold text-slate-900 dark:text-white">Account Details</h2>
@@ -348,7 +393,7 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
             </aside>
 
             {/* --- Main Content --- */}
-            <main className="flex-grow flex flex-col min-w-0 bg-white dark:bg-zinc-900 relative">
+            <main className="flex-grow flex flex-col min-w-0 min-h-0 bg-white dark:bg-zinc-900 relative">
               {/* Header for Desktop */}
               <div className="hidden sm:flex items-center justify-between p-6 border-b border-slate-100 dark:border-zinc-800">
                 <div>
@@ -360,17 +405,47 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
                 </button>
               </div>
 
-              <div className="flex-grow overflow-y-auto p-4 sm:p-8">
+              <div className="flex-grow overflow-y-auto min-h-0 p-4 sm:p-8">
                 {fetching ? (
                   <div className="h-full flex items-center justify-center">
                     <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
                   </div>
                 ) : (
-                  <div className="max-w-2xl mx-auto space-y-8 pb-20 sm:pb-0">
+                  <div className="max-w-2xl mx-auto space-y-8 pb-32 sm:pb-8">
 
                     {/* --- Business Profile Section --- */}
                     {activeSection === 'business' && (
                       <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        {/* Logo Upload UI */}
+                        <div className="flex flex-col items-center justify-center py-4 border-b border-slate-100 dark:border-zinc-800 mb-6">
+                          <div
+                            className="w-28 h-28 rounded-2xl border-2 border-dashed border-slate-300 dark:border-zinc-700 flex items-center justify-center cursor-pointer hover:border-indigo-500 dark:hover:border-indigo-400 transition-all relative overflow-hidden group shadow-sm bg-slate-50 dark:bg-zinc-950"
+                            onClick={() => fileInputRef.current?.click()}
+                          >
+                            {logoPreview ? (
+                              <div className="relative w-full h-full">
+                                <Image src={logoPreview} alt="Logo Preview" fill className="object-cover" />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                  <ImagePlus className="w-6 h-6 text-white" />
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="flex flex-col items-center text-slate-400 dark:text-zinc-500 group-hover:text-indigo-500 dark:group-hover:text-indigo-400 transition-colors">
+                                <ImagePlus className="w-8 h-8 mb-1" />
+                                <span className="text-[10px] font-medium">Upload Logo</span>
+                              </div>
+                            )}
+                            <input
+                              type="file"
+                              ref={fileInputRef}
+                              onChange={handleLogoChange}
+                              className="hidden"
+                              accept="image/*"
+                            />
+                          </div>
+                          <p className="text-xs text-slate-500 dark:text-zinc-400 mt-3 font-medium">Tap to upload your store logo</p>
+                        </div>
+
                         <div>
                           <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">Store Name <span className="text-xs text-slate-400 font-normal ml-1">(Read-only)</span></label>
                           <input

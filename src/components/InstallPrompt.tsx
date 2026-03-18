@@ -22,6 +22,7 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
     (typeof params?.storeId === 'string' ? params.storeId : (Array.isArray(params?.storeId) ? params.storeId[0] : '')) ||
     searchParams?.get('storeId') ||
     '';
+  const [storeMeta, setStoreMeta] = useState<any | null>(null);
   const [storeName, setStoreName] = useState('');
 
   const isAdmin = pathname?.startsWith('/admin') || pathname === '/signin';
@@ -29,12 +30,13 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
   const isReferralDashboard = /^\/(register|start)\/[^/]+\/dashboard\/?$/.test(pathname || '');
 
   useEffect(() => {
-    async function fetchStoreName() {
+    async function fetchStoreData() {
       if (!storeId) return;
       const meta = await getStoreMeta(storeId);
+      setStoreMeta(meta);
       setStoreName(meta?.name || storeId || 'The Store App');
     }
-    fetchStoreName();
+    fetchStoreData();
   }, [storeId]);
 
   if (!showPrompt || (!storeId && !isRoadmap && !isReferralDashboard)) return null;
@@ -137,8 +139,24 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
                 {/* Header */}
                 <div className="flex-shrink-0 px-6 pt-3 pb-5 flex items-center justify-between border-b border-gray-100 dark:border-gray-800/50">
                   <div className="flex items-center gap-4">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-violet-500 to-cyan-500 flex items-center justify-center text-white font-extrabold text-xl shadow-lg ring-4 ring-violet-500/10">
-                      {storeInitials}
+                    <div className="relative group">
+                      <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-[2rem] flex items-center justify-center text-white text-2xl font-black shadow-xl ring-4 ring-white dark:ring-zinc-900 overflow-hidden">
+                        {storeMeta?.logo && typeof storeMeta.logo === 'string' && storeMeta.logo.startsWith('http') ? (
+                          <img
+                            key={storeMeta.logo}
+                            src={storeMeta.logo}
+                            alt={storeMeta.name || 'Store'}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="relative z-10">{storeInitials}</span>
+                        )}
+                      </div>
+                      <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-white dark:bg-zinc-800 rounded-2xl shadow-lg flex items-center justify-center border-4 border-slate-50 dark:border-zinc-950">
+                        <div className="w-full h-full bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                          <Download size={14} className="text-white" />
+                        </div>
+                      </div>
                     </div>
                     <div className="flex flex-col">
                       <h2 className="text-xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight">

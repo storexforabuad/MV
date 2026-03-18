@@ -14,7 +14,7 @@ type Category = {
 
 const ICON_MAP: Record<string, string> = {
   'Promo': '🔥',
-  'Popular': '💖',
+  'Popular': '❤️',
   'New Arrivals': '⭐',
 };
 

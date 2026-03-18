@@ -10,9 +10,10 @@ import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 interface StoreInquiryModalProps {
   isOpen: boolean;
   onClose: () => void;
+  logoUrl?: string;
 }
 
-const StoreInquiryModal = ({ isOpen, onClose }: StoreInquiryModalProps) => {
+const StoreInquiryModal = ({ isOpen, onClose, logoUrl }: StoreInquiryModalProps) => {
   const [businessName, setBusinessName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -79,6 +80,14 @@ const StoreInquiryModal = ({ isOpen, onClose }: StoreInquiryModalProps) => {
                       <X size={24} className="text-slate-600 dark:text-slate-300" />
                     </button>
                   </div>
+
+                  {logoUrl && (
+                    <div className="flex justify-center mb-6">
+                      <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-lg ring-4 ring-white dark:ring-slate-800">
+                        <img src={logoUrl} alt="Store Logo" className="w-full h-full object-cover" />
+                      </div>
+                    </div>
+                  )}
 
                   <p className="text-sm text-slate-600 dark:text-slate-400 mb-6">
                     For just <span className="font-bold text-indigo-600 dark:text-indigo-400">₦5,000</span>, you can get a beautiful online store just like this one to grow your business.
