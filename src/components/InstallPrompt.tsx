@@ -127,7 +127,7 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
               leaveFrom="opacity-100 translate-y-0 sm:scale-100"
               leaveTo="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95"
             >
-              <Dialog.Panel className="relative w-full transform overflow-hidden rounded-t-[2.5rem] bg-white dark:bg-modal-background text-left align-middle shadow-2xl transition-all flex flex-col max-h-[70vh] sm:max-w-md sm:rounded-2xl sm:max-h-[85vh]">
+              <Dialog.Panel className="relative w-full transform overflow-hidden rounded-t-[2.5rem] bg-white dark:bg-modal-background text-left align-middle shadow-2xl transition-all flex flex-col max-h-[75vh] sm:max-w-md sm:rounded-2xl sm:max-h-[85vh]">
 
                 {/* Mobile Handle Bar */}
                 <div className="flex-shrink-0 pt-4 pb-1 flex justify-center sm:hidden">
