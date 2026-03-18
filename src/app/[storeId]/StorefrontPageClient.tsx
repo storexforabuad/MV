@@ -564,7 +564,6 @@ export default function StorefrontPageClient({
           )}
         </div>
       </div>
-      <InstallPrompt storeId={storeId} />
     </div>
   );
 }

@@ -74,8 +74,7 @@ export default function SuccessPage() {
                         <div className="mb-3">
                             {/* Rendered by StorePreviewBar - lazy loaded in place */}
                         </div>
-                        {/* Keep InstallPrompt in case browser shows native prompt UI */}
-                        <InstallPrompt storeId={storeId} />
+                        {/* Keep InstallPrompt in case browser shows native prompt UI removed as it is now global */}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
