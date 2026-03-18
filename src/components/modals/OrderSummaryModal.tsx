@@ -43,6 +43,7 @@ interface OrderSummaryModalProps {
   selectedColor?: string;
   initialQuantity?: number;
   openedFrom?: 'productDetails' | 'productCard';
+  isReorder?: boolean;
 }
 
 export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta, customer: initialCustomer, selectedSize, selectedColor, initialQuantity = 1, openedFrom, isReorder = false }: OrderSummaryModalProps) {
@@ -889,16 +890,14 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             {/* Description */}
                             {product.description && (
                               <div className="p-6 rounded-[2rem] bg-gray-50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-700/50">
-                                {(isElectronicsProduct(product) || isSolarProduct(product)) && (
-                                  <div className="flex items-center gap-2 mb-4">
-                                    <div className="w-8 h-8 rounded-2xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-gray-600 dark:text-gray-300 border border-gray-100 dark:border-gray-700">
-                                      <Info className="w-4 h-4" />
-                                    </div>
-                                    <h3 className="text-sm font-bold text-gray-900 dark:text-white">Unit Condition & Notes</h3>
+                                <div className="flex items-center gap-2 mb-4">
+                                  <div className="w-8 h-8 rounded-2xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-gray-600 dark:text-gray-300 border border-gray-100 dark:border-gray-700">
+                                    <Info className="w-4 h-4" />
                                   </div>
-                                )}
-                                <p className={`text-gray-600 dark:text-gray-300 leading-relaxed ${(isElectronicsProduct(product) || isSolarProduct(product)) ? 'text-sm' : 'text-sm italic'}`}>
-                                  {isElectronicsProduct(product) || isSolarProduct(product) ? product.description : `"${product.description}"`}
+                                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">Unit Condition & Notes</h3>
+                                </div>
+                                <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-sm">
+                                  {product.description}
                                 </p>
                               </div>
                             )}

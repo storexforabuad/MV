@@ -78,6 +78,34 @@ const transformProductData = (data: DocumentData): Product => {
   return product as unknown as Product;
 };
 
+const transformStoreData = (data: DocumentData): any => {
+  const store: Record<string, any> = { ...data };
+
+  // Helper to recursively transform Timestamps
+  const transformValue = (val: any): any => {
+    if (val instanceof Timestamp) {
+      return val.toDate().toISOString();
+    }
+    if (val && typeof val === 'object' && !Array.isArray(val)) {
+      const transformed: Record<string, any> = {};
+      for (const k in val) {
+        transformed[k] = transformValue(val[k]);
+      }
+      return transformed;
+    }
+    if (Array.isArray(val)) {
+      return val.map(transformValue);
+    }
+    return val;
+  };
+
+  for (const key in store) {
+    store[key] = transformValue(store[key]);
+  }
+
+  return store;
+};
+
 
 function assertDb() {
   if (!db) throw new Error('Firestore db is not initialized. Check your Firebase config and imports.');
@@ -124,7 +152,7 @@ export async function getStores(): Promise<StoreMeta[]> {
     const snapshot = await getDocs(storesRef);
     return snapshot.docs.map(doc => ({
       id: doc.id,
-      ...doc.data(),
+      ...transformStoreData(doc.data()),
     })) as StoreMeta[];
   } catch (error) {
     console.error('Error fetching stores:', error);
@@ -149,7 +177,7 @@ export async function getStoreMeta(storeId: string): Promise<StoreMeta | null> {
     const storeRef = doc(db, 'stores', storeId);
     const storeSnap = await getDoc(storeRef);
     if (!storeSnap.exists()) return null;
-    return { id: storeSnap.id, ...storeSnap.data() } as StoreMeta;
+    return { id: storeSnap.id, ...transformStoreData(storeSnap.data()) } as StoreMeta;
   } catch (error) {
     console.error('Error fetching store meta:', error);
     return null;

@@ -254,7 +254,7 @@ export default function AddSolarProductComposer({
             setCurrentStep(1);
             setActiveProductIndex(0);
         } else {
-            const newImages = newFiles.map(file => ({ file, preview: URL.createObjectURL(file) }));
+            const newImages = newFiles.map(file => ({ file, preview: URL.createObjectURL(file), isMain: false }));
             const currentImages = activeProduct.images || [];
             if (currentImages.length === 0 && newImages.length > 0) newImages[0].isMain = true;
             handleProductChange(activeProductIndex, 'images', [...currentImages, ...newImages]);
@@ -743,7 +743,7 @@ export default function AddSolarProductComposer({
                         </footer>
                     )}
 
-                    <CategorySelectorModal isOpen={isCategorySelectorOpen} onClose={() => setCategorySelectorOpen(false)} onSelect={(id) => handleProductChange(activeProductIndex, 'categoryId', id)} categories={categories} onAddCategory={onAddCategory} />
+                    <CategorySelectorModal isOpen={isCategorySelectorOpen} onClose={() => setCategorySelectorOpen(false)} onSelect={(id) => handleProductChange(activeProductIndex, 'categoryId', id)} categories={categories} onAddCategory={onAddCategory} selectedCategoryId={activeProduct?.categoryId} />
                 </motion.div>
             )}
         </AnimatePresence>

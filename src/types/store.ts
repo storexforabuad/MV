@@ -37,7 +37,7 @@ export interface StoreMeta {
   country?: string;
 
   // Store Vertical
-  storeType?: 'general' | 'restaurant' | 'fashion' | 'livestock' | 'automotive' | 'electronics' | 'real-estate' | 'artist' | 'beauty' | 'home-services' | 'digital-products' | 'sports' | 'sports-rental' | 'pitchperfect' | 'pitch';
+  storeType?: 'general' | 'restaurant' | 'fashion' | 'livestock' | 'automotive' | 'electronics' | 'solar' | 'real-estate' | 'artist' | 'beauty' | 'home-services' | 'digital-products' | 'sports' | 'sports-rental' | 'pitchperfect' | 'pitch';
 
   // Timezone & payout tracking
   timezone?: string;
