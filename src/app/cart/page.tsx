@@ -210,7 +210,7 @@ export default function CartPage() {
         </div>
 
         {/* Optimized Branded Footer */}
-        {Object.keys(storeMetas).length > 0 && (
+        {Object.keys(storeMetas).length > 0 && false && (
           <motion.button
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}

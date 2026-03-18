@@ -14,8 +14,8 @@ type Category = {
 
 const ICON_MAP: Record<string, string> = {
   'Promo': '🔥',
-  'Popular': '❤️',
-  'New Arrivals': '⭐',
+  'Popular': '⭐',
+  'New Arrivals': '⏰',
 };
 
 const COLOR_MAP: Record<string, string> = {
@@ -25,6 +25,11 @@ const COLOR_MAP: Record<string, string> = {
 };
 
 function getIconForCategory(name: string) {
+  const lowerName = name.toLowerCase();
+
+  if (lowerName === 'jallabiya' || lowerName === 'jalabiya' || lowerName === 'jallabs') return '👕';
+  if (lowerName === 'shoe' || lowerName === 'shoes') return '👞';
+
   return ICON_MAP[name] || '🛍️';
 }
 
