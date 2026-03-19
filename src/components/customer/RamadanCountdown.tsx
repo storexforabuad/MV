@@ -15,7 +15,7 @@ type Phase = 'pre' | 'during' | 'post';
 // Countdown targets moon sighting night, but day counting starts from first fasting day
 const COUNTDOWN_TARGET = new Date('2026-02-17T00:00:00');
 const RAMADAN_START = new Date('2026-02-18T00:00:00'); // First day of fasting
-const RAMADAN_END = new Date('2026-03-20T00:00:00'); // 30 days from Feb 18
+const RAMADAN_END = new Date('2026-03-19T00:00:00'); // Adjusted to show Eid earlier
 const TOTAL_DAYS = 30;
 
 // 30 daily Ramadan blessings/duas
@@ -391,15 +391,17 @@ export default function RamadanCountdown({ className, storeName, onNeedAWebsiteC
     // ── Post-Ramadan: Eid Mubarak ──
     return (
         <div className={`cursor-pointer ${className || ''}`} onClick={() => onNeedAWebsiteClick?.()}>
-            <div className="relative overflow-hidden rounded-[2.5rem] bg-indigo-950 border border-amber-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] h-full flex flex-col justify-center">
+            <div className="relative overflow-hidden rounded-[2.5rem] bg-emerald-950 border border-amber-400/40 shadow-2xl min-h-[180px] sm:min-h-[220px] h-full flex flex-col justify-center group">
                 <div className="absolute inset-0">
-                    <Image src="/images/events/ramadan_2026_new.png" alt="Eid Background" fill priority className="object-cover opacity-25 scale-110" />
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-950/95 via-purple-950/80 to-indigo-950/95" />
+                    {/* Background Texture */}
+                    <Image src="/images/events/ramadan_2026_new.png" alt="Eid Background" fill priority className="object-cover opacity-[0.15] mix-blend-overlay scale-110 group-hover:scale-105 transition-transform duration-1000" />
+                    {/* New Emerald/Teal Gradient for Eid */}
+                    <div className="absolute inset-0 bg-gradient-to-br from-emerald-950/95 via-teal-950/85 to-emerald-900/95" />
                 </div>
                 {/* Store Name Overlay */}
                 {storeName && (
                     <div className="absolute top-4 sm:top-5 left-4 sm:left-5 z-20 max-w-[40%] sm:max-w-[45%]">
-                        <div className="bg-black/30 backdrop-blur-md rounded-[1rem] sm:rounded-2xl border border-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 shadow-lg">
+                        <div className="bg-black/20 backdrop-blur-md rounded-[1rem] sm:rounded-2xl border border-white/10 px-2.5 py-1 sm:px-3 sm:py-1.5 shadow-lg">
                             <p className="text-white font-bold text-[9px] sm:text-[11px] truncate">
                                 {storeName}
                             </p>
@@ -408,35 +410,79 @@ export default function RamadanCountdown({ className, storeName, onNeedAWebsiteC
                 )}
                 {/* BizConnect Badge */}
                 <div className="absolute bottom-3 right-4 z-20">
-                    <div className="bg-black/30 backdrop-blur-md rounded-xl sm:rounded-[1rem] border border-white/10 px-2 py-0.5 sm:px-2.5 sm:py-1 shadow-lg flex items-center gap-1">
+                    <div className="bg-black/20 backdrop-blur-md rounded-xl sm:rounded-[1rem] border border-white/10 px-2 py-0.5 sm:px-2.5 sm:py-1 shadow-lg flex items-center gap-1">
                         <span className="text-[7px] sm:text-[9px] text-white/70 font-medium tracking-tight">Powered by</span>
                         <span className="text-[8px] sm:text-[10px] font-bold text-amber-400">BizConNet&trade;</span>
                     </div>
                 </div>
-                <div className="absolute top-4 left-6 opacity-30"><Moon className="w-12 h-12 text-amber-400 rotate-12" /></div>
-                <div className="absolute bottom-4 right-6 opacity-20"><Sparkles className="w-16 h-16 text-amber-400" /></div>
-                <div className="relative z-10 px-6 py-8 flex flex-col items-center text-center gap-4">
+
+                {/* Floating Elements (Stars & Lantern effects) */}
+                <div className="absolute top-4 left-6 opacity-40">
+                    <motion.div animate={{ rotate: [0, 8, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}>
+                        <Moon className="w-10 h-10 sm:w-12 sm:h-12 text-amber-300" />
+                    </motion.div>
+                </div>
+                <div className="absolute bottom-5 right-6 opacity-30">
+                    <motion.div animate={{ scale: [1, 1.15, 1], opacity: [0.6, 1, 0.6], rotate: [0, 15, 0] }} transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}>
+                        <Sparkles className="w-12 h-12 sm:w-16 sm:h-16 text-amber-300" />
+                    </motion.div>
+                </div>
+
+                {/* Random Floating Stars */}
+                {[...Array(6)].map((_, i) => (
+                    <motion.div
+                        key={`eid-star-${i}`}
+                        className="absolute text-amber-300/40"
+                        style={{ top: `${15 + i * 15}%`, left: `${8 + i * 16}%` }}
+                        animate={{ y: [0, -12, 0], opacity: [0.1, 0.7, 0.1], scale: [0.7, 1.2, 0.7] }}
+                        transition={{ duration: 3 + i * 0.5, repeat: Infinity, delay: i * 0.4, ease: "easeInOut" }}
+                    >
+                        <Star className="w-3 h-3 sm:w-4 sm:h-4 fill-current" />
+                    </motion.div>
+                ))}
+
+                <div className="relative z-10 px-6 py-8 flex flex-col items-center text-center gap-3 sm:gap-4">
                     <motion.div
                         initial={{ scale: 0.8, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.6, ease: "easeOut" }}
-                        className="text-5xl sm:text-6xl"
+                        transition={{ duration: 0.8, ease: "easeOut", type: "spring", bounce: 0.4 }}
+                        className="relative"
                     >
-                        🎉
+                        <div className="absolute inset-0 bg-amber-400/20 blur-2xl rounded-full" />
+                        <span className="text-5xl sm:text-6xl relative z-10 drop-shadow-xl block mb-1 sm:mb-2">✨</span>
                     </motion.div>
-                    <div className="space-y-1">
-                        <h3 className="text-2xl sm:text-4xl font-black text-white tracking-tight leading-tight">
-                            Eid <span className="text-amber-400">Mubarak!</span>
+
+                    <div className="space-y-1.5 sm:space-y-2">
+                        <h3 className="text-[28px] min-[390px]:text-[32px] sm:text-5xl font-black text-white tracking-tight leading-tight flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 drop-shadow-[0_0_15px_rgba(251,191,36,0.3)]">
+                            Eid <span className="text-amber-400 relative">
+                                Mubarak!
+                                <motion.div
+                                    className="absolute -inset-2 bg-amber-400/20 blur-xl rounded-full -z-10"
+                                    animate={{ opacity: [0.3, 0.6, 0.3], scale: [0.9, 1.1, 0.9] }}
+                                    transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                                />
+                            </span>
                         </h3>
-                        <p className="text-[11px] sm:text-sm text-indigo-100/70 font-medium tracking-wide max-w-[280px] sm:max-w-md mx-auto">
-                            May Allah accept our fasting, prayers, and good deeds. Ameen.
+
+                        <div className="flex items-center justify-center gap-2 sm:gap-3 py-1 sm:py-1.5 opacity-80">
+                            <div className="h-[1px] w-8 sm:w-12 bg-amber-400/40" />
+                            <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-amber-400 fill-current" />
+                            <div className="h-[1px] w-8 sm:w-12 bg-amber-400/40" />
+                        </div>
+
+                        <p className="text-[11px] sm:text-[15px] text-emerald-50/90 font-semibold tracking-wider max-w-[280px] sm:max-w-md mx-auto italic drop-shadow-md">
+                            TaqabbalAllahu Minna Wa Minkum
+                        </p>
+                        <p className="text-[9px] sm:text-[11px] text-emerald-100/60 font-medium tracking-wide max-w-[280px] sm:max-w-sm mx-auto uppercase">
+                            May Allah accept from us and from you.
                         </p>
                     </div>
                 </div>
+
                 <motion.div
                     className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12"
-                    animate={{ x: ['-150%', '250%'] }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", repeatDelay: 3 }}
+                    animate={{ x: ['-200%', '300%'] }}
+                    transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", repeatDelay: 2.5 }}
                 />
             </div>
         </div>
