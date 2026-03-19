@@ -15,7 +15,7 @@ import { useOrders } from '@/hooks/useOrders';
 import toast from 'react-hot-toast';
 import { useParams } from 'next/navigation';
 import { getCustomerDetails } from '@/app/actions/customerActions';
-import { isFoodBeverageProduct, isFashionProduct, isElectronicsProduct, isSolarProduct } from '@/utils/productHelpers';
+import { isFoodBeverageProduct, isFashionProduct, isElectronicsProduct, isSolarProduct, isVehicleProduct } from '@/utils/productHelpers';
 import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
 import { saveModalState, getModalState, clearModalState } from '@/lib/paymentModalStorage';
 import { requestCustomerNotificationPermission } from '@/lib/requestCustomerNotifications';
@@ -23,6 +23,7 @@ import PaymentFlowPage from './PaymentFlowPage';
 import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 import { shouldShowWhatsAppPreview } from '@/utils/storeHelpers';
 import WhatsAppPreviewPage from './WhatsAppPreviewPage';
+import { Tag, Calendar, Settings, MapPin } from 'lucide-react';
 
 const SPICINESS_LEVELS = [
   { value: 'mild', label: '😌 Mild', color: 'bg-green-100 text-green-800 border-green-200' },
@@ -86,7 +87,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
       setQuantity(initialQuantity);
 
       // Shortcut: skip specs page if opening from product details
-      if (product && (isElectronicsProduct(product) || isSolarProduct(product)) && openedFrom === 'productDetails') {
+      if (product && (isElectronicsProduct(product) || isSolarProduct(product) || isVehicleProduct(product)) && openedFrom === 'productDetails') {
         setCurrentPage(2);
       } else {
         setCurrentPage(1);
@@ -190,8 +191,9 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
   const isElectronics = isElectronicsProduct(product);
   const isSolar = isSolarProduct(product);
-  const summaryPageNum = (isElectronics || isSolar) ? 2 : 1;
-  const paymentPageNum = (isElectronics || isSolar) ? 3 : 2;
+  const isVehicle = isVehicleProduct(product);
+  const summaryPageNum = (isElectronics || isSolar || isVehicle) ? 2 : 1;
+  const paymentPageNum = (isElectronics || isSolar || isVehicle) ? 3 : 2;
 
   const hasSizes = (p: any) => {
     return (p.sizes && p.sizes.length > 0) || (p.sizeOption && p.sizeOption.length > 0);
@@ -284,29 +286,40 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
         // toast.success('Order placed! Redirecting to WhatsApp...');
 
         const productUrl = `https://tinyurl.com/bizconnet/${storeId}/products/${product.id}`;
-        const message = `🛍️ *${isReorder ? 'Reorder Request' : 'New Order Request'}*\n\n` +
-          `Hello! I would like to ${isReorder ? 'reorder' : 'order'} this item:\n\n` +
-          `*${product.name.trim()}*\n` +
-          `🔗 *Product Link:* ${productUrl}\n` +
-          `🔢 *Quantity:* ${quantity} ${product.productType === 'livestock' ? ((product as any).priceUnit === 'kg' ? 'kg' : 'pcs') : ''}\n` +
-          (interactiveSelectedColor ? `🎨 *Color:* ${interactiveSelectedColor}\n` : '') +
-          (interactiveSelectedSize ? `📏 *Size:* ${interactiveSelectedSize}\n` : '') +
-          (isFoodBeverageProduct(product) ? `🌶️ *Spiciness:* ${SPICINESS_LEVELS.find(s => s.value === selectedSpiciness)?.label}\n` : '') +
-          (isFoodBeverageProduct(product) && specialInstructions ? `📝 *Note:* ${specialInstructions}\n` : '') +
-          (isSolarProduct(product) ? (
-            (product.subtype === 'solar-panels' ? `☀️ *Panel Specs:* ${product.wattage}${product.cellType ? ` (${product.cellType})` : ''}${product.efficiencyRating ? `, Efficiency: ${product.efficiencyRating}` : ''}\n` : '') +
-            (product.subtype === 'inverters' ? `🔄 *Inverter Specs:* ${product.powerCapacity}${product.inverterType ? ` (${product.inverterType})` : ''}${product.systemVoltage ? `, System: ${product.systemVoltage}` : ''}\n` : '') +
-            (product.subtype === 'batteries' ? `🔋 *Battery:* ${product.batteryCapacity}${product.batteryChemistry ? ` (${product.batteryChemistry})` : ''}${product.lifeCycles ? `, cycles: ${product.lifeCycles}` : ''}\n` : '') +
-            (product.subtype === 'charge-controllers' ? `🎛️ *Controller:* ${product.maxCurrentRating}${product.controllerType ? ` (${product.controllerType})` : ''}\n` : '') +
-            (product.subtype === 'dc-appliances' || product.subtype === 'ac-appliances' ? `⚡ *Power:* ${product.powerConsumption}${product.energyStarRating ? ` (${product.energyStarRating})` : ''}\n` : '') +
-            (product.subtype === 'solar-kits' ? `📦 *Kit Capacity:* ${product.totalSystemCapacity}${product.estimatedDailyYield ? ` (Yield: ${product.estimatedDailyYield})` : ''}\n` : '')
-          ) : '') +
-          `💰 *Price:* ${formatPrice(product.price)}\n` +
-          `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n` +
-          `${deliveryMethod === 'home' ? (customer?.deliveryAddress?.street ? `📍 *To:* ${customer.deliveryAddress.street}\n` : '📍 *Address:* (Please provide your address below)\n') : ''}` +
-          `*Total (excluding delivery):* ${formatPrice(total)}\n\n` +
-          `Please provide delivery fee and payment details.\n\n` +
-          `Thank you! 🙏`;
+
+        let message = '';
+        if (isVehicleProduct(product)) {
+          message = `🛍️ *${isReorder ? 'Reorder Request' : 'New Vehicle Enquiry'}*\n\n` +
+            `Hello! I'm interested in the *${product.name.trim()}* listed at *${formatPrice(product.price)}*.\n\n` +
+            `📍 Location: ${product.vehicleDetails?.location || 'N/A'}\n` +
+            `🛣️ Mileage: ${product.vehicleDetails?.mileage !== undefined ? product.vehicleDetails.mileage.toLocaleString() : 'N/A'} km\n` +
+            `🔗 Link: ${productUrl}\n\n` +
+            `Could you please provide more information?`;
+        } else {
+          message = `🛍️ *${isReorder ? 'Reorder Request' : 'New Order Request'}*\n\n` +
+            `Hello! I would like to ${isReorder ? 'reorder' : 'order'} this item:\n\n` +
+            `*${product.name.trim()}*\n` +
+            `🔗 *Product Link:* ${productUrl}\n` +
+            `🔢 *Quantity:* ${quantity} ${product.productType === 'livestock' ? ((product as any).priceUnit === 'kg' ? 'kg' : 'pcs') : ''}\n` +
+            (interactiveSelectedColor ? `🎨 *Color:* ${interactiveSelectedColor}\n` : '') +
+            (interactiveSelectedSize ? `📏 *Size:* ${interactiveSelectedSize}\n` : '') +
+            (isFoodBeverageProduct(product) ? `🌶️ *Spiciness:* ${SPICINESS_LEVELS.find(s => s.value === selectedSpiciness)?.label}\n` : '') +
+            (isFoodBeverageProduct(product) && specialInstructions ? `📝 *Note:* ${specialInstructions}\n` : '') +
+            (isSolarProduct(product) ? (
+              (product.subtype === 'solar-panels' ? `☀️ *Panel Specs:* ${product.wattage}${product.cellType ? ` (${product.cellType})` : ''}${product.efficiencyRating ? `, Efficiency: ${product.efficiencyRating}` : ''}\n` : '') +
+              (product.subtype === 'inverters' ? `🔄 *Inverter Specs:* ${product.powerCapacity}${product.inverterType ? ` (${product.inverterType})` : ''}${product.systemVoltage ? `, System: ${product.systemVoltage}` : ''}\n` : '') +
+              (product.subtype === 'batteries' ? `🔋 *Battery:* ${product.batteryCapacity}${product.batteryChemistry ? ` (${product.batteryChemistry})` : ''}${product.lifeCycles ? `, cycles: ${product.lifeCycles}` : ''}\n` : '') +
+              (product.subtype === 'charge-controllers' ? `🎛️ *Controller:* ${product.maxCurrentRating}${product.controllerType ? ` (${product.controllerType})` : ''}\n` : '') +
+              (product.subtype === 'dc-appliances' || product.subtype === 'ac-appliances' ? `⚡ *Power:* ${product.powerConsumption}${product.energyStarRating ? ` (${product.energyStarRating})` : ''}\n` : '') +
+              (product.subtype === 'solar-kits' ? `📦 *Kit Capacity:* ${product.totalSystemCapacity}${product.estimatedDailyYield ? ` (Yield: ${product.estimatedDailyYield})` : ''}\n` : '')
+            ) : '') +
+            `💰 *Price:* ${formatPrice(product.price)}\n` +
+            `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n` +
+            `${deliveryMethod === 'home' ? (customer?.deliveryAddress?.street ? `📍 *To:* ${customer.deliveryAddress.street}\n` : '📍 *Address:* (Please provide your address below)\n') : ''}` +
+            `*Total (excluding delivery):* ${formatPrice(total)}\n\n` +
+            `Please provide delivery fee and payment details.\n\n` +
+            `Thank you! 🙏`;
+        }
 
         const encodedMessage = encodeURIComponent(message);
         const whatsappUrl = `https://wa.me/${formatWhatsAppNumber(storeMeta.whatsapp)}?text=${encodedMessage}`;
@@ -356,7 +369,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex min-h-full items-end justify-center p-0 text-center sm:items-center sm:p-4">
               <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95" enterTo="opacity-100 translate-y-0 sm:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 sm:scale-100" leaveTo="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95">
-                <Dialog.Panel className="relative w-full transform overflow-hidden rounded-t-[2rem] bg-white dark:bg-modal-background text-left align-middle shadow-2xl transition-all flex flex-col max-h-[92vh] sm:max-w-2xl sm:rounded-2xl sm:max-h-[85vh]">
+                <Dialog.Panel className="relative w-full transform overflow-hidden rounded-t-[2rem] bg-white dark:bg-modal-background text-left align-middle shadow-2xl transition-all flex flex-col h-[72vh] max-h-[72vh] sm:h-auto sm:max-w-2xl sm:rounded-2xl sm:max-h-[85vh]">
 
                   {/* Handle Bar for Mobile */}
                   <div className="flex-shrink-0 pt-3 pb-1 flex justify-center sm:hidden">
@@ -366,7 +379,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                   {/* Header */}
                   <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-modal-background">
                     <h3 className="text-lg font-semibold leading-6 text-gray-900 dark:text-white">
-                      {currentPage === 1 && (isElectronics || isSolar) ? 'Product Specifications' : currentPage === summaryPageNum ? 'Order Summary' : (isPaymentFlowEnabled ? 'Payment' : 'WhatsApp Preview')}
+                      {currentPage === 1 && (isElectronics || isSolar || isVehicle) ? 'Product Specifications' : currentPage === summaryPageNum ? 'Order Summary' : (isPaymentFlowEnabled ? 'Payment' : 'WhatsApp Preview')}
                     </h3>
                     <button
                       type="button"
@@ -905,6 +918,110 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                         );
                       })()}
 
+                      {/* Page 1 (Vehicle Specs) */}
+                      {currentPage === 1 && isVehicle && (() => {
+                        const v = product as any;
+                        return (
+                          <div className="pt-2 sm:pt-4 space-y-6">
+                            {/* Product Header Card */}
+                            <div className="flex items-center space-x-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50">
+                              <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-white dark:bg-gray-900 shadow-sm border border-gray-100 dark:border-gray-800">
+                                <Image src={currentProductImage} alt={product.name} fill sizes="80px" className="object-cover" />
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{product.name}</h4>
+                                <p className="text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">{formatPrice(product.price)}</p>
+                              </div>
+                            </div>
+
+                            {/* Tech Specs Grid */}
+                            <div className="grid grid-cols-2 gap-3">
+                              {v.vehicleDetails?.make && (
+                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                    <Tag className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Make/Model</span>
+                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white">{v.vehicleDetails.make} {v.vehicleDetails.model}</p>
+                                  </div>
+                                </div>
+                              )}
+                              {v.vehicleDetails?.mileage !== undefined && (
+                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                    <Gauge className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Mileage</span>
+                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white">{v.vehicleDetails.mileage.toLocaleString()} km</p>
+                                  </div>
+                                </div>
+                              )}
+                              {v.vehicleDetails?.year && (
+                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                                    <Calendar className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Year</span>
+                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white">{v.vehicleDetails.year}</p>
+                                  </div>
+                                </div>
+                              )}
+                              {v.vehicleDetails?.transmission && (
+                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                                    <Settings className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Transmission</span>
+                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white capitalize">{v.vehicleDetails.transmission}</p>
+                                  </div>
+                                </div>
+                              )}
+                              {v.vehicleDetails?.fuelType && (
+                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center text-green-600 dark:text-green-400">
+                                    <Zap className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Fuel</span>
+                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white capitalize">{v.vehicleDetails.fuelType}</p>
+                                  </div>
+                                </div>
+                              )}
+                              {v.vehicleDetails?.location && (
+                                <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-red-100 dark:bg-red-900/40 flex items-center justify-center text-red-600 dark:text-red-400">
+                                    <MapPin className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Location</span>
+                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white">{v.vehicleDetails.location}</p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Description */}
+                            {product.description && (
+                              <div className="p-6 rounded-[2rem] bg-gray-50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-700/50">
+                                <div className="flex items-center gap-2 mb-4">
+                                  <div className="w-8 h-8 rounded-2xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-gray-600 dark:text-gray-300 border border-gray-100 dark:border-gray-700">
+                                    <Info className="w-4 h-4" />
+                                  </div>
+                                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">Unit Condition & Notes</h3>
+                                </div>
+                                <p className="text-gray-600 dark:text-gray-300 leading-relaxed text-sm whitespace-pre-wrap">
+                                  {product.description}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
+
                       {/* Summary Page */}
                       {currentPage === summaryPageNum && (
                         <div className="pt-4 sm:pt-8">
@@ -1068,29 +1185,31 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           )}
 
                           {/* Delivery Method */}
-                          <div className="mt-8">
-                            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3">Delivery Method</h4>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div onClick={() => setDeliveryMethod('home')} className={`flex cursor-pointer items-center rounded-xl border p-4 transition-all duration-200 ${deliveryMethod === 'home' ? 'border-green-500 bg-green-50 dark:bg-green-900/10 ring-1 ring-green-500' : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900'}`}>
-                                <div className={`p-2 rounded-full mr-3 ${deliveryMethod === 'home' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'}`}>
-                                  <HomeIcon className="h-5 w-5" />
+                          {!isVehicle && (
+                            <div className="mt-8">
+                              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3">Delivery Method</h4>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div onClick={() => setDeliveryMethod('home')} className={`flex cursor-pointer items-center rounded-xl border p-4 transition-all duration-200 ${deliveryMethod === 'home' ? 'border-green-500 bg-green-50 dark:bg-green-900/10 ring-1 ring-green-500' : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900'}`}>
+                                  <div className={`p-2 rounded-full mr-3 ${deliveryMethod === 'home' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'}`}>
+                                    <HomeIcon className="h-5 w-5" />
+                                  </div>
+                                  <span className="text-sm font-medium dark:text-gray-200">Home Delivery</span>
                                 </div>
-                                <span className="text-sm font-medium dark:text-gray-200">Home Delivery</span>
-                              </div>
-                              <div onClick={() => setDeliveryMethod('pickup')} className={`flex cursor-pointer items-center rounded-xl border p-4 transition-all duration-200 ${deliveryMethod === 'pickup' ? 'border-green-500 bg-green-50 dark:bg-green-900/10 ring-1 ring-green-500' : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900'}`}>
-                                <div className={`p-2 rounded-full mr-3 ${deliveryMethod === 'pickup' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'}`}>
-                                  <BriefcaseIcon className="h-5 w-5" />
+                                <div onClick={() => setDeliveryMethod('pickup')} className={`flex cursor-pointer items-center rounded-xl border p-4 transition-all duration-200 ${deliveryMethod === 'pickup' ? 'border-green-500 bg-green-50 dark:bg-green-900/10 ring-1 ring-green-500' : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900'}`}>
+                                  <div className={`p-2 rounded-full mr-3 ${deliveryMethod === 'pickup' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'}`}>
+                                    <BriefcaseIcon className="h-5 w-5" />
+                                  </div>
+                                  <span className="text-sm font-medium dark:text-gray-200">Pick Up</span>
                                 </div>
-                                <span className="text-sm font-medium dark:text-gray-200">Pick Up</span>
                               </div>
+                              {deliveryMethod === 'home' && customer && customer.deliveryAddress && (
+                                <div className="mt-3 flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 p-3 rounded-lg">
+                                  <span className="font-medium flex-shrink-0">Delivering to:</span>
+                                  <span>{customer.deliveryAddress.street}</span>
+                                </div>
+                              )}
                             </div>
-                            {deliveryMethod === 'home' && customer && customer.deliveryAddress && (
-                              <div className="mt-3 flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 p-3 rounded-lg">
-                                <span className="font-medium flex-shrink-0">Delivering to:</span>
-                                <span>{customer.deliveryAddress.street}</span>
-                              </div>
-                            )}
-                          </div>
+                          )}
 
                           {/* Payment Details */}
                           <div className="mt-8 border-t border-gray-200 dark:border-gray-800 pt-6">
@@ -1100,7 +1219,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                 <dt>Item price</dt>
                                 <dd className="font-medium text-gray-900 dark:text-gray-200">{formatPrice(product.price * quantity)}</dd>
                               </div>
-                              {deliveryMethod === 'home' && (
+                              {deliveryMethod === 'home' && !isVehicle && (
                                 <div className="flex justify-between">
                                   <dt>Home delivery</dt>
                                   <dd className="font-medium text-gray-900 dark:text-gray-200">TBD by vendor</dd>
@@ -1158,7 +1277,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                   {/* Footer */}
                   <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-modal-background p-4 sm:px-6">
                     <div className="max-w-3xl mx-auto w-full">
-                      {currentPage === 1 && isElectronics ? (
+                      {currentPage === 1 && (isElectronics || isSolar || isVehicle) ? (
                         <button
                           type="button"
                           className="w-full rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 shadow-lg transition-all active:scale-[0.98]"
@@ -1168,7 +1287,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                         </button>
                       ) : currentPage === summaryPageNum ? (
                         <div className="flex gap-3">
-                          {isElectronics && (
+                          {(isElectronics || isSolar || isVehicle) && (
                             <button
                               type="button"
                               className="w-1/3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold py-4 px-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-[0.98]"
@@ -1179,7 +1298,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           )}
                           <button
                             type="button"
-                            className={`${isElectronics ? 'w-2/3' : 'w-full'} rounded-xl border border-transparent px-6 py-4 text-base font-bold text-white shadow-lg transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+                            className={`${(isElectronics || isSolar || isVehicle) ? 'w-2/3' : 'w-full'} rounded-xl border border-transparent px-6 py-4 text-base font-bold text-white shadow-lg transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
                               ${hasSizes(product) && !interactiveSelectedSize
                                 ? 'bg-gray-400 dark:bg-gray-700 cursor-not-allowed'
                                 : 'bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2'}`}
@@ -1202,7 +1321,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             ) : hasSizes(product) && !interactiveSelectedSize ? (
                               'Select Size to Continue'
                             ) : (
-                              'Order via Whatsapp'
+                              isVehicle ? 'Enquire about Vehicle' : 'Order via Whatsapp'
                             )}
                           </button>
                         </div>

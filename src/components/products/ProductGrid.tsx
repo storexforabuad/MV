@@ -323,7 +323,11 @@ const ProductGrid = memo(function ProductGrid({
                 className="group block relative touch-manipulation"
               >
                 {productWithType.productType === 'vehicle' ? (
-                  <VehicleCard product={productWithType} storeId={storeId} />
+                  <VehicleCard
+                    product={productWithType}
+                    storeId={storeId}
+                    onOrderClick={handleOrderClick}
+                  />
                 ) : (
                   <ProductCard
                     product={productWithType}

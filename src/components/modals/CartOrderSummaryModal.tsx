@@ -13,7 +13,7 @@ import { Loader2, MessageSquare, ExternalLink, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast';
 import { getCustomerDetails } from '@/app/actions/customerActions';
 import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
-import { isElectronicsProduct, isSolarProduct } from '@/utils/productHelpers';
+import { isElectronicsProduct, isSolarProduct, isVehicleProduct } from '@/utils/productHelpers';
 import { saveModalState, getModalState, clearModalState } from '@/lib/paymentModalStorage';
 import { requestCustomerNotificationPermission } from '@/lib/requestCustomerNotifications';
 import PaymentFlowPage from './PaymentFlowPage';
@@ -57,6 +57,9 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
 
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const total = subtotal;
+
+  const hasVehicle = cartItems.some(item => isVehicleProduct(item as any));
+  const allVehicles = cartItems.length > 0 && cartItems.every(item => isVehicleProduct(item as any));
 
   const onCloseRef = useRef(onClose);
   useEffect(() => {
@@ -231,18 +234,23 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
               ((item as any).subtype === 'dc-appliances' || (item as any).subtype === 'ac-appliances' ? `⚡ *Power:* ${(item as any).powerConsumption}${(item as any).energyStarRating ? ` (${(item as any).energyStarRating})` : ''}\n` : '') +
               ((item as any).subtype === 'solar-kits' ? `📦 *Kit Capacity:* ${(item as any).totalSystemCapacity}${(item as any).estimatedDailyYield ? ` (Yield: ${(item as any).estimatedDailyYield})` : ''}\n` : '')
             ) : '') +
+            (isVehicleProduct(item as any) ? (
+              (((item as any).vehicleDetails?.make || (item as any).vehicleDetails?.model) ? `🚗 *Make/Model:* ${(item as any).vehicleDetails.make || ''} ${(item as any).vehicleDetails.model || ''}\n` : '') +
+              ((item as any).vehicleDetails?.year ? `📅 *Year:* ${(item as any).vehicleDetails.year}\n` : '') +
+              ((item as any).vehicleDetails?.mileage !== undefined ? `🛣️ *Mileage:* ${(item as any).vehicleDetails.mileage.toLocaleString()} km\n` : '')
+            ) : '') +
             `*Subtotal:* ${formatPrice(item.price * item.quantity)}`;
         }).join('\n\n');
 
-        const message = `🛍️ *${isReorder ? 'Reorder Request' : 'New Cart Order'}*\n\n` +
-          `Hello! I would like to ${isReorder ? 'reorder' : 'order'} the following items:\n\n` +
+        const message = `🛍️ *${isReorder ? 'Reorder Request' : allVehicles ? 'New Vehicles Enquiry' : 'New Cart Order'}*\n\n` +
+          `Hello! I would like to ${isReorder ? 'reorder' : 'enquire about/order'} the following items:\n\n` +
           `${itemsSummary}\n\n` +
           `--------------------\n` +
-          `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n` +
-          `${deliveryMethod === 'home' ? (customer?.deliveryAddress?.street ? `📍 *Address:* ${customer.deliveryAddress.street}\n` : '📍 *Address:* (Please provide your address below)\n') : ''}` +
+          (!allVehicles ? `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n` : '') +
+          (!allVehicles && deliveryMethod === 'home' ? (customer?.deliveryAddress?.street ? `📍 *Address:* ${customer.deliveryAddress.street}\n` : '📍 *Address:* (Please provide your address below)\n') : '') +
           (orderNotes ? `📝 *Special Instructions:* ${orderNotes}\n` : '') +
-          `*Grand Total (excl. delivery):* ${formatPrice(total)}\n\n` +
-          `Please confirm availability and provide payment details.\n\n` +
+          `*Grand Total${!allVehicles ? ' (excl. delivery)' : ''}:* ${formatPrice(total)}\n\n` +
+          `Please confirm availability and provide ${!allVehicles ? 'payment/delivery' : 'more'} details.\n\n` +
           `Thank you! 🙏`;
 
         const encodedMessage = encodeURIComponent(message);
@@ -498,34 +506,36 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                           </div>
 
                           {/* Delivery Method */}
-                          <div className="mt-8 border-t border-gray-200 dark:border-gray-800 pt-6">
-                            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3">Delivery Method</h4>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div onClick={() => setDeliveryMethod('home')} className={`flex cursor-pointer items-center rounded-xl border p-4 transition-all duration-200 ${deliveryMethod === 'home' ? 'border-green-500 bg-green-50 dark:bg-green-900/10 ring-1 ring-green-500' : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900'}`}>
-                                <div className={`p-2 rounded-full mr-3 ${deliveryMethod === 'home' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'}`}>
-                                  <HomeIcon className="h-5 w-5" />
+                          {!hasVehicle && (
+                            <div className="mt-8 border-t border-gray-200 dark:border-gray-800 pt-6">
+                              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3">Delivery Method</h4>
+                              <div className="grid grid-cols-2 gap-4">
+                                <div onClick={() => setDeliveryMethod('home')} className={`flex cursor-pointer items-center rounded-xl border p-4 transition-all duration-200 ${deliveryMethod === 'home' ? 'border-green-500 bg-green-50 dark:bg-green-900/10 ring-1 ring-green-500' : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900'}`}>
+                                  <div className={`p-2 rounded-full mr-3 ${deliveryMethod === 'home' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'}`}>
+                                    <HomeIcon className="h-5 w-5" />
+                                  </div>
+                                  <span className="text-sm font-medium dark:text-gray-200">Home Delivery</span>
                                 </div>
-                                <span className="text-sm font-medium dark:text-gray-200">Home Delivery</span>
-                              </div>
-                              <div onClick={() => setDeliveryMethod('pickup')} className={`flex cursor-pointer items-center rounded-xl border p-4 transition-all duration-200 ${deliveryMethod === 'pickup' ? 'border-green-500 bg-green-50 dark:bg-green-900/10 ring-1 ring-green-500' : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900'}`}>
-                                <div className={`p-2 rounded-full mr-3 ${deliveryMethod === 'pickup' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'}`}>
-                                  <BriefcaseIcon className="h-5 w-5" />
+                                <div onClick={() => setDeliveryMethod('pickup')} className={`flex cursor-pointer items-center rounded-xl border p-4 transition-all duration-200 ${deliveryMethod === 'pickup' ? 'border-green-500 bg-green-50 dark:bg-green-900/10 ring-1 ring-green-500' : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900'}`}>
+                                  <div className={`p-2 rounded-full mr-3 ${deliveryMethod === 'pickup' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'}`}>
+                                    <BriefcaseIcon className="h-5 w-5" />
+                                  </div>
+                                  <span className="text-sm font-medium dark:text-gray-200">Pick Up</span>
                                 </div>
-                                <span className="text-sm font-medium dark:text-gray-200">Pick Up</span>
                               </div>
+                              {deliveryMethod === 'home' && customer && customer.deliveryAddress && (
+                                <div className="mt-3 flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 p-3 rounded-lg">
+                                  <span className="font-medium flex-shrink-0">Delivering to:</span>
+                                  <span>{customer.name} - {customer.deliveryAddress.street}</span>
+                                </div>
+                              )}
                             </div>
-                            {deliveryMethod === 'home' && customer && customer.deliveryAddress && (
-                              <div className="mt-3 flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 p-3 rounded-lg">
-                                <span className="font-medium flex-shrink-0">Delivering to:</span>
-                                <span>{customer.name} - {customer.deliveryAddress.street}</span>
-                              </div>
-                            )}
-                          </div>
+                          )}
 
                           <div className="mt-8 border-t border-gray-200 dark:border-gray-800 pt-6">
                             <dl className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
                               <div className="flex justify-between"><dt>Subtotal</dt><dd className="font-medium text-gray-900 dark:text-gray-200">{formatPrice(subtotal)}</dd></div>
-                              {deliveryMethod === 'home' && (
+                              {deliveryMethod === 'home' && !hasVehicle && (
                                 <div className="flex justify-between">
                                   <dt>Home delivery</dt>
                                   <dd className="font-medium text-gray-900 dark:text-gray-200">TBD by vendor</dd>
@@ -610,7 +620,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                           ) : cartItems.some(item => ((item as any).sizes?.length > 0 || (item as any).sizeOption?.length > 0) && !item.selectedSize) ? (
                             'Select Sizes to Continue'
                           ) : (
-                            'Order via Whatsapp'
+                            allVehicles ? 'Enquire about Vehicles' : hasVehicle ? 'Enquire & Order via Whatsapp' : 'Order via Whatsapp'
                           )}
                         </button>
                       ) : currentPage === 2 && isPaymentFlowEnabled ? (

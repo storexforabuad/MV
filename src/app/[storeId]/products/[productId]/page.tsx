@@ -392,7 +392,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
               />
             </div>
             {allImages.length > 1 && (
-              <div className="mt-4 -mx-4 px-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory flex gap-3 pt-2 pb-4">
+              <div className="mt-4 -mx-4 px-4 scroll-px-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory flex items-center gap-3 pt-2 pb-4">
                 {allImages.map((image, index) => (
                   <button
                     key={index}

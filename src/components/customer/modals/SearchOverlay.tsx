@@ -59,10 +59,10 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-[100] flex flex-col bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl"
+                    className="fixed inset-0 z-[100] flex flex-col bg-white/95 dark:bg-black/95 backdrop-blur-xl"
                 >
                     {/* Header */}
-                    <div className="flex-shrink-0 px-4 py-6 sm:px-8 border-b border-gray-100 dark:border-gray-800">
+                    <div className="flex-shrink-0 px-4 py-6 sm:px-8 border-b border-gray-100 dark:border-white/10">
                         <div className="max-w-4xl mx-auto flex items-center gap-4">
                             <div className="relative flex-1">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -72,12 +72,12 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
                                     placeholder="Search products..."
                                     value={query}
                                     onChange={(e) => setQuery(e.target.value)}
-                                    className="w-full bg-gray-100 dark:bg-gray-800/50 border-none rounded-2xl pl-12 pr-12 py-4 text-lg font-medium text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500/50 transition-all shadow-inner"
+                                    className="w-full bg-gray-100 dark:bg-white/5 border-none rounded-2xl pl-12 pr-12 py-4 text-lg font-medium text-gray-900 dark:text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500/50 transition-all shadow-inner"
                                 />
                                 {query && (
                                     <button
                                         onClick={() => setQuery('')}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 p-1 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-6 h-6 rounded-full bg-gray-200 dark:bg-white/10 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
                                     >
                                         <X className="w-4 h-4" />
                                     </button>
@@ -85,7 +85,7 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
                             </div>
                             <button
                                 onClick={onClose}
-                                className="p-3 rounded-2xl bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all active:scale-95"
+                                className="p-3 rounded-2xl bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10 transition-all active:scale-95"
                             >
                                 <X className="w-6 h-6" />
                             </button>
@@ -101,18 +101,18 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
                                         <Search className="w-10 h-10 text-blue-500" />
                                     </div>
                                     <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Find what you're looking for</h3>
-                                    <p className="text-gray-500 dark:text-gray-400">Search for names, categories, or descriptions</p>
+                                    <p className="text-gray-500 dark:text-zinc-400">Search for names, categories, or descriptions</p>
                                 </div>
                             ) : filteredProducts.length > 0 ? (
                                 <div className="space-y-4">
-                                    <p className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-6">Found {filteredProducts.length} items</p>
+                                    <p className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-zinc-500 mb-6">Found {filteredProducts.length} items</p>
                                     {filteredProducts.map((product) => (
                                         <motion.div
                                             key={product.id}
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             onClick={() => onProductClick(product)}
-                                            className="group flex items-center gap-4 p-3 rounded-2xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-500/5 transition-all cursor-pointer"
+                                            className="group flex items-center gap-4 p-3 rounded-2xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/5 hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-500/5 transition-all cursor-pointer"
                                         >
                                             <div className="relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
                                                 <Image
@@ -141,7 +141,7 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
                                                     )}
                                                 </div>
                                             </div>
-                                            <div className="p-2 rounded-full bg-gray-50 dark:bg-gray-900 group-hover:bg-blue-500 group-hover:text-white transition-all">
+                                            <div className="p-2 rounded-full bg-gray-50 dark:bg-black group-hover:bg-blue-500 group-hover:text-white transition-all">
                                                 <ArrowRight className="w-5 h-5" />
                                             </div>
                                         </motion.div>

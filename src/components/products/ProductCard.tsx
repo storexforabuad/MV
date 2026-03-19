@@ -335,6 +335,8 @@ export default function ProductCard({
           e.preventDefault();
           e.stopPropagation();
 
+          const isImageClick = !!(e.target as Element).closest('.product-image-container');
+
           if (isSoldOut) {
             toast.error('Product is sold out', { duration: 2000, position: 'bottom-center' });
             if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
@@ -373,15 +375,21 @@ export default function ProductCard({
                 if (navigator.vibrate) navigator.vibrate(20);
               }
             } else {
-              handleClick();
-              window.location.href = productLink;
+              if (isVehicleProduct(product) && isImageClick && onOrderClick) {
+                onOrderClick(product, selectedColor, selectedSize);
+                handleTrackInteraction();
+                if (navigator.vibrate) navigator.vibrate(20);
+              } else {
+                handleClick();
+                window.location.href = productLink;
+              }
             }
           }, 300);
         }}
         style={{ WebkitTapHighlightColor: 'transparent' }}
       >
         <div
-          className="relative aspect-[3/4] w-full rounded-[32px] overflow-hidden
+          className="product-image-container relative aspect-[3/4] w-full rounded-[32px] overflow-hidden
           shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08),0_2px_6px_-1px_rgba(0,0,0,0.05)] dark:shadow-lg dark:shadow-white/10
           transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]
           transform-gpu will-change-transform
@@ -691,6 +699,32 @@ export default function ProductCard({
                 }
               })()}
             </div>
+          )}
+
+          {/* Vehicle Overlays */}
+          {!isSoldOut && isVehicleProduct(product) && (
+            <>
+              {/* Location Overlay (Bottom Left) */}
+              {product.vehicleDetails?.location && (
+                <div className="absolute bottom-[14px] left-[14px] z-10">
+                  <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                    <span className="bg-white/80 dark:bg-black/60 backdrop-blur-md border border-white/20 px-2.5 py-1.5 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 shadow-sm flex items-center gap-1">
+                      📍 {product.vehicleDetails.location}
+                    </span>
+                  </div>
+                </div>
+              )}
+              {/* Mileage Overlay (Bottom Right) */}
+              {product.vehicleDetails?.mileage !== undefined && (
+                <div className="absolute bottom-[14px] right-[14px] z-10 mb-[-4px] mr-[36px]">
+                  <div className="inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                    <span className="bg-white/80 dark:bg-black/60 backdrop-blur-md border border-white/20 px-2.5 py-1.5 rounded-xl text-xs font-bold text-slate-800 dark:text-slate-100 shadow-sm flex items-center gap-1">
+                      🛣️ {product.vehicleDetails.mileage.toLocaleString()} km
+                    </span>
+                  </div>
+                </div>
+              )}
+            </>
           )}
 
           <AnimatePresence initial={false} custom={direction} mode="popLayout">
