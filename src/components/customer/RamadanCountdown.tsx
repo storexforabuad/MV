@@ -449,11 +449,11 @@ export default function RamadanCountdown({ className, storeName, onNeedAWebsiteC
                         className="relative"
                     >
                         <div className="absolute inset-0 bg-amber-400/20 blur-2xl rounded-full" />
-                        <span className="text-5xl sm:text-6xl relative z-10 drop-shadow-xl block mb-1 sm:mb-2">✨</span>
+                        <span className="text-3xl sm:text-5xl relative z-10 drop-shadow-xl block mb-1">✨</span>
                     </motion.div>
 
-                    <div className="space-y-1.5 sm:space-y-2">
-                        <h3 className="text-[28px] min-[390px]:text-[32px] sm:text-5xl font-black text-white tracking-tight leading-tight flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 drop-shadow-[0_0_15px_rgba(251,191,36,0.3)]">
+                    <div className="space-y-1.5 sm:space-y-2 pb-5 sm:pb-0">
+                        <h3 className="text-[26px] min-[390px]:text-[30px] sm:text-5xl font-black text-white tracking-tight leading-tight flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 drop-shadow-[0_0_15px_rgba(251,191,36,0.3)]">
                             Eid <span className="text-amber-400 relative">
                                 Mubarak!
                                 <motion.div
@@ -470,10 +470,10 @@ export default function RamadanCountdown({ className, storeName, onNeedAWebsiteC
                             <div className="h-[1px] w-8 sm:w-12 bg-amber-400/40" />
                         </div>
 
-                        <p className="text-[11px] sm:text-[15px] text-emerald-50/90 font-semibold tracking-wider max-w-[280px] sm:max-w-md mx-auto italic drop-shadow-md">
+                        <p className="text-[10px] min-[360px]:text-[11px] sm:text-[15px] text-emerald-50/90 font-bold tracking-wider max-w-[200px] min-[360px]:max-w-[240px] sm:max-w-md mx-auto italic drop-shadow-md">
                             TaqabbalAllahu Minna Wa Minkum
                         </p>
-                        <p className="text-[9px] sm:text-[11px] text-emerald-100/60 font-medium tracking-wide max-w-[280px] sm:max-w-sm mx-auto uppercase">
+                        <p className="text-[8px] min-[360px]:text-[9px] sm:text-[11px] text-emerald-100/60 font-black tracking-widest max-w-[180px] min-[360px]:max-w-[220px] sm:max-w-sm mx-auto uppercase leading-tight">
                             May Allah accept from us and from you.
                         </p>
                     </div>
