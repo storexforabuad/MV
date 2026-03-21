@@ -80,7 +80,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
   const searchParams = useSearchParams();
   const router = useRouter();
   const { storeId, productId } = params;
-  const initialVariant = searchParams.get('v');
+  const initialVariant = searchParams?.get('v');
 
   const productIsFashion = product ? isFashionProduct(product) : false;
 

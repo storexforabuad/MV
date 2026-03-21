@@ -13,7 +13,7 @@ import { Loader2, MessageSquare, ExternalLink, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast';
 import { getCustomerDetails } from '@/app/actions/customerActions';
 import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
-import { isElectronicsProduct, isSolarProduct, isVehicleProduct } from '@/utils/productHelpers';
+import { isFashionProduct, isElectronicsProduct, isSolarProduct, isVehicleProduct } from '@/utils/productHelpers';
 import { saveModalState, getModalState, clearModalState } from '@/lib/paymentModalStorage';
 import { requestCustomerNotificationPermission } from '@/lib/requestCustomerNotifications';
 import PaymentFlowPage from './PaymentFlowPage';
