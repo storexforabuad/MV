@@ -50,7 +50,7 @@ const BusinessCardModal = dynamic(() => import('../../components/products/Busine
 });
 
 const ProductGridSkeleton = () => (
-  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 gap-3 sm:gap-4 px-4">
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 px-3 sm:px-6 lg:px-8">
     {Array.from({ length: 6 }).map((_, index) => (
       <SkeletonLoader key={`product-skeleton-${index}`} />
     ))}
@@ -58,7 +58,7 @@ const ProductGridSkeleton = () => (
 );
 
 const LoadingGrid = () => (
-  <div className="space-y-6">
+  <div className="mt-4">
     <ProductGridSkeleton />
   </div>
 );
