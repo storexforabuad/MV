@@ -216,10 +216,13 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
         // toast.success('Order placed! Redirecting to WhatsApp...');
 
         const itemsSummary = cartItems.map(item => {
-          const productUrl = `https://tinyurl.com/bizconnet/${storeId}/products/${item.id}`;
-          const colorText = item.selectedColor ? `🎨 *Color:* ${item.selectedColor}\n` : '';
+          const productUrl = `https://tinyurl.com/bizconnet/${storeId}/products/${item.id}${item.selectedColor ? `?v=${encodeURIComponent(item.selectedColor)}` : ''}`;
+          const colorLabel = (item as any).isTextile ? 'Design' : 'Color';
+          const colorText = item.selectedColor ? `🎨 *${colorLabel}:* ${item.selectedColor}\n` : '';
           const sizeText = item.selectedSize ? `📏 *Size:* ${item.selectedSize}\n` : '';
-          const unitText = item.productType === 'livestock' ? (item as any).priceUnit === 'kg' ? 'kg' : 'pcs' : '';
+          const unitText = item.productType === 'livestock'
+            ? ((item as any).priceUnit === 'kg' ? 'kg' : 'pcs')
+            : ((item as any).isTextile ? (item.quantity > 1 ? 'Yards' : 'Yard') : '');
 
           return `*${item.name.trim()}*\n` +
             `🔗 ${productUrl}\n` +
@@ -349,8 +352,8 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                               const isMissingSize = hasSizes && !item.selectedSize;
                               const itemId = item.id + (item.selectedColor || '') + (item.selectedSize || '');
 
-                              let displayImage = item.images?.[0] || '';
-                              if ((item as any).colors && item.selectedColor) {
+                              let displayImage = (item as any).selectedImage || item.images?.[0] || '';
+                              if (!(item as any).selectedImage && (item as any).colors && item.selectedColor) {
                                 const colorObj = (item as any).colors.find((c: any) => c.name === item.selectedColor || c.hex === item.selectedColor);
                                 if (colorObj?.images?.length > 0) {
                                   displayImage = colorObj.images[0];
@@ -386,7 +389,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                                     <div className="flex flex-wrap gap-2 mt-1.5">
                                       {item.selectedColor && (
                                         <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
-                                          {item.selectedColor}
+                                          {(item as any).isTextile ? 'Design' : 'Color'}: {item.selectedColor}
                                         </span>
                                       )}
                                       {isElectronicsProduct(item as any) && (item as any).condition && (
@@ -420,7 +423,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                                     </div>
 
                                     {/* Interactive Color Selector for Cart Items */}
-                                    {((item as any).colors) && (item as any).colors.length > 0 && (
+                                    {((item as any).colors) && (item as any).colors.length > 0 && !(item as any).isTextile && (
                                       <div className="mt-2.5 flex flex-wrap gap-1.5 pt-2.5 border-t border-gray-100 dark:border-gray-800/50">
                                         {((item as any).colors).map((color: any) => (
                                           <button
@@ -480,7 +483,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                                     )}
                                     <div className="mt-1.5 flex items-center justify-between">
                                       <p className="text-xs text-gray-500 dark:text-gray-400">
-                                        {formatPrice(item.price)} x {item.quantity}
+                                        {formatPrice(item.price)} x {item.quantity}{(item as any).isTextile ? (item.quantity > 1 ? ' Yards' : ' Yard') : ''}
                                       </p>
                                       <p className="text-sm font-bold text-gray-900 dark:text-white">{formatPrice(item.price * item.quantity)}</p>
                                     </div>

@@ -129,6 +129,7 @@ const ProductGrid = memo(function ProductGrid({
   const [orderModalProduct, setOrderModalProduct] = useState<Product | null>(null);
   const [orderModalColor, setOrderModalColor] = useState<string | undefined>();
   const [orderModalSize, setOrderModalSize] = useState<string | undefined>();
+  const [orderModalImage, setOrderModalImage] = useState<string | undefined>();
   const [orderModalQuantity, setOrderModalQuantity] = useState(1);
 
   // Reorder state
@@ -164,10 +165,11 @@ const ProductGrid = memo(function ProductGrid({
     }
   };
 
-  const handleOrderClick = (product: Product, selectedColor?: string, selectedSize?: string) => {
+  const handleOrderClick = (product: Product, selectedColor?: string, selectedSize?: string, selectedImage?: string) => {
     setOrderModalProduct(product);
     setOrderModalColor(selectedColor);
     setOrderModalSize(selectedSize);
+    setOrderModalImage(selectedImage);
     setIsReorder(false);
     setIsOrderModalOpen(true);
   };
@@ -394,6 +396,7 @@ const ProductGrid = memo(function ProductGrid({
         customer={null}
         selectedSize={orderModalSize}
         selectedColor={orderModalColor}
+        selectedImage={orderModalImage}
         initialQuantity={orderModalQuantity}
         openedFrom="productCard"
         isReorder={isReorder}

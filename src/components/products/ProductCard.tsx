@@ -35,7 +35,7 @@ interface ProductCardProps {
   storeId?: string | null;
   activeCategoryId: string;
   storeMeta?: any; // StoreMeta type, optional for ProductCard
-  onOrderClick?: (product: Product, selectedColor?: string, selectedSize?: string) => void;
+  onOrderClick?: (product: Product, selectedColor?: string, selectedSize?: string, selectedImage?: string) => void;
   isSingleView?: boolean;
 }
 
@@ -51,7 +51,7 @@ export default function ProductCard({
   const [imgSrc, setImgSrc] = useState(product.images?.[0] || DEFAULT_IMAGES.medium);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [direction, setDirection] = useState(0); // 1 for next, -1 for prev
-  const [selectedColor, setSelectedColor] = useState<string | undefined>(isFashionProduct(product) && product.colors?.[0] ? product.colors[0].name : undefined);
+  const [selectedColor, setSelectedColor] = useState<string | undefined>(isFashionProduct(product) && product.colors?.[0] && !product.isTextile ? product.colors[0].name : undefined);
   const [selectedSize, setSelectedSize] = useState<string | undefined>();
   const cardRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -100,7 +100,12 @@ export default function ProductCard({
 
   // Get images for carousel (all images so user can swipe through colors on the card)
   const getCarouselImages = (): string[] => {
-    return product.images || [];
+    if (!product) return [];
+    if (!isFashionProduct(product) || !product.colors) return product.images || [];
+
+    // For fashion/textile, we want to show all variant images in the carousel
+    const colorImages = product.colors.flatMap(c => c.images || []);
+    return colorImages.length > 0 ? colorImages : (product.images || []);
   };
 
   const carouselImages = getCarouselImages();
@@ -157,10 +162,21 @@ export default function ProductCard({
       navigator.vibrate(15);
     }
 
+    const getEffectiveColor = () => {
+      if (isFashionProduct(product) && product.colors) {
+        // If no color is explicitly selected, derive from currently visible image
+        const colorMatch = product.colors.find(c => c.images?.includes(carouselImages[currentImageIndex]));
+        if (colorMatch) return colorMatch.name;
+      }
+      return selectedColor;
+    };
+
+    const effectiveColor = getEffectiveColor();
+
     if (isInCart) {
       cartDispatch({
         type: 'REMOVE_ITEM',
-        payload: { id: product.id, selectedSize, selectedColor }
+        payload: { id: product.id, selectedSize, selectedColor: effectiveColor }
       });
       toast.success('Removed from cart', {
         duration: 2000,
@@ -172,10 +188,7 @@ export default function ProductCard({
         },
       });
     } else {
-      cartDispatch({
-        type: 'ADD_ITEM',
-        payload: { ...product, quantity: 1, storeId: storeId || product.storeId, selectedSize, selectedColor }
-      });
+      cartDispatch({ type: 'ADD_ITEM', payload: { ...product, quantity: 1, storeId, selectedSize, selectedColor: effectiveColor, selectedImage: carouselImages[currentImageIndex] } });
       toast.success('Added to cart', {
         duration: 2000,
         position: 'bottom-center',
@@ -193,7 +206,12 @@ export default function ProductCard({
     e.preventDefault();
     e.stopPropagation();
     if (onOrderClick) {
-      onOrderClick(product, selectedColor, selectedSize);
+      let finalColor = selectedColor;
+      if (isFashionProduct(product) && product.colors) {
+        const colorMatch = product.colors.find(c => c.images?.includes(carouselImages[currentImageIndex]));
+        if (colorMatch) finalColor = colorMatch.name;
+      }
+      onOrderClick(product, finalColor, selectedSize, carouselImages[currentImageIndex]);
     }
   };
 
@@ -364,19 +382,19 @@ export default function ProductCard({
                 // Intelligent Color Mapping: Pre-select color based on current visible image
                 let finalSelectedColor = selectedColor;
                 if (isFashionProduct(product) && product.colors) {
-                  const colorMatch = product.colors.find(c => c.images?.includes(displayImage));
+                  const colorMatch = product.colors.find(c => c.images?.includes(carouselImages[currentImageIndex]));
                   if (colorMatch) {
                     finalSelectedColor = colorMatch.name;
                   }
                 }
-                onOrderClick(product, finalSelectedColor, selectedSize);
+                onOrderClick(product, finalSelectedColor, selectedSize, carouselImages[currentImageIndex]);
                 handleTrackInteraction();
                 // Haptic feedback
                 if (navigator.vibrate) navigator.vibrate(20);
               }
             } else {
               if (isVehicleProduct(product) && isImageClick && onOrderClick) {
-                onOrderClick(product, selectedColor, selectedSize);
+                onOrderClick(product, selectedColor, selectedSize, carouselImages[currentImageIndex]);
                 handleTrackInteraction();
                 if (navigator.vibrate) navigator.vibrate(20);
               } else {

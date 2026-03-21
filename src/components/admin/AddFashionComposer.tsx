@@ -70,6 +70,7 @@ interface BatchFashionProduct {
     sizes: string[]; // Selected sizes
     sizeCategory: FashionSizeCategory; // 'clothing', 'shoes', or 'caps'
     hasSizes: boolean; // Whether this product has sizes (defaults to false)
+    isTextile?: boolean;
 }
 
 interface AddFashionComposerProps {
@@ -147,6 +148,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
         sizes: [],
         sizeCategory: 'clothing', // Default to clothing
         hasSizes: false, // Sizes are optional by default
+        isTextile: false,
     });
 
     const [isCategorySelectorOpen, setCategorySelectorOpen] = useState(false);
@@ -181,10 +183,10 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
 
     // Initialize first color if none exists when entering step 1
     useEffect(() => {
-        if (currentStep === 1 && productData.colors.length === 0) {
+        if (currentStep === 1 && productData.colors.length === 0 && !productData.isTextile) {
             addColor();
         }
-    }, [currentStep]);
+    }, [currentStep, productData.isTextile]);
 
     const resetState = () => {
         setCurrentStep(0);
@@ -201,6 +203,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
             sizes: [],
             sizeCategory: 'clothing',
             hasSizes: false,
+            isTextile: false,
         });
         setUploadProgress([]);
         setIsUploading(false);
@@ -356,6 +359,46 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
         }));
     };
 
+    const handleTextileImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const files = Array.from(e.target.files);
+
+            const newColors: ColorVariant[] = files.map((file, index) => {
+                const colorId = (Date.now() + index).toString() + Math.random().toString(36).substring(7);
+                const imageItem: ImageItem = {
+                    id: (Date.now() + index + 1000).toString() + Math.random().toString(36).substring(7),
+                    file,
+                    status: 'idle'
+                };
+
+                // Automatic naming D01, D02...
+                const currentCount = productData.colors.length + index + 1;
+                const designName = `D${String(currentCount).padStart(2, '0')}`;
+
+                // Start background upload for this specific design immediately
+                startBackgroundUpload(imageItem, colorId);
+
+                return {
+                    id: colorId,
+                    name: designName,
+                    hex: '#000000',
+                    images: [imageItem]
+                };
+            });
+
+            setProductData(prev => ({
+                ...prev,
+                colors: [...prev.colors, ...newColors]
+            }));
+
+            if (newColors.length > 0) {
+                setActiveColorId(newColors[0].id);
+            }
+
+            e.target.value = '';
+        }
+    };
+
     const toggleSize = (size: string) => {
         setProductData(prev => {
             const sizes = prev.sizes.includes(size)
@@ -367,8 +410,8 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
 
     const handleSubmit = async () => {
         // Validate required fields
-        if (!productData.name || !productData.price || !productData.categoryId || productData.colors.length === 0) {
-            toast.error('Please fill all required fields and add at least one color.');
+        if (!productData.name || !productData.price || !productData.categoryId || (productData.colors.length === 0 && !productData.isTextile)) {
+            toast.error('Please fill all required fields.');
             return;
         }
 
@@ -522,6 +565,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                 },
                 limitedStock: productData.limitedStock,
                 soldOut: productData.soldOut,
+                isTextile: productData.isTextile,
             };
 
             const productToAdd: FashionProduct = {
@@ -603,6 +647,16 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                 <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
                             </div>
                         </button>
+                        <ModernToggle
+                            label="Is Textile Product?"
+                            description="Enable if this is a textile item where each image is a variant of the same design (skips color picking)."
+                            checked={!!productData.isTextile}
+                            onChange={(checked) => {
+                                handleProductChange('isTextile', checked);
+                                handleProductChange('colors', []); // Clear variants to avoid invalid state
+                                setActiveColorId(null);
+                            }}
+                        />
                     </motion.div>
                 );
 
@@ -623,32 +677,76 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                 </h3>
                             </div>
 
-                            {/* Tab List */}
-                            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                                {productData.colors.map((color) => (
+                            {/* Tab List - Hidden for Textile */}
+                            {!productData.isTextile && (
+                                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                                    {productData.colors.map((color) => (
+                                        <button
+                                            key={color.id}
+                                            onClick={() => setActiveColorId(color.id)}
+                                            className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-full border transition-all ${activeColorId === color.id
+                                                ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white shadow-md'
+                                                : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
+                                                }`}
+                                        >
+                                            <div className="w-4 h-4 rounded-full border border-white/20" style={{ backgroundColor: color.hex }}></div>
+                                            <span className="text-sm font-medium whitespace-nowrap max-w-[80px] truncate">{color.name || 'New Color'}</span>
+                                        </button>
+                                    ))}
                                     <button
-                                        key={color.id}
-                                        onClick={() => setActiveColorId(color.id)}
-                                        className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 rounded-full border transition-all ${activeColorId === color.id
-                                            ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white shadow-md'
-                                            : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700'
-                                            }`}
+                                        onClick={addColor}
+                                        className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800 hover:bg-blue-100 transition-colors"
                                     >
-                                        <div className="w-4 h-4 rounded-full border border-white/20" style={{ backgroundColor: color.hex }}></div>
-                                        <span className="text-sm font-medium whitespace-nowrap max-w-[80px] truncate">{color.name || 'New Color'}</span>
+                                        <Plus className="w-5 h-5" />
                                     </button>
-                                ))}
-                                <button
-                                    onClick={addColor}
-                                    className="flex-shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800 hover:bg-blue-100 transition-colors"
-                                >
-                                    <Plus className="w-5 h-5" />
-                                </button>
-                            </div>
+                                </div>
+                            )}
 
-                            {/* Active Color Editor */}
+                            {/* Active Color Editor / Textile Designs List */}
                             <AnimatePresence mode="wait">
-                                {activeColor ? (
+                                {productData.isTextile ? (
+                                    <motion.div
+                                        key="textile-designs"
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        className="space-y-4"
+                                    >
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            {productData.colors.map((design, idx) => (
+                                                <div key={design.id} className="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700 flex items-center gap-3">
+                                                    <div className="relative w-16 h-20 rounded-lg overflow-hidden flex-shrink-0 bg-slate-200 dark:bg-slate-700">
+                                                        {design.images[0] && (
+                                                            <Image src={URL.createObjectURL(design.images[0].file)} alt="Preview" fill className="object-cover" />
+                                                        )}
+                                                        <div className="absolute top-1 left-1">
+                                                            {design.images[0]?.status === 'success' && <CheckCircle2 className="w-3 h-3 text-green-500 bg-white rounded-full" />}
+                                                            {(design.images[0]?.status === 'uploading' || design.images[0]?.status === 'compressing') && <Loader2 className="w-3 h-3 text-blue-500 animate-spin bg-white rounded-full" />}
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex-1">
+                                                        <label className="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-1 block">Design Name</label>
+                                                        <input
+                                                            type="text"
+                                                            value={design.name}
+                                                            onChange={(e) => updateColor(design.id, 'name', e.target.value)}
+                                                            className="w-full bg-transparent border-b border-slate-300 dark:border-slate-600 focus:border-blue-500 outline-none text-slate-900 dark:text-slate-100 font-semibold py-1"
+                                                            placeholder="D01"
+                                                        />
+                                                    </div>
+                                                    <button onClick={() => removeColor(design.id)} className="p-2 text-slate-400 hover:text-red-500 transition-colors">
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                </div>
+                                            ))}
+
+                                            <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 dark:border-slate-600 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors group bg-white dark:bg-slate-900 h-24 sm:h-auto">
+                                                <ImagePlus className="w-6 h-6 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                                                <span className="text-xs text-slate-500 mt-2 font-semibold">Add Designs</span>
+                                                <input type="file" accept="image/*" multiple className="hidden" onChange={handleTextileImageUpload} />
+                                            </label>
+                                        </div>
+                                    </motion.div>
+                                ) : activeColor ? (
                                     <motion.div
                                         key={activeColor.id}
                                         initial={{ opacity: 0, y: 10 }}
@@ -703,9 +801,11 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                             )}
                                         </div>
 
-                                        {/* Image Upload for Active Color */}
+                                        {/* Image Upload Area */}
                                         <div>
-                                            <label className="text-xs text-slate-500 font-medium mb-2 block">Images for {activeColor.name || 'this color'}</label>
+                                            <label className="text-xs text-slate-500 font-medium mb-2 block">
+                                                Images for {activeColor.name || 'this color'}
+                                            </label>
                                             <div className="flex flex-wrap gap-3">
                                                 {activeColor.images.map((image, index) => (
                                                     <div key={image.id} className="relative aspect-[3/4] w-32 rounded-lg overflow-hidden group shadow-sm bg-slate-200 dark:bg-slate-700">
@@ -749,8 +849,12 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                 >
                                     <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
                                     <div className="flex-1">
-                                        <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">Missing Image</p>
-                                        <p className="text-xs text-amber-700 dark:text-amber-300">Add at least one image to "{activeColor.name || 'this color'}" before proceeding</p>
+                                        <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">{productData.isTextile ? 'Missing Design Images' : 'Missing Color Image'}</p>
+                                        <p className="text-xs text-amber-700 dark:text-amber-300">
+                                            {productData.isTextile
+                                                ? 'Add at least one design image before proceeding'
+                                                : `Add at least one image to "${activeColor.name || 'this color'}" before proceeding`}
+                                        </p>
                                     </div>
                                 </motion.div>
                             )}

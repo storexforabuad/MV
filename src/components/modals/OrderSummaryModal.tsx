@@ -42,12 +42,13 @@ interface OrderSummaryModalProps {
   customer: Customer | null;
   selectedSize?: string;
   selectedColor?: string;
+  selectedImage?: string;
   initialQuantity?: number;
   openedFrom?: 'productDetails' | 'productCard';
   isReorder?: boolean;
 }
 
-export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta, customer: initialCustomer, selectedSize, selectedColor, initialQuantity = 1, openedFrom, isReorder = false }: OrderSummaryModalProps) {
+export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta, customer: initialCustomer, selectedSize, selectedColor, selectedImage, initialQuantity = 1, openedFrom, isReorder = false }: OrderSummaryModalProps) {
   const [currentPage, setCurrentPage] = useState<1 | 2 | 3>(1);
   const [quantity, setQuantity] = useState(initialQuantity);
   const [deliveryMethod, setDeliveryMethod] = useState('home');
@@ -65,7 +66,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   // Interactive color and size selection state
   const [interactiveSelectedColor, setInteractiveSelectedColor] = useState<string | undefined>(selectedColor);
   const [interactiveSelectedSize, setInteractiveSelectedSize] = useState<string | undefined>(selectedSize);
-  const [currentProductImage, setCurrentProductImage] = useState<string>(product?.images?.[0] || DEFAULT_PRODUCT_IMAGE);
+  const [currentProductImage, setCurrentProductImage] = useState<string>(selectedImage || product?.images?.[0] || DEFAULT_PRODUCT_IMAGE);
 
   const hasPushedState = useRef(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -170,15 +171,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
       const colorData = (product as any).colors.find((c: any) => c.name === interactiveSelectedColor || c.hex === interactiveSelectedColor);
       if (colorData && colorData.images && colorData.images.length > 0) {
         setCurrentProductImage(colorData.images[0]);
-      } else if (product.images && product.images.length > 0) {
-        setCurrentProductImage(product.images[0]);
-      } else {
-        setCurrentProductImage(DEFAULT_PRODUCT_IMAGE);
       }
-    } else if (product && product.images && product.images.length > 0) {
-      setCurrentProductImage(product.images[0]);
-    } else {
-      setCurrentProductImage(DEFAULT_PRODUCT_IMAGE);
     }
   }, [interactiveSelectedColor, product]);
 
@@ -192,6 +185,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const isElectronics = isElectronicsProduct(product);
   const isSolar = isSolarProduct(product);
   const isVehicle = isVehicleProduct(product);
+  const isFashion = isFashionProduct(product);
   const summaryPageNum = (isElectronics || isSolar || isVehicle) ? 2 : 1;
   const paymentPageNum = (isElectronics || isSolar || isVehicle) ? 3 : 2;
 
@@ -285,7 +279,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
         // toast.success('Order placed! Redirecting to WhatsApp...');
 
-        const productUrl = `https://tinyurl.com/bizconnet/${storeId}/products/${product.id}`;
+        const productUrl = `https://tinyurl.com/bizconnet/${storeId}/products/${product.id}${interactiveSelectedColor ? `?v=${encodeURIComponent(interactiveSelectedColor)}` : ''}`;
 
         let message = '';
         if (isVehicleProduct(product)) {
@@ -300,8 +294,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
             `Hello! I would like to ${isReorder ? 'reorder' : 'order'} this item:\n\n` +
             `*${product.name.trim()}*\n` +
             `🔗 *Product Link:* ${productUrl}\n` +
-            `🔢 *Quantity:* ${quantity} ${product.productType === 'livestock' ? ((product as any).priceUnit === 'kg' ? 'kg' : 'pcs') : ''}\n` +
-            (interactiveSelectedColor ? `🎨 *Color:* ${interactiveSelectedColor}\n` : '') +
+            `🔢 *Quantity:* ${quantity} ${isFashion && (product as any).isTextile ? (quantity > 1 ? 'Yards' : 'Yard') : (product.productType === 'livestock' ? ((product as any).priceUnit === 'kg' ? 'kg' : 'pcs') : '')}\n` +
+            (interactiveSelectedColor ? `🎨 *${isFashion && (product as any).isTextile ? 'Design' : 'Color'}:* ${interactiveSelectedColor}\n` : '') +
             (interactiveSelectedSize ? `📏 *Size:* ${interactiveSelectedSize}\n` : '') +
             (isFoodBeverageProduct(product) ? `🌶️ *Spiciness:* ${SPICINESS_LEVELS.find(s => s.value === selectedSpiciness)?.label}\n` : '') +
             (isFoodBeverageProduct(product) && specialInstructions ? `📝 *Note:* ${specialInstructions}\n` : '') +
@@ -1042,8 +1036,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                               <h4 className="text-base font-semibold text-gray-900 dark:text-white">{product.name}</h4>
                               <div className="mt-1 mb-2 flex flex-wrap gap-2">
                                 {interactiveSelectedColor && (
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700">
-                                    🎨 {interactiveSelectedColor}
+                                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-[11px] font-bold text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+                                    {isFashion && (product as any).isTextile ? '🎨 Design: ' : '🎨 Color: '}{interactiveSelectedColor}
                                   </span>
                                 )}
                                 {interactiveSelectedSize && (
@@ -1061,7 +1055,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             </div>
                             <div className="flex flex-col items-center gap-1 bg-gray-50 dark:bg-gray-900 p-2 rounded-lg border border-gray-100 dark:border-gray-800">
                               <span className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold">
-                                {product.productType === 'livestock' && (product as any).priceUnit === 'kg' ? 'Kilos' : 'Quantity'}
+                                {isFashion && (product as any).isTextile ? (quantity > 1 ? 'Yards' : 'Yard') : (product.productType === 'livestock' && (product as any).priceUnit === 'kg' ? 'Kilos' : 'Quantity')}
                               </span>
                               <div className="flex items-center gap-3">
                                 <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Minus size={18} /></button>
@@ -1072,31 +1066,36 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           </div>
 
                           {/* Variant Selection (Color/Size) */}
-                          <div className="space-y-6">
+                          <div className="space-y-6 pt-2 border-t border-gray-100 dark:border-gray-800">
                             {/* Color Selection - For Products with Colors */}
-                            {(product as any).colors && (product as any).colors.length > 0 && (
-                              <div className="mt-8">
-                                <label className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3 block">
-                                  🎨 Select Color
-                                </label>
-                                <div className="flex flex-wrap gap-3">
-                                  {(product as any).colors.map((color: any) => (
+                            {isFashion && (product as any).colors && (product as any).colors.length > 0 && !(product as any).isTextile && (
+                              <div className="space-y-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <div className="w-1.5 h-6 bg-pink-500 rounded-full" />
+                                  <h4 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">
+                                    🎨 Select Color
+                                  </h4>
+                                </div>
+                                <div className="flex flex-wrap gap-2.5">
+                                  {(product as any).colors.map((color: any, idx: number) => (
                                     <button
-                                      key={color.name}
+                                      key={idx}
                                       onClick={() => setInteractiveSelectedColor(color.name)}
                                       className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border-2 transition-all duration-200 ${interactiveSelectedColor === color.name
-                                        ? 'border-green-500 bg-green-50 dark:bg-green-900/20 ring-2 ring-green-400'
-                                        : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                                        ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-900/20'
+                                        : 'border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700'
                                         }`}
                                     >
                                       <div
-                                        className="w-6 h-6 rounded-full border border-gray-300 dark:border-gray-600 shadow-sm"
+                                        className="h-4 w-4 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm"
                                         style={{ backgroundColor: color.hex }}
                                       />
-                                      <span className="text-sm font-medium text-gray-900 dark:text-white">{color.name}</span>
+                                      <span className={`text-xs font-bold leading-none ${interactiveSelectedColor === color.name ? 'text-blue-700 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}>
+                                        {color.name}
+                                      </span>
                                       {interactiveSelectedColor === color.name && (
                                         <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                                         </svg>
                                       )}
                                     </button>

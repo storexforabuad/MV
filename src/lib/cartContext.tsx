@@ -9,6 +9,7 @@ export interface CartItem extends Omit<Product, 'size' | 'storeId'> {
   storeId?: string;
   selectedSize?: string;
   selectedColor?: string;
+  selectedImage?: string;
 }
 
 interface CartState {
@@ -18,7 +19,7 @@ interface CartState {
 }
 
 type CartAction =
-  | { type: 'ADD_ITEM'; payload: Omit<Product, 'storeId'> & { quantity: number; storeId?: string | null; selectedSize?: string; selectedColor?: string } }
+  | { type: 'ADD_ITEM'; payload: Omit<Product, 'storeId'> & { quantity: number; storeId?: string | null; selectedSize?: string; selectedColor?: string; selectedImage?: string } }
   | { type: 'REMOVE_ITEM'; payload: { id: string; selectedSize?: string; selectedColor?: string } }
   | { type: 'UPDATE_QUANTITY'; payload: { id: string; quantity: number; selectedSize?: string; selectedColor?: string } }
   | { type: 'UPDATE_SIZE'; payload: { id: string; oldSize?: string; newSize: string; selectedColor?: string } }

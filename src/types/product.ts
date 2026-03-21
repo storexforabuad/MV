@@ -126,6 +126,7 @@ export interface FashionProduct extends BaseProduct {
 
   // Category for sizing (clothing vs shoes vs caps vs jallabs)
   sizeCategory?: 'clothing' | 'shoes' | 'caps' | 'jallabs' | 'insence' | 'oil-perfumes' | 'waist-beads'; // Optional for backward compatibility, defaults to 'clothing'
+  isTextile?: boolean;
 
   // Variants
   colors: {

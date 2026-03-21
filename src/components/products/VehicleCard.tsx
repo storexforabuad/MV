@@ -20,7 +20,7 @@ const DEFAULT_IMAGES = {
 interface VehicleCardProps {
     product: VehicleProduct;
     storeId?: string | null;
-    onOrderClick?: (product: Product, selectedColor?: string, selectedSize?: string) => void;
+    onOrderClick?: (product: Product, selectedColor?: string, selectedSize?: string, selectedImage?: string) => void;
 }
 
 export default function VehicleCard({ product, storeId, onOrderClick }: VehicleCardProps) {
@@ -200,7 +200,7 @@ export default function VehicleCard({ product, storeId, onOrderClick }: VehicleC
 
                     clickTimeoutRef.current = setTimeout(() => {
                         if (isImageClick && onOrderClick) {
-                            onOrderClick(product);
+                            onOrderClick(product, undefined, undefined, carouselImages[currentImageIndex]);
                             if (navigator.vibrate) navigator.vibrate(20);
                         } else {
                             handleClick();

@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import Image from 'next/image';
 import dynamic from 'next/dynamic';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { getProductById, incrementProductViews, getStoreMeta, getCategories } from '@/lib/db';
 
 import { useCart } from '@/lib/cartContext';
@@ -77,8 +77,10 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
 
   const discount = product ? calculateDiscount(product.price, product.originalPrice) : null;
 
+  const searchParams = useSearchParams();
   const router = useRouter();
   const { storeId, productId } = params;
+  const initialVariant = searchParams.get('v');
 
   const productIsFashion = product ? isFashionProduct(product) : false;
 
@@ -167,6 +169,19 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
   // Initialize selected color on load
   useEffect(() => {
     if (productIsFashion && product && allImages.length > 0 && !selectedColor) {
+      // 1. Check for deep linked variant via 'v' param
+      if (initialVariant) {
+        const matchingColor = (product as FashionProduct).colors.find(c => c.name === initialVariant);
+        if (matchingColor) {
+          setSelectedColor(matchingColor);
+          // Find the first image index for this color
+          const imgIndex = allImages.indexOf(matchingColor.images[0]);
+          if (imgIndex !== -1) setSelectedImage(imgIndex);
+          return;
+        }
+      }
+
+      // 2. Fallback to default first image logic
       const firstImageUrl = allImages[0];
       const initialColor = (product as FashionProduct).colors.find(c =>
         c.images.includes(firstImageUrl)
@@ -177,7 +192,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
         setSelectedColor((product as FashionProduct).colors[0]);
       }
     }
-  }, [product, productIsFashion, allImages, selectedColor]);
+  }, [product, productIsFashion, allImages, selectedColor, initialVariant]);
 
   const isInCart = useMemo(() => {
     if (!product) return false;
