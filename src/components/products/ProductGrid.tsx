@@ -28,28 +28,12 @@ import { CartItem } from '@/lib/cartContext';
 import SearchOverlay from '@/components/customer/modals/SearchOverlay';
 
 const VehicleCard = dynamic(() => import('./VehicleCard'), {
-  loading: () => (
-    <div className="animate-pulse bg-card-background rounded-[32px] h-[280px]">
-      <div className="h-48 bg-gray-200 rounded-t-[32px]"></div>
-      <div className="p-4 space-y-3">
-        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-      </div>
-    </div>
-  ),
+  loading: () => <SkeletonLoader />,
   ssr: false
 });
 
 const ProductCard = dynamic(() => import('./ProductCard'), {
-  loading: () => (
-    <div className="animate-pulse bg-card-background rounded-[32px] h-[280px]">
-      <div className="h-48 bg-gray-200 rounded-t-[32px]"></div>
-      <div className="p-4 space-y-3">
-        <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-        <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-      </div>
-    </div>
-  ),
+  loading: () => <SkeletonLoader />,
   ssr: false
 });
 
