@@ -1037,7 +1037,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                               <div className="mt-1 mb-2 flex flex-wrap gap-2">
                                 {interactiveSelectedColor && (
                                   <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-[11px] font-bold text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
-                                    {isFashion && (product as any).isTextile ? '🎨 Design: ' : '🎨 Color: '}{interactiveSelectedColor}
+                                    {isFashionProduct(product) && (product as any).isTextile ? '🎨 Design: ' : '🎨 Color: '}{interactiveSelectedColor}
                                   </span>
                                 )}
                                 {interactiveSelectedSize && (
@@ -1055,7 +1055,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             </div>
                             <div className="flex flex-col items-center gap-1 bg-gray-50 dark:bg-gray-900 p-2 rounded-lg border border-gray-100 dark:border-gray-800">
                               <span className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold">
-                                {isFashion && (product as any).isTextile ? (quantity > 1 ? 'Yards' : 'Yard') : (product.productType === 'livestock' && (product as any).priceUnit === 'kg' ? 'Kilos' : 'Quantity')}
+                                {isFashionProduct(product) && (product as any).isTextile ? (quantity > 1 ? 'Yards' : 'Yard') : (product.productType === 'livestock' && (product as any).priceUnit === 'kg' ? 'Kilos' : 'Quantity')}
                               </span>
                               <div className="flex items-center gap-3">
                                 <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Minus size={18} /></button>
@@ -1068,7 +1068,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           {/* Variant Selection (Color/Size) */}
                           <div className="space-y-6 pt-2 border-t border-gray-100 dark:border-gray-800">
                             {/* Color Selection - For Products with Colors */}
-                            {isFashion && (product as any).colors && (product as any).colors.length > 0 && !(product as any).isTextile && (
+                            {isFashionProduct(product) && (product as any).colors && (product as any).colors.length > 0 && !(product as any).isTextile && (
                               <div className="space-y-4">
                                 <div className="flex items-center gap-2 mb-2">
                                   <div className="w-1.5 h-6 bg-pink-500 rounded-full" />

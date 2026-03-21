@@ -134,7 +134,7 @@ const PRESET_COLORS = [
 
 const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose, storeId, categories, onProductAdded, onAddCategory, storeName, instagramHandle }) => {
     const [currentStep, setCurrentStep] = useState(0); // 0: Details, 1: Variants, 2: Pricing, 3: Review, 4: Uploading, 5: Summary
-    const [useWatermark, setUseWatermark] = useState(true);
+    const [useWatermark, setUseWatermark] = useState(false);
     const [productData, setProductData] = useState<BatchFashionProduct>({
         id: Date.now().toString(),
         name: '',

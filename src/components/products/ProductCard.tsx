@@ -882,8 +882,7 @@ export default function ProductCard({
 
           {/* Carousel Dots - Bottom Center - Only show when NOT sold out */}
           {!isSoldOut && hasMultipleImages && (
-            <div className={`absolute bottom-[18px] left-1/2 transform -translate-x-1/2 flex gap-0.5 z-10 transition-opacity duration-300 ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
-              }`}>
+            <div className={`absolute bottom-[18px] left-1/2 transform -translate-x-1/2 flex gap-0.5 z-10 transition-opacity duration-300 ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
               {carouselImages.map((_, index) => (
                 <span
                   key={index}
@@ -898,8 +897,7 @@ export default function ProductCard({
           )}
         </div>
 
-        <div className={`mt-3 space-y-1 px-1 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)]
-          ${!isMobile ? 'group-hover:translate-y-[-2px]' : ''}`}>
+        <div className={`mt-3 space-y-1 px-1 transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ${!isMobile ? 'group-hover:translate-y-[-2px]' : ''}`}>
           <h3 className="text-sm font-medium text-text-primary line-clamp-2 card-text-gradient">
             {product.name}
           </h3>

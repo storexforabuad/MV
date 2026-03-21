@@ -217,12 +217,12 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
 
         const itemsSummary = cartItems.map(item => {
           const productUrl = `https://tinyurl.com/bizconnet/${storeId}/products/${item.id}${item.selectedColor ? `?v=${encodeURIComponent(item.selectedColor)}` : ''}`;
-          const colorLabel = (item as any).isTextile ? 'Design' : 'Color';
+          const colorLabel = isFashionProduct(item as any) && (item as any).isTextile ? 'Design' : 'Color';
           const colorText = item.selectedColor ? `🎨 *${colorLabel}:* ${item.selectedColor}\n` : '';
           const sizeText = item.selectedSize ? `📏 *Size:* ${item.selectedSize}\n` : '';
           const unitText = item.productType === 'livestock'
             ? ((item as any).priceUnit === 'kg' ? 'kg' : 'pcs')
-            : ((item as any).isTextile ? (item.quantity > 1 ? 'Yards' : 'Yard') : '');
+            : (isFashionProduct(item as any) && (item as any).isTextile ? (item.quantity > 1 ? 'Yards' : 'Yard') : '');
 
           return `*${item.name.trim()}*\n` +
             `🔗 ${productUrl}\n` +
