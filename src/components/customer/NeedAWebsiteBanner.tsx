@@ -9,6 +9,7 @@ interface NeedAWebsiteBannerProps {
 }
 
 const NeedAWebsiteBanner = ({ storeId }: NeedAWebsiteBannerProps) => {
+  return null;
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const shimmerEffectClasses = `

@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ustaz Block — BizConNet Store Poster</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Orbitron:wght@700;900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        /* ═══════════════════════════════════════════
+       POSTER CONFIG — Change these for new stores
+       ═══════════════════════════════════════════ */
+        :root {
+            --store-url: "https://tinyurl.com/bizconnet/ustaz-block";
+
+            /* ELECTRIC THEME — Electronics / Phone Shop */
+            --bg-deep: #050d1a;
+            --bg-mid: #0a1628;
+            --accent-1: #00d4ff;
+            /* Electric cyan */
+            --accent-2: #0080ff;
+            /* Bright blue */
+            --accent-glow: rgba(0, 212, 255, 0.15);
+            --accent-border: rgba(0, 212, 255, 0.35);
+            --text-primary: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.55);
+            --qr-bg: #ffffff;
+            --badge-android: #00c853;
+            --badge-ios: #555e6e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a2e;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 24px;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* ─── POSTER SHELL (A4 ratio: 210x297mm ≈ 794x1123px at 96dpi) ─── */
+        .poster {
+            width: 794px;
+            min-height: 1123px;
+            background: var(--bg-deep);
+            border-radius: 0;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ─── CIRCUIT BOARD BACKGROUND PATTERN ─── */
+        .poster::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(var(--accent-border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--accent-border) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.08;
+            pointer-events: none;
+        }
+
+        /* ─── TOP GLOW ─── */
+        .poster::after {
+            content: '';
+            position: absolute;
+            top: -120px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 400px;
+            background: radial-gradient(ellipse, rgba(0, 130, 255, 0.25) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        /* ─── SCANLINE OVERLAY ─── */
+        .scanline {
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(0deg,
+                    transparent,
+                    transparent 3px,
+                    rgba(0, 0, 0, 0.06) 3px,
+                    rgba(0, 0, 0, 0.06) 4px);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 44px 52px 40px;
+            gap: 0;
+        }
+
+        /* ─── TOP BAR ─── */
+        .top-bar {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+        }
+
+        .brand-strip {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent-1);
+            box-shadow: 0 0 10px var(--accent-1);
+        }
+
+        .brand-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--accent-1);
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .location-tag {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid var(--accent-border);
+            border-radius: 100px;
+            padding: 5px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent-1);
+            letter-spacing: 0.05em;
+        }
+
+        /* ─── HEADLINE ─── */
+        .headline-block {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .scan-label {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.35em;
+            color: var(--accent-1);
+            text-transform: uppercase;
+            margin-bottom: 12px;
+        }
+
+        .main-headline {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 56px;
+            font-weight: 900;
+            line-height: 1;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
+        }
+
+        .main-headline span {
+            color: var(--accent-1);
+            text-shadow: 0 0 40px rgba(0, 212, 255, 0.6);
+        }
+
+        .sub-headline {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-top: 12px;
+            letter-spacing: 0.05em;
+        }
+
+        /* ─── HORIZONTAL RULE ─── */
+        .rule {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-1), transparent);
+            margin: 24px 0;
+            opacity: 0.4;
+        }
+
+        /* ─── QR SECTION ─── */
+        .qr-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0;
+            margin-bottom: 28px;
+        }
+
+        .qr-outer-ring {
+            position: relative;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--accent-1), var(--accent-2));
+            border-radius: 28px;
+            box-shadow:
+                0 0 60px rgba(0, 212, 255, 0.4),
+                0 0 120px rgba(0, 130, 255, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        /* Corner scan decorations */
+        .qr-outer-ring::before,
+        .qr-outer-ring::after {
+            content: '';
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            border-color: var(--accent-1);
+            border-style: solid;
+        }
+
+        .qr-outer-ring::before {
+            top: -6px;
+            left: -6px;
+            border-width: 3px 0 0 3px;
+            border-radius: 4px 0 0 0;
+        }
+
+        .qr-outer-ring::after {
+            bottom: -6px;
+            right: -6px;
+            border-width: 0 3px 3px 0;
+            border-radius: 0 0 4px 0;
+        }
+
+        /* Extra corners via wrapper */
+        .qr-corner-tl,
+        .qr-corner-tr,
+        .qr-corner-bl,
+        .qr-corner-br {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            border-color: var(--accent-1);
+            border-style: solid;
+        }
+
+        .qr-corner-wrap {
+            position: absolute;
+            inset: -6px;
+            pointer-events: none;
+        }
+
+        .qr-corner-tr {
+            top: 0;
+            right: 0;
+            border-width: 3px 3px 0 0;
+            border-radius: 0 4px 0 0;
+        }
+
+        .qr-corner-bl {
+            bottom: 0;
+            left: 0;
+            border-width: 0 0 3px 3px;
+            border-radius: 0 0 0 4px;
+        }
+
+        .qr-inner {
+            background: var(--qr-bg);
+            border-radius: 16px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #qr-canvas {
+            display: block;
+            border-radius: 4px;
+        }
+
+        .qr-caption {
+            margin-top: 16px;
+            font-family: 'Inter', monospace;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 0.04em;
+        }
+
+        /* ─── INSTRUCTION BADGES ─── */
+        .instruction-row {
+            display: flex;
+            gap: 16px;
+            width: 100%;
+            margin-bottom: 28px;
+        }
+
+        .badge {
+            flex: 1;
+            border-radius: 16px;
+            padding: 16px 18px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .badge-android {
+            background: rgba(0, 200, 83, 0.08);
+            border: 1px solid rgba(0, 200, 83, 0.3);
+        }
+
+        .badge-ios {
+            background: rgba(150, 160, 180, 0.08);
+            border: 1px solid rgba(150, 160, 180, 0.25);
+        }
+
+        .badge-icon {
+            font-size: 28px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .badge-content {}
+
+        .badge-title {
+            font-size: 13px;
+            font-weight: 800;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .badge-android .badge-title {
+            color: #00e676;
+        }
+
+        .badge-ios .badge-title {
+            color: #8899bb;
+        }
+
+        .badge-text {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        /* ─── VALUE PROPS ─── */
+        .value-props {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+
+        .value-card {
+            background: var(--accent-glow);
+            border: 1px solid var(--accent-border);
+            border-radius: 14px;
+            padding: 16px 12px;
+            text-align: center;
+        }
+
+        .value-icon {
+            font-size: 22px;
+            margin-bottom: 6px;
+        }
+
+        .value-title {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 3px;
+        }
+
+        .value-desc {
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* ─── STORE IDENTITY FOOTER ─── */
+        .store-footer {
+            width: 100%;
+            background: linear-gradient(135deg, rgba(0, 130, 255, 0.15), rgba(0, 212, 255, 0.08));
+            border: 1px solid var(--accent-border);
+            border-radius: 20px;
+            padding: 24px 28px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .store-logo-circle {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent-2), var(--accent-1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            flex-shrink: 0;
+            box-shadow: 0 0 24px rgba(0, 212, 255, 0.4);
+        }
+
+        .store-info {
+            flex: 1;
+        }
+
+        .store-name {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 0.03em;
+            margin-bottom: 4px;
+        }
+
+        .store-tagline {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+        }
+
+        .store-location {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .location-label {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .location-name {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--accent-1);
+        }
+
+        /* ─── VERY BOTTOM STRIP ─── */
+        .bottom-strip {
+            width: 100%;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, 0.07);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .bottom-url {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.03em;
+        }
+
+        .powered-by {
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.25);
+        }
+
+        .powered-by strong {
+            color: var(--accent-1);
+            font-weight: 700;
+        }
+
+        /* ─── DOWNLOAD BUTTON (hidden when printing) ─── */
+        .download-btn {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: linear-gradient(135deg, #00d4ff, #0080ff);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 14px 24px;
+            font-family: 'Inter', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 32px rgba(0, 130, 255, 0.4);
+            z-index: 1000;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 130, 255, 0.5);
+        }
+
+        /* ─── PRINT STYLES ─── */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                margin: 0;
+            }
+
+            .poster {
+                width: 210mm;
+                min-height: 297mm;
+                border-radius: 0;
+                page-break-after: avoid;
+            }
+
+            .download-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="poster" id="poster">
+        <div class="scanline"></div>
+
+        <div class="content">
+
+            <!-- TOP BAR -->
+            <div class="top-bar">
+                <div class="brand-strip">
+                    <div class="brand-dot"></div>
+                    <span class="brand-label">BizConNet Store</span>
+                </div>
+                <div class="location-tag">📍 Wunti Market</div>
+            </div>
+
+            <!-- HEADLINE -->
+            <div class="headline-block">
+                <div class="scan-label">— Scan to Shop —</div>
+                <div class="main-headline">
+                    USTAZ <span>BLOCK</span>
+                </div>
+                <div class="sub-headline">Phones &nbsp;·&nbsp; Resell &nbsp;·&nbsp; Repair &nbsp;·&nbsp; Accessories
+                </div>
+            </div>
+
+            <div class="rule"></div>
+
+            <!-- QR CODE -->
+            <div class="qr-section">
+                <div class="qr-outer-ring">
+                    <div class="qr-corner-wrap">
+                        <div style="position:absolute;top:0;right:0;" class="qr-corner-tr"></div>
+                        <div style="position:absolute;bottom:0;left:0;" class="qr-corner-bl"></div>
+                    </div>
+                    <div class="qr-inner">
+                        <canvas id="qr-canvas"></canvas>
+                    </div>
+                </div>
+                <div class="qr-caption">tinyurl.com/bizconnet/ustaz-block</div>
+            </div>
+
+            <!-- INSTRUCTION BADGES -->
+            <div class="instruction-row">
+                <div class="badge badge-android">
+                    <div class="badge-icon">🤖</div>
+                    <div class="badge-content">
+                        <div class="badge-title">Android</div>
+                        <div class="badge-text">
+                            Scan & tap <strong style="color:#fff">"Add to Home Screen"</strong> to install the app —
+                            shop anytime, offline-ready.
+                        </div>
+                    </div>
+                </div>
+                <div class="badge badge-ios">
+                    <div class="badge-icon">🍎</div>
+                    <div class="badge-content">
+                        <div class="badge-title">iPhone / iOS</div>
+                        <div class="badge-text">
+                            Scan to visit our store. Tap <strong style="color:#fff">Share → Add to Home Screen</strong>
+                            to save it.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VALUE PROPS -->
+            <div class="value-props">
+                <div class="value-card">
+                    <div class="value-icon">📱</div>
+                    <div class="value-title">Browse Stock</div>
+                    <div class="value-desc">See all phones, accessories & prices before you visit</div>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">💬</div>
+                    <div class="value-title">Order on WhatsApp</div>
+                    <div class="value-desc">Tap to order — your details go straight to us</div>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">🔧</div>
+                    <div class="value-title">Book a Repair</div>
+                    <div class="value-desc">Check repair services & pricing from your phone</div>
+                </div>
+            </div>
+
+            <!-- STORE FOOTER -->
+            <div class="store-footer">
+                <div class="store-logo-circle">📱</div>
+                <div class="store-info">
+                    <div class="store-name">Ustaz Block</div>
+                    <div class="store-tagline">Your trusted phone plug in Wunti Market</div>
+                </div>
+                <div class="store-location">
+                    <div class="location-label">Find us at</div>
+                    <div class="location-name">Wunti Market</div>
+                </div>
+            </div>
+
+            <!-- BOTTOM STRIP -->
+            <div class="bottom-strip">
+                <div class="bottom-url">tinyurl.com/bizconnet/ustaz-block</div>
+                <div class="powered-by">Powered by <strong>BizConNet</strong></div>
+            </div>
+
+        </div><!-- /content -->
+    </div><!-- /poster -->
+
+    <!-- Download Button (hidden on print) -->
+    <button class="download-btn" onclick="printPoster()">🖨️ Print / Save as PDF</button>
+
+    <script>
+        // ─── GENERATE QR CODE ───────────────────────────────────────────────
+        const STORE_URL = 'https://tinyurl.com/bizconnet/ustaz-block';
+
+        QRCode.toCanvas(document.getElementById('qr-canvas'), STORE_URL, {
+            width: 280,
+            margin: 1,
+            color: {
+                dark: '#050d1a',   // matches poster deep bg
+                light: '#ffffff'
+            },
+            errorCorrectionLevel: 'H'   // Highest — survives minor damage/dirt
+        }, function (error) {
+            if (error) {
+                console.error('QR Error:', error);
+                // Fallback: show URL as text
+                document.getElementById('qr-canvas').style.display = 'none';
+                const fallback = document.createElement('div');
+                fallback.style.cssText = 'padding:20px;text-align:center;font-size:12px;color:#333;width:280px;word-break:break-all;';
+                fallback.textContent = STORE_URL;
+                document.getElementById('qr-canvas').parentNode.appendChild(fallback);
+            }
+        });
+
+        // ─── PRINT HANDLER ──────────────────────────────────────────────────
+        function printPoster() {
+            window.print();
+        }
+    </script>
+</body>
+
+</html>

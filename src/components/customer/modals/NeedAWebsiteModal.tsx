@@ -20,6 +20,7 @@ interface NeedAWebsiteModalProps {
 }
 
 const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsiteModalProps) => {
+  return null;
   const modal = useWebsiteRegistrationModal();
   const contentRef = useRef<HTMLDivElement>(null);
   const [storeMeta, setStoreMeta] = useState<any | null>(null);

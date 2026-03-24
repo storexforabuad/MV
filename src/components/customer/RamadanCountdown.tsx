@@ -390,7 +390,7 @@ export default function RamadanCountdown({ className, storeName, onNeedAWebsiteC
 
     // ── Post-Ramadan: Eid Mubarak ──
     return (
-        <div className={`cursor-pointer ${className || ''}`} onClick={() => onNeedAWebsiteClick?.()}>
+        <div className={className || ''}>
             <div className="relative overflow-hidden rounded-[2.5rem] bg-emerald-950 border border-amber-400/40 shadow-2xl min-h-[180px] sm:min-h-[220px] h-full flex flex-col justify-center group">
                 <div className="absolute inset-0">
                     {/* Background Texture */}
