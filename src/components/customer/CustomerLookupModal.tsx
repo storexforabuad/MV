@@ -10,14 +10,16 @@ import toast from "react-hot-toast";
 import Confetti from '@/components/Confetti';
 import { useCustomer } from "@/context/CustomerContext";
 import { geography } from "@/config/geography";
+import { Portal } from "@headlessui/react";
 
 interface CustomerLookupModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: (customer: Customer) => void;
+    loginContext?: { storeType?: string; itemType?: 'product' | 'service' };
 }
 
-const CreateAccountForm = ({ phoneNumber, onAccountCreated }: { phoneNumber: string, onAccountCreated: (customer: Customer) => void }) => {
+const CreateAccountForm = ({ phoneNumber, onAccountCreated, isBrandContext }: { phoneNumber: string, onAccountCreated: (customer: Customer) => void, isBrandContext: boolean }) => {
     const [address, setAddress] = useState<DeliveryAddress>({
         country: "Nigeria",
         state: "Bauchi",
@@ -55,7 +57,14 @@ const CreateAccountForm = ({ phoneNumber, onAccountCreated }: { phoneNumber: str
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            <h2 className="text-3xl font-extrabold text-center text-slate-800 dark:text-white">Create Your Account</h2>
+            <h2 className="text-3xl font-extrabold text-center text-slate-800 dark:text-white">
+                {isBrandContext ? "Brand Verification" : "Create Your Account"}
+            </h2>
+            {isBrandContext && (
+                <p className="text-center text-sm font-medium text-purple-600 dark:text-purple-400 mt-[-1rem]">
+                    Join as a verified brand to book PR & collaboration services.
+                </p>
+            )}
 
             <div className="relative">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
@@ -95,13 +104,13 @@ const CreateAccountForm = ({ phoneNumber, onAccountCreated }: { phoneNumber: str
             </div>
 
             <button type="submit" disabled={isSubmitting} className="w-full bg-slate-800 text-white font-bold py-3 rounded-2xl mt-4 hover:bg-slate-900 transition-colors disabled:bg-slate-600 shadow-lg">
-                {isSubmitting ? "Creating Account..." : "Create Account"}
+                {isSubmitting ? "Creating Account..." : (isBrandContext ? "Complete Verification" : "Create Account")}
             </button>
         </form >
     )
 }
 
-const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModalProps) => {
+const CustomerLookupModal = ({ isOpen, onClose, onSuccess, loginContext }: CustomerLookupModalProps) => {
     const [step, setStep] = useState<"PhoneNumberInput" | "AccountLookup" | "WelcomeBack" | "CreateAccount" | "CollectEmail" | "AllDone">("PhoneNumberInput");
     const [phoneNumber, setPhoneNumber] = useState("");
     const [email, setEmail] = useState("");
@@ -110,6 +119,9 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
     const [isLoading, setIsLoading] = useState(false);
     const [isNewUser, setIsNewUser] = useState(false);
     const { setCustomer } = useCustomer();
+
+    const isBrandContext = loginContext?.storeType === 'media-influencer' && loginContext?.itemType === 'service';
+    const isFollowerContext = loginContext?.storeType === 'media-influencer' && loginContext?.itemType === 'product';
 
     const handlePhoneNumberSubmit = async () => {
         let processedNumber = phoneNumber.replace(/\D/g, '');
@@ -227,7 +239,11 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
                 return (
                     <div>
                         <h2 className="text-3xl font-extrabold text-center text-slate-800 dark:text-white mb-4">Welcome!</h2>
-                        <p className="text-center text-slate-500 dark:text-slate-400 mb-8">Enter your phone number to find or create your account.</p>
+                        <p className="text-center text-slate-500 dark:text-slate-400 mb-8">
+                            {isBrandContext ? "Enter your phone number to verify your brand identity." :
+                                isFollowerContext ? "Sign in to order and support your favorite creator." :
+                                    "Enter your phone number to find or create your account."}
+                        </p>
                         <div className="flex items-center bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 focus-within:ring-2 focus-within:ring-purple-500 transition-all">
                             <span className="text-slate-400 dark:text-slate-500 mr-2 font-medium">🇳🇬 +234</span>
                             <input
@@ -272,12 +288,14 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
                     </div>
                 )
             case "CreateAccount":
-                return <CreateAccountForm phoneNumber={phoneNumber} onAccountCreated={handleAccountCreated} />
+                return <CreateAccountForm phoneNumber={phoneNumber} onAccountCreated={handleAccountCreated} isBrandContext={isBrandContext} />
             case "CollectEmail":
                 return (
                     <form onSubmit={handleEmailSubmit} className="space-y-6">
                         <h2 className="text-3xl font-extrabold text-center text-slate-800 dark:text-white">One Last Thing</h2>
-                        <p className="text-center text-slate-500 dark:text-slate-400">We need your email to send you payment receipts and order updates.</p>
+                        <p className="text-center text-slate-500 dark:text-slate-400">
+                            {isBrandContext ? "We need your email to send you booking updates and campaign deliverables." : "We need your email to send you payment receipts and order updates."}
+                        </p>
 
                         <div className="relative">
                             <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
@@ -304,8 +322,8 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
                         </motion.div>
                         {isNewUser ? (
                             <>
-                                <h2 className="text-3xl font-bold mt-4 text-slate-800 dark:text-white">Your account has been created!</h2>
-                                <p className="text-slate-600 dark:text-slate-300 mt-2">Your referral link is now active. Congrats!</p>
+                                <h2 className="text-3xl font-bold mt-4 text-slate-800 dark:text-white">{isBrandContext ? "Brand Verified!" : "Account created!"}</h2>
+                                {!isBrandContext && <p className="text-slate-600 dark:text-slate-300 mt-2">Your referral link is now active. Congrats!</p>}
                             </>
                         ) : (
                             <h2 className="text-3xl font-bold mt-4 text-slate-800 dark:text-white">You&apos;re all set!</h2>
@@ -321,8 +339,9 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-end sm:items-center justify-center p-4 backdrop-blur-sm">
-            <motion.div
+        <Portal>
+            <div className="fixed inset-0 bg-black bg-opacity-70 z-[100] flex items-end sm:items-center justify-center p-4 backdrop-blur-sm">
+                <motion.div
                 initial={{ y: "100%", opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: "100%", opacity: 0 }}
@@ -347,6 +366,7 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess }: CustomerLookupModal
                 </div>
             </motion.div>
         </div>
+        </Portal>
     );
 };
 

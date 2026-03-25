@@ -306,6 +306,25 @@ export interface SolarProduct extends BaseProduct {
 }
 
 // ==========================================
+// MEDIA INFLUENCER PRODUCT (New)
+// ==========================================
+export interface MediaInfluencerProduct extends BaseProduct {
+  productType: 'media-influencer';
+
+  // Subtypes: e.g., 'service' (PR/Collab) vs 'booking-fee'
+  subtype: 'service' | 'booking-fee';
+
+  // Specific to 'service'
+  platform?: 'Instagram' | 'TikTok' | 'YouTube' | 'Twitter' | 'Cross-Platform';
+  deliveryTimeDays?: number;
+  revisionsAllowed?: number;
+
+  categoryId?: string;
+  category?: string;
+  isActive?: boolean;
+}
+
+// ==========================================
 // MASTER UNION TYPE
 // ==========================================
-export type Product = GeneralProduct | VehicleProduct | LivestockProduct | FashionProduct | FoodBeverageProduct | ElectronicsProduct | SolarProduct;
+export type Product = GeneralProduct | VehicleProduct | LivestockProduct | FashionProduct | FoodBeverageProduct | ElectronicsProduct | SolarProduct | MediaInfluencerProduct;

@@ -27,14 +27,18 @@ export interface Order {
     products: Product[]; // Now supports multiple products
     storeMeta: StoreMeta;
     orderDate: string; // ISO string
-    orderStatus: 'processing' | 'partially-ready' | 'ready' | 'shipped';
+    orderStatus: 'processing' | 'partially-ready' | 'ready' | 'shipped' | 'pending-review';
     orderNotes?: string;
     // Payment-related fields (currently for restaurant orders only, expandable to other store types)
     paymentEvidenceUrl?: string; // Cloudinary URL of payment proof - latest upload only
-    paymentStatus?: 'pending' | 'submitted'; // pending: no evidence yet, submitted: customer uploaded evidence
+    paymentStatus?: 'pending' | 'submitted' | 'escrow-held' | 'escrow-released' | 'refunded'; // pending: no evidence yet, submitted: customer uploaded evidence
     paymentEvidenceUploadedAt?: string; // ISO string - for TTL cleanup tracking (30 days)
     paymentEvidenceFileName?: string; // Original filename for reference
     deliveryMethod?: 'home' | 'pickup';
+
+    // Media Influencer / Escrow Fields
+    deliverableUrl?: string; // Cloudinary URL for PR Service deliverables
+    campaignBrief?: string;  // Detailed instructions from Brand to Influencer
 }
 
 // Type for the detailed order object returned to the ADMIN client.
@@ -59,7 +63,7 @@ interface FirestoreOrderData {
     storeMeta: StoreMeta;
     orderDate: Timestamp;
     customerId: string;
-    orderStatus: 'processing' | 'partially-ready' | 'ready' | 'shipped';
+    orderStatus: 'processing' | 'partially-ready' | 'ready' | 'shipped' | 'pending-review';
     deliveryMethod: 'home' | 'pickup';
     customerInfo: {
         id: string;
@@ -71,10 +75,14 @@ interface FirestoreOrderData {
     orderNotes?: string;
     // Payment-related fields (restaurant orders, expandable to other types)
     paymentEvidenceUrl?: string;
-    paymentStatus?: 'pending' | 'submitted';
+    paymentStatus?: 'pending' | 'submitted' | 'escrow-held' | 'escrow-released' | 'refunded';
     paymentEvidenceUploadedAt?: Timestamp;
     paymentEvidenceFileName?: string;
     ttl?: number; // Unix timestamp in seconds - Firestore TTL for auto-cleanup after 30 days
+
+    // Media Influencer / Escrow Fields
+    deliverableUrl?: string;
+    campaignBrief?: string;
 }
 
 /**
@@ -101,17 +109,22 @@ export const addOrderToFirestore = async (
             throw new Error("This store is currently closed.");
         }
 
-        const customerRef = doc(db, 'customers', customerId);
-        const customerSnap = await getDoc(customerRef);
-        if (!customerSnap.exists()) throw new Error("Customer not found.");
-        const customerData = customerSnap.data() as Customer;
+        const isGuest = customerId.startsWith('guest-');
+        let customerData: any = customer;
+
+        if (!isGuest) {
+            const customerRef = doc(db, 'customers', customerId);
+            const customerSnap = await getDoc(customerRef);
+            if (!customerSnap.exists()) throw new Error("Customer not found.");
+            customerData = customerSnap.data() as Customer;
+        }
 
         const orderDate = Timestamp.now();
         const newOrderId = doc(collection(db, 'dummy')).id;
         const batch = writeBatch(db);
         let referralWasApplied = false;
 
-        if (referralCode) {
+        if (referralCode && !isGuest) {
             const firstEligibleProduct = products.find(p => p.commission && p.commission > 0);
             if (firstEligibleProduct) {
                 const referrersQuery = query(collection(db, 'customers'), where("referralCode", "==", referralCode), limit(1));
@@ -145,7 +158,7 @@ export const addOrderToFirestore = async (
             }
         }
 
-        if (bonusApplied) {
+        if (bonusApplied && !isGuest) {
             batch.update(customerRef, { totalReferralCommission: 0 });
         }
 
@@ -179,8 +192,10 @@ export const addOrderToFirestore = async (
             }),
         };
 
-        const customerOrderRef = doc(db, 'customers', customerId, 'orders', newOrderId);
-        batch.set(customerOrderRef, orderPayload);
+        if (!isGuest) {
+            const customerOrderRef = doc(db, 'customers', customerId, 'orders', newOrderId);
+            batch.set(customerOrderRef, orderPayload);
+        }
 
         const storeOrderRef = doc(db, 'stores', storeId, 'orders', newOrderId);
         batch.set(storeOrderRef, orderPayload);
@@ -417,6 +432,9 @@ const transformOrderData = (doc: any): StoreOrder => {
                 : data.paymentEvidenceUploadedAt
             : undefined,
         deliveryMethod: data.deliveryMethod || 'home',
+        // Media Influencer / Escrow Fields
+        deliverableUrl: data.deliverableUrl,
+        campaignBrief: data.campaignBrief,
     };
 };
 
@@ -588,3 +606,92 @@ export async function acknowledgeOrders(customerId: string, orderIds: string[]):
         throw error;
     }
 }
+
+/**
+ * Called after Paystack payment callback (real or mock).
+ * Marks the order paymentStatus as 'escrow-held' meaning funds received.
+ */
+export async function confirmPayment(storeId: string, orderId: string, paystackReference: string): Promise<{ success: boolean; error?: string }> {
+    try {
+        const orderRef = doc(db, 'stores', storeId, 'orders', orderId);
+        const orderSnap = await getDoc(orderRef);
+        if (!orderSnap.exists()) return { success: false, error: 'Order not found' };
+
+        await updateDoc(orderRef, {
+            paymentStatus: 'escrow-held',
+            paystackReference,
+            paymentConfirmedAt: Timestamp.now(),
+        });
+
+        // Also update customer copy if it exists
+        const orderData = orderSnap.data();
+        if (orderData?.customerId) {
+            const customerOrderRef = doc(db, 'customers', orderData.customerId, 'orders', orderId);
+            await updateDoc(customerOrderRef, {
+                paymentStatus: 'escrow-held',
+                paystackReference,
+            }).catch(() => {/* customer copy may not exist for guest orders */ });
+        }
+
+        return { success: true };
+    } catch (error) {
+        console.error('confirmPayment error:', error);
+        return { success: false, error: String(error) };
+    }
+}
+
+/**
+ * Influencer uploads a deliverable URL (Cloudinary) for a service order.
+ * Moves order to 'pending-review' so the brand can approve.
+ */
+export async function uploadEscrowDeliverable(
+    storeId: string,
+    orderId: string,
+    deliverableUrl: string,
+    influencerNote?: string
+): Promise<{ success: boolean; error?: string }> {
+    try {
+        const orderRef = doc(db, 'stores', storeId, 'orders', orderId);
+        const snap = await getDoc(orderRef);
+        if (!snap.exists()) return { success: false, error: 'Order not found' };
+
+        await updateDoc(orderRef, {
+            deliverableUrl,
+            influencerNote: influencerNote || null,
+            deliverableUploadedAt: Timestamp.now(),
+            orderStatus: 'pending-review',
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error('uploadEscrowDeliverable error:', error);
+        return { success: false, error: String(error) };
+    }
+}
+
+/**
+ * Brand approves the deliverable — conceptually releases escrow funds.
+ * Moves order to 'delivered' and paymentStatus to 'escrow-released'.
+ */
+export async function releaseEscrow(
+    storeId: string,
+    orderId: string
+): Promise<{ success: boolean; error?: string }> {
+    try {
+        const orderRef = doc(db, 'stores', storeId, 'orders', orderId);
+        const snap = await getDoc(orderRef);
+        if (!snap.exists()) return { success: false, error: 'Order not found' };
+
+        await updateDoc(orderRef, {
+            paymentStatus: 'escrow-released',
+            orderStatus: 'shipped', // repurposed as "delivered" for services
+            escrowReleasedAt: Timestamp.now(),
+        });
+
+        return { success: true };
+    } catch (error) {
+        console.error('releaseEscrow error:', error);
+        return { success: false, error: String(error) };
+    }
+}
+

@@ -9,7 +9,7 @@ interface PaymentEvidenceViewerProps {
   paymentEvidenceUrl?: string;
   paymentEvidenceFileName?: string;
   paymentEvidenceUploadedAt?: string;
-  paymentStatus?: 'pending' | 'submitted';
+  paymentStatus?: 'pending' | 'submitted' | 'escrow-held' | 'escrow-released' | 'refunded';
 }
 
 export default function PaymentEvidenceViewer({
@@ -27,12 +27,12 @@ export default function PaymentEvidenceViewer({
 
   const uploadDate = paymentEvidenceUploadedAt
     ? new Date(paymentEvidenceUploadedAt).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      })
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
     : 'Unknown';
 
   return (
@@ -69,11 +69,10 @@ export default function PaymentEvidenceViewer({
         <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800">
           <div className="flex items-center gap-2">
             <div
-              className={`h-2 w-2 rounded-full ${
-                paymentStatus === 'submitted'
+              className={`h-2 w-2 rounded-full ${paymentStatus === 'submitted'
                   ? 'bg-yellow-500'
                   : 'bg-gray-400'
-              }`}
+                }`}
             />
             <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
               {paymentStatus === 'submitted'

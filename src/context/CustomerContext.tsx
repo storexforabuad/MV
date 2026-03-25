@@ -5,11 +5,16 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { Customer } from '@/types/customer';
 import CustomerLookupModal from '@/components/customer/CustomerLookupModal';
 
+export interface LoginContext {
+  storeType?: string;
+  itemType?: 'product' | 'service';
+}
+
 interface CustomerContextType {
   customer: Customer | null;
   setCustomer: (customer: Customer | null) => void;
   loading: boolean;
-  promptLogin: () => void;
+  promptLogin: (ctx?: LoginContext) => void;
 }
 
 const CustomerContext = createContext<CustomerContextType | undefined>(undefined);
@@ -18,6 +23,7 @@ export const CustomerProvider = ({ children }: { children: ReactNode }) => {
   const [customer, setCustomerState] = useState<Customer | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [loginContext, setLoginContext] = useState<LoginContext | undefined>(undefined);
 
   useEffect(() => {
     try {
@@ -42,7 +48,9 @@ export const CustomerProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const promptLogin = () => {
+  const promptLogin = (ctx?: LoginContext) => {
+    if (ctx) setLoginContext(ctx);
+    else setLoginContext(undefined);
     setIsLoginModalOpen(true);
   };
 
@@ -54,10 +62,11 @@ export const CustomerProvider = ({ children }: { children: ReactNode }) => {
   return (
     <CustomerContext.Provider value={{ customer, setCustomer, loading, promptLogin }}>
       {children}
-      <CustomerLookupModal 
+      <CustomerLookupModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
         onSuccess={handleLoginSuccess}
+        loginContext={loginContext}
       />
     </CustomerContext.Provider>
   );

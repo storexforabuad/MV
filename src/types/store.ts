@@ -37,7 +37,7 @@ export interface StoreMeta {
   country?: string;
 
   // Store Vertical
-  storeType?: 'general' | 'restaurant' | 'fashion' | 'livestock' | 'automotive' | 'electronics' | 'solar' | 'real-estate' | 'artist' | 'beauty' | 'home-services' | 'digital-products' | 'sports' | 'sports-rental' | 'pitchperfect' | 'pitch';
+  storeType?: 'general' | 'restaurant' | 'fashion' | 'livestock' | 'automotive' | 'electronics' | 'solar' | 'real-estate' | 'artist' | 'beauty' | 'home-services' | 'digital-products' | 'sports' | 'sports-rental' | 'pitchperfect' | 'pitch' | 'media-influencer';
 
   // Timezone & payout tracking
   timezone?: string;
@@ -56,7 +56,7 @@ export interface StoreMeta {
 
   // Subscription Management
   subscriptionStatus?: 'trial' | 'active' | 'past_due' | 'cancelled' | 'expired';
-  subscriptionTier?: 'basic' | 'pro' | 'promax' | 'general';
+  subscriptionTier?: 'basic' | 'pro' | 'promax' | 'general' | 'max';
   subscriptionPlanCode?: string;     // Paystack plan code
   subscriptionCode?: string;         // Paystack subscription code
   paystackCustomerCode?: string;     // Paystack customer code for recurring billing
@@ -85,6 +85,15 @@ export interface StoreMeta {
   };
   adminPin?: string; // 4-digit PIN for admin access
   isInfluencer?: boolean;     // Flag for influencer accounts
+
+  // Influencer Social Stats
+  socialStats?: {
+    instagramFollowers?: number;
+    tiktokFollowers?: number;
+    youtubeSubscribers?: number;
+    twitterFollowers?: number;
+  };
+
   isFreePlan?: boolean;       // Flag for free forever accounts (no billing)
   isTestStore?: boolean;      // Flag for internal test/dev stores (excluded from metrics)
   isWeeklyBilling?: boolean;  // TRUE only for accounts from NeedAWebsiteModal (weekly plan). Source of truth for WeeklyRR.

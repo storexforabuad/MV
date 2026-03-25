@@ -59,9 +59,9 @@ export default function ProductCard({
   const [isMobile, setIsMobile] = useState(false);
   const { wishlist, addToWishlist, removeFromWishlist } = useWishlist();
   const { state: cartState, dispatch: cartDispatch } = useCart();
-  const { customer } = useCustomer();
   const [wishlistLoading, setWishlistLoading] = useState(false);
   const hasTrackedInteraction = useRef(false);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
 
   const handleTrackInteraction = () => {
     if (!storeId || !product.id || hasTrackedInteraction.current) return;
@@ -225,13 +225,33 @@ export default function ProductCard({
     setCurrentImageIndex((prev) => (prev === 0 ? totalImages - 1 : prev - 1));
   };
 
-  const handleNextImage = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleNextImage = (e: React.MouseEvent | React.TouchEvent) => {
+    if (e.preventDefault) e.preventDefault();
+    if (e.stopPropagation) e.stopPropagation();
     handleImagePressEnd(); // cancel any pending long press
     handleTrackInteraction();
     setDirection(1);
     setCurrentImageIndex((prev) => (prev === totalImages - 1 ? 0 : prev + 1));
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.touches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStart === null) return;
+    const touchEnd = e.changedTouches[0].clientX;
+    const swipeDistance = touchStart - touchEnd;
+    const swipeThreshold = 40; // minimum distance to be considered a swipe
+
+    if (swipeDistance > swipeThreshold) {
+      // Swiped left, go to next image
+      handleNextImage(e);
+    } else if (swipeDistance < -swipeThreshold) {
+      // Swiped right, go to previous image
+      handlePrevImage(e);
+    }
+    setTouchStart(null);
   };
 
   const handleDotClick = (e: React.MouseEvent, index: number) => {
@@ -407,19 +427,21 @@ export default function ProductCard({
         style={{ WebkitTapHighlightColor: 'transparent' }}
       >
         <div
-          className="product-image-container relative aspect-[3/4] w-full rounded-[32px] overflow-hidden
+          className={`product-image-container relative aspect-[3/4] w-full rounded-[32px] overflow-hidden
           shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08),0_2px_6px_-1px_rgba(0,0,0,0.05)] dark:shadow-lg dark:shadow-white/10
-          transition-all duration-200 ease-[cubic-bezier(0.4,0,0.2,1)]
+          transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
           transform-gpu will-change-transform
           group-hover:shadow-[0_16px_24px_-8px_rgba(0,0,0,0.12),0_4px_12px_-4px_rgba(0,0,0,0.08)] dark:group-hover:shadow-xl dark:group-hover:shadow-white/15
           ${!isMobile ? 'group-hover:translate-y-[-4px]' : ''}
-          bg-white dark:bg-card-background border-2 border-transparent"
+          bg-white dark:bg-card-background border-2 border-transparent`}
           style={{
             transform: 'translate3d(0,0,0)',
             perspective: '1000px',
             backfaceVisibility: 'hidden',
           }}
           draggable="false"
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
         >
           {imageLoading && (
             <div className="absolute inset-0 bg-[var(--skeleton-background)] animate-pulse z-10" />
@@ -772,10 +794,10 @@ export default function ProductCard({
               animate="center"
               exit="exit"
               transition={{
-                x: { type: "spring", stiffness: 300, damping: 30 },
-                opacity: { duration: 0.3 }
+                x: { type: "spring", stiffness: 400, damping: 40 },
+                opacity: { duration: 0.25 }
               }}
-              className="absolute inset-0"
+              className="absolute inset-0 pointer-events-none"
             >
               <Image
                 src={displayImage}
@@ -854,43 +876,45 @@ export default function ProductCard({
           {/* Navigation Arrows - Only show when NOT sold out and multiple images */}
           {!isSoldOut && hasMultipleImages && (
             <>
-              {/* Left Arrow */}
               <motion.button
                 onClick={handlePrevImage}
-                className="absolute left-[14px] top-1/2 transform -translate-y-1/2 z-20 p-2.5 rounded-full card-glass shadow-lg flex items-center justify-center"
+                onContextMenu={(e) => { e.preventDefault(); handlePrevImage(e); }}
+                className="absolute left-[14px] top-1/2 transform -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-md border border-white/30 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] flex items-center justify-center transition-all duration-300"
                 aria-label="Previous image"
                 type="button"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,255,255,0.7)' }}
+                whileTap={{ scale: 0.9 }}
               >
-                <ChevronLeft size={20} className="text-slate-800" />
+                <ChevronLeft size={18} className="text-gray-900 drop-shadow-md" />
               </motion.button>
 
               {/* Right Arrow */}
               <motion.button
                 onClick={handleNextImage}
-                className="absolute right-[14px] top-1/2 transform -translate-y-1/2 z-30 p-2.5 rounded-full card-glass shadow-lg flex items-center justify-center"
+                onContextMenu={(e) => { e.preventDefault(); handleNextImage(e); }}
+                className="absolute right-[14px] top-1/2 transform -translate-y-1/2 z-30 w-9 h-9 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-md border border-white/30 shadow-[0_8px_32px_0_rgba(31,38,135,0.15)] flex items-center justify-center transition-all duration-300"
                 aria-label="Next image"
                 type="button"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,255,255,0.7)' }}
+                whileTap={{ scale: 0.9 }}
               >
-                <ChevronRight size={20} className="text-slate-800" />
+                <ChevronRight size={18} className="text-gray-900 drop-shadow-md" />
               </motion.button>
             </>
           )}
 
           {/* Carousel Dots - Bottom Center - Only show when NOT sold out */}
           {!isSoldOut && hasMultipleImages && (
-            <div className={`absolute bottom-[18px] left-1/2 transform -translate-x-1/2 flex gap-0.5 z-10 transition-opacity duration-300 ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+            <div className={`absolute bottom-[16px] left-1/2 transform -translate-x-1/2 flex items-center justify-center gap-1.5 z-20 px-3 py-1.5 rounded-full bg-black/20 backdrop-blur-sm transition-opacity duration-300 ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
               {carouselImages.map((_, index) => (
-                <span
+                <button
                   key={index}
-                  className={`transition-all duration-200 rounded-full ${index === currentImageIndex
-                    ? 'w-1 h-1 bg-white shadow-md'
-                    : 'w-0.75 h-0.75 bg-white/60'
+                  onClick={(e) => handleDotClick(e, index)}
+                  className={`transition-all duration-300 ease-out focus:outline-none ${index === currentImageIndex
+                    ? 'w-4 h-1.5 bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)]'
+                    : 'w-1.5 h-1.5 bg-white/50 rounded-full hover:bg-white/80'
                     }`}
-                  aria-label={`Image ${index + 1} of ${totalImages}`}
+                  aria-label={`Go to image ${index + 1} of ${totalImages}`}
                 />
               ))}
             </div>

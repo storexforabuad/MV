@@ -15,6 +15,7 @@ import { Customer } from '@/types/customer';
 import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 import { CartItem } from '@/lib/cartContext';
 import { isSolarProduct } from '@/utils/productHelpers';
+import EscrowDeliverablePanel from '@/components/admin/EscrowDeliverablePanel';
 
 interface OrderDetailCardProps {
   order: Order;
@@ -22,6 +23,8 @@ interface OrderDetailCardProps {
   storeMeta: StoreMeta;
   isHighlighted?: boolean;
   onReorder?: (order: Order) => void;
+  onRefresh?: () => void;
+  storeId?: string;
 }
 
 const getStatusUI = (status: Order['orderStatus']) => {
@@ -38,12 +41,13 @@ const getStatusUI = (status: Order['orderStatus']) => {
   }
 };
 
-export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted, onReorder }: OrderDetailCardProps) {
+export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted, onReorder, storeId, onRefresh }: OrderDetailCardProps) {
   const [isReordering, setIsReordering] = useState(false);
   const { customer } = useCustomer();
 
-  // Backward compatibility: Handle both new multi-product orders and old single-product orders.
   const products = order.products || [];
+  const isServiceOrder = products.some((p: any) => p.productType === 'media-influencer' && p.subtype === 'service');
+  const resolvedStoreId = storeId || storeMeta?.id || '';
 
   const handleReorder = async () => {
     if (onReorder) {
@@ -181,6 +185,21 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted, onR
             <p className="font-semibold text-text-secondary">Total</p>
             <p className="text-lg font-bold text-purple-400">{formatPrice(totalAmount)}</p>
           </div>
+
+          {/* Brand Escrow Approval Panel — shown when influencer has submitted deliverable */}
+          {isServiceOrder && resolvedStoreId && (
+            <div className="mt-4">
+              <EscrowDeliverablePanel
+                orderId={order.id}
+                storeId={resolvedStoreId}
+                isInfluencerView={false}
+                paymentStatus={order.paymentStatus}
+                orderStatus={order.orderStatus}
+                deliverableUrl={(order as any).deliverableUrl}
+                onUpdate={onRefresh}
+              />
+            </div>
+          )}
         </div>
         <div className="flex border-t border-border-color">
           <button

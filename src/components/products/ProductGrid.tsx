@@ -2,7 +2,7 @@
 import { memo, useState, useEffect, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Info, Phone, MessageCircle, Star, Clock, MapPin, Instagram, Gift, Search, Globe, Sparkles } from 'lucide-react';
+import { Info, Phone, MessageCircle, Star, Clock, MapPin, Instagram, Gift, Search, Globe, Sparkles, UserCircle } from 'lucide-react';
 import { Product } from '../../types/product';
 import { Order } from '../../hooks/useOrders';
 import { motion, LayoutGroup, AnimatePresence, Transition } from 'framer-motion';
@@ -11,7 +11,7 @@ import { getStoreMeta } from '../../lib/db';
 import { StoreMeta } from '../../types/store';
 import { useCustomer } from '@/context/CustomerContext';
 import { useOrders } from '@/hooks/useOrders';
-import { OrdersModal } from '@/components/customer/modals/OrdersModal';
+import CustomerProfileModal from '@/components/customer/modals/CustomerProfileModal';
 import { ReferralsModal } from '@/components/customer/modals/ReferralsModal';
 import {
   ensureProductType,
@@ -120,7 +120,7 @@ const ProductGrid = memo(function ProductGrid({
 }: ProductGridProps) {
   const router = useRouter();
   const { customer, promptLogin } = useCustomer();
-  const { orders, addOrder } = useOrders(customer?.id ?? null, storeId || "");
+  const { orders, addOrder, refetchOrders } = useOrders(customer?.id ?? null, storeId || "");
   const [isSingleColumn, setIsSingleColumn] = useState(true);
   const [isReferralModalOpen, setReferralModalOpen] = useState(false);
 
@@ -231,6 +231,14 @@ const ProductGrid = memo(function ProductGrid({
               aria-label="Your Orders"
               text="Orders"
             />
+            {storeMeta?.storeType === 'media-influencer' && (
+              <GlassButton
+                onClick={() => setOrdersModalOpen(true)}
+                aria-label="Follower Account"
+              >
+                <UserCircle className="w-5 h-5 text-[var(--text-primary)]" />
+              </GlassButton>
+            )}
             <GlassButton
               onClick={() => setIsSearchOverlayOpen(true)}
               aria-label="Search products"
@@ -242,16 +250,18 @@ const ProductGrid = memo(function ProductGrid({
       )}
 
       {storeId && storeMeta && (
-        <OrdersModal
+        <CustomerProfileModal
           isOpen={isOrdersModalOpen}
           onClose={() => setOrdersModalOpen(false)}
           orders={orders}
           storeId={storeId}
           addOrder={addOrder}
           storeMeta={storeMeta}
+          customer={customer}
           highlightOrderId={highlightOrderId}
           onNotificationRequest={onNotificationRequest}
           onReorder={handleReorder}
+          onRefresh={refetchOrders}
         />
       )}
       {storeId && (

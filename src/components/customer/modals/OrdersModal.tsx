@@ -144,6 +144,7 @@ const OrdersModal: React.FC<OrdersModalProps> = ({
                                     storeMeta={storeMeta}
                                     isHighlighted={highlightOrderId === order.id}
                                     onReorder={onReorder}
+                                    storeId={storeMeta?.id}
                                   />
                                 </div>
                               ))}

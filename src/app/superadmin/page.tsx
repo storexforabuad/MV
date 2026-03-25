@@ -106,6 +106,13 @@ export default function SuperAdminPage() {
                         <TrendingUp className="w-4 h-4" /> Growth Portal
                     </Link>
 
+                    <Link
+                        href="/mediadashboard"
+                        className="h-12 px-5 rounded-2xl bg-violet-50 dark:bg-violet-900/20 text-violet-600 dark:text-violet-400 font-black uppercase tracking-widest text-[10px] flex items-center gap-2 border border-violet-100 dark:border-violet-800 hover:bg-violet-100 transition-colors"
+                    >
+                        <Zap className="w-4 h-4" /> Media Dash
+                    </Link>
+
                     <button
                         onClick={() => setIsNotifOpen(true)}
                         className="w-12 h-12 rounded-2xl bg-white shadow-soft flex items-center justify-center text-slate-600 hover:text-indigo-600 transition-colors border border-slate-100 relative group"

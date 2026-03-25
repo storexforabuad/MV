@@ -3,15 +3,17 @@ import React, { useState, useMemo, Fragment, useRef, useEffect, useCallback, use
 import { Menu, Transition } from '@headlessui/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { XMarkIcon, MagnifyingGlassIcon, EllipsisVerticalIcon, EyeIcon } from '@heroicons/react/24/solid';
-import { Archive, Percent } from 'lucide-react';
+import { Archive, Percent, PlusCircle } from 'lucide-react';
 import Image from 'next/image';
-import { Product } from '../../types/product';
+import { Product, MediaInfluencerProduct } from '../../types/product';
 import { formatPrice } from '../../utils/price';
 import EditProductPanel from './EditProductPanel';
 import ConfirmationDialog from '../common/ConfirmationDialog';
 import { useDynamicMenuPosition } from '@/hooks/useDynamicMenuPosition';
 import { isGeneralProduct } from '../../utils/productHelpers';
 import { useInView } from 'react-intersection-observer';
+import { addProduct } from '../../lib/db';
+import toast from 'react-hot-toast';
 
 // --- TYPES ---
 interface ManageProductsModalProps {
@@ -23,6 +25,8 @@ interface ManageProductsModalProps {
   onUpdateProduct: (productId: string, data: Partial<Product>) => Promise<void>;
   onDeleteProduct: (productId: string) => void;
   onAddCategory: (name: string) => Promise<void>;
+  storeType?: string;
+  storeId?: string;
 }
 type FilterType = 'all' | 'popular' | 'limited' | 'soldout';
 
@@ -189,9 +193,52 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
   const [isSelectMode, setIsSelectMode] = useState(false);
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [isBulkDeleteConfirmOpen, setIsBulkDeleteConfirmOpen] = useState(false);
+  const [isGeneratingFee, setIsGeneratingFee] = useState(false);
 
   const [visibleCount, setVisibleCount] = useState(20);
   const { ref: loadMoreRef, inView } = useInView();
+
+  const hasBookingFee = products.some(p => p.productType === 'media-influencer' && p.subtype === 'booking-fee');
+
+  const handleAddBookingFee = async () => {
+    if (!storeId || hasBookingFee) return;
+    setIsGeneratingFee(true);
+    try {
+      const newFee: MediaInfluencerProduct = {
+        id: '', // DB assigned
+        storeId,
+        name: 'Booking Access Fee',
+        description: 'A one-time verification fee for brands to unlock PR & Collaboration requests.',
+        price: 5000, // Minimum 5k
+        images: ['https://res.cloudinary.com/kikks/image/upload/v1700000000/booking-badge.jpg'], // Using a generic placeholder for now
+        views: 0,
+        createdAt: { toMillis: () => Date.now() } as any,
+        commission: 20, // 20% platform cut for booking fee
+        productType: 'media-influencer',
+        subtype: 'booking-fee',
+        platform: 'Cross-Platform',
+        deliveryTimeDays: 0,
+        revisionsAllowed: 0,
+        categoryId: '',
+        category: 'Verification',
+        isActive: true,
+      };
+
+      const docId = await addProduct(storeId, newFee);
+      if (typeof docId === 'string') {
+        setProducts(prev => [{ ...newFee, id: docId }, ...prev]);
+      } else {
+        // Fallback if addProduct doesn't return string ID reliably
+        window.location.reload();
+      }
+      toast.success('Booking Fee product generated!');
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to generate Booking Fee');
+    } finally {
+      setIsGeneratingFee(false);
+    }
+  };
 
   const filterCounts = useMemo(() => {
     return {
@@ -314,8 +361,19 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
                 </h2>
                 <p className="text-xs text-gray-500 dark:text-zinc-400">Inventory & Stock</p>
               </div>
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-800 rounded-xl flex items-center justify-center shadow-lg">
-                <Archive className="w-6 h-6 text-white" />
+              <div className="flex items-center gap-3">
+                {storeType === 'media-influencer' && !hasBookingFee && (
+                  <button
+                    onClick={handleAddBookingFee}
+                    disabled={isGeneratingFee}
+                    className="text-xs font-bold bg-amber-500 hover:bg-amber-600 text-white py-2 px-3 rounded-xl flex items-center gap-1 shadow-sm transition-colors disabled:opacity-50"
+                  >
+                    {isGeneratingFee ? 'Generating...' : <><PlusCircle className="w-4 h-4" /> Add Booking Fee</>}
+                  </button>
+                )}
+                <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-indigo-800 rounded-xl flex items-center justify-center shadow-lg">
+                  <Archive className="w-6 h-6 text-white" />
+                </div>
               </div>
             </header>
 

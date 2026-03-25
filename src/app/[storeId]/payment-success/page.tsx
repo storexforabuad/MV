@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useRouter, useParams } from 'next/navigation';
-import { CheckCircle, Loader2, ShoppingBag, MessageSquare } from 'lucide-react';
+import { CheckCircle, Loader2, ShoppingBag, MessageSquare, Package } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import Link from 'next/link';
-import { getOrderById } from '@/app/actions/orderActions';
+import { getOrderById, confirmPayment } from '@/app/actions/orderActions';
 import { formatPrice } from '@/utils/price';
 import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 
@@ -13,50 +13,63 @@ export default function PaymentSuccessPage() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const params = useParams();
-    const reference = searchParams?.get('reference');
+    const reference = searchParams?.get('reference') || searchParams?.get('trxref') || '';
     const storeId = (params?.storeId as string) || '';
+    const orderId = searchParams?.get('orderId') || '';
+    const isMock = searchParams?.get('mock') === 'true';
 
     const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
-    const [orderId, setOrderId] = useState<string | null>(null);
+    const [resolvedOrderId, setResolvedOrderId] = useState<string | null>(null);
     const [order, setOrder] = useState<any>(null);
-    const [isGeneratingMessage, setIsGeneratingMessage] = useState(false);
+    const hasRun = useRef(false);
 
     useEffect(() => {
-        if (!reference) {
-            setStatus('error');
+        if (hasRun.current || !reference) {
+            if (!reference) setStatus('error');
             return;
         }
+        hasRun.current = true;
 
         const verifyPayment = async () => {
             try {
-                const response = await fetch(`/api/paystack/verify?reference=${reference}`);
-                const data = await response.json();
+                let confirmedOrderId = orderId;
 
-                if (data.success && data.data.status === 'success') {
+                if (isMock) {
+                    // Mock: Skip Paystack, just confirm in Firestore
+                    if (orderId && storeId) {
+                        await confirmPayment(storeId, orderId, reference);
+                    }
                     setStatus('success');
-                    setOrderId(data.data.metadata?.orderId || 'Unknown'); // Fallback if metadata missing
+                    setResolvedOrderId(orderId || null);
+                } else {
+                    const response = await fetch(`/api/paystack/verify?reference=${reference}`);
+                    const data = await response.json();
 
-                    // Trigger Confetti
-                    const duration = 3 * 1000;
-                    const animationEnd = Date.now() + duration;
-                    const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+                    if (data.success && data.data.status === 'success') {
+                        confirmedOrderId = data.data.metadata?.orderId || orderId || 'Unknown';
+                        setStatus('success');
+                        setResolvedOrderId(confirmedOrderId);
 
-                    const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
-
-                    const interval: any = setInterval(function () {
-                        const timeLeft = animationEnd - Date.now();
-
-                        if (timeLeft <= 0) {
-                            return clearInterval(interval);
+                        // Mark order as escrow-held
+                        if (confirmedOrderId && storeId) {
+                            await confirmPayment(storeId, confirmedOrderId, reference);
                         }
 
-                        const particleCount = 50 * (timeLeft / duration);
-                        confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
-                        confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
-                    }, 250);
-
-                } else {
-                    setStatus('error');
+                        // Trigger Confetti
+                        const duration = 3 * 1000;
+                        const animationEnd = Date.now() + duration;
+                        const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+                        const randomInRange = (min: number, max: number) => Math.random() * (max - min) + min;
+                        const interval: any = setInterval(function () {
+                            const timeLeft = animationEnd - Date.now();
+                            if (timeLeft <= 0) return clearInterval(interval);
+                            const particleCount = 50 * (timeLeft / duration);
+                            confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+                            confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+                        }, 250);
+                    } else {
+                        setStatus('error');
+                    }
                 }
             } catch (error) {
                 console.error('Verification failed', error);
@@ -65,13 +78,13 @@ export default function PaymentSuccessPage() {
         };
 
         verifyPayment();
-    }, [reference]);
+    }, [reference, storeId, orderId, isMock]);
 
     useEffect(() => {
-        if (orderId && orderId !== 'Unknown' && storeId) {
-            getOrderById(storeId, orderId).then(setOrder).catch(console.error);
+        if (resolvedOrderId && resolvedOrderId !== 'Unknown' && storeId) {
+            getOrderById(storeId, resolvedOrderId).then(setOrder).catch(console.error);
         }
-    }, [orderId, storeId]);
+    }, [resolvedOrderId, storeId]);
 
     const handleSendReceipt = () => {
         if (!order) {
@@ -163,17 +176,30 @@ export default function PaymentSuccessPage() {
                     Your order has been confirmed and the vendor has been notified.
                 </p>
 
-                <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 mb-8 border border-gray-100 dark:border-gray-700">
+                <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 mb-6 border border-gray-100 dark:border-gray-700">
                     <div className="flex justify-between text-sm mb-2">
                         <span className="text-gray-500 dark:text-gray-400">Payment Reference</span>
                         <span className="font-mono font-medium text-gray-900 dark:text-white truncate max-w-[150px]">{reference || 'N/A'}</span>
                     </div>
-                    {orderId && (
+                    {resolvedOrderId && (
                         <div className="flex justify-between text-sm">
                             <span className="text-gray-500 dark:text-gray-400">Order ID</span>
-                            <span className="font-mono font-medium text-gray-900 dark:text-white">#{orderId.slice(0, 8)}</span>
+                            <span className="font-mono font-medium text-gray-900 dark:text-white">#{resolvedOrderId.slice(0, 8)}</span>
                         </div>
                     )}
+                </div>
+
+                {/* Escrow Banner */}
+                <div className="w-full bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-xl p-4 mb-6 text-left">
+                    <div className="flex items-start gap-3">
+                        <Package className="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                            <p className="text-sm font-semibold text-blue-700 dark:text-blue-300">Funds Held in Escrow</p>
+                            <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">
+                                Your payment is secure. If this is a service order, funds will be released to the influencer only after you approve the campaign deliverable.
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
                 <div className="space-y-3">

@@ -10,6 +10,7 @@ import toast from 'react-hot-toast';
 import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 import PaymentEvidenceViewer from './PaymentEvidenceViewer';
 import { MarkOrderReadyModal } from './MarkOrderReadyModal';
+import EscrowDeliverablePanel from '@/components/admin/EscrowDeliverablePanel';
 
 interface AdminOrdersModalProps {
   isOpen: boolean;
@@ -39,9 +40,10 @@ const OrderProductRow = ({ product }: { product: any }) => {
   );
 };
 
-const CustomerOrdersCard = ({ order, onMarkReady, isHighlighted }: { order: StoreOrder, onMarkReady: (order: StoreOrder) => void, isHighlighted?: boolean }) => {
+const CustomerOrdersCard = ({ order, onMarkReady, isHighlighted, storeId, onUpdate }: { order: StoreOrder, onMarkReady: (order: StoreOrder) => void, isHighlighted?: boolean, storeId: string, onUpdate: () => void }) => {
   const { customerInfo, products } = order;
   const whatsappUrl = `https://wa.me/${formatWhatsAppNumber(customerInfo.phoneNumber)}`;
+  const isServiceOrder = products.some((p: any) => p.productType === 'media-influencer' && p.subtype === 'service');
 
   // Find if there are any dropshipped items in this order
   const dropshippedItems = products.filter((p: any) => p.isDropshipped && p.supplierId);
@@ -141,6 +143,21 @@ const CustomerOrdersCard = ({ order, onMarkReady, isHighlighted }: { order: Stor
           paymentEvidenceUploadedAt={order.paymentEvidenceUploadedAt}
           paymentStatus={order.paymentStatus}
         />
+      )}
+
+      {/* Escrow Deliverable Panel — only for Media Influencer Service orders */}
+      {isServiceOrder && (
+        <div className="px-4 pb-3">
+          <EscrowDeliverablePanel
+            orderId={order.id}
+            storeId={storeId}
+            isInfluencerView={true}
+            paymentStatus={order.paymentStatus}
+            orderStatus={order.orderStatus}
+            deliverableUrl={(order as any).deliverableUrl}
+            onUpdate={onUpdate}
+          />
+        </div>
       )}
 
       <button
@@ -250,6 +267,8 @@ export const AdminOrdersModal = ({ isOpen, onClose, orders, onOrderUpdated, stor
                           order={order}
                           onMarkReady={handleMarkReady}
                           isHighlighted={highlightOrderId === order.id}
+                          storeId={storeId}
+                          onUpdate={onOrderUpdated}
                         />
                       ))}
                     </div>

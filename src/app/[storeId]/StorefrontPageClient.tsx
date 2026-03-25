@@ -154,6 +154,53 @@ export default function StorefrontPageClient({
     }
   }, [storeId]);
 
+  // --- MOCK DATA INJECTION FOR VISUALIZATION ---
+  useEffect(() => {
+    if (storeMeta?.storeType === 'media-influencer' && products.length === 0 && !loading) {
+      // 1. Inject Custom Media Categories
+      if (categories.length === 0) {
+        setCategories([
+          { id: 'pr-collabs', name: 'PR & Collab Services' },
+          { id: 'apparel', name: 'Apparel & Modest Wear' },
+          { id: 'fragrances', name: 'Perfumes & Oils' },
+          { id: 'automobiles', name: 'Cars For Sale' }
+        ]);
+      }
+
+      // 2. Inject Abundant Mock Products for Scrolling
+      const mockMediaProducts: any[] = [
+        // PR & COLLAB SERVICES
+        { id: 'mock-1', name: 'Dedicated Instagram Reel', description: 'High quality 60s dedicated reel for your brand. Includes 1 revision.', price: 250000, originalPrice: 300000, images: ['https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg'], productType: 'media-influencer', subtype: 'service', platform: 'Instagram', deliveryTimeDays: 5, revisionsAllowed: 1, categoryId: 'pr-collabs', createdAt: new Date().toISOString(), isActive: true },
+        { id: 'mock-2', name: 'TikTok Sound Promo (Viral)', description: 'I will vividly use your sound in my next lifestyle vlog. Proven high engagement.', price: 75000, images: ['https://upload.wikimedia.org/wikipedia/en/a/a9/TikTok_logo.svg'], productType: 'media-influencer', subtype: 'service', platform: 'TikTok', deliveryTimeDays: 2, revisionsAllowed: 0, categoryId: 'pr-collabs', createdAt: new Date().toISOString(), isActive: true },
+        { id: 'mock-10', name: 'YouTube Integration (2 Mins)', description: 'A dedicated 2-minute integration segment in my next weekly vlog.', price: 400000, images: ['https://upload.wikimedia.org/wikipedia/commons/b/b8/YouTube_Logo_2017.svg'], productType: 'media-influencer', subtype: 'service', platform: 'YouTube', deliveryTimeDays: 7, revisionsAllowed: 2, categoryId: 'pr-collabs', createdAt: new Date().toISOString(), isActive: true },
+        { id: 'mock-11', name: '24hr Instagram Story Post', description: '3 slides maximum. High conversion rate with custom link integration.', price: 45000, images: ['https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg'], productType: 'media-influencer', subtype: 'service', platform: 'Instagram', deliveryTimeDays: 1, revisionsAllowed: 0, categoryId: 'pr-collabs', createdAt: new Date().toISOString(), isActive: true },
+
+        // AUTOMOBILES
+        { id: 'mock-3', name: 'Mercedes Benz GLC 300 2021', description: 'Direct Tokunbo, panoramic roof, ambient lighting.', price: 45000000, images: ['https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80'], productType: 'vehicle', vehicleDetails: { condition: 'foreign-used', transmission: 'automatic', mileage: 34000 }, categoryId: 'automobiles', createdAt: new Date().toISOString(), isActive: true },
+        { id: 'mock-12', name: 'Lexus RX 350 F-Sport 2020', description: 'Super clean, custom red leather interior, imported.', price: 38000000, images: ['https://images.unsplash.com/photo-1520050206274-a1ae446cb3cc?w=800&q=80'], productType: 'vehicle', vehicleDetails: { condition: 'foreign-used', transmission: 'automatic', mileage: 41000 }, categoryId: 'automobiles', createdAt: new Date().toISOString(), isActive: true },
+        { id: 'mock-13', name: 'Toyota Camry XSE 2022', description: 'Nigerian used, 4 months driven, first body paint.', price: 21000000, images: ['https://images.unsplash.com/photo-1621007947382-bb3c3994e3fd?w=800&q=80'], productType: 'vehicle', vehicleDetails: { condition: 'nigerian-used', transmission: 'automatic', mileage: 12000 }, categoryId: 'automobiles', createdAt: new Date().toISOString(), isActive: true },
+
+        // APPAREL
+        { id: 'mock-5', name: 'Satin Modest Abaya', description: 'Flowy, elegant satin finish. Includes matching hijab.', price: 35000, images: ['https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=800&q=80'], productType: 'fashion', sizes: ['S', 'M', 'L', 'XL'], colors: [{ name: 'Navy Blue', hex: '#000080' }, { name: 'Emerald', hex: '#50c878' }], categoryId: 'apparel', createdAt: new Date().toISOString(), isActive: true },
+        { id: 'mock-6', name: 'Casual Two-Piece Lounge Wear', description: 'Extremely comfortable cotton blend for everyday use.', price: 22000, images: ['https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800&q=80'], productType: 'fashion', sizes: ['M', 'L'], colors: [{ name: 'Beige', hex: '#f5f5dc' }], categoryId: 'apparel', createdAt: new Date().toISOString(), isActive: true },
+        { id: 'mock-7', name: 'Luxury Sequin Evening Dress', description: 'Perfect for weddings and high-profile events. Tailored fit.', price: 85000, images: ['https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=800&q=80'], productType: 'fashion', sizes: ['S', 'M', 'L'], colors: [{ name: 'Gold', hex: '#ffd700' }], categoryId: 'apparel', createdAt: new Date().toISOString(), isActive: true },
+
+        // FRAGRANCES & GENERAL
+        { id: 'mock-4', name: 'Oud Mood Premium Perfume', description: 'Long lasting arabian oud. 100ml.', price: 15000, images: ['https://images.unsplash.com/photo-1594035910387-fea47794261f?w=800&q=80'], productType: 'fashion', sizes: ['100ml', '50ml', '3ml (Oil)'], categoryId: 'fragrances', createdAt: new Date().toISOString(), isActive: true },
+        { id: 'mock-8', name: 'Baccarat Rouge 540 (Decant)', description: 'Authentic 10ml decant spray. Highly addictive scent.', price: 45000, images: ['https://images.unsplash.com/photo-1594035910387-fea47794261f?w=800&q=80'], productType: 'fashion', sizes: ['10ml'], categoryId: 'fragrances', createdAt: new Date().toISOString(), isActive: true },
+        { id: 'mock-9', name: 'Vanilla Musk Scented Oil', description: 'Thick, unadulterated oil perfume for a subtle aura.', price: 8000, originalPrice: 10000, images: ['https://images.unsplash.com/photo-1594035910387-fea47794261f?w=800&q=80'], productType: 'fashion', sizes: ['3ml', '6ml', '12ml'], categoryId: 'fragrances', createdAt: new Date().toISOString(), isActive: true }
+      ];
+
+      // To visualize specific categories, only set if activeCategoryId matches, otherwise show all
+      if (activeCategoryId && activeCategoryId !== 'promo' && activeCategoryId !== 'popular' && activeCategoryId !== 'new-arrivals') {
+        const filtered = mockMediaProducts.filter(p => p.categoryId === activeCategoryId);
+        setProducts(filtered);
+      } else {
+        setProducts(mockMediaProducts);
+      }
+    }
+  }, [storeMeta?.storeType, loading, products.length, categories.length, activeCategoryId]);
+
   const searchParams = useSearchParams();
 
   // Handle order highlighting from deep link

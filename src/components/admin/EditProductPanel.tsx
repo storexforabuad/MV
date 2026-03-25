@@ -38,8 +38,8 @@ interface ProductFormState extends Omit<Product, 'price' | 'originalPrice'> {
   warrantyDuration?: string;
 }
 
-const StyledInput: React.FC<{ id: string, label: string, value: string | number, onChange: (e: ChangeEvent<HTMLInputElement>) => void, type?: string, placeholder?: string }> = ({ id, label, value, onChange, type = 'text', placeholder = '' }) => (
-  <div>
+const StyledInput: React.FC<{ id: string, label: string, value: string | number, onChange: (e: ChangeEvent<HTMLInputElement>) => void, type?: string, placeholder?: string, disabled?: boolean }> = ({ id, label, value, onChange, type = 'text', placeholder = '', disabled = false }) => (
+  <div className={disabled ? 'opacity-60' : ''}>
     <label htmlFor={id} className="block text-sm font-medium text-gray-500 dark:text-gray-400">{label}</label>
     <input
       type={type}
@@ -47,7 +47,8 @@ const StyledInput: React.FC<{ id: string, label: string, value: string | number,
       value={value}
       onChange={onChange}
       placeholder={placeholder}
-      className="mt-1 block w-full bg-gray-100 dark:bg-gray-800 p-3 rounded-lg border-transparent text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      disabled={disabled}
+      className={`mt-1 block w-full bg-gray-100 dark:bg-gray-800 p-3 rounded-lg border-transparent ${disabled ? 'cursor-not-allowed' : 'text-gray-900 dark:text-gray-100'} placeholder:text-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
     />
   </div>
 );
@@ -119,6 +120,11 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
         alert('Error: The product must have a valid price.');
         return;
       }
+      const isBookingFeeValidation = formState.productType === 'media-influencer' && (formState as any).subtype === 'booking-fee';
+      if (isBookingFeeValidation && basePrice < 5000) {
+        alert('Error: Minimum price for the Booking Access Fee is ₦5,000.');
+        return;
+      }
       payload.price = basePrice;
       payload.originalPrice = undefined;
     }
@@ -171,6 +177,8 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
 
   if (!formState || !product) return null;
 
+  const isBookingFee = formState.productType === 'media-influencer' && (formState as any).subtype === 'booking-fee';
+
   return (
     <>
       <Transition.Root show={isOpen} as={Fragment}>
@@ -195,16 +203,26 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
 
                       <div className="relative flex-1 p-4 space-y-6">
 
+                        {isBookingFee && (
+                          <div className="bg-amber-50 dark:bg-amber-900/20 p-5 rounded-2xl border border-amber-200 dark:border-amber-800">
+                            <h3 className="font-bold text-amber-900 dark:text-amber-100 text-lg">Booking Access Fee</h3>
+                            <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                              This is the 1-time verification fee brands pay to unlock PR requests. You can only adjust the price (minimum ₦5,000). The platform takes a 20% cut. Name and categorization are locked to maintain platform standards.
+                            </p>
+                          </div>
+                        )}
+
                         <StyledInput
                           id="product-name"
                           label="Product Name"
                           value={formState.name ?? ''}
                           onChange={(e: ChangeEvent<HTMLInputElement>) => handleInputChange('name', e.target.value)}
+                          disabled={isBookingFee}
                         />
 
-                        <div>
+                        <div className={isBookingFee ? 'opacity-60 pointer-events-none' : ''}>
                           <h3 className="block text-sm font-medium text-gray-500 dark:text-gray-400">Category</h3>
-                          <button onClick={() => setCategorySelectorOpen(true)} className="mt-1 flex justify-between items-center w-full bg-gray-100 dark:bg-gray-800 p-3 rounded-lg text-left">
+                          <button onClick={() => !isBookingFee && setCategorySelectorOpen(true)} className="mt-1 flex justify-between items-center w-full bg-gray-100 dark:bg-gray-800 p-3 rounded-lg text-left disabled:cursor-not-allowed">
                             <span className="text-gray-900 dark:text-gray-100">{currentCategoryName}</span>
                             <ChevronRightIcon className="h-5 w-5 text-gray-400" />
                           </button>
@@ -218,27 +236,29 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                           type="number"
                         />
 
-                        <div className="space-y-3">
-                          <ModernSwitch
-                            label="Promo"
-                            checked={formState.onPromo || false}
-                            onChange={(checked) => handleInputChange('onPromo', checked)}
-                          />
+                        {!isBookingFee && (
+                          <div className="space-y-3">
+                            <ModernSwitch
+                              label="Promo"
+                              checked={formState.onPromo || false}
+                              onChange={(checked) => handleInputChange('onPromo', checked)}
+                            />
 
-                          <AnimatePresence>
-                            {formState.onPromo && (
-                              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}>
-                                <StyledInput
-                                  id="promo-price"
-                                  label="Promo Price"
-                                  value={formState.promoPrice ?? ''}
-                                  onChange={(e) => handlePriceChange('promoPrice', e.target.value)}
-                                  type="number"
-                                />
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
+                            <AnimatePresence>
+                              {formState.onPromo && (
+                                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 10 }}>
+                                  <StyledInput
+                                    id="promo-price"
+                                    label="Promo Price"
+                                    value={formState.promoPrice ?? ''}
+                                    onChange={(e) => handlePriceChange('promoPrice', e.target.value)}
+                                    type="number"
+                                  />
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        )}
 
                         {formState.productType === 'livestock' && (
                           <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
@@ -473,21 +493,23 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                           </div>
                         )}
 
-                        <div className="space-y-1">
-                          <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Inventory Status</h3>
-                          <ModernSwitch
-                            label="Limited Stock"
-                            description="Mark item as having limited availability."
-                            checked={formState.limitedStock || false}
-                            onChange={(checked) => handleInputChange('limitedStock', checked)}
-                          />
-                          <ModernSwitch
-                            label="Sold Out"
-                            description="Mark item as completely unavailable."
-                            checked={formState.soldOut || false}
-                            onChange={(checked) => handleInputChange('soldOut', checked)}
-                          />
-                        </div>
+                        {!isBookingFee && (
+                          <div className="space-y-1">
+                            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Inventory Status</h3>
+                            <ModernSwitch
+                              label="Limited Stock"
+                              description="Mark item as having limited availability."
+                              checked={formState.limitedStock || false}
+                              onChange={(checked) => handleInputChange('limitedStock', checked)}
+                            />
+                            <ModernSwitch
+                              label="Sold Out"
+                              description="Mark item as completely unavailable."
+                              checked={formState.soldOut || false}
+                              onChange={(checked) => handleInputChange('soldOut', checked)}
+                            />
+                          </div>
+                        )}
 
                       </div>
 

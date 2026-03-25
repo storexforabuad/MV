@@ -37,3 +37,7 @@ export function isElectronicsProduct(product: Product): product is ElectronicsPr
 export function isSolarProduct(product: Product): product is SolarProduct {
     return product.productType === 'solar';
 }
+
+export function isMediaInfluencerProduct(product: Product): product is any {
+    return product.productType === 'media-influencer';
+}

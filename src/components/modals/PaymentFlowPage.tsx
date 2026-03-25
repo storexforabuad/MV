@@ -101,12 +101,17 @@ export default function PaymentFlowPage({
         throw new Error('Failed to create order');
       }
 
-      // 2. Initialize Paystack with Order ID
+      // 2. Initialize Paystack (real or mock based on env)
       const cartSummary = cartItems
         ? `${cartItems.length} items`
         : `${quantity}x ${product?.name}`;
 
-      const response = await fetch('/api/paystack/initialize-transaction', {
+      const isMockMode = process.env.NEXT_PUBLIC_PAYSTACK_MOCK === 'true';
+      const endpoint = isMockMode
+        ? '/api/paystack/mock-payment'
+        : '/api/paystack/initialize-transaction';
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

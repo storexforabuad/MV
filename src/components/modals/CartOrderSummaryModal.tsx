@@ -12,6 +12,7 @@ import { useOrders } from '@/hooks/useOrders';
 import { Loader2, MessageSquare, ExternalLink, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getCustomerDetails } from '@/app/actions/customerActions';
+import { useCustomer } from '@/context/CustomerContext';
 import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
 import { isFashionProduct, isElectronicsProduct, isSolarProduct, isVehicleProduct } from '@/utils/productHelpers';
 import { saveModalState, getModalState, clearModalState } from '@/lib/paymentModalStorage';
@@ -52,6 +53,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
   const storeId = passedStoreId || cartItems[0]?.storeId;
   const { addOrder } = useOrders(customer?.id || null, storeId || "");
   const { dispatch } = useCart();
+  const { promptLogin } = useCustomer();
 
   const isPaymentFlowEnabled = shouldUsePaymentFlow(storeMeta?.storeType, storeMeta?.subscriptionStatus);
 
@@ -153,7 +155,12 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
     if (!storeMeta || !storeId) return;
 
     if (isPaymentFlowEnabled && !customer) {
-      toast.error('Please log in to use the secure payment flow');
+      toast.error('Please log in or verify identity to use the secure payment flow');
+      const hasService = cartItems.some(i => i.productType === 'media-influencer' && (i as any).subtype === 'service');
+      promptLogin({
+        storeType: storeMeta.storeType,
+        itemType: hasService ? 'service' : 'product'
+      });
       return;
     }
 

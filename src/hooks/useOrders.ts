@@ -31,13 +31,27 @@ export const useOrders = (customerId: string | null, storeId: string) => {
         const customerOrders = allStoreOrders.filter(o => o.customerInfo.id === customerId);
         setOrders(customerOrders);
       } else {
-        // Fetch from localStorage for anonymous users
-        const savedOrders = localStorage.getItem(`orders_${storeId}`);
-        if (savedOrders) {
-          setOrders(JSON.parse(savedOrders));
-        } else {
-          setOrders([]);
+        // Fetch from Firestore for guest email in localStorage
+        const guestEmail = localStorage.getItem('guest_email');
+        const allStoreOrders = await fetchStoreOrders(storeId);
+        
+        let guestOrdersFromFirestore: Order[] = [];
+        if (guestEmail) {
+          const guestId = `guest-${guestEmail.replace(/[^a-zA-Z0-9]/g, '')}`;
+          guestOrdersFromFirestore = allStoreOrders.filter(o => o.customerInfo.id === guestId || o.customerInfo.id === `guest-${guestEmail}`);
         }
+
+        // Also check legacy localStorage orders
+        const savedOrders = localStorage.getItem(`orders_${storeId}`);
+        const legacyOrders = savedOrders ? JSON.parse(savedOrders) : [];
+        
+        // Merge and deduplicate
+        const merged = [...guestOrdersFromFirestore, ...legacyOrders].reduce((acc: Order[], curr: Order) => {
+          if (!acc.some(o => o.id === curr.id)) acc.push(curr);
+          return acc;
+        }, []);
+
+        setOrders(merged);
       }
     } catch (error) {
       console.error('Failed to fetch orders:', error);

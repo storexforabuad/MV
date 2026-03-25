@@ -13,7 +13,11 @@
  * @returns true if the store should use the payment flow, false otherwise
  */
 export function shouldUsePaymentFlow(storeType: string | undefined, subscriptionStatus: string | undefined): boolean {
-  // Subscription stores always use WhatsApp checkout, never Paystack
+  // Media Influencer ALWAYS uses payment flow (escrow protection)
+  if (storeType === 'media-influencer') {
+    return true;
+  }
+  // Subscription stores (other types) use WhatsApp checkout
   if (subscriptionStatus) {
     return false;
   }

@@ -58,6 +58,12 @@ export default function CreateStoreModal({
     ceoInstagram: "",
     businessDescription: "",
     businessInstagram: "",
+    socialStats: {
+      instagramFollowers: 0,
+      tiktokFollowers: 0,
+      youtubeSubscribers: 0,
+      twitterFollowers: 0,
+    },
     hasPhysicalShop: false,
     shopNumber: "",
     plazaBuildingName: "",
@@ -114,6 +120,21 @@ export default function CreateStoreModal({
     if (type === 'checkbox') {
       const { checked } = e.target as HTMLInputElement;
       setFormData((prev) => ({ ...prev, [name]: checked }));
+    } else if (name.startsWith('socialStats.')) {
+      const field = name.split('.')[1];
+      setFormData((prev) => ({
+        ...prev,
+        socialStats: {
+          ...prev.socialStats,
+          [field]: parseInt(value) || 0,
+        }
+      }));
+    } else if (name === 'storeType') {
+      if (value === 'media-influencer') {
+        setFormData((prev) => ({ ...prev, storeType: value, isInfluencer: true, isTestStore: false }));
+      } else {
+        setFormData((prev) => ({ ...prev, storeType: value, isInfluencer: false }));
+      }
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -261,6 +282,12 @@ export default function CreateStoreModal({
       ceoInstagram: "",
       businessDescription: "",
       businessInstagram: "",
+      socialStats: {
+        instagramFollowers: 0,
+        tiktokFollowers: 0,
+        youtubeSubscribers: 0,
+        twitterFollowers: 0,
+      },
       hasPhysicalShop: false,
       shopNumber: "",
       plazaBuildingName: "",
@@ -347,6 +374,7 @@ export default function CreateStoreModal({
                   <option value="livestock">🐟 Livestock (Fishery & Aquaculture)</option>
                   <option value="automotive">🚗 Automotive (Car Dealership)</option>
                   <option value="solar">☀️ Solar & Renewable Energy</option>
+                  <option value="media-influencer">📣 Media Influencer (PR & Collab)</option>
                   <option value="social-commerce">🌐 Social Commerce</option>
                   <option value="digital-products">💻 Digital Products</option>
                   <option value="consultancy">🎓 Consultancy</option>
@@ -380,7 +408,12 @@ export default function CreateStoreModal({
               label="Influencer Account?"
               description="Free Forever Max Account"
               checked={formData.isInfluencer || false}
-              onChange={checked => setFormData(prev => ({ ...prev, isInfluencer: checked, isTestStore: false }))}
+              onChange={checked => setFormData(prev => ({
+                ...prev,
+                isInfluencer: checked,
+                storeType: checked ? 'media-influencer' : prev.storeType === 'media-influencer' ? 'general' : prev.storeType,
+                isTestStore: false
+              }))}
             />
 
             <ModernToggle
@@ -400,6 +433,25 @@ export default function CreateStoreModal({
                     <FloatingLabelInput label="Plaza Name" name="plazaBuildingName" value={formData.plazaBuildingName || ''} onChange={(e) => handleInputChange(e)} />
                   </div>
                   <FloatingLabelInput label="Street Address" name="streetAddress" value={formData.streetAddress || ''} onChange={(e) => handleInputChange(e)} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <AnimatePresence>
+              {formData.storeType === 'media-influencer' && (
+                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="space-y-4 overflow-hidden border-t border-slate-100 dark:border-slate-800 pt-4 mt-2">
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+                      <Globe className="w-4 h-4 text-pink-500" /> Social Identity
+                    </h3>
+                    <p className="text-[10px] text-slate-500 mt-0.5">Let brands see your reach (estimated counts).</p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <FloatingLabelInput label="IG Followers" name="socialStats.instagramFollowers" type="number" value={formData.socialStats?.instagramFollowers || ''} onChange={(e) => handleInputChange(e)} />
+                    <FloatingLabelInput label="TikTok Followers" name="socialStats.tiktokFollowers" type="number" value={formData.socialStats?.tiktokFollowers || ''} onChange={(e) => handleInputChange(e)} />
+                    <FloatingLabelInput label="YouTube Subs" name="socialStats.youtubeSubscribers" type="number" value={formData.socialStats?.youtubeSubscribers || ''} onChange={(e) => handleInputChange(e)} />
+                    <FloatingLabelInput label="X/Twitter Followers" name="socialStats.twitterFollowers" type="number" value={formData.socialStats?.twitterFollowers || ''} onChange={(e) => handleInputChange(e)} />
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>

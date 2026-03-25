@@ -15,6 +15,7 @@ import { useOrders } from '@/hooks/useOrders';
 import toast from 'react-hot-toast';
 import { useParams } from 'next/navigation';
 import { getCustomerDetails } from '@/app/actions/customerActions';
+import { useCustomer } from '@/context/CustomerContext';
 import { isFoodBeverageProduct, isFashionProduct, isElectronicsProduct, isSolarProduct, isVehicleProduct } from '@/utils/productHelpers';
 import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
 import { saveModalState, getModalState, clearModalState } from '@/lib/paymentModalStorage';
@@ -62,6 +63,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const [whatsappMessage, setWhatsappMessage] = useState('');
   const [hasPlacedOrder, setHasPlacedOrder] = useState(false);
   const [showSizeError, setShowSizeError] = useState(false);
+  const [guestEmail, setGuestEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
 
   // Interactive color and size selection state
   const [interactiveSelectedColor, setInteractiveSelectedColor] = useState<string | undefined>(selectedColor);
@@ -74,7 +77,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
   const routeParams = useParams();
   const storeId = typeof routeParams?.storeId === 'string' ? routeParams.storeId : Array.isArray(routeParams?.storeId) ? routeParams.storeId[0] : undefined;
-  const { addOrder } = useOrders(customer?.id || null, storeId!);
+  const { addOrder, orders, isLoading: isOrdersLoading } = useOrders(customer?.id || null, storeId!);
+  const { promptLogin } = useCustomer();
 
   const isPaymentFlowEnabled = shouldUsePaymentFlow(storeMeta?.storeType, storeMeta?.subscriptionStatus);
 
@@ -197,7 +201,15 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
     return p.sizes || p.sizeOption || [];
   };
 
-  const total = product.price * quantity;
+  const isServiceProduct = product.productType === 'media-influencer' && product.subtype === 'service';
+  const hasPaidBookingFee = orders.some(o => ['completed', 'delivered', 'pending'].includes(o.orderStatus) && o.products.some((p: any) => p.productType === 'media-influencer' && p.subtype === 'booking-fee'));
+
+  const requiresBookingFee = isServiceProduct && !hasPaidBookingFee;
+  const bookingFeeAmount = 5000; // Fixed 5k NGN minimum or fetch from store if available
+  const serviceFeeAmount = isServiceProduct ? (product.price * quantity) * 0.10 : 0; // 10% escrow fee
+
+  const subtotal = product.price * quantity;
+  const total = subtotal + serviceFeeAmount + (requiresBookingFee ? bookingFeeAmount : 0);
 
   const handleEvidenceUploaded = (evidenceUrl: string, fileName: string) => {
     setUploadedEvidence({ url: evidenceUrl, fileName });
@@ -210,7 +222,11 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
     if (!product || !storeId || !storeMeta) return;
 
     if (isPaymentFlowEnabled && !customer) {
-      toast.error('Please log in to use the secure payment flow');
+      toast.error('Please log in or verify identity to use the secure payment flow');
+      promptLogin({
+        storeType: storeMeta.storeType,
+        itemType: product.productType === 'media-influencer' && product.subtype === 'service' ? 'service' : 'product'
+      });
       return;
     }
 
@@ -240,8 +256,23 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
       if (isPaymentFlowEnabled) {
         if (!customer) throw new Error("Customer session not found");
+
+        let productsToOrder = [productToOrder];
+        if (requiresBookingFee) {
+          productsToOrder.push({
+            id: 'auto-booking-fee',
+            name: '1-Time Brand Booking Fee',
+            price: bookingFeeAmount,
+            quantity: 1,
+            productType: 'media-influencer',
+            subtype: 'booking-fee',
+            images: ['/default_product_800x800.png'],
+            description: 'Mandatory verification fee to book services on this platform.',
+          } as any);
+        }
+
         await addOrder(
-          [productToOrder],
+          productsToOrder,
           storeMetaWithId,
           customer,
           referrerId,
@@ -346,6 +377,20 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   };
 
   const handleProceedToPayment = () => {
+    if (!customer && !guestEmail && isPaymentFlowEnabled && isServiceProduct) {
+      setEmailError('Please enter your email to continue');
+      return;
+    }
+
+    if (guestEmail && !guestEmail.includes('@')) {
+      setEmailError('Please enter a valid email address');
+      return;
+    }
+
+    if (guestEmail) {
+      localStorage.setItem('guest_email', guestEmail);
+    }
+
     setCurrentPage(paymentPageNum as any);
     if (storeId) {
       saveModalState(storeId, paymentPageNum, uploadedEvidence?.url, uploadedEvidence?.fileName);
@@ -1053,16 +1098,44 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                 )}
                               </p>
                             </div>
-                            <div className="flex flex-col items-center gap-1 bg-gray-50 dark:bg-gray-900 p-2 rounded-lg border border-gray-100 dark:border-gray-800">
-                              <span className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold">
-                                {isFashionProduct(product) && (product as any).isTextile ? (quantity > 1 ? 'Yards' : 'Yard') : (product.productType === 'livestock' && (product as any).priceUnit === 'kg' ? 'Kilos' : 'Quantity')}
-                              </span>
-                              <div className="flex items-center gap-3">
-                                <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Minus size={18} /></button>
-                                <span className="text-lg font-bold text-gray-900 dark:text-white min-w-[1.5rem] text-center">{quantity}</span>
-                                <button onClick={() => setQuantity(q => q + 1)} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Plus size={18} /></button>
+
+                            {/* Guest Email Collection (Phase 2) */}
+                            {!customer && isServiceProduct && isPaymentFlowEnabled && (
+                              <div className="mt-4 p-4 rounded-xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/50">
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-2">
+                                  Checkout as Guest
+                                </label>
+                                <input
+                                  type="email"
+                                  placeholder="Enter your email"
+                                  value={guestEmail}
+                                  onChange={(e) => {
+                                    setGuestEmail(e.target.value);
+                                    setEmailError('');
+                                  }}
+                                  className={`w-full px-4 py-3 rounded-xl bg-white dark:bg-gray-900 border ${emailError ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'} focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm font-medium`}
+                                />
+                                {emailError && (
+                                  <p className="mt-1 text-[10px] font-bold text-red-500">{emailError}</p>
+                                )}
+                                <p className="mt-2 text-[10px] text-gray-500 dark:text-gray-400 leading-tight">
+                                  We'll use this to send your service booking confirmation and escrow receipt.
+                                </p>
                               </div>
-                            </div>
+                            )}
+
+                            {!isServiceProduct && (
+                              <div className="flex flex-col items-center gap-1 bg-gray-50 dark:bg-gray-900 p-2 rounded-lg border border-gray-100 dark:border-gray-800">
+                                <span className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold">
+                                  {isFashionProduct(product) && (product as any).isTextile ? (quantity > 1 ? 'Yards' : 'Yard') : (product.productType === 'livestock' && (product as any).priceUnit === 'kg' ? 'Kilos' : 'Quantity')}
+                                </span>
+                                <div className="flex items-center gap-3">
+                                  <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Minus size={18} /></button>
+                                  <span className="text-lg font-bold text-gray-900 dark:text-white min-w-[1.5rem] text-center">{quantity}</span>
+                                  <button onClick={() => setQuantity(q => q + 1)} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Plus size={18} /></button>
+                                </div>
+                              </div>
+                            )}
                           </div>
 
                           {/* Variant Selection (Color/Size) */}
@@ -1105,7 +1178,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             )}
 
                             {/* Size Selection - For Products with Sizes */}
-                            {hasSizes(product) && (
+                            {!isServiceProduct && hasSizes(product) && (
                               <div ref={sizeSectionRef} className={`mt-6 p-4 rounded-xl transition-all duration-300 ${showSizeError ? 'bg-red-50 dark:bg-red-900/10 animate-shake ring-1 ring-red-500' : ''}`}>
                                 <div className="flex items-center justify-between mb-3">
                                   <label className={`text-sm font-bold flex items-center gap-2 ${showSizeError ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-gray-200'}`}>
@@ -1216,9 +1289,24 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             <dl className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
                               <div className="flex justify-between">
                                 <dt>Item price</dt>
-                                <dd className="font-medium text-gray-900 dark:text-gray-200">{formatPrice(product.price * quantity)}</dd>
+                                <dd className="font-medium text-gray-900 dark:text-gray-200">{formatPrice(subtotal)}</dd>
                               </div>
-                              {deliveryMethod === 'home' && !isVehicle && (
+
+                              {isServiceProduct && (
+                                <div className="flex justify-between items-center text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/10 p-2 rounded-lg -mx-2">
+                                  <dt className="flex items-center gap-1 font-medium">Escrow Service Fee (10%) <AlertCircle size={14} title="Platform secure escrow protection fee" /></dt>
+                                  <dd className="font-bold">{formatPrice(serviceFeeAmount)}</dd>
+                                </div>
+                              )}
+
+                              {requiresBookingFee && (
+                                <div className="flex justify-between items-center text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/10 p-2 rounded-lg -mx-2">
+                                  <dt className="flex items-center gap-1 font-medium">1-Time Booking Fee <AlertCircle size={14} title="Required for first-time brand bookings" /></dt>
+                                  <dd className="font-bold">{formatPrice(bookingFeeAmount)}</dd>
+                                </div>
+                              )}
+
+                              {deliveryMethod === 'home' && !isVehicle && !isServiceProduct && (
                                 <div className="flex justify-between">
                                   <dt>Home delivery</dt>
                                   <dd className="font-medium text-gray-900 dark:text-gray-200">TBD by vendor</dd>
@@ -1250,6 +1338,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             selectedSpiciness={selectedSpiciness}
                             specialInstructions={specialInstructions}
                             deliveryMethod={deliveryMethod}
+                            customer={customer || (guestEmail ? ({ email: guestEmail, name: guestEmail.split('@')[0], id: `guest-${guestEmail.replace(/[^a-zA-Z0-9]/g, '')}` } as any) : null)}
                           />
                         </div>
                       )}
@@ -1320,7 +1409,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             ) : hasSizes(product) && !interactiveSelectedSize ? (
                               'Select Size to Continue'
                             ) : (
-                              isVehicle ? 'Enquire about Vehicle' : 'Order via Whatsapp'
+                              isVehicle ? 'Enquire about Vehicle' : (isPaymentFlowEnabled ? 'Proceed to Payment' : 'Order via Whatsapp')
                             )}
                           </button>
                         </div>
