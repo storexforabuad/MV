@@ -1600,14 +1600,14 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
                               {isServiceProduct && (
                                 <div className="flex justify-between items-center text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/10 p-2 rounded-lg -mx-2">
-                                  <dt className="flex items-center gap-1 font-medium">Escrow Service Fee (10%) <AlertCircle size={14} title="Platform secure escrow protection fee" /></dt>
+                                  <dt className="flex items-center gap-1 font-medium">Escrow Service Fee (10%) <span title="Platform secure escrow protection fee" className="inline-flex"><AlertCircle size={14} /></span></dt>
                                   <dd className="font-bold">{formatPrice(serviceFeeAmount)}</dd>
                                 </div>
                               )}
 
                               {requiresBookingFee && (
                                 <div className="flex justify-between items-center text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/10 p-2 rounded-lg -mx-2">
-                                  <dt className="flex items-center gap-1 font-medium">1-Time Booking Fee <AlertCircle size={14} title="Required for first-time brand bookings" /></dt>
+                                  <dt className="flex items-center gap-1 font-medium">1-Time Booking Fee <span title="Required for first-time brand bookings" className="inline-flex"><AlertCircle size={14} /></span></dt>
                                   <dd className="font-bold">{formatPrice(bookingFeeAmount)}</dd>
                                 </div>
                               )}
@@ -1636,7 +1636,6 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             onBack={handleBackToSummary}
                             uploadedEvidence={uploadedEvidence}
                             total={total}
-                            customer={customer}
                             product={product}
                             quantity={quantity}
                             selectedSize={interactiveSelectedSize}

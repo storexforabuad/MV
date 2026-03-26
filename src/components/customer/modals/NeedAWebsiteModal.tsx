@@ -173,6 +173,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
   // Get the selected tier details for success screen
   const selectedTierDetails = modal.formData.planId ? TIER_DETAILS[modal.formData.planId as keyof typeof TIER_DETAILS] : null;
   const selectedStore = modal.formData.storeType ? STORE_TYPES.find(s => s.id === modal.formData.storeType) : null;
+  const SelectedStoreIcon = selectedStore?.icon;
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
@@ -201,7 +202,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
           {/* Progress bar only on screens 2-5 */}
           {typeof modal.currentScreen === 'number' && (modal.currentScreen as number) >= 2 && (modal.currentScreen as number) <= 5 && (
             <ProgressIndicator
-              currentStep={modal.currentScreen - 1}
+              currentStep={(modal.currentScreen as number) - 1}
               totalSteps={4}
             />
           )}
@@ -613,8 +614,8 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                       <div>
                         <p className="text-xs font-semibold text-white">Category</p>
                         <div className="flex items-center gap-2 mt-0.5">
-                          <selectedStore.icon size={14} className={isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} />
-                          <p className="text-xs text-slate-400">{selectedStore.label}</p>
+                          {SelectedStoreIcon && <SelectedStoreIcon size={14} className={isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} />}
+                          <p className="text-xs text-slate-400">{selectedStore?.label}</p>
                         </div>
                       </div>
                     </div>
@@ -653,7 +654,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                       <Check className={`${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} flex-shrink-0 mt-0.5`} size={18} />
                       <div>
                         <p className="text-xs font-semibold text-white">Plan</p>
-                        <p className={`text-xs ${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} mt-0.5 font-semibold`}>₦{Math.round(selectedTierDetails.price / 2)}/week (Special Rate)</p>
+                        <p className={`text-xs ${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} mt-0.5 font-semibold`}>₦{Math.round((selectedTierDetails?.price || 0) / 2)}/week (Special Rate)</p>
                       </div>
                     </div>
                   )}
@@ -668,6 +669,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                     Continue Shopping
                   </button>
                   <button
+                    onClick={() => window.open('https://wa.me/2347032905036', '_blank')}
                     className={`w-full font-semibold py-2 transition-colors text-sm ${isStunnerStores ? 'text-cyan-400 hover:text-cyan-300' : is420Hub ? 'text-emerald-400 hover:text-emerald-300' : 'text-amber-400 hover:text-amber-300'}`}
                   >
                     Chat with Admin
@@ -681,7 +683,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
         {/* Footer CTA */}
         {modal.currentScreen !== 'success' && (
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-slate-900 via-slate-900 to-transparent px-6 py-4 border-t border-slate-700/50 flex gap-2">
-            {typeof modal.currentScreen === 'number' && modal.currentScreen > 2 && (
+            {typeof modal.currentScreen === 'number' && (modal.currentScreen as number) > 2 && (
               <button
                 onClick={modal.prevScreen}
                 className="px-4 py-3 rounded-xl border border-slate-700 text-slate-300 hover:border-slate-600 transition-colors font-medium"
@@ -717,7 +719,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
               ) : (
                 <>Next</>
               )}
-              {!modal.loading && typeof modal.currentScreen === 'number' && modal.currentScreen < 5 && <ArrowRight size={16} />}
+              {!modal.loading && typeof modal.currentScreen === 'number' && (modal.currentScreen as number) < 5 && <ArrowRight size={16} />}
             </button>
           </div>
         )}

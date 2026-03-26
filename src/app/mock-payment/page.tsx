@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CheckCircle, CreditCard, Loader2, Lock, ShieldCheck, X, ChevronRight, Landmark, Smartphone } from 'lucide-react';
@@ -9,7 +9,7 @@ import { formatPrice } from '@/utils/price';
 type PaymentMethod = 'card' | 'bank' | 'ussd';
 type Stage = 'select' | 'processing' | 'success' | 'failed';
 
-export default function MockPaymentPage() {
+function MockPaymentContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const reference = searchParams?.get('reference') || '';
@@ -214,5 +214,17 @@ export default function MockPaymentPage() {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function MockPaymentPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+                <Loader2 className="w-10 h-10 text-green-500 animate-spin" />
+            </div>
+        }>
+            <MockPaymentContent />
+        </Suspense>
     );
 }
