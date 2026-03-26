@@ -8,7 +8,7 @@ import { Product } from '@/types/product';
 import { StoreMeta } from '@/types/store';
 import { Customer } from '@/types/customer';
 import { formatPrice } from '@/utils/price';
-import { Minus, Plus, Loader2, MessageSquare, ExternalLink, AlertCircle, Smartphone, Activity, Database, Cpu, Network, ShieldCheck, Package, Fingerprint, Info, Code, Battery, Headphones, VolumeX, Gamepad2, Zap, Watch, Cable, Link, Sun, Layers, RefreshCw, Gauge, Monitor, Wifi } from 'lucide-react';
+import { Minus, Plus, Loader2, MessageSquare, ExternalLink, AlertCircle, Smartphone, Activity, Database, Cpu, Network, ShieldCheck, Package, Fingerprint, Info, Code, Battery, Headphones, VolumeX, Gamepad2, Zap, Watch, Cable, Link, Sun, Layers, RefreshCw, Gauge, Monitor, Wifi, Palette, Ruler, PenTool, CheckCircle2 } from 'lucide-react';
 import { ElectronicsProduct } from '@/types/product';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOrders } from '@/hooks/useOrders';
@@ -16,7 +16,7 @@ import toast from 'react-hot-toast';
 import { useParams } from 'next/navigation';
 import { getCustomerDetails } from '@/app/actions/customerActions';
 import { useCustomer } from '@/context/CustomerContext';
-import { isFoodBeverageProduct, isFashionProduct, isElectronicsProduct, isSolarProduct, isVehicleProduct } from '@/utils/productHelpers';
+import { isFoodBeverageProduct, isFashionProduct, isElectronicsProduct, isSolarProduct, isVehicleProduct, isBeautyProduct, isArtProduct } from '@/utils/productHelpers';
 import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
 import { saveModalState, getModalState, clearModalState } from '@/lib/paymentModalStorage';
 import { requestCustomerNotificationPermission } from '@/lib/requestCustomerNotifications';
@@ -190,8 +190,11 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const isSolar = isSolarProduct(product);
   const isVehicle = isVehicleProduct(product);
   const isFashion = isFashionProduct(product);
-  const summaryPageNum = (isElectronics || isSolar || isVehicle) ? 2 : 1;
-  const paymentPageNum = (isElectronics || isSolar || isVehicle) ? 3 : 2;
+  const isBeauty = isBeautyProduct(product);
+  const isArt = isArtProduct(product);
+  const isMediaInfluencer = product.productType === 'media-influencer';
+  const summaryPageNum = (isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer || isArt) ? 2 : 1;
+  const paymentPageNum = (isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer || isArt) ? 3 : 2;
 
   const hasSizes = (p: any) => {
     return (p.sizes && p.sizes.length > 0) || (p.sizeOption && p.sizeOption.length > 0);
@@ -418,7 +421,12 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                   {/* Header */}
                   <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-modal-background">
                     <h3 className="text-lg font-semibold leading-6 text-gray-900 dark:text-white">
-                      {currentPage === 1 && (isElectronics || isSolar || isVehicle) ? 'Product Specifications' : currentPage === summaryPageNum ? 'Order Summary' : (isPaymentFlowEnabled ? 'Payment' : 'WhatsApp Preview')}
+                      {currentPage === 1 && (isElectronics || isSolar || isVehicle) ? 'Product Specifications' :
+                        currentPage === 1 && isBeauty ? 'Details & Directions' :
+                          currentPage === 1 && isArt ? 'Art Passport & Provenance' :
+                            currentPage === 1 && isMediaInfluencer ? (isServiceProduct ? 'Service Collaboration Details' : 'Influencer Product Details') :
+                              currentPage === summaryPageNum ? 'Order Summary' :
+                                (isPaymentFlowEnabled ? 'Payment' : 'WhatsApp Preview')}
                     </h3>
                     <button
                       type="button"
@@ -454,7 +462,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             {/* Product Header Card */}
                             <div className="flex items-center space-x-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50">
                               <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-white dark:bg-gray-900 shadow-sm border border-gray-100 dark:border-gray-800">
-                                <Image src={currentProductImage} alt={product.name} fill sizes="80px" className="object-cover" />
+                                <Image src={currentProductImage || DEFAULT_PRODUCT_IMAGE} alt={product.name} fill sizes="80px" className="object-cover" onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; }} />
                               </div>
                               <div className="flex-1">
                                 <h4 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{product.name}</h4>
@@ -1061,6 +1069,289 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                         );
                       })()}
 
+                      {/* Page 1 (Beauty Instructions & Benefits) */}
+                      {currentPage === 1 && isBeauty && (() => {
+                        const b = product as any;
+
+                        return (
+                          <div className="pt-2 sm:pt-4 space-y-8 pb-10">
+                            {/* Product Header Card */}
+                            <div className="flex items-center space-x-5 p-5 rounded-3xl bg-gray-50/80 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 backdrop-blur-sm">
+                              <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-2xl bg-white dark:bg-gray-900 shadow-md border border-gray-100 dark:border-gray-800 transform rotate-[-2deg]">
+                                <Image src={currentProductImage || DEFAULT_PRODUCT_IMAGE} alt={product.name} fill sizes="96px" className="object-cover" onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; }} />
+                              </div>
+                              <div className="flex-1">
+                                {b.brand && <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.2em]">{b.brand}</span>}
+                                <h4 className="text-xl font-bold text-gray-900 dark:text-white leading-tight mt-1">{product.name}</h4>
+                                <p className="text-sm font-bold text-green-600 dark:text-green-400 mt-2">{formatPrice(product.price)}</p>
+                              </div>
+                            </div>
+
+                            {/* Section: How to Use */}
+                            {(b.howToUse || b.instructions) && (
+                              <section className="space-y-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shadow-sm border border-indigo-200/50 dark:border-indigo-800/30">
+                                    <Activity className="w-5 h-5" />
+                                  </div>
+                                  <h3 className="text-base font-bold text-gray-900 dark:text-white tracking-tight">How to Apply / Use</h3>
+                                </div>
+                                <div className="p-5 rounded-3xl bg-gray-50 dark:bg-gray-800/20 border border-gray-100 dark:border-gray-700/50">
+                                  <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                                    {b.howToUse || b.instructions}
+                                  </p>
+                                </div>
+                              </section>
+                            )}
+
+                            {/* Section: Science & Benefits */}
+                            {b.benefits && (
+                              <section className="space-y-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 rounded-2xl bg-pink-100 dark:bg-pink-900/40 flex items-center justify-center text-pink-600 dark:text-pink-400 shadow-sm border border-pink-200/50 dark:border-pink-800/30">
+                                    <Zap className="w-5 h-5" />
+                                  </div>
+                                  <h3 className="text-base font-bold text-gray-900 dark:text-white tracking-tight">Science & Benefits</h3>
+                                </div>
+                                <div className="p-5 rounded-3xl bg-gray-50 dark:bg-gray-800/20 border border-gray-100 dark:border-gray-700/50">
+                                  <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                                    {b.benefits}
+                                  </p>
+                                </div>
+                              </section>
+                            )}
+
+                            {/* Section: Ingredients */}
+                            {b.ingredients && (
+                              <section className="space-y-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shadow-sm border border-emerald-200/50 dark:border-emerald-800/30">
+                                    <Database className="w-5 h-5" />
+                                  </div>
+                                  <h3 className="text-base font-bold text-gray-900 dark:text-white tracking-tight">Ingredients</h3>
+                                </div>
+                                <div className="p-5 rounded-3xl bg-gray-50 dark:bg-gray-800/20 border border-gray-100 dark:border-gray-700/50">
+                                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400 leading-relaxed tracking-wide italic">
+                                    {b.ingredients}
+                                  </p>
+                                </div>
+                              </section>
+                            )}
+
+                            {/* Section: Compatibility (Skin/Hair Type) */}
+                            {(b.skinTypes || b.hairTypes) && (
+                              <section className="space-y-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400 shadow-sm border border-amber-200/50 dark:border-amber-800/30">
+                                    <Fingerprint className="w-5 h-5" />
+                                  </div>
+                                  <h3 className="text-base font-bold text-gray-900 dark:text-white tracking-tight">Compatibility</h3>
+                                </div>
+                                <div className="flex flex-wrap gap-2">
+                                  {([...(b.skinTypes || []), ...(b.hairTypes || [])]).map((type: string, i: number) => (
+                                    <span key={i} className="px-4 py-2 rounded-full bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 text-xs font-bold text-gray-700 dark:text-gray-300 shadow-sm">
+                                      ✨ {type}
+                                    </span>
+                                  ))}
+                                </div>
+                              </section>
+                            )}
+                          </div>
+                        );
+                      })()}
+
+                      {/* Page 1 (Media Influencer Details) */}
+                      {currentPage === 1 && isMediaInfluencer && (() => {
+                        const m = product as any;
+
+                        return (
+                          <div className="pt-2 sm:pt-4 space-y-8 pb-10">
+                            {/* Product Header Card */}
+                            <div className="flex items-center space-x-5 p-5 rounded-3xl bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100/50 dark:border-indigo-800/30 backdrop-blur-sm">
+                              <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-2xl bg-white dark:bg-gray-900 shadow-md border border-gray-100 dark:border-gray-800">
+                                <Image src={currentProductImage || DEFAULT_PRODUCT_IMAGE} alt={product.name} fill sizes="96px" className="object-cover" onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; }} />
+                              </div>
+                              <div className="flex-1">
+                                {isServiceProduct ? (
+                                  <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.2em]">Service Collaboration</span>
+                                ) : (
+                                  <span className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-[0.2em]">Influencer Product</span>
+                                )}
+                                <h4 className="text-xl font-bold text-gray-900 dark:text-white leading-tight mt-1">{product.name}</h4>
+                                <p className="text-sm font-bold text-indigo-600 dark:text-indigo-400 mt-2">{formatPrice(product.price)}</p>
+                              </div>
+                            </div>
+
+                            {/* Service Specifics */}
+                            {isServiceProduct && (
+                              <div className="grid grid-cols-2 gap-3">
+                                {m.platform && (
+                                  <div className="bg-white dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm flex flex-col gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                      <Smartphone className="w-4 h-4" />
+                                    </div>
+                                    <div>
+                                      <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Platform</span>
+                                      <p className="font-bold text-[13px] text-gray-900 dark:text-white">{m.platform}</p>
+                                    </div>
+                                  </div>
+                                )}
+                                {m.deliveryTimeDays !== undefined && (
+                                  <div className="bg-white dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm flex flex-col gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                      <Calendar className="w-4 h-4" />
+                                    </div>
+                                    <div>
+                                      <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Wait Time</span>
+                                      <p className="font-bold text-[13px] text-gray-900 dark:text-white">{m.deliveryTimeDays} Days</p>
+                                    </div>
+                                  </div>
+                                )}
+                                {m.revisionsAllowed !== undefined && (
+                                  <div className="bg-white dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm flex flex-col gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900/40 flex items-center justify-center text-purple-600 dark:text-purple-400">
+                                      <RefreshCw className="w-4 h-4" />
+                                    </div>
+                                    <div>
+                                      <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Revisions</span>
+                                      <p className="font-bold text-[13px] text-gray-900 dark:text-white">{m.revisionsAllowed} Rounds</p>
+                                    </div>
+                                  </div>
+                                )}
+                                <div className="bg-white dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm flex flex-col gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                    <ShieldCheck className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Protection</span>
+                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white">Escrow Ready</p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Influencer Guidelines / Description */}
+                            <section className="space-y-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shadow-sm border border-indigo-200/50 dark:border-indigo-800/30">
+                                  <Info className="w-5 h-5" />
+                                </div>
+                                <h3 className="text-base font-bold text-gray-900 dark:text-white tracking-tight">Collaboration Guidelines</h3>
+                              </div>
+                              <div className="p-5 rounded-3xl bg-gray-50 dark:bg-gray-800/20 border border-gray-100 dark:border-gray-700/50">
+                                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line lowercase first-letter:uppercase">
+                                  {product.description || "The influencer will provide details upon WhatsApp connection. All collaborations are protected via platform Escrow for your safety."}
+                                </p>
+                              </div>
+                            </section>
+
+                            {/* Trust Badge */}
+                            <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800/50 flex items-center gap-4">
+                              <div className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 flex items-center justify-center text-emerald-600 shadow-sm border border-emerald-100 dark:border-emerald-800">
+                                <ShieldCheck size={28} />
+                              </div>
+                              <div>
+                                <h4 className="text-sm font-bold text-gray-900 dark:text-white">Verified Influencer</h4>
+                                <p className="text-[11px] text-gray-500 dark:text-gray-400 font-medium leading-tight">Payments are held in Escrow until you confirm the service delivery.</p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
+                      {/* Page 1 (Art Passport - "Art Details") */}
+                      {currentPage === 1 && isArt && (() => {
+                        const artProduct = product as any; // Using ArtProduct type
+                        return (
+                          <div className="pt-2 sm:pt-4 space-y-6">
+                            {/* Artwork Header Card */}
+                            <div className="flex items-center space-x-5 p-5 rounded-3xl bg-amber-50/50 dark:bg-amber-900/10 border border-amber-100/50 dark:border-amber-800/30 backdrop-blur-sm">
+                              <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-2xl bg-white dark:bg-gray-900 shadow-md border border-gray-100 dark:border-gray-800 transform rotate-[-2deg]">
+                                <Image src={currentProductImage || DEFAULT_PRODUCT_IMAGE} alt={product.name} fill sizes="96px" className="object-cover" onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; }} />
+                              </div>
+                              <div className="flex-1">
+                                <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-[0.2em]">Authentic Artwork</span>
+                                <h4 className="text-xl font-bold text-gray-900 dark:text-white leading-tight mt-1">{product.name}</h4>
+                                <p className="text-lg font-black text-amber-600 dark:text-amber-500 mt-2">{formatPrice(product.price)}</p>
+                              </div>
+                            </div>
+
+                            {/* Provenance & Technical Details Grid */}
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="bg-gray-50 dark:bg-gray-800/40 p-5 rounded-[2.5rem] border border-gray-100 dark:border-gray-700/50 flex flex-col gap-3">
+                                <div className="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                  <Palette className="w-5 h-5" />
+                                </div>
+                                <div>
+                                  <span className="text-[11px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">Medium</span>
+                                  <p className="font-bold text-[14px] text-gray-900 dark:text-white">{artProduct.artDetails?.medium || 'Original Work'}</p>
+                                </div>
+                              </div>
+
+                              <div className="bg-gray-50 dark:bg-gray-800/40 p-5 rounded-[2.5rem] border border-gray-100 dark:border-gray-700/50 flex flex-col gap-3">
+                                <div className="w-10 h-10 rounded-2xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                  <Layers className="w-5 h-5" />
+                                </div>
+                                <div>
+                                  <span className="text-[11px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">Surface</span>
+                                  <p className="font-bold text-[14px] text-gray-900 dark:text-white">{artProduct.artDetails?.surface || 'Standard'}</p>
+                                </div>
+                              </div>
+
+                              <div className="bg-gray-50 dark:bg-gray-800/40 p-5 rounded-[2.5rem] border border-gray-100 dark:border-gray-700/50 flex flex-col gap-3">
+                                <div className="w-10 h-10 rounded-2xl bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                  <PenTool className="w-5 h-5" />
+                                </div>
+                                <div>
+                                  <span className="text-[11px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">Edition</span>
+                                  <p className="font-bold text-[14px] text-gray-900 dark:text-white capitalize">{artProduct.artDetails?.edition || 'Original'}</p>
+                                </div>
+                              </div>
+
+                              <div className="bg-gray-50 dark:bg-gray-800/40 p-5 rounded-[2.5rem] border border-gray-100 dark:border-gray-700/50 flex flex-col gap-3">
+                                <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                                  <Ruler className="w-5 h-5" />
+                                </div>
+                                <div>
+                                  <span className="text-[11px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest">Dimensions</span>
+                                  <p className="font-bold text-[14px] text-gray-900 dark:text-white">{artProduct.artDetails?.dimensions || 'Not specified'}</p>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Verification Badges */}
+                            <div className="flex flex-wrap gap-3">
+                              {artProduct.artDetails?.isSigned && (
+                                <div className="px-4 py-2 rounded-2xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50 flex items-center gap-2">
+                                  <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+                                  <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">Hand Signed</span>
+                                </div>
+                              )}
+                              {artProduct.artDetails?.hasCertificate && (
+                                <div className="px-4 py-2 rounded-2xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 flex items-center gap-2">
+                                  <ShieldCheck className="w-4 h-4 text-blue-500" />
+                                  <span className="text-xs font-bold text-blue-700 dark:text-blue-400">Certificate of Authenticity</span>
+                                </div>
+                              )}
+                              {artProduct.artDetails?.year && (
+                                <div className="px-4 py-2 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50 flex items-center gap-2">
+                                  <Calendar className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                                  <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Created {artProduct.artDetails.year}</span>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Artist Description */}
+                            <div className="p-6 rounded-[2rem] bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30">
+                              <h5 className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-3">About the Piece</h5>
+                              <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed lowercase first-letter:uppercase">
+                                {product.description || "An original creative expression from the artist, meticulously crafted to evoke emotion and inspire. Each piece is unique and part of the artdealer curated collection."}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
                       {/* Summary Page */}
                       {currentPage === summaryPageNum && (
                         <div className="pt-4 sm:pt-8">
@@ -1069,12 +1360,13 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-50 dark:bg-gray-900 shadow-inner">
                               <div className={`absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 animate-shimmer bg-[length:200%_100%] transition-opacity duration-300 ${imageLoading ? 'opacity-100' : 'opacity-0'}`} />
                               <Image
-                                src={currentProductImage}
+                                src={currentProductImage || DEFAULT_PRODUCT_IMAGE}
                                 alt={product.name}
                                 width={80}
                                 height={80}
                                 className={`h-20 w-20 object-cover relative z-10 transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
                                 onLoad={() => setImageLoading(false)}
+                                onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; setImageLoading(false); }}
                               />
                             </div>
                             <div className="flex-1">
@@ -1365,7 +1657,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                   {/* Footer */}
                   <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-modal-background p-4 sm:px-6">
                     <div className="max-w-3xl mx-auto w-full">
-                      {currentPage === 1 && (isElectronics || isSolar || isVehicle) ? (
+                      {currentPage === 1 && (isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer) ? (
                         <button
                           type="button"
                           className="w-full rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 shadow-lg transition-all active:scale-[0.98]"
@@ -1375,7 +1667,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                         </button>
                       ) : currentPage === summaryPageNum ? (
                         <div className="flex gap-3">
-                          {(isElectronics || isSolar || isVehicle) && (
+                          {(isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer) && (
                             <button
                               type="button"
                               className="w-1/3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold py-4 px-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-[0.98]"
@@ -1386,7 +1678,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           )}
                           <button
                             type="button"
-                            className={`${(isElectronics || isSolar || isVehicle) ? 'w-2/3' : 'w-full'} rounded-xl border border-transparent px-6 py-4 text-base font-bold text-white shadow-lg transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+                            className={`${(isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer) ? 'w-2/3' : 'w-full'} rounded-xl border border-transparent px-6 py-4 text-base font-bold text-white shadow-lg transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
                               ${hasSizes(product) && !interactiveSelectedSize
                                 ? 'bg-gray-400 dark:bg-gray-700 cursor-not-allowed'
                                 : 'bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2'}`}
@@ -1409,7 +1701,9 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             ) : hasSizes(product) && !interactiveSelectedSize ? (
                               'Select Size to Continue'
                             ) : (
-                              isVehicle ? 'Enquire about Vehicle' : (isPaymentFlowEnabled ? 'Proceed to Payment' : 'Order via Whatsapp')
+                              isVehicle ? 'Enquire about Vehicle' :
+                                isMediaInfluencer ? (isServiceProduct ? 'Book via WhatsApp' : 'Order via WhatsApp') :
+                                  (isPaymentFlowEnabled ? 'Proceed to Payment' : 'Order via WhatsApp')
                             )}
                           </button>
                         </div>

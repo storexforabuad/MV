@@ -31,6 +31,7 @@ import toast from 'react-hot-toast';
 import HeroCarousel from '@/components/customer/HeroCarousel';
 import NeedAWebsiteModal from '@/components/customer/modals/NeedAWebsiteModal';
 import InstallPrompt from '@/components/InstallPrompt';
+import { mockArtProducts, mockBeautyProducts } from '@/lib/mockProducts';
 
 const ProductGrid = dynamic(
   () => import('../../components/products/ProductGrid'),
@@ -191,12 +192,48 @@ export default function StorefrontPageClient({
         { id: 'mock-9', name: 'Vanilla Musk Scented Oil', description: 'Thick, unadulterated oil perfume for a subtle aura.', price: 8000, originalPrice: 10000, images: ['https://images.unsplash.com/photo-1594035910387-fea47794261f?w=800&q=80'], productType: 'fashion', sizes: ['3ml', '6ml', '12ml'], categoryId: 'fragrances', createdAt: new Date().toISOString(), isActive: true }
       ];
 
-      // To visualize specific categories, only set if activeCategoryId matches, otherwise show all
       if (activeCategoryId && activeCategoryId !== 'promo' && activeCategoryId !== 'popular' && activeCategoryId !== 'new-arrivals') {
         const filtered = mockMediaProducts.filter(p => p.categoryId === activeCategoryId);
         setProducts(filtered);
       } else {
         setProducts(mockMediaProducts);
+      }
+    }
+
+    const isArtStore = storeMeta?.storeType === 'artdealer' || storeMeta?.storeType === 'artist';
+
+    if (isArtStore && products.length === 0 && !loading) {
+      if (categories.length === 0) {
+        setCategories([
+          { id: 'paintings', name: 'Paintings & Canvas' },
+          { id: 'sculptures', name: 'Sculptures & 3D' },
+          { id: 'digital', name: 'Digital & Modern' }
+        ]);
+      }
+
+      if (activeCategoryId && activeCategoryId !== 'promo' && activeCategoryId !== 'popular' && activeCategoryId !== 'new-arrivals') {
+        const filtered = (mockArtProducts as any[]).filter(p => p.categoryId === activeCategoryId || p.artDetails?.style?.toLowerCase() === activeCategoryId.toLowerCase());
+        setProducts(filtered.length > 0 ? filtered : mockArtProducts as any[]);
+      } else {
+        setProducts(mockArtProducts as any[]);
+      }
+    }
+
+    if (storeMeta?.storeType === 'beauty' && products.length === 0 && !loading) {
+      if (categories.length === 0) {
+        setCategories([
+          { id: 'makeup', name: 'Makeup & Cosmetics' },
+          { id: 'skincare', name: 'Skincare & Body' },
+          { id: 'haircare', name: 'Haircare & Tools' },
+          { id: 'fragrance', name: 'Perfumes & Oils' }
+        ]);
+      }
+
+      if (activeCategoryId && activeCategoryId !== 'promo' && activeCategoryId !== 'popular' && activeCategoryId !== 'new-arrivals') {
+        const filtered = (mockBeautyProducts as any[]).filter(p => p.categoryId === activeCategoryId || p.subtype === activeCategoryId);
+        setProducts(filtered.length > 0 ? filtered : mockBeautyProducts as any[]);
+      } else {
+        setProducts(mockBeautyProducts as any[]);
       }
     }
   }, [storeMeta?.storeType, loading, products.length, categories.length, activeCategoryId]);

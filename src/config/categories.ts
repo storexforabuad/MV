@@ -10,4 +10,10 @@ export const categorySuggestions = [
   "Drinks",
   "Snacks",
   "Toys & Games",
+  "Lipstick",
+  "Foundation",
+  "Moisturizer",
+  "Serum",
+  "Hair Oil",
+  "Shampoo",
 ];

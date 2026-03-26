@@ -6,14 +6,33 @@ import { Dialog, Transition } from '@headlessui/react';
 import { X, Send } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { formatWhatsAppNumber } from '@/utils/phoneUtils';
+import { StoreMeta } from '@/types/store';
+import { Globe, Instagram, Youtube, Twitter } from 'lucide-react';
+
+const TikTokIcon = ({ size = 20, className = "" }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" />
+  </svg>
+);
 
 interface StoreInquiryModalProps {
   isOpen: boolean;
   onClose: () => void;
   logoUrl?: string;
+  storeMeta?: StoreMeta | null;
 }
 
-const StoreInquiryModal = ({ isOpen, onClose, logoUrl }: StoreInquiryModalProps) => {
+const StoreInquiryModal = ({ isOpen, onClose, logoUrl, storeMeta }: StoreInquiryModalProps) => {
   const [businessName, setBusinessName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -85,6 +104,61 @@ const StoreInquiryModal = ({ isOpen, onClose, logoUrl }: StoreInquiryModalProps)
                     <div className="flex justify-center mb-6">
                       <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-lg ring-4 ring-white dark:ring-slate-800">
                         <img src={logoUrl} alt="Store Logo" className="w-full h-full object-cover" />
+                      </div>
+                    </div>
+                  )}
+
+                  {storeMeta?.storeType === 'media-influencer' && storeMeta.socialStats && (
+                    <div className="mb-6 space-y-3">
+                      <div className="flex items-center gap-2 mb-2 px-1">
+                        <Globe size={14} className="text-indigo-500" />
+                        <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Influencer Reach</span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {storeMeta.socialStats.instagramFollowers !== undefined && (
+                          <div className="flex items-center gap-2 p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <Instagram size={14} className="text-pink-500" />
+                            <div className="flex flex-col">
+                              <span className="text-[10px] font-bold text-slate-900 dark:text-slate-100">
+                                {storeMeta.socialStats.instagramFollowers.toLocaleString()}
+                              </span>
+                              <span className="text-[8px] text-slate-400 uppercase tracking-tighter">Followers</span>
+                            </div>
+                          </div>
+                        )}
+                        {storeMeta.socialStats.tiktokFollowers !== undefined && (
+                          <div className="flex items-center gap-2 p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <TikTokIcon size={14} className="text-slate-900 dark:text-slate-100" />
+                            <div className="flex flex-col">
+                              <span className="text-[10px] font-bold text-slate-900 dark:text-slate-100">
+                                {storeMeta.socialStats.tiktokFollowers.toLocaleString()}
+                              </span>
+                              <span className="text-[8px] text-slate-400 uppercase tracking-tighter">Followers</span>
+                            </div>
+                          </div>
+                        )}
+                        {storeMeta.socialStats.youtubeSubscribers !== undefined && (
+                          <div className="flex items-center gap-2 p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <Youtube size={14} className="text-red-500" />
+                            <div className="flex flex-col">
+                              <span className="text-[10px] font-bold text-slate-900 dark:text-slate-100">
+                                {storeMeta.socialStats.youtubeSubscribers.toLocaleString()}
+                              </span>
+                              <span className="text-[8px] text-slate-400 uppercase tracking-tighter">Subs</span>
+                            </div>
+                          </div>
+                        )}
+                        {storeMeta.socialStats.twitterFollowers !== undefined && (
+                          <div className="flex items-center gap-2 p-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm">
+                            <Twitter size={14} className="text-blue-400" />
+                            <div className="flex flex-col">
+                              <span className="text-[10px] font-bold text-slate-900 dark:text-slate-100">
+                                {storeMeta.socialStats.twitterFollowers.toLocaleString()}
+                              </span>
+                              <span className="text-[8px] text-slate-400 uppercase tracking-tighter">Followers</span>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   )}

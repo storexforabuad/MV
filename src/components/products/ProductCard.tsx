@@ -20,7 +20,9 @@ import {
   isLivestockProduct,
   isFoodBeverageProduct,
   isElectronicsProduct,
-  isSolarProduct
+  isSolarProduct,
+  isBeautyProduct,
+  isArtProduct
 } from '../../utils/productHelpers';
 
 
@@ -101,11 +103,12 @@ export default function ProductCard({
   // Get images for carousel (all images so user can swipe through colors on the card)
   const getCarouselImages = (): string[] => {
     if (!product) return [];
-    if (!isFashionProduct(product) || !product.colors) return product.images || [];
+    if (isBeautyProduct(product) && product.shades) {
+      const shadeImages = product.shades.flatMap(s => s.images || []);
+      return shadeImages.length > 0 ? shadeImages : (product.images || []);
+    }
 
-    // For fashion/textile, we want to show all variant images in the carousel
-    const colorImages = product.colors.flatMap(c => c.images || []);
-    return colorImages.length > 0 ? colorImages : (product.images || []);
+    return product.images || [];
   };
 
   const carouselImages = getCarouselImages();
@@ -246,10 +249,10 @@ export default function ProductCard({
 
     if (swipeDistance > swipeThreshold) {
       // Swiped left, go to next image
-      handleNextImage(e);
+      handleNextImage(e as unknown as React.MouseEvent);
     } else if (swipeDistance < -swipeThreshold) {
       // Swiped right, go to previous image
-      handlePrevImage(e);
+      handlePrevImage(e as unknown as React.MouseEvent);
     }
     setTouchStart(null);
   };
@@ -281,10 +284,11 @@ export default function ProductCard({
     if (isFoodBeverageProduct(product)) return !product.available || !!product.soldOut;
     if (isElectronicsProduct(product)) return !product.available || !!product.soldOut;
     if (isSolarProduct(product)) return !product.available || !!product.soldOut;
+    if (isArtProduct(product)) return !product.available || !!product.soldOut;
     return false;
   })();
 
-  const isLimitedStock = (isGeneralProduct(product) || isFashionProduct(product) || isLivestockProduct(product) || isElectronicsProduct(product) || isSolarProduct(product))
+  const isLimitedStock = (isGeneralProduct(product) || isFashionProduct(product) || isLivestockProduct(product) || isElectronicsProduct(product) || isSolarProduct(product) || isBeautyProduct(product) || isArtProduct(product))
     ? !!product.limitedStock
     : false;
 
@@ -478,6 +482,15 @@ export default function ProductCard({
               </div>
 
               {/* Top Right: Brand + Condition */}
+              {isBeautyProduct(product) && product.brand && (
+                <div className="absolute top-[18px] right-[18px] z-10">
+                  <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                    <span className="product-badge bg-white/90 dark:bg-black/60 backdrop-blur text-slate-700 dark:text-slate-200 shadow-sm whitespace-nowrap border border-white/20 dark:border-white/10 uppercase font-black tracking-[0.15em] text-[9px] px-3 py-1">
+                      {product.brand}
+                    </span>
+                  </div>
+                </div>
+              )}
               {(isElectronicsProduct(product) || isSolarProduct(product)) && (
                 <div className="absolute top-[18px] right-[18px] z-10 flex flex-col items-end gap-2">
                   {/* Brand Badge */}
@@ -509,7 +522,47 @@ export default function ProductCard({
                   )}
                 </div>
               )}
+              {isArtProduct(product) && product.artDetails && (
+                <div className="absolute top-[18px] right-[18px] z-10 flex flex-col items-end gap-2">
+                  {product.artDetails.edition && (
+                    <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                      <span className="product-badge bg-amber-500 text-white shadow-sm whitespace-nowrap text-[10px] font-bold tracking-wide border border-white/20 px-2 py-0.5 rounded-lg capitalize">
+                        {product.artDetails.edition === 'original' ? '🖼️ Original' : product.artDetails.edition.replace('-', ' ')}
+                      </span>
+                    </div>
+                  )}
+                  {product.artDetails.isSigned && (
+                    <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                      <span className="product-badge bg-indigo-600 text-white shadow-sm whitespace-nowrap text-[10px] font-bold tracking-wide border border-white/20 px-2 py-0.5 rounded-lg">
+                        ✍️ Signed
+                      </span>
+                    </div>
+                  )}
+                </div>
+              )}
             </>
+          )}
+
+          {/* Beauty Overlays on Bottom Left */}
+          {!isSoldOut && isBeautyProduct(product) && (
+            <div className="absolute bottom-[14px] left-[14px] z-10 flex flex-col gap-1.5 max-w-[calc(100%-80px)]">
+              {/* Bottle Sizes / Volumes */}
+              {product.bottleSizes && product.bottleSizes.length > 0 && (
+                <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                  <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-bold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2.5 py-1">
+                    🧴 {product.bottleSizes[0].size} {product.bottleSizes[0].label && `(${product.bottleSizes[0].label})`}
+                  </span>
+                </div>
+              )}
+              {/* Skin/Hair Types */}
+              {(product.skinTypes?.[0] || product.hairTypes?.[0]) && (
+                <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                  <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-bold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2.5 py-1 uppercase">
+                    ✨ {product.skinTypes?.[0] || product.hairTypes?.[0]}
+                  </span>
+                </div>
+              )}
+            </div>
           )}
 
           {/* Food Overlays on Bottom Left */}
@@ -738,6 +791,24 @@ export default function ProductCard({
                     return null;
                 }
               })()}
+            </div>
+          )}
+
+          {/* Art Bottom Left Overlay */}
+          {!isSoldOut && isArtProduct(product) && (product as any).artDetails && (
+            <div className="absolute bottom-[14px] left-[14px] z-10 flex flex-col gap-1.5 max-w-[calc(100%-80px)]">
+              <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-bold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2.5 py-1">
+                  🎨 {(product as any).artDetails.medium} on {(product as any).artDetails.surface}
+                </span>
+              </div>
+              {(product as any).artDetails.dimensions && (
+                <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                  <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-bold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2.5 py-1 lowercase">
+                    📏 {(product as any).artDetails.dimensions}
+                  </span>
+                </div>
+              )}
             </div>
           )}
 

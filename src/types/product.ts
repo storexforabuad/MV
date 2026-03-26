@@ -325,6 +325,74 @@ export interface MediaInfluencerProduct extends BaseProduct {
 }
 
 // ==========================================
+// BEAUTY PRODUCT (New)
+// ==========================================
+export interface BeautyProduct extends BaseProduct {
+  productType: 'beauty';
+  subtype: 'makeup' | 'skincare' | 'haircare' | 'fragrance' | 'other';
+  brand?: string;
+
+  // Variants
+  shades?: {
+    name: string;
+    hex: string;
+    images: string[];
+  }[];
+
+  bottleSizes?: {
+    size: string; // e.g. "100ml"
+    price: number;
+    label?: 'Small' | 'Medium' | 'Large' | 'Sampler' | string;
+  }[];
+
+  // Attributes
+  skinTypes?: string[]; // Oily, Dry, Combination, Sensitive, All
+  hairTypes?: string[]; // Straight, Wavy, Curly, Coily, All
+
+  // High-Conversion Content
+  ingredients?: string;
+  howToUse?: string;
+  benefits?: string;
+
+  // Inventory
+  limitedStock?: boolean;
+  soldOut?: boolean;
+  quantity?: number;
+  inStock?: boolean;
+
+  categoryId?: string;
+  category?: string;
+}
+
+// ==========================================
+// ART PRODUCT (New)
+// ==========================================
+export interface ArtProduct extends BaseProduct {
+  productType: 'art';
+
+  // Art-specific fields
+  artDetails: {
+    medium: string;         // "Oil", "Acrylic", "Watercolour", "Digital", etc.
+    surface: string;        // "Canvas", "Paper", "Board", "Wood", etc.
+    dimensions: string;     // "60x80cm"
+    year?: string;          // "2024"
+    edition?: 'original' | 'limited-edition' | 'open-edition';
+    isSigned?: boolean;
+    isFramed?: boolean;
+    hasCertificate?: boolean;
+    subject?: string;       // "Portrait", "Landscape", "Abstract", etc.
+    style?: string;         // "Impressionism", "Realism", "Modern", etc.
+  };
+
+  // Availability
+  available: boolean;
+  soldOut?: boolean;
+  limitedStock?: boolean;
+  categoryId?: string;
+  category?: string;
+}
+
+// ==========================================
 // MASTER UNION TYPE
 // ==========================================
-export type Product = GeneralProduct | VehicleProduct | LivestockProduct | FashionProduct | FoodBeverageProduct | ElectronicsProduct | SolarProduct | MediaInfluencerProduct;
+export type Product = GeneralProduct | VehicleProduct | LivestockProduct | FashionProduct | FoodBeverageProduct | ElectronicsProduct | SolarProduct | MediaInfluencerProduct | BeautyProduct | ArtProduct;

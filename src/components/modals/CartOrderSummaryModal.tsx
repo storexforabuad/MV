@@ -9,12 +9,12 @@ import { StoreMeta } from '@/types/store';
 import { Customer } from '@/types/customer';
 import { formatPrice } from '@/utils/price';
 import { useOrders } from '@/hooks/useOrders';
-import { Loader2, MessageSquare, ExternalLink, AlertCircle } from 'lucide-react';
+import { Loader2, MessageSquare, ExternalLink, AlertCircle, Activity, Palette, Layers, Ruler, PenTool, CheckCircle2, ShieldCheck, Calendar } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { getCustomerDetails } from '@/app/actions/customerActions';
 import { useCustomer } from '@/context/CustomerContext';
 import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
-import { isFashionProduct, isElectronicsProduct, isSolarProduct, isVehicleProduct } from '@/utils/productHelpers';
+import { isFashionProduct, isElectronicsProduct, isSolarProduct, isVehicleProduct, isBeautyProduct, isArtProduct } from '@/utils/productHelpers';
 import { saveModalState, getModalState, clearModalState } from '@/lib/paymentModalStorage';
 import { requestCustomerNotificationPermission } from '@/lib/requestCustomerNotifications';
 import PaymentFlowPage from './PaymentFlowPage';
@@ -34,7 +34,7 @@ interface CartOrderSummaryModalProps {
 }
 
 export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess, cartItems, storeMeta, customer: initialCustomer, storeId: passedStoreId, isReorder = false }: CartOrderSummaryModalProps) {
-  const [currentPage, setCurrentPage] = useState<1 | 2>(1);
+  const [currentPage, setCurrentPage] = useState<1 | 2 | 3>(1);
   const [deliveryMethod, setDeliveryMethod] = useState('home');
   const [customer, setCustomer] = useState<Customer | null>(initialCustomer);
   const [isPlacingOrder, setIsPlacingOrder] = useState(false);
@@ -60,8 +60,16 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const total = subtotal;
 
+  const hasArt = cartItems.some(item => isArtProduct(item as any));
+  const hasBeauty = cartItems.some(item => isBeautyProduct(item as any));
+  const hasMediaInfluencer = cartItems.some(item => item.productType === 'media-influencer');
+  const summaryPageNum = (hasBeauty || hasMediaInfluencer || hasArt) ? 2 : 1;
+  const paymentPageNum = (hasBeauty || hasMediaInfluencer || hasArt) ? 3 : 2;
+
   const hasVehicle = cartItems.some(item => isVehicleProduct(item as any));
   const allVehicles = cartItems.length > 0 && cartItems.every(item => isVehicleProduct(item as any));
+  const hasService = cartItems.some(item => item.productType === 'media-influencer' && (item as any).subtype === 'service');
+  const allServices = cartItems.length > 0 && cartItems.every(item => item.productType === 'media-influencer' && (item as any).subtype === 'service');
 
   const onCloseRef = useRef(onClose);
   useEffect(() => {
@@ -322,7 +330,10 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                   {/* Header */}
                   <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-modal-background">
                     <h3 className="text-lg font-semibold leading-6 text-gray-900 dark:text-white">
-                      {currentPage === 1 ? 'Cart Summary' : (isPaymentFlowEnabled ? 'Payment' : 'WhatsApp Preview')}
+                      {currentPage === 1 && hasBeauty ? 'Beauty Guide & Directions' :
+                        currentPage === 1 && hasMediaInfluencer ? 'Influencer Collaboration Guide' :
+                          currentPage === summaryPageNum ? 'Cart Summary' :
+                            (isPaymentFlowEnabled ? 'Payment' : 'WhatsApp Preview')}
                     </h3>
                     <button
                       type="button"
@@ -350,8 +361,196 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                   {/* Main Content */}
                   <div ref={scrollContainerRef} className="flex-grow overflow-y-auto p-4 sm:p-6">
                     <div className="max-w-3xl mx-auto w-full">
-                      {/* Page 1: Cart Summary */}
-                      {currentPage === 1 && (
+                      {/* Page 1: Beauty Guide */}
+                      {currentPage === 1 && hasBeauty && (
+                        <div className="pt-2 sm:pt-4 space-y-8 pb-10">
+                          <div className="flex items-center gap-3 p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/50">
+                            <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                              <Activity size={20} />
+                            </div>
+                            <div>
+                              <h4 className="text-sm font-bold text-gray-900 dark:text-white">Beauty Masterclass Guide</h4>
+                              <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Professional application steps for your selected beauty items.</p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-8">
+                            {cartItems.filter(item => isBeautyProduct(item as any)).map((item: any, idx) => (
+                              <div key={idx} className="space-y-4">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-1.5 h-6 bg-pink-500 rounded-full" />
+                                  <h5 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-widest">{item.name}</h5>
+                                </div>
+                                <div className="grid grid-cols-1 gap-3">
+                                  {(item.howToUse || item.instructions) && (
+                                    <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                      <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1 block">How to Use</span>
+                                      <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed italic whitespace-pre-line">"{item.howToUse || item.instructions}"</p>
+                                    </div>
+                                  )}
+                                  {item.benefits && (
+                                    <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                      <span className="text-[10px] font-bold text-pink-600 dark:text-pink-400 uppercase tracking-widest mb-1 block">Science & Benefits</span>
+                                      <p className="text-[11px] text-gray-600 dark:text-gray-300 leading-relaxed font-medium italic">{item.benefits}</p>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Page 1: Media Influencer Guide */}
+                      {currentPage === 1 && hasMediaInfluencer && (
+                        <div className="pt-2 sm:pt-4 space-y-8 pb-10">
+                          <div className="flex items-center gap-3 p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/50">
+                            <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                              <ShieldCheck size={20} />
+                            </div>
+                            <div>
+                              <h4 className="text-sm font-bold text-gray-900 dark:text-white">Influencer Collaboration Prep</h4>
+                              <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Important details for your upcoming collaboration(s).</p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-8">
+                            {cartItems.filter(item => item.productType === 'media-influencer').map((item: any, idx) => (
+                              <div key={idx} className="space-y-4">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-1.5 h-6 bg-indigo-500 rounded-full" />
+                                  <h5 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-widest">{item.name}</h5>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                  {item.platform && (
+                                    <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                      <span className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1 block">Platform</span>
+                                      <p className="text-xs font-bold text-gray-900 dark:text-white">{item.platform}</p>
+                                    </div>
+                                  )}
+                                  {item.deliveryTimeDays !== undefined && (
+                                    <div className="p-3 rounded-xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                      <span className="text-[9px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1 block">Timeline</span>
+                                      <p className="text-xs font-bold text-gray-900 dark:text-white">{item.deliveryTimeDays} Days</p>
+                                    </div>
+                                  )}
+                                </div>
+                                {item.description && (
+                                  <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                    <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-1 block">Guidelines</span>
+                                    <p className="text-xs text-gray-600 dark:text-gray-300 leading-relaxed italic whitespace-pre-line lowercase first-letter:uppercase">
+                                      {item.description}
+                                    </p>
+                                  </div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800/50">
+                            <p className="text-[11px] text-emerald-700 dark:text-emerald-400 font-bold text-center">
+                              🛡️ Payments are protected via Escrow for all influencer services.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Page 1: Art Collection Passport */}
+                      {currentPage === 1 && hasArt && (
+                        <div className="pt-2 sm:pt-4 space-y-8 pb-10">
+                          <div className="flex items-center gap-3 p-4 rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/50">
+                            <div className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-amber-600 dark:text-amber-400">
+                              <Palette size={20} />
+                            </div>
+                            <div>
+                              <h4 className="text-sm font-bold text-gray-900 dark:text-white">Art Collection Passport</h4>
+                              <p className="text-[10px] text-gray-500 dark:text-gray-400 font-medium">Provenance and technical details for your selected artworks.</p>
+                            </div>
+                          </div>
+
+                          <div className="space-y-10">
+                            {cartItems.filter(item => isArtProduct(item as any)).map((item: any, idx) => (
+                              <div key={idx} className="space-y-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="relative w-12 h-12 rounded-xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm">
+                                    <Image
+                                      src={item.selectedImage || item.images?.[0] || '/default_product_800x800.png'}
+                                      alt={item.name}
+                                      fill
+                                      className="object-cover"
+                                      onError={(e) => { (e.target as HTMLImageElement).src = '/default_product_800x800.png'; }}
+                                    />
+                                  </div>
+                                  <h5 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-widest">{item.name}</h5>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                  <div className="p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                      <Palette size={14} />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <span className="text-[9px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest block">Medium</span>
+                                      <p className="text-[11px] font-bold text-gray-900 dark:text-white truncate">{item.artDetails?.medium || 'Original'}</p>
+                                    </div>
+                                  </div>
+                                  <div className="p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                      <Layers size={14} />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <span className="text-[9px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest block">Surface</span>
+                                      <p className="text-[11px] font-bold text-gray-900 dark:text-white truncate">{item.artDetails?.surface || 'Canvas'}</p>
+                                    </div>
+                                  </div>
+                                  <div className="p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                      <PenTool size={14} />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <span className="text-[9px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest block">Edition</span>
+                                      <p className="text-[11px] font-bold text-gray-900 dark:text-white capitalize truncate">{item.artDetails?.edition || 'Original'}</p>
+                                    </div>
+                                  </div>
+                                  <div className="p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 flex items-center gap-3">
+                                    <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                                      <Ruler size={14} />
+                                    </div>
+                                    <div className="min-w-0">
+                                      <span className="text-[9px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-widest block">Size</span>
+                                      <p className="text-[11px] font-bold text-gray-900 dark:text-white truncate">{item.artDetails?.dimensions || 'N/A'}</p>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                <div className="flex flex-wrap gap-2">
+                                  {item.artDetails?.isSigned && (
+                                    <div className="px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-800/50 flex items-center gap-1.5">
+                                      <CheckCircle2 size={10} className="text-emerald-500" />
+                                      <span className="text-[9px] font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">Hand Signed</span>
+                                    </div>
+                                  )}
+                                  {item.artDetails?.hasCertificate && (
+                                    <div className="px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 flex items-center gap-1.5">
+                                      <ShieldCheck size={10} className="text-blue-500" />
+                                      <span className="text-[9px] font-bold text-blue-700 dark:text-blue-400 uppercase tracking-widest">COA</span>
+                                    </div>
+                                  )}
+                                  {item.artDetails?.year && (
+                                    <div className="px-3 py-1.5 rounded-xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50 flex items-center gap-1.5">
+                                      <Calendar size={10} className="text-gray-500 dark:text-gray-400" />
+                                      <span className="text-[9px] font-bold text-gray-700 dark:text-gray-300 uppercase tracking-widest">{item.artDetails.year}</span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Summary Page */}
+                      {currentPage === summaryPageNum && (
                         <div className="pt-4 sm:pt-8">
                           <div className="space-y-4">
                             {cartItems.map(item => {
@@ -359,7 +558,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                               const isMissingSize = hasSizes && !item.selectedSize;
                               const itemId = item.id + (item.selectedColor || '') + (item.selectedSize || '');
 
-                              let displayImage = (item as any).selectedImage || item.images?.[0] || '';
+                              let displayImage = (item as any).selectedImage || item.images?.[0] || '/default_product_800x800.png';
                               if (!(item as any).selectedImage && (item as any).colors && item.selectedColor) {
                                 const colorObj = (item as any).colors.find((c: any) => c.name === item.selectedColor || c.hex === item.selectedColor);
                                 if (colorObj?.images?.length > 0) {
@@ -382,6 +581,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                                       height={64}
                                       className={`h-16 w-16 object-cover relative z-10 transition-opacity duration-300 ${imageLoading[itemId] !== false ? 'opacity-0' : 'opacity-100'}`}
                                       onLoad={() => setImageLoading(prev => ({ ...prev, [itemId]: false }))}
+                                      onError={(e) => { (e.target as HTMLImageElement).src = '/default_product_800x800.png'; setImageLoading(prev => ({ ...prev, [itemId]: false })); }}
                                     />
                                   </div>
                                   <div className="flex-1 min-w-0">
@@ -602,38 +802,59 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                   {/* Footer */}
                   <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-modal-background p-4 sm:px-6">
                     <div className="max-w-3xl mx-auto w-full">
-                      {currentPage === 1 ? (
+                      {currentPage === 1 && (hasBeauty || hasMediaInfluencer) ? (
                         <button
                           type="button"
-                          className={`w-full rounded-xl border border-transparent px-6 py-4 text-base font-bold text-white shadow-lg transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
-                            ${cartItems.some(item => ((item as any).sizes?.length > 0 || (item as any).sizeOption?.length > 0) && !item.selectedSize)
-                              ? 'bg-gray-400 dark:bg-gray-700 cursor-not-allowed'
-                              : 'bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2'}`}
-                          onClick={() => {
-                            const itemMissingSize = cartItems.find(item => ((item as any).sizes?.length > 0 || (item as any).sizeOption?.length > 0) && !item.selectedSize);
-                            if (itemMissingSize) {
-                              setShowSizeError(true);
-                              const itemId = itemMissingSize.id + (itemMissingSize.selectedColor || '') + (itemMissingSize.selectedSize || '');
-                              sizeSectionRef.current[itemId]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                              // Haptic feedback for error
-                              if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
-                              return;
-                            }
-                            isPaymentFlowEnabled ? handleProceedToPayment() : handlePlaceOrder();
-                          }}
-                          disabled={isPlacingOrder || !storeId || (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false)}
+                          className="w-full rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 shadow-lg transition-all active:scale-[0.98]"
+                          onClick={() => setCurrentPage(2)}
                         >
-                          {isPlacingOrder ? (
-                            <span className="flex items-center justify-center gap-2"><Loader2 className="h-5 w-5 animate-spin" />Processing...</span>
-                          ) : (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false) ? (
-                            'Store Closed'
-                          ) : cartItems.some(item => ((item as any).sizes?.length > 0 || (item as any).sizeOption?.length > 0) && !item.selectedSize) ? (
-                            'Select Sizes to Continue'
-                          ) : (
-                            allVehicles ? 'Enquire about Vehicles' : hasVehicle ? 'Enquire & Order via Whatsapp' : 'Order via Whatsapp'
-                          )}
+                          Review Order Summary
                         </button>
-                      ) : currentPage === 2 && isPaymentFlowEnabled ? (
+                      ) : currentPage === summaryPageNum ? (
+                        <div className="flex gap-3">
+                          {(hasBeauty || hasMediaInfluencer) && (
+                            <button
+                              type="button"
+                              className="w-1/3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold py-4 px-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-[0.98]"
+                              onClick={() => setCurrentPage(1)}
+                            >
+                              Back
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            className={`${(hasBeauty || hasMediaInfluencer) ? 'w-2/3' : 'w-full'} rounded-xl border border-transparent px-6 py-4 text-base font-bold text-white shadow-lg transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+                              ${cartItems.some(item => ((item as any).sizes?.length > 0 || (item as any).sizeOption?.length > 0) && !item.selectedSize)
+                                ? 'bg-gray-400 dark:bg-gray-700 cursor-not-allowed'
+                                : 'bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2'}`}
+                            onClick={() => {
+                              const itemMissingSize = cartItems.find(item => ((item as any).sizes?.length > 0 || (item as any).sizeOption?.length > 0) && !item.selectedSize);
+                              if (itemMissingSize) {
+                                setShowSizeError(true);
+                                const itemId = itemMissingSize.id + (itemMissingSize.selectedColor || '') + (itemMissingSize.selectedSize || '');
+                                sizeSectionRef.current[itemId]?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                // Haptic feedback for error
+                                if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
+                                return;
+                              }
+                              isPaymentFlowEnabled ? handleProceedToPayment() : handlePlaceOrder();
+                            }}
+                            disabled={isPlacingOrder || !storeId || (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false)}
+                          >
+                            {isPlacingOrder ? (
+                              <span className="flex items-center justify-center gap-2"><Loader2 className="h-5 w-5 animate-spin" />Processing...</span>
+                            ) : (storeMeta?.storeType === 'restaurant' && storeMeta?.isOpen === false) ? (
+                              'Store Closed'
+                            ) : cartItems.some(item => ((item as any).sizes?.length > 0 || (item as any).sizeOption?.length > 0) && !item.selectedSize) ? (
+                              'Select Sizes to Continue'
+                            ) : (
+                              allVehicles ? 'Enquire about Vehicles' :
+                                hasMediaInfluencer ? (allServices ? 'Book via WhatsApp' : hasService ? 'Book & Order via WhatsApp' : 'Order via WhatsApp') :
+                                  hasVehicle ? 'Enquire & Order via WhatsApp' : 'Order via WhatsApp'
+                            )}
+                          </button>
+                        </div>
+                      ) : currentPage === paymentPageNum && isPaymentFlowEnabled ? (
                         <div className="flex flex-col gap-3">
                           {uploadedEvidence ? (
                             <button
@@ -658,7 +879,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                             </button>
                           )}
                         </div>
-                      ) : currentPage === 2 && !isPaymentFlowEnabled ? (
+                      ) : currentPage === paymentPageNum && !isPaymentFlowEnabled ? (
                         <button
                           type="button"
                           className="w-full bg-[#25D366] hover:bg-[#20bd5b] text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-green-500/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50"

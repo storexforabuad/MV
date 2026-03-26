@@ -13,10 +13,12 @@
  * @returns true if the store should use the payment flow, false otherwise
  */
 export function shouldUsePaymentFlow(storeType: string | undefined, subscriptionStatus: string | undefined): boolean {
-  // Media Influencer ALWAYS uses payment flow (escrow protection)
+  // Media Influencer escrow flow is temporarily disabled/put aside by user
+  /*
   if (storeType === 'media-influencer') {
     return true;
   }
+  */
   // Subscription stores (other types) use WhatsApp checkout
   if (subscriptionStatus) {
     return false;

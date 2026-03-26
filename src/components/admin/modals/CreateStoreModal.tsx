@@ -370,8 +370,10 @@ export default function CreateStoreModal({
                   <option value="general">🛍️ General (Retail, Food, etc.)</option>
                   <option value="restaurant">🍔 Restaurant (Food & Drinks)</option>
                   <option value="fashion">👗 Fashion (Ready-to-Wear, Bespoke)</option>
+                  <option value="beauty">✨ Beauty (Cosmetics, Skincare)</option>
                   <option value="electronics">📱 Electronics (Gadgets, Devices)</option>
                   <option value="livestock">🐟 Livestock (Fishery & Aquaculture)</option>
+                  <option value="artdealer">🎨 Art Dealer (Gallery & Artist)</option>
                   <option value="automotive">🚗 Automotive (Car Dealership)</option>
                   <option value="solar">☀️ Solar & Renewable Energy</option>
                   <option value="media-influencer">📣 Media Influencer (PR & Collab)</option>

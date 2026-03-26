@@ -10,6 +10,7 @@ import {
   Sparkles,
   Wrench,
   Sun,
+  Palette,
 } from 'lucide-react';
 
 export type StoreType =
@@ -24,7 +25,8 @@ export type StoreType =
   | 'beauty'
   | 'home-services'
   | 'digital-products'
-  | 'solar';
+  | 'solar'
+  | 'artdealer';
 
 export const STORE_TYPES: Array<{
   id: StoreType;
@@ -116,6 +118,13 @@ export const STORE_TYPES: Array<{
       icon: Laptop,
       description: 'E-books, courses, software, and digital assets.',
       color: 'from-indigo-500 to-blue-500',
+    },
+    {
+      id: 'artdealer',
+      label: 'Art Dealer',
+      icon: Palette,
+      description: 'Paintings, sculptures, and creative works from artists.',
+      color: 'from-amber-400 to-orange-500',
     },
   ];
 

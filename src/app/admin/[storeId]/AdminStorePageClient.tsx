@@ -55,6 +55,7 @@ const AddMediaComposer = dynamic(() => import('../../../components/admin/AddMedi
 const ManageProductsModal = dynamic(() => import('../../../components/admin/ManageProductsModal'), { ssr: false });
 const ManageCategoriesModal = dynamic(() => import('../../../components/admin/ManageCategoriesModal'), { ssr: false });
 const AdminOrdersModal = dynamic(() => import('../../../components/admin/modals/AdminOrdersModal').then(mod => mod.AdminOrdersModal), { ssr: false });
+const AddBeautyComposer = dynamic(() => import('../../../components/admin/AddBeautyComposer'), { ssr: false });
 const AmbassadorHubModal = dynamic(() => import('../../../components/admin/modals/AmbassadorHubModal').then(mod => mod.AmbassadorHubModal), { ssr: false });
 const PostsComposerModal = dynamic(() => import('../../../components/admin/modals/PostsComposerModal'), { ssr: false });
 const SocialPostsModal = dynamic(() => import('../../../components/admin/modals/SocialPostsModal'), { ssr: false });
@@ -738,6 +739,17 @@ export default function AdminStorePageClient({
         />
       ) : storeMeta?.storeType === 'media-influencer' ? (
         <AddMediaComposer
+          isOpen={isComposerOpen}
+          onClose={() => setIsComposerOpen(false)}
+          storeId={storeId}
+          categories={categories}
+          onProductAdded={() => fetchData()}
+          onAddCategory={handleAddCategory}
+          storeName={storeMeta?.name || ''}
+          instagramHandle={storeMeta?.businessInstagram}
+        />
+      ) : storeMeta?.storeType === 'beauty' ? (
+        <AddBeautyComposer
           isOpen={isComposerOpen}
           onClose={() => setIsComposerOpen(false)}
           storeId={storeId}

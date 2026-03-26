@@ -4,6 +4,7 @@
 import { useState } from 'react';
 import { Store } from 'lucide-react';
 import StoreInquiryModal from '@/components/modals/StoreInquiryModal';
+import { StoreMeta } from '@/types/store';
 
 const shimmerEffectClasses = `
   relative overflow-hidden 
@@ -13,7 +14,7 @@ const shimmerEffectClasses = `
   dark:before:via-slate-800/50 before:via-slate-200/50 before:to-transparent
 `;
 
-const PromoBanner = ({ logoUrl }: { logoUrl?: string }) => {
+const PromoBanner = ({ logoUrl, storeMeta }: { logoUrl?: string; storeMeta?: StoreMeta | null }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
@@ -38,6 +39,7 @@ const PromoBanner = ({ logoUrl }: { logoUrl?: string }) => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         logoUrl={logoUrl}
+        storeMeta={storeMeta}
       />
     </>
   );
