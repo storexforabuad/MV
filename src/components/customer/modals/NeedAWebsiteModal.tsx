@@ -199,7 +199,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
           </div>
 
           {/* Progress bar only on screens 2-5 */}
-          {typeof modal.currentScreen === 'number' && modal.currentScreen >= 2 && modal.currentScreen <= 5 && (
+          {typeof modal.currentScreen === 'number' && (modal.currentScreen as number) >= 2 && (modal.currentScreen as number) <= 5 && (
             <ProgressIndicator
               currentStep={modal.currentScreen - 1}
               totalSteps={4}
