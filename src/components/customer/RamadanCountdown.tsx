@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Moon, Sparkles, Star, RefreshCw } from 'lucide-react';
+import { Moon, Sparkles, Star } from 'lucide-react';
 import Image from 'next/image';
 
 interface TimeLeft {
@@ -475,16 +475,10 @@ export default function RamadanCountdown({ className, storeName, onNeedAWebsiteC
                             <div className="h-[1px] w-8 sm:w-12 bg-amber-400/40" />
                         </div>
 
-                        <div className="flex flex-col items-center gap-2">
-                            <p className="text-[10px] min-[360px]:text-[11px] sm:text-[15px] text-emerald-50/90 font-bold tracking-wider max-w-[200px] min-[360px]:max-w-[240px] sm:max-w-md mx-auto italic drop-shadow-md">
-                                TaqabbalAllahu Minna Wa Minkum
-                            </p>
-                            <div className="bg-emerald-800/40 backdrop-blur-sm px-3 py-1 rounded-full border border-emerald-500/20 flex items-center gap-1.5 group-hover:bg-emerald-700/60 transition-colors">
-                                <RefreshCw className="w-3 h-3 text-amber-400 animate-none group-active:animate-spin" />
-                                <span className="text-[9px] font-bold text-amber-400 uppercase tracking-tighter">Check for Updates</span>
-                            </div>
-                        </div>
-                        <p className="text-[8px] min-[360px]:text-[9px] sm:text-[11px] text-emerald-100/60 font-black tracking-widest max-w-[180px] min-[360px]:max-w-[220px] sm:max-w-sm mx-auto uppercase leading-tight mt-1">
+                        <p className="text-[10px] min-[360px]:text-[11px] sm:text-[15px] text-emerald-50/90 font-bold tracking-wider max-w-[200px] min-[360px]:max-w-[240px] sm:max-w-md mx-auto italic drop-shadow-md">
+                            TaqabbalAllahu Minna Wa Minkum
+                        </p>
+                        <p className="text-[8px] min-[360px]:text-[9px] sm:text-[11px] text-emerald-100/60 font-black tracking-widest max-w-[180px] min-[360px]:max-w-[220px] sm:max-w-sm mx-auto uppercase leading-tight">
                             May Allah accept from us and from you.
                         </p>
                     </div>
