@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Moon, Sparkles, Star } from 'lucide-react';
+import { Moon, Sparkles, Star, RefreshCw } from 'lucide-react';
 import Image from 'next/image';
 
 interface TimeLeft {
@@ -163,7 +163,7 @@ function useRingSize() {
     return size;
 }
 
-export default function RamadanCountdown({ className, storeName, onNeedAWebsiteClick }: { className?: string; storeName?: string; onNeedAWebsiteClick?: () => void }) {
+export default function RamadanCountdown({ className, storeName, onNeedAWebsiteClick, onRefresh }: { className?: string; storeName?: string; onNeedAWebsiteClick?: () => void; onRefresh?: () => void }) {
     const [now, setNow] = useState<Date | null>(null);
     const ringSize = useRingSize();
 
@@ -388,10 +388,15 @@ export default function RamadanCountdown({ className, storeName, onNeedAWebsiteC
         );
     }
 
-    // ── Post-Ramadan: Eid Mubarak ──
     return (
         <div className={className || ''}>
-            <div className="relative overflow-hidden rounded-[2.5rem] bg-emerald-950 border border-amber-400/40 shadow-2xl min-h-[180px] sm:min-h-[220px] h-full flex flex-col justify-center group">
+            <div
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onRefresh?.();
+                }}
+                className="relative overflow-hidden rounded-[2.5rem] bg-emerald-950 border border-amber-400/40 shadow-2xl min-h-[180px] sm:min-h-[220px] h-full flex flex-col justify-center group cursor-pointer active:scale-[0.98] transition-all duration-200"
+            >
                 <div className="absolute inset-0">
                     {/* Background Texture */}
                     <Image src="/images/events/ramadan_2026_new.png" alt="Eid Background" fill priority className="object-cover opacity-[0.15] mix-blend-overlay scale-110 group-hover:scale-105 transition-transform duration-1000" />
@@ -470,10 +475,16 @@ export default function RamadanCountdown({ className, storeName, onNeedAWebsiteC
                             <div className="h-[1px] w-8 sm:w-12 bg-amber-400/40" />
                         </div>
 
-                        <p className="text-[10px] min-[360px]:text-[11px] sm:text-[15px] text-emerald-50/90 font-bold tracking-wider max-w-[200px] min-[360px]:max-w-[240px] sm:max-w-md mx-auto italic drop-shadow-md">
-                            TaqabbalAllahu Minna Wa Minkum
-                        </p>
-                        <p className="text-[8px] min-[360px]:text-[9px] sm:text-[11px] text-emerald-100/60 font-black tracking-widest max-w-[180px] min-[360px]:max-w-[220px] sm:max-w-sm mx-auto uppercase leading-tight">
+                        <div className="flex flex-col items-center gap-2">
+                            <p className="text-[10px] min-[360px]:text-[11px] sm:text-[15px] text-emerald-50/90 font-bold tracking-wider max-w-[200px] min-[360px]:max-w-[240px] sm:max-w-md mx-auto italic drop-shadow-md">
+                                TaqabbalAllahu Minna Wa Minkum
+                            </p>
+                            <div className="bg-emerald-800/40 backdrop-blur-sm px-3 py-1 rounded-full border border-emerald-500/20 flex items-center gap-1.5 group-hover:bg-emerald-700/60 transition-colors">
+                                <RefreshCw className="w-3 h-3 text-amber-400 animate-none group-active:animate-spin" />
+                                <span className="text-[9px] font-bold text-amber-400 uppercase tracking-tighter">Check for Updates</span>
+                            </div>
+                        </div>
+                        <p className="text-[8px] min-[360px]:text-[9px] sm:text-[11px] text-emerald-100/60 font-black tracking-widest max-w-[180px] min-[360px]:max-w-[220px] sm:max-w-sm mx-auto uppercase leading-tight mt-1">
                             May Allah accept from us and from you.
                         </p>
                     </div>

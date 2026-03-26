@@ -315,8 +315,8 @@ export const mockBeautyProducts: BeautyProduct[] = [
         subtype: 'makeup',
         categoryId: 'makeup',
         shades: [
-            { name: 'Classic Red', hex: '#BE1E2D', images: ['lipstick_red.png'] },
-            { name: 'Nude Blush', hex: '#E6A8A1', images: ['lipstick_nude.png'] }
+            { name: 'Classic Red', hex: '#BE1E2D', images: ['/lipstick_red.png'] },
+            { name: 'Nude Blush', hex: '#E6A8A1', images: ['/lipstick_nude.png'] }
         ],
         benefits: '12-hour wear, smudge-proof, velvet texture.',
         howToUse: 'Apply to clean lips and let dry for 60 seconds.',

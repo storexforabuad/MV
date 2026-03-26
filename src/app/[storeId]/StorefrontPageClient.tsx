@@ -427,6 +427,24 @@ export default function StorefrontPageClient({
     // If we DO have a saved scroll, we don't scroll to top, 
     // the scroll restoration Effect will handle jumping to the right spot once products load.
   }, [activeCategoryId]);
+  const handleRefresh = useCallback(async () => {
+    if (!storeId || loading) return;
+
+    const refreshingToast = toast.loading('Checking for new products...');
+    try {
+      // Clear cache for current category (first page)
+      const cacheKey = `store_${storeId}_products_${activeCategoryId || 'all'}_page1`;
+      ProductListCache.clear(cacheKey);
+
+      // Re-fetch products
+      await fetchProducts(activeCategoryId, 1, null);
+
+      toast.success('Store menu updated!', { id: refreshingToast });
+    } catch (error) {
+      console.error('[Storefront] Refresh failed:', error);
+      toast.error('Failed to refresh products', { id: refreshingToast });
+    }
+  }, [storeId, activeCategoryId, loading, fetchProducts]);
 
   // Handle category deep link auto-scroll on mount
   useEffect(() => {
@@ -579,8 +597,8 @@ export default function StorefrontPageClient({
         onSuccess={() => setIsLoginModalOpen(false)}
       />
       <div className="pt-52 pb-safe-area-inset-bottom">
-        <div className="mt-2">
-          <HeroCarousel storeMeta={storeMeta} onNeedAWebsiteClick={() => setIsNeedAWebsiteModalOpen(true)} />
+        <div className="mt-2 text-center">
+          <HeroCarousel storeMeta={storeMeta} onNeedAWebsiteClick={() => setIsNeedAWebsiteModalOpen(true)} onRefresh={handleRefresh} />
         </div>
         {/* <NeedAWebsiteBanner
           storeId={storeId}

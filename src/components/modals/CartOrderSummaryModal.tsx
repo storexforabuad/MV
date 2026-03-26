@@ -605,7 +605,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                                     <div className="flex flex-wrap gap-2 mt-1.5">
                                       {item.selectedColor && (
                                         <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
-                                          {(item as any).isTextile ? 'Design' : 'Color'}: {item.selectedColor}
+                                          {isBeautyProduct(item as any) ? 'Shade' : (item as any).isTextile ? 'Design' : 'Color'}: {item.selectedColor}
                                         </span>
                                       )}
                                       {isElectronicsProduct(item as any) && (item as any).condition && (
@@ -633,7 +633,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                                       )}
                                       {item.selectedSize && (
                                         <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border border-green-100 dark:border-green-800">
-                                          Size: {item.selectedSize}
+                                          {isBeautyProduct(item as any) ? 'Volume' : 'Size'}: {item.selectedSize}
                                         </span>
                                       )}
                                     </div>

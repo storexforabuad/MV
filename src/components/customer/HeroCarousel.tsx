@@ -10,6 +10,7 @@ import { ChevronRight, ChevronLeft } from 'lucide-react';
 interface HeroCarouselProps {
     storeMeta?: StoreMeta;
     onNeedAWebsiteClick?: () => void;
+    onRefresh?: () => void;
 }
 
 const variants = {
@@ -38,7 +39,7 @@ const swipePower = (offset: number, velocity: number) => {
     return Math.abs(offset) * velocity;
 };
 
-export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick }: HeroCarouselProps) {
+export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh }: HeroCarouselProps) {
     const [page, setPage] = useState(0);
     const [direction, setDirection] = useState(0);
 
@@ -299,7 +300,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick }: HeroCar
                     ) : isStunnerStores ? (
                         pageIndex === 0 ? <CustomStunnerCard /> : <CustomStunnerGlamCard />
                     ) : pageIndex === 0 ? (
-                        <RamadanCountdown className="w-full h-full" storeName={storeMeta?.name} onNeedAWebsiteClick={onNeedAWebsiteClick} />
+                        <RamadanCountdown className="w-full h-full" storeName={storeMeta?.name} onNeedAWebsiteClick={onNeedAWebsiteClick} onRefresh={onRefresh} />
                     ) : showWelcomeSlide && pageIndex === 1 ? (
                         <WelcomeCard />
                     ) : null}

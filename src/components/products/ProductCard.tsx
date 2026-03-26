@@ -545,7 +545,7 @@ export default function ProductCard({
 
           {/* Beauty Overlays on Bottom Left */}
           {!isSoldOut && isBeautyProduct(product) && (
-            <div className="absolute bottom-[14px] left-[14px] z-10 flex flex-col gap-1.5 max-w-[calc(100%-80px)]">
+            <div className="absolute bottom-[14px] left-[14px] z-10 flex flex-col items-start gap-1.5 max-w-[calc(100%-80px)]">
               {/* Bottle Sizes / Volumes */}
               {product.bottleSizes && product.bottleSizes.length > 0 && (
                 <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
@@ -596,7 +596,7 @@ export default function ProductCard({
 
           {/* Electronics Bottom Left Overlay */}
           {!isSoldOut && isElectronicsProduct(product) && (
-            <div className="absolute bottom-[14px] left-[14px] z-10 flex flex-col gap-1.5 max-w-[calc(100%-80px)]">
+            <div className="absolute bottom-[14px] left-[14px] z-10 flex flex-col items-start gap-1.5 max-w-[calc(100%-80px)]">
               {(() => {
                 switch (product.subtype) {
                   case 'powerbank':
@@ -723,7 +723,7 @@ export default function ProductCard({
 
           {/* Solar Bottom Left Overlay */}
           {!isSoldOut && isSolarProduct(product) && (
-            <div className="absolute bottom-[14px] left-[14px] z-10 flex flex-col gap-1.5 max-w-[calc(100%-80px)]">
+            <div className="absolute bottom-[14px] left-[14px] z-10 flex flex-col items-start gap-1.5 max-w-[calc(100%-80px)]">
               {(() => {
                 const s = product;
                 switch (s.subtype) {
@@ -796,7 +796,7 @@ export default function ProductCard({
 
           {/* Art Bottom Left Overlay */}
           {!isSoldOut && isArtProduct(product) && (product as any).artDetails && (
-            <div className="absolute bottom-[14px] left-[14px] z-10 flex flex-col gap-1.5 max-w-[calc(100%-80px)]">
+            <div className="absolute bottom-[14px] left-[14px] z-10 flex flex-col items-start gap-1.5 max-w-[calc(100%-80px)]">
               <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
                 <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-bold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2.5 py-1">
                   🎨 {(product as any).artDetails.medium} on {(product as any).artDetails.surface}
