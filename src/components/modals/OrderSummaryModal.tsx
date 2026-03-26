@@ -129,8 +129,13 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
           }
         });
       }
+
+      // Sync product image when modal opens or product changes
+      if (product) {
+        setCurrentProductImage(selectedImage || product.images?.[0] || DEFAULT_PRODUCT_IMAGE);
+      }
     }
-  }, [isOpen, initialCustomer, isPaymentFlowEnabled, storeId]);
+  }, [isOpen, initialCustomer, isPaymentFlowEnabled, storeId, product, selectedImage]);
 
   // Dedicated history management effect
   useEffect(() => {
@@ -340,6 +345,15 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
               (product.subtype === 'charge-controllers' ? `🎛️ *Controller:* ${product.maxCurrentRating}${product.controllerType ? ` (${product.controllerType})` : ''}\n` : '') +
               (product.subtype === 'dc-appliances' || product.subtype === 'ac-appliances' ? `⚡ *Power:* ${product.powerConsumption}${product.energyStarRating ? ` (${product.energyStarRating})` : ''}\n` : '') +
               (product.subtype === 'solar-kits' ? `📦 *Kit Capacity:* ${product.totalSystemCapacity}${product.estimatedDailyYield ? ` (Yield: ${product.estimatedDailyYield})` : ''}\n` : '')
+            ) : '') +
+            (isArt && (product as any).artDetails ? (
+              `🎨 *Medium:* ${(product as any).artDetails.medium}\n` +
+              `🖼️ *Surface:* ${(product as any).artDetails.surface}\n` +
+              `📏 *Dimensions:* ${(product as any).artDetails.dimensions}\n` +
+              `📅 *Year:* ${(product as any).artDetails.year}\n` +
+              `✨ *Edition:* ${(product as any).artDetails.edition}\n` +
+              ((product as any).artDetails.isSigned ? `✍️ *Signed by Artist*\n` : '') +
+              ((product as any).artDetails.hasCertificate ? `📜 *Certificate of Authenticity Included*\n` : '')
             ) : '') +
             `💰 *Price:* ${formatPrice(product.price)}\n` +
             `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n` +
@@ -1657,7 +1671,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                   {/* Footer */}
                   <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-modal-background p-4 sm:px-6">
                     <div className="max-w-3xl mx-auto w-full">
-                      {currentPage === 1 && (isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer) ? (
+                      {currentPage === 1 && (isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer || isArt) ? (
                         <button
                           type="button"
                           className="w-full rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 shadow-lg transition-all active:scale-[0.98]"
@@ -1667,7 +1681,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                         </button>
                       ) : currentPage === summaryPageNum ? (
                         <div className="flex gap-3">
-                          {(isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer) && (
+                          {(isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer || isArt) && (
                             <button
                               type="button"
                               className="w-1/3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold py-4 px-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-[0.98]"
@@ -1678,7 +1692,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           )}
                           <button
                             type="button"
-                            className={`${(isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer) ? 'w-2/3' : 'w-full'} rounded-xl border border-transparent px-6 py-4 text-base font-bold text-white shadow-lg transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+                            className={`${(isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer || isArt) ? 'w-2/3' : 'w-full'} rounded-xl border border-transparent px-6 py-4 text-base font-bold text-white shadow-lg transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
                               ${hasSizes(product) && !interactiveSelectedSize
                                 ? 'bg-gray-400 dark:bg-gray-700 cursor-not-allowed'
                                 : 'bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2'}`}

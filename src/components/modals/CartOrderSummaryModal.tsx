@@ -257,6 +257,15 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
               ((item as any).vehicleDetails?.year ? `📅 *Year:* ${(item as any).vehicleDetails.year}\n` : '') +
               ((item as any).vehicleDetails?.mileage !== undefined ? `🛣️ *Mileage:* ${(item as any).vehicleDetails.mileage.toLocaleString()} km\n` : '')
             ) : '') +
+            (isArtProduct(item as any) && (item as any).artDetails ? (
+              `🎨 *Medium:* ${(item as any).artDetails.medium}\n` +
+              `🖼️ *Surface:* ${(item as any).artDetails.surface}\n` +
+              `📏 *Dimensions:* ${(item as any).artDetails.dimensions}\n` +
+              `📅 *Year:* ${(item as any).artDetails.year}\n` +
+              `✨ *Edition:* ${(item as any).artDetails.edition}\n` +
+              ((item as any).artDetails.isSigned ? `✍️ *Signed by Artist*\n` : '') +
+              ((item as any).artDetails.hasCertificate ? `📜 *COA Included*\n` : '')
+            ) : '') +
             `*Subtotal:* ${formatPrice(item.price * item.quantity)}`;
         }).join('\n\n');
 
@@ -802,7 +811,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                   {/* Footer */}
                   <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-modal-background p-4 sm:px-6">
                     <div className="max-w-3xl mx-auto w-full">
-                      {currentPage === 1 && (hasBeauty || hasMediaInfluencer) ? (
+                      {currentPage === 1 && (hasBeauty || hasMediaInfluencer || hasArt) ? (
                         <button
                           type="button"
                           className="w-full rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 shadow-lg transition-all active:scale-[0.98]"
@@ -812,7 +821,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                         </button>
                       ) : currentPage === summaryPageNum ? (
                         <div className="flex gap-3">
-                          {(hasBeauty || hasMediaInfluencer) && (
+                          {(hasBeauty || hasMediaInfluencer || hasArt) && (
                             <button
                               type="button"
                               className="w-1/3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold py-4 px-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-[0.98]"
@@ -823,7 +832,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                           )}
                           <button
                             type="button"
-                            className={`${(hasBeauty || hasMediaInfluencer) ? 'w-2/3' : 'w-full'} rounded-xl border border-transparent px-6 py-4 text-base font-bold text-white shadow-lg transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+                            className={`${(hasBeauty || hasMediaInfluencer || hasArt) ? 'w-2/3' : 'w-full'} rounded-xl border border-transparent px-6 py-4 text-base font-bold text-white shadow-lg transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
                               ${cartItems.some(item => ((item as any).sizes?.length > 0 || (item as any).sizeOption?.length > 0) && !item.selectedSize)
                                 ? 'bg-gray-400 dark:bg-gray-700 cursor-not-allowed'
                                 : 'bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2'}`}
