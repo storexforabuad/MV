@@ -111,9 +111,10 @@ export const addOrderToFirestore = async (
 
         const isGuest = customerId.startsWith('guest-');
         let customerData: any = customer;
+        let customerRef = null;
 
         if (!isGuest) {
-            const customerRef = doc(db, 'customers', customerId);
+            customerRef = doc(db, 'customers', customerId);
             const customerSnap = await getDoc(customerRef);
             if (!customerSnap.exists()) throw new Error("Customer not found.");
             customerData = customerSnap.data() as Customer;
@@ -158,7 +159,7 @@ export const addOrderToFirestore = async (
             }
         }
 
-        if (bonusApplied && !isGuest) {
+        if (bonusApplied && customerRef) {
             batch.update(customerRef, { totalReferralCommission: 0 });
         }
 

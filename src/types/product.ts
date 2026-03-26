@@ -322,6 +322,19 @@ export interface MediaInfluencerProduct extends BaseProduct {
   categoryId?: string;
   category?: string;
   isActive?: boolean;
+  soldOut?: boolean;
+}
+
+export interface BeautyShade {
+  name: string;
+  hex: string;
+  images: string[];
+}
+
+export interface BeautyBottleSize {
+  size: string; // e.g. "100ml"
+  price: number;
+  label?: 'Small' | 'Medium' | 'Large' | 'Sampler' | string;
 }
 
 // ==========================================
@@ -333,17 +346,9 @@ export interface BeautyProduct extends BaseProduct {
   brand?: string;
 
   // Variants
-  shades?: {
-    name: string;
-    hex: string;
-    images: string[];
-  }[];
+  shades?: BeautyShade[];
 
-  bottleSizes?: {
-    size: string; // e.g. "100ml"
-    price: number;
-    label?: 'Small' | 'Medium' | 'Large' | 'Sampler' | string;
-  }[];
+  bottleSizes?: BeautyBottleSize[];
 
   // Attributes
   skinTypes?: string[]; // Oily, Dry, Combination, Sensitive, All

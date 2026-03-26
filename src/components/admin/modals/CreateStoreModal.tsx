@@ -131,9 +131,9 @@ export default function CreateStoreModal({
       }));
     } else if (name === 'storeType') {
       if (value === 'media-influencer') {
-        setFormData((prev) => ({ ...prev, storeType: value, isInfluencer: true, isTestStore: false }));
+        setFormData((prev) => ({ ...prev, storeType: value as any, isInfluencer: true, isTestStore: false }));
       } else {
-        setFormData((prev) => ({ ...prev, storeType: value, isInfluencer: false }));
+        setFormData((prev) => ({ ...prev, storeType: value as any, isInfluencer: false }));
       }
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));

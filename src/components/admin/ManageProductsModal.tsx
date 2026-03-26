@@ -183,7 +183,7 @@ const FilterChip = ({ label, value, activeFilter, onClick, count }: { label: str
 
 // --- MAIN COMPONENT ---
 
-const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClose, products, setProducts, categories, onUpdateProduct, onDeleteProduct, onAddCategory }) => {
+const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClose, products, setProducts, categories, onUpdateProduct, onDeleteProduct, onAddCategory, storeId, storeType }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const deferredSearchQuery = useDeferredValue(searchQuery);
 

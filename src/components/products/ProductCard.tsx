@@ -981,9 +981,9 @@ export default function ProductCard({
                 <button
                   key={index}
                   onClick={(e) => handleDotClick(e, index)}
-                  className={`transition-all duration-300 ease-out focus:outline-none ${index === currentImageIndex
-                    ? 'w-4 h-1.5 bg-white rounded-full shadow-[0_0_8px_rgba(255,255,255,0.8)]'
-                    : 'w-1.5 h-1.5 bg-white/50 rounded-full hover:bg-white/80'
+                  className={`transition-all duration-300 ease-out focus:outline-none rounded-full ${index === currentImageIndex
+                    ? 'w-1.5 h-1.5 bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]'
+                    : 'w-1.5 h-1.5 bg-white/50 hover:bg-white/80'
                     }`}
                   aria-label={`Go to image ${index + 1} of ${totalImages}`}
                 />

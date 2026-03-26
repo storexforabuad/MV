@@ -10,6 +10,7 @@ import { compressImage } from '../../utils/imageCompression';
 import { applyWatermark } from '../../utils/watermark';
 import { formatPrice } from '../../utils/price';
 import CategorySelectorModal from './modals/CategorySelectorModal';
+import { Dialog, Transition } from '@headlessui/react';
 import {
     X,
     Sparkles,
@@ -350,7 +351,7 @@ const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, 
                 productType: 'beauty',
                 categoryId: productData.categoryId,
                 category: categories.find(c => c.id === productData.categoryId)?.name || '',
-                beautyType: productData.beautyType,
+                subtype: productData.beautyType as any,
                 shades: productData.beautyType === 'makeup' ? validVariants as any : undefined,
                 bottleSizes: productData.beautyType !== 'makeup' ? validVariants as any : undefined,
                 skinTypes: productData.skinTypes,
@@ -688,6 +689,7 @@ const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, 
                     isOpen={isCategorySelectorOpen}
                     onClose={() => setCategorySelectorOpen(false)}
                     categories={categories}
+                    selectedCategoryId={productData.categoryId}
                     onSelect={(id) => handleProductChange('categoryId', id)}
                     onAddCategory={onAddCategory}
                 />

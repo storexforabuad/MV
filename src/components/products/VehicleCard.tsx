@@ -139,6 +139,13 @@ export default function VehicleCard({ product, storeId, onOrderClick }: VehicleC
         setCurrentImageIndex((prev) => (prev === totalImages - 1 ? 0 : prev + 1));
     };
 
+    const handleDotClick = (e: React.MouseEvent, index: number) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDirection(index > currentImageIndex ? 1 : -1);
+        setCurrentImageIndex(index);
+    };
+
     const executeCopy = () => {
         if (isCopyingRef.current) return;
         isCopyingRef.current = true;
@@ -383,16 +390,18 @@ export default function VehicleCard({ product, storeId, onOrderClick }: VehicleC
 
                     {/* Carousel Dots - Positioned higher to not occlude badges */}
                     {product.available && hasMultipleImages && (
-                        <div className={`absolute bottom-[54px] left-1/2 transform -translate-x-1/2 flex gap-1 z-20 transition-opacity duration-300 ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                        <div className={`absolute bottom-[16px] left-1/2 transform -translate-x-1/2 flex items-center justify-center gap-1.5 z-20 px-3 py-1.5 rounded-full bg-black/20 backdrop-blur-sm transition-opacity duration-300 ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
                             }`}>
                             {carouselImages.map((_, index) => (
-                                <span
+                                <button
                                     key={index}
-                                    className={`transition-all duration-200 rounded-full shadow-md ${index === currentImageIndex
-                                        ? 'w-1.5 h-1.5 bg-white'
-                                        : 'w-1 h-1 bg-white/60'
+                                    onClick={(e) => handleDotClick(e, index)}
+                                    className={`transition-all duration-300 ease-out focus:outline-none rounded-full ${index === currentImageIndex
+                                        ? 'w-1.5 h-1.5 bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]'
+                                        : 'w-1 h-1 bg-white/50 hover:bg-white/80'
                                         }`}
-                                    aria-label={`Image ${index + 1} of ${totalImages}`}
+                                    aria-label={`Go to image ${index + 1} of ${totalImages}`}
+                                    type="button"
                                 />
                             ))}
                         </div>
