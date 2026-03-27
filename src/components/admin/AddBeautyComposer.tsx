@@ -10,7 +10,6 @@ import { compressImage } from '../../utils/imageCompression';
 import { applyWatermark } from '../../utils/watermark';
 import { formatPrice } from '../../utils/price';
 import CategorySelectorModal from './modals/CategorySelectorModal';
-import { Dialog, Transition } from '@headlessui/react';
 import {
     X,
     Sparkles,
@@ -61,7 +60,7 @@ interface BatchBeautyProduct {
     categoryId: string;
     limitedStock: boolean;
     soldOut: boolean;
-    
+
     // Beauty Specific
     beautyType: 'makeup' | 'skincare' | 'haircare' | 'fragrance';
     subType?: string;
@@ -143,7 +142,7 @@ const FloatingLabelInput: React.FC<{ label: string, value: string | number, onCh
 );
 
 const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, storeId, categories, onProductAdded, onAddCategory, storeName, instagramHandle }) => {
-    const [currentStep, setCurrentStep] = useState(0); 
+    const [currentStep, setCurrentStep] = useState(0);
     const [useWatermark, setUseWatermark] = useState(false);
     const [productData, setProductData] = useState<BatchBeautyProduct>({
         id: Date.now().toString(),
@@ -174,6 +173,18 @@ const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, 
             addVariant();
         }
     }, [currentStep]);
+
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+            if (categories && categories.length > 0 && !productData.categoryId) {
+                setProductData(prev => ({ ...prev, categoryId: categories[0].id }));
+            }
+        } else {
+            document.body.style.overflow = 'auto';
+        }
+        return () => { document.body.style.overflow = 'auto'; };
+    }, [isOpen, categories]);
 
     const resetState = () => {
         setCurrentStep(0);
@@ -381,7 +392,7 @@ const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, 
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
                         <FloatingLabelInput label="Product Name" value={productData.name} onChange={(e) => handleProductChange('name', e.target.value)} />
                         <FloatingLabelInput label="Brand Name" value={productData.brand} onChange={(e) => handleProductChange('brand', e.target.value)} />
-                        
+
                         <div className="space-y-3">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Store Category</label>
                             <button onClick={() => setCategorySelectorOpen(true)} className="w-full text-left p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-700 flex justify-between items-center group">
@@ -399,8 +410,8 @@ const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, 
                                     <button
                                         key={type}
                                         onClick={() => handleProductChange('beautyType', type)}
-                                        className={`p-3 rounded-xl border text-sm font-bold capitalize transition-all ${productData.beautyType === type 
-                                            ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' 
+                                        className={`p-3 rounded-xl border text-sm font-bold capitalize transition-all ${productData.beautyType === type
+                                            ? 'bg-indigo-600 border-indigo-600 text-white shadow-md'
                                             : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400'}`}
                                     >
                                         {type}
@@ -452,7 +463,7 @@ const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, 
                                             {productData.beautyType === 'makeup' && (
                                                 <div className="flex flex-wrap gap-2">
                                                     {PRESET_SKIN_COLORS.map(p => (
-                                                        <button key={p.hex} onClick={() => { updateVariant(activeVariant.id, 'hex', p.hex); updateVariant(activeVariant.id, 'name', p.name); }} 
+                                                        <button key={p.hex} onClick={() => { updateVariant(activeVariant.id, 'hex', p.hex); updateVariant(activeVariant.id, 'name', p.name); }}
                                                             className={`w-8 h-8 rounded-full border-2 transition-transform ${activeVariant.hex === p.hex ? 'border-indigo-500 scale-110' : 'border-transparent hover:scale-110'}`} style={{ backgroundColor: p.hex }} />
                                                     ))}
                                                     <div className="relative w-8 h-8 rounded-full overflow-hidden border-2 border-slate-200">
@@ -515,11 +526,10 @@ const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, 
                                     <div className="flex flex-wrap gap-2">
                                         {(productData.beautyType === 'haircare' ? HAIR_TYPES : SKIN_TYPES).map(type => (
                                             <button key={type} onClick={() => toggleMultiSelect(productData.beautyType === 'haircare' ? 'hairTypes' : 'skinTypes', type)}
-                                                className={`px-3 py-1.5 rounded-full text-[10px] font-black tracking-wider transition-all border ${
-                                                    (productData.beautyType === 'haircare' ? productData.hairTypes : productData.skinTypes).includes(type)
-                                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
-                                                    : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-400 dark:text-slate-500'
-                                                }`}>
+                                                className={`px-3 py-1.5 rounded-full text-[10px] font-black tracking-wider transition-all border ${(productData.beautyType === 'haircare' ? productData.hairTypes : productData.skinTypes).includes(type)
+                                                        ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
+                                                        : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-400 dark:text-slate-500'
+                                                    }`}>
                                                 {type.toUpperCase()}
                                             </button>
                                         ))}
@@ -536,14 +546,14 @@ const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, 
                         <FloatingLabelInput label="Regular Price (₦)" type="number" value={productData.price || ''} onChange={(e) => handleProductChange('price', parseFloat(e.target.value))} />
                         <ModernToggle label="Limited Stock?" description="Display a badge when stock is running low." checked={productData.limitedStock} onChange={(val) => handleProductChange('limitedStock', val)} />
                         <ModernToggle label="Mark as Sold Out?" checked={productData.soldOut} onChange={(val) => handleProductChange('soldOut', val)} />
-                        
+
                         <div className="p-4 rounded-3xl bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-900/20 space-y-4">
-                             <ModernToggle label="Special Promo Price?" checked={productData.isPromo} onChange={(val) => handleProductChange('isPromo', val)} />
-                             {productData.isPromo && (
-                                 <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}>
-                                     <FloatingLabelInput label="Discounted Price (₦)" type="number" value={productData.promoPrice || ''} onChange={(e) => handleProductChange('promoPrice', parseFloat(e.target.value))} />
-                                 </motion.div>
-                             )}
+                            <ModernToggle label="Special Promo Price?" checked={productData.isPromo} onChange={(val) => handleProductChange('isPromo', val)} />
+                            {productData.isPromo && (
+                                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}>
+                                    <FloatingLabelInput label="Discounted Price (₦)" type="number" value={productData.promoPrice || ''} onChange={(e) => handleProductChange('promoPrice', parseFloat(e.target.value))} />
+                                </motion.div>
+                            )}
                         </div>
                     </motion.div>
                 );
@@ -625,76 +635,65 @@ const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, 
         }
     };
 
-    if (!isOpen) return null;
+    const STEPS = [{ name: 'Details' }, { name: 'Variants & Science' }, { name: 'Pricing' }, { name: 'Review' }, { name: 'Publishing' }, { name: 'Success' }];
+    const modalVariants = { hidden: { opacity: 0, y: '100%' }, visible: { opacity: 1, y: 0 }, exit: { opacity: 0, y: '100%' } };
 
     return (
-        <Transition.Root show={isOpen} as={Fragment}>
-            <Dialog as="div" className="relative z-50" onClose={handleClose}>
-                <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm transition-opacity" />
-                <div className="fixed inset-0 z-10 overflow-y-auto">
-                    <div className="flex min-h-full items-end justify-center p-0 sm:items-center sm:p-4">
-                        <Dialog.Panel className="relative w-full transform overflow-hidden rounded-t-[3rem] bg-white dark:bg-slate-950 text-left align-middle shadow-2xl transition-all sm:max-w-xl sm:rounded-[3rem] p-0 flex flex-col max-h-[95vh]">
-                            
-                            {/* Header */}
-                            <div className="flex-shrink-0 px-8 py-6 flex justify-between items-center border-b border-slate-50 dark:border-slate-900 bg-white dark:bg-slate-950/80 backdrop-blur-xl z-10">
-                                <div>
-                                    <h3 className="text-xl font-black text-slate-900 dark:text-white">
-                                        {currentStep === 0 ? 'Create Product' : currentStep === 1 ? 'Variants & Science' : currentStep === 2 ? 'Pricing' : 'Review'}
-                                    </h3>
-                                    <p className="text-[10px] font-bold text-indigo-600 uppercase tracking-[0.2em]">{currentStep + 1} of 4 • BEAUTY ECOSYSTEM</p>
-                                </div>
-                                <button onClick={handleClose} className="p-2 rounded-2xl bg-slate-50 dark:bg-slate-900 text-slate-400 hover:text-slate-600 transition-colors"><X size={20} /></button>
+        <AnimatePresence>
+            {isOpen && (
+                <motion.div className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-slate-950 shadow-2xl overflow-hidden" initial="hidden" animate="visible" exit="exit" variants={modalVariants}>
+                    <header className="flex-shrink-0 flex items-center justify-between p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg sticky top-0 z-20">
+                        <div className="flex items-center gap-4">
+                            <button onClick={currentStep > 0 && currentStep < 4 ? () => setCurrentStep(currentStep - 1) : handleClose} className="p-2 hover:bg-slate-100 dark:bg-slate-800 rounded-full transition-colors">
+                                {currentStep > 0 && currentStep < 4 ? <ChevronLeft className="w-6 h-6 text-slate-900 dark:text-white" /> : <X className="w-6 h-6 text-slate-900 dark:text-white" />}
+                            </button>
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-900 dark:text-white">Add Beauty Product</h2>
+                                <p className="text-xs text-slate-500">{STEPS[currentStep]?.name || 'Finalizing'} • {Math.min(currentStep + 1, 4)}/4</p>
                             </div>
+                        </div>
+                        <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center shadow-lg">
+                            <Sparkles className="w-6 h-6 text-white" />
+                        </div>
+                    </header>
 
-                            {/* Body */}
-                            <div className="flex-grow overflow-y-auto px-8 py-8 scrollbar-hide" ref={scrollContainerRef}>
-                                <div className="max-w-md mx-auto">
-                                    {renderStepContent()}
-                                </div>
-                            </div>
-
-                            {/* Footer Nav */}
-                            {currentStep < 4 && (
-                                <div className="flex-shrink-0 p-8 border-t border-slate-50 dark:border-slate-900 bg-white dark:bg-slate-950/80 backdrop-blur-xl z-10">
-                                    <div className="max-w-md mx-auto flex gap-4">
-                                        {currentStep > 0 && (
-                                            <button onClick={() => setCurrentStep(currentStep - 1)} className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-white border border-slate-100 dark:border-slate-800 transition-all active:scale-95"><ChevronLeft size={24} /></button>
-                                        )}
-                                        <button 
-                                            onClick={currentStep === 3 ? handleSubmit : () => {
-                                                if (currentStep === 0 && (!productData.name || !productData.categoryId)) {
-                                                    toast.error('Product name and category are required.');
-                                                    return;
-                                                }
-                                                if (currentStep === 1 && productData.variants.some(v => v.images.length === 0)) {
-                                                    toast.error('All variants must have at least one image.');
-                                                    return;
-                                                }
-                                                setCurrentStep(currentStep + 1);
-                                            }}
-                                            className="flex-1 p-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black shadow-xl shadow-indigo-500/10 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-                                        >
-                                            {currentStep === 3 ? 'Publish Product' : 'Continue'}
-                                            <ChevronRight size={20} />
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-
-                        </Dialog.Panel>
+                    <div className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-3xl mx-auto w-full pb-32" ref={scrollContainerRef}>
+                        {renderStepContent()}
                     </div>
-                </div>
 
-                <CategorySelectorModal
-                    isOpen={isCategorySelectorOpen}
-                    onClose={() => setCategorySelectorOpen(false)}
-                    categories={categories}
-                    selectedCategoryId={productData.categoryId}
-                    onSelect={(id) => handleProductChange('categoryId', id)}
-                    onAddCategory={onAddCategory}
-                />
-            </Dialog>
-        </Transition.Root>
+                    {currentStep < 4 && (
+                        <footer className="fixed bottom-0 left-0 right-0 p-4 sm:p-6 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 z-20">
+                            <div className="max-w-3xl mx-auto w-full">
+                                <button
+                                    onClick={currentStep === 3 ? handleSubmit : () => {
+                                        if (currentStep === 0 && (!productData.name || !productData.categoryId)) {
+                                            toast.error('Product name and category are required.');
+                                            return;
+                                        }
+                                        if (currentStep === 1 && productData.variants.some(v => v.images.length === 0)) {
+                                            toast.error('All variants must have at least one image.');
+                                            return;
+                                        }
+                                        setCurrentStep(currentStep + 1);
+                                    }}
+                                    className="w-full py-4 rounded-2xl bg-indigo-600 text-white font-black text-lg transition-all shadow-lg hover:bg-indigo-700 active:scale-[0.98] flex items-center justify-center gap-2"
+                                >
+                                    {currentStep === 3 ? 'Publish Product' : 'Next Step'}
+                                </button>
+                            </div>
+                        </footer>
+                    )}
+                    <CategorySelectorModal
+                        isOpen={isCategorySelectorOpen}
+                        onClose={() => setCategorySelectorOpen(false)}
+                        categories={categories}
+                        selectedCategoryId={productData.categoryId}
+                        onSelect={(id) => handleProductChange('categoryId', id)}
+                        onAddCategory={onAddCategory}
+                    />
+                </motion.div>
+            )}
+        </AnimatePresence>
     );
 };
 
