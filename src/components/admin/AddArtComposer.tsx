@@ -6,6 +6,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ArtProduct } from '../../types/product';
 import toast from 'react-hot-toast';
 
+import CategorySelectorModal from './modals/CategorySelectorModal';
+import { uploadImageToCloudinary } from '../../lib/cloudinaryClient';
+import { compressImage } from '../../utils/imageCompression';
+import { applyWatermark } from '../../utils/watermark';
 import { Category } from '../../types/category';
 import { addProduct } from '../../lib/db';
 
@@ -81,7 +85,7 @@ const FloatingLabelInput = ({ label, type = "text", value, onChange, placeholder
             )}
             <label
                 htmlFor={inputId}
-                className="absolute left-4 -top-2.5 bg-white dark:bg-zinc-900 px-1 text-xs font-medium text-amber-600 dark:text-amber-500 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-zinc-500 peer-placeholder-shown:top-4 peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-amber-600 pointer-events-none"
+                className={`absolute left-4 -top-2.5 bg-white dark:bg-zinc-900 px-1 text-xs font-medium text-amber-600 dark:text-amber-500 transition-all peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-amber-600 pointer-events-none ${multiline ? 'peer-placeholder-shown:top-4 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-zinc-500' : 'peer-placeholder-shown:text-base peer-placeholder-shown:text-zinc-500 peer-placeholder-shown:top-4'}`}
             >
                 {label}
             </label>
@@ -117,6 +121,8 @@ export default function AddArtComposer({
     });
 
     const [newImage, setNewImage] = useState('');
+    const [isUploading, setIsUploading] = useState(false);
+    const [isCategorySelectorOpen, setCategorySelectorOpen] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
@@ -155,12 +161,37 @@ export default function AddArtComposer({
     };
 
     const addImage = () => {
-        if (newImage && !formData.images?.includes(newImage)) {
+        if (!newImage) return;
+        if (newImage.startsWith('data:')) {
+            toast.error('Please upload images directly instead of pasting base64 data.');
+            return;
+        }
+        if (!formData.images?.includes(newImage)) {
             setFormData(prev => ({
                 ...prev,
                 images: [...(prev.images || []), newImage]
             }));
             setNewImage('');
+        }
+    };
+
+    const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            setIsUploading(true);
+            try {
+                const file = e.target.files[0];
+                const compressed = await compressImage(file);
+                const imageUrl = await uploadImageToCloudinary(compressed, storeId);
+                setFormData(prev => ({
+                    ...prev,
+                    images: [...(prev.images || []), imageUrl]
+                }));
+            } catch (error) {
+                console.error("Upload failed", error);
+                toast.error('Failed to upload image');
+            } finally {
+                setIsUploading(false);
+            }
         }
     };
 
@@ -226,6 +257,16 @@ export default function AddArtComposer({
                         <FloatingLabelInput label="Artwork Title" value={formData.name || ''} onChange={(e) => handleInputChange('name', e.target.value)} placeholder="e.g. Sunset in Lagos" />
                         <FloatingLabelInput label="Price (₦)" type="number" prefix="₦" value={formData.price === 0 ? '' : formData.price || ''} onChange={(e) => handleInputChange('price', e.target.value === '' ? 0 : parseFloat(e.target.value))} />
                         <FloatingLabelInput label="Description" value={formData.description || ''} onChange={(e) => handleInputChange('description', e.target.value)} placeholder="Tell the story behind this piece..." multiline />
+
+                        <div className="space-y-3">
+                            <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1">Category</label>
+                            <button onClick={() => setCategorySelectorOpen(true)} className="w-full text-left p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-200 dark:border-zinc-700 flex justify-between items-center group">
+                                <span className={`font-medium ${formData.categoryId ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-400'}`}>
+                                    {categories.find(c => c.id === formData.categoryId)?.name || 'Select Category'}
+                                </span>
+                                <ChevronRight size={20} className="text-zinc-400 group-hover:text-amber-500 transition-colors" />
+                            </button>
+                        </div>
                     </motion.div>
                 );
             case 1:
@@ -290,10 +331,28 @@ export default function AddArtComposer({
                             </div>
                             <button
                                 onClick={addImage}
-                                className="px-6 py-4 rounded-xl bg-amber-500 text-white hover:bg-amber-600 transition-colors shadow-lg shadow-amber-500/20"
+                                className="px-6 py-4 rounded-xl bg-amber-500 text-white hover:bg-amber-600 transition-colors shadow-lg shadow-amber-500/20 flex items-center justify-center shrink-0"
                             >
                                 <Plus size={20} />
                             </button>
+                        </div>
+
+                        <div className="relative">
+                            <label className="flex flex-col items-center justify-center w-full py-8 border-2 border-dashed border-zinc-300 dark:border-zinc-700 rounded-2xl cursor-pointer bg-zinc-50 dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors group">
+                                {isUploading ? (
+                                    <div className="flex flex-col items-center">
+                                        <Loader2 className="w-8 h-8 text-amber-500 animate-spin mb-2" />
+                                        <p className="text-sm font-medium text-zinc-500">Uploading...</p>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <Upload className="w-8 h-8 text-zinc-400 group-hover:text-amber-500 transition-colors mb-2" />
+                                        <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">Click to upload from device</p>
+                                        <p className="text-xs text-zinc-500 mt-1">JPEG, PNG up to 10MB</p>
+                                    </>
+                                )}
+                                <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} disabled={isUploading} />
+                            </label>
                         </div>
 
                         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -363,15 +422,14 @@ export default function AddArtComposer({
 
             case 5:
                 return (
-                    <div className="py-20 text-center space-y-6">
-                        <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto shadow-inner">
+                    <div className="py-20 text-center space-y-6 pb-32">
+                        <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mx-auto shadow-inner">
                             <CheckCircle2 size={48} className="animate-bounce" />
                         </div>
                         <div>
                             <h3 className="text-2xl font-bold text-zinc-900 dark:text-white">Artwork Published!</h3>
                             <p className="text-zinc-500 mt-2">Your art is now visible to collectors.</p>
                         </div>
-                        <button onClick={onClose} className="px-10 py-4 mt-4 bg-zinc-900 text-white rounded-full font-bold shadow-xl hover:scale-105 transition-transform">Done</button>
                     </div>
                 );
             default:
@@ -402,7 +460,7 @@ export default function AddArtComposer({
                         {renderStepContent()}
                     </div>
 
-                    {step < 4 && (
+                    {step < 5 && (
                         <footer className="fixed bottom-0 left-0 right-0 p-4 sm:p-6 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md border-t border-zinc-200 dark:border-zinc-800 z-20">
                             <div className="max-w-3xl mx-auto w-full">
                                 <button
@@ -415,6 +473,30 @@ export default function AddArtComposer({
                             </div>
                         </footer>
                     )}
+                    {step === 5 && (
+                        <footer className="fixed bottom-0 left-0 right-0 p-4 sm:p-6 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md border-t border-zinc-200 dark:border-zinc-800 z-20">
+                            <div className="max-w-3xl mx-auto w-full flex items-center gap-4">
+                                <button onClick={() => setStep(0)} className="flex-1 py-4 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-bold transition-all hover:bg-zinc-200 dark:hover:bg-zinc-700 break-words line-clamp-1 truncate active:scale-[0.98]">
+                                    Add More
+                                </button>
+                                <button onClick={onClose} className="flex-[2] py-4 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold shadow-xl transition-all hover:bg-zinc-800 dark:hover:bg-zinc-100 active:scale-[0.98]">
+                                    Done
+                                </button>
+                            </div>
+                        </footer>
+                    )}
+
+                    <CategorySelectorModal
+                        isOpen={isCategorySelectorOpen}
+                        onClose={() => setCategorySelectorOpen(false)}
+                        categories={categories}
+                        selectedCategoryId={formData.categoryId || ''}
+                        onSelect={(id) => {
+                            handleInputChange('categoryId', id);
+                            setCategorySelectorOpen(false);
+                        }}
+                        onAddCategory={onAddCategory}
+                    />
                 </motion.div>
             )}
         </AnimatePresence>

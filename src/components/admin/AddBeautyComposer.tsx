@@ -135,7 +135,7 @@ const FloatingLabelInput: React.FC<{ label: string, value: string | number, onCh
                 className="block w-full px-4 py-3.5 text-base text-slate-900 dark:text-slate-100 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 appearance-none focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 peer transition-all"
             />
         )}
-        <label className="absolute text-sm text-slate-500 dark:text-slate-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-slate-900 px-2 peer-focus:px-2 peer-focus:text-indigo-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-6 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-3">
+        <label className={`absolute text-sm text-slate-500 dark:text-slate-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-slate-900 px-2 peer-focus:px-2 peer-focus:text-indigo-600 ${multiline ? 'peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:top-4' : 'peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-6'} peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 start-3 cursor-text`}>
             {label}
         </label>
     </div>
@@ -495,7 +495,7 @@ const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, 
                                                 <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                                                     {img.status === 'uploading' && <Loader2 className="animate-spin text-white" size={16} />}
                                                 </div>
-                                                <button onClick={() => updateVariant(activeVariant.id, 'images', activeVariant.images.filter((_, i) => i !== idx))} className="absolute top-1 right-1 p-1 bg-white/80 dark:bg-black/60 rounded-full"><X size={12} /></button>
+                                                <button onClick={() => updateVariant(activeVariant.id, 'images', activeVariant.images.filter((_, i) => i !== idx))} className="absolute top-2 right-2 z-10 p-1.5 bg-white/90 dark:bg-black/60 text-slate-900 dark:text-white rounded-full shadow-md flex items-center justify-center hover:bg-white transition-colors"><X size={12} /></button>
                                             </div>
                                         ))}
                                         <label className="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors">
@@ -527,8 +527,8 @@ const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, 
                                         {(productData.beautyType === 'haircare' ? HAIR_TYPES : SKIN_TYPES).map(type => (
                                             <button key={type} onClick={() => toggleMultiSelect(productData.beautyType === 'haircare' ? 'hairTypes' : 'skinTypes', type)}
                                                 className={`px-3 py-1.5 rounded-full text-[10px] font-black tracking-wider transition-all border ${(productData.beautyType === 'haircare' ? productData.hairTypes : productData.skinTypes).includes(type)
-                                                        ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
-                                                        : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-400 dark:text-slate-500'
+                                                    ? 'bg-indigo-600 border-indigo-600 text-white shadow-sm'
+                                                    : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-700 text-slate-400 dark:text-slate-500'
                                                     }`}>
                                                 {type.toUpperCase()}
                                             </button>
@@ -618,15 +618,14 @@ const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, 
 
             case 5: // Success
                 return (
-                    <div className="flex flex-col items-center justify-center py-10 text-center space-y-6">
-                        <div className="w-24 h-24 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600">
+                    <div className="flex flex-col items-center justify-center py-10 text-center space-y-6 pb-24">
+                        <div className="w-24 h-24 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 mx-auto shadow-inner">
                             <CheckCircle2 size={48} className="animate-bounce" />
                         </div>
                         <div>
                             <h3 className="text-2xl font-black text-slate-900 dark:text-white">Product Live!</h3>
                             <p className="text-slate-500 mt-2">Your beauty product is now available in your storefront.</p>
                         </div>
-                        <button onClick={handleClose} className="px-10 py-4 rounded-2xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold shadow-xl hover:scale-105 transition-transform">Done</button>
                     </div>
                 );
 
@@ -661,7 +660,7 @@ const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, 
                         {renderStepContent()}
                     </div>
 
-                    {currentStep < 4 && (
+                    {currentStep < 5 && (
                         <footer className="fixed bottom-0 left-0 right-0 p-4 sm:p-6 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 z-20">
                             <div className="max-w-3xl mx-auto w-full">
                                 <button
@@ -683,12 +682,27 @@ const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, 
                             </div>
                         </footer>
                     )}
+                    {currentStep === 5 && (
+                        <footer className="fixed bottom-0 left-0 right-0 p-4 sm:p-6 bg-white/95 dark:bg-slate-950/95 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 z-20">
+                            <div className="max-w-3xl mx-auto w-full flex justify-between gap-4">
+                                <button onClick={() => setCurrentStep(0)} className="flex-1 py-4 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold transition-colors break-words line-clamp-1 truncate active:scale-[0.98]">
+                                    Add More
+                                </button>
+                                <button onClick={handleClose} className="flex-[2] py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-xl shadow-indigo-500/30 transition-transform active:scale-[0.98]">
+                                    Done
+                                </button>
+                            </div>
+                        </footer>
+                    )}
                     <CategorySelectorModal
                         isOpen={isCategorySelectorOpen}
                         onClose={() => setCategorySelectorOpen(false)}
                         categories={categories}
                         selectedCategoryId={productData.categoryId}
-                        onSelect={(id) => handleProductChange('categoryId', id)}
+                        onSelect={(id) => {
+                            handleProductChange('categoryId', id);
+                            setCategorySelectorOpen(false);
+                        }}
                         onAddCategory={onAddCategory}
                     />
                 </motion.div>

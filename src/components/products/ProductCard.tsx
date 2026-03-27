@@ -976,16 +976,14 @@ export default function ProductCard({
 
           {/* Carousel Dots - Bottom Center - Only show when NOT sold out */}
           {!isSoldOut && hasMultipleImages && (
-            <div className={`absolute bottom-[16px] left-1/2 transform -translate-x-1/2 flex items-center justify-center gap-1.5 z-20 px-3 py-1.5 rounded-full bg-black/20 backdrop-blur-sm transition-opacity duration-300 ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+            <div className={`absolute bottom-3 left-1/2 transform -translate-x-1/2 flex items-center justify-center gap-1 z-20 transition-opacity duration-300 ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
               {carouselImages.map((_, index) => (
-                <button
+                <div
                   key={index}
-                  onClick={(e) => handleDotClick(e, index)}
-                  className={`transition-all duration-300 ease-out focus:outline-none rounded-full ${index === currentImageIndex
+                  className={`transition-all duration-300 ease-out rounded-full ${index === currentImageIndex
                     ? 'w-1.5 h-1.5 bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]'
-                    : 'w-1.5 h-1.5 bg-white/50 hover:bg-white/80'
+                    : 'w-1.5 h-1.5 bg-white/60'
                     }`}
-                  aria-label={`Go to image ${index + 1} of ${totalImages}`}
                 />
               ))}
             </div>
