@@ -207,7 +207,9 @@ export default function StorefrontPageClient({
         setCategories([
           { id: 'paintings', name: 'Paintings & Canvas' },
           { id: 'sculptures', name: 'Sculptures & 3D' },
-          { id: 'digital', name: 'Digital & Modern' }
+          { id: 'digital', name: 'Digital & Modern' },
+          { id: 'photography', name: 'Photography & Prints' },
+          { id: 'mixed-media', name: 'Mixed Media Arts' }
         ]);
       }
 
@@ -225,7 +227,9 @@ export default function StorefrontPageClient({
           { id: 'makeup', name: 'Makeup & Cosmetics' },
           { id: 'skincare', name: 'Skincare & Body' },
           { id: 'haircare', name: 'Haircare & Tools' },
-          { id: 'fragrance', name: 'Perfumes & Oils' }
+          { id: 'fragrance', name: 'Perfumes & Oils' },
+          { id: 'tools', name: 'Brushes & Beauty Tools' },
+          { id: 'wellness', name: 'Wellness & Supplements' }
         ]);
       }
 

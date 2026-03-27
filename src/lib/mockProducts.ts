@@ -268,6 +268,84 @@ export const mockArtProducts: ArtProduct[] = [
             subject: 'Abstract',
             style: 'Modern'
         }
+    },
+    {
+        id: 'art-11',
+        storeId: 'mock-art-store',
+        name: 'Monochrome Streets',
+        description: 'A striking black and white street photography piece capturing the essence of urban life.',
+        price: 35000,
+        originalPrice: 45000,
+        images: ['https://images.unsplash.com/photo-1542456578-1ca7b824ef78?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'art',
+        categoryId: 'photography',
+        available: true,
+        artDetails: {
+            medium: 'Photography',
+            surface: 'Archival Paper',
+            dimensions: '40 x 50 cm',
+            year: '2023',
+            edition: 'limited-edition',
+            isSigned: true,
+            isFramed: true,
+            hasCertificate: true,
+            subject: 'Architecture',
+            style: 'Documentary'
+        }
+    },
+    {
+        id: 'art-12',
+        storeId: 'mock-art-store',
+        name: 'Echoes of Time',
+        description: 'A mixed media piece incorporating vintage documents, acrylics, and gold leaf.',
+        price: 130000,
+        originalPrice: 160000,
+        images: ['https://images.unsplash.com/photo-1578301978693-85fa9c03fa75?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'art',
+        categoryId: 'mixed-media',
+        available: true,
+        artDetails: {
+            medium: 'Mixed Media',
+            surface: 'Wood Panel',
+            dimensions: '80 x 100 cm',
+            year: '2024',
+            edition: 'original',
+            isSigned: true,
+            isFramed: false,
+            hasCertificate: true,
+            subject: 'Abstract',
+            style: 'Contemporary'
+        }
+    },
+    {
+        id: 'art-13',
+        storeId: 'mock-art-store',
+        name: 'Sunset over the Marina',
+        description: 'A vibrant impressionist painting capturing the golden hour over a bustling marina.',
+        price: 95000,
+        originalPrice: 120000,
+        images: ['https://images.unsplash.com/photo-1518991444122-eb1fe6be62b7?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'art',
+        categoryId: 'paintings',
+        available: true,
+        artDetails: {
+            medium: 'Oil',
+            surface: 'Canvas',
+            dimensions: '60 x 90 cm',
+            year: '2024',
+            edition: 'original',
+            isSigned: true,
+            isFramed: true,
+            hasCertificate: true,
+            subject: 'Landscape',
+            style: 'Impressionism'
+        }
     }
 ];
 
@@ -479,6 +557,66 @@ export const mockBeautyProducts: BeautyProduct[] = [
         ingredients: 'Dead Sea Mud, Activated Charcoal, Kaolin Clay.',
         howToUse: 'Apply for 10 minutes until dry, then wash with warm water.',
         benefits: 'Deep pore cleansing, oil control.',
+        inStock: true
+    },
+    {
+        id: 'beauty-11',
+        storeId: 'mock-beauty-store',
+        name: 'Pro Artistry Brush Set',
+        brand: 'LuxeTools',
+        description: 'A 12-piece professional grade makeup brush set with vegan bristles and a travel case.',
+        price: 25000,
+        originalPrice: 32000,
+        images: ['https://images.unsplash.com/photo-1596462502278-27bfdd403348?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'beauty',
+        subtype: 'other',
+        categoryId: 'tools',
+        benefits: 'Flawless application, perfectly blended makeup.',
+        howToUse: 'Use specific brushes for foundation, powder, blush, and eye makeup.',
+        inStock: true
+    },
+    {
+        id: 'beauty-12',
+        storeId: 'mock-beauty-store',
+        name: 'Marine Collagen Peptides',
+        brand: 'GlowInner',
+        description: 'Unflavored marine collagen powder for healthy hair, skin, and nails.',
+        price: 18000,
+        originalPrice: 24000,
+        images: ['https://images.unsplash.com/photo-1584305574636-f38b2488a1cd?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'beauty',
+        subtype: 'other',
+        categoryId: 'wellness',
+        ingredients: '100% Hydrolyzed Marine Collagen.',
+        howToUse: 'Mix 1 scoop daily into your coffee, smoothie, or water.',
+        benefits: 'Promotes skin elasticity, strengthens nails.',
+        inStock: true
+    },
+    {
+        id: 'beauty-13',
+        storeId: 'mock-beauty-store',
+        name: 'Luminous Foundation',
+        brand: 'Chroma',
+        description: 'A medium-coverage, buildable foundation that leaves a natural, radiant finish.',
+        price: 16500,
+        originalPrice: 21000,
+        images: ['https://images.unsplash.com/photo-1631214500515-e4ace7a44fbc?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'beauty',
+        subtype: 'makeup',
+        categoryId: 'makeup',
+        skinTypes: ['Normal', 'Combination', 'Dry'],
+        shades: [
+            { name: 'Warm Honey', hex: '#D2A27F', images: [] },
+            { name: 'Deep Mocha', hex: '#5A3F33', images: [] }
+        ],
+        benefits: 'Hydrating, long-lasting, photo-ready.',
+        howToUse: 'Apply 1-2 pumps onto the back of your hand, and blend onto face using a brush or sponge.',
         inStock: true
     }
 ];
