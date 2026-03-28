@@ -24,7 +24,7 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({ isOpen, onClose, 
         minute: '2-digit'
     });
 
-    const totalAmount = order.products.reduce((acc, p) => acc + p.price * (p.quantity || 1), 0);
+    const totalAmount = order.products.reduce((acc, p: any) => acc + (p.price || 0) * (p.quantity || 1), 0);
     const reference = order.paymentEvidenceFileName || 'N/A';
 
     return (
@@ -89,7 +89,7 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({ isOpen, onClose, 
                                     <div>
                                         <h4 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 px-1">Order Items</h4>
                                         <div className="space-y-3">
-                                            {order.products.map((p, idx) => (
+                                            {order.products.map((p: any, idx) => (
                                                 <div key={idx} className="flex justify-between items-center p-3 rounded-2xl border border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
                                                     <div className="flex items-center gap-3">
                                                         <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-gray-400">
@@ -100,7 +100,7 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({ isOpen, onClose, 
                                                             <p className="text-[10px] text-gray-500 font-medium">Qty: {p.quantity || 1}</p>
                                                         </div>
                                                     </div>
-                                                    <p className="text-sm font-bold text-gray-900 dark:text-white">{formatPrice(p.price * (p.quantity || 1))}</p>
+                                                    <p className="text-sm font-bold text-gray-900 dark:text-white">{formatPrice((p.price || 0) * (p.quantity || 1))}</p>
                                                 </div>
                                             ))}
                                         </div>

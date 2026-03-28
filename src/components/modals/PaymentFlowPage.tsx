@@ -148,7 +148,7 @@ export default function PaymentFlowPage({
           updates.deliveryAddress = { country: 'Nigeria', state: stateInput, street: streetInput };
         }
 
-        if (Object.keys(updates).length > 0) {
+        if (Object.keys(updates).length > 0 && activeCustomer) {
           const customerRef = doc(db, 'customers', activeCustomer.id);
           await updateDoc(customerRef, updates);
           const updatedCustomer = { ...activeCustomer, ...updates };
@@ -158,7 +158,11 @@ export default function PaymentFlowPage({
       }
 
       // Now trigger Paystack with the fully populated activeCustomer
-      await executePaystackPayment(activeCustomer);
+      if (activeCustomer) {
+        await executePaystackPayment(activeCustomer);
+      } else {
+        throw new Error('Customer information is missing.');
+      }
     } catch (err) {
       toast.error('Failed to save details. Please try again.');
       setIsProcessing(false);
@@ -204,10 +208,10 @@ export default function PaymentFlowPage({
       const referrerId = localStorage.getItem('referrerId');
 
       const newOrder = await addOrderToFirestore(
-        customer.id,
+        activeCustomer.id,
         itemsToOrder,
         storeMeta,
-        customer,
+        activeCustomer,
         referrerId,
         false, // bonusApplied
         deliveryMethod as 'home' | 'pickup',
@@ -234,7 +238,7 @@ export default function PaymentFlowPage({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: customer.email || 'customer@example.com',
+          email: activeCustomer.email || 'customer@example.com',
           amount: total,
           storeId,
           metadata: {

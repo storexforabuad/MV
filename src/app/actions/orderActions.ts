@@ -39,6 +39,15 @@ export interface Order {
     // Media Influencer / Escrow Fields
     deliverableUrl?: string; // Cloudinary URL for PR Service deliverables
     campaignBrief?: string;  // Detailed instructions from Brand to Influencer
+
+    // Metadata & Customer Info (Snapshotted at order time)
+    customerInfo?: {
+        id: string;
+        name: string;
+        phoneNumber: string;
+        deliveryAddress: DeliveryAddress;
+    };
+    referralApplied?: boolean;
 }
 
 // Type for the detailed order object returned to the ADMIN client.
