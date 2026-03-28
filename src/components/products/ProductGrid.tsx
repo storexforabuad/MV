@@ -228,8 +228,8 @@ const ProductGrid = memo(function ProductGrid({
             </GlassButton> */}
             <GlassButton
               onClick={handleOrdersClick}
-              aria-label="Your Orders"
-              text="Orders"
+              aria-label="Your Profile"
+              text="Profile"
             />
             {storeMeta?.storeType === 'media-influencer' && (
               <GlassButton

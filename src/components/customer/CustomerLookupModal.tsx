@@ -3,7 +3,7 @@
 
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { findCustomerByPhone, findOrCreateCustomer, updateCustomerEmail } from "@/app/actions/customerActions";
+import { findCustomerByPhone, findCustomerByEmail, findOrCreateCustomer, updateCustomerEmail } from "@/app/actions/customerActions";
 import { Mail, X, Loader, CheckCircle, MapPin, Search } from "lucide-react";
 import { Customer, DeliveryAddress } from "@/types/customer";
 import toast from "react-hot-toast";
@@ -19,19 +19,20 @@ interface CustomerLookupModalProps {
     loginContext?: { storeType?: string; itemType?: 'product' | 'service' };
 }
 
-const CreateAccountForm = ({ phoneNumber, onAccountCreated, isBrandContext }: { phoneNumber: string, onAccountCreated: (customer: Customer) => void, isBrandContext: boolean }) => {
+const CreateAccountForm = ({ initialPhone, initialEmail, onAccountCreated, isBrandContext }: { initialPhone: string, initialEmail: string, onAccountCreated: (customer: Customer) => void, isBrandContext: boolean }) => {
     const [address, setAddress] = useState<DeliveryAddress>({
         country: "Nigeria",
         state: "Bauchi",
         street: "",
     });
-    const [email, setEmail] = useState("");
+    const [email, setEmail] = useState(initialEmail);
+    const [phone, setPhone] = useState(initialPhone);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const nigerianStates = geography.find(c => c.name === 'Nigeria')?.states.map(s => s.name) || [];
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!address.state || !address.street || !email) {
+        if (!address.state || !address.street || !email || !phone) {
             toast.error("Please fill in all fields.");
             return;
         }
@@ -41,10 +42,20 @@ const CreateAccountForm = ({ phoneNumber, onAccountCreated, isBrandContext }: { 
             return;
         }
 
+        let processedNumber = phone.replace(/\D/g, '');
+        if (processedNumber.length === 11 && processedNumber.startsWith('0')) {
+            processedNumber = processedNumber.substring(1);
+        }
+        if (processedNumber.length !== 10) {
+            toast.error("Please enter a valid 10-digit phone number.");
+            return;
+        }
+        const formattedPhoneNumber = `+234${processedNumber}`;
+
         setIsSubmitting(true);
         try {
-            const tempName = `User ${phoneNumber.slice(-4)}`;
-            const result = await findOrCreateCustomer(phoneNumber, { name: tempName, email, deliveryAddress: address });
+            const tempName = `User ${formattedPhoneNumber.slice(-4)}`;
+            const result = await findOrCreateCustomer(formattedPhoneNumber, { name: tempName, email, deliveryAddress: address });
             toast.success("Account created successfully!");
             onAccountCreated(result.customer);
         } catch (err) {
@@ -92,6 +103,18 @@ const CreateAccountForm = ({ phoneNumber, onAccountCreated, isBrandContext }: { 
             </div>
 
             <div className="relative">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">🇳🇬</span>
+                <input
+                    type="tel"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
+                    placeholder="Phone number"
+                    className="w-full pl-12 pr-4 py-3 bg-slate-100 dark:bg-slate-700 border-2 border-slate-200 dark:border-slate-600 rounded-xl font-semibold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
+                    required
+                />
+            </div>
+
+            <div className="relative">
                 <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
                 <input
                     type="email"
@@ -111,7 +134,8 @@ const CreateAccountForm = ({ phoneNumber, onAccountCreated, isBrandContext }: { 
 }
 
 const CustomerLookupModal = ({ isOpen, onClose, onSuccess, loginContext }: CustomerLookupModalProps) => {
-    const [step, setStep] = useState<"PhoneNumberInput" | "AccountLookup" | "WelcomeBack" | "CreateAccount" | "CollectEmail" | "AllDone">("PhoneNumberInput");
+    const [step, setStep] = useState<"ContactInput" | "AccountLookup" | "WelcomeBack" | "CreateAccount" | "CollectEmail" | "AllDone">("ContactInput");
+    const [inputValue, setInputValue] = useState("");
     const [phoneNumber, setPhoneNumber] = useState("");
     const [email, setEmail] = useState("");
     const [isSubmittingEmail, setIsSubmittingEmail] = useState(false);
@@ -123,24 +147,33 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess, loginContext }: Custo
     const isBrandContext = loginContext?.storeType === 'media-influencer' && loginContext?.itemType === 'service';
     const isFollowerContext = loginContext?.storeType === 'media-influencer' && loginContext?.itemType === 'product';
 
-    const handlePhoneNumberSubmit = async () => {
-        let processedNumber = phoneNumber.replace(/\D/g, '');
-
-        if (processedNumber.length === 11 && processedNumber.startsWith('0')) {
-            processedNumber = processedNumber.substring(1);
-        }
-
-        if (processedNumber.length !== 10) {
-            toast.error("Please enter a valid 10-digit phone number.");
-            return;
-        }
-
+    const handleContactSubmit = async () => {
         setIsLoading(true);
         setStep("AccountLookup");
 
+        const isEmail = inputValue.includes('@');
+        let customer: Customer | null = null;
+
         try {
-            const formattedPhoneNumber = `+234${processedNumber}`;
-            const customer = await findCustomerByPhone(formattedPhoneNumber);
+            if (isEmail) {
+                setEmail(inputValue.trim());
+                customer = await findCustomerByEmail(inputValue.trim());
+            } else {
+                let processedNumber = inputValue.replace(/\D/g, '');
+                if (processedNumber.length === 11 && processedNumber.startsWith('0')) {
+                    processedNumber = processedNumber.substring(1);
+                }
+
+                if (processedNumber.length !== 10) {
+                    toast.error("Please enter a valid phone number or email.");
+                    setStep("ContactInput");
+                    setIsLoading(false);
+                    return;
+                }
+                const formattedPhoneNumber = `+234${processedNumber}`;
+                setPhoneNumber(formattedPhoneNumber);
+                customer = await findCustomerByPhone(formattedPhoneNumber);
+            }
 
             if (customer) {
                 const normalized = { ...customer, phone: (customer as any).phone || (customer as any).phoneNumber } as Customer;
@@ -152,14 +185,13 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess, loginContext }: Custo
                     setStep("WelcomeBack");
                 }
             } else {
-                setPhoneNumber(formattedPhoneNumber);
                 setIsNewUser(true);
                 setStep("CreateAccount");
             }
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred.";
             toast.error(errorMessage);
-            setStep("PhoneNumberInput");
+            setStep("ContactInput");
         } finally {
             setIsLoading(false);
         }
@@ -221,9 +253,11 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess, loginContext }: Custo
     }
 
     const resetState = () => {
+        setInputValue("");
         setPhoneNumber("");
+        setEmail("");
         setFoundCustomer(null);
-        setStep("PhoneNumberInput");
+        setStep("ContactInput");
         setIsLoading(false);
         setIsNewUser(false);
     }
@@ -235,27 +269,27 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess, loginContext }: Custo
 
     const renderStep = () => {
         switch (step) {
-            case "PhoneNumberInput":
+            case "ContactInput":
                 return (
                     <div>
                         <h2 className="text-3xl font-extrabold text-center text-slate-800 dark:text-white mb-4">Welcome!</h2>
                         <p className="text-center text-slate-500 dark:text-slate-400 mb-8">
-                            {isBrandContext ? "Enter your phone number to verify your brand identity." :
+                            {isBrandContext ? "Enter your phone number or email to verify your brand identity." :
                                 isFollowerContext ? "Sign in to order and support your favorite creator." :
-                                    "Enter your phone number to find or create your account."}
+                                    "Enter your phone number or email to find or create your account."}
                         </p>
                         <div className="flex items-center bg-slate-100 dark:bg-slate-800 border-2 border-slate-200 dark:border-slate-700 rounded-2xl px-4 py-3 focus-within:ring-2 focus-within:ring-purple-500 transition-all">
-                            <span className="text-slate-400 dark:text-slate-500 mr-2 font-medium">🇳🇬 +234</span>
+                            {!inputValue.includes('@') && <span className="text-slate-400 dark:text-slate-500 mr-2 font-medium">🇳🇬 +234</span>}
                             <input
-                                type="tel"
-                                value={phoneNumber}
-                                onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ''))}
+                                type={inputValue.includes('@') ? "email" : "text"}
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
                                 className="w-full outline-none border-none bg-transparent text-slate-800 dark:text-white font-semibold"
-                                placeholder="0801 234 5678"
-                                onKeyDown={(e) => e.key === 'Enter' && handlePhoneNumberSubmit()}
+                                placeholder="Phone number or your@email.com"
+                                onKeyDown={(e) => e.key === 'Enter' && handleContactSubmit()}
                             />
                         </div>
-                        <button onClick={handlePhoneNumberSubmit} disabled={isLoading} className="w-full bg-slate-800 text-white font-bold py-3 rounded-2xl mt-6 hover:bg-slate-900 transition-colors disabled:bg-slate-600 shadow-lg">
+                        <button onClick={handleContactSubmit} disabled={isLoading} className="w-full bg-slate-800 text-white font-bold py-3 rounded-2xl mt-6 hover:bg-slate-900 transition-colors disabled:bg-slate-600 shadow-lg">
                             {isLoading ? "Please wait..." : "Continue"}
                         </button>
                     </div>
@@ -288,7 +322,7 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess, loginContext }: Custo
                     </div>
                 )
             case "CreateAccount":
-                return <CreateAccountForm phoneNumber={phoneNumber} onAccountCreated={handleAccountCreated} isBrandContext={isBrandContext} />
+                return <CreateAccountForm initialPhone={phoneNumber} initialEmail={email} onAccountCreated={handleAccountCreated} isBrandContext={isBrandContext} />
             case "CollectEmail":
                 return (
                     <form onSubmit={handleEmailSubmit} className="space-y-6">
@@ -342,30 +376,30 @@ const CustomerLookupModal = ({ isOpen, onClose, onSuccess, loginContext }: Custo
         <Portal>
             <div className="fixed inset-0 bg-black bg-opacity-70 z-[100] flex items-end sm:items-center justify-center p-4 backdrop-blur-sm">
                 <motion.div
-                initial={{ y: "100%", opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: "100%", opacity: 0 }}
-                transition={{ type: "spring", stiffness: 200, damping: 25 }}
-                className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-md mx-auto relative overflow-hidden max-h-[90vh] flex flex-col"
-            >
-                <button onClick={handleClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
-                    <X size={20} />
-                </button>
-                <div className="p-8 overflow-y-auto">
-                    <AnimatePresence mode="wait">
-                        <motion.div
-                            key={step}
-                            initial={{ opacity: 0, x: 30 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -30 }}
-                            transition={{ duration: 0.3, ease: 'easeInOut' }}
-                        >
-                            {renderStep()}
-                        </motion.div>
-                    </AnimatePresence>
-                </div>
-            </motion.div>
-        </div>
+                    initial={{ y: "100%", opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: "100%", opacity: 0 }}
+                    transition={{ type: "spring", stiffness: 200, damping: 25 }}
+                    className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-2xl w-full max-w-md mx-auto relative overflow-hidden max-h-[90vh] flex flex-col"
+                >
+                    <button onClick={handleClose} className="absolute top-4 right-4 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 z-10 p-2 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+                        <X size={20} />
+                    </button>
+                    <div className="p-8 overflow-y-auto">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={step}
+                                initial={{ opacity: 0, x: 30 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -30 }}
+                                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                            >
+                                {renderStep()}
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+                </motion.div>
+            </div>
         </Portal>
     );
 };

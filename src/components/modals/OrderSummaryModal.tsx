@@ -80,7 +80,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const { addOrder, orders, isLoading: isOrdersLoading } = useOrders(customer?.id || null, storeId!);
   const { promptLogin } = useCustomer();
 
-  const isPaymentFlowEnabled = shouldUsePaymentFlow(storeMeta?.storeType, storeMeta?.subscriptionStatus);
+  const isPaymentFlowEnabled = shouldUsePaymentFlow(storeMeta);
 
   const onCloseRef = useRef(onClose);
   useEffect(() => {

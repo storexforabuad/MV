@@ -76,6 +76,7 @@ export default function CreateStoreModal({
     bankName: "",
     isInfluencer: false,
     isTestStore: false,
+    paymentFlow: "whatsapp",
   });
   const [categories, setCategories] = useState<string[]>([]);
   const [customCategory, setCustomCategory] = useState("");
@@ -236,6 +237,7 @@ export default function CreateStoreModal({
         isFreePlan: isInfluencer || false,
         isTestStore: isTestStore || false,
         isWeeklyBilling: initialData?.isWeeklyBilling || false, // Only true for NeedAWebsiteModal signups
+        paymentFlow: formData.paymentFlow || "whatsapp",
 
         // Referral Tracking
         referralCode: initialData?.referralCode || null,
@@ -300,6 +302,7 @@ export default function CreateStoreModal({
       bankName: "",
       isInfluencer: false,
       isTestStore: false,
+      paymentFlow: "whatsapp",
     });
     setCategories([]);
     setLogoFile(null);
@@ -423,6 +426,13 @@ export default function CreateStoreModal({
               description="Internal use only — excluded from metrics"
               checked={formData.isTestStore || false}
               onChange={checked => setFormData(prev => ({ ...prev, isTestStore: checked, isInfluencer: false }))}
+            />
+
+            <ModernToggle
+              label="Paystack Escrow System?"
+              description="Enable secure escrow payments via Paystack instead of WhatsApp orders"
+              checked={formData.paymentFlow === 'paystack_escrow'}
+              onChange={checked => setFormData(prev => ({ ...prev, paymentFlow: checked ? 'paystack_escrow' : 'whatsapp' }))}
             />
 
             <ModernToggle label="Physical Shop?" description="Do you have a physical location?" checked={formData.hasPhysicalShop || false} onChange={checked => setFormData(prev => ({ ...prev, hasPhysicalShop: checked }))} />

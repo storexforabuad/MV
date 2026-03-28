@@ -11,6 +11,11 @@ export interface Customer {
   id: string; // The Firestore document ID
   phoneNumber: string;
   email?: string;
+  bankDetails?: {
+    accountName: string;
+    accountNumber: string;
+    bankName: string;
+  };
   name: string;
   referralCode: string;
   deliveryAddress: DeliveryAddress;

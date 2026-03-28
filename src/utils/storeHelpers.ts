@@ -12,19 +12,16 @@
  * @param subscriptionStatus - The subscription status of the store (trial, active, past_due, cancelled, expired, or undefined)
  * @returns true if the store should use the payment flow, false otherwise
  */
-export function shouldUsePaymentFlow(storeType: string | undefined, subscriptionStatus: string | undefined): boolean {
-  // Media Influencer escrow flow is temporarily disabled/put aside by user
-  /*
-  if (storeType === 'media-influencer') {
+export function shouldUsePaymentFlow(storeMeta: any | undefined | null): boolean {
+  if (!storeMeta) return false;
+
+  // If the store explicitly has paystack_escrow toggled on, use the payment flow.
+  if (storeMeta.paymentFlow === 'paystack_escrow') {
     return true;
   }
-  */
-  // Subscription stores (other types) use WhatsApp checkout
-  if (subscriptionStatus) {
-    return false;
-  }
-  // Only non-subscription fashion and restaurant stores use payment flow
-  return storeType === 'fashion' || storeType === 'restaurant';
+
+  // All other stores default to WhatsApp flow, including those missing the new field.
+  return false;
 }
 
 /**

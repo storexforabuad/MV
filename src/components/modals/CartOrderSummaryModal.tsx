@@ -55,7 +55,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
   const { dispatch } = useCart();
   const { promptLogin } = useCustomer();
 
-  const isPaymentFlowEnabled = shouldUsePaymentFlow(storeMeta?.storeType, storeMeta?.subscriptionStatus);
+  const isPaymentFlowEnabled = shouldUsePaymentFlow(storeMeta);
 
   const subtotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
   const total = subtotal;
@@ -859,7 +859,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                             ) : (
                               allVehicles ? 'Enquire about Vehicles' :
                                 hasMediaInfluencer ? (allServices ? 'Book via WhatsApp' : hasService ? 'Book & Order via WhatsApp' : 'Order via WhatsApp') :
-                                  hasVehicle ? 'Enquire & Order via WhatsApp' : 'Order via WhatsApp'
+                                  hasVehicle ? 'Enquire & Order via WhatsApp' : (isPaymentFlowEnabled ? 'Proceed to Payment' : 'Order via WhatsApp')
                             )}
                           </button>
                         </div>

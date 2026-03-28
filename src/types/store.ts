@@ -39,6 +39,9 @@ export interface StoreMeta {
   // Store Vertical
   storeType?: 'general' | 'restaurant' | 'fashion' | 'livestock' | 'automotive' | 'electronics' | 'solar' | 'real-estate' | 'artist' | 'beauty' | 'home-services' | 'digital-products' | 'sports' | 'sports-rental' | 'pitchperfect' | 'pitch' | 'media-influencer' | 'artdealer';
 
+  // Payment Configuration
+  paymentFlow?: 'whatsapp' | 'paystack_escrow';
+
   // Timezone & payout tracking
   timezone?: string;
   lastPaidAt?: Timestamp;

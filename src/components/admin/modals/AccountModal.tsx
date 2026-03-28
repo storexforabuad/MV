@@ -10,7 +10,7 @@ import { geography } from '../../../config/geography';
 import { uploadImageToCloudinary } from "../../../lib/cloudinaryClient";
 import { compressImage } from "../../../utils/imageCompression";
 import Image from "next/image";
-import { Briefcase, Loader2, User, MapPin, CreditCard, Store, ChevronRight, X, Lock, ImagePlus } from 'lucide-react';
+import { Briefcase, Loader2, User, MapPin, CreditCard, Store, ChevronRight, X, Lock, ImagePlus, ShieldCheck } from 'lucide-react';
 
 interface AccountModalProps {
   isOpen: boolean;
@@ -666,6 +666,31 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
                             ))}
                           </select>
                         </div>
+
+                        {/* Payment Flow Toggle */}
+                        <div className="mt-6 pt-6 border-t border-slate-100 dark:border-zinc-800">
+                          <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-zinc-950 rounded-xl border border-slate-200 dark:border-zinc-800">
+                            <div>
+                              <h4 className="font-medium text-slate-900 dark:text-white">Paystack Escrow System</h4>
+                              <p className="text-xs text-slate-500 mt-1 max-w-sm">Allow customers to pay securely via Paystack Escrow instead of manual WhatsApp transfers.</p>
+                              <div className="mt-2.5 space-y-1.5 text-[11px] text-slate-600 dark:text-zinc-400 font-medium">
+                                <p className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Builds extreme customer trust & boosts sales.</p>
+                                <p className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> 100% protection from fake payment receipts.</p>
+                                <p className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5 text-emerald-500" /> Automated payment verification.</p>
+                              </div>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer flex-shrink-0 ml-4">
+                              <input
+                                type="checkbox"
+                                checked={formData.paymentFlow === 'paystack_escrow'}
+                                onChange={e => updateField('paymentFlow', e.target.checked ? 'paystack_escrow' : 'whatsapp')}
+                                className="sr-only peer"
+                              />
+                              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 dark:peer-focus:ring-indigo-800 rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:-zinc-600 peer-checked:bg-indigo-600"></div>
+                            </label>
+                          </div>
+                        </div>
+
                       </div>
                     )}
 

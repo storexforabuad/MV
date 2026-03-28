@@ -82,6 +82,33 @@ export const findCustomerByPhone = async (phoneNumber: string): Promise<Customer
 };
 
 /**
+ * Finds a customer by their email address and serializes the result.
+ * @param email The customer's email address.
+ * @returns The customer object if found (with serialized timestamp), otherwise null.
+ */
+export const findCustomerByEmail = async (email: string): Promise<Customer | null> => {
+  try {
+    const customersRef = collection(db, "customers");
+    const q = query(customersRef, where("email", "==", email));
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      const doc = querySnapshot.docs[0];
+      const data = doc.data();
+      return {
+        id: doc.id,
+        ...data,
+        createdAt: serializeTimestamp(data.createdAt),
+      } as unknown as Customer;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error in findCustomerByEmail:", error);
+    throw new Error("Failed to search for customer by email.");
+  }
+};
+
+/**
  * Finds an existing customer or creates a new one, ensuring the result is serialized.
  * @param phoneNumber The customer's phone number.
  * @param details The customer's details required for creation.

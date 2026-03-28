@@ -2,12 +2,11 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useRouter, useParams } from 'next/navigation';
-import { CheckCircle, Loader2, ShoppingBag, MessageSquare, Package } from 'lucide-react';
+import { CheckCircle, Loader2, ShoppingBag, Package } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import Link from 'next/link';
 import { getOrderById, confirmPayment } from '@/app/actions/orderActions';
 import { formatPrice } from '@/utils/price';
-import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 
 export default function PaymentSuccessPage() {
     const searchParams = useSearchParams();
@@ -86,53 +85,6 @@ export default function PaymentSuccessPage() {
         }
     }, [resolvedOrderId, storeId]);
 
-    const handleSendReceipt = () => {
-        if (!order) {
-            // Fallback if order details not loaded yet
-            const message = `Hello! I just paid for my order. Reference: ${reference}`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-            return;
-        }
-
-        const storeName = order.storeMeta?.name || 'the store';
-        const whatsapp = order.storeMeta?.whatsapp;
-
-        let productDetails = '';
-        if (order.products && order.products.length > 0) {
-            productDetails = order.products.map((p: any) => {
-                const productUrl = `https://tinyurl.com/bizconnet/${storeId}/products/${p.id}`;
-                return `• *${p.name.trim()}* (x${p.quantity || 1})\n🔗 ${productUrl}`;
-            }).join('\n\n');
-        }
-
-        const totalAmount = order.products.reduce((sum: number, p: any) => sum + (p.price * (p.quantity || 1)), 0);
-
-        let deliveryDetails = '';
-        if (order.deliveryMethod === 'pickup') {
-            deliveryDetails = `🏪 *Delivery:* Pickup at Store`;
-        } else {
-            const addr = order.customerInfo?.deliveryAddress;
-            if (addr) {
-                deliveryDetails = `📍 *Delivery Address:*\n${addr.street}, ${addr.state}`;
-            }
-        }
-
-        const message = `✅ *Payment Successful!*\n\n` +
-            `Hello! I just completed the payment for my order at *${storeName}*.\n\n` +
-            `💳 *Reference:* ${reference}\n` +
-            `🆔 *Order ID:* #${orderId?.slice(0, 8)}\n\n` +
-            `📦 *Order Details:*\n${productDetails}\n\n` +
-            (deliveryDetails ? `${deliveryDetails}\n\n` : '') +
-            `💰 *Total Paid:* ${formatPrice(totalAmount)}\n\n` +
-            `Please confirm receipt and process my order. Thank you! 🙏✨`;
-
-        const whatsappUrl = whatsapp
-            ? `https://wa.me/${formatWhatsAppNumber(whatsapp)}?text=${encodeURIComponent(message)}`
-            : `https://wa.me/?text=${encodeURIComponent(message)}`;
-
-        window.open(whatsappUrl, '_blank');
-    };
-
     if (status === 'verifying') {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
@@ -203,26 +155,30 @@ export default function PaymentSuccessPage() {
                 </div>
 
                 <div className="space-y-3">
-                    <button
-                        onClick={handleSendReceipt}
-                        className="w-full py-3.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold shadow-lg shadow-green-500/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-                    >
-                        <MessageSquare className="w-5 h-5" />
-                        <span>Send Receipt to Vendor</span>
-                    </button>
+                    {resolvedOrderId && (
+                        <Link
+                            href={`/${storeId}?open=orders&orderId=${resolvedOrderId}`}
+                            className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+                        >
+                            <ShoppingBag className="w-5 h-5" />
+                            <span>View Order</span>
+                        </Link>
+                    )}
 
                     <Link
                         href={`/${storeId}`}
                         className="w-full py-3.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center gap-2 transition-all"
                     >
-                        <ShoppingBag className="w-5 h-5" />
+                        <Package className="w-5 h-5" />
                         <span>Continue Shopping</span>
                     </Link>
                 </div>
             </div>
 
-            <div className="absolute bottom-4 text-center text-xs text-gray-400">
-                Secured by <span className="font-bold text-gray-500">BizconNet™</span>
+            <div className="absolute bottom-6 text-center">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">
+                    Secured by <span className="text-gray-600 dark:text-gray-300">BCN™</span>
+                </p>
             </div>
         </div>
     );

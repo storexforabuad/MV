@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { Timestamp } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
-import { Repeat, MessageSquare, Clock, CheckCircle, Truck } from 'lucide-react';
+import { Repeat, MessageSquare, Clock, CheckCircle, Truck, FileText } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Order } from '../../../hooks/useOrders';
 import { formatPrice } from '../../../utils/price';
@@ -16,6 +16,7 @@ import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 import { CartItem } from '@/lib/cartContext';
 import { isSolarProduct } from '@/utils/productHelpers';
 import EscrowDeliverablePanel from '@/components/admin/EscrowDeliverablePanel';
+import OrderReceiptModal from '../modals/OrderReceiptModal';
 
 interface OrderDetailCardProps {
   order: Order;
@@ -43,6 +44,7 @@ const getStatusUI = (status: Order['orderStatus']) => {
 
 export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted, onReorder, storeId, onRefresh }: OrderDetailCardProps) {
   const [isReordering, setIsReordering] = useState(false);
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
   const { customer } = useCustomer();
 
   const products = order.products || [];
@@ -205,13 +207,26 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted, onR
           <button
             onClick={handleReorder}
             disabled={isReordering}
-            className="flex-1 flex items-center justify-center gap-2 p-3 text-sm font-bold text-text-secondary hover:bg-zinc-700 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 flex items-center justify-center gap-2 p-4 text-xs font-bold text-text-secondary hover:bg-zinc-800 transition-colors border-r border-border-color disabled:opacity-50"
           >
-            <Repeat className="w-4 h-4" />
-            <span>Reorder Now</span>
+            <Repeat className="w-3.5 h-3.5" />
+            <span>Reorder</span>
+          </button>
+          <button
+            onClick={() => setIsReceiptModalOpen(true)}
+            className="flex-1 flex items-center justify-center gap-2 p-4 text-xs font-bold text-purple-400 hover:bg-zinc-800 transition-colors"
+          >
+            <FileText className="w-3.5 h-3.5" />
+            <span>Receipt</span>
           </button>
         </div>
       </div>
+
+      <OrderReceiptModal
+        isOpen={isReceiptModalOpen}
+        onClose={() => setIsReceiptModalOpen(false)}
+        order={order}
+      />
     </>
   );
 }
