@@ -42,7 +42,7 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({ isOpen, onClose, 
                     <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm transition-opacity" />
                 </Transition.Child>
 
-                <div className="fixed inset-0 z-10 overflow-y-auto">
+                <div className="fixed inset-0 z-10 overflow-hidden">
                     <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
                         <Transition.Child
                             as={Fragment}
@@ -53,10 +53,10 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({ isOpen, onClose, 
                             leaveFrom="opacity-100 translate-y-0 sm:scale-100"
                             leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
                         >
-                            <Dialog.Panel className="relative transform overflow-hidden rounded-[2.5rem] bg-white dark:bg-gray-900 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-100 dark:border-gray-800">
+                            <Dialog.Panel className="relative transform overflow-hidden rounded-[2.5rem] bg-white dark:bg-gray-900 text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-gray-100 dark:border-gray-800 flex flex-col max-h-[92vh]">
 
                                 {/* Header */}
-                                <div className="px-6 pt-6 pb-4 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800">
+                                <div className="px-6 pt-6 pb-4 flex justify-between items-center bg-gray-50/50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-800 flex-shrink-0">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-2xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600">
                                             <CheckCircle className="w-6 h-6" />
@@ -71,7 +71,7 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({ isOpen, onClose, 
                                     </button>
                                 </div>
 
-                                <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto custom-scrollbar">
+                                <div className="p-6 space-y-6 flex-1 overflow-y-auto custom-scrollbar">
 
                                     {/* Summary Info */}
                                     <div className="grid grid-cols-2 gap-4">
@@ -131,15 +131,7 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({ isOpen, onClose, 
                                 </div>
 
                                 {/* Footer Actions */}
-                                <div className="p-6 bg-gray-50/50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800 space-y-3">
-                                    <button
-                                        onClick={() => handleSendWhatsAppReceipt(order)}
-                                        className="w-full py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-bold shadow-lg shadow-green-500/20 flex items-center justify-center gap-3 transition-all active:scale-[0.98]"
-                                    >
-                                        <MessageSquare className="w-5 h-5" />
-                                        <span>Send to Vendor (WhatsApp)</span>
-                                    </button>
-
+                                <div className="p-6 bg-gray-50/50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-800 space-y-3 flex-shrink-0">
                                     <div className="flex gap-3">
                                         <button
                                             onClick={() => window.print()}

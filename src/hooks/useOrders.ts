@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
-import { addOrderToFirestore, fetchStoreOrders } from '@/app/actions/orderActions';
+import { addOrderToFirestore, fetchStoreOrders, fetchCustomerOrders } from '@/app/actions/orderActions';
 import { Product } from '@/types/product';
 import { StoreMeta } from '@/types/store';
 import { Customer } from '@/types/customer';
@@ -26,27 +26,37 @@ export const useOrders = (customerId: string | null, storeId: string) => {
       setIsLoading(true);
 
       if (customerId) {
-        // Fetch from Firestore for logged-in users
-        const allStoreOrders = await fetchStoreOrders(storeId);
-        const customerOrders = allStoreOrders.filter(o => o.customerInfo.id === customerId);
+        // Efficiently fetch only this customer's orders
+        const customerOrders = await fetchCustomerOrders(storeId, customerId);
         setOrders(customerOrders);
       } else {
-        // Fetch from Firestore for guest email in localStorage
+        // Fetch for guest email in localStorage
         const guestEmail = localStorage.getItem('guest_email');
-        const allStoreOrders = await fetchStoreOrders(storeId);
-        
         let guestOrdersFromFirestore: Order[] = [];
+
         if (guestEmail) {
           const guestId = `guest-${guestEmail.replace(/[^a-zA-Z0-9]/g, '')}`;
-          guestOrdersFromFirestore = allStoreOrders.filter(o => o.customerInfo.id === guestId || o.customerInfo.id === `guest-${guestEmail}`);
+          const firestoreOrders = await fetchCustomerOrders(storeId, guestId);
+
+          // Also check for legacy quest ID format if different
+          const legacyFormatId = `guest-${guestEmail}`;
+          if (guestId !== legacyFormatId) {
+            const legacyOrders = await fetchCustomerOrders(storeId, legacyFormatId);
+            guestOrdersFromFirestore = [...firestoreOrders, ...legacyOrders].reduce((acc: Order[], curr: Order) => {
+              if (!acc.some(o => o.id === curr.id)) acc.push(curr);
+              return acc;
+            }, []);
+          } else {
+            guestOrdersFromFirestore = firestoreOrders;
+          }
         }
 
-        // Also check legacy localStorage orders
+        // Also check legacy localStorage orders (completely anonymous)
         const savedOrders = localStorage.getItem(`orders_${storeId}`);
-        const legacyOrders = savedOrders ? JSON.parse(savedOrders) : [];
-        
+        const legacyLocalOrders = savedOrders ? JSON.parse(savedOrders) : [];
+
         // Merge and deduplicate
-        const merged = [...guestOrdersFromFirestore, ...legacyOrders].reduce((acc: Order[], curr: Order) => {
+        const merged = [...guestOrdersFromFirestore, ...legacyLocalOrders].reduce((acc: Order[], curr: Order) => {
           if (!acc.some(o => o.id === curr.id)) acc.push(curr);
           return acc;
         }, []);

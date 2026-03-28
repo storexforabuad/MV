@@ -29,6 +29,7 @@ interface CustomerProfileModalProps {
   onNotificationRequest?: () => Promise<{ success: boolean; error?: string }>;
   onReorder?: (order: Order) => void;
   onRefresh?: () => void;
+  extraOrder?: Order; // Newly added prop for in-promise orders
 }
 
 type Tab = 'orders' | 'wallet' | 'settings';
@@ -59,10 +60,12 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
   highlightOrderId,
   onNotificationRequest,
   onReorder,
-  onRefresh
+  onRefresh,
+  extraOrder
 }) => {
   const { promptLogin, setCustomer, customer: contextCustomer } = useCustomer();
   const [activeTab, setActiveTab] = useState<Tab>('orders');
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const nigerianStates = geography.find(c => c.name === 'Nigeria')?.states.map(s => s.name) || [];
 
@@ -135,14 +138,21 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
 
   const groupedOrders = useMemo(() => {
     if (!orders) return {};
-    return [...orders].sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime())
+    let combined = [...orders];
+
+    // Inject extraOrder if it's not already in the list
+    if (extraOrder && !combined.find(o => o.id === extraOrder.id)) {
+      combined.unshift(extraOrder);
+    }
+
+    return combined.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime())
       .reduce((acc, order) => {
         const orderDate = new Date(order.orderDate).toDateString();
         if (!acc[orderDate]) acc[orderDate] = [];
         acc[orderDate].push(order);
         return acc;
       }, {} as Record<string, Order[]>);
-  }, [orders]);
+  }, [orders, extraOrder]);
 
   const sortedDateKeys = useMemo(() => {
     return Object.keys(groupedOrders).sort((a, b) => new Date(b).getTime() - new Date(a).getTime());
@@ -517,6 +527,45 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
                             </div>
                           )}
                         </div>
+
+                        {customer && !isEditingSettings && (
+                          <div className="pt-4 pb-8">
+                            {showLogoutConfirm ? (
+                              <div className="bg-red-50 dark:bg-red-900/10 rounded-2xl p-4 border border-red-100 dark:border-red-800/50 space-y-3 animate-in fade-in zoom-in-95 duration-200">
+                                <p className="text-xs font-bold text-red-700 dark:text-red-400 text-center uppercase tracking-wider">
+                                  Are you sure you want to sign out?
+                                </p>
+                                <div className="flex gap-2">
+                                  <button
+                                    onClick={() => setShowLogoutConfirm(false)}
+                                    className="flex-1 py-3 rounded-xl bg-white dark:bg-gray-800 text-gray-500 font-bold text-xs border border-gray-200 dark:border-gray-700 hover:bg-gray-50 transition-all"
+                                  >
+                                    Cancel
+                                  </button>
+                                  <button
+                                    onClick={() => {
+                                      setCustomer(null);
+                                      setShowLogoutConfirm(false);
+                                      onClose();
+                                      toast.success('Signed out successfully');
+                                    }}
+                                    className="flex-1 py-3 rounded-xl bg-red-600 text-white font-bold text-xs shadow-md hover:bg-red-700 transition-all"
+                                  >
+                                    Yes, Sign Out
+                                  </button>
+                                </div>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => setShowLogoutConfirm(true)}
+                                className="w-full py-4 flex items-center justify-center gap-3 text-red-600 dark:text-red-400 font-black uppercase tracking-widest text-[10px] bg-gray-50 dark:bg-gray-900/50 rounded-2xl border border-gray-100 dark:border-gray-800 hover:bg-red-50 dark:hover:bg-red-900/10 transition-all active:scale-[0.98]"
+                              >
+                                <LogOut className="w-4 h-4" />
+                                <span>Sign Out of Account</span>
+                              </button>
+                            )}
+                          </div>
+                        )}
 
                         {isEditingSettings && (
                           <div className="flex gap-3 pt-2 pb-6">

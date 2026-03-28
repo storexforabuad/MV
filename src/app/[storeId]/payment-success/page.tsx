@@ -7,6 +7,12 @@ import confetti from 'canvas-confetti';
 import Link from 'next/link';
 import { getOrderById, confirmPayment } from '@/app/actions/orderActions';
 import { formatPrice } from '@/utils/price';
+import { useCustomer } from '@/context/CustomerContext';
+import { useOrders } from '@/hooks/useOrders';
+import CustomerProfileModal from '@/components/customer/modals/CustomerProfileModal';
+import { StoreMeta } from '@/types/store';
+import { getStoreMeta } from '@/lib/db';
+import NavigationStore from '@/lib/navigationStore';
 
 export default function PaymentSuccessPage() {
     const searchParams = useSearchParams();
@@ -20,6 +26,12 @@ export default function PaymentSuccessPage() {
     const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
     const [resolvedOrderId, setResolvedOrderId] = useState<string | null>(null);
     const [order, setOrder] = useState<any>(null);
+    const [storeMeta, setStoreMeta] = useState<StoreMeta | null>(null);
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+    const { customer } = useCustomer();
+    const { orders, addOrder, refetchOrders } = useOrders(customer?.id || null, storeId);
+
     const hasRun = useRef(false);
 
     useEffect(() => {
@@ -82,6 +94,9 @@ export default function PaymentSuccessPage() {
     useEffect(() => {
         if (resolvedOrderId && resolvedOrderId !== 'Unknown' && storeId) {
             getOrderById(storeId, resolvedOrderId).then(setOrder).catch(console.error);
+        }
+        if (storeId) {
+            getStoreMeta(storeId).then(setStoreMeta).catch(console.error);
         }
     }, [resolvedOrderId, storeId]);
 
@@ -156,17 +171,21 @@ export default function PaymentSuccessPage() {
 
                 <div className="space-y-3">
                     {resolvedOrderId && (
-                        <Link
-                            href={`/${storeId}?open=orders&orderId=${resolvedOrderId}`}
+                        <button
+                            onClick={() => setIsProfileOpen(true)}
                             className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
                         >
                             <ShoppingBag className="w-5 h-5" />
                             <span>View Order</span>
-                        </Link>
+                        </button>
                     )}
 
                     <Link
                         href={`/${storeId}`}
+                        onClick={() => {
+                            // If they click continue shopping, they go back to the store.
+                            // The StorefrontPageClient will handle the scroll restoration from NavigationStore.
+                        }}
                         className="w-full py-3.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center justify-center gap-2 transition-all"
                     >
                         <Package className="w-5 h-5" />
@@ -175,9 +194,26 @@ export default function PaymentSuccessPage() {
                 </div>
             </div>
 
-            <div className="absolute bottom-6 text-center">
-                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em]">
-                    Secured by <span className="text-gray-600 dark:text-gray-300">BCN™</span>
+            {storeId && storeMeta && (
+                <CustomerProfileModal
+                    isOpen={isProfileOpen}
+                    onClose={() => setIsProfileOpen(false)}
+                    orders={orders}
+                    storeId={storeId}
+                    addOrder={addOrder}
+                    storeMeta={storeMeta}
+                    customer={customer}
+                    highlightOrderId={resolvedOrderId}
+                    extraOrder={order}
+                    onRefresh={refetchOrders}
+                />
+            )}
+
+            <div className="mt-12 text-center pb-8">
+                <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.3em] flex items-center justify-center gap-2">
+                    <span className="w-8 h-px bg-gray-200 dark:bg-gray-800"></span>
+                    SECURED BY <span className="text-gray-900 dark:text-white">BCN™</span>
+                    <span className="w-8 h-px bg-gray-200 dark:bg-gray-800"></span>
                 </p>
             </div>
         </div>

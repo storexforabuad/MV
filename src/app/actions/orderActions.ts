@@ -440,6 +440,26 @@ const transformOrderData = (doc: any): StoreOrder => {
 };
 
 /**
+ * Fetches all orders for a specific customer in a specific store.
+ */
+export const fetchCustomerOrders = async (storeId: string, customerId: string): Promise<StoreOrder[]> => {
+    try {
+        const ordersRef = collection(db, 'stores', storeId, 'orders');
+        // Query specifically for this customer to avoid fetching all store orders
+        const q = query(ordersRef, where('customerInfo.id', '==', customerId));
+        const querySnapshot = await getDocs(q);
+        const orders = querySnapshot.docs.map(transformOrderData);
+
+        // Sort by date descending
+        orders.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
+        return orders;
+    } catch (error) {
+        console.error("Error fetching customer orders:", error);
+        throw new Error("Failed to fetch customer orders.");
+    }
+};
+
+/**
  * Fetches all orders for a specific store, with manual sorting to prevent index errors.
  */
 export const fetchStoreOrders = async (storeId: string): Promise<StoreOrder[]> => {
@@ -482,7 +502,8 @@ export const getRevenueAnalytics = async (storeId: string) => {
         // --- Base Analytics (Lifetime & Historical) ---
         const storeRef = doc(db, 'stores', storeId);
         const storeSnap = await getDoc(storeRef);
-        const lifetimeRevenue = storeSnap.data()?.totalRevenue || 0;
+        const storeData = storeSnap.data() as any;
+        const lifetimeRevenue = storeData?.totalRevenue || 0;
 
         const metricsRef = collection(db, 'stores', storeId, 'dailyMetrics');
         const metricsQuery = query(metricsRef, orderBy("date", "desc"), limit(7));
@@ -591,7 +612,8 @@ export async function acknowledgeOrders(customerId: string, orderIds: string[]):
 
         // Get current acknowledged orders
         const customerDoc = await getDoc(customerRef);
-        const currentAcknowledgedIds = customerDoc.data()?.acknowledgedOrderIds || [];
+        const customerData = customerDoc.data() as any;
+        const currentAcknowledgedIds = customerData?.acknowledgedOrderIds || [];
 
         // Merge with new ones, avoiding duplicates
         const updatedAcknowledgedIds = Array.from(new Set([...currentAcknowledgedIds, ...orderIds]));
@@ -625,9 +647,9 @@ export async function confirmPayment(storeId: string, orderId: string, paystackR
         });
 
         // Also update customer copy if it exists
-        const orderData = orderSnap.data();
+        const orderData = orderSnap.data() as any;
         if (orderData?.customerId) {
-            const customerOrderRef = doc(db, 'customers', orderData.customerId, 'orders', orderId);
+            const customerOrderRef = doc(db, 'customers', orderData.customerId as string, 'orders', orderId);
             await updateDoc(customerOrderRef, {
                 paymentStatus: 'escrow-held',
                 paystackReference,

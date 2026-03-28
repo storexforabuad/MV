@@ -10,12 +10,13 @@ import { Customer } from '@/types/customer';
 import { addOrderToFirestore } from '@/app/actions/orderActions';
 import { isFoodBeverageProduct } from '@/utils/productHelpers';
 import { useCustomer } from '@/context/CustomerContext';
-import { findOrCreateCustomer, updateCustomerEmail } from '@/app/actions/customerActions';
+import { findOrCreateCustomer, updateCustomerEmail, findCustomerByEmail } from '@/app/actions/customerActions';
 import { doc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/db';
 import { geography } from '@/config/geography';
 
 import { CartItem } from '@/lib/cartContext';
+import NavigationStore from '@/lib/navigationStore';
 
 interface PaymentFlowPageProps {
   storeMeta: StoreMeta;
@@ -57,6 +58,9 @@ export default function PaymentFlowPage({
   const customer = contextCustomer || propCustomer;
 
   const [showMissingInfoForm, setShowMissingInfoForm] = useState(false);
+  const [verificationStep, setVerificationStep] = useState<'email' | 'details'>('email');
+  const [isVerifyingEmail, setIsVerifyingEmail] = useState(false);
+
   const [phoneInput, setPhoneInput] = useState(customer?.phoneNumber || '');
   const [emailInput, setEmailInput] = useState(customer?.email || '');
   const [streetInput, setStreetInput] = useState(customer?.deliveryAddress?.street || '');
@@ -70,6 +74,32 @@ export default function PaymentFlowPage({
   const needsEmail = !customer?.email;
   const needsAddress = deliveryMethod === 'home' && (!customer?.deliveryAddress?.street || !customer?.deliveryAddress?.state);
   const isMissingInfo = !customer || needsPhone || needsEmail || needsAddress;
+
+  const handleEmailNext = async () => {
+    if (!emailInput || !emailInput.includes('@')) {
+      toast.error('Please enter a valid email address.');
+      return;
+    }
+
+    setIsVerifyingEmail(true);
+    try {
+      const existingCustomer = await findCustomerByEmail(emailInput);
+      if (existingCustomer) {
+        setCustomer(existingCustomer);
+        setPhoneInput(existingCustomer.phoneNumber || '');
+        setStreetInput(existingCustomer.deliveryAddress?.street || '');
+        setStateInput(existingCustomer.deliveryAddress?.state || 'Bauchi');
+        toast.success(`Welcome back, ${existingCustomer.name}!`);
+      }
+      setVerificationStep('details');
+    } catch (err) {
+      console.error('Email verification error:', err);
+      // Even if check fails, let them proceed to enter details manually
+      setVerificationStep('details');
+    } finally {
+      setIsVerifyingEmail(false);
+    }
+  };
 
   const handleMissingInfoSubmit = async () => {
     if (!phoneInput || !emailInput || (deliveryMethod === 'home' && (!streetInput || !stateInput))) {
@@ -216,6 +246,11 @@ export default function PaymentFlowPage({
 
       const data = await response.json();
       if (data.authorization_url) {
+        // Save scroll position before redirecting to Paystack
+        if (typeof window !== 'undefined') {
+          const activeCategory = NavigationStore.getActiveCategory() || 'all';
+          NavigationStore.saveScrollPosition(activeCategory, window.scrollY);
+        }
         window.location.href = data.authorization_url;
       } else {
         toast.error('Could not initialize payment');
@@ -303,65 +338,100 @@ export default function PaymentFlowPage({
                 Required Details
               </div>
 
-              {(!customer || needsPhone) && (
-                <div>
-                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">Phone Number</label>
-                  <div className="flex bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
-                    <span className="px-3 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-500 font-medium">🇳🇬</span>
+              {verificationStep === 'email' ? (
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">Email Address</label>
                     <input
-                      type="tel"
-                      value={phoneInput}
-                      onChange={(e) => setPhoneInput(e.target.value)}
-                      placeholder="0801 234 5678"
-                      className="w-full px-3 py-2.5 bg-transparent outline-none text-sm font-medium"
+                      type="email"
+                      value={emailInput}
+                      onChange={(e) => setEmailInput(e.target.value)}
+                      placeholder="your@email.com"
+                      className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none text-sm font-medium focus:border-green-500"
+                      autoFocus
                     />
+                    <p className="text-[10px] text-gray-400 mt-1">We'll check if you're already registered with us.</p>
+                  </div>
+
+                  <button
+                    onClick={handleEmailNext}
+                    disabled={isVerifyingEmail}
+                    className="w-full py-3.5 rounded-xl bg-green-600 text-white font-bold text-base shadow-lg hover:bg-green-700 transition-all flex items-center justify-center gap-2 active:scale-[0.98]"
+                  >
+                    {isVerifyingEmail ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Continue'}
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {(!customer || needsPhone) && (
+                    <div>
+                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">Phone Number</label>
+                      <div className="flex bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+                        <span className="px-3 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-500 font-medium">🇳🇬</span>
+                        <input
+                          type="tel"
+                          value={phoneInput}
+                          onChange={(e) => setPhoneInput(e.target.value)}
+                          placeholder="0801 234 5678"
+                          className="w-full px-3 py-2.5 bg-transparent outline-none text-sm font-medium"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                  {(!customer || needsEmail) && (
+                    <div>
+                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">Email Address (Confirm)</label>
+                      <input
+                        type="email"
+                        value={emailInput}
+                        readOnly={!!customer}
+                        onChange={(e) => setEmailInput(e.target.value)}
+                        placeholder="your@email.com"
+                        className={`w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none text-sm font-medium focus:border-green-500 ${customer ? 'opacity-70' : ''}`}
+                      />
+                    </div>
+                  )}
+
+                  {(!customer || needsAddress) && deliveryMethod === 'home' && (
+                    <div className="space-y-3 pt-2 border-t border-dashed border-gray-200 dark:border-gray-700">
+                      <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Delivery Address</label>
+                      <select
+                        value={stateInput}
+                        onChange={(e) => setStateInput(e.target.value)}
+                        className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none text-sm font-medium"
+                      >
+                        {nigerianStates.map(state => (
+                          <option key={state} value={state}>{state}</option>
+                        ))}
+                      </select>
+                      <input
+                        type="text"
+                        value={streetInput}
+                        onChange={(e) => setStreetInput(e.target.value)}
+                        placeholder="Street Address (e.g 123 Main St)"
+                        className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none text-sm font-medium focus:border-green-500"
+                      />
+                    </div>
+                  )}
+
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      onClick={() => setVerificationStep('email')}
+                      className="px-4 py-3.5 rounded-xl border border-gray-200 text-gray-500 font-bold text-sm"
+                    >
+                      Back
+                    </button>
+                    <button
+                      onClick={handleMissingInfoSubmit}
+                      disabled={isProcessing}
+                      className="flex-1 py-3.5 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-base shadow-lg hover:opacity-90 transition-all flex items-center justify-center gap-2"
+                    >
+                      {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Confirm & Proceed'}
+                    </button>
                   </div>
                 </div>
               )}
-
-              {(!customer || needsEmail) && (
-                <div>
-                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1 block">Email Address</label>
-                  <input
-                    type="email"
-                    value={emailInput}
-                    onChange={(e) => setEmailInput(e.target.value)}
-                    placeholder="your@email.com"
-                    className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none text-sm font-medium focus:border-green-500"
-                  />
-                  <p className="text-[10px] text-gray-400 mt-1">Required for Paystack receipt & Escrow updates.</p>
-                </div>
-              )}
-
-              {(!customer || needsAddress) && deliveryMethod === 'home' && (
-                <div className="space-y-3 pt-2 border-t border-dashed border-gray-200 dark:border-gray-700">
-                  <label className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider block">Delivery Address</label>
-                  <select
-                    value={stateInput}
-                    onChange={(e) => setStateInput(e.target.value)}
-                    className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none text-sm font-medium"
-                  >
-                    {nigerianStates.map(state => (
-                      <option key={state} value={state}>{state}</option>
-                    ))}
-                  </select>
-                  <input
-                    type="text"
-                    value={streetInput}
-                    onChange={(e) => setStreetInput(e.target.value)}
-                    placeholder="Street Address (e.g 123 Main St)"
-                    className="w-full px-3 py-2.5 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg outline-none text-sm font-medium focus:border-green-500"
-                  />
-                </div>
-              )}
-
-              <button
-                onClick={handleMissingInfoSubmit}
-                disabled={isProcessing}
-                className="w-full py-3.5 mt-2 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-base shadow-lg hover:opacity-90 transition-all flex items-center justify-center gap-2"
-              >
-                {isProcessing ? <Loader2 className="w-5 h-5 animate-spin" /> : 'Confirm & Proceed to Payment'}
-              </button>
             </div>
           ) : (
             <button
