@@ -7,10 +7,11 @@ import { addProduct } from '../../lib/db';
 import { uploadImageToCloudinary } from '../../lib/cloudinaryClient';
 import { compressImage } from '../../utils/imageCompression';
 import {
-    X, Plus, Trash2, ImagePlus, Loader2, ArrowLeft, Briefcase, Clock, FileEdit, CheckCircle2
+    X, Plus, Trash2, ImagePlus, Loader2, ArrowLeft, Briefcase, Clock, FileEdit, CheckCircle2, ChevronRight
 } from 'lucide-react';
 import Image from 'next/image';
 import CategorySelectorModal from './modals/CategorySelectorModal';
+import { ModernToggle, FloatingLabelInput } from '../ui/ComposerInputs';
 
 interface AddServiceComposerProps {
     isOpen: boolean;
@@ -35,6 +36,10 @@ export default function AddServiceComposer({ isOpen, onClose, onBack, storeId, c
     const [platform, setPlatform] = useState<'Instagram' | 'TikTok' | 'YouTube' | 'Twitter' | 'Cross-Platform'>('Instagram');
     const [deliveryTimeDays, setDeliveryTimeDays] = useState('7');
     const [revisionsAllowed, setRevisionsAllowed] = useState('1');
+
+    // Promo Logic
+    const [isPromo, setIsPromo] = useState(false);
+    const [promoPrice, setPromoPrice] = useState('');
 
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -63,6 +68,8 @@ export default function AddServiceComposer({ isOpen, onClose, onBack, storeId, c
         setPlatform('Instagram');
         setDeliveryTimeDays('7');
         setRevisionsAllowed('1');
+        setIsPromo(false);
+        setPromoPrice('');
         setImageFile(null);
         setImagePreview(null);
         setIsUploading(false);
@@ -89,7 +96,9 @@ export default function AddServiceComposer({ isOpen, onClose, onBack, storeId, c
                 storeId,
                 name,
                 description,
-                price: Number(price),
+                price: isPromo ? Number(promoPrice) : Number(price),
+                originalPrice: isPromo ? Number(price) : undefined,
+                onPromo: isPromo,
                 images: [imageUrl],
                 views: 0,
                 createdAt: { toMillis: () => Date.now() } as any,
@@ -172,30 +181,59 @@ export default function AddServiceComposer({ isOpen, onClose, onBack, storeId, c
 
                         {/* Basic Info */}
                         <div className="space-y-4">
-                            <div>
-                                <label className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2 block">Service Title</label>
-                                <input
-                                    type="text"
-                                    placeholder="e.g. 15s TikTok Shoutout"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2 block">Price (₦)</label>
-                                <input
-                                    type="number"
-                                    placeholder="e.g. 150000"
-                                    value={price}
-                                    onChange={(e) => setPrice(e.target.value)}
-                                    className="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-                                />
-                            </div>
-                            <button onClick={() => setCategorySelectorOpen(true)} className="w-full text-left p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
-                                <span className="block text-xs text-slate-500 font-bold uppercase tracking-wider mb-1">Category</span>
-                                <span className={`text-base font-medium ${categoryId ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}>{categoryName}</span>
+                            <FloatingLabelInput
+                                label="Service Title"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="e.g. 15s TikTok Shoutout"
+                            />
+
+                            <FloatingLabelInput
+                                label="Price (₦)"
+                                type="number"
+                                value={price}
+                                onChange={(e) => setPrice(e.target.value)}
+                                placeholder="e.g. 150000"
+                            />
+
+                            <button onClick={() => setCategorySelectorOpen(true)} className="w-full text-left p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-blue-500 transition-colors group">
+                                <span className="block text-xs text-slate-500 dark:text-slate-400 mb-1">Category</span>
+                                <div className="flex justify-between items-center">
+                                    <span className={`text-base font-medium ${categoryId ? 'text-slate-900 dark:text-slate-100' : 'text-slate-400'}`}>{categoryName}</span>
+                                    <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-blue-500 transition-colors" />
+                                </div>
                             </button>
+
+                            <div className="space-y-4 pt-2 border-t border-slate-100 dark:border-slate-800">
+                                <ModernToggle
+                                    label="On Promotion"
+                                    description="Enable a discount badge for this service"
+                                    checked={isPromo}
+                                    onChange={setIsPromo}
+                                />
+
+                                <AnimatePresence>
+                                    {isPromo && (
+                                        <motion.div
+                                            initial={{ opacity: 0, height: 0 }}
+                                            animate={{ opacity: 1, height: 'auto' }}
+                                            exit={{ opacity: 0, height: 0 }}
+                                            className="overflow-hidden"
+                                        >
+                                            <div className="pt-2">
+                                                <FloatingLabelInput
+                                                    label="Promo Price (₦)"
+                                                    type="number"
+                                                    value={promoPrice}
+                                                    onChange={(e) => setPromoPrice(e.target.value)}
+                                                    placeholder="e.g. 120000"
+                                                />
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+
                             <div>
                                 <label className="text-xs text-slate-500 font-bold uppercase tracking-wider mb-2 block">Description</label>
                                 <textarea

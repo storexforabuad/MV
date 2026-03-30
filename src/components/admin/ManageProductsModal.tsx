@@ -10,7 +10,7 @@ import { formatPrice } from '../../utils/price';
 import EditProductPanel from './EditProductPanel';
 import ConfirmationDialog from '../common/ConfirmationDialog';
 import { useDynamicMenuPosition } from '@/hooks/useDynamicMenuPosition';
-import { isGeneralProduct } from '../../utils/productHelpers';
+import { isGeneralProduct, isMediaInfluencerProduct, isBeautyProduct, isArtProduct, isVehicleProduct, isFoodBeverageProduct } from '../../utils/productHelpers';
 import { useInView } from 'react-intersection-observer';
 import { addProduct } from '../../lib/db';
 import toast from 'react-hot-toast';
@@ -87,13 +87,15 @@ const ProductRow = React.memo(({
           )}
         </div>
 
-        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-500 dark:text-zinc-400">
+        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500 dark:text-zinc-400">
           <div>
             {isGeneralProduct(product) && product.soldOut ?
               <span className="px-2 py-0.5 text-xs font-medium text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-400 rounded-full">Sold Out</span> :
               isGeneralProduct(product) && product.limitedStock ?
                 <span className="px-2 py-0.5 text-xs font-medium text-yellow-800 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400 rounded-full">Limited</span> :
-                <span className="px-2 py-0.5 text-xs font-medium text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400 rounded-full">In Stock</span>
+                !isMediaInfluencerProduct(product) && !isArtProduct(product) && !isVehicleProduct(product) && (
+                  <span className="px-2 py-0.5 text-xs font-medium text-green-700 bg-green-100 dark:bg-green-900/30 dark:text-green-400 rounded-full">In Stock</span>
+                )
             }
             {product.productType === 'fashion' && (
               <div className="flex items-center gap-2 mt-1">
@@ -116,16 +118,51 @@ const ProductRow = React.memo(({
                 {product.soldOut && <span className="px-2 py-0.5 text-xs font-medium text-red-700 bg-red-100 dark:bg-red-900/30 dark:text-red-400 rounded-full">Sold Out</span>}
               </div>
             )}
+
+            {isMediaInfluencerProduct(product) && (
+              <div className="flex flex-wrap items-center gap-2 mt-1">
+                <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 dark:bg-indigo-900/30 dark:text-indigo-300 rounded-md border border-indigo-100 dark:border-indigo-800/50">
+                  {product.platform}
+                </span>
+                {product.subtype === 'service' && product.deliveryTimeDays !== undefined && (
+                  <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-50 dark:bg-blue-900/30 dark:text-blue-300 rounded-md border border-blue-100 dark:border-blue-800/50">
+                    {product.deliveryTimeDays} Days Delivery
+                  </span>
+                )}
+                {product.subtype === 'booking-fee' && (
+                  <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-300 rounded-md border border-amber-100 dark:border-amber-800/50">
+                    Verification Fee
+                  </span>
+                )}
+              </div>
+            )}
+
+            {isBeautyProduct(product) && (
+              <div className="flex items-center gap-2 mt-1">
+                <span className="px-2 py-0.5 text-xs font-medium text-purple-700 bg-purple-50 dark:bg-purple-900/30 dark:text-purple-300 rounded-full">
+                  {product.subtype.charAt(0).toUpperCase() + product.subtype.slice(1)}
+                </span>
+                {product.limitedStock && <span className="px-2 py-0.5 text-xs font-medium text-yellow-800 bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-400 rounded-full">Limited</span>}
+              </div>
+            )}
+
+            {isArtProduct(product) && (
+              <div className="flex items-center gap-2 mt-1">
+                <span className="px-2 py-0.5 text-xs font-medium text-amber-700 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-300 rounded-full">
+                  {product.artDetails.medium}
+                </span>
+                {product.artDetails.dimensions && (
+                  <span className="text-xs text-gray-500 dark:text-zinc-400">
+                    {product.artDetails.dimensions}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-1">
             <EyeIcon className="w-4 h-4" />
             <span>{product.views || 0}</span>
-          </div>
-
-          <div className="flex items-center gap-1">
-            <Percent className="w-4 h-4" />
-            <span>{product.commission || 0}%</span>
           </div>
 
           {product.isDropshipped && (
@@ -135,6 +172,7 @@ const ProductRow = React.memo(({
           )}
         </div>
       </div>
+
       {!isSelectMode && !product.isDropshipped && (
         <Menu as="div" className="relative flex-shrink-0">
           <Menu.Button

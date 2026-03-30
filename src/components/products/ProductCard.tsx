@@ -22,7 +22,8 @@ import {
   isElectronicsProduct,
   isSolarProduct,
   isBeautyProduct,
-  isArtProduct
+  isArtProduct,
+  isMediaInfluencerProduct
 } from '../../utils/productHelpers';
 
 
@@ -820,6 +821,37 @@ export default function ProductCard({
                     return null;
                 }
               })()}
+            </div>
+          )}
+
+          {/* Media Influencer Platform Badge (Top Right) */}
+          {!isSoldOut && isMediaInfluencerProduct(product) && (
+            <div className="absolute top-[14px] right-[14px] z-10">
+              <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-indigo-600 dark:text-indigo-400 shadow-sm font-bold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2.5 py-1 uppercase rounded-full">
+                  📱 {product.platform}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Media Influencer Overlays on Bottom Left */}
+          {!isSoldOut && isMediaInfluencerProduct(product) && (
+            <div className="absolute bottom-[14px] left-[14px] z-10 flex flex-col items-start gap-1.5 max-w-[calc(100%-80px)]">
+              {product.subtype === 'service' && product.deliveryTimeDays !== undefined && (
+                <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                  <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-indigo-600 dark:text-indigo-400 shadow-sm font-bold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2.5 py-1 uppercase rounded-lg">
+                    ⏱️ {product.deliveryTimeDays} Days Delivery
+                  </span>
+                </div>
+              )}
+              {product.subtype === 'service' && product.revisionsAllowed !== undefined && (
+                <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                  <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-indigo-600 dark:text-indigo-400 shadow-sm font-bold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2.5 py-1 uppercase rounded-lg">
+                    🔄 {product.revisionsAllowed} Revisions
+                  </span>
+                </div>
+              )}
             </div>
           )}
 

@@ -2,7 +2,17 @@
 import React, { useState, useEffect, Fragment, useMemo, ChangeEvent } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon, ChevronRightIcon, TrashIcon } from '@heroicons/react/24/solid';
-import { Product, FashionProduct, ElectronicsProduct } from '../../types/product';
+import {
+  Product,
+  FashionProduct,
+  ElectronicsProduct,
+  ArtProduct,
+  BeautyProduct,
+  MediaInfluencerProduct,
+  VehicleProduct,
+  SolarProduct,
+  FoodBeverageProduct
+} from '../../types/product';
 import { motion, AnimatePresence } from 'framer-motion';
 import CategorySelectorModal from './modals/CategorySelectorModal';
 import ModernSwitch from '../common/ModernSwitch';
@@ -29,13 +39,31 @@ interface ProductFormState extends Omit<Product, 'price' | 'originalPrice'> {
   availableSizes?: string[];
   sizeOption?: 'baby-clothes' | 'kids-shoes' | 'adult-shoes';
 
-  // Electronics
+  // Electronics & Solar
   brand?: string;
   condition?: ElectronicsProduct['condition'];
   storage?: string;
   ram?: string;
   warranty?: boolean;
   warrantyDuration?: string;
+
+  // Media Influencer
+  platform?: MediaInfluencerProduct['platform'];
+  deliveryTimeDays?: number;
+  revisionsAllowed?: number;
+  subtype?: string; // Used by Media, Beauty, Food, Solar
+
+  // Beauty
+  shades?: BeautyProduct['shades'];
+
+  // Art
+  artDetails?: ArtProduct['artDetails'];
+
+  // Vehicle
+  vehicleDetails?: VehicleProduct['vehicleDetails'];
+
+  // Food
+  preparationTime?: number;
 }
 
 const StyledInput: React.FC<{ id: string, label: string, value: string | number, onChange: (e: ChangeEvent<HTMLInputElement>) => void, type?: string, placeholder?: string, disabled?: boolean }> = ({ id, label, value, onChange, type = 'text', placeholder = '', disabled = false }) => (
@@ -102,7 +130,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
     if (!product || !formState || isSaving) return;
 
     const { basePrice, promoPrice, onPromo, ...restOfState } = formState;
-    const payload: Partial<Product> = {
+    const payload: any = {
       ...restOfState,
       productType: formState.productType || 'general',
       onPromo: onPromo,
@@ -129,28 +157,50 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
       payload.originalPrice = undefined;
     }
 
-    // Handle Electronics
-    if (formState.productType === 'electronics') {
+    // Handle Specialized Types
+    if (formState.productType === 'electronics' || formState.productType === 'solar') {
       (payload as any).brand = formState.brand;
+      (payload as any).subtype = formState.subtype;
       (payload as any).condition = formState.condition;
       (payload as any).storage = formState.storage;
       (payload as any).ram = formState.ram;
       (payload as any).warranty = formState.warranty;
-      if (formState.warranty) {
-        (payload as any).warrantyDuration = formState.warrantyDuration;
-      } else {
-        (payload as any).warrantyDuration = null; // Clear if turned off
-      }
+      (payload as any).warrantyDuration = formState.warranty ? formState.warrantyDuration : null;
     }
 
-    // Ensure sizes are synced
+    if (formState.productType === 'media-influencer') {
+      (payload as any).platform = formState.platform;
+      (payload as any).deliveryTimeDays = formState.deliveryTimeDays;
+      (payload as any).revisionsAllowed = formState.revisionsAllowed;
+      (payload as any).subtype = formState.subtype;
+    }
+
+    if (formState.productType === 'beauty') {
+      (payload as any).brand = formState.brand;
+      (payload as any).subtype = formState.subtype;
+      (payload as any).shades = formState.shades;
+    }
+
+    if (formState.productType === 'art') {
+      (payload as any).artDetails = formState.artDetails;
+    }
+
+    if (formState.productType === 'vehicle') {
+      (payload as any).vehicleDetails = formState.vehicleDetails;
+    }
+
+    if (formState.productType === 'food') {
+      (payload as any).subtype = formState.subtype;
+      (payload as any).preparationTime = formState.preparationTime;
+    }
+
+    // Ensure sizes are synced for Fashion
     if (formState.productType === 'fashion') {
       (payload as any).sizes = formState.sizes;
       (payload as any).soldOutSizes = formState.soldOutSizes;
     } else {
       (payload as any).availableSizes = formState.availableSizes;
       (payload as any).sizeOption = formState.sizeOption;
-      // Also support soldOutSizes for general products if they have sizeOption
       if (formState.sizeOption) {
         (payload as any).soldOutSizes = formState.soldOutSizes;
       }
@@ -428,68 +478,215 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                           </div>
                         )}
 
-                        {formState.productType === 'electronics' && (
+                        {(formState.productType === 'electronics' || formState.productType === 'solar' || formState.productType === 'beauty') && (
                           <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
-                            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Electronics Details</h3>
+                            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 capitalize">{formState.productType} Details</h3>
 
                             <StyledInput
                               id="brand"
                               label="Brand"
-                              value={(formState as any).brand ?? ''}
-                              onChange={(e) => handleInputChange('brand' as any, e.target.value)}
+                              value={formState.brand ?? ''}
+                              onChange={(e) => handleInputChange('brand', e.target.value)}
                             />
 
-                            <div>
-                              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Condition</label>
-                              <select
-                                value={(formState as any).condition ?? 'brand-new'}
-                                onChange={(e) => handleInputChange('condition' as any, e.target.value)}
-                                className="w-full p-3 bg-gray-100 dark:bg-gray-800 rounded-lg border-transparent text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
-                              >
-                                <option value="brand-new">Brand New</option>
-                                <option value="open-box">Open Box</option>
-                                <option value="used-good">Used (Good)</option>
-                                <option value="used-fair">Used (Fair)</option>
-                                <option value="refurbished">Refurbished</option>
-                              </select>
-                            </div>
+                            {(formState.productType === 'beauty' || formState.productType === 'solar') && (
+                              <StyledInput
+                                id="subtype"
+                                label="Subtype (e.g. Skin Care, Panels)"
+                                value={formState.subtype ?? ''}
+                                onChange={(e) => handleInputChange('subtype', e.target.value)}
+                              />
+                            )}
 
-                            <div className="grid grid-cols-2 gap-4">
-                              <StyledInput
-                                id="storage"
-                                label="Storage (e.g. 128GB)"
-                                value={(formState as any).storage ?? ''}
-                                onChange={(e) => handleInputChange('storage' as any, e.target.value)}
-                              />
-                              <StyledInput
-                                id="ram"
-                                label="RAM (e.g. 8GB)"
-                                value={(formState as any).ram ?? ''}
-                                onChange={(e) => handleInputChange('ram' as any, e.target.value)}
-                              />
-                            </div>
+                            {formState.productType === 'electronics' && (
+                              <>
+                                <div>
+                                  <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Condition</label>
+                                  <select
+                                    value={formState.condition ?? 'brand-new'}
+                                    onChange={(e) => handleInputChange('condition', e.target.value)}
+                                    className="w-full p-3 bg-gray-100 dark:bg-gray-800 rounded-lg border-transparent text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
+                                  >
+                                    <option value="brand-new">Brand New</option>
+                                    <option value="open-box">Open Box</option>
+                                    <option value="used-good">Used (Good)</option>
+                                    <option value="used-fair">Used (Fair)</option>
+                                    <option value="refurbished">Refurbished</option>
+                                  </select>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-4">
+                                  <StyledInput
+                                    id="storage"
+                                    label="Storage"
+                                    value={formState.storage ?? ''}
+                                    onChange={(e) => handleInputChange('storage', e.target.value)}
+                                  />
+                                  <StyledInput
+                                    id="ram"
+                                    label="RAM"
+                                    value={formState.ram ?? ''}
+                                    onChange={(e) => handleInputChange('ram', e.target.value)}
+                                  />
+                                </div>
+                              </>
+                            )}
 
                             <div className="space-y-3 pt-2">
                               <ModernSwitch
                                 label="Includes Warranty"
-                                checked={(formState as any).warranty || false}
-                                onChange={(checked) => handleInputChange('warranty' as any, checked)}
+                                checked={formState.warranty || false}
+                                onChange={(checked) => handleInputChange('warranty', checked)}
                               />
                               <AnimatePresence>
-                                {(formState as any).warranty && (
+                                {formState.warranty && (
                                   <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
                                     <StyledInput
                                       id="warrantyDuration"
                                       label="Warranty Duration"
                                       placeholder="e.g. 6 months"
-                                      value={(formState as any).warrantyDuration ?? ''}
-                                      onChange={(e) => handleInputChange('warrantyDuration' as any, e.target.value)}
+                                      value={formState.warrantyDuration ?? ''}
+                                      onChange={(e) => handleInputChange('warrantyDuration', e.target.value)}
                                     />
                                   </motion.div>
                                 )}
                               </AnimatePresence>
                             </div>
+                          </div>
+                        )}
 
+                        {formState.productType === 'media-influencer' && (
+                          <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Media/Campaign Details</h3>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Platform</label>
+                              <select
+                                value={formState.platform ?? 'Instagram'}
+                                onChange={(e) => handleInputChange('platform', e.target.value)}
+                                className="w-full p-3 bg-gray-100 dark:bg-gray-800 rounded-lg border-transparent text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
+                              >
+                                <option value="Instagram">Instagram</option>
+                                <option value="TikTok">TikTok</option>
+                                <option value="YouTube">YouTube</option>
+                                <option value="Twitter">Twitter</option>
+                                <option value="Cross-Platform">Cross-Platform</option>
+                              </select>
+                            </div>
+
+                            <StyledInput
+                              id="deliveryDays"
+                              label="Delivery Time (Days)"
+                              type="number"
+                              value={formState.deliveryTimeDays ?? ''}
+                              onChange={(e) => handleInputChange('deliveryTimeDays', parseInt(e.target.value))}
+                            />
+
+                            <StyledInput
+                              id="revisions"
+                              label="Max Revisions"
+                              type="number"
+                              value={formState.revisionsAllowed ?? ''}
+                              onChange={(e) => handleInputChange('revisionsAllowed', parseInt(e.target.value))}
+                            />
+                          </div>
+                        )}
+
+                        {formState.productType === 'art' && (
+                          <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Artwork Specifications</h3>
+
+                            <StyledInput
+                              id="art-medium"
+                              label="Medium"
+                              value={formState.artDetails?.medium ?? ''}
+                              onChange={(e) => handleInputChange('artDetails', { ...formState.artDetails, medium: e.target.value })}
+                            />
+
+                            <StyledInput
+                              id="art-dimensions"
+                              label="Dimensions"
+                              value={formState.artDetails?.dimensions ?? ''}
+                              onChange={(e) => handleInputChange('artDetails', { ...formState.artDetails, dimensions: e.target.value })}
+                            />
+
+                            <div className="flex gap-4">
+                              <ModernSwitch
+                                label="Is Framed"
+                                checked={formState.artDetails?.isFramed || false}
+                                onChange={(checked) => handleInputChange('artDetails', { ...formState.artDetails, isFramed: checked })}
+                              />
+                              <ModernSwitch
+                                label="Is Signed"
+                                checked={formState.artDetails?.isSigned || false}
+                                onChange={(checked) => handleInputChange('artDetails', { ...formState.artDetails, isSigned: checked })}
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {formState.productType === 'vehicle' && formState.vehicleDetails && (
+                          <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Vehicle Specification</h3>
+                            <div className="grid grid-cols-2 gap-4">
+                              <StyledInput
+                                id="vehicle-make"
+                                label="Make"
+                                value={formState.vehicleDetails.make}
+                                onChange={(e) => handleInputChange('vehicleDetails', { ...formState.vehicleDetails, make: e.target.value })}
+                              />
+                              <StyledInput
+                                id="vehicle-model"
+                                label="Model"
+                                value={formState.vehicleDetails.model}
+                                onChange={(e) => handleInputChange('vehicleDetails', { ...formState.vehicleDetails, model: e.target.value })}
+                              />
+                              <StyledInput
+                                id="vehicle-year"
+                                label="Year"
+                                value={formState.vehicleDetails.year}
+                                onChange={(e) => handleInputChange('vehicleDetails', { ...formState.vehicleDetails, year: e.target.value })}
+                              />
+                              <div>
+                                <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Condition</label>
+                                <select
+                                  value={formState.vehicleDetails.condition}
+                                  onChange={(e) => handleInputChange('vehicleDetails', { ...formState.vehicleDetails, condition: e.target.value })}
+                                  className="w-full p-3 bg-gray-100 dark:bg-gray-800 rounded-lg border-transparent text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
+                                >
+                                  <option value="brand-new">Brand New</option>
+                                  <option value="nigerian-used">Nigerian Used</option>
+                                  <option value="foreign-used">Foreign Used (Tokunbo)</option>
+                                </select>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
+                        {formState.productType === 'food' && (
+                          <div className="space-y-4 border-t border-gray-200 dark:border-gray-700 pt-4">
+                            <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">Food/Dining Details</h3>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Subtype</label>
+                                <select
+                                  value={formState.subtype ?? 'dish'}
+                                  onChange={(e) => handleInputChange('subtype', e.target.value)}
+                                  className="w-full p-3 bg-gray-100 dark:bg-gray-800 rounded-lg border-transparent text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-blue-500"
+                                >
+                                  <option value="dish">Dish</option>
+                                  <option value="drink">Drink</option>
+                                  <option value="snack">Snack</option>
+                                </select>
+                              </div>
+                              <StyledInput
+                                id="prep-time"
+                                label="Prep Time (Mins)"
+                                type="number"
+                                value={formState.preparationTime ?? ''}
+                                onChange={(e) => handleInputChange('preparationTime', parseInt(e.target.value))}
+                              />
+                            </div>
                           </div>
                         )}
 
