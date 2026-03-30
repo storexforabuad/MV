@@ -142,25 +142,25 @@ const CustomerOrdersCard = ({ order, onMarkReady, isHighlighted, storeId, onUpda
   return (
     <motion.div
       id={`order-${order.id}`}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={`bg-white dark:bg-slate-900 rounded-2xl border ${isHighlighted ? 'border-orange-500 ring-1 ring-orange-500' : 'border-slate-200 dark:border-slate-800'} overflow-hidden shadow-sm`}
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className={`bg-white dark:bg-slate-900 rounded-[2rem] border-2 ${isHighlighted ? 'border-orange-500 ring-4 ring-orange-500/10' : 'border-slate-100 dark:border-slate-800'} overflow-hidden shadow-xl shadow-slate-200/40 dark:shadow-none hover:border-slate-200 dark:hover:border-slate-700 transition-all duration-300`}
     >
-      <div className="p-5 border-b border-slate-100 dark:border-slate-800/50">
-        <div className="flex justify-between items-start mb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
-              <User className="w-5 h-5 text-slate-500" />
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 flex items-center justify-center shadow-inner">
+              <User className="w-6 h-6 text-slate-600 dark:text-slate-400" />
             </div>
             <div>
-              <h4 className="font-bold text-slate-900 dark:text-white">{customerInfo.name}</h4>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Order #{order.id.slice(-6).toUpperCase()}</p>
+              <h4 className="font-black text-lg text-slate-900 dark:text-white leading-tight">{customerInfo.name}</h4>
+              <p className="text-[10px] font-bold text-orange-500 uppercase tracking-widest mt-0.5">Order #{order.id.slice(-6).toUpperCase()}</p>
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-3">
             <a
               href={`tel:${customerInfo.phoneNumber}`}
-              className="p-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+              className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition-all hover:scale-110 active:scale-95 translate-y-[2px]"
             >
               <Phone className="w-4 h-4" />
             </a>
@@ -168,17 +168,17 @@ const CustomerOrdersCard = ({ order, onMarkReady, isHighlighted, storeId, onUpda
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50 transition-colors"
+              className="w-10 h-10 rounded-xl bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 hover:bg-green-100 dark:hover:bg-green-900/40 flex items-center justify-center transition-all hover:scale-110 active:scale-95 translate-y-[2px]"
             >
               <MessageCircle className="w-4 h-4" />
             </a>
           </div>
         </div>
 
-        <div className="space-y-2">
-          <div className="flex items-start gap-3">
+        <div className="space-y-3">
+          <div className="flex items-start gap-4 p-4 rounded-2xl bg-slate-50/50 dark:bg-slate-800/30 border border-slate-100 dark:border-white/5">
             <MapPin className="w-4 h-4 mt-0.5 text-slate-400 flex-shrink-0" />
-            <span className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+            <span className="text-[13px] font-medium text-slate-600 dark:text-slate-400 leading-relaxed italic">
               {customerInfo.deliveryAddress.street}, {customerInfo.deliveryAddress.state}
             </span>
           </div>
@@ -259,17 +259,19 @@ const CustomerOrdersCard = ({ order, onMarkReady, isHighlighted, storeId, onUpda
         </div>
       )}
 
-      <button
-        onClick={() => onMarkReady(order)}
-        disabled={order.orderStatus === 'ready'}
-        className={`w-full flex items-center justify-center gap-2 py-4 text-sm font-bold text-white transition-colors rounded-b-2xl rounded-t-none mt-2 ${order.orderStatus === 'ready'
-          ? 'bg-slate-400 cursor-not-allowed'
-          : 'bg-green-500 hover:bg-green-600 active:bg-green-700'
-          }`}
-      >
-        <CheckCircle className="w-5 h-5" />
-        <span>{order.orderStatus === 'ready' ? 'Shipped' : 'Mark as Ready'}</span>
-      </button>
+      {!isServiceOrder && (
+        <button
+          onClick={() => onMarkReady(order)}
+          disabled={order.orderStatus === 'ready'}
+          className={`w-full flex items-center justify-center gap-2 py-5 text-sm font-black uppercase tracking-widest text-white transition-all rounded-b-[2rem] rounded-t-none mt-4 ${order.orderStatus === 'ready'
+            ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'
+            : 'bg-green-500 hover:bg-green-600 active:bg-green-700 shadow-lg shadow-green-500/20'
+            }`}
+        >
+          <CheckCircle className="w-5 h-5" />
+          <span>{order.orderStatus === 'ready' ? 'Ready for Delivery' : 'Mark as Ready'}</span>
+        </button>
+      )}
     </motion.div>
   );
 };

@@ -3,6 +3,7 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Search, ShoppingBag, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 import Image from 'next/image';
 import { useModalBackNavigation } from '@/hooks/useModalBackNavigation';
 import { Product } from '@/types/product';
@@ -107,44 +108,52 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
                                 <div className="space-y-4">
                                     <p className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-zinc-500 mb-6">Found {filteredProducts.length} items</p>
                                     {filteredProducts.map((product) => (
-                                        <motion.div
+                                        <Link
                                             key={product.id}
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            onClick={() => onProductClick(product)}
-                                            className="group flex items-center gap-4 p-3 rounded-2xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/5 hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-500/5 transition-all cursor-pointer"
+                                            href={`#`} // Placeholder, handled by onClick or actual href if preferred
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                onProductClick(product);
+                                            }}
+                                            className="block"
                                         >
-                                            <div className="relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
-                                                <Image
-                                                    src={product.images[0]}
-                                                    alt={product.name}
-                                                    fill
-                                                    sizes="(max-width: 640px) 80px, 80px"
-                                                    className="object-cover group-hover:scale-110 transition-transform duration-500"
-                                                />
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <h4 className="font-bold text-gray-900 dark:text-white truncate group-hover:text-blue-500 transition-colors">
-                                                    {product.name}
-                                                </h4>
-                                                <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1 mb-2">
-                                                    {product.description}
-                                                </p>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-bold text-blue-600 dark:text-blue-400">
-                                                        {formatPrice(product.price)}
-                                                    </span>
-                                                    {product.originalPrice && product.originalPrice > product.price && (
-                                                        <span className="text-xs text-gray-400 line-through">
-                                                            {formatPrice(product.originalPrice)}
-                                                        </span>
-                                                    )}
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className="group flex items-center gap-4 p-3 rounded-2xl bg-white dark:bg-zinc-900 border border-gray-100 dark:border-white/5 hover:border-blue-500/50 hover:shadow-xl hover:shadow-blue-500/5 transition-all cursor-pointer"
+                                            >
+                                                <div className="relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0">
+                                                    <Image
+                                                        src={product.images[0]}
+                                                        alt={product.name}
+                                                        fill
+                                                        sizes="(max-width: 640px) 80px, 80px"
+                                                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                                    />
                                                 </div>
-                                            </div>
-                                            <div className="p-2 rounded-full bg-gray-50 dark:bg-black group-hover:bg-blue-500 group-hover:text-white transition-all">
-                                                <ArrowRight className="w-5 h-5" />
-                                            </div>
-                                        </motion.div>
+                                                <div className="flex-1 min-w-0">
+                                                    <h4 className="font-bold text-gray-900 dark:text-white truncate group-hover:text-blue-500 transition-colors">
+                                                        {product.name}
+                                                    </h4>
+                                                    <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-1 mb-2">
+                                                        {product.description}
+                                                    </p>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="font-bold text-blue-600 dark:text-blue-400">
+                                                            {formatPrice(product.price)}
+                                                        </span>
+                                                        {product.originalPrice && product.originalPrice > product.price && (
+                                                            <span className="text-xs text-gray-400 line-through">
+                                                                {formatPrice(product.originalPrice)}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="p-2 rounded-full bg-gray-50 dark:bg-black group-hover:bg-blue-500 group-hover:text-white transition-all">
+                                                    <ArrowRight className="w-5 h-5" />
+                                                </div>
+                                            </motion.div>
+                                        </Link>
                                     ))}
                                 </div>
                             ) : (

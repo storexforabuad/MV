@@ -263,6 +263,16 @@ const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCa
     glowClass: 'dark:shadow-teal-500/30 shadow-teal-500/50',
     cardType: 'action',
   },
+  {
+    label: 'Customers',
+    valueKey: 'totalContacts',
+    icon: Users,
+    gradient: 'bg-gradient-to-br from-indigo-500 via-blue-600 to-sky-700',
+    text: 'text-white',
+    component: null,
+    glowClass: 'dark:shadow-indigo-500/30 shadow-indigo-500/50',
+    cardType: 'metric',
+  },
 ];
 
 const formatCurrencyForCard = (amount: number) => {
@@ -500,8 +510,14 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const ordersIndex = cardData.findIndex(card => card.label === 'Orders');
 
   // Filter to show only specific cards
-  const allowedCards = ['Launch', 'Orders', 'Share', 'Settings', 'Views', 'Manage Categories', 'Manage Products', 'Subscription', 'Circles'];
-  const cardsToRender = cardData.filter(card => allowedCards.includes(card.label));
+  const allowedCards = ['Launch', 'Orders', 'Share', 'Settings', 'Views', 'Manage Categories', 'Manage Products', 'Subscription', 'Circles', 'Revenue', 'Deliveries', 'Customers'];
+  const cardsToRender = cardData.filter(card => {
+    if (allowedCards.includes(card.label)) {
+      if (card.label === 'Subscription' && props.storeType === 'media-influencer') return false;
+      return true;
+    }
+    return false;
+  });
 
   const previousModalState = useRef(false);
   const onRefreshRef = useRef(onRefresh);
@@ -589,6 +605,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     }
     else if (label === 'Settings') setIsAccountModalOpen(true);
     else if (label === 'Circles') setIsCirclesModalOpen(true);
+    else if (label === 'Customers') setIsCustomersModalOpen(true);
     else setOpenModal(idx);
 
     if (props.setIsModalOpen && label !== 'Orders' && label !== 'Manage Products' && label !== 'Ambassador' && label !== 'Manage Categories') props.setIsModalOpen(true);

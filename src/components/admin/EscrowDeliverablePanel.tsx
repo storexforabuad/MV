@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, CheckCircle, Clock, Unlock, Video, Image, FileText, ExternalLink, Loader2, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
-import { uploadEscrowDeliverable, releaseEscrow } from '@/app/actions/orderActions';
+import { uploadEscrowDeliverable, releaseEscrow, updateOrderStatus, getOrderById } from '@/app/actions/orderActions';
 
 interface EscrowDeliverablePanelProps {
     orderId: string;
@@ -78,13 +78,24 @@ export default function EscrowDeliverablePanel({
                 setUploadProgress(80);
             }
 
+            // First, trigger "Mark as Ready" logic for revenue recognition if it hasn't been done
+            try {
+                const orderData = await getOrderById(storeId, orderId);
+                if (orderData && orderData.orderStatus !== 'ready' && orderData.orderStatus !== 'shipped' && orderData.orderStatus !== 'pending-review') {
+                    const productIds = orderData.products.map((p: any) => p.id);
+                    await updateOrderStatus(storeId, orderId, productIds);
+                }
+            } catch (err) {
+                console.error("Failed to auto-mark as ready during deliverable submission", err);
+            }
+
             const result = await uploadEscrowDeliverable(storeId, orderId, finalUrl, influencerNote);
 
             if (result.success) {
                 setDeliverableUrl(finalUrl);
                 setUploaded(true);
                 setUploadProgress(100);
-                toast.success('Deliverable submitted! Awaiting brand approval.');
+                toast.success('Deliverable submitted! Order updated.');
                 onUpdate?.();
             } else {
                 toast.error(result.error || 'Upload failed');
@@ -228,12 +239,12 @@ export default function EscrowDeliverablePanel({
                     <button
                         onClick={handleSubmitDeliverable}
                         disabled={isUploading}
-                        className="w-full py-3 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 transition-all active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
+                        className="w-full py-4 rounded-[1.25rem] bg-gradient-to-r from-blue-600 to-indigo-700 text-white font-black text-sm uppercase tracking-widest hover:from-blue-700 hover:to-indigo-800 transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
                     >
                         {isUploading ? (
-                            <><Loader2 size={16} className="animate-spin" /> Uploading...</>
+                            <><Loader2 size={18} className="animate-spin" /> Uploading...</>
                         ) : (
-                            <><Upload size={16} /> Submit Deliverable</>
+                            <><Upload size={18} /> Submit Deliverable</>
                         )}
                     </button>
                 </div>
