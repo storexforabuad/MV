@@ -1,13 +1,14 @@
 'use client';
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Briefcase, Shirt, Car, Package, ArrowLeft } from 'lucide-react';
+import { X, Briefcase, Shirt, Car, Package, ArrowLeft, Sparkles } from 'lucide-react';
 import dynamic from 'next/dynamic';
 
 const AddFashionComposer = dynamic(() => import('./AddFashionComposer'), { ssr: false });
 const AddVehicleComposer = dynamic(() => import('./AddVehicleComposer'), { ssr: false });
 const AddProductComposer = dynamic(() => import('./AddProductComposer'), { ssr: false });
 const AddServiceComposer = dynamic(() => import('./AddServiceComposer'), { ssr: false });
+const AddBeautyComposer = dynamic(() => import('./AddBeautyComposer'), { ssr: false });
 
 interface AddMediaComposerProps {
     isOpen: boolean;
@@ -20,7 +21,7 @@ interface AddMediaComposerProps {
     instagramHandle?: string;
 }
 
-type ComposerRoute = 'hub' | 'service' | 'fashion' | 'vehicle' | 'general';
+type ComposerRoute = 'hub' | 'service' | 'fashion' | 'vehicle' | 'general' | 'beauty';
 
 export default function AddMediaComposer(props: AddMediaComposerProps) {
     const [route, setRoute] = useState<ComposerRoute>('hub');
@@ -43,6 +44,7 @@ export default function AddMediaComposer(props: AddMediaComposerProps) {
     };
 
     if (route === 'service') return <AddServiceComposer {...sharedProps} onBack={() => setRoute('hub')} storeName={props.storeName} instagramHandle={props.instagramHandle} />;
+    if (route === 'beauty') return <AddBeautyComposer {...sharedProps} storeName={props.storeName} instagramHandle={props.instagramHandle} />;
     if (route === 'fashion') return <AddFashionComposer {...sharedProps} storeName={props.storeName} instagramHandle={props.instagramHandle} />;
     if (route === 'vehicle') return <AddVehicleComposer {...sharedProps} />;
     if (route === 'general') return <AddProductComposer {...sharedProps} />;
@@ -80,6 +82,16 @@ export default function AddMediaComposer(props: AddMediaComposerProps) {
                             <div>
                                 <h3 className="font-semibold text-slate-900 dark:text-white text-base">PR & Collab Services</h3>
                                 <p className="text-xs text-slate-500 mt-0.5">Brand deals, shoutouts, UGC, Escrow protected</p>
+                            </div>
+                        </button>
+
+                        <button onClick={() => setRoute('beauty')} className="w-full flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-br from-purple-50 to-fuchsia-50 dark:from-purple-900/20 dark:to-fuchsia-900/20 border border-purple-100 dark:border-purple-800 hover:shadow-md transition-all text-left group">
+                            <div className="p-3 bg-white dark:bg-slate-800 rounded-xl shadow-sm text-purple-600 dark:text-purple-400 group-hover:scale-110 transition-transform">
+                                <Sparkles className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-slate-900 dark:text-white text-base">Beauty & Candles</h3>
+                                <p className="text-xs text-slate-500 mt-0.5">Makeup, Skincare, Haircare, and Home Fragrance</p>
                             </div>
                         </button>
 

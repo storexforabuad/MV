@@ -10,9 +10,10 @@ interface LaunchGuideModalProps {
   onClose: () => void;
   storeLink: string;
   products: Product[];
+  storeType?: string;
 }
 
-export default function LaunchGuideModal({ isOpen, onClose, storeLink, products }: LaunchGuideModalProps) {
+export default function LaunchGuideModal({ isOpen, onClose, storeLink, products, storeType }: LaunchGuideModalProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [language, setLanguage] = useState<'en' | 'ha'>('en');
   const scrollRef = useRef<HTMLElement>(null);
@@ -97,7 +98,18 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
     }
   };
 
-  const slides = [
+  const mediaCopies = {
+    phase1: {
+      en: `Exciting news! 🚀 I've just launched my official booking page. Brands, artists, and businesses—you can now check my promo rates and book me directly without waiting for a DM reply. Link in my bio! 📈`,
+      ha: `Sabuwar sanarwa! 🚀 Na bude shafina na musamman don karbar aikin tallace-tallace. Kamfanoni da mawaka, yanzu za ku iya ganin farashina kuma ku biya kai tsaye ba tare da kun jira na yi reply a DM ba. Link din yana a Bio dina! 📈`,
+    },
+    phase2: {
+      en: `Hey! Thanks for reaching out. All my updated promo rates and availability are on my page. You can pick exactly what you need and book it directly here: ${tinyUrl}`,
+      ha: `Sannu! Mun gode da tuntuɓarmu. Dukkan sababbin farashina na tallace-tallace suna a shafina. Kuna iya zabar daidai abin da kuke so kuma ku biya kai tsaye a nan: ${tinyUrl}`,
+    }
+  };
+
+  const standardSlides = [
     {
       id: 'intro',
       icon: Rocket,
@@ -202,6 +214,86 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products 
       ]
     }
   ];
+
+  const influencerSlides = [
+    {
+      id: 'intro',
+      icon: Rocket,
+      iconColor: 'bg-gradient-to-br from-blue-500 to-indigo-600',
+      title: 'Influencer Monetization Playbook',
+      description: 'You already have the audience. Complete these plays to turn your DMs into an automated booking machine for promos and services.',
+      highlights: [
+        'Secure the Link in Bio',
+        'Double-Tap shortcuts',
+        'Redirect DMs instantly'
+      ],
+      actionText: 'Start Playbook',
+    },
+    {
+      id: 'phase1',
+      icon: Smartphone,
+      iconColor: 'bg-gradient-to-br from-pink-500 to-rose-500',
+      title: 'Play 1: The Link in Bio',
+      description: 'Your bio is prime real estate. Before you announce anything, make sure your store link is permanently placed on your Instagram, TikTok, and X profiles.',
+      tips: [
+        'Double-tap your main Store Link above to copy it',
+        'Paste it in your social media "Website" section',
+        'Add a pointing emoji in your bio (e.g., "Book Promos 👇")'
+      ]
+    },
+    {
+      id: 'phase2',
+      icon: Copy,
+      iconColor: 'bg-gradient-to-br from-violet-500 to-purple-600',
+      title: 'Play 2: The Double-Tap Shortcut',
+      description: 'When brands ask for specific rates, you don\'t need to type them out. Double-tap to instantly copy a direct link to any category or service.',
+      tips: [
+        'Double-tap "Categories" to send a specific section (e.g., Music Promo)',
+        'Double-tap a specific service to send them straight to checkout',
+        'This skips the negotiation phase completely'
+      ]
+    },
+    {
+      id: 'phase3',
+      icon: Megaphone,
+      iconColor: 'bg-gradient-to-br from-amber-400 to-orange-500',
+      title: 'Play 3: Go Live Announcement',
+      description: 'Time to let your audience know you are taking automated bookings. Pin this post or put it on your story.',
+      copyText: mediaCopies.phase1[language],
+      tips: [
+        'Pin the announcement to the top of your profile',
+        'Share it to WhatsApp & Snapchat stories',
+        'Ensure the "Link in Bio" is clear'
+      ]
+    },
+    {
+      id: 'phase4',
+      icon: TrendingUp,
+      iconColor: 'bg-gradient-to-br from-green-400 to-emerald-500',
+      title: 'Play 4: The "Every Post" Rule',
+      description: 'People only click what they are reminded of. Mention your store link in the caption of every single post you make.',
+      tips: [
+        'End captions with: "Link in bio for promos/shoutouts!"',
+        'Pin a comment with your store link on your videos',
+        'If posting an ad, link directly to that ad\'s category'
+      ]
+    },
+    {
+      id: 'phase5',
+      icon: List,
+      iconColor: 'bg-gradient-to-br from-sky-400 to-blue-500',
+      title: 'Play 5: The DM Redirect',
+      description: 'When someone DMs asking "How much for a story promo?", don\'t negotiate. Reply with a direct link and tell them to book there.',
+      copyText: mediaCopies.phase2[language],
+      tips: [
+        'Save this message as a "Quick Reply" on your phone',
+        'Double-tap to paste the specific service link in the DM',
+        'Only start working once you get the Order Notification'
+      ]
+    }
+  ];
+
+  const slides = storeType === 'media-influencer' ? influencerSlides : standardSlides;
 
   const slide = slides[currentSlide];
   const Icon = slide.icon;

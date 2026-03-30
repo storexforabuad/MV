@@ -7,7 +7,7 @@ import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { getProductById, incrementProductViews, getStoreMeta, getCategories } from '@/lib/db';
 
 import { useCart } from '@/lib/cartContext';
-import { Product, FashionProduct, FoodBeverageProduct, ElectronicsProduct } from '@/types/product';
+import { Product, FashionProduct, FoodBeverageProduct, ElectronicsProduct, BeautyProduct } from '@/types/product';
 import { Category } from '@/types/category';
 import { StoreMeta } from '@/types/store';
 import { calculateDiscount, formatPrice } from '@/utils/price';
@@ -23,7 +23,8 @@ import {
   ensureProductType, isFashionProduct, isGeneralProduct, isVehicleProduct, isFoodBeverageProduct,
   isLivestockProduct,
   isElectronicsProduct,
-  isSolarProduct
+  isSolarProduct,
+  isBeautyProduct
 } from '@/utils/productHelpers';
 import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
 import SizeSelector from '@/components/products/SizeSelector';
@@ -1216,6 +1217,79 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                           </div>
                         )}
                       </div>
+                    </div>
+                  );
+                })()}
+
+                {/* BEAUTY/CANDLE PRODUCT UI */}
+                {isBeautyProduct(product) && (() => {
+                  const b = product as BeautyProduct;
+                  return (
+                    <div className="mb-8 space-y-4">
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                        Technical Specifications
+                      </h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        {b.scent && (
+                          <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                            <div className="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/40 flex items-center justify-center text-rose-600 dark:text-rose-400">
+                              <Sparkles className="w-4 h-4" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Scent</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5 truncate" title={b.scent}>{b.scent}</p>
+                            </div>
+                          </div>
+                        )}
+                        {b.waxType && (
+                          <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                            <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                              <Layers className="w-4 h-4" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Wax Base</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5 capitalize">{b.waxType}</p>
+                            </div>
+                          </div>
+                        )}
+                        {b.burnTime && (
+                          <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                            <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                              <Clock className="w-4 h-4" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Burn Time</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{b.burnTime}</p>
+                            </div>
+                          </div>
+                        )}
+                        {b.volume && (
+                          <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                            <div className="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-900/40 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
+                              <Database className="w-4 h-4" />
+                            </div>
+                            <div className="flex-1">
+                              <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Volume</p>
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{b.volume}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Instructions / How to Use */}
+                      {(b.howToUse || b.instructions) && (
+                        <div className="mt-6 p-6 rounded-[2rem] bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100/50 dark:border-indigo-800/30">
+                          <div className="flex items-center gap-2 mb-3">
+                            <div className="w-8 h-8 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-700">
+                              <Info className="w-4 h-4" />
+                            </div>
+                            <h4 className="text-sm font-bold text-indigo-900 dark:text-indigo-300">How to Use</h4>
+                          </div>
+                          <p className="text-sm text-indigo-800/70 dark:text-indigo-300/70 leading-relaxed">
+                            {b.howToUse || b.instructions}
+                          </p>
+                        </div>
+                      )}
                     </div>
                   );
                 })()}

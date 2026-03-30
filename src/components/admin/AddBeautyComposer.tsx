@@ -62,7 +62,7 @@ interface BatchBeautyProduct {
     soldOut: boolean;
 
     // Beauty Specific
-    beautyType: 'makeup' | 'skincare' | 'haircare' | 'fragrance';
+    beautyType: 'skincare' | 'makeup' | 'haircare' | 'fragrance' | 'candles' | 'tools' | 'wellness';
     subType?: string;
     variants: BeautyVariant[];
     skinTypes: string[];
@@ -70,6 +70,11 @@ interface BatchBeautyProduct {
     ingredients: string;
     howToUse: string;
     benefits: string;
+
+    // Candle Specific
+    burnTime?: string;
+    scent?: string;
+    waxType?: string;
 }
 
 interface AddBeautyComposerProps {
@@ -160,6 +165,9 @@ const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, 
         ingredients: '',
         howToUse: '',
         benefits: '',
+        burnTime: '',
+        scent: '',
+        waxType: '',
     });
 
     const [isCategorySelectorOpen, setCategorySelectorOpen] = useState(false);
@@ -204,6 +212,9 @@ const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, 
             ingredients: '',
             howToUse: '',
             benefits: '',
+            burnTime: '',
+            scent: '',
+            waxType: '',
         });
         setIsUploading(false);
         setActiveVariantId(null);
@@ -221,7 +232,7 @@ const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, 
     const addVariant = () => {
         const newVariant: BeautyVariant = {
             id: Date.now().toString() + Math.random().toString(36).substring(7),
-            name: productData.beautyType === 'makeup' ? '' : 'Full Size',
+            name: productData.beautyType === 'makeup' ? '' : (productData.beautyType === 'candles' ? '250g' : 'Full Size'),
             hex: productData.beautyType === 'makeup' ? '#D9B99B' : undefined,
             images: [],
         };
@@ -372,6 +383,9 @@ const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, 
                 benefits: productData.benefits,
                 limitedStock: productData.limitedStock,
                 soldOut: productData.soldOut,
+                burnTime: productData.beautyType === 'candles' ? productData.burnTime : undefined,
+                scent: productData.beautyType === 'candles' ? productData.scent : undefined,
+                waxType: productData.beautyType === 'candles' ? productData.waxType : undefined,
             };
 
             await addProduct(storeId, product);
@@ -405,8 +419,8 @@ const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, 
 
                         <div className="space-y-3">
                             <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Beauty Category</label>
-                            <div className="grid grid-cols-2 gap-2">
-                                {['skincare', 'makeup', 'haircare', 'fragrance'].map(type => (
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                {['skincare', 'makeup', 'haircare', 'fragrance', 'candles', 'tools', 'wellness'].map(type => (
                                     <button
                                         key={type}
                                         onClick={() => handleProductChange('beautyType', type)}
@@ -419,6 +433,20 @@ const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, 
                                 ))}
                             </div>
                         </div>
+
+                        {productData.beautyType === 'candles' && (
+                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="space-y-4 pt-2 border-t border-slate-100 dark:border-slate-800">
+                                <h4 className="text-xs font-black text-indigo-600 uppercase tracking-widest flex items-center gap-2">
+                                    <Sparkles size={14} /> Candle Specifications
+                                </h4>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <FloatingLabelInput label="Scent Profile" value={productData.scent || ''} onChange={(e) => handleProductChange('scent', e.target.value)} placeholder="e.g. Lavender & Vanilla" />
+                                    <FloatingLabelInput label="Burn Time" value={productData.burnTime || ''} onChange={(e) => handleProductChange('burnTime', e.target.value)} placeholder="e.g. 45 Hours" />
+                                </div>
+                                <FloatingLabelInput label="Wax Type" value={productData.waxType || ''} onChange={(e) => handleProductChange('waxType', e.target.value)} placeholder="e.g. 100% Soy Wax" />
+                            </motion.div>
+                        )}
+
                     </motion.div>
                 );
 
@@ -431,9 +459,9 @@ const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, 
                             <div className="flex justify-between items-center">
                                 <h3 className="text-lg font-black text-slate-900 dark:text-white flex items-center gap-2">
                                     <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600">
-                                        {productData.beautyType === 'makeup' ? <Pipette size={20} /> : <Droplets size={20} />}
+                                        {productData.beautyType === 'makeup' ? <Pipette size={20} /> : (productData.beautyType === 'candles' ? <Clock size={20} /> : <Droplets size={20} />)}
                                     </div>
-                                    {productData.beautyType === 'makeup' ? 'Shades' : 'Sizes / Volumes'}
+                                    {productData.beautyType === 'makeup' ? 'Shades' : (productData.beautyType === 'candles' ? 'Weights / Burn Times' : 'Sizes / Volumes')}
                                 </h3>
                                 <button onClick={addVariant} className="p-2 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 hover:bg-indigo-100 transition-colors">
                                     <Plus size={20} />

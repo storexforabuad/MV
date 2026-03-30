@@ -501,6 +501,15 @@ export default function ProductCard({
                       </span>
                     </div>
                   )}
+                  {/* Solar Warranty */}
+                  {isSolarProduct(product) && product.warranty && (
+                    <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                      <span className="product-badge bg-indigo-600 text-white shadow-sm whitespace-nowrap text-[9px] font-black border border-white/20 px-2 py-0.5 rounded-lg uppercase tracking-wider">
+                        🛡️ {product.warrantyDuration || 'Warranty'}
+                      </span>
+                    </div>
+                  )}
+
                   {/* Condition Badge */}
                   {product.condition && (
                     <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
@@ -543,19 +552,38 @@ export default function ProductCard({
             </>
           )}
 
-          {/* Beauty Overlays on Bottom Left */}
           {!isSoldOut && isBeautyProduct(product) && (
             <div className="absolute bottom-[14px] left-[14px] z-10 flex flex-col items-start gap-1.5 max-w-[calc(100%-80px)]">
-              {/* Bottle Sizes / Volumes */}
+              {/* Candle Specifics */}
+              {product.subtype === 'candles' && (
+                <>
+                  {product.scent && (
+                    <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                      <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-bold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2.5 py-1">
+                        🕯️ {product.scent}
+                      </span>
+                    </div>
+                  )}
+                  {product.burnTime && (
+                    <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                      <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-bold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2.5 py-1">
+                        ⏱️ {product.burnTime}
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/* Bottle Sizes / Volumes (Only if not candle or if candle has size) */}
               {product.bottleSizes && product.bottleSizes.length > 0 && (
                 <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
                   <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-bold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2.5 py-1">
-                    🧴 {product.bottleSizes[0].size} {product.bottleSizes[0].label && `(${product.bottleSizes[0].label})`}
+                    {product.subtype === 'candles' ? '⚖️' : '🧴'} {product.bottleSizes[0].size} {product.bottleSizes[0].label && `(${product.bottleSizes[0].label})`}
                   </span>
                 </div>
               )}
               {/* Skin/Hair Types */}
-              {(product.skinTypes?.[0] || product.hairTypes?.[0]) && (
+              {product.subtype !== 'candles' && (product.skinTypes?.[0] || product.hairTypes?.[0]) && (
                 <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
                   <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-bold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2.5 py-1 uppercase">
                     ✨ {product.skinTypes?.[0] || product.hairTypes?.[0]}
@@ -564,6 +592,7 @@ export default function ProductCard({
               )}
             </div>
           )}
+
 
           {/* Food Overlays on Bottom Left */}
           {!isSoldOut && isFoodBeverageProduct(product) && (

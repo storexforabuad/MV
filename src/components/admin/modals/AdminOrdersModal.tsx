@@ -21,6 +21,83 @@ interface AdminOrdersModalProps {
   highlightOrderId?: string | null;
 }
 
+const MOCK_ORDERS: any[] = [
+  {
+    id: "mock-service-001",
+    customerInfo: {
+      id: "cust-1",
+      name: "Amara Okeke",
+      phoneNumber: "08012345678",
+      deliveryAddress: { street: "No. 42 Crescent Drive, Victoria Island", state: "Lagos", country: "Nigeria" }
+    },
+    products: [
+      {
+        id: "serv-high-tier",
+        name: "Premium Brand Ambassadorship",
+        price: 250000,
+        quantity: 1,
+        productType: 'media-influencer',
+        subtype: 'service',
+        brandName: "Standard Chartered Bank",
+        campaignBrief: "Launch of the new 'Digital First' banking app. Require 1 main feed video explaining the benefits, 3 stories with swipe-up links, and a link-in-bio for 2 weeks."
+      }
+    ],
+    orderDate: new Date().toISOString(),
+    orderStatus: 'processing',
+    paymentStatus: 'escrow-held'
+  },
+  {
+    id: "mock-product-002",
+    customerInfo: {
+      id: "cust-2",
+      name: "Musa Ibrahim",
+      phoneNumber: "09055544433",
+      deliveryAddress: { street: "Wunti Market Road", state: "Bauchi", country: "Nigeria" }
+    },
+    products: [
+      {
+        id: "candle-mock-1",
+        name: "Midnight Jasmine Scented Candle",
+        price: 12500,
+        quantity: 2,
+        productType: 'beauty',
+        subtype: 'candle',
+        scent: "Midnight Jasmine",
+        burnTime: "45 Hours",
+        waxType: "Natural Soy Wax"
+      }
+    ],
+    orderDate: new Date(Date.now() - 3600000 * 2).toISOString(),
+    orderStatus: 'ready',
+    paymentStatus: 'escrow-held'
+  },
+  {
+    id: "mock-solar-003",
+    customerInfo: {
+      id: "cust-3",
+      name: "Olawale Johnson",
+      phoneNumber: "07022334455",
+      deliveryAddress: { street: "Garki Area 11", state: "Abuja", country: "Nigeria" }
+    },
+    products: [
+      {
+        id: "solar-mock-1",
+        name: "5KVA Hybrid Solar Inverter System",
+        price: 850000,
+        quantity: 1,
+        productType: 'solar',
+        subtype: 'inverters',
+        powerCapacity: "5KVA / 4000W",
+        systemVoltage: "48V DC",
+        inverterType: "Pure Sine Wave"
+      }
+    ],
+    orderDate: new Date(Date.now() - 86400000).toISOString(),
+    orderStatus: 'shipped',
+    paymentStatus: 'escrow-released'
+  }
+];
+
 const OrderProductRow = ({ product }: { product: any }) => {
   return (
     <div className="flex items-center justify-between py-3">
@@ -147,7 +224,29 @@ const CustomerOrdersCard = ({ order, onMarkReady, isHighlighted, storeId, onUpda
 
       {/* Escrow Deliverable Panel — only for Media Influencer Service orders */}
       {isServiceOrder && (
-        <div className="px-4 pb-3">
+        <div className="px-5 pb-4 space-y-4">
+          {/* Display Service specifics if available */}
+          {products.map((p: any) => (p.brandName || p.campaignBrief) && (
+            <div key={p.id} className="p-4 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/50 space-y-3">
+              <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
+                <Package className="w-4 h-4" />
+                <span className="text-xs font-bold uppercase tracking-wider">Service Requirements</span>
+              </div>
+              {p.brandName && (
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-tight text-indigo-400 dark:text-indigo-500">Brand Name</p>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-white">{p.brandName}</p>
+                </div>
+              )}
+              {p.campaignBrief && (
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-tight text-indigo-400 dark:text-indigo-500">Campaign Brief</p>
+                  <p className="text-sm text-slate-700 dark:text-slate-300 bg-white/50 dark:bg-slate-800/50 p-3 rounded-lg border border-indigo-100/30 dark:border-indigo-800/20">{p.campaignBrief}</p>
+                </div>
+              )}
+            </div>
+          ))}
+
           <EscrowDeliverablePanel
             orderId={order.id}
             storeId={storeId}
@@ -196,7 +295,9 @@ export const AdminOrdersModal = ({ isOpen, onClose, orders, onOrderUpdated, stor
   const [isPending, startTransition] = useTransition();
   const [selectedOrderForReadiness, setSelectedOrderForReadiness] = useState<StoreOrder | null>(null);
 
-  const groupedOrders = groupOrdersByDay(orders);
+  // Merge real orders with mock orders for comprehensive visualization
+  const displayOrders = [...orders, ...MOCK_ORDERS];
+  const groupedOrders = groupOrdersByDay(displayOrders);
   const modalVariants = { hidden: { opacity: 0, y: '100%' }, visible: { opacity: 1, y: 0 }, exit: { opacity: 0, y: '100%' } };
 
   // Auto-scroll to highlighted order
@@ -244,9 +345,11 @@ export const AdminOrdersModal = ({ isOpen, onClose, orders, onOrderUpdated, stor
           <header className="flex-shrink-0 flex items-center justify-between w-full max-w-5xl mx-auto p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
-                All Store Orders ({orders.length})
+                All Store Orders ({displayOrders.length})
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Manage your orders</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {orders.length === 0 ? "Viewing Demo Orders" : "Manage your orders"}
+              </p>
             </div>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-400 to-amber-600 flex items-center justify-center shadow-lg">
               <ShoppingCart className="w-6 h-6 text-white" />
@@ -255,7 +358,7 @@ export const AdminOrdersModal = ({ isOpen, onClose, orders, onOrderUpdated, stor
 
           {/* --- Main Scrollable Content --- */}
           <main className="flex-grow w-full max-w-5xl mx-auto overflow-y-auto p-4 sm:p-6 scrollbar-hide">
-            {orders.length > 0 ? (
+            {displayOrders.length > 0 ? (
               <div className="space-y-6">
                 {Object.entries(groupedOrders).map(([day, dayOrders]) => (
                   <div key={day}>

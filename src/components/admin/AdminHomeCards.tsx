@@ -500,7 +500,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const ordersIndex = cardData.findIndex(card => card.label === 'Orders');
 
   // Filter to show only specific cards
-  const allowedCards = ['Launch', 'Share', 'Settings', 'Views', 'Manage Categories', 'Manage Products', 'Subscription', 'Circles'];
+  const allowedCards = ['Launch', 'Orders', 'Share', 'Settings', 'Views', 'Manage Categories', 'Manage Products', 'Subscription', 'Circles'];
   const cardsToRender = cardData.filter(card => allowedCards.includes(card.label));
 
   const previousModalState = useRef(false);
@@ -1098,6 +1098,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
           products={props.products}
           isOpen={isLaunchGuideModalOpen}
           onClose={handleCloseLaunchGuideModal}
+          storeType={props.storeType}
         />
       )}
 

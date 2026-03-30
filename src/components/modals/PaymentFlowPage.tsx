@@ -243,7 +243,8 @@ export default function PaymentFlowPage({
           storeId,
           metadata: {
             orderId: newOrder.id,
-            cart_items: cartSummary
+            cart_items: cartSummary,
+            commission_percent: itemsToOrder[0]?.commission || (itemsToOrder.some(i => i.productType === 'media-influencer' && i.subtype === 'service') ? 15 : 5)
           }
         })
       });
@@ -289,8 +290,8 @@ export default function PaymentFlowPage({
               <span className="font-medium text-gray-900 dark:text-white">{formatPrice(total)}</span>
             </div>
             <div className="flex justify-between items-center border-b border-dashed border-gray-200 dark:border-gray-700 pb-4">
-              <span className="text-gray-500 dark:text-gray-400 text-sm">Service Fee</span>
-              <span className="font-medium text-gray-900 dark:text-white">₦0.00</span>
+              <span className="text-gray-500 dark:text-gray-400 text-sm">Escrow Protection</span>
+              <span className="font-medium text-green-600 dark:text-green-400 text-xs">FREE</span>
             </div>
             <div className="flex justify-between items-center pt-2">
               <span className="text-gray-900 dark:text-white font-bold text-lg">TOTAL TO PAY</span>

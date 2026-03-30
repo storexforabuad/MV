@@ -66,6 +66,10 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const [guestEmail, setGuestEmail] = useState('');
   const [emailError, setEmailError] = useState('');
 
+  // Influencer Service specific inputs
+  const [brandName, setBrandName] = useState('');
+  const [campaignBrief, setCampaignBrief] = useState('');
+
   // Interactive color and size selection state
   const [interactiveSelectedColor, setInteractiveSelectedColor] = useState<string | undefined>(selectedColor);
   const [interactiveSelectedSize, setInteractiveSelectedSize] = useState<string | undefined>(selectedSize);
@@ -100,6 +104,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
       setSelectedSpiciness('medium');
       setSpecialInstructions('');
+      setBrandName('');
+      setCampaignBrief('');
       setUploadedEvidence(undefined);
       setShowLeaveAppConfirmation(false);
       setHasPlacedOrder(false);
@@ -187,7 +193,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   // Reset hasPlacedOrder if any order details change
   useEffect(() => {
     setHasPlacedOrder(false);
-  }, [quantity, deliveryMethod, selectedSpiciness, specialInstructions, interactiveSelectedSize, interactiveSelectedColor, product?.id]);
+  }, [quantity, deliveryMethod, selectedSpiciness, specialInstructions, brandName, campaignBrief, interactiveSelectedSize, interactiveSelectedColor, product?.id]);
 
   if (!product) return null;
 
@@ -198,8 +204,10 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const isBeauty = isBeautyProduct(product);
   const isArt = isArtProduct(product);
   const isMediaInfluencer = product.productType === 'media-influencer';
-  const summaryPageNum = (isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer || isArt) ? 2 : 1;
-  const paymentPageNum = (isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer || isArt) ? 3 : 2;
+  const isServiceProduct = product.productType === 'media-influencer' && product.subtype === 'service';
+  const hasPage1 = isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer || isArt;
+  const summaryPageNum = hasPage1 ? 2 : 1;
+  const paymentPageNum = hasPage1 ? 3 : 2;
 
   const hasSizes = (p: any) => {
     return (p.sizes && p.sizes.length > 0) || (p.sizeOption && p.sizeOption.length > 0);
@@ -209,15 +217,10 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
     return p.sizes || p.sizeOption || [];
   };
 
-  const isServiceProduct = product.productType === 'media-influencer' && product.subtype === 'service';
-  const hasPaidBookingFee = orders.some(o => ['completed', 'delivered', 'pending'].includes(o.orderStatus) && o.products.some((p: any) => p.productType === 'media-influencer' && p.subtype === 'booking-fee'));
 
-  const requiresBookingFee = isServiceProduct && !hasPaidBookingFee;
-  const bookingFeeAmount = 5000; // Fixed 5k NGN minimum or fetch from store if available
-  const serviceFeeAmount = isServiceProduct ? (product.price * quantity) * 0.10 : 0; // 10% escrow fee
 
   const subtotal = product.price * quantity;
-  const total = subtotal + serviceFeeAmount + (requiresBookingFee ? bookingFeeAmount : 0);
+  const total = subtotal; // Removed legacy escrow and booking fees
 
   const handleEvidenceUploaded = (evidenceUrl: string, fileName: string) => {
     setUploadedEvidence({ url: evidenceUrl, fileName });
@@ -259,25 +262,16 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
         selectedSize: interactiveSelectedSize,
         selectedColor: interactiveSelectedColor,
         selectedSpiciness: isFoodBeverageProduct(product) ? selectedSpiciness : undefined,
-        specialInstructions: isFoodBeverageProduct(product) ? specialInstructions : undefined
+        specialInstructions: isFoodBeverageProduct(product) ? specialInstructions : undefined,
+        brandName: isServiceProduct ? brandName : undefined,
+        campaignBrief: isServiceProduct ? campaignBrief : undefined
       };
 
       if (isPaymentFlowEnabled) {
         if (!customer) throw new Error("Customer session not found");
 
         let productsToOrder = [productToOrder];
-        if (requiresBookingFee) {
-          productsToOrder.push({
-            id: 'auto-booking-fee',
-            name: '1-Time Brand Booking Fee',
-            price: bookingFeeAmount,
-            quantity: 1,
-            productType: 'media-influencer',
-            subtype: 'booking-fee',
-            images: ['/default_product_800x800.png'],
-            description: 'Mandatory verification fee to book services on this platform.',
-          } as any);
-        }
+        // Booking fee removed per request
 
         await addOrder(
           productsToOrder,
@@ -338,6 +332,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
             (interactiveSelectedSize ? `📏 *Size:* ${interactiveSelectedSize}\n` : '') +
             (isFoodBeverageProduct(product) ? `🌶️ *Spiciness:* ${SPICINESS_LEVELS.find(s => s.value === selectedSpiciness)?.label}\n` : '') +
             (isFoodBeverageProduct(product) && specialInstructions ? `📝 *Note:* ${specialInstructions}\n` : '') +
+            (isServiceProduct && brandName ? `🏢 *Brand Name:* ${brandName}\n` : '') +
+            (isServiceProduct && campaignBrief ? `📝 *Campaign Brief:* ${campaignBrief}\n` : '') +
             (isSolarProduct(product) ? (
               (product.subtype === 'solar-panels' ? `☀️ *Panel Specs:* ${product.wattage}${product.cellType ? ` (${product.cellType})` : ''}${product.efficiencyRating ? `, Efficiency: ${product.efficiencyRating}` : ''}\n` : '') +
               (product.subtype === 'inverters' ? `🔄 *Inverter Specs:* ${product.powerCapacity}${product.inverterType ? ` (${product.inverterType})` : ''}${product.systemVoltage ? `, System: ${product.systemVoltage}` : ''}\n` : '') +
@@ -1101,6 +1097,54 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                               </div>
                             </div>
 
+                            {/* Candle Specifics - If applicable */}
+                            {(b.scent || b.waxType || b.burnTime) && (
+                              <div className="grid grid-cols-2 gap-3 px-1">
+                                {b.scent && (
+                                  <div className="bg-white dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm flex flex-col gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900/40 flex items-center justify-center text-rose-600 dark:text-rose-400">
+                                      <Palette className="w-4 h-4" />
+                                    </div>
+                                    <div>
+                                      <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Scent Profile</span>
+                                      <p className="font-bold text-[13px] text-gray-900 dark:text-white truncate" title={b.scent}>{b.scent}</p>
+                                    </div>
+                                  </div>
+                                )}
+                                {b.waxType && (
+                                  <div className="bg-white dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm flex flex-col gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                      <Layers className="w-4 h-4" />
+                                    </div>
+                                    <div>
+                                      <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Wax Base</span>
+                                      <p className="font-bold text-[13px] text-gray-900 dark:text-white capitalize">{b.waxType}</p>
+                                    </div>
+                                  </div>
+                                )}
+                                {b.burnTime && (
+                                  <div className="bg-white dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm flex flex-col gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                      <Clock className="w-4 h-4" />
+                                    </div>
+                                    <div>
+                                      <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Burn Time</span>
+                                      <p className="font-bold text-[13px] text-gray-900 dark:text-white">{b.burnTime}</p>
+                                    </div>
+                                  </div>
+                                )}
+                                <div className="bg-white dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm flex flex-col gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                    <Zap className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Premium</span>
+                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white">Hand-Poured</p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
                             {/* Section: How to Use */}
                             {(b.howToUse || b.instructions) && (
                               <section className="space-y-4">
@@ -1174,7 +1218,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                         );
                       })()}
 
-                      {/* Page 1 (Media Influencer Details) */}
+                      {/* Page 1 (Media Influencer Details - Only for physical products, services go straight to summary) */}
                       {currentPage === 1 && isMediaInfluencer && (() => {
                         const m = product as any;
 
@@ -1244,7 +1288,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                               </div>
                             )}
 
-                            {/* Influencer Guidelines / Description */}
+                            {/* Guidelines / Description */}
                             <section className="space-y-4">
                               <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shadow-sm border border-indigo-200/50 dark:border-indigo-800/30">
@@ -1252,9 +1296,11 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                 </div>
                                 <h3 className="text-base font-bold text-gray-900 dark:text-white tracking-tight">Collaboration Guidelines</h3>
                               </div>
-                              <div className="p-5 rounded-3xl bg-gray-50 dark:bg-gray-800/20 border border-gray-100 dark:border-gray-700/50">
-                                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line lowercase first-letter:uppercase">
-                                  {product.description || "The influencer will provide details upon WhatsApp connection. All collaborations are protected via platform Escrow for your safety."}
+                              <div className="p-6 rounded-[2rem] bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30">
+                                <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed lowercase first-letter:uppercase whitespace-pre-line">
+                                  {product.description || (isServiceProduct
+                                    ? "Establish clear expectations for this collaboration. The influencer will review your brief and requirements once the booking is confirmed."
+                                    : "The influencer will provide details upon WhatsApp connection. All collaborations are protected via platform Escrow for your safety.")}
                                 </p>
                               </div>
                             </section>
@@ -1366,83 +1412,113 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                         );
                       })()}
 
-                      {/* Summary Page */}
+                      {/* Stage 2: Fulfillment / Requirements */}
                       {currentPage === summaryPageNum && (
                         <div className="pt-4 sm:pt-8">
-                          {/* Product Details */}
-                          <div className="flex items-center space-x-4">
-                            <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-50 dark:bg-gray-900 shadow-inner">
-                              <div className={`absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 animate-shimmer bg-[length:200%_100%] transition-opacity duration-300 ${imageLoading ? 'opacity-100' : 'opacity-0'}`} />
-                              <Image
-                                src={currentProductImage || DEFAULT_PRODUCT_IMAGE}
-                                alt={product.name}
-                                width={80}
-                                height={80}
-                                className={`h-20 w-20 object-cover relative z-10 transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
-                                onLoad={() => setImageLoading(false)}
-                                onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; setImageLoading(false); }}
-                              />
-                            </div>
-                            <div className="flex-1">
-                              <h4 className="text-base font-semibold text-gray-900 dark:text-white">{product.name}</h4>
-                              <div className="mt-1 mb-2 flex flex-wrap gap-2">
-                                {interactiveSelectedColor && (
-                                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-[11px] font-bold text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
-                                    {isFashionProduct(product) && (product as any).isTextile ? '🎨 Design: ' : '🎨 Color: '}{interactiveSelectedColor}
-                                  </span>
-                                )}
-                                {interactiveSelectedSize && (
-                                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700">
-                                    📏 {interactiveSelectedSize}
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                                {formatPrice(product.price)}
-                                {product.productType === 'livestock' && (
-                                  <span>/{(product as any).priceUnit === 'kg' ? 'kg' : 'pc'}</span>
-                                )}
-                              </p>
-                            </div>
-
-                            {/* Guest Email Collection (Phase 2) */}
-                            {!customer && isServiceProduct && isPaymentFlowEnabled && (
-                              <div className="mt-4 p-4 rounded-xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800/50">
-                                <label className="block text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-2">
-                                  Checkout as Guest
-                                </label>
-                                <input
-                                  type="email"
-                                  placeholder="Enter your email"
-                                  value={guestEmail}
-                                  onChange={(e) => {
-                                    setGuestEmail(e.target.value);
-                                    setEmailError('');
-                                  }}
-                                  className={`w-full px-4 py-3 rounded-xl bg-white dark:bg-gray-900 border ${emailError ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'} focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm font-medium`}
-                                />
-                                {emailError && (
-                                  <p className="mt-1 text-[10px] font-bold text-red-500">{emailError}</p>
-                                )}
-                                <p className="mt-2 text-[10px] text-gray-500 dark:text-gray-400 leading-tight">
-                                  We'll use this to send your service booking confirmation and escrow receipt.
-                                </p>
-                              </div>
-                            )}
-
-                            {!isServiceProduct && (
-                              <div className="flex flex-col items-center gap-1 bg-gray-50 dark:bg-gray-900 p-2 rounded-lg border border-gray-100 dark:border-gray-800">
-                                <span className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold">
-                                  {isFashionProduct(product) && (product as any).isTextile ? (quantity > 1 ? 'Yards' : 'Yard') : (product.productType === 'livestock' && (product as any).priceUnit === 'kg' ? 'Kilos' : 'Quantity')}
-                                </span>
-                                <div className="flex items-center gap-3">
-                                  <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Minus size={18} /></button>
-                                  <span className="text-lg font-bold text-gray-900 dark:text-white min-w-[1.5rem] text-center">{quantity}</span>
-                                  <button onClick={() => setQuantity(q => q + 1)} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Plus size={18} /></button>
+                          {isServiceProduct ? (
+                            /* Dedicated Collaboration Brief Screen for Services */
+                            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 rounded-[1.5rem] bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-100/50 dark:border-indigo-800/30 shadow-sm">
+                                  <PenTool className="w-6 h-6" />
+                                </div>
+                                <div>
+                                  <h3 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">Campaign Brief</h3>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">Define your collaboration requirements</p>
                                 </div>
                               </div>
-                            )}
-                          </div>
+
+                              <div className="space-y-6">
+                                <div>
+                                  <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2 ml-1">Brand / Company Name</label>
+                                  <input
+                                    type="text"
+                                    placeholder="Enter your brand name"
+                                    value={brandName}
+                                    onChange={(e) => setBrandName(e.target.value)}
+                                    className="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium transition-all"
+                                  />
+                                </div>
+                                <div>
+                                  <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2 ml-1">Campaign Objective</label>
+                                  <textarea
+                                    placeholder="Briefly describe the goals for this collaboration..."
+                                    value={campaignBrief}
+                                    onChange={(e) => setCampaignBrief(e.target.value)}
+                                    rows={5}
+                                    className="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium resize-none transition-all"
+                                  />
+                                </div>
+
+                                {/* Guest Email (Capture on Brief page for services since summary is standard) */}
+                                {!customer && isPaymentFlowEnabled && (
+                                  <div className="p-5 rounded-3xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100/50 dark:border-blue-800/30">
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-2 ml-1">Fulfillment Email</label>
+                                    <input
+                                      type="email"
+                                      placeholder="Where should we send updates?"
+                                      value={guestEmail}
+                                      onChange={(e) => setGuestEmail(e.target.value)}
+                                      className="w-full px-5 py-4 rounded-2xl bg-white dark:bg-gray-800/40 border border-blue-100/30 dark:border-blue-800/20 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm font-medium"
+                                    />
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ) : (
+                            /* Standard Summary View for Physical Products */
+                            <div className="space-y-6">
+                              <div className="flex items-center space-x-4">
+                                <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-50 dark:bg-gray-900 shadow-inner">
+                                  <div className={`absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 animate-shimmer bg-[length:200%_100%] transition-opacity duration-300 ${imageLoading ? 'opacity-100' : 'opacity-0'}`} />
+                                  <Image
+                                    src={currentProductImage || DEFAULT_PRODUCT_IMAGE}
+                                    alt={product.name}
+                                    width={80}
+                                    height={80}
+                                    className={`h-20 w-20 object-cover relative z-10 transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                                    onLoad={() => setImageLoading(false)}
+                                    onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; setImageLoading(false); }}
+                                  />
+                                </div>
+                                <div className="flex-1">
+                                  <h4 className="text-base font-semibold text-gray-900 dark:text-white">{product.name}</h4>
+                                  <div className="mt-1 mb-2 flex flex-wrap gap-2">
+                                    {interactiveSelectedColor && (
+                                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-[11px] font-bold text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
+                                        {isFashionProduct(product) && (product as any).isTextile ? '🎨 Design: ' : '🎨 Color: '}{interactiveSelectedColor}
+                                      </span>
+                                    )}
+                                    {interactiveSelectedSize && (
+                                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700">
+                                        📏 {interactiveSelectedSize}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <p className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                                    {formatPrice(product.price)}
+                                    {product.productType === 'livestock' && (
+                                      <span>/{(product as any).priceUnit === 'kg' ? 'kg' : 'pc'}</span>
+                                    )}
+                                  </p>
+                                </div>
+                              </div>
+
+
+                              {!isServiceProduct && (
+                                <div className="flex flex-col items-center gap-1 bg-gray-50 dark:bg-gray-900 p-2 rounded-lg border border-gray-100 dark:border-gray-800">
+                                  <span className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold">
+                                    {isFashionProduct(product) && (product as any).isTextile ? (quantity > 1 ? 'Yards' : 'Yard') : (product.productType === 'livestock' && (product as any).priceUnit === 'kg' ? 'Kilos' : 'Quantity')}
+                                  </span>
+                                  <div className="flex items-center gap-3">
+                                    <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Minus size={18} /></button>
+                                    <span className="text-lg font-bold text-gray-900 dark:text-white min-w-[1.5rem] text-center">{quantity}</span>
+                                    <button onClick={() => setQuantity(q => q + 1)} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Plus size={18} /></button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                          )}
 
                           {/* Variant Selection (Color/Size) */}
                           <div className="space-y-6 pt-2 border-t border-gray-100 dark:border-gray-800">
@@ -1562,8 +1638,9 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             </div>
                           )}
 
-                          {/* Delivery Method */}
-                          {!isVehicle && (
+                          {/* Collaboration Brief for Services (Moved back to Page 1) */}
+                          {/* Delivery Method (Hidden for services) */}
+                          {!isVehicle && !isServiceProduct && (
                             <div className="mt-8">
                               <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3">Delivery Method</h4>
                               <div className="grid grid-cols-2 gap-4">
@@ -1598,19 +1675,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                 <dd className="font-medium text-gray-900 dark:text-gray-200">{formatPrice(subtotal)}</dd>
                               </div>
 
-                              {isServiceProduct && (
-                                <div className="flex justify-between items-center text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/10 p-2 rounded-lg -mx-2">
-                                  <dt className="flex items-center gap-1 font-medium">Escrow Service Fee (10%) <span title="Platform secure escrow protection fee" className="inline-flex"><AlertCircle size={14} /></span></dt>
-                                  <dd className="font-bold">{formatPrice(serviceFeeAmount)}</dd>
-                                </div>
-                              )}
-
-                              {requiresBookingFee && (
-                                <div className="flex justify-between items-center text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/10 p-2 rounded-lg -mx-2">
-                                  <dt className="flex items-center gap-1 font-medium">1-Time Booking Fee <span title="Required for first-time brand bookings" className="inline-flex"><AlertCircle size={14} /></span></dt>
-                                  <dd className="font-bold">{formatPrice(bookingFeeAmount)}</dd>
-                                </div>
-                              )}
+                              {/* Fees removed for commission model */}
 
                               {deliveryMethod === 'home' && !isVehicle && !isServiceProduct && (
                                 <div className="flex justify-between">
@@ -1715,7 +1780,10 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                               'Select Size to Continue'
                             ) : (
                               isVehicle ? 'Enquire about Vehicle' :
-                                isMediaInfluencer ? (isServiceProduct ? 'Book via WhatsApp' : 'Order via WhatsApp') :
+                                isMediaInfluencer ? (
+                                  isPaymentFlowEnabled ? 'Proceed to Payment' :
+                                    (isServiceProduct ? 'Book via WhatsApp' : 'Order via WhatsApp')
+                                ) :
                                   (isPaymentFlowEnabled ? 'Proceed to Payment' : 'Order via WhatsApp')
                             )}
                           </button>

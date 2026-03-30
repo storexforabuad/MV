@@ -342,13 +342,18 @@ export interface BeautyBottleSize {
 // ==========================================
 export interface BeautyProduct extends BaseProduct {
   productType: 'beauty';
-  subtype: 'makeup' | 'skincare' | 'haircare' | 'fragrance' | 'other';
+  subtype: 'makeup' | 'skincare' | 'haircare' | 'fragrance' | 'candles' | 'other';
   brand?: string;
 
   // Variants
   shades?: BeautyShade[];
 
   bottleSizes?: BeautyBottleSize[];
+
+  // Candle Specific
+  burnTime?: string;
+  scent?: string;
+  waxType?: string;
 
   // Attributes
   skinTypes?: string[]; // Oily, Dry, Combination, Sensitive, All
@@ -368,6 +373,7 @@ export interface BeautyProduct extends BaseProduct {
   categoryId?: string;
   category?: string;
 }
+
 
 // ==========================================
 // ART PRODUCT (New)

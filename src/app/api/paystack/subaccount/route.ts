@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
             business_name: businessName,
             settlement_bank: settlementBank,
             account_number: accountNumber,
-            percentage_charge: 4.5, // Commission as requested
+            percentage_charge: 0, // We handle splitting dynamically per transaction
         };
 
         let response;

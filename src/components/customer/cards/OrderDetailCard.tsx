@@ -166,6 +166,16 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted, onR
                         <span className="font-semibold">Note:</span> {(product as any).specialInstructions}
                       </div>
                     )}
+                    {((product as any).brandName) && (
+                      <div className="mt-2 p-2 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded text-xs text-indigo-800 dark:text-indigo-200">
+                        <span className="font-semibold uppercase tracking-wider text-[10px] block mb-1">Brand Name</span> {(product as any).brandName}
+                      </div>
+                    )}
+                    {((product as any).campaignBrief) && (
+                      <div className="mt-2 p-2 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded text-xs text-indigo-800 dark:text-indigo-200">
+                        <span className="font-semibold uppercase tracking-wider text-[10px] block mb-1">Campaign Brief</span> {(product as any).campaignBrief}
+                      </div>
+                    )}
                     <p className="text-xs text-text-secondary mt-1">Qty: {product.productType === 'general' ? product.quantity : 1}</p>
                   </div>
                   <p className="font-semibold text-text-primary text-sm">{formatPrice(product.price * (product.productType === 'general' ? product.quantity : 1))}</p>

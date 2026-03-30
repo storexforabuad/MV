@@ -37,6 +37,13 @@ export async function POST(request: NextRequest) {
 
         if (subaccountCode) {
             params.subaccount = subaccountCode;
+            params.percentage_charge = 0;
+
+            // Calculate dynamic commission if provided in metadata
+            const commissionPercent = metadata?.commission_percent || 0;
+            if (commissionPercent > 0) {
+                params.transaction_charge = Math.round(amount * (commissionPercent / 100) * 100);
+            }
         }
 
         const response = await fetch('https://api.paystack.co/transaction/initialize', {

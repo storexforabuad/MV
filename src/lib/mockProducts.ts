@@ -1,4 +1,6 @@
-import { ArtProduct, BeautyProduct } from '../types/product';
+import { ArtProduct, BeautyProduct, MediaInfluencerProduct, VehicleProduct, FashionProduct, SolarProduct } from '../types/product';
+
+
 
 // Helper to create a Firestore-like timestamp for mock data
 const mockTimestamp = () => ({
@@ -616,7 +618,455 @@ export const mockBeautyProducts: BeautyProduct[] = [
             { name: 'Deep Mocha', hex: '#5A3F33', images: [] }
         ],
         benefits: 'Hydrating, long-lasting, photo-ready.',
-        howToUse: 'Apply 1-2 pumps onto the back of your hand, and blend onto face using a brush or sponge.',
+    }
+];
+
+/**
+ * Mock Solar Products
+ */
+export const mockSolarProducts: SolarProduct[] = [
+    {
+        id: 'solar-1',
+        storeId: 'mock-solar-store',
+        name: 'Canadian Solar 550W Mono',
+        brand: 'Canadian Solar',
+        condition: 'brand-new',
+        quantity: 50,
+        description: 'High-efficiency monocrystalline solar panel with half-cut cell technology.',
+        price: 85000,
+        images: ['https://images.unsplash.com/photo-1509391366360-fe5bb6583e2c?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'solar',
+        subtype: 'solar-panels',
+        wattage: '550W',
+        cellType: 'Monocrystalline',
+        efficiencyRating: '21.3%',
+        warranty: true,
+        warrantyDuration: '25 Years',
+        available: true
+    },
+    {
+        id: 'solar-2',
+        storeId: 'mock-solar-store',
+        name: 'Luminous 5kVA Hybrid Inverter',
+        brand: 'Luminous',
+        condition: 'brand-new',
+        quantity: 20,
+        description: 'Pure sine wave hybrid inverter with MPPT charge controller built-in.',
+        price: 450000,
+        images: ['https://images.unsplash.com/photo-1508514177221-188b1cf16e9d?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'solar',
+        subtype: 'inverters',
+        powerCapacity: '5kVA',
+        inverterType: 'Hybrid',
+        systemVoltage: '48V',
+        warranty: true,
+        warrantyDuration: '2 Years',
+        available: true
+    },
+    {
+        id: 'solar-3',
+        storeId: 'mock-solar-store',
+        name: 'Felicity Solar 10kWh Lithium Battery',
+        brand: 'Felicity',
+        condition: 'brand-new',
+        quantity: 15,
+        description: 'Deep cycle LiFePO4 battery for long-lasting energy storage.',
+        price: 1200000,
+        images: ['https://images.unsplash.com/photo-1620714223084-8fcacc6dfd8d?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'solar',
+        subtype: 'batteries',
+        batteryCapacity: '200Ah / 10kWh',
+        batteryChemistry: 'LiFePO4',
+        lifeCycles: '6000+',
+        warranty: true,
+        warrantyDuration: '5 Years',
+        available: true
+    }
+];
+
+/**
+ * Mock Candle Products
+ */
+export const mockCandleProducts: BeautyProduct[] = [
+    {
+        id: 'candle-1',
+        storeId: 'mock-media-store',
+        name: 'Midnight Lavender Soy Candle',
+        brand: 'Luminous Glow',
+        description: 'Soothing lavender scent mixed with subtle vanilla notes. Perfect for relaxation.',
+        price: 12000,
+        images: ['https://images.unsplash.com/photo-1605651202774-7d573fd3f12d?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'beauty',
+        subtype: 'candles',
+        categoryId: 'candles',
+        category: 'Candles & Home Fragrance',
+        scent: 'Lavender & Vanilla',
+        burnTime: '45 Hours',
+        waxType: '100% Soy Wax',
+        bottleSizes: [{ size: '250g', price: 12000 }],
         inStock: true
+    },
+    {
+        id: 'candle-2',
+        storeId: 'mock-media-store',
+        name: 'Spiced Sandalwood Decor Candle',
+        brand: 'Aura Home',
+        description: 'A warm, woody aroma in a beautiful ceramic jar that doubles as decor.',
+        price: 18500,
+        images: ['https://images.unsplash.com/photo-1596433809252-260c2745dfdd?w=800&q=80'],
+
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'beauty',
+        subtype: 'candles',
+        categoryId: 'candles',
+        category: 'Candles & Home Fragrance',
+        scent: 'Sandalwood & Amber',
+        burnTime: '60 Hours',
+        waxType: 'Beeswax Blend',
+        bottleSizes: [{ size: '400g', price: 18500 }],
+        inStock: true
+    }
+];
+
+/**
+ * Mock Media Influencer Products
+ * A diverse mix of PR services, automobiles, and luxury fashion
+ */
+export const mockMediaProducts: (MediaInfluencerProduct | VehicleProduct | FashionProduct | BeautyProduct)[] = [
+    // --- PR & COLLAB SERVICES ---
+    {
+        id: 'media-1',
+        storeId: 'mock-media-store',
+        name: 'Dedicated Instagram Reel',
+        description: 'High-quality 60s dedicated reel for your brand. Includes trend research and 1 revision.',
+        price: 250000,
+        originalPrice: 300000,
+        images: ['https://images.unsplash.com/photo-1611162617213-7d7a39e9b1d7?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'media-influencer',
+        subtype: 'service',
+        platform: 'Instagram',
+        deliveryTimeDays: 5,
+        revisionsAllowed: 1,
+        categoryId: 'pr-collabs',
+        category: 'PR & Collab Services',
+        isActive: true
+    },
+    {
+        id: 'media-2',
+        storeId: 'mock-media-store',
+        name: 'TikTok Sound Promo (Viral)',
+        description: 'I will use your brand sound in a creative lifestyle vlog. High engagement guaranteed.',
+        price: 75000,
+        images: ['https://images.unsplash.com/photo-1596524430615-b46475ddff6e?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'media-influencer',
+        subtype: 'service',
+        platform: 'TikTok',
+        deliveryTimeDays: 2,
+        revisionsAllowed: 0,
+        categoryId: 'pr-collabs',
+        category: 'PR & Collab Services',
+        isActive: true
+    },
+    {
+        id: 'media-3',
+        storeId: 'mock-media-store',
+        name: 'YouTube Integration (2 Mins)',
+        description: 'A dedicated 2-minute integration segment in my next weekly vlog.',
+        price: 400000,
+        images: ['https://images.unsplash.com/photo-1492724441997-5dc865305da7?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'media-influencer',
+        subtype: 'service',
+        platform: 'YouTube',
+        deliveryTimeDays: 7,
+        revisionsAllowed: 2,
+        categoryId: 'pr-collabs',
+        category: 'PR & Collab Services',
+        isActive: true
+    },
+    {
+        id: 'media-4',
+        storeId: 'mock-media-store',
+        name: '24hr Instagram Story Post',
+        description: '3 slides maximum with custom link integration and CTA.',
+        price: 45000,
+        images: ['https://images.unsplash.com/photo-1611262588024-d12430b98920?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'media-influencer',
+        subtype: 'service',
+        platform: 'Instagram',
+        deliveryTimeDays: 1,
+        revisionsAllowed: 0,
+        categoryId: 'pr-collabs',
+        category: 'PR & Collab Services',
+        isActive: true,
+        commission: 15
+    },
+    {
+        id: 'media-birthday',
+        storeId: 'mock-media-store',
+        name: 'Personalized Birthday Shoutout',
+        description: 'A special 30s video message wishing you or your loved one a happy birthday!',
+        price: 25000,
+        images: ['https://images.unsplash.com/photo-1513151233558-d860c5398176?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'media-influencer',
+        subtype: 'service',
+        platform: 'Cross-Platform',
+        deliveryTimeDays: 2,
+        revisionsAllowed: 0,
+        categoryId: 'pr-collabs',
+        category: 'PR & Collab Services',
+        isActive: true,
+        commission: 15
+    },
+    {
+        id: 'media-event',
+        storeId: 'mock-media-store',
+        name: 'Event Appearance (2 Hours)',
+        description: 'Physical appearance at your brand launch or private event. Includes 5 photos/stories.',
+        price: 500000,
+        images: ['https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'media-influencer',
+        subtype: 'service',
+        platform: 'Cross-Platform',
+        deliveryTimeDays: 14,
+        revisionsAllowed: 0,
+        categoryId: 'pr-collabs',
+        category: 'PR & Collab Services',
+        isActive: true,
+        commission: 15
+    },
+    {
+        id: 'media-unboxing',
+        storeId: 'mock-media-store',
+        name: 'Premium Product Unboxing',
+        description: 'A detailed unboxing video showing first impressions and product features.',
+        price: 120000,
+        images: ['https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'media-influencer',
+        subtype: 'service',
+        platform: 'Instagram',
+        deliveryTimeDays: 4,
+        revisionsAllowed: 1,
+        categoryId: 'pr-collabs',
+        category: 'PR & Collab Services',
+        isActive: true,
+        commission: 15
+    },
+
+    // --- CANDLES & HOME FRAGRANCE ---
+    ...mockCandleProducts.map(c => ({ ...c, storeId: 'mock-media-store' })) as any[],
+
+    /*
+    // --- AUTOMOBILES (Hidden for now) ---
+    {
+        id: 'media-v1',
+        storeId: 'mock-media-store',
+        name: 'Mercedes Benz GLC 300 2021',
+        description: 'Direct Tokunbo, panoramic roof, ambient lighting, low mileage.',
+        price: 45000000,
+        images: ['https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'vehicle',
+        vehicleDetails: {
+            make: 'Mercedes-Benz',
+            model: 'GLC 300',
+            year: 2021,
+            condition: 'foreign-used',
+            transmission: 'automatic',
+            fuelType: 'petrol',
+            bodyType: 'suv',
+            color: 'Obsidian Black',
+            mileage: 34000,
+            location: 'Lagos'
+        },
+        categoryId: 'automobiles',
+        category: 'Cars For Sale',
+        available: true
+    },
+    {
+        id: 'media-v2',
+        storeId: 'mock-media-store',
+        name: 'Lexus RX 350 F-Sport 2020',
+        description: 'Super clean, custom red leather interior, fully loaded.',
+        price: 38000000,
+        images: ['https://images.unsplash.com/photo-1520050206274-a1ae446cb3cc?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'vehicle',
+        vehicleDetails: {
+            make: 'Lexus',
+            model: 'RX 350',
+            year: 2020,
+            condition: 'foreign-used',
+            transmission: 'automatic',
+            fuelType: 'petrol',
+            bodyType: 'suv',
+            color: 'White Pearl',
+            mileage: 41000,
+            location: 'Abuja'
+        },
+        categoryId: 'automobiles',
+        category: 'Cars For Sale',
+        available: true
+    },
+    {
+        id: 'media-v3',
+        storeId: 'mock-media-store',
+        name: 'Toyota Camry XSE 2022',
+        description: 'Nigerian used, first body paint, extremely well maintained.',
+        price: 21000000,
+        images: ['https://images.unsplash.com/photo-1621007947382-bb3c3994e3fd?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'vehicle',
+        vehicleDetails: {
+            make: 'Toyota',
+            model: 'Camry XSE',
+            year: 2022,
+            condition: 'nigerian-used',
+            transmission: 'automatic',
+            fuelType: 'petrol',
+            bodyType: 'sedan',
+            color: 'Silver Metallic',
+            mileage: 12000,
+            location: 'Lagos'
+        },
+        categoryId: 'automobiles',
+        category: 'Cars For Sale',
+        available: true
+    },
+    */
+
+    // --- APPAREL ---
+    {
+        id: 'media-f1',
+        storeId: 'mock-media-store',
+        name: 'Satin Modest Abaya',
+        description: 'Flowy, elegant satin finish with intricate sleeve detailing. Includes matching hijab.',
+        price: 35000,
+        images: ['https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'fashion',
+        sizeCategory: 'clothing',
+        sizes: ['S', 'M', 'L', 'XL'],
+        colors: [
+            { name: 'Navy Blue', hex: '#000080', images: [] },
+            { name: 'Emerald', hex: '#50c878', images: [] }
+        ],
+        sizeChart: { type: 'jallab-standard' },
+        categoryId: 'apparel',
+        category: 'Apparel & Modest Wear'
+    },
+    {
+        id: 'media-f2',
+        storeId: 'mock-media-store',
+        name: 'Casual Two-Piece Lounge Wear',
+        description: 'Breathable cotton blend for premium everyday comfort.',
+        price: 22000,
+        images: ['https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'fashion',
+        sizeCategory: 'clothing',
+        sizes: ['M', 'L'],
+        colors: [{ name: 'Beige', hex: '#f5f5dc', images: [] }],
+        sizeChart: { type: 'nigerian-standard' },
+        categoryId: 'apparel',
+        category: 'Apparel & Modest Wear'
+    },
+    {
+        id: 'media-f3',
+        storeId: 'mock-media-store',
+        name: 'Luxury Sequin Evening Dress',
+        description: 'Hand-sewn sequins for a dazzling look at high-profile events.',
+        price: 85000,
+        images: ['https://images.unsplash.com/photo-1566174053879-31528523f8ae?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'fashion',
+        sizeCategory: 'clothing',
+        sizes: ['S', 'M', 'L'],
+        colors: [{ name: 'Gold', hex: '#ffd700', images: [] }],
+        sizeChart: { type: 'nigerian-standard' },
+        categoryId: 'apparel',
+        category: 'Apparel & Modest Wear'
+    },
+
+    // --- FRAGRANCES ---
+    {
+        id: 'media-p1',
+        storeId: 'mock-media-store',
+        name: 'Oud Mood Premium Perfume',
+        description: 'A rich, woody scent with long-lasting projection. 100ml EDP.',
+        price: 15000,
+        images: ['https://images.unsplash.com/photo-1594035910387-fea47794261f?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'fashion',
+        sizeCategory: 'clothing',
+        sizes: ['100ml', '50ml'],
+        colors: [],
+        sizeChart: { type: 'oil-perfume-volume' },
+        categoryId: 'fragrances',
+        category: 'Perfumes & Oils'
+    },
+    {
+        id: 'media-p2',
+        storeId: 'mock-media-store',
+        name: 'Baccarat Rouge 540 (Decant)',
+        description: 'Highly concentrated authentic decant. Versatile and luxurious.',
+        price: 45000,
+        images: ['https://images.unsplash.com/photo-1541643600914-78b084683601?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'fashion',
+        sizeCategory: 'clothing',
+        sizes: ['10ml'],
+        colors: [],
+        sizeChart: { type: 'oil-perfume-volume' },
+        categoryId: 'fragrances',
+        category: 'Perfumes & Oils'
+    },
+    {
+        id: 'media-p3',
+        storeId: 'mock-media-store',
+        name: 'Vanilla Musk Scented Oil',
+        description: 'Exquisite vanilla blend in a non-alcoholic oil base.',
+        price: 8000,
+        originalPrice: 10000,
+        images: ['https://images.unsplash.com/photo-1594035910387-fea47794261f?w=800&q=80'], // Fixed 404
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'fashion',
+        sizeCategory: 'clothing',
+        sizes: ['3ml', '6ml', '12ml'],
+        colors: [],
+        sizeChart: { type: 'oil-perfume-volume' },
+        categoryId: 'fragrances',
+        category: 'Perfumes & Oils'
     }
 ];
