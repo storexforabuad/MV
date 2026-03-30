@@ -5,7 +5,7 @@ import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import RamadanCountdown from './RamadanCountdown';
 import Image from 'next/image';
 import { StoreMeta } from '@/types/store';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
+import { ChevronRight, ChevronLeft, BadgeCheck } from 'lucide-react';
 
 interface HeroCarouselProps {
     storeMeta?: StoreMeta;
@@ -45,6 +45,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
 
     const is420Hub = storeMeta?.id === '420-Hub' || storeMeta?.name === '420-Hub' || storeMeta?.name === '420 Hub';
     const isStunnerStores = storeMeta?.id?.toLowerCase().includes('stunner') || storeMeta?.name?.toLowerCase().includes('stunner');
+    const isMediaInfluencer = storeMeta?.storeType === 'media-influencer' || storeMeta?.storeType === 'media';
     // Only show the second slide if it's a restaurant or fashion store
     const showWelcomeSlide = false;
     const slideCount = isStunnerStores ? 2 : 1; // Stunner Stores has the Glam section slide
@@ -266,6 +267,52 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
         );
     };
 
+    const CustomInfluencerCard = () => {
+        return (
+            <div className="relative overflow-hidden rounded-[2.5rem] bg-zinc-950 border border-indigo-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col justify-center w-full h-full">
+                <div className="absolute inset-0 bg-slate-950">
+                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f46e51a_1px,transparent_1px),linear-gradient(to_bottom,#4f46e51a_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/40 via-slate-950/80 to-slate-950" />
+                </div>
+
+                <div className="relative z-10 px-6 sm:px-8 py-6 sm:py-8 flex flex-col justify-center h-full items-start text-left gap-4">
+                    <div className="space-y-2 w-full">
+                        <div className="flex flex-wrap gap-2 items-center">
+                            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 backdrop-blur-sm shadow-sm hover:shadow-blue-500/20 transition-all">
+                                <BadgeCheck className="w-3.5 h-3.5 text-blue-400" />
+                                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">
+                                    Verified Media Kit
+                                </span>
+                            </div>
+                        </div>
+
+                        <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-none break-words">
+                            Official <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-blue-500">
+                                Booking Page
+                            </span>
+                        </h3>
+
+                        <p className="text-sm text-gray-300 max-w-xs sm:max-w-sm font-medium leading-relaxed line-clamp-3">
+                            Take advantage of thousands of engaged followers. Fast, reliable, and professional promotion services.
+                        </p>
+                    </div>
+                </div>
+
+                {/* Powered by Bizconnet™ at the bottom right */}
+                <div className="absolute bottom-4 right-6 z-20">
+                    <span className="text-[10px] sm:text-xs font-semibold text-white/40 tracking-wider">
+                        Powered by <span className="text-indigo-500/80">BizConNet™</span>
+                    </span>
+                </div>
+
+                {/* Decorative shine */}
+                <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-indigo-500/20 blur-[60px] rounded-full pointer-events-none" />
+                <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-blue-500/10 blur-[60px] rounded-full pointer-events-none" />
+            </div>
+        );
+    };
+
     return (
         <div className="relative mx-4 mb-6 h-[220px] overflow-hidden rounded-[2.5rem]">
             <AnimatePresence initial={false} custom={direction} mode="popLayout">
@@ -299,6 +346,8 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                         <CustomSmokeShopCard />
                     ) : isStunnerStores ? (
                         pageIndex === 0 ? <CustomStunnerCard /> : <CustomStunnerGlamCard />
+                    ) : isMediaInfluencer ? (
+                        <CustomInfluencerCard />
                     ) : pageIndex === 0 ? (
                         <RamadanCountdown className="w-full h-full" storeName={storeMeta?.name} onNeedAWebsiteClick={onNeedAWebsiteClick} onRefresh={onRefresh} />
                     ) : showWelcomeSlide && pageIndex === 1 ? (
@@ -318,7 +367,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                                 setPage(i);
                             }}
                             className={`pointer-events-auto rounded-full transition-all duration-300 ${i === pageIndex
-                                ? `${isStunnerStores ? 'bg-cyan-400' : is420Hub ? 'bg-emerald-400' : 'bg-amber-400'} w-6 h-1.5`
+                                ? `${isStunnerStores ? 'bg-cyan-400' : is420Hub ? 'bg-emerald-400' : isMediaInfluencer ? 'bg-indigo-400' : 'bg-amber-400'} w-6 h-1.5`
                                 : 'bg-white/30 hover:bg-white/50 w-1.5 h-1.5'
                                 }`}
                             style={{ minWidth: '6px', minHeight: '6px', padding: 0, border: 'none' }}

@@ -279,26 +279,7 @@ export default function PaymentFlowPage({
           ← Back to Summary
         </button>
 
-        {/* Digital Receipt Card */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden relative">
-          {/* Perforated Edge Effect (Top) */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-[repeating-linear-gradient(90deg,transparent,transparent_4px,black_4px,black_8px)] opacity-5"></div>
-
-          <div className="p-6 space-y-4">
-            <div className="flex justify-between items-center border-b border-dashed border-gray-200 dark:border-gray-700 pb-4">
-              <span className="text-gray-500 dark:text-gray-400 text-sm">Order Total</span>
-              <span className="font-medium text-gray-900 dark:text-white">{formatPrice(total)}</span>
-            </div>
-            <div className="flex justify-between items-center border-b border-dashed border-gray-200 dark:border-gray-700 pb-4">
-              <span className="text-gray-500 dark:text-gray-400 text-sm">Escrow Protection</span>
-              <span className="font-medium text-green-600 dark:text-green-400 text-xs">FREE</span>
-            </div>
-            <div className="flex justify-between items-center pt-2">
-              <span className="text-gray-900 dark:text-white font-bold text-lg">TOTAL TO PAY</span>
-              <span className="text-2xl font-bold text-green-600 dark:text-green-400">{formatPrice(total)}</span>
-            </div>
-          </div>
-        </div>
+        {/* Digital Receipt Card previously here, removed to avoid redundancy with Page 2 */}
       </div>
 
       <div className="grid grid-cols-1 gap-6">

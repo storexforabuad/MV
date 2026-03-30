@@ -1458,9 +1458,18 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                       type="email"
                                       placeholder="Where should we send updates?"
                                       value={guestEmail}
-                                      onChange={(e) => setGuestEmail(e.target.value)}
-                                      className="w-full px-5 py-4 rounded-2xl bg-white dark:bg-gray-800/40 border border-blue-100/30 dark:border-blue-800/20 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm font-medium"
+                                      onChange={(e) => {
+                                        setGuestEmail(e.target.value);
+                                        if (emailError) setEmailError('');
+                                      }}
+                                      className={`w-full px-5 py-4 rounded-2xl bg-white dark:bg-gray-800/40 border ${emailError ? 'border-red-500 ring-1 ring-red-500' : 'border-blue-100/30 dark:border-blue-800/20'} focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm font-medium transition-colors`}
                                     />
+                                    {emailError && (
+                                      <p className="mt-2 text-xs font-bold text-red-500 flex items-center gap-1">
+                                        <AlertCircle className="w-3.5 h-3.5" />
+                                        {emailError}
+                                      </p>
+                                    )}
                                   </div>
                                 )}
                               </div>

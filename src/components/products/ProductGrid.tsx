@@ -226,18 +226,18 @@ const ProductGrid = memo(function ProductGrid({
             >
               <Gift className="w-5 h-5 text-[var(--text-primary)]" />
             </GlassButton> */}
-            <GlassButton
+            {/* Profile Button Hidden as per request */}
+            {/* <GlassButton
               onClick={handleOrdersClick}
               aria-label="Your Profile"
               text="Profile"
-            />
+            /> */}
             {storeMeta?.storeType === 'media-influencer' && (
               <GlassButton
                 onClick={() => setOrdersModalOpen(true)}
                 aria-label="Follower Account"
-              >
-                <UserCircle className="w-5 h-5 text-[var(--text-primary)]" />
-              </GlassButton>
+                text="Profile"
+              />
             )}
             <GlassButton
               onClick={() => setIsSearchOverlayOpen(true)}
