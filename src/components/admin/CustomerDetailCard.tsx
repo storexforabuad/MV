@@ -8,6 +8,7 @@ import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 
 interface CustomerDetailCardProps {
     customer: StoreCustomer;
+    storeType?: string;
 }
 
 const StatGridItem: React.FC<{ label: string; value: string | number | React.ReactNode }> = ({ label, value }) => (
@@ -17,7 +18,7 @@ const StatGridItem: React.FC<{ label: string; value: string | number | React.Rea
     </div>
 );
 
-export const CustomerDetailCard: React.FC<CustomerDetailCardProps> = ({ customer }) => {
+export const CustomerDetailCard: React.FC<CustomerDetailCardProps> = ({ customer, storeType }) => {
 
     const formattedAddress = [
         customer.deliveryAddress.street,
@@ -56,8 +57,14 @@ export const CustomerDetailCard: React.FC<CustomerDetailCardProps> = ({ customer
 
                 {/* Stats Grid */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-4">
-                    <StatGridItem label="Total Orders" value={customer.totalOrdersInStore} />
-                    <StatGridItem label="Total Spent" value={<Naira amount={customer.totalSpentInStore} />} />
+                    <StatGridItem
+                        label={storeType === 'media-influencer' ? "Campaigns" : "Total Orders"}
+                        value={customer.totalOrdersInStore}
+                    />
+                    <StatGridItem
+                        label={storeType === 'media-influencer' ? "Investment" : "Total Spent"}
+                        value={<Naira amount={customer.totalSpentInStore} />}
+                    />
                     <StatGridItem label="Referrals" value={customer.successfulReferralCount} />
                     <StatGridItem label="Commission" value={<Naira amount={customer.totalReferralCommission} />} />
                 </div>

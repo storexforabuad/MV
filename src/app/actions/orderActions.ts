@@ -491,7 +491,7 @@ export const fetchStoreOrders = async (storeId: string): Promise<StoreOrder[]> =
 export const getReadyForDeliveryOrders = async (storeId: string): Promise<StoreOrder[]> => {
     try {
         const ordersRef = collection(db, 'stores', storeId, 'orders');
-        const q = query(ordersRef, where('orderStatus', 'in', ['ready', 'partially-ready']));
+        const q = query(ordersRef, where('orderStatus', 'in', ['ready', 'partially-ready', 'pending-review']));
         const querySnapshot = await getDocs(q);
         const orders = querySnapshot.docs.map(transformOrderData);
         orders.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
@@ -591,11 +591,21 @@ export const getRevenueAnalytics = async (storeId: string) => {
             totalBonus: dailyBonusMap[day.date] || 0
         }));
 
+        // --- Pending Escrow Analysis ---
+        const escrowQuery = query(ordersRef, where('paymentStatus', '==', 'escrow-held'));
+        const escrowSnap = await getDocs(escrowQuery);
+        let pendingEscrow = 0;
+        escrowSnap.forEach(doc => {
+            const order = doc.data();
+            pendingEscrow += order.totalPrice || 0;
+        });
+
         return {
             lifetimeRevenue,
             lifetimeBonus,
             historicalData: enrichedHistoricalData,
             topEarningProducts,
+            pendingEscrow,
         };
 
     } catch (error) {

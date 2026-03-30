@@ -1107,7 +1107,12 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
       {/* === MODAL RENDERERS === */}
 
-      <CustomersListModal storeId={props.storeId} isOpen={isCustomersModalOpen} onClose={handleCloseCustomersModal} />
+      <CustomersListModal
+        storeId={props.storeId}
+        isOpen={isCustomersModalOpen}
+        onClose={handleCloseCustomersModal}
+        storeType={props.storeType}
+      />
 
       {isLaunchGuideModalOpen && (
         <LaunchGuideModal
@@ -1131,7 +1136,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
       {isBizconNetworkModalOpen && (<BizconNetworkModal isOpen={isBizconNetworkModalOpen} onClose={handleCloseBizconNetworkModal} />)}
 
-      {isDeliveriesHubModalOpen && (<DeliveriesHubModal isOpen={isDeliveriesHubModalOpen} onClose={handleCloseDeliveriesHubModal} storeId={storeId} />)}
+      {isDeliveriesHubModalOpen && (<DeliveriesHubModal isOpen={isDeliveriesHubModalOpen} onClose={handleCloseDeliveriesHubModal} storeId={storeId} storeType={props.storeType} />)}
 
       {isRevenueModalOpen && (<RevenueModal isOpen={isRevenueModalOpen} onClose={handleCloseRevenueModal} storeId={storeId} />)}
 

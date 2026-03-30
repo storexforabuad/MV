@@ -447,6 +447,19 @@ export async function getProductById(storeId: string | null, id: string): Promis
       const productRef = doc(db, 'stores', storeId, 'products', id);
       const productSnap = await getDoc(productRef);
       if (!productSnap.exists()) {
+        // Fallback to mock data for development/testing
+        const { mockArtProducts, mockBeautyProducts, mockMediaProducts, mockSolarProducts } = require('./mockProducts');
+        const allMockProducts = [
+          ...mockArtProducts,
+          ...mockBeautyProducts,
+          ...mockMediaProducts,
+          ...mockSolarProducts
+        ];
+        const mockProduct = allMockProducts.find((p: any) => p.id === id);
+        if (mockProduct) {
+          console.log(`[DB] Using mock fallback for product: ${id}`);
+          return transformProductData(mockProduct) as Product;
+        }
         return null;
       }
       productData = { id: productSnap.id, ...productSnap.data() };

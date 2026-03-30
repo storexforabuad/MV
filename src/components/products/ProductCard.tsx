@@ -514,10 +514,10 @@ export default function ProductCard({
                   {/* Condition Badge */}
                   {product.condition && (
                     <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
-                      <span className={`product-badge shadow-sm whitespace-nowrap text-[10px] font-bold tracking-wide border border-white/20 px-2 py-0.5 rounded-lg ${product.condition === 'brand-new' ? 'bg-green-500 text-white' :
+                      <span className={`product-badge shadow-sm whitespace-nowrap text-[10px] font-bold tracking-wide border border-white/20 px-2 py-0.5 rounded-lg ${product.condition === 'brand-new' ? 'bg-zinc-400 text-white' :
                         product.condition === 'open-box' ? 'bg-blue-500 text-white' :
-                          product.condition === 'used-good' ? 'bg-amber-500 text-white' :
-                            product.condition === 'used-fair' ? 'bg-orange-500 text-white' :
+                          product.condition === 'used-good' ? 'bg-green-500 text-white' :
+                            product.condition === 'used-fair' ? 'bg-yellow-400 text-zinc-900' :
                               product.condition === 'refurbished' ? 'bg-purple-500 text-white' :
                                 'bg-white/90 dark:bg-zinc-800/90 text-zinc-800 dark:text-zinc-200 backdrop-blur'
                         }`}>

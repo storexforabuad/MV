@@ -10,9 +10,10 @@ interface CustomersListModalProps {
   storeId: string;
   isOpen: boolean;
   onClose: () => void;
+  storeType?: string;
 }
 
-export const CustomersListModal: React.FC<CustomersListModalProps> = ({ storeId, isOpen, onClose }) => {
+export const CustomersListModal: React.FC<CustomersListModalProps> = ({ storeId, isOpen, onClose, storeType }) => {
   const [customers, setCustomers] = useState<StoreCustomer[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,9 +53,11 @@ export const CustomersListModal: React.FC<CustomersListModalProps> = ({ storeId,
           <header className="flex-shrink-0 flex items-center justify-between w-full max-w-5xl mx-auto p-4 sm:p-6 border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-slate-900 dark:text-white">
-                Customers ({customers.length})
+                {storeType === 'media-influencer' ? 'Brand Partners' : 'Customers'} ({customers.length})
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Your store customers</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                {storeType === 'media-influencer' ? 'Brands you have worked with' : 'Your store customers'}
+              </p>
             </div>
             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
               <Users className="w-6 h-6 text-white" />
@@ -88,7 +91,7 @@ export const CustomersListModal: React.FC<CustomersListModalProps> = ({ storeId,
             {!isLoading && !error && customers.length > 0 && (
               <div className="space-y-4">
                 {customers.map(customer => (
-                  <CustomerDetailCard key={customer.id} customer={customer} />
+                  <CustomerDetailCard key={customer.id} customer={customer} storeType={storeType} />
                 ))}
               </div>
             )}

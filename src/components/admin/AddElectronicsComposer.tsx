@@ -634,7 +634,12 @@ export default function AddElectronicsComposer({
                                             handleProductChange(activeProductIndex, 'condition', cond.value);
                                             smartScroll(descriptionRef);
                                         }}
-                                        className={`py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all flex items-center justify-center ${activeProduct.condition === cond.value ? 'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500 text-indigo-700 dark:text-indigo-400 shadow-sm' : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400'}`}
+                                        className={`py-3 px-4 rounded-xl border-2 font-medium text-sm transition-all flex items-center justify-center ${activeProduct.condition === cond.value ?
+                                            (cond.value === 'brand-new' ? 'bg-zinc-100 dark:bg-zinc-800 border-zinc-400 text-zinc-700 dark:text-zinc-300' :
+                                                cond.value === 'used-good' ? 'bg-green-50 dark:bg-green-900/30 border-green-500 text-green-700 dark:text-green-400' :
+                                                    cond.value === 'used-fair' ? 'bg-yellow-50 dark:bg-yellow-900/30 border-yellow-500 text-yellow-700 dark:text-yellow-400' :
+                                                        'bg-indigo-50 dark:bg-indigo-900/30 border-indigo-500 text-indigo-700 dark:text-indigo-400')
+                                            : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-400 shadow-sm'}`}
                                     >
                                         {cond.label}
                                     </button>
