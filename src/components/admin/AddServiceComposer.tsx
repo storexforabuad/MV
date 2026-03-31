@@ -7,7 +7,7 @@ import { addProduct } from '../../lib/db';
 import { uploadImageToCloudinary } from '../../lib/cloudinaryClient';
 import { compressImage } from '../../utils/imageCompression';
 import {
-    X, Plus, Trash2, ImagePlus, Loader2, ArrowLeft, Briefcase, Clock, FileEdit, CheckCircle2, ChevronRight, ChevronLeft, Globe, Zap, Sparkles, MessageCircle, Share2
+    X, Plus, Trash2, ImagePlus, Loader2, ArrowLeft, Briefcase, Clock, FileEdit, CheckCircle2, ChevronRight, ChevronLeft, Globe, Zap, Sparkles, MessageCircle, Share2, Shield
 } from 'lucide-react';
 import Image from 'next/image';
 import CategorySelectorModal from './modals/CategorySelectorModal';
@@ -345,14 +345,13 @@ export default function AddServiceComposer({ isOpen, onClose, onBack, storeId, c
                         </AnimatePresence>
 
                         <div className="p-6 bg-slate-50 dark:bg-slate-900/50 rounded-3xl border border-slate-100 dark:border-slate-800">
-                            <div className="flex items-start gap-4">
+                            <div className="flex items-center gap-4">
                                 <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl">
-                                    <Sparkles className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                                    <Shield className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                                 </div>
-                                <div>
-                                    <h4 className="font-bold text-slate-900 dark:text-white">Escrow Protected</h4>
-                                    <p className="text-sm text-slate-500 mt-1">Payments are held securely by BCN until the service is delivered. A 10% commission applies.</p>
-                                </div>
+                                <h4 className="font-bold text-slate-900 dark:text-white text-lg flex items-center gap-1.5">
+                                    BCN<span className="text-[10px] font-black align-top leading-none text-blue-600">™</span> Escrow Protected
+                                </h4>
                             </div>
                         </div>
                     </motion.div>
