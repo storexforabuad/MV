@@ -480,6 +480,14 @@ export default function ProductCard({
                     </span>
                   </div>
                 )}
+                {/* Solar Warranty (Moved to Top Left) */}
+                {isSolarProduct(product) && product.warranty && (
+                  <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                    <span className="product-badge bg-indigo-600 text-white shadow-sm whitespace-nowrap text-[9px] font-black border border-white/20 px-2 py-0.5 rounded-lg uppercase tracking-wider">
+                      🛡️ {product.warrantyDuration || 'Warranty'}
+                    </span>
+                  </div>
+                )}
               </div>
 
               {/* Top Right: Brand + Condition */}
@@ -499,14 +507,6 @@ export default function ProductCard({
                     <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
                       <span className="product-badge bg-white/90 dark:bg-black/60 backdrop-blur text-slate-700 dark:text-slate-200 shadow-sm whitespace-nowrap border border-white/20 dark:border-white/10 uppercase font-bold tracking-widest text-[10px]">
                         {product.brand}
-                      </span>
-                    </div>
-                  )}
-                  {/* Solar Warranty */}
-                  {isSolarProduct(product) && product.warranty && (
-                    <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
-                      <span className="product-badge bg-indigo-600 text-white shadow-sm whitespace-nowrap text-[9px] font-black border border-white/20 px-2 py-0.5 rounded-lg uppercase tracking-wider">
-                        🛡️ {product.warrantyDuration || 'Warranty'}
                       </span>
                     </div>
                   )}
