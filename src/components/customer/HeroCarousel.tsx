@@ -5,7 +5,7 @@ import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import RamadanCountdown from './RamadanCountdown';
 import Image from 'next/image';
 import { StoreMeta } from '@/types/store';
-import { ChevronRight, ChevronLeft, BadgeCheck } from 'lucide-react';
+import { ChevronRight, ChevronLeft, BadgeCheck, Sparkles, Users, Heart, Camera, Zap } from 'lucide-react';
 
 interface HeroCarouselProps {
     storeMeta?: StoreMeta;
@@ -48,7 +48,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
     const isMediaInfluencer = storeMeta?.storeType === 'media-influencer';
     // Only show the second slide if it's a restaurant or fashion store
     const showWelcomeSlide = false;
-    const slideCount = isStunnerStores ? 2 : 1; // Stunner Stores has the Glam section slide
+    const slideCount = isStunnerStores ? 2 : isMediaInfluencer ? 2 : 1;
 
     const paginate = (newDirection: number) => {
         if (slideCount <= 1) return;
@@ -269,46 +269,127 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
 
     const CustomInfluencerCard = () => {
         return (
-            <div className="relative overflow-hidden rounded-[2.5rem] bg-zinc-950 border border-indigo-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col justify-center w-full h-full">
-                <div className="absolute inset-0 bg-slate-950">
-                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#4f46e51a_1px,transparent_1px),linear-gradient(to_bottom,#4f46e51a_1px,transparent_1px)] bg-[size:14px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)]" />
-                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-900/40 via-slate-950/80 to-slate-950" />
+            <div className="relative overflow-hidden rounded-[2.75rem] bg-gradient-to-br from-rose-600 via-fuchsia-600 to-indigo-700 border border-white/20 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col w-full h-full group">
+                {/* Decorative background elements */}
+                <div className="absolute inset-0 overflow-hidden">
+                    <div className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-amber-400/20 blur-[100px] rounded-full animate-pulse" />
+                    <div className="absolute -bottom-[20%] -right-[10%] w-[60%] h-[60%] bg-pink-400/20 blur-[100px] rounded-full animate-pulse delay-700" />
+                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay" />
                 </div>
 
                 <div className="relative z-10 px-6 sm:px-8 py-6 sm:py-8 flex flex-col justify-center h-full items-start text-left gap-4">
                     <div className="space-y-2 w-full">
-                        <div className="flex flex-wrap gap-2 items-center">
-                            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 backdrop-blur-sm shadow-sm hover:shadow-blue-500/20 transition-all">
-                                <BadgeCheck className="w-3.5 h-3.5 text-blue-400" />
-                                <span className="text-[10px] font-bold text-blue-400 uppercase tracking-wider">
+                        <div className="flex flex-nowrap gap-1.5 items-center w-full overflow-hidden">
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 border border-white/30 backdrop-blur-md shadow-lg flex-shrink-0"
+                            >
+                                <Sparkles className="w-3 h-3 text-amber-300" />
+                                <span className="text-[9px] font-black text-white uppercase tracking-wider">
+                                    Premium Influencer
+                                </span>
+                            </motion.div>
+                            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/20 border border-blue-400/30 backdrop-blur-md flex-shrink-0">
+                                <BadgeCheck className="w-3 h-3 text-blue-300" />
+                                <span className="text-[9px] font-bold text-blue-100 uppercase tracking-wider whitespace-nowrap">
                                     Verified Media Kit
                                 </span>
                             </div>
                         </div>
 
-                        <h3 className="text-2xl sm:text-3xl md:text-4xl font-black text-white tracking-tight leading-none break-words">
+                        <motion.h3
+                            initial={{ y: 20, opacity: 0 }}
+                            animate={{ y: 0, opacity: 1 }}
+                            transition={{ delay: 0.2 }}
+                            className="text-2xl sm:text-3xl md:text-3xl font-black text-white tracking-tighter leading-none break-words"
+                        >
                             Official <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-blue-500">
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-white to-rose-200 drop-shadow-sm">
                                 Booking Page
                             </span>
-                        </h3>
+                        </motion.h3>
 
-                        <p className="text-sm text-gray-300 max-w-xs sm:max-w-sm font-medium leading-relaxed line-clamp-3">
-                            Take advantage of thousands of engaged followers. Fast, reliable, and professional promotion services.
-                        </p>
+                        <motion.p
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.4 }}
+                            className="text-xs sm:text-sm text-white/90 max-w-xs sm:max-w-sm font-medium leading-tight line-clamp-2"
+                        >
+                            Professional promotion services, secured by BCN™ Escrow.
+                        </motion.p>
                     </div>
                 </div>
 
-                {/* Powered by Bizconnet™ at the bottom right */}
-                <div className="absolute bottom-4 right-6 z-20">
-                    <span className="text-[10px] sm:text-xs font-semibold text-white/40 tracking-wider">
-                        Powered by <span className="text-indigo-500/80">BizConNet™</span>
+                {/* Powered by Bizconnet™ */}
+                <div className="absolute bottom-8 right-8 z-20 flex items-center gap-1.5">
+                    <span className="text-[9px] font-bold text-white/60 tracking-widest uppercase">
+                        Powered by <span className="text-white">BizConNet™</span>
                     </span>
                 </div>
+            </div>
+        );
+    };
 
-                {/* Decorative shine */}
-                <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-indigo-500/20 blur-[60px] rounded-full pointer-events-none" />
-                <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-blue-500/10 blur-[60px] rounded-full pointer-events-none" />
+    const InfluencerStatsCard = () => {
+        const stats = storeMeta?.socialStats || {
+            instagramFollowers: 45000,
+            tiktokFollowers: 125000,
+            youtubeSubscribers: 8500,
+            twitterFollowers: 12000
+        };
+
+        const formatNumber = (num: number) => {
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+            return num.toString();
+        };
+
+        return (
+            <div className="relative overflow-hidden rounded-[2.75rem] bg-zinc-950 border border-rose-500/30 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col w-full h-full">
+                <div className="absolute inset-0">
+                    <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-zinc-950 to-rose-950 opacity-90" />
+                    <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(244,63,94,0.15),transparent)]" />
+                </div>
+
+                <div className="relative z-10 px-10 py-6 flex flex-col justify-between h-full w-full">
+                    <div className="flex justify-between items-start">
+                        <div className="space-y-0.5">
+                            <div className="flex items-center gap-2">
+                                <Users className="w-2.5 h-2.5 text-rose-400" />
+                                <h3 className="text-[9px] font-black text-rose-400 uppercase tracking-widest">Global Reach</h3>
+                            </div>
+                            <p className="text-base sm:text-lg font-black text-white leading-none">Social Media Stats</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
+                        {[
+                            { label: 'Instagram', value: stats.instagramFollowers || 45000, color: 'text-pink-400', icon: '📸' },
+                            { label: 'TikTok', value: stats.tiktokFollowers || 120000, color: 'text-cyan-400', icon: '🎵' },
+                            { label: 'YouTube', value: stats.youtubeSubscribers || 15000, color: 'text-red-500', icon: '📺' },
+                            { label: 'Twitter/X', value: stats.twitterFollowers || 8000, color: 'text-blue-400', icon: '🐦' }
+                        ].map((item, idx) => (
+                            <motion.div
+                                key={item.label}
+                                initial={{ opacity: 0, scale: 0.9 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ delay: idx * 0.1 }}
+                                className="bg-white/5 backdrop-blur-md rounded-2xl p-2 border border-white/10 flex flex-col items-center justify-center text-center group hover:bg-white/10 transition-all min-h-[60px]"
+                            >
+                                <div className="flex items-center gap-1.5 mb-0.5">
+                                    <span className="text-sm">{item.icon}</span>
+                                    <span className={`text-base font-black ${item.color} leading-none tracking-tighter`}>{formatNumber(item.value)}</span>
+                                </div>
+                                <span className="text-[7px] font-bold text-white/40 uppercase tracking-tighter">{item.label}</span>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="absolute bottom-4 right-10">
+                    <span className="text-[7px] font-bold text-white/10 tracking-[0.3em]">INSIGHT ENGINE</span>
+                </div>
             </div>
         );
     };
@@ -347,7 +428,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                     ) : isStunnerStores ? (
                         pageIndex === 0 ? <CustomStunnerCard /> : <CustomStunnerGlamCard />
                     ) : isMediaInfluencer ? (
-                        <CustomInfluencerCard />
+                        pageIndex === 0 ? <CustomInfluencerCard /> : <InfluencerStatsCard />
                     ) : pageIndex === 0 ? (
                         <RamadanCountdown className="w-full h-full" storeName={storeMeta?.name} onNeedAWebsiteClick={onNeedAWebsiteClick} onRefresh={onRefresh} />
                     ) : showWelcomeSlide && pageIndex === 1 ? (
