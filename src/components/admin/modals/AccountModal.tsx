@@ -10,7 +10,7 @@ import { geography } from '../../../config/geography';
 import { uploadImageToCloudinary } from "../../../lib/cloudinaryClient";
 import { compressImage } from "../../../utils/imageCompression";
 import Image from "next/image";
-import { Briefcase, Loader2, User, MapPin, CreditCard, Store, ChevronRight, X, Lock, ImagePlus, ShieldCheck } from 'lucide-react';
+import { Briefcase, Loader2, User, MapPin, CreditCard, Store, ChevronRight, X, Lock, ImagePlus, ShieldCheck, Globe } from 'lucide-react';
 
 interface AccountModalProps {
   isOpen: boolean;
