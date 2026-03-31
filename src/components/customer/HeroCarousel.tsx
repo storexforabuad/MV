@@ -323,7 +323,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.4 }}
-                            className="text-xs sm:text-sm text-white/90 max-w-xs sm:max-w-sm font-medium leading-tight line-clamp-1 mt-1"
+                            className="text-xs sm:text-sm text-white/90 max-w-[280px] sm:max-w-sm font-medium leading-tight mt-1"
                         >
                             Professional promotion services, secured by BCN™ Escrow.
                         </motion.p>
@@ -331,7 +331,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                 </div>
 
                 {/* Powered by Bizconnet™ */}
-                <div className="absolute bottom-8 right-8 z-20 flex items-center gap-1.5">
+                <div className="absolute bottom-6 sm:bottom-8 right-8 z-20 flex items-center gap-1.5">
                     <span className="text-[9px] font-bold text-white/60 tracking-widest uppercase">
                         Powered by <span className="text-white">BizConNet™</span>
                     </span>
