@@ -24,6 +24,20 @@ export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean;
     storeMeta.country
   ].filter(Boolean).join(', ');
 
+  const isInfluencer = storeMeta.storeType === 'media-influencer';
+  const socialStats = storeMeta.socialStats || {
+    instagramFollowers: 45000,
+    tiktokFollowers: 125000,
+    youtubeSubscribers: 8500,
+    twitterFollowers: 12000
+  };
+
+  const formatNumber = (num: number) => {
+    if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+    if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+    return num.toString();
+  };
+
   const handleGetDirections = () => {
     if (fullAddress) {
       const encodedAddress = encodeURIComponent(fullAddress);
@@ -157,6 +171,37 @@ export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean;
                           </div>
                         )}
                       </div>
+
+                      {isInfluencer && (
+                        <div className="mt-8 pt-8 border-t border-gray-100 dark:border-gray-800">
+                          <div className="flex items-center gap-2 mb-4">
+                            <BadgeCheck className="w-4 h-4 text-pink-500" />
+                            <h4 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">Social Reach</h4>
+                          </div>
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center text-center">
+                              <span className="text-sm mb-1">📸</span>
+                              <p className="text-sm font-black text-gray-900 dark:text-white leading-none">{formatNumber(socialStats.instagramFollowers || 45000)}</p>
+                              <span className="text-[8px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tighter mt-1">Instagram</span>
+                            </div>
+                            <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center text-center">
+                              <span className="text-sm mb-1">🎵</span>
+                              <p className="text-sm font-black text-gray-900 dark:text-white leading-none">{formatNumber(socialStats.tiktokFollowers || 125000)}</p>
+                              <span className="text-[8px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tighter mt-1">TikTok</span>
+                            </div>
+                            <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center text-center">
+                              <span className="text-sm mb-1">📺</span>
+                              <p className="text-sm font-black text-gray-900 dark:text-white leading-none">{formatNumber(socialStats.youtubeSubscribers || 8500)}</p>
+                              <span className="text-[8px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tighter mt-1">YouTube</span>
+                            </div>
+                            <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center text-center">
+                              <span className="text-sm mb-1">🐦</span>
+                              <p className="text-sm font-black text-gray-900 dark:text-white leading-none">{formatNumber(socialStats.twitterFollowers || 12000)}</p>
+                              <span className="text-[8px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tighter mt-1">Twitter</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
 
                     <div className="mt-8 text-center">

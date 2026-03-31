@@ -534,6 +534,72 @@ export default function AccountModal({ isOpen, handleClose, storeId }: AccountMo
                             />
                           </div>
                         </div>
+
+                        {formData.storeType === 'media-influencer' && (
+                          <div className="pt-6 border-t border-slate-100 dark:border-zinc-800 space-y-6">
+                            <div>
+                              <h4 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                                <Globe className="w-4 h-4 text-pink-500" /> Social Reach (Followers)
+                              </h4>
+                              <p className="text-xs text-slate-500 mt-0.5">Let brands see your estimated reach across platforms.</p>
+                            </div>
+
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">Instagram Followers</label>
+                                <input
+                                  type="number"
+                                  value={formData.socialStats?.instagramFollowers || ''}
+                                  onChange={e => setFormData(prev => ({
+                                    ...prev,
+                                    socialStats: { ...prev.socialStats, instagramFollowers: parseInt(e.target.value) || 0 }
+                                  }))}
+                                  className="w-full p-3.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                  placeholder="e.g. 45000"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">TikTok Followers</label>
+                                <input
+                                  type="number"
+                                  value={formData.socialStats?.tiktokFollowers || ''}
+                                  onChange={e => setFormData(prev => ({
+                                    ...prev,
+                                    socialStats: { ...prev.socialStats, tiktokFollowers: parseInt(e.target.value) || 0 }
+                                  }))}
+                                  className="w-full p-3.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                  placeholder="e.g. 125000"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">YouTube Subscribers</label>
+                                <input
+                                  type="number"
+                                  value={formData.socialStats?.youtubeSubscribers || ''}
+                                  onChange={e => setFormData(prev => ({
+                                    ...prev,
+                                    socialStats: { ...prev.socialStats, youtubeSubscribers: parseInt(e.target.value) || 0 }
+                                  }))}
+                                  className="w-full p-3.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                  placeholder="e.g. 8500"
+                                />
+                              </div>
+                              <div>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-zinc-300 mb-1.5">X/Twitter Followers</label>
+                                <input
+                                  type="number"
+                                  value={formData.socialStats?.twitterFollowers || ''}
+                                  onChange={e => setFormData(prev => ({
+                                    ...prev,
+                                    socialStats: { ...prev.socialStats, twitterFollowers: parseInt(e.target.value) || 0 }
+                                  }))}
+                                  className="w-full p-3.5 bg-slate-50 dark:bg-zinc-950 border border-slate-200 dark:border-zinc-800 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                                  placeholder="e.g. 12000"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
 

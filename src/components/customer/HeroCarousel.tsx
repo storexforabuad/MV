@@ -374,9 +374,9 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1">
                         {[
                             { label: 'Instagram', value: stats.instagramFollowers || 45000, color: 'text-pink-400', icon: '📸' },
-                            { label: 'TikTok', value: stats.tiktokFollowers || 120000, color: 'text-cyan-400', icon: '🎵' },
-                            { label: 'YouTube', value: stats.youtubeSubscribers || 15000, color: 'text-red-500', icon: '📺' },
-                            { label: 'Twitter/X', value: stats.twitterFollowers || 8000, color: 'text-blue-400', icon: '🐦' }
+                            { label: 'TikTok', value: stats.tiktokFollowers || 125000, color: 'text-cyan-400', icon: '🎵' },
+                            { label: 'YouTube', value: stats.youtubeSubscribers || 8500, color: 'text-red-500', icon: '📺' },
+                            { label: 'Twitter/X', value: stats.twitterFollowers || 12000, color: 'text-blue-400', icon: '🐦' }
                         ].map((item, idx) => (
                             <motion.div
                                 key={item.label}
