@@ -76,6 +76,7 @@ interface AdminHomeCardsProps {
   ambassadorTier?: string;
   ceoEmail?: string; // For subscription modal
   onSubscriptionCardClick?: () => void;
+  paymentFlow?: string;
 }
 
 const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferralBonus: number, handleClose: () => void }) => (
@@ -514,6 +515,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const cardsToRender = cardData.filter(card => {
     if (allowedCards.includes(card.label)) {
       if (card.label === 'Subscription' && props.storeType === 'media-influencer') return false;
+      if (card.label === 'Circles' && props.paymentFlow === 'paystack_escrow') return false;
       return true;
     }
     return false;

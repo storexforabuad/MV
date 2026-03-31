@@ -152,9 +152,9 @@ const ManageCategoriesModal: React.FC<ManageCategoriesModalProps> = ({ isOpen, o
     setEditingCategoryId(null);
   };
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (categoryToDelete) {
-      onDeleteCategory(categoryToDelete.id);
+      await onDeleteCategory(categoryToDelete.id);
       setCategoryToDelete(null);
     }
   };

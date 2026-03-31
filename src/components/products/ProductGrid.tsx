@@ -219,26 +219,21 @@ const ProductGrid = memo(function ProductGrid({
             >
               <Info className="w-5 h-5 text-[var(--text-primary)]" />
             </GlassButton>
-            {/* Referral Button Hidden as per request */}
-            {/* <GlassButton
-              onClick={handleReferralsClick}
-              aria-label="Your Referral Bonuses"
-            >
-              <Gift className="w-5 h-5 text-[var(--text-primary)]" />
-            </GlassButton> */}
-            {/* Profile Button Hidden as per request */}
-            {/* <GlassButton
-              onClick={handleOrdersClick}
-              aria-label="Your Profile"
-              text="Profile"
-            /> */}
-            {storeMeta?.storeType === 'media-influencer' && (
+
+            {storeMeta?.paymentFlow === 'paystack_escrow' ? (
               <GlassButton
                 onClick={() => setOrdersModalOpen(true)}
-                aria-label="Follower Account"
+                aria-label="Member Profile"
                 text="Profile"
               />
+            ) : (
+              <GlassButton
+                onClick={() => setOrdersModalOpen(true)}
+                aria-label="Your Orders"
+                text="Orders"
+              />
             )}
+
             <GlassButton
               onClick={() => setIsSearchOverlayOpen(true)}
               aria-label="Search products"
@@ -262,6 +257,7 @@ const ProductGrid = memo(function ProductGrid({
           onNotificationRequest={onNotificationRequest}
           onReorder={handleReorder}
           onRefresh={refetchOrders}
+          showOnlyOrders={storeMeta?.paymentFlow !== 'paystack_escrow'}
         />
       )}
       {storeId && (

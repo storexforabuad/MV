@@ -30,6 +30,7 @@ interface CustomerProfileModalProps {
   onReorder?: (order: Order) => void;
   onRefresh?: () => void;
   extraOrder?: Order; // Newly added prop for in-promise orders
+  showOnlyOrders?: boolean;
 }
 
 type Tab = 'orders' | 'wallet' | 'settings';
@@ -61,10 +62,19 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
   onNotificationRequest,
   onReorder,
   onRefresh,
-  extraOrder
+  extraOrder,
+  showOnlyOrders = false
 }) => {
   const { promptLogin, setCustomer, customer: contextCustomer } = useCustomer();
-  const [activeTab, setActiveTab] = useState<Tab>('orders');
+  const [activeTab, setActiveTab] = useState<Tab>(showOnlyOrders ? 'orders' : 'orders');
+
+  // Effect to sync activeTab if showOnlyOrders changes
+  useEffect(() => {
+    if (showOnlyOrders) {
+      setActiveTab('orders');
+    }
+  }, [showOnlyOrders]);
+
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const nigerianStates = geography.find(c => c.name === 'Nigeria')?.states.map(s => s.name) || [];
@@ -201,10 +211,10 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
                   <div className="flex items-center justify-between mb-6">
                     <div>
                       <h2 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight">
-                        {customer?.name || 'Guest Profile'}
+                        {showOnlyOrders ? 'Your Orders' : (customer?.name || 'Guest Profile')}
                       </h2>
                       <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest">
-                        {customer ? 'Member since ' + new Date(customer.id === 'guest' ? Date.now() : parseInt(customer.id) || Date.now()).getFullYear() : 'Browsing as Guest'}
+                        {showOnlyOrders ? 'Order History' : (customer ? 'Member since ' + new Date(customer.id === 'guest' ? Date.now() : parseInt(customer.id) || Date.now()).getFullYear() : 'Browsing as Guest')}
                       </p>
                     </div>
                     <button onClick={onClose} className="p-2 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
@@ -213,23 +223,25 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
                   </div>
 
                   {/* Tabs */}
-                  <div className="flex gap-2 p-1 bg-gray-100 dark:bg-gray-900/50 rounded-2xl">
-                    {(['orders', 'wallet', 'settings'] as Tab[]).map((tab) => (
-                      <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 ${activeTab === tab
-                          ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-black/5'
-                          : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
-                          }`}
-                      >
-                        {tab === 'orders' && <Package className="w-4 h-4" />}
-                        {tab === 'wallet' && <Wallet className="w-4 h-4" />}
-                        {tab === 'settings' && <Settings className="w-4 h-4" />}
-                        {tab}
-                      </button>
-                    ))}
-                  </div>
+                  {!showOnlyOrders && (
+                    <div className="flex gap-2 p-1 bg-gray-100 dark:bg-gray-900/50 rounded-2xl">
+                      {(['orders', 'wallet', 'settings'] as Tab[]).map((tab) => (
+                        <button
+                          key={tab}
+                          onClick={() => setActiveTab(tab)}
+                          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 ${activeTab === tab
+                            ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-black/5'
+                            : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+                            }`}
+                        >
+                          {tab === 'orders' && <Package className="w-4 h-4" />}
+                          {tab === 'wallet' && <Wallet className="w-4 h-4" />}
+                          {tab === 'settings' && <Settings className="w-4 h-4" />}
+                          {tab}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 {/* Scrollable Content */}

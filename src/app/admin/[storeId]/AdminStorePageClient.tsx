@@ -494,30 +494,51 @@ export default function AdminStorePageClient({
   };
 
   const handleAddCategory = async (name: string) => {
+    // Generate a temporary ID for optimistic update
+    const tempId = `temp-${Date.now()}`;
+    const tempCategory: Category = { id: tempId, name, storeId };
+
+    setCategories(prev => [...prev, tempCategory]);
+
     try {
       const newCategory = await addCategory(storeId, name);
-      setCategories(prev => [...prev, newCategory]);
+      // Replace temp category with real one
+      setCategories(prev => prev.map(c => c.id === tempId ? newCategory : c));
     } catch (error) {
       console.error("Failed to add category:", error);
-      handleManualRefresh();
+      toast.error("Failed to add category");
+      setCategories(prev => prev.filter(c => c.id !== tempId));
     }
   };
 
   const handleUpdateCategory = async (categoryId: string, name: string) => {
+    const previousCategories = [...categories];
+    setCategories(prev => prev.map(c => c.id === categoryId ? { ...c, name } : c));
+
     try {
       await updateCategory(storeId, categoryId, name);
       handleManualRefresh();
     } catch (error) {
       console.error("Failed to update category:", error);
+      toast.error("Failed to update category");
+      setCategories(previousCategories);
     }
   };
 
   const handleDeleteCategory = async (categoryId: string) => {
+    // Optimistic Update
+    const previousCategories = [...categories];
+    setCategories(prev => prev.filter(c => c.id !== categoryId));
+
     try {
       await deleteCategory(storeId, categoryId);
+      // Products might become uncategorized, so refresh all data
       handleManualRefresh();
     } catch (error) {
       console.error("Failed to delete category:", error);
+      toast.error("Failed to delete category");
+      // Rollback
+      setCategories(previousCategories);
     }
   };
 
@@ -652,6 +673,7 @@ export default function AdminStorePageClient({
               setIsModalOpen={setIsHomeCardModalOpen}
               ambassadorTier={ambassadorTier}
               onSubscriptionCardClick={() => setIsSubscriptionModalOpen(true)}
+              paymentFlow={storeMeta?.paymentFlow}
             />
             <div className="mt-6">
               {storeMeta?.storeType === 'sports' && <AdminInvoicePanel storeId={storeId} />}
