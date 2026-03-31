@@ -400,7 +400,7 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
                 <p className="text-xs text-gray-500 dark:text-zinc-400">Inventory & Stock</p>
               </div>
               <div className="flex items-center gap-3">
-                {storeType === 'media-influencer' && !hasBookingFee && (
+                {false && storeType === 'media-influencer' && !hasBookingFee && (
                   <button
                     onClick={handleAddBookingFee}
                     disabled={isGeneratingFee}
