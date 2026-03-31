@@ -22,6 +22,7 @@ import AddPitchComposer from '../pitch/AddPitchComposer';
 import AdminBookingsModal from './modals/AdminBookingsModal';
 import SocialPostsModal from './modals/SocialPostsModal';
 import { BizconNetworkModal } from './modals/BizconNetworkModal';
+import { BCNBenefitsModal } from './modals/BCNBenefitsModal';
 import { DeliveriesHubModal } from './modals/DeliveriesHubModal';
 import RevenueModal from './modals/RevenueModal';
 import CommissionModal from './modals/CommissionModal';
@@ -92,6 +93,15 @@ const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferral
 );
 
 const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.ElementType | null, glowClass: string, isAiCard?: boolean, colspan?: number, isWholesaleCard?: boolean, cardType?: 'metric' | 'action' }[] = [
+  {
+    label: 'BCN™',
+    icon: ShieldCheck,
+    gradient: 'bg-gradient-to-br from-amber-400 via-orange-500 to-indigo-700',
+    text: 'text-white',
+    component: null,
+    glowClass: 'dark:shadow-orange-500/30 shadow-indigo-500/50',
+    cardType: 'action',
+  },
   {
     label: 'BizconNet™',
     icon: Globe,
@@ -400,7 +410,11 @@ const MetricCard = ({ icon: Icon, label, count, gradient, glowClass, onClick, in
       </div>
       <div className="text-3xl font-bold drop-shadow"><AnimatedNumber value={count} /></div>
       <div className="text-sm font-medium text-center opacity-90">
-        {label === 'Manage Categories' ? 'Categories' : label === 'Manage Products' ? 'Products' : label}
+        {label === 'Manage Categories' ? 'Categories' :
+          label === 'Manage Products' ? (inlineStyle ? 'Products' : 'Gigs') :
+            label === 'Orders' ? 'Bookings' :
+              label === 'Revenue' ? 'Earnings' :
+                label}
       </div>
     </button>
   </motion.div>
@@ -418,6 +432,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [isPostsModalOpen, setIsPostsModalOpen] = useState(false);
   const [isSocialPostsModalOpen, setIsSocialPostsModalOpen] = useState(false);
   const [isBizconNetworkModalOpen, setIsBizconNetworkModalOpen] = useState(false);
+  const [isBCNBenefitsModalOpen, setIsBCNBenefitsModalOpen] = useState(false);
   const [isDeliveriesHubModalOpen, setIsDeliveriesHubModalOpen] = useState(false);
   const [isRevenueModalOpen, setIsRevenueModalOpen] = useState(false);
   const [isCommissionModalOpen, setIsCommissionModalOpen] = useState(false);
@@ -511,7 +526,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const ordersIndex = cardData.findIndex(card => card.label === 'Orders');
 
   // Filter to show only specific cards
-  const allowedCards = ['Launch', 'Orders', 'Settings', 'Views', 'Manage Categories', 'Manage Products', 'Subscription', 'Circles', 'Revenue', 'Deliveries', 'Customers'];
+  const allowedCards = ['Launch', 'BCN™', 'Orders', 'Settings', 'Views', 'Manage Categories', 'Manage Products', 'Subscription', 'Circles', 'Revenue', 'Deliveries', 'Customers'];
   const cardsToRender = cardData.filter(card => {
     if (allowedCards.includes(card.label)) {
       if (card.label === 'Subscription' && props.storeType === 'media-influencer') return false;
@@ -529,7 +544,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   }, [onRefresh]);
 
   useEffect(() => {
-    const modalIsOpen = openModal !== null || isTipsModalOpen || isLaunchGuideModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isBizconNetworkModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen || isAdvertisingModalOpen || isEventsModalOpen || isAccountModalOpen || isWarehouseModalOpen || isWholesaleModalOpen || isCirclesModalOpen;
+    const modalIsOpen = openModal !== null || isTipsModalOpen || isLaunchGuideModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isBizconNetworkModalOpen || isBCNBenefitsModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen || isAdvertisingModalOpen || isEventsModalOpen || isAccountModalOpen || isWarehouseModalOpen || isWholesaleModalOpen || isCirclesModalOpen;
 
     // Check if modal was literally JUST closed (transition from true to false)
     if (previousModalState.current && !modalIsOpen) {
@@ -553,6 +568,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         setIsPostsModalOpen(false);
         setIsSocialPostsModalOpen(false);
         setIsBizconNetworkModalOpen(false);
+        setIsBCNBenefitsModalOpen(false);
         setIsDeliveriesHubModalOpen(false);
         setIsRevenueModalOpen(false);
         setIsCommissionModalOpen(false);
@@ -570,7 +586,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         window.removeEventListener('popstate', handlePopState);
       };
     }
-  }, [openModal, isTipsModalOpen, isLaunchGuideModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, isAdvertisingModalOpen, isEventsModalOpen, isAccountModalOpen, isWarehouseModalOpen, isWholesaleModalOpen, isCirclesModalOpen, setIsModalOpen]);
+  }, [openModal, isTipsModalOpen, isLaunchGuideModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isBCNBenefitsModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, isAdvertisingModalOpen, isEventsModalOpen, isAccountModalOpen, isWarehouseModalOpen, isWholesaleModalOpen, isCirclesModalOpen, setIsModalOpen]);
 
   const handleOpenModal = (idx: number, card: typeof cardData[0]) => {
     if (isRefreshing) return; // Prevent opening modals during refresh
@@ -585,7 +601,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     }
 
     const { label, subtitle } = card;
-    if (label === 'BizconNet™') setIsBizconNetworkModalOpen(true);
+    if (label === 'BCN™') setIsBCNBenefitsModalOpen(true);
+    else if (label === 'BizconNet™') setIsBizconNetworkModalOpen(true);
     else if (label === 'Launch') setIsLaunchGuideModalOpen(true);
     else if (label === 'Tips') setIsTipsModalOpen(true);
     else if (label === 'Views') setIsViewsModalOpen(true);
@@ -675,6 +692,12 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const handleCloseBizconNetworkModal = () => {
     if (popHistoryIfExists()) return;
     setIsBizconNetworkModalOpen(false);
+    if (props.setIsModalOpen) props.setIsModalOpen(false);
+  }
+
+  const handleCloseBCNBenefitsModal = () => {
+    if (popHistoryIfExists()) return;
+    setIsBCNBenefitsModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
@@ -1044,7 +1067,9 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
                   <div className="text-3xl font-bold"><AnimatedNumber value={wholesaleStats.activePartners} /></div>
 
                   {/* Card Label */}
-                  <div className="text-sm font-medium text-center opacity-90">Wholesale</div>
+                  <div className="text-sm font-medium text-center opacity-90">
+                    {props.storeType === 'media-influencer' ? 'Sponsors' : 'Wholesale'}
+                  </div>
                 </button>
               </motion.div>
             );
@@ -1137,6 +1162,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
       {isSocialPostsModalOpen && (<SocialPostsModal isOpen={isSocialPostsModalOpen} onClose={handleCloseSocialPostsModal} storeId={props.storeId} storeName={props.storeName || 'Store'} products={props.products} categories={props.categories} />)}
 
       {isBizconNetworkModalOpen && (<BizconNetworkModal isOpen={isBizconNetworkModalOpen} onClose={handleCloseBizconNetworkModal} />)}
+
+      {isBCNBenefitsModalOpen && (<BCNBenefitsModal isOpen={isBCNBenefitsModalOpen} onClose={handleCloseBCNBenefitsModal} />)}
 
       {isDeliveriesHubModalOpen && (<DeliveriesHubModal isOpen={isDeliveriesHubModalOpen} onClose={handleCloseDeliveriesHubModal} storeId={storeId} storeType={props.storeType} />)}
 

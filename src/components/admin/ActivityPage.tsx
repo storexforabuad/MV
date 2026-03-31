@@ -19,7 +19,9 @@ import {
   Calendar,
   Flame,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  ShieldCheck,
+  Star
 } from 'lucide-react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { Notification } from '@/types/notification';
@@ -106,7 +108,8 @@ const ActivityPage: React.FC<ActivityPageProps> = ({
   const totalViews = products.reduce((sum, p) => sum + (p.views || 0), 0) + (storeMeta?.storePageViews || 0);
 
   // Subscription Logic Refinement
-  const isInfluencer = storeMeta?.isInfluencer || storeMeta?.isFreePlan;
+  const isInfluencer = storeMeta?.isInfluencer || storeMeta?.storeType === 'media-influencer' || storeMeta?.isFreePlan;
+  const isEscrowActive = storeMeta?.paymentFlow === 'paystack_escrow';
   const subscriptionStatus = storeMeta?.subscriptionStatus || 'trial';
 
   const getNextBillingDate = () => {
@@ -172,7 +175,21 @@ const ActivityPage: React.FC<ActivityPageProps> = ({
       icon: Flame,
       color: "from-violet-500 to-purple-500",
       text: "Use high-quality imagery to boost your conversion rates."
-    }
+    },
+    ...(storeMeta?.storeType === 'media-influencer' ? [
+      {
+        id: "tip6",
+        icon: ShieldCheck,
+        color: "from-amber-400 to-orange-500",
+        text: "Always encourage brands to use BCN™ Escrow for guaranteed payouts."
+      },
+      {
+        id: "tip7",
+        icon: Star,
+        color: "from-blue-400 to-indigo-500",
+        text: "Keep your rate card updated in your product descriptions."
+      }
+    ] : [])
   ];
 
   const [currentTipIndex, setCurrentTipIndex] = useState(0);
@@ -221,8 +238,18 @@ const ActivityPage: React.FC<ActivityPageProps> = ({
   };
 
   // Notification Refinement Logic
-  const processedNotifications = notifications.map(n => {
-    // If it's a subscription notification and user is active/influencer
+  const processedNotifications = notifications.filter(n => {
+    // Hide subscription notifications if escrow is active
+    if (isEscrowActive) {
+      const lowerTitle = n.title.toLowerCase();
+      const lowerMsg = n.message.toLowerCase();
+      if (lowerTitle.includes('subscription') || lowerMsg.includes('trial') || lowerTitle.includes('premium')) {
+        return false;
+      }
+    }
+    return true;
+  }).map(n => {
+    // If it's a subscription notification and user is active/influencer (and not filtered out)
     if (n.title.toLowerCase().includes('subscription') || n.message.toLowerCase().includes('trial')) {
       if (subscriptionStatus === 'active' || isInfluencer) {
         return {
@@ -260,8 +287,12 @@ const ActivityPage: React.FC<ActivityPageProps> = ({
           </div>
 
           <div className="text-left w-full">
-            <h2 className="text-3xl font-black tracking-tight drop-shadow-md">Social Hub</h2>
-            <p className="text-blue-100 font-medium mt-1 text-lg opacity-90">Boom your sales everywhere</p>
+            <h2 className="text-3xl font-black tracking-tight drop-shadow-md">
+              {storeMeta?.storeType === 'media-influencer' ? 'Collab Hub' : 'Social Hub'}
+            </h2>
+            <p className="text-blue-100 font-medium mt-1 text-lg opacity-90">
+              {storeMeta?.storeType === 'media-influencer' ? 'Grow your influence' : 'Boom your sales everywhere'}
+            </p>
           </div>
 
           <div className="flex items-center gap-3 mt-4 w-full">
@@ -297,7 +328,7 @@ const ActivityPage: React.FC<ActivityPageProps> = ({
       <motion.div variants={itemVariants} className="space-y-4">
         <h3 className="text-sm font-black uppercase tracking-widest text-zinc-500 dark:text-zinc-400 px-2 flex items-center gap-2">
           {products.length > 0 ? <TrendingUp className="h-4 w-4 text-orange-500" /> : <Sparkles className="h-4 w-4 text-amber-500" />}
-          {products.length > 0 ? "Now Trending" : "Getting Started"}
+          {products.length > 0 ? (storeMeta?.storeType === 'media-influencer' ? "Top Performing Gigs" : "Now Trending") : "Getting Started"}
         </h3>
 
         {products.length > 0 ? (

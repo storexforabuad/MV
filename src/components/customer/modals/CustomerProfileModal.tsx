@@ -248,8 +248,8 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
                 <div ref={scrollContainerRef} className="flex-grow overflow-y-auto custom-scrollbar">
                   <div className="px-6 py-6">
 
-                    {/* Guest Lookup View */}
-                    {!customer && activeTab === 'orders' && (
+                    {/* Guest Lookup View - Only for Escrow Stores */}
+                    {!customer && activeTab === 'orders' && !showOnlyOrders && (
                       <div className="bg-blue-50 dark:bg-blue-900/10 rounded-3xl p-8 text-center border border-blue-100 dark:border-blue-800/50 mb-8">
                         <div className="w-16 h-16 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
                           <Mail className="w-8 h-8 text-blue-500" />
@@ -266,7 +266,7 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
                     )}
 
                     {/* Orders Tab */}
-                    {activeTab === 'orders' && (orders.length > 0 || customer) && (
+                    {activeTab === 'orders' && (orders.length > 0 || customer || showOnlyOrders) && (
                       <div className="space-y-8">
                         {orders.length > 0 ? (
                           sortedDateKeys.map((dateKey) => (
@@ -295,7 +295,9 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
                             <div className="w-16 h-16 bg-gray-50 dark:bg-gray-900 rounded-full flex items-center justify-center mx-auto mb-4 border border-gray-100 dark:border-gray-800">
                               <Package className="w-8 h-8 text-gray-300" />
                             </div>
-                            <p className="text-sm text-gray-500 font-bold uppercase tracking-widest">No orders found for this email</p>
+                            <p className="text-sm text-gray-500 font-bold uppercase tracking-widest">
+                              {showOnlyOrders ? 'No orders found yet' : 'No orders found for this email'}
+                            </p>
                           </div>
                         )}
                       </div>
