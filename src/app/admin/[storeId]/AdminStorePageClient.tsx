@@ -20,15 +20,18 @@ import {
   updateCategory,
   deleteCategory,
   fetchStoreOrders,
-  StoreOrder
+  StoreOrder,
+  addProduct
 } from '../../../lib/db';
 import { getCommissionAnalytics, CommissionEvent } from '@/app/actions/commissionActions';
 import { getRevenueAnalytics, getReadyForDeliveryOrders } from '@/app/actions/orderActions'; // Import revenue and delivery analytics
 import { requestNotificationPermission } from '../../../lib/firebase-messaging';
-import { Product } from '../../../types/product';
+import { Product, MediaInfluencerProduct } from '../../../types/product';
 import { isGeneralProduct } from '../../../utils/productHelpers';
 import { Category } from '../../../types/category';
 import { StoreMeta } from '../../../types/store';
+import { mockMediaProducts } from '../../../lib/mockProducts';
+import { getHiddenMockIds, hideMockId } from '../../../utils/mockPersistence';
 import AdminHeader from '../../../components/admin/AdminHeader';
 import AdminSkeleton from '../../../components/admin/AdminSkeleton';
 import MobileNav from '../../../components/admin/MobileNav';
@@ -359,12 +362,30 @@ export default function AdminStorePageClient({
         getRevenueAnalytics(storeId), // Fetch revenue data
         getReadyForDeliveryOrders(storeId) // Fetch delivery orders
       ]);
-      setProducts(fetchedProducts);
-      setCategories(fetchedCategories);
-      setContacts(fetchedContacts);
       setStoreMeta(fetchedStoreMeta as StoreMeta);
       setReferrals(fetchedReferrals);
       setCommissionAnalytics(commissionData);
+
+      // --- Influencer Mock Injection ---
+      let processedProducts = fetchedProducts;
+      let processedCategories = fetchedCategories;
+
+      if (fetchedStoreMeta?.storeType === 'media-influencer' && fetchedProducts.length === 0) {
+        const hiddenIds = getHiddenMockIds(storeId);
+        processedProducts = (mockMediaProducts as Product[]).filter(p => !hiddenIds.includes(p.id));
+
+        if (fetchedCategories.length === 0) {
+          processedCategories = [
+            { id: 'pr-collabs', name: 'PR & Collab Services' },
+            { id: 'candles', name: 'Candles & Home' },
+            { id: 'apparel', name: 'Apparel & Modest Wear' },
+            { id: 'fragrances', name: 'Perfumes & Oils' }
+          ];
+        }
+      }
+
+      setProducts(processedProducts);
+      setCategories(processedCategories);
 
       if (revenueData) {
         setRealTotalRevenue(revenueData.lifetimeRevenue + revenueData.lifetimeBonus);
@@ -476,7 +497,23 @@ export default function AdminStorePageClient({
 
   const handleUpdateProduct = async (productId: string, updatedData: Partial<Product>) => {
     try {
-      await updateProduct(storeId, productId, updatedData);
+      // If updating a mock product, convert it to a real product in the database
+      if (productId.startsWith('media-') || productId.startsWith('candle-')) {
+        const mockProduct = products.find(p => p.id === productId);
+        if (mockProduct) {
+          const newProductData = {
+            ...mockProduct,
+            ...updatedData,
+            storeId: storeId, // Ensure it's for this store
+            id: undefined, // Let Firestore generate a real ID
+            createdAt: new Date() // Set real creation date
+          };
+          await addProduct(storeId, newProductData as any);
+          toast.success('Mock service converted to real product!');
+        }
+      } else {
+        await updateProduct(storeId, productId, updatedData);
+      }
       await handleManualRefresh();
     } catch (error) {
       console.error("Failed to update product:", error);
@@ -486,7 +523,13 @@ export default function AdminStorePageClient({
 
   const handleDeleteProduct = async (productId: string) => {
     try {
-      await deleteProduct(storeId, productId);
+      // If deleting a mock product, hide it locally
+      if (productId.startsWith('media-') || productId.startsWith('candle-')) {
+        hideMockId(storeId, productId);
+        toast.success('Mock service hidden');
+      } else {
+        await deleteProduct(storeId, productId);
+      }
       handleManualRefresh();
     } catch (error) {
       console.error("Failed to delete product:", error);

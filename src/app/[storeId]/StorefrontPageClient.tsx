@@ -32,6 +32,7 @@ import HeroCarousel from '@/components/customer/HeroCarousel';
 import NeedAWebsiteModal from '@/components/customer/modals/NeedAWebsiteModal';
 import InstallPrompt from '@/components/InstallPrompt';
 import { mockArtProducts, mockBeautyProducts, mockMediaProducts, mockSolarProducts, mockCandleProducts } from '@/lib/mockProducts';
+import { getHiddenMockIds } from '@/utils/mockPersistence';
 
 
 
@@ -160,6 +161,11 @@ export default function StorefrontPageClient({
   // --- MOCK DATA INJECTION FOR VISUALIZATION ---
   useEffect(() => {
     if (storeMeta?.storeType === 'media-influencer' && products.length === 0 && !loading) {
+      const hiddenIds = getHiddenMockIds(storeId);
+      const influencerMocks = (mockMediaProducts as any[]).filter(p => !hiddenIds.includes(p.id));
+
+      if (influencerMocks.length === 0) return; // All mocks hidden and no real products
+
       if (categories.length === 0) {
         setCategories([
           { id: 'pr-collabs', name: 'PR & Collab Services' },
@@ -170,10 +176,10 @@ export default function StorefrontPageClient({
       }
 
       if (activeCategoryId && activeCategoryId !== 'promo' && activeCategoryId !== 'popular' && activeCategoryId !== 'new-arrivals') {
-        const filtered = (mockMediaProducts as any[]).filter(p => p.categoryId === activeCategoryId);
+        const filtered = influencerMocks.filter(p => p.categoryId === activeCategoryId);
         setProducts(filtered);
       } else {
-        setProducts(mockMediaProducts as any[]);
+        setProducts(influencerMocks);
       }
     }
 
