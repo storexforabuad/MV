@@ -302,19 +302,28 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             initial={{ y: 20, opacity: 0 }}
                             animate={{ y: 0, opacity: 1 }}
                             transition={{ delay: 0.2 }}
-                            className="text-2xl sm:text-3xl md:text-3xl font-black text-white tracking-tighter leading-none break-words"
+                            className="text-2xl sm:text-3xl font-black text-white tracking-tighter leading-none whitespace-nowrap"
                         >
-                            Official <br />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-white to-rose-200 drop-shadow-sm">
-                                Booking Page
-                            </span>
+                            Official Booking Page
                         </motion.h3>
+
+                        <motion.div
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="flex items-center gap-2"
+                        >
+                            <span className="text-xs sm:text-sm font-bold text-amber-200/90 uppercase tracking-widest">
+                                For {storeMeta?.ceoName || 'Aisha Ibrahem'}
+                            </span>
+                            <div className="h-px w-8 bg-gradient-to-r from-amber-400/50 to-transparent" />
+                        </motion.div>
 
                         <motion.p
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ delay: 0.4 }}
-                            className="text-xs sm:text-sm text-white/90 max-w-xs sm:max-w-sm font-medium leading-tight line-clamp-2"
+                            className="text-xs sm:text-sm text-white/90 max-w-xs sm:max-w-sm font-medium leading-tight line-clamp-1 mt-1"
                         >
                             Professional promotion services, secured by BCN™ Escrow.
                         </motion.p>
@@ -352,18 +361,17 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                     <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(244,63,94,0.15),transparent)]" />
                 </div>
 
-                <div className="relative z-10 px-10 py-6 flex flex-col justify-between h-full w-full">
-                    <div className="flex justify-between items-start">
-                        <div className="space-y-0.5">
-                            <div className="flex items-center gap-2">
-                                <Users className="w-2.5 h-2.5 text-rose-400" />
-                                <h3 className="text-[9px] font-black text-rose-400 uppercase tracking-widest">Global Reach</h3>
-                            </div>
-                            <p className="text-base sm:text-lg font-black text-white leading-none">Social Media Stats</p>
+                <div className="relative z-10 px-8 pt-4 pb-12 flex flex-col justify-between h-full w-full overflow-hidden">
+                    <div className="flex flex-row items-center gap-2 overflow-hidden">
+                        <div className="flex items-center gap-1 shrink-0">
+                            <Users className="w-2.5 h-2.5 text-rose-400" />
+                            <h3 className="text-[8px] font-black text-rose-400 uppercase tracking-widest whitespace-nowrap">Global Reach</h3>
                         </div>
+                        <span className="text-white/20 text-[10px]">•</span>
+                        <p className="text-xs sm:text-sm font-black text-white leading-none whitespace-nowrap uppercase tracking-tighter">Social Media Stats</p>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1">
                         {[
                             { label: 'Instagram', value: stats.instagramFollowers || 45000, color: 'text-pink-400', icon: '📸' },
                             { label: 'TikTok', value: stats.tiktokFollowers || 120000, color: 'text-cyan-400', icon: '🎵' },
