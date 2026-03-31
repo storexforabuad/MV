@@ -1263,21 +1263,10 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                             </div>
                           </div>
                         )}
-                        {b.volume && (
-                          <div className="flex items-start gap-3 p-3 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
-                            <div className="w-8 h-8 rounded-full bg-cyan-100 dark:bg-cyan-900/40 flex items-center justify-center text-cyan-600 dark:text-cyan-400">
-                              <Database className="w-4 h-4" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-[10px] font-bold text-gray-500 tracking-wider uppercase">Volume</p>
-                              <p className="text-sm font-semibold text-gray-900 dark:text-white mt-0.5">{b.volume}</p>
-                            </div>
-                          </div>
-                        )}
                       </div>
 
                       {/* Instructions / How to Use */}
-                      {(b.howToUse || b.instructions) && (
+                      {b.howToUse && (
                         <div className="mt-6 p-6 rounded-[2rem] bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100/50 dark:border-indigo-800/30">
                           <div className="flex items-center gap-2 mb-3">
                             <div className="w-8 h-8 rounded-xl bg-white dark:bg-gray-800 shadow-sm flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-700">
@@ -1286,7 +1275,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                             <h4 className="text-sm font-bold text-indigo-900 dark:text-indigo-300">How to Use</h4>
                           </div>
                           <p className="text-sm text-indigo-800/70 dark:text-indigo-300/70 leading-relaxed">
-                            {b.howToUse || b.instructions}
+                            {b.howToUse}
                           </p>
                         </div>
                       )}

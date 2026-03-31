@@ -496,7 +496,7 @@ export default function AdminStorePageClient({
   const handleAddCategory = async (name: string) => {
     // Generate a temporary ID for optimistic update
     const tempId = `temp-${Date.now()}`;
-    const tempCategory: Category = { id: tempId, name, storeId };
+    const tempCategory: Category = { id: tempId, name };
 
     setCategories(prev => [...prev, tempCategory]);
 

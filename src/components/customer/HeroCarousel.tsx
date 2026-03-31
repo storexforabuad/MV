@@ -45,7 +45,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
 
     const is420Hub = storeMeta?.id === '420-Hub' || storeMeta?.name === '420-Hub' || storeMeta?.name === '420 Hub';
     const isStunnerStores = storeMeta?.id?.toLowerCase().includes('stunner') || storeMeta?.name?.toLowerCase().includes('stunner');
-    const isMediaInfluencer = storeMeta?.storeType === 'media-influencer' || storeMeta?.storeType === 'media';
+    const isMediaInfluencer = storeMeta?.storeType === 'media-influencer';
     // Only show the second slide if it's a restaurant or fashion store
     const showWelcomeSlide = false;
     const slideCount = isStunnerStores ? 2 : 1; // Stunner Stores has the Glam section slide
