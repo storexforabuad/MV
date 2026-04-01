@@ -78,6 +78,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const hasPushedState = useRef(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const sizeSectionRef = useRef<HTMLDivElement>(null);
+  const emailSectionRef = useRef<HTMLDivElement>(null);
 
   const routeParams = useParams();
   const storeId = typeof routeParams?.storeId === 'string' ? routeParams.storeId : Array.isArray(routeParams?.storeId) ? routeParams.storeId[0] : undefined;
@@ -392,6 +393,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const handleProceedToPayment = () => {
     if (!customer && !guestEmail && isPaymentFlowEnabled && isServiceProduct) {
       setEmailError('Please enter your email to continue');
+      emailSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
 
@@ -1456,7 +1458,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
                                 {/* Guest Email (Capture on Brief page for services since summary is standard) */}
                                 {!customer && isPaymentFlowEnabled && (
-                                  <div className="p-5 rounded-3xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100/50 dark:border-blue-800/30">
+                                  <div ref={emailSectionRef} className="p-5 rounded-3xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100/50 dark:border-blue-800/30">
                                     <label className="block text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-2 ml-1">Fulfillment Email</label>
                                     <input
                                       type="email"
@@ -1754,7 +1756,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           className="w-full rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 shadow-lg transition-all active:scale-[0.98]"
                           onClick={() => setCurrentPage(2)}
                         >
-                          Next
+                          {isServiceProduct ? 'Book' : 'Order'}
                         </button>
                       ) : currentPage === summaryPageNum ? (
                         <div className="flex gap-3">

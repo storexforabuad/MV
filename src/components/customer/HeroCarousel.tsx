@@ -48,7 +48,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
     const isMediaInfluencer = storeMeta?.storeType === 'media-influencer';
     // Only show the second slide if it's a restaurant or fashion store
     const showWelcomeSlide = false;
-    const slideCount = isStunnerStores ? 2 : isMediaInfluencer ? 2 : 1;
+    const slideCount = isStunnerStores ? 2 : isMediaInfluencer ? 1 : 1;
 
     const paginate = (newDirection: number) => {
         if (slideCount <= 1) return;

@@ -45,10 +45,13 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
   const [hasPlacedOrder, setHasPlacedOrder] = useState(false);
   const [showSizeError, setShowSizeError] = useState(false);
   const [imageLoading, setImageLoading] = useState<Record<string, boolean>>({});
+  const [guestEmail, setGuestEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
 
   const hasPushedState = useRef(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const sizeSectionRef = useRef<Record<string, HTMLDivElement | null>>({});
+  const emailSectionRef = useRef<HTMLDivElement>(null);
 
   const storeId = passedStoreId || cartItems[0]?.storeId;
   const { addOrder } = useOrders(customer?.id || null, storeId || "");
@@ -312,6 +315,21 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
   };
 
   const handleProceedToPayment = () => {
+    if (!customer && !guestEmail && isPaymentFlowEnabled && hasService) {
+      setEmailError('Please enter your email to continue');
+      emailSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    if (guestEmail && !guestEmail.includes('@')) {
+      setEmailError('Please enter a valid email address');
+      return;
+    }
+
+    if (guestEmail) {
+      localStorage.setItem('guest_email', guestEmail);
+    }
+
     setCurrentPage(2);
     if (storeId) {
       saveModalState(storeId, 2, uploadedEvidence?.url, uploadedEvidence?.fileName);
@@ -724,6 +742,29 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                             />
                           </div>
 
+                          {/* Guest Email Capture for Services */}
+                          {!customer && isPaymentFlowEnabled && hasService && (
+                            <div ref={emailSectionRef} className="mt-8 p-5 rounded-3xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100/50 dark:border-blue-800/30">
+                              <label className="block text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-2 ml-1">Fulfillment Email</label>
+                              <input
+                                type="email"
+                                placeholder="Where should we send updates?"
+                                value={guestEmail}
+                                onChange={(e) => {
+                                  setGuestEmail(e.target.value);
+                                  if (emailError) setEmailError('');
+                                }}
+                                className={`w-full px-5 py-4 rounded-2xl bg-white dark:bg-gray-800/40 border ${emailError ? 'border-red-500 ring-1 ring-red-500' : 'border-blue-100/30 dark:border-blue-800/20'} focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm font-medium transition-colors`}
+                              />
+                              {emailError && (
+                                <p className="mt-2 text-xs font-bold text-red-500 flex items-center gap-1">
+                                  <AlertCircle className="w-3.5 h-3.5" />
+                                  {emailError}
+                                </p>
+                              )}
+                            </div>
+                          )}
+
                           {/* Delivery Method */}
                           {!hasVehicle && (
                             <div className="mt-8 border-t border-gray-200 dark:border-gray-800 pt-6">
@@ -817,7 +858,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                           className="w-full rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 shadow-lg transition-all active:scale-[0.98]"
                           onClick={() => setCurrentPage(2)}
                         >
-                          Review Order Summary
+                          {allServices ? 'Book' : 'Order'}
                         </button>
                       ) : currentPage === summaryPageNum ? (
                         <div className="flex gap-3">
