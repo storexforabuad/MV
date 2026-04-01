@@ -268,6 +268,13 @@ const ProductGrid = memo(function ProductGrid({
           storeId={storeId || undefined}
           onProductClick={(product) => {
             setIsSearchOverlayOpen(false);
+            const targetUrl = storeId
+              ? `/${storeId}/products/${product.id}`
+              : `/bizcon/products/${product.id}?storeId=${product.storeId}`;
+
+            // Using window.location.href for the most robust navigation from a modal state
+            // to ensure it doesn't get cancelled by the component unmounting.
+            window.location.href = targetUrl;
           }}
         />
       )}

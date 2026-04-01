@@ -1,5 +1,5 @@
 'use client';
-import { Tag, Rocket, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays, CheckCircle2, Briefcase, ShieldCheck, Clock, AlertCircle, ExternalLink, Warehouse, Settings, ArrowLeft } from 'lucide-react';
+import { Tag, Rocket, Star, AlertTriangle, Eye, Gift, XCircle, RefreshCw, Archive, ShoppingCart, Share2, Lightbulb, Users, Percent, Send, Globe, Truck, TrendingUp, TrendingDown, Upload, Megaphone, CalendarDays, CheckCircle2, Briefcase, ShieldCheck, Clock, AlertCircle, ExternalLink, Warehouse, Settings, ArrowLeft, Compass } from 'lucide-react';
 import { Dispatch, SetStateAction, useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useVendor } from '@/context/VendorContext';
@@ -94,21 +94,12 @@ const ReferralBonusModal = ({ totalReferralBonus, handleClose }: { totalReferral
 
 const cardData: { label: string, subtitle?: string, valueKey?: keyof AdminHomeCardsProps, icon: React.ElementType, gradient: string, text: string, component: React.ElementType | null, glowClass: string, isAiCard?: boolean, colspan?: number, isWholesaleCard?: boolean, cardType?: 'metric' | 'action' }[] = [
   {
-    label: 'Compass 🧭',
-    icon: ShieldCheck,
+    label: 'Compass',
+    icon: Compass,
     gradient: 'bg-gradient-to-br from-amber-400 via-orange-500 to-indigo-700',
     text: 'text-white',
     component: null,
     glowClass: 'dark:shadow-orange-500/30 shadow-indigo-500/50',
-    cardType: 'action',
-  },
-  {
-    label: 'Compass 🧭',
-    icon: Globe,
-    gradient: 'bg-gradient-to-br from-blue-600 via-indigo-700 to-purple-800',
-    text: 'text-white',
-    component: null,
-    glowClass: 'dark:shadow-blue-500/30 shadow-blue-500/50',
     cardType: 'action',
   },
   {
@@ -526,7 +517,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const ordersIndex = cardData.findIndex(card => card.label === 'Orders');
 
   // Filter to show only specific cards
-  const allowedCards = ['Launch', 'Compass 🧭', 'Orders', 'Settings', 'Views', 'Manage Categories', 'Manage Products', 'Subscription', 'Circles', 'Revenue', 'Deliveries', 'Customers'];
+  const allowedCards = ['Launch', 'Compass', 'Orders', 'Settings', 'Views', 'Manage Categories', 'Manage Products', 'Subscription', 'Circles', 'Revenue', 'Deliveries', 'Customers'];
   const cardsToRender = cardData.filter(card => {
     if (allowedCards.includes(card.label)) {
       if (card.label === 'Subscription' && props.storeType === 'media-influencer') return false;
@@ -601,8 +592,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     }
 
     const { label, subtitle } = card;
-    if (label === 'Compass 🧭') setIsBCNBenefitsModalOpen(true);
-    else if (label === 'Compass 🧭') setIsBizconNetworkModalOpen(true);
+    if (label === 'Compass') setIsBCNBenefitsModalOpen(true);
+    else if (label === 'Compass') setIsBizconNetworkModalOpen(true);
     else if (label === 'Launch') setIsLaunchGuideModalOpen(true);
     else if (label === 'Tips') setIsTipsModalOpen(true);
     else if (label === 'Views') setIsViewsModalOpen(true);

@@ -212,7 +212,7 @@ export default function PaymentSuccessPage() {
             <div className="mt-12 text-center pb-8">
                 <p className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.3em] flex items-center justify-center gap-2">
                     <span className="w-8 h-px bg-gray-200 dark:bg-gray-800"></span>
-                    SECURED BY <span className="text-gray-900 dark:text-white">BCN™</span>
+                    SECURED BY <span className="text-gray-900 dark:text-white">Compass 🧭</span>
                     <span className="w-8 h-px bg-gray-200 dark:bg-gray-800"></span>
                 </p>
             </div>

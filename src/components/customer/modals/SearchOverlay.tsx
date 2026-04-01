@@ -110,16 +110,21 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
                                 <div className="space-y-4">
                                     <p className="text-xs font-bold uppercase tracking-widest text-gray-400 dark:text-zinc-500 mb-6">Found {filteredProducts.length} items</p>
                                     {filteredProducts.map((product) => (
-                                        <Link
+                                        <motion.div
                                             key={product.id}
-                                            href={storeId
-                                                ? `/${storeId}/products/${product.id}`
-                                                : `/bizcon/products/${product.id}?storeId=${product.storeId}`
-                                            }
-                                            onClick={() => {
+                                            layout
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, scale: 0.95 }}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
                                                 onProductClick(product);
+                                                window.location.href = storeId
+                                                    ? `/${storeId}/products/${product.id}`
+                                                    : `/bizcon/products/${product.id}?storeId=${product.storeId}`;
                                             }}
-                                            className="block"
+                                            className="block cursor-pointer"
                                         >
                                             <motion.div
                                                 initial={{ opacity: 0, y: 10 }}
@@ -157,7 +162,7 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
                                                     <ArrowRight className="w-5 h-5" />
                                                 </div>
                                             </motion.div>
-                                        </Link>
+                                        </motion.div>
                                     ))}
                                 </div>
                             ) : (

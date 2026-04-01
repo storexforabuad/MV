@@ -205,8 +205,8 @@ export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean;
                     </div>
 
                     <div className="mt-8 text-center">
-                      <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">
-                        POWERED BY <span className="text-indigo-600 dark:text-indigo-400">Compass 🧭</span> 2026.
+                      <p className="text-[10px] font-bold text-center text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-8 flex items-center justify-center gap-1.5 translate-y-2">
+                        Powered by <span className="text-slate-500 dark:text-slate-300">Compass 🧭</span>
                       </p>
                     </div>
                   </div>

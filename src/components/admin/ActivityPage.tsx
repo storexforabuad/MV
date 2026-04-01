@@ -181,7 +181,7 @@ const ActivityPage: React.FC<ActivityPageProps> = ({
         id: "tip6",
         icon: ShieldCheck,
         color: "from-amber-400 to-orange-500",
-        text: "Always encourage brands to use BCN™ Escrow for guaranteed payouts."
+        text: "Always encourage brands to use Compass 🧭 Escrow for guaranteed payouts."
       },
       {
         id: "tip7",

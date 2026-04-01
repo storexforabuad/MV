@@ -157,8 +157,8 @@ const OrderReceiptModal: React.FC<OrderReceiptModalProps> = ({ isOpen, onClose, 
                                         </button>
                                     </div>
 
-                                    <p className="text-center text-[10px] font-bold text-gray-400 uppercase tracking-[0.2em] pt-4">
-                                        Secured by <span className="text-gray-600 dark:text-gray-300">BCN™</span>
+                                    <p className="text-[10px] font-bold text-center text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-8 flex items-center justify-center gap-1.5 translate-y-2">
+                                        Powered by <span className="text-slate-500 dark:text-slate-300">Compass 🧭</span>
                                     </p>
                                 </div>
 
