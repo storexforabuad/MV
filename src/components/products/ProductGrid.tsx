@@ -265,13 +265,9 @@ const ProductGrid = memo(function ProductGrid({
           isOpen={isSearchOverlayOpen}
           onClose={() => setIsSearchOverlayOpen(false)}
           products={products}
+          storeId={storeId || undefined}
           onProductClick={(product) => {
             setIsSearchOverlayOpen(false);
-            // Always navigate to product page from search results to provide full context (category + product)
-            const targetUrl = storeId
-              ? `/${storeId}/products/${product.id}`
-              : `/bizcon/products/${product.id}?storeId=${product.storeId}`;
-            router.push(targetUrl);
           }}
         />
       )}

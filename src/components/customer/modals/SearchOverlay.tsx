@@ -15,13 +15,15 @@ interface SearchOverlayProps {
     onClose: () => void;
     products: Product[];
     onProductClick: (product: Product) => void;
+    storeId?: string;
 }
 
 const SearchOverlay: React.FC<SearchOverlayProps> = ({
     isOpen,
     onClose,
     products,
-    onProductClick
+    onProductClick,
+    storeId
 }) => {
     const [query, setQuery] = useState('');
     const inputRef = useRef<HTMLInputElement>(null);
@@ -110,9 +112,11 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
                                     {filteredProducts.map((product) => (
                                         <Link
                                             key={product.id}
-                                            href={`#`} // Placeholder, handled by onClick or actual href if preferred
-                                            onClick={(e) => {
-                                                e.preventDefault();
+                                            href={storeId
+                                                ? `/${storeId}/products/${product.id}`
+                                                : `/bizcon/products/${product.id}?storeId=${product.storeId}`
+                                            }
+                                            onClick={() => {
                                                 onProductClick(product);
                                             }}
                                             className="block"
