@@ -146,7 +146,7 @@ export async function getCommissionDashboardData(referralCode: string) {
                 console.error('Error reading commissionPayments for store', storeId, err);
             }
 
-            // Ambassador earns ambassadorPercent of BizConnect's 4.5% fee
+            // Ambassador earns ambassadorPercent of Compass ??'s 4.5% fee
             const weeklyCommission = sumRevenueLast7Days * 0.045 * (ambassadorPercent / 100);
 
             // Commission period: 5 years from referralDate

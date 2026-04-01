@@ -130,7 +130,7 @@ export function Receipt({ orders }: { orders: Order[] }) {
             </div>
 
             <div className="bg-gray-50 text-center py-3 px-6 rounded-b-2xl relative z-10">
-                <p className="text-xs text-gray-500 font-medium">Powered by <span className="font-bold text-indigo-600">BizconNet™</span> Network</p>
+                <p className="text-xs text-gray-500 font-medium">Powered by <span className="font-bold text-indigo-600">Compass 🧭</span> Network</p>
             </div>
             <div className="absolute bottom-0 left-0 w-full h-16 bg-gray-50/50 backdrop-blur-xl" style={{
                 clipPath: 'ellipse(100% 55% at 48% 100%)'

@@ -1,10 +1,10 @@
 import { Suspense } from 'react';
-import BizconContent from './BizconContent';
+import compassContent from './compassContent';
 
-export default function BizconPage() {
+export default function compassPage() {
   return (
     <Suspense>
-      <BizconContent />
+      <compassContent />
     </Suspense>
   );
 }

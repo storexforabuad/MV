@@ -51,7 +51,7 @@ export default function EscrowDeliverablePanel({
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || 'ml_default');
-        formData.append('folder', `bizconnet/deliverables/${storeId}`);
+        formData.append('folder', `Compass 🧭/deliverables/${storeId}`);
 
         const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '';
         const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/upload`, {
@@ -140,7 +140,7 @@ export default function EscrowDeliverablePanel({
         try {
             const result = await disputeEscrow(storeId, orderId, disputeReason);
             if (result.success) {
-                toast.success('Dispute submitted. BizCon admin will review.');
+                toast.success('Dispute submitted. compass admin will review.');
                 setShowDisputeInput(false);
                 onUpdate?.();
             } else {
@@ -377,7 +377,7 @@ export default function EscrowDeliverablePanel({
                         <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
                         <div>
                             <p className="text-sm font-semibold text-red-700 dark:text-red-300">Under Dispute</p>
-                            <p className="text-xs text-red-600 dark:text-red-400">Escrow funds are frozen. BizCon support will review the case.</p>
+                            <p className="text-xs text-red-600 dark:text-red-400">Escrow funds are frozen. compass support will review the case.</p>
                         </div>
                     </div>
                     {isInfluencerView && (

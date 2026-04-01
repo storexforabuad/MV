@@ -101,7 +101,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                     </div>
                 </div>
 
-                {/* Powered by Bizconnet™ at the bottom right */}
+                {/* Powered by Compass 🧭 at the bottom right */}
                 <div className="absolute bottom-4 right-6 z-20">
                     <span className="text-[10px] sm:text-xs font-semibold text-white/40 tracking-wider">
                         Powered by <span className="text-emerald-500/80">Compass 🧭</span>
@@ -146,7 +146,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                     </div>
                 </div>
 
-                {/* Powered by Bizconnet™ at the bottom right */}
+                {/* Powered by Compass 🧭 at the bottom right */}
                 <div className="absolute bottom-4 right-6 z-20">
                     <span className="text-[10px] sm:text-xs font-semibold text-white/40 tracking-wider">
                         Powered by <span className="text-violet-500/80">Compass 🧭</span>
@@ -192,7 +192,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                     </div>
                 </div>
 
-                {/* Powered by Bizconnet™ at the bottom right */}
+                {/* Powered by Compass 🧭 at the bottom right */}
                 <div className="absolute bottom-4 right-6 z-20">
                     <span className="text-[10px] sm:text-xs font-semibold text-white/40 tracking-wider">
                         Powered by <span className="text-violet-500/80">Compass 🧭</span>

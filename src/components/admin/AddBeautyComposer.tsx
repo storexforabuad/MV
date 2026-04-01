@@ -267,7 +267,7 @@ const AddBeautyComposer: React.FC<AddBeautyComposerProps> = ({ isOpen, onClose, 
         try {
             let processedFile = await compressImage(imageItem.file);
             if (useWatermark) {
-                let watermarkText = instagramHandle || `${storeName} | BizconNet™Verified`;
+                let watermarkText = instagramHandle || `${storeName} | Compass 🧭Verified`;
                 processedFile = await applyWatermark(processedFile, watermarkText);
             }
 

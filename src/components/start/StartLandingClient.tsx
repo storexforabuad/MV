@@ -31,7 +31,7 @@ export default function StartLandingClient({ referralCode, ambassadorName }: Sta
                         <div className="w-8 h-8 bg-emerald-500 rounded-xl flex items-center justify-center">
                             <Zap className="w-5 h-5 text-white fill-current" />
                         </div>
-                        <span className="text-lg font-black tracking-tight">BizConnect</span>
+                        <span className="text-lg font-black tracking-tight">Compass 🧭</span>
                     </div>
                     <div className="flex items-center gap-4">
                         <Link href="/login" className="text-sm font-bold text-slate-500 hover:text-slate-900 dark:hover:text-white transition-colors">
@@ -77,7 +77,7 @@ export default function StartLandingClient({ referralCode, ambassadorName }: Sta
                             >
                                 Start Your <br />
                                 <span className="text-emerald-500">Business</span> <br />
-                                with BizConnect.
+                                with Compass 🧭.
                             </motion.h1>
 
                             <motion.p
@@ -122,7 +122,7 @@ export default function StartLandingClient({ referralCode, ambassadorName }: Sta
                             <div className="relative aspect-video rounded-3xl overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900">
                                 <Image
                                     src="/images/start-hero.png"
-                                    alt="BizConnect Storefront Interface"
+                                    alt="Compass ?? Storefront Interface"
                                     fill
                                     className="object-cover"
                                     priority

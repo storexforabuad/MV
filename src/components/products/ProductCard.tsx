@@ -273,7 +273,7 @@ export default function ProductCard({
 
   const productLink = storeId
     ? `/${storeId}/products/${product.id}`
-    : `/bizcon/products/${product.id}?storeId=${product.storeId}`;
+    : `/compass/products/${product.id}?storeId=${product.storeId}`;
 
 
   const discount = calculateDiscount(product.price, product.originalPrice);
@@ -320,9 +320,9 @@ export default function ProductCard({
     isCopyingRef.current = true;
     setTimeout(() => { isCopyingRef.current = false; }, 2000);
 
-    const finalStoreId = storeId || product.storeId || 'bizcon';
-    const url = `https://tinyurl.com/bizconnet/${finalStoreId}/products/${product.id}`;
-    const caption = `Check out ${product.name} at ${storeMeta?.name || 'our store'} Online Store: ${url}`;
+    const finalStoreId = storeId || product.storeId || 'compass';
+    const url = `https://tinyurl.com/thelinkinmybio/${finalStoreId}/products/${product.id}`;
+    const caption = `Discover this amazing find on Compass 🧭\n\nCheck out ${product.name} at ${storeMeta?.name || 'our store'} Online Store: ${url}`;
 
     navigator.clipboard.writeText(caption)
       .then(() => {

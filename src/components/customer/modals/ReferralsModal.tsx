@@ -37,7 +37,7 @@ const ReferralsModal: React.FC<ReferralsModalProps> = ({ isOpen, onClose, storeI
   const [copied, setCopied] = useState(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-  const referralLink = customer ? `https://tinyurl.com/bizconnet/${storeId}?ref=${customer.referralCode}` : '';
+  const referralLink = customer ? `https://tinyurl.com/thelinkinmybio/${storeId}?ref=${customer.referralCode}` : '';
   const referralData = customer?.referralDataByStore?.[storeId];
   const commissionEarned = referralData?.commissionEarned || 0;
   const referralCount = referralData?.referralCount || 0;

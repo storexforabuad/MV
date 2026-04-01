@@ -270,7 +270,7 @@ const ProductGrid = memo(function ProductGrid({
             setIsSearchOverlayOpen(false);
             const targetUrl = storeId
               ? `/${storeId}/products/${product.id}`
-              : `/bizcon/products/${product.id}?storeId=${product.storeId}`;
+              : `/compass/products/${product.id}?storeId=${product.storeId}`;
 
             // Using window.location.href for the most robust navigation from a modal state
             // to ensure it doesn't get cancelled by the component unmounting.
@@ -374,7 +374,7 @@ const ProductGrid = memo(function ProductGrid({
                       <Globe className={`w-4 h-4 ${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}`} />
                     </div>
                     <span className={`text-[10px] font-black tracking-[0.2em] uppercase ${isStunnerStores ? 'text-violet-400/80' : is420Hub ? 'text-emerald-400/80' : 'text-amber-400/80'}`}>
-                      POWERED BY <span className={isStunnerStores ? 'text-violet-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}>BIZCONNET™ 2026.</span>
+                      POWERED BY <span className={isStunnerStores ? 'text-violet-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}>COMPASS 🧭 2026.</span>
                     </span>
                   </div>
 

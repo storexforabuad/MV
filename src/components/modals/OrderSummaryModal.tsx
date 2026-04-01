@@ -313,7 +313,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
         // toast.success('Order placed! Redirecting to WhatsApp...');
 
-        const productUrl = `https://tinyurl.com/bizconnet/${storeId}/products/${product.id}${interactiveSelectedColor ? `?v=${encodeURIComponent(interactiveSelectedColor)}` : ''}`;
+        const productUrl = `https://tinyurl.com/thelinkinmybio/${storeId}/products/${product.id}${interactiveSelectedColor ? `?v=${encodeURIComponent(interactiveSelectedColor)}` : ''}`;
 
         let message = '';
         if (isVehicleProduct(product)) {

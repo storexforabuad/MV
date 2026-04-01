@@ -114,7 +114,7 @@ export default function VehicleCard({ product, storeId, onOrderClick }: VehicleC
 
     const productLink = storeId
         ? `/${storeId}/products/${product.id}`
-        : `/bizcon/products/${product.id}?storeId=${product.storeId}`;
+        : `/compass/products/${product.id}?storeId=${product.storeId}`;
 
     const handleImageError = () => {
         // Fallback handled via UI if needed, but displayImage covers most cases
@@ -151,8 +151,8 @@ export default function VehicleCard({ product, storeId, onOrderClick }: VehicleC
         isCopyingRef.current = true;
         setTimeout(() => { isCopyingRef.current = false; }, 2000);
 
-        const finalStoreId = storeId || product.storeId || 'bizcon';
-        const url = `https://tinyurl.com/bizconnet/${finalStoreId}/products/${product.id}`;
+        const finalStoreId = storeId || product.storeId || 'compass';
+        const url = `https://tinyurl.com/thelinkinmybio/${finalStoreId}/products/${product.id}`;
         const caption = `Check out ${product.name} at our store Online Store: ${url}`;
 
         navigator.clipboard.writeText(caption)

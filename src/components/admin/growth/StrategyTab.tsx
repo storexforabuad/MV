@@ -64,7 +64,7 @@ const contentCalendar = [
 const objections = [
     {
         objection: '"I already use WhatsApp to take orders."',
-        reply: 'That\'s exactly why you\'ll love this! BizConnect works WITH WhatsApp — it organizes your orders into a professional catalogue, so customers can browse and order directly. You still receive all orders via WhatsApp. It just makes you look 10x more professional.'
+        reply: 'That\'s exactly why you\'ll love this! Compass ?? works WITH WhatsApp — it organizes your orders into a professional catalogue, so customers can browse and order directly. You still receive all orders via WhatsApp. It just makes you look 10x more professional.'
     },
     {
         objection: '"It\'s too expensive."',
@@ -110,8 +110,7 @@ export default function StrategyTab() {
     };
 
     const copyStory = () => {
-        const story = `🎉 Exciting news!\n\n[Vendor Name]'s store just received its FIRST online order through BizconNet™!\n\nCustomers can now browse their full catalogue and order directly via WhatsApp 👇\n🔗 [Store Link]\n\
-nIf you run a business and want a professional storefront like this, DM me — I'll set it up for you for FREE for 14 days!\n\n#BizConnect #NigerianBusiness #MSME #Kano #Nigeria`;
+        const story = `🎉 Exciting news!\n\n[Vendor Name]'s store just received its FIRST online order through Compass 🧭!\n\nCustomers can now browse their full catalogue and order directly via WhatsApp 👇\n🔗 [Store Link]\n\nIf you run a business and want a professional storefront like this, DM me — I'll set it up for you for FREE for 14 days!\n\n#NigerianBusiness #MSME #Kano #Nigeria`;
         navigator.clipboard.writeText(story);
         setStoryTemplateCopied(true);
         setTimeout(() => setStoryTemplateCopied(false), 2000);
@@ -249,7 +248,7 @@ nIf you run a business and want a professional storefront like this, DM me — I
                                 <Zap className="w-4 h-4 text-yellow-500" /> Influencer "Free Forever" Pitch
                             </h3>
                             <button
-                                onClick={() => copyTemplate('influencer', "Hey [Name]! 🌟 I love your content. We've built a professional storefront platform called BizconNet™ and we'd love to set you up with a Free Forever Max Account for your merch/products. It looks premium, handles all orders on WhatsApp, and your followers will love the experience. Check out this demo we made for you: [Link]. No strings attached – would you be interested?")}
+                                onClick={() => copyTemplate('influencer', "Hey [Name]! 🌟 I love your content. We've built a professional storefront platform called Compass 🧭 and we'd love to set you up with a Free Forever Max Account for your merch/products. It looks premium, handles all orders on WhatsApp, and your followers will love the experience. Check out this demo we made for you: [Link]. No strings attached – would you be interested?")}
                                 className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-3 py-1.5 rounded-lg transition-all"
                             >
                                 {copiedKey === 'influencer' ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
@@ -258,7 +257,7 @@ nIf you run a business and want a professional storefront like this, DM me — I
                         </div>
                         <div className="relative bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
                             <p className="text-sm text-slate-700 dark:text-slate-300 italic leading-relaxed">
-                                "Hey [Name]! 🌟 I love your content. We've built a professional storefront platform called BizconNet™ and we'd love to set you up with a **Free Forever Max Account** for your merch/products. It looks premium, handles all orders on WhatsApp, and your followers will love the experience. Check out this demo we made for you: [Link]. No strings attached – would you be interested?"
+                                "Hey [Name]! 🌟 I love your content. We've built a professional storefront platform called Compass 🧭 and we'd love to set you up with a **Free Forever Max Account** for your merch/products. It looks premium, handles all orders on WhatsApp, and your followers will love the experience. Check out this demo we made for you: [Link]. No strings attached – would you be interested?"
                             </p>
                             <div className="absolute -top-2 -right-2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-1 rounded-lg shadow-lg">
                                 VIRAL SCALE
@@ -278,14 +277,14 @@ nIf you run a business and want a professional storefront like this, DM me — I
                     <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-900/30 mb-4 font-mono text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed">
                         {`🎉 Exciting news!
 
-[Vendor Name]'s store just received its FIRST online order through BizconNet™!
+[Vendor Name]'s store just received its FIRST online order through Compass 🧭!
 
 Customers can now browse their full catalogue and order directly via WhatsApp 👇
 🔗 [Store Link]
 
 If you run a business and want a professional storefront like this, DM me — I'll set it up for you for FREE for 14 days!
 
-#BizConnect #NigerianBusiness #MSME #Kano #Nigeria`}
+#Compass ?? #NigerianBusiness #MSME #Kano #Nigeria`}
                     </div>
                     <button
                         onClick={copyStory}

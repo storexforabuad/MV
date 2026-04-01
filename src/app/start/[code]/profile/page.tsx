@@ -6,7 +6,7 @@ interface PageProps {
 }
 
 export const metadata = {
-    title: 'Ambassador Profile | BizConnect',
+    title: 'Ambassador Profile | Compass 🧭',
     description: 'Manage your ambassador profile and earnings details'
 };
 

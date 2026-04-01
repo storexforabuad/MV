@@ -162,7 +162,7 @@ export default function CartPage() {
       <NeedAWebsiteModal
         isOpen={isNeedWebsiteModalOpen}
         onClose={() => setIsNeedWebsiteModalOpen(false)}
-        storeId={Object.keys(storeMetas)[0] || 'bizcon'}
+        storeId={Object.keys(storeMetas)[0] || 'compass'}
         storeName={Object.values(storeMetas)[0]?.name}
       />
       <div className="min-h-screen mx-auto max-w-2xl px-3 sm:px-4 pb-8 pt-[calc(var(--navbar-height)+1.5rem)] sm:pt-[calc(var(--navbar-height)+2rem)] flex flex-col">
@@ -244,7 +244,7 @@ export default function CartPage() {
                         <Globe className={`w-4 h-4 ${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}`} />
                       </div>
                       <span className={`text-[10px] font-black tracking-[0.2em] uppercase ${isStunnerStores ? 'text-violet-400/80' : is420Hub ? 'text-emerald-400/80' : 'text-amber-400/80'}`}>
-                        POWERED BY <span className={isStunnerStores ? 'text-violet-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}>BIZCONNET™ 2026.</span>
+                        POWERED BY <span className={isStunnerStores ? 'text-violet-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}>Compass 🧭 2026.</span>
                       </span>
                     </div>
 

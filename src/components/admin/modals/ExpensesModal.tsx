@@ -61,7 +61,7 @@ export default function ExpensesModal({ isOpen, onClose, totalCommission, totalE
           {/* --- Main Scrollable Content --- */}
           <main className="flex-grow overflow-y-auto p-5 space-y-4 bg-gray-50 dark:bg-slate-950/50">
 
-            {/* Bizcon Commission Expense */}
+            {/* compass Commission Expense */}
             <div className="bg-white dark:bg-slate-800 p-4 rounded-xl border border-gray-100 dark:border-slate-700 shadow-sm">
               <div className="flex justify-between items-start mb-2">
                 <div className="flex items-center gap-3">
@@ -69,7 +69,7 @@ export default function ExpensesModal({ isOpen, onClose, totalCommission, totalE
                     <Percent className="w-5 h-5 text-red-500 dark:text-red-400" />
                   </div>
                   <div>
-                    <p className="font-semibold text-slate-800 dark:text-slate-100">BizconNet™Commission</p>
+                    <p className="font-semibold text-slate-800 dark:text-slate-100">Compass 🧭Commission</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Platform & network fees</p>
                   </div>
                 </div>

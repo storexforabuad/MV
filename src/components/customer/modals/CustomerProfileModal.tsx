@@ -347,7 +347,7 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
                             <div>
                               <h5 className="text-sm font-bold text-gray-900 dark:text-white mb-1">How Escrow Works</h5>
                               <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed">
-                                Your payment is held securely by BizCon. We only release it to the influencer once you approve their work or the delivery window passes.
+                                Your payment is held securely by Compass 🧭. We only release it to the influencer once you approve their work or the delivery window passes.
                               </p>
                             </div>
                           </div>
@@ -619,7 +619,7 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
                         {!customer && (
                           <div className="p-6 rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg">
                             <h4 className="text-lg font-bold mb-2">Create an account?</h4>
-                            <p className="text-xs opacity-80 mb-6 leading-relaxed">Save your details securely and manage multiple delivery addresses across all BizCon stores.</p>
+                            <p className="text-xs opacity-80 mb-6 leading-relaxed">Save your details securely and manage multiple delivery addresses across all Compass stores.</p>
                             <button onClick={() => { onClose(); setTimeout(() => promptLogin(), 300); }} className="w-full py-3 bg-white text-blue-600 rounded-xl font-bold text-sm shadow-lg shadow-blue-900/20 hover:-translate-y-0.5 transition">
                               Register Now
                             </button>

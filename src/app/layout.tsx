@@ -41,13 +41,13 @@ export async function generateMetadata({ params }: { params: { storeId: string }
 
   // Default metadata if no storeId or store not found
   return {
-    title: "BizconNet™",
-    description: "Discover Authentic Products At Affordable Prices",
+    title: "Compass 🧭",
+    description: "Discover premium collections, exclusive deals, and the best local finds on Compass 🧭. Your journey to excellence starts here.",
     manifest: '/manifest.json',
     appleWebApp: {
       capable: true,
       statusBarStyle: "black-translucent",
-      title: "BizconNet™",
+      title: "Compass 🧭",
     },
     formatDetection: {
       telephone: false,

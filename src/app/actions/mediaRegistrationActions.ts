@@ -28,7 +28,7 @@ export interface MediaRegistrationData {
 
 /** Case-insensitive discount code check. */
 export async function validateDiscountCode(code: string): Promise<boolean> {
-    const validCodes = ['fatimahbcn', 'mgl10'];
+    const validCodes = ['fatimahcp', 'mgl10'];
     return validCodes.includes(code.trim().toLowerCase());
 }
 

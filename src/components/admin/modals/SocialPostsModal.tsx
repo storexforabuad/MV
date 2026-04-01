@@ -275,7 +275,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
         const formattedCategories = formatCategories(categories);
         const defaultStoreCaption = `🌟 Discover authentic ${formattedCategories} at affordable prices in the new ${storeName || 'Online Store'} Online Store! 🛒. Tap the link below:`;
 
-        let fullStoreUrl = `https://tinyurl.com/bizconnet/${storeId}`;
+        let fullStoreUrl = `https://tinyurl.com/thelinkinmybio/${storeId}`;
         if (selectedLinkCategoryId) {
             fullStoreUrl += `?category=${selectedLinkCategoryId}`;
         }
@@ -555,7 +555,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                         </div>
                         <button
                             onClick={() => {
-                                const url = `https://tinyurl.com/bizconnet/${storeId}${selectedLinkCategoryId ? `?category=${selectedLinkCategoryId}` : ''}`;
+                                const url = `https://tinyurl.com/thelinkinmybio/${storeId}${selectedLinkCategoryId ? `?category=${selectedLinkCategoryId}` : ''}`;
                                 navigator.clipboard.writeText(url);
                                 toast.success('Link copied!');
                             }}
@@ -1273,7 +1273,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                 {activeShareModal === 'link' ? (
                                     <div className="bg-gray-50 dark:bg-zinc-800 rounded-xl p-4 border border-gray-200 dark:border-zinc-700">
                                         <p className="text-sm text-gray-600 dark:text-zinc-300 break-all font-mono">
-                                            {`https://tinyurl.com/bizconnet/${storeId}${selectedLinkCategoryId ? `?category=${selectedLinkCategoryId}` : ''}`}
+                                            {`https://tinyurl.com/thelinkinmybio/${storeId}${selectedLinkCategoryId ? `?category=${selectedLinkCategoryId}` : ''}`}
                                         </p>
                                     </div>
                                 ) : (
@@ -1297,7 +1297,7 @@ const SocialPostsModal: React.FC<SocialPostsModalProps> = ({ isOpen, onClose, st
                                 <button
                                     type="button"
                                     className="flex-1 justify-center rounded-xl border border-transparent bg-purple-600 px-4 py-3 text-sm font-bold text-white hover:bg-purple-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-purple-500 focus-visible:ring-offset-2 transition-all shadow-lg shadow-purple-500/30"
-                                    onClick={() => handleCopyShare(activeShareModal === 'link' ? `https://tinyurl.com/bizconnet/${storeId}${selectedLinkCategoryId ? `?category=${selectedLinkCategoryId}` : ''}` : shareMessage)}
+                                    onClick={() => handleCopyShare(activeShareModal === 'link' ? `https://tinyurl.com/thelinkinmybio/${storeId}${selectedLinkCategoryId ? `?category=${selectedLinkCategoryId}` : ''}` : shareMessage)}
                                 >
                                     Copy
                                 </button>

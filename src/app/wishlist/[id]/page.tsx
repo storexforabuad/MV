@@ -142,7 +142,7 @@ function SharedWishlistPageContent({ params }: SharedWishlistPageProps) {
                 <NeedAWebsiteModal
                     isOpen={isNeedWebsiteModalOpen}
                     onClose={() => setIsNeedWebsiteModalOpen(false)}
-                    storeId="bizcon"
+                    storeId="compass"
                 />
 
                 <div className="space-y-6">
@@ -190,7 +190,7 @@ function SharedWishlistPageContent({ params }: SharedWishlistPageProps) {
 
                                             <div className="flex items-center bg-gray-50 dark:bg-gray-800/80 rounded-full p-1 border border-gray-100 dark:border-gray-700/50 shadow-sm">
                                                 <Link
-                                                    href={item.storeId ? `/${item.storeId}/products/${item.id}?fromWishlist=${id}` : `/bizcon/products/${item.id}?fromWishlist=${id}`}
+                                                    href={item.storeId ? `/${item.storeId}/products/${item.id}?fromWishlist=${id}` : `/compass/products/${item.id}?fromWishlist=${id}`}
                                                     className="flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full hover:bg-white dark:hover:bg-gray-700 transition-all text-text-secondary hover:text-text-primary group/eye"
                                                     title="View product"
                                                 >
@@ -258,7 +258,7 @@ function SharedWishlistPageContent({ params }: SharedWishlistPageProps) {
                                         <Globe className="w-4 h-4 text-amber-400" />
                                     </div>
                                     <span className="text-[10px] font-black text-amber-400/80 tracking-[0.2em] uppercase">
-                                        POWERED BY <span className="text-amber-400">BIZCONNET™ 2026.</span>
+                                        POWERED BY <span className="text-amber-400">Compass 🧭 2026.</span>
                                     </span>
                                 </div>
 

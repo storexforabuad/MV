@@ -2,7 +2,7 @@ import ReferralDashboardClient from '@/components/referral/ReferralDashboardClie
 import { getCommissionDashboardData } from '@/app/actions/startActions';
 
 export const metadata = {
-    title: 'Ambassador Dashboard | BizConnect',
+    title: 'Ambassador Dashboard | Compass 🧭',
     description: 'Track your referrals and earnings.',
 };
 

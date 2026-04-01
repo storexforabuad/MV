@@ -43,7 +43,7 @@ export default function VehicleDetailPage({ product, storeMeta, storeId }: Vehic
         const message = `Hello! I'd like to chat with you about the *${product.name}* listed at *${formatPrice(product.price)}*.\n\n` +
             `📍 Location: ${product.vehicleDetails.location}\n` +
             `🛣️ Mileage: ${product.vehicleDetails.mileage?.toLocaleString() || 'N/A'} km\n` +
-            `🔗 Link: https://tinyurl.com/bizconnet/${storeId}/products/${product.id}\n\n` +
+            `🔗 Link: https://tinyurl.com/thelinkinmybio/${storeId}/products/${product.id}\n\n` +
             `Could you please provide more information?`;
 
         const whatsappUrl = `https://wa.me/${formatWhatsAppNumber(storeMeta.whatsapp)}?text=${encodeURIComponent(message)}`;

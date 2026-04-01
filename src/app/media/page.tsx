@@ -660,7 +660,7 @@ function RegistrationSection() {
                 setFormError('Payment widget is loading. Please try again in a moment.');
                 return;
             }
-            const ref = `BCN_MED_${Date.now()}_${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
+            const ref = `CP_MED_${Date.now()}_${Math.random().toString(36).slice(2, 7).toUpperCase()}`;
             const handler = window.PaystackPop.setup({
                 key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
                 email: form.email,

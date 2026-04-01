@@ -280,7 +280,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
 
                 <div className="text-center pt-4">
                   <div className="text-[10px] text-slate-500/70 font-medium tracking-wide flex flex-wrap items-center justify-center gap-1">
-                    <span>Powered by <span className={`font-black tracking-tight ${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}`}>BizConNet™</span> 2026</span>
+                    <span>Powered by <span className={`font-black tracking-tight ${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}`}>Compass 🧭</span> 2026</span>
                     <span className="flex flex-wrap items-center justify-center gap-1">
                       in partnership with
                       <span className="flex items-center font-bold ml-0.5 text-[11px] tracking-tight">
@@ -435,7 +435,7 @@ const NeedAWebsiteModal = ({ isOpen, onClose, storeId, storeName }: NeedAWebsite
                     <div className="flex-1 min-w-0">
                       <p className="text-[10px] text-slate-500 font-bold uppercase tracking-tight mb-1">Your Unique Web Address</p>
                       <p className={`${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'} font-bold truncate`}>
-                        tinyurl.com/bizconnet/{modal.formData.businessName.toLowerCase().replace(/[^a-z0-9]/g, '-')}
+                        tinyurl.com/thelinkinmybio/{modal.formData.businessName.toLowerCase().replace(/[^a-z0-9]/g, '-')}
                       </p>
                     </div>
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isStunnerStores ? 'bg-violet-500/10 text-cyan-400 group-hover:bg-violet-500' : is420Hub ? 'bg-emerald-500/10 text-emerald-500 group-hover:bg-emerald-500' : 'bg-amber-500/10 text-amber-500 group-hover:bg-amber-500'} group-hover:text-white`}>

@@ -234,7 +234,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
         // toast.success('Order placed! Redirecting to WhatsApp...');
 
         const itemsSummary = cartItems.map(item => {
-          const productUrl = `https://tinyurl.com/bizconnet/${storeId}/products/${item.id}${item.selectedColor ? `?v=${encodeURIComponent(item.selectedColor)}` : ''}`;
+          const productUrl = `https://tinyurl.com/thelinkinmybio/${storeId}/products/${item.id}${item.selectedColor ? `?v=${encodeURIComponent(item.selectedColor)}` : ''}`;
           const colorLabel = isFashionProduct(item as any) && (item as any).isTextile ? 'Design' : 'Color';
           const colorText = item.selectedColor ? `🎨 *${colorLabel}:* ${item.selectedColor}\n` : '';
           const sizeText = item.selectedSize ? `📏 *Size:* ${item.selectedSize}\n` : '';

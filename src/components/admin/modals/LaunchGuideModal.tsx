@@ -67,7 +67,7 @@ export default function LaunchGuideModal({ isOpen, onClose, storeLink, products,
   } catch (e) {
     if (storeLink) storeId = storeLink;
   }
-  const tinyUrl = `https://tinyurl.com/bizconnet/${storeId}`;
+  const tinyUrl = `https://tinyurl.com/thelinkinmybio/${storeId}`;
 
   const topProductUrl = topProduct ? `${tinyUrl}/product/${topProduct.id}` : tinyUrl;
 

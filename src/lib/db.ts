@@ -426,7 +426,7 @@ export async function getProductById(storeId: string | null, id: string): Promis
 
   try {
     let productData;
-    // Case 1: Global search (for /bizcon)
+    // Case 1: Global search (for /compass)
     if (storeId === null) {
       const productsRef = collectionGroup(db, 'products');
       const q = query(productsRef, where('id', '==', id), limit(1));

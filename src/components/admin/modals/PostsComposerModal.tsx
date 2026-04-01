@@ -179,7 +179,7 @@ const PostsComposerModal: React.FC<PostsComposerProps> = ({ isOpen, onClose, sto
     };
 
     const handleProductSelect = async (product: Product) => {
-        const caption = `Check out our new product: ${product.name}!\n\nPrice: ₦${product.price.toLocaleString()}\n\nOrder now at https://${storeName}.bizcon.app/products/${product.id}`;
+        const caption = `Check out our new product: ${product.name}!\n\nPrice: ₦${product.price.toLocaleString()}\n\nOrder now at https://${storeName}.compass.app/products/${product.id}`;
         setMessage(caption);
 
         if (product.images && product.images[0]) {

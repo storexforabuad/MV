@@ -87,7 +87,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
 
   const handleShare = (withReferral: boolean) => {
     if (!product || !storeId) return;
-    const productUrl = `https://tinyurl.com/bizconnet/${storeId}/products/${product.id}`;
+    const productUrl = `https://tinyurl.com/thelinkinmybio/${storeId}/products/${product.id}`;
     const canonicalShareUrl = withReferral && customer ? `${productUrl}?ref=${customer.referralCode}` : productUrl;
     const shareText = `Check out "${product.name}"! I think you'll love it. Use my link to shop:`;
     const shareData = { title: product.name, text: shareText, url: canonicalShareUrl };
@@ -1335,7 +1335,7 @@ export default function ProductDetail({ params }: { params: { storeId: string; p
                                 <Globe className={`w-4 h-4 ${isStunnerStores ? 'text-cyan-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}`} />
                               </div>
                               <span className={`text-[10px] font-black tracking-[0.2em] uppercase ${isStunnerStores ? 'text-violet-400/80' : is420Hub ? 'text-emerald-400/80' : 'text-amber-400/80'}`}>
-                                POWERED BY <span className={isStunnerStores ? 'text-violet-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}>BIZCONNET™ 2026.</span>
+                                POWERED BY <span className={isStunnerStores ? 'text-violet-400' : is420Hub ? 'text-emerald-400' : 'text-amber-400'}>Compass 🧭 2026.</span>
                               </span>
                             </div>
 

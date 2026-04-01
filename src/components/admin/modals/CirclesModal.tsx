@@ -65,7 +65,7 @@ export default function CirclesModal({ isOpen, onClose, storeId }: CirclesModalP
         }).format(amount);
     };
 
-    const referralLink = `tinyurl.com/bizconnet/${storeId}`;
+    const referralLink = `tinyurl.com/thelinkinmybio/${storeId}`;
 
     const handleCopyLink = () => {
         navigator.clipboard.writeText(referralLink);
@@ -74,7 +74,7 @@ export default function CirclesModal({ isOpen, onClose, storeId }: CirclesModalP
     };
 
     const handleShareWhatsApp = () => {
-        const message = `Hey! I'm inviting you to get a business website with BizconNet™. Use my link to get a LIFETIME 50% discount on your subscription: ${referralLink}`;
+        const message = `Hey! I'm inviting you to get a business website with Compass 🧭. Use my link to get a LIFETIME 50% discount on your subscription: ${referralLink}`;
         window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
     };
 
@@ -391,11 +391,11 @@ function StoreCard({ store, formatCurrency }: { store: ReferralStoreStats, forma
                             <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-3 flex items-center justify-between">
                                 <div className="flex items-center gap-2 min-w-0">
                                     <ExternalLink className="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
-                                    <span className="text-[10px] font-bold text-slate-300 truncate">tinyurl.com/bizconnet/{store.id}</span>
+                                    <span className="text-[10px] font-bold text-slate-300 truncate">tinyurl.com/thelinkinmybio/{store.id}</span>
                                 </div>
                                 <button
                                     onClick={() => {
-                                        navigator.clipboard.writeText(`tinyurl.com/bizconnet/${store.id}`);
+                                        navigator.clipboard.writeText(`tinyurl.com/thelinkinmybio/${store.id}`);
                                     }}
                                     className="ml-2 p-1.5 hover:bg-slate-700 rounded-lg transition-colors flex-shrink-0"
                                 >

@@ -3,7 +3,7 @@ import CodeEntryForm from '@/components/referral/CodeEntryForm';
 import { Suspense } from 'react';
 
 export const metadata = {
-    title: 'Start Your Business | BizConnect',
+    title: 'Start Your Business | Compass ??',
     description: 'The premium platform for modern commerce. Launch your online store in minutes.',
 };
 

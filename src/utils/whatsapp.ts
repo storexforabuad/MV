@@ -37,7 +37,7 @@ export const generateOrderReceiptMessage = (order: Order, trxref?: string): stri
         `📦 *Order Details:*\n${productDetails}\n\n` +
         (deliveryDetails ? `${deliveryDetails}\n\n` : '') +
         `💰 *Total:* ${formatPrice(totalAmount)}\n\n` +
-        `*Escrow Status:* Supported by BizCon Escrow. Funds are protected until delivery. ✨`;
+        `*Escrow Status:* Supported by compass Escrow. Funds are protected until delivery. ✨`;
 };
 
 /**

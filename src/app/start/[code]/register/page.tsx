@@ -1,7 +1,7 @@
 import WizardContainer from '@/components/start/WizardContainer';
 
 export const metadata = {
-    title: 'Create Your Store | BizConnect',
+    title: 'Create Your Store | Compass 🧭',
     description: 'Start your business in minutes.',
 };
 

@@ -122,7 +122,7 @@ const SearchOverlay: React.FC<SearchOverlayProps> = ({
                                                 onProductClick(product);
                                                 window.location.href = storeId
                                                     ? `/${storeId}/products/${product.id}`
-                                                    : `/bizcon/products/${product.id}?storeId=${product.storeId}`;
+                                                    : `/compass/products/${product.id}?storeId=${product.storeId}`;
                                             }}
                                             className="block cursor-pointer"
                                         >

@@ -17,7 +17,7 @@ const ReferralBanner = ({ storeId, storeName, onLoginClick }: ReferralBannerProp
   const { customer } = useCustomer();
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
 
-  const referralLink = customer ? `https://tinyurl.com/bizconnet/${storeId}?ref=${customer.referralCode}` : '';
+  const referralLink = customer ? `https://tinyurl.com/thelinkinmybio/${storeId}?ref=${customer.referralCode}` : '';
   const commissionEarned = customer?.referralDataByStore?.[storeId]?.commissionEarned || 0;
 
   const shimmerEffectClasses = `

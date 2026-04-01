@@ -353,7 +353,7 @@ export default function AddServiceComposer({ isOpen, onClose, onBack, storeId, c
                                     <Shield className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                                 </div>
                                 <h4 className="font-bold text-slate-900 dark:text-white text-lg flex items-center gap-1.5">
-                                    BCN<span className="text-[10px] font-black align-top leading-none text-blue-600">™</span> Escrow Protected
+                                    Compass 🧭<span className="text-[10px] font-black align-top leading-none text-blue-600">™</span> Escrow Protected
                                 </h4>
                             </div>
                         </div>

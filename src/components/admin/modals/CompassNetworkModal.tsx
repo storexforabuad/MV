@@ -2,9 +2,8 @@
 
 import { Zap, TrendingUp, Star, Globe, Sparkles, Building2, CreditCard, Smartphone } from 'lucide-react';
 import { AnimatePresence, motion, Variants } from 'framer-motion';
-import { ReactNode } from 'react';
 
-interface BizconNetworkModalProps {
+interface CompassNetworkModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
@@ -69,7 +68,7 @@ const FeatureCard = ({
   </motion.div>
 );
 
-export const BizconNetworkModal = ({ isOpen, onClose }: BizconNetworkModalProps) => {
+export const CompassNetworkModal = ({ isOpen, onClose }: CompassNetworkModalProps) => {
   return (
     <AnimatePresence>
       {isOpen && (
@@ -88,7 +87,7 @@ export const BizconNetworkModal = ({ isOpen, onClose }: BizconNetworkModalProps)
             <header className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 dark:border-slate-700 flex-shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
-                  BizconNet™App
+                  Compass 🧭 App
                 </h2>
                 <p className="text-xs text-gray-500 dark:text-gray-400">Built for Vendors, by Vendors</p>
               </div>
@@ -119,7 +118,7 @@ export const BizconNetworkModal = ({ isOpen, onClose }: BizconNetworkModalProps)
                   iconBg="bg-emerald-100 dark:bg-emerald-900/30"
                   title="Get More Customers"
                   description="Connect with more buyers and expand your reach through our powerful online and offline channels."
-                  proTip="Join our exclusive events including Funfairs, Trade Fairs, and Pop-ups organized by BizconNet™to showcase your products directly to customers!"
+                  proTip="Join our exclusive events including Funfairs, Trade Fairs, and Pop-ups organized by Compass 🧭 to showcase your products directly to customers!"
                 />
 
                 <FeatureCard

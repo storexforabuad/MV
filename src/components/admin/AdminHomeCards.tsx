@@ -21,8 +21,8 @@ import PostsComposerModal from './modals/PostsComposerModal';
 import AddPitchComposer from '../pitch/AddPitchComposer';
 import AdminBookingsModal from './modals/AdminBookingsModal';
 import SocialPostsModal from './modals/SocialPostsModal';
-import { BizconNetworkModal } from './modals/BizconNetworkModal';
-import { BCNBenefitsModal } from './modals/BCNBenefitsModal';
+import { CompassNetworkModal } from './modals/CompassNetworkModal';
+import { CompassBenefitsModal } from './modals/CompassBenefitsModal';
 import { DeliveriesHubModal } from './modals/DeliveriesHubModal';
 import RevenueModal from './modals/RevenueModal';
 import CommissionModal from './modals/CommissionModal';
@@ -422,8 +422,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   const [isCustomersModalOpen, setIsCustomersModalOpen] = useState(false);
   const [isPostsModalOpen, setIsPostsModalOpen] = useState(false);
   const [isSocialPostsModalOpen, setIsSocialPostsModalOpen] = useState(false);
-  const [isBizconNetworkModalOpen, setIsBizconNetworkModalOpen] = useState(false);
-  const [isBCNBenefitsModalOpen, setIsBCNBenefitsModalOpen] = useState(false);
+  const [isCompassNetworkModalOpen, setIsCompassNetworkModalOpen] = useState(false);
+  const [isCompassBenefitsModalOpen, setIsCompassBenefitsModalOpen] = useState(false);
   const [isDeliveriesHubModalOpen, setIsDeliveriesHubModalOpen] = useState(false);
   const [isRevenueModalOpen, setIsRevenueModalOpen] = useState(false);
   const [isCommissionModalOpen, setIsCommissionModalOpen] = useState(false);
@@ -535,7 +535,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   }, [onRefresh]);
 
   useEffect(() => {
-    const modalIsOpen = openModal !== null || isTipsModalOpen || isLaunchGuideModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isBizconNetworkModalOpen || isBCNBenefitsModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen || isAdvertisingModalOpen || isEventsModalOpen || isAccountModalOpen || isWarehouseModalOpen || isWholesaleModalOpen || isCirclesModalOpen;
+    const modalIsOpen = openModal !== null || isTipsModalOpen || isLaunchGuideModalOpen || isCustomersModalOpen || isViewsModalOpen || isShareModalOpen || isPostsModalOpen || isSocialPostsModalOpen || isCompassNetworkModalOpen || isCompassBenefitsModalOpen || isDeliveriesHubModalOpen || isRevenueModalOpen || isCommissionModalOpen || isExpensesModalOpen || isAdvertisingModalOpen || isEventsModalOpen || isAccountModalOpen || isWarehouseModalOpen || isWholesaleModalOpen || isCirclesModalOpen;
 
     // Check if modal was literally JUST closed (transition from true to false)
     if (previousModalState.current && !modalIsOpen) {
@@ -558,8 +558,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         setIsShareModalOpen(false);
         setIsPostsModalOpen(false);
         setIsSocialPostsModalOpen(false);
-        setIsBizconNetworkModalOpen(false);
-        setIsBCNBenefitsModalOpen(false);
+        setIsCompassNetworkModalOpen(false);
+        setIsCompassBenefitsModalOpen(false);
         setIsDeliveriesHubModalOpen(false);
         setIsRevenueModalOpen(false);
         setIsCommissionModalOpen(false);
@@ -577,7 +577,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
         window.removeEventListener('popstate', handlePopState);
       };
     }
-  }, [openModal, isTipsModalOpen, isLaunchGuideModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isBizconNetworkModalOpen, isBCNBenefitsModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, isAdvertisingModalOpen, isEventsModalOpen, isAccountModalOpen, isWarehouseModalOpen, isWholesaleModalOpen, isCirclesModalOpen, setIsModalOpen]);
+  }, [openModal, isTipsModalOpen, isLaunchGuideModalOpen, isCustomersModalOpen, isViewsModalOpen, isShareModalOpen, isPostsModalOpen, isSocialPostsModalOpen, isCompassNetworkModalOpen, isCompassBenefitsModalOpen, isDeliveriesHubModalOpen, isRevenueModalOpen, isCommissionModalOpen, isExpensesModalOpen, isAdvertisingModalOpen, isEventsModalOpen, isAccountModalOpen, isWarehouseModalOpen, isWholesaleModalOpen, isCirclesModalOpen, setIsModalOpen]);
 
   const handleOpenModal = (idx: number, card: typeof cardData[0]) => {
     if (isRefreshing) return; // Prevent opening modals during refresh
@@ -592,8 +592,8 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     }
 
     const { label, subtitle } = card;
-    if (label === 'Compass') setIsBCNBenefitsModalOpen(true);
-    else if (label === 'Compass') setIsBizconNetworkModalOpen(true);
+    if (label === 'Compass') setIsCompassBenefitsModalOpen(true);
+    else if (label === 'Compass') setIsCompassNetworkModalOpen(true);
     else if (label === 'Launch') setIsLaunchGuideModalOpen(true);
     else if (label === 'Tips') setIsTipsModalOpen(true);
     else if (label === 'Views') setIsViewsModalOpen(true);
@@ -680,15 +680,15 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
-  const handleCloseBizconNetworkModal = () => {
+  const handleCloseCompassNetworkModal = () => {
     if (popHistoryIfExists()) return;
-    setIsBizconNetworkModalOpen(false);
+    setIsCompassNetworkModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
-  const handleCloseBCNBenefitsModal = () => {
+  const handleCloseCompassBenefitsModal = () => {
     if (popHistoryIfExists()) return;
-    setIsBCNBenefitsModalOpen(false);
+    setIsCompassBenefitsModalOpen(false);
     if (props.setIsModalOpen) props.setIsModalOpen(false);
   }
 
@@ -1088,7 +1088,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             return <MetricCard key={card.label} icon={Icon} label={card.label} count={metricValue} gradient={card.gradient} glowClass={card.glowClass} onClick={() => handleOpenModal(idx, card)} inlineStyle={inlineStyle} />;
           }
 
-          // Render action cards (BizconNet™, Tips, Share, Settings, Subscription, Warehouse, Events)
+          // Render action cards (Compass 🧭, Tips, Share, Settings, Subscription, Warehouse, Events)
           if (card.cardType === 'action') {
             return (
               <motion.div key={card.label} variants={itemVariants} className={`relative h-full ${spotlightClasses}`}>
@@ -1152,9 +1152,9 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
       {isSocialPostsModalOpen && (<SocialPostsModal isOpen={isSocialPostsModalOpen} onClose={handleCloseSocialPostsModal} storeId={props.storeId} storeName={props.storeName || 'Store'} products={props.products} categories={props.categories} />)}
 
-      {isBizconNetworkModalOpen && (<BizconNetworkModal isOpen={isBizconNetworkModalOpen} onClose={handleCloseBizconNetworkModal} />)}
+      {isCompassNetworkModalOpen && (<CompassNetworkModal isOpen={isCompassNetworkModalOpen} onClose={handleCloseCompassNetworkModal} />)}
 
-      {isBCNBenefitsModalOpen && (<BCNBenefitsModal isOpen={isBCNBenefitsModalOpen} onClose={handleCloseBCNBenefitsModal} />)}
+      {isCompassBenefitsModalOpen && (<CompassBenefitsModal isOpen={isCompassBenefitsModalOpen} onClose={handleCloseCompassBenefitsModal} />)}
 
       {isDeliveriesHubModalOpen && (<DeliveriesHubModal isOpen={isDeliveriesHubModalOpen} onClose={handleCloseDeliveriesHubModal} storeId={storeId} storeType={props.storeType} />)}
 

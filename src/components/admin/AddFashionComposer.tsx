@@ -275,7 +275,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                     let watermarkText = '';
                     if (instagramHandle) {
                         const cleanHandle = instagramHandle.startsWith('@') ? instagramHandle : `@${instagramHandle}`;
-                        watermarkText = `${cleanHandle} | BizconNet™Verified`;
+                        watermarkText = `${cleanHandle} | Compass 🧭Verified`;
                     } else {
                         const formattedName = storeName
                             .replace(/\./g, ' ')
@@ -283,7 +283,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                             .filter(Boolean)
                             .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
                             .join(' ');
-                        watermarkText = `${formattedName} | BizconNet™Verified`;
+                        watermarkText = `${formattedName} | Compass 🧭Verified`;
                     }
                     processedFile = await applyWatermark(processedFile, watermarkText);
                 } catch (err) {
@@ -488,7 +488,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                             let watermarkText = '';
                             if (instagramHandle) {
                                 const cleanHandle = instagramHandle.startsWith('@') ? instagramHandle : `@${instagramHandle}`;
-                                watermarkText = `${cleanHandle} | BizconNet™Verified`;
+                                watermarkText = `${cleanHandle} | Compass 🧭Verified`;
                             } else {
                                 const formattedName = storeName
                                     .replace(/\./g, ' ')
@@ -496,7 +496,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                                     .filter(Boolean)
                                     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
                                     .join(' ');
-                                watermarkText = `${formattedName} | BizconNet™Verified`;
+                                watermarkText = `${formattedName} | Compass 🧭Verified`;
                             }
                             processedFile = await applyWatermark(processedFile, watermarkText);
                         } catch (err) {
@@ -991,7 +991,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
                         </div>
 
                         <div className="space-y-3 pt-4 border-t border-slate-200 dark:border-slate-700">
-                            <ModernToggle label="Watermark Images" description="Add store name & BizConnect verified to images" checked={useWatermark} onChange={setUseWatermark} />
+                            <ModernToggle label="Watermark Images" description="Add store name & Compass ?? verified to images" checked={useWatermark} onChange={setUseWatermark} />
                             <ModernToggle label="Limited Stock" description="Show 'Low Stock' badge to customers" checked={productData.limitedStock} onChange={checked => handleProductChange('limitedStock', checked)} />
                             <ModernToggle label="Sold Out" description="Mark as currently unavailable" checked={productData.soldOut} onChange={checked => handleProductChange('soldOut', checked)} />
                         </div>

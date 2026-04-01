@@ -11,7 +11,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     const store = await getStoreMetaAdmin(params.storeId);
     return {
         title: store?.name || 'Store',
-        description: store?.description || 'Welcome to our store',
+        description: store?.description || 'Your one-stop destination for curated collections on Compass 🧭',
         manifest: `/api/manifest?storeId=${params.storeId}&context=customer`,
     };
 }

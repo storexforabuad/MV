@@ -157,7 +157,7 @@ export default function ProductDetail({ params }: { params: { productId: string 
 
   return (
     <>
-      <Navbar storeName={storeMeta?.name || 'Bizcon Marketplace'} />
+      <Navbar storeName={storeMeta?.name || 'Compass 🧭 Marketplace'} />
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8 pt-[calc(var(--navbar-height)+1rem)] lg:pt-[calc(var(--navbar-height)+2rem)]">
         <div className="flex flex-col lg:flex lg:flex-row gap-6 lg:gap-x-8">
           {/* Image Section */}

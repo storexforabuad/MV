@@ -146,7 +146,7 @@ function StoreCard({ store, index, onRefresh }: { store: MediaStoreStats; index:
                                 </div>
                             </div>
 
-                            {/* BizConNet Cuts */}
+                            {/* Compass 🧭 Cuts */}
                             <div className="col-span-2">
                                 <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Compass Platform Cuts</p>
                                 <div className="grid grid-cols-3 gap-2">

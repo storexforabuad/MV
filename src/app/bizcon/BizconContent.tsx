@@ -40,10 +40,10 @@ const LoadingGrid = () => (
 
 const PRODUCTS_PAGE_SIZE = 24;
 
-export default function BizconContent() {
+export default function compassContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
-  const storeName = "Bizcon Marketplace";
+  const storeName = "compass Marketplace";
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [activeCategory, setActiveCategory] = useState('Promo');
@@ -62,7 +62,7 @@ export default function BizconContent() {
 
     try {
       let result: PaginatedProductsResult;
-      const cacheKey = `bizcon_products_${category}_page1`;
+      const cacheKey = `compass_products_${category}_page1`;
 
       switch (category) {
         case 'Promo':
@@ -100,7 +100,7 @@ export default function BizconContent() {
   }, [loading, setIsConnectionError]);
 
   const handleCategorySelect = useCallback((category: string) => {
-    const cacheKey = `bizcon_products_${category}_page1`;
+    const cacheKey = `compass_products_${category}_page1`;
     const cachedData = ProductListCache.get(cacheKey);
 
     if (cachedData) {
@@ -134,7 +134,7 @@ export default function BizconContent() {
         }
         fetchProducts(activeCategory, null);
       } catch (error) {
-        console.error("Error fetching initial bizcon data:", error);
+        console.error("Error fetching initial compass data:", error);
         setIsConnectionError(true);
         setInitialLoading(false);
       }

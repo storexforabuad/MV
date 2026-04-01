@@ -3,7 +3,7 @@
 import { ShieldCheck, MessageSquareX, Sparkles, Building2, CreditCard, Smartphone, Receipt, CheckCircle2, X } from 'lucide-react';
 import { AnimatePresence, motion, Variants } from 'framer-motion';
 
-interface BCNBenefitsModalProps {
+interface CompassBenefitsModalProps {
     isOpen: boolean;
     onClose: () => void;
 }
@@ -70,7 +70,7 @@ const PainSolutionCard = ({
     </motion.div>
 );
 
-export const BCNBenefitsModal = ({ isOpen, onClose }: BCNBenefitsModalProps) => {
+export const CompassBenefitsModal = ({ isOpen, onClose }: CompassBenefitsModalProps) => {
     return (
         <AnimatePresence>
             {isOpen && (

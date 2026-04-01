@@ -146,7 +146,7 @@ export default function CategoryBar({
   onActiveCategoryClick,
   scrollDirection = 'up',
   storeType,
-  storeId = 'bizcon',
+  storeId = 'compass',
   storeName,
 }: CategoryBarProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -162,7 +162,7 @@ export default function CategoryBar({
     isCopyingRef.current = true;
     setTimeout(() => { isCopyingRef.current = false; }, 2000);
 
-    const url = `https://tinyurl.com/bizconnet/${storeId}?category=${category.id}`;
+    const url = `https://tinyurl.com/thelinkinmybio/${storeId}?category=${category.id}`;
     const caption = `Check out the ${category.name} category at ${storeName || 'our store'} Online Store: ${url}`;
 
     navigator.clipboard.writeText(caption)

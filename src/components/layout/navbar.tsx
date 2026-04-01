@@ -185,8 +185,8 @@ function NavbarContent({ storeId, storeName, scrollDirection = 'up', backButtonH
     isCopyingRef.current = true;
     setTimeout(() => { isCopyingRef.current = false; }, 2000);
 
-    const url = `https://tinyurl.com/bizconnet/${storeId}`;
-    const caption = `Check out ${storeName || 'this store'} Online Store: ${url}`;
+    const url = `https://tinyurl.com/thelinkinmybio/${storeId}`;
+    const caption = `Discover premium collections and exclusive deals on Compass 🧭\n\nCheck out ${storeName || 'our store'} Online Store: ${url}`;
 
     navigator.clipboard.writeText(caption)
       .then(() => {
