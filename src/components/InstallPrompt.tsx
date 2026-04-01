@@ -2,7 +2,7 @@
 
 import React, { Fragment, useEffect, useState } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { X, Zap, ShoppingCart, Package, Bell, Smartphone, Share, PlusSquare, Sparkles, Star, Download } from 'lucide-react';
+import { X, Zap, ShoppingCart, Package, Bell, Smartphone, Share, PlusSquare, Sparkles, Star, Download, ShieldCheck } from 'lucide-react';
 import { useInstallPrompt } from '../hooks/useInstallPrompt';
 import { usePathname, useParams, useSearchParams } from 'next/navigation';
 import { getStoreMeta } from '../lib/db';
@@ -28,6 +28,7 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
   const isAdmin = pathname?.startsWith('/admin') || pathname === '/signin';
   const isRoadmap = pathname === '/devteam/roadmap';
   const isReferralDashboard = /^\/(register|start)\/[^/]+\/dashboard\/?$/.test(pathname || '');
+  const isInfluencer = storeMeta?.storeType === 'media-influencer';
 
   useEffect(() => {
     async function fetchStoreData() {
@@ -51,7 +52,7 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
   const displayStoreName = formatStoreName(storeName);
 
   const titleText = isRoadmap ? 'Get Roadmap App' : isReferralDashboard ? 'Get Dashboard App' : isAdmin ? 'Control Center' : `Experience ${displayStoreName}`;
-  const subtitleText = isRoadmap ? 'Track your path to 10k vendors' : isReferralDashboard ? 'Track your referrals' : isAdmin ? 'Manage your store on the go' : 'A premium shopping experience.';
+  const subtitleText = isRoadmap ? 'Track your path to 10k vendors' : isReferralDashboard ? 'Track your referrals' : isAdmin ? 'Manage your store on the go' : isInfluencer ? 'Seamlessly book services and collaborations.' : 'A premium shopping experience.';
 
   const getInitials = (name: string) => {
     if (!name) return 'A';
@@ -69,29 +70,29 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
       icon: Zap,
       color: 'text-amber-500',
       bgColor: 'bg-amber-500/10',
-      title: 'Order Instantly',
-      desc: 'Browse catalogs and place orders 24/7 without delays.'
+      title: isInfluencer ? 'Book Services' : 'Order Instantly',
+      desc: isInfluencer ? 'Schedule PR, collaborations, and ads 24/7.' : 'Browse catalogs and place orders 24/7 without delays.'
     },
     {
-      icon: ShoppingCart,
-      color: 'text-blue-500',
-      bgColor: 'bg-blue-500/10',
-      title: 'Save & Share Carts',
-      desc: 'Build lists for later or share carts with family and friends.'
+      icon: isInfluencer ? ShieldCheck : ShoppingCart,
+      color: isInfluencer ? 'text-indigo-500' : 'text-blue-500',
+      bgColor: isInfluencer ? 'bg-indigo-500/10' : 'bg-blue-500/10',
+      title: isInfluencer ? 'Secure Escrow' : 'Save & Share Carts',
+      desc: isInfluencer ? 'Payments held safely until your work is delivered.' : 'Build lists for later or share carts with family and friends.'
     },
     {
       icon: Package,
       color: 'text-emerald-500',
       bgColor: 'bg-emerald-500/10',
-      title: 'Track Purchases',
-      desc: 'Keep a full history and status of all your orders.'
+      title: isInfluencer ? 'Track Deliverables' : 'Track Purchases',
+      desc: isInfluencer ? 'Monitor your active bookings and download media.' : 'Keep a full history and status of all your orders.'
     },
     {
       icon: Bell,
       color: 'text-violet-500',
       bgColor: 'bg-violet-500/10',
-      title: 'Real-time Alerts',
-      desc: 'Get notified for flash sales, restocks, and new arrivals.'
+      title: isInfluencer ? 'Service Alerts' : 'Real-time Alerts',
+      desc: isInfluencer ? 'Be the first to know about new service launches.' : 'Get notified for flash sales, restocks, and new arrivals.'
     }
   ];
 
@@ -221,7 +222,7 @@ export default function InstallPrompt({ storeId: propStoreId }: InstallPromptPro
                           <Sparkles className="w-6 h-6" />
                         </div>
                         <p className="text-[15px] font-bold text-violet-800 dark:text-violet-300 leading-snug">
-                          Upgrade to the full premium shopping experience.
+                          {isInfluencer ? 'Access premium influencer services & exclusive content.' : 'Upgrade to the full premium shopping experience.'}
                         </p>
                       </div>
 
