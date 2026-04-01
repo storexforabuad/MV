@@ -129,9 +129,13 @@ function HeroSection() {
     return (
         <Section
             id="hero"
-            className="min-h-[100svh] flex flex-col items-center justify-center px-6 pt-20 pb-16 text-center bg-white dark:bg-black"
+            className="min-h-[100svh] flex flex-col items-center justify-center px-6 pt-28 pb-16 text-center bg-white dark:bg-black"
         >
-            <ConcentricRings className="top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110vw] max-w-[800px] text-violet-500 dark:text-violet-400 opacity-70" />
+            {/* Background mesh gradient */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(139,92,246,0.08),_transparent_70%)] dark:bg-[radial-gradient(circle_at_50%_50%,_rgba(139,92,246,0.15),_transparent_70%)]" />
+
+            <ConcentricRings className="top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[140vw] max-w-[1000px] text-violet-500 dark:text-violet-400 opacity-70 animate-pulse-slow" />
+            <ConcentricRings className="top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110vw] max-w-[800px] text-violet-400 dark:text-violet-300 opacity-40 rotate-[15deg]" />
 
             <motion.div variants={fadeUp} className="mb-5">
                 <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/40 text-violet-700 dark:text-violet-300 text-xs font-bold tracking-wide uppercase border border-violet-200 dark:border-violet-700/50">
@@ -190,8 +194,9 @@ function EarningsCalculator() {
     const monthlyEstimate = Math.round(followers * baseRate * engagementMult);
 
     return (
-        <Section id="calculator" className="py-24 px-6 bg-gray-50 dark:bg-zinc-950">
-            <div className="max-w-xl mx-auto">
+        <Section id="calculator" className="py-24 px-6 bg-slate-50 dark:bg-zinc-950 relative">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,_rgba(139,92,246,0.03),_transparent_40%)]" />
+            <div className="max-w-xl mx-auto relative">
                 <motion.div variants={fadeUp} className="text-center mb-12">
                     <span className="text-xs font-bold uppercase tracking-widest text-violet-500 mb-3 block">Estimation Tool</span>
                     <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white">
@@ -306,9 +311,10 @@ const creatorServices = [
 
 function WhatCanYouSell() {
     return (
-        <Section className="py-24 px-6 bg-white dark:bg-black">
+        <Section className="py-24 px-6 bg-white dark:bg-black relative">
+            <div className="absolute inset-0 bg-[linear-gradient(135deg,_rgba(139,92,246,0.02)_0%,_transparent_100%)]" />
             <ConcentricRings className="top-0 right-0 w-[80vw] max-w-[600px] text-violet-400 opacity-40" />
-            <div className="max-w-4xl mx-auto">
+            <div className="max-w-4xl mx-auto relative">
                 <motion.div variants={fadeUp} className="text-center mb-16">
                     <span className="text-xs font-bold uppercase tracking-widest text-violet-500 mb-3 block">Your Catalog</span>
                     <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 dark:text-white leading-tight">
@@ -634,11 +640,19 @@ function RegistrationSection() {
                         <div>
                             <label className="block text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2">Discount Code</label>
                             <div className="relative">
-                                <input type="text" placeholder="MGL10 or FatimahBCN" value={form.discountCode} onChange={e => handleDiscountChange(e.target.value)} className={`${inputClass} pr-10`} />
+                                <input type="text" placeholder="Enter code" value={form.discountCode} onChange={e => handleDiscountChange(e.target.value)} className={`${inputClass} pr-10`} />
                                 {discountValid === true && <Check size={16} className="absolute right-4 top-1/2 -translate-y-1/2 text-green-500" />}
                             </div>
+                            <p className="mt-2 text-[10px] text-gray-400 dark:text-zinc-500 font-medium">
+                                Hint: Try <span className="text-violet-500 font-bold">MGL10</span> for 100% off Early Access 🚀
+                            </p>
                         </div>
-                        <button type="submit" disabled={formState === 'submitting'} className="w-full py-4 rounded-2xl font-extrabold text-base text-white bg-gradient-to-r from-violet-600 to-purple-700 shadow-lg shadow-violet-500/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                        <button
+                            type="submit"
+                            disabled={formState === 'submitting'}
+                            className="w-full py-4 rounded-2xl font-extrabold text-base text-white bg-gradient-to-r from-violet-600 to-purple-700 shadow-xl shadow-violet-500/40 hover:shadow-violet-600/60 active:scale-[0.98] transition-all flex items-center justify-center gap-2 relative overflow-hidden group"
+                        >
+                            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                             {formState === 'submitting' ? <Loader2 size={18} className="animate-spin" /> : price === 0 ? "Join Compass 🧭 Free" : "Secure My Spot — ₦10,000"}
                         </button>
                     </motion.form>
@@ -653,11 +667,15 @@ export default function NewMediaLandingPage() {
     return (
         <main className="min-h-screen bg-white dark:bg-black overflow-x-hidden">
             {/* Sticky nav pill */}
-            <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50">
-                <div className="glassmorphic rounded-full px-5 py-2.5 flex items-center gap-3 border border-white/60 dark:border-white/10 shadow-lg shadow-black/10">
-                    <CompassIcon size={16} className="text-violet-600 dark:text-violet-400" />
-                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Compass 🧭 Hub</span>
-                    <a href="#register" className="text-xs font-bold text-violet-600 dark:text-violet-400 hover:underline">Join →</a>
+            <div className="fixed top-6 left-1/2 -translate-x-1/2 z-50">
+                <div className="glassmorphic rounded-full px-6 py-3.5 flex items-center gap-5 border border-white/60 dark:border-white/10 shadow-xl shadow-black/10 min-w-[240px] justify-between backdrop-blur-md">
+                    <div className="flex items-center gap-2">
+                        <CompassIcon size={18} className="text-violet-600 dark:text-violet-400" />
+                        <span className="text-xs font-black uppercase tracking-widest text-gray-800 dark:text-gray-100 italic">Compass 🧭</span>
+                    </div>
+                    <a href="#register" className="text-xs font-black text-violet-600 dark:text-violet-400 hover:scale-105 active:scale-95 transition-all flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-violet-100 dark:bg-violet-900/40">
+                        Join →
+                    </a>
                 </div>
             </div>
 

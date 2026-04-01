@@ -940,6 +940,9 @@ export const mockMediaProducts: (MediaInfluencerProduct | VehicleProduct | Fashi
     // --- CANDLES & HOME FRAGRANCE ---
     ...mockCandleProducts.map(c => ({ ...c, storeId: 'mock-media-store' })) as any[],
 
+    // --- SKINCARE ---
+    ...mockBeautyProducts.filter(p => p.subtype === 'skincare').map(p => ({ ...p, storeId: 'mock-media-store' })) as any[],
+
     /*
     // --- AUTOMOBILES (Hidden for now) ---
     {
@@ -1029,7 +1032,7 @@ export const mockMediaProducts: (MediaInfluencerProduct | VehicleProduct | Fashi
         name: 'Satin Modest Abaya',
         description: 'Flowy, elegant satin finish with intricate sleeve detailing. Includes matching hijab.',
         price: 35000,
-        images: ['https://images.unsplash.com/photo-1583337130417-3346a1be7dee?w=800&q=80'],
+        images: ['/images/abaya.png'],
         views: 0,
         createdAt: mockTimestamp(),
         productType: 'fashion',
