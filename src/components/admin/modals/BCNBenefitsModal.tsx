@@ -93,7 +93,7 @@ export const BCNBenefitsModal = ({ isOpen, onClose }: BCNBenefitsModalProps) => 
                             </div>
                             <div>
                                 <h2 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-600 dark:from-white dark:to-gray-400">
-                                    BCN™ Business Hub
+                                    Compass Business Hub 🧭
                                 </h2>
                                 <p className="text-[10px] uppercase tracking-widest font-bold text-blue-500 dark:text-blue-400">
                                     Secured Influencer Business
@@ -126,7 +126,7 @@ export const BCNBenefitsModal = ({ isOpen, onClose }: BCNBenefitsModalProps) => 
                                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Start Dominating.</span>
                                 </h1>
                                 <p className="text-gray-500 dark:text-gray-400 text-sm sm:text-base max-w-lg mx-auto">
-                                    BCN™ is the foundation for professional influencers. We handle the security so you can focus on the creativity.
+                                    Compass 🧭 is the foundation for professional influencers. We handle the security so you can focus on the creativity.
                                 </p>
                             </motion.div>
 
@@ -142,7 +142,7 @@ export const BCNBenefitsModal = ({ isOpen, onClose }: BCNBenefitsModalProps) => 
                                     iconBg="bg-blue-100 dark:bg-blue-900/30"
                                     title="No More Ghosting"
                                     pain="Chasing brands for weeks or getting ghosted after sending the deliverable."
-                                    solution="BCN™ Escrow holds the payment upfront. Once you deliver, you're guaranteed your payout."
+                                    solution="Compass 🧭 Escrow holds the payment upfront. Once you deliver, you're guaranteed your payout."
                                 />
 
                                 <PainSolutionCard

@@ -104,7 +104,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                 {/* Powered by Bizconnet™ at the bottom right */}
                 <div className="absolute bottom-4 right-6 z-20">
                     <span className="text-[10px] sm:text-xs font-semibold text-white/40 tracking-wider">
-                        Powered by <span className="text-emerald-500/80">BCN™</span>
+                        Powered by <span className="text-emerald-500/80">Compass 🧭</span>
                     </span>
                 </div>
 
@@ -149,7 +149,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                 {/* Powered by Bizconnet™ at the bottom right */}
                 <div className="absolute bottom-4 right-6 z-20">
                     <span className="text-[10px] sm:text-xs font-semibold text-white/40 tracking-wider">
-                        Powered by <span className="text-violet-500/80">BCN™</span>
+                        Powered by <span className="text-violet-500/80">Compass 🧭</span>
                     </span>
                 </div>
 
@@ -195,7 +195,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                 {/* Powered by Bizconnet™ at the bottom right */}
                 <div className="absolute bottom-4 right-6 z-20">
                     <span className="text-[10px] sm:text-xs font-semibold text-white/40 tracking-wider">
-                        Powered by <span className="text-violet-500/80">BCN™</span>
+                        Powered by <span className="text-violet-500/80">Compass 🧭</span>
                     </span>
                 </div>
 
@@ -325,7 +325,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             transition={{ delay: 0.4 }}
                             className="text-xs sm:text-sm text-white/90 max-w-[280px] sm:max-w-sm font-medium leading-tight mt-1"
                         >
-                            Professional promotion services, secured by BCN™ Escrow.
+                            Professional promotion services, secured by Escrow.
                         </motion.p>
                     </div>
                 </div>
@@ -333,7 +333,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                 {/* Powered by BCN™ */}
                 <div className="absolute bottom-6 sm:bottom-8 right-8 z-20 flex items-center gap-1.5">
                     <span className="text-[9px] font-bold text-white/60 tracking-widest uppercase">
-                        Powered by <span className="text-white">BCN™</span>
+                        Powered by <span className="text-white">Compass 🧭</span>
                     </span>
                 </div>
             </div>
