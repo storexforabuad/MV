@@ -40,7 +40,7 @@ const LoadingGrid = () => (
 
 const PRODUCTS_PAGE_SIZE = 24;
 
-export default function compassContent() {
+export default function CompassContent() {
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const storeName = "compass Marketplace";
