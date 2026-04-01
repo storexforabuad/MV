@@ -104,7 +104,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                 {/* Powered by Bizconnet™ at the bottom right */}
                 <div className="absolute bottom-4 right-6 z-20">
                     <span className="text-[10px] sm:text-xs font-semibold text-white/40 tracking-wider">
-                        Powered by <span className="text-emerald-500/80">BizConNet™</span>
+                        Powered by <span className="text-emerald-500/80">BCN™</span>
                     </span>
                 </div>
 
@@ -149,7 +149,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                 {/* Powered by Bizconnet™ at the bottom right */}
                 <div className="absolute bottom-4 right-6 z-20">
                     <span className="text-[10px] sm:text-xs font-semibold text-white/40 tracking-wider">
-                        Powered by <span className="text-violet-500/80">BizConNet™</span>
+                        Powered by <span className="text-violet-500/80">BCN™</span>
                     </span>
                 </div>
 
@@ -195,7 +195,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                 {/* Powered by Bizconnet™ at the bottom right */}
                 <div className="absolute bottom-4 right-6 z-20">
                     <span className="text-[10px] sm:text-xs font-semibold text-white/40 tracking-wider">
-                        Powered by <span className="text-violet-500/80">BizConNet™</span>
+                        Powered by <span className="text-violet-500/80">BCN™</span>
                     </span>
                 </div>
 
@@ -313,8 +313,8 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             transition={{ delay: 0.3 }}
                             className="flex items-center gap-2"
                         >
-                            <span className="text-xs sm:text-sm font-bold text-amber-200/90 uppercase tracking-widest">
-                                For {storeMeta?.ceoName || 'Aisha Ibrahem'}
+                            <span className="text-xs sm:text-sm font-bold text-white/90 uppercase tracking-widest">
+                                For <span className="text-amber-400"> {storeMeta?.ceoName || 'Aisha Ibrahem'}</span>
                             </span>
                             <div className="h-px w-8 bg-gradient-to-r from-amber-400/50 to-transparent" />
                         </motion.div>
@@ -330,10 +330,10 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                     </div>
                 </div>
 
-                {/* Powered by Bizconnet™ */}
+                {/* Powered by BCN™ */}
                 <div className="absolute bottom-6 sm:bottom-8 right-8 z-20 flex items-center gap-1.5">
                     <span className="text-[9px] font-bold text-white/60 tracking-widest uppercase">
-                        Powered by <span className="text-white">BizConNet™</span>
+                        Powered by <span className="text-white">BCN™</span>
                     </span>
                 </div>
             </div>
