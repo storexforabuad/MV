@@ -234,12 +234,12 @@ const ProductGrid = memo(function ProductGrid({
               />
             )}
 
-            <GlassButton
+            {/* <GlassButton
               onClick={() => setIsSearchOverlayOpen(true)}
               aria-label="Search products"
             >
               <Search className="w-5 h-5 text-[var(--text-primary)]" />
-            </GlassButton>
+            </GlassButton> */}
           </div>
         </div>
       )}
