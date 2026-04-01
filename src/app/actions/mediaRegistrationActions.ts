@@ -21,13 +21,15 @@ export interface MediaRegistrationData {
     paymentType: 'paid' | 'free';
     discountCode?: string | null;
     paystackRef?: string | null;
+    source?: 'media' | 'newmedia' | string; // New: track which landing page was used
     registeredAt?: Timestamp;
     whatsappNotified?: boolean;
 }
 
 /** Case-insensitive discount code check. */
 export async function validateDiscountCode(code: string): Promise<boolean> {
-    return code.trim().toLowerCase() === 'fatimahbcn';
+    const validCodes = ['fatimahbcn', 'mgl10'];
+    return validCodes.includes(code.trim().toLowerCase());
 }
 
 /** Check if email is already registered. */
@@ -58,6 +60,7 @@ export async function saveMediaRegistration(
             paymentType: data.paymentType,
             discountCode: data.discountCode || null,
             paystackRef: data.paystackRef || null,
+            source: data.source || 'media',
             registeredAt: Timestamp.now(),
             whatsappNotified: true,
         });

@@ -109,7 +109,7 @@ function StoreCard({ store, index, onRefresh }: { store: MediaStoreStats; index:
                     )}
                     <div className="text-right">
                         <p className="text-sm font-extrabold text-green-600 dark:text-green-400">{fmt(store.totalPlatformRevenue)}</p>
-                        <p className="text-[10px] text-gray-400">BizConNet cut</p>
+                        <p className="text-[10px] text-gray-400">Compass cut</p>
                     </div>
                     <ChevronRight
                         size={16}
@@ -148,7 +148,7 @@ function StoreCard({ store, index, onRefresh }: { store: MediaStoreStats; index:
 
                             {/* BizConNet Cuts */}
                             <div className="col-span-2">
-                                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">BizConNet Platform Cuts</p>
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">Compass Platform Cuts</p>
                                 <div className="grid grid-cols-3 gap-2">
                                     <div className="rounded-2xl p-3 bg-green-50 dark:bg-green-900/20">
                                         <p className="text-[10px] font-bold uppercase tracking-wider text-green-600 dark:text-green-400 opacity-70">20% Booking</p>
@@ -249,8 +249,8 @@ function RegistrationCard({ reg, index }: { reg: MediaRegistrationData; index: n
             </div>
             <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
                 <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${reg.paymentType === 'paid'
-                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
-                        : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                    ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                    : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
                     }`}>
                     {reg.paymentType === 'paid' ? <><BadgeCheck size={10} /> Paid</> : <><Tag size={10} /> Free</>}
                 </span>
@@ -318,8 +318,8 @@ function NewRegistrationsSection() {
                         key={f}
                         onClick={() => setFilter(f)}
                         className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all capitalize ${filter === f
-                                ? 'bg-violet-600 text-white shadow-md shadow-violet-500/30'
-                                : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700'
+                            ? 'bg-violet-600 text-white shadow-md shadow-violet-500/30'
+                            : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700'
                             }`}
                     >
                         {f}
@@ -397,7 +397,7 @@ export default function MediaDashboardPage() {
                             <h1 className="text-xl font-extrabold text-gray-900 dark:text-white tracking-tight">Media Dashboard</h1>
                         </div>
                         <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 ml-10">
-                            Influencer stores · BizConNet platform analytics
+                            Influencer stores · Compass 🧭 platform analytics
                         </p>
                     </div>
 

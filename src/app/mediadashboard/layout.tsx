@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Media Dashboard — BizConNet',
+    title: 'Media Dashboard — Compass 🧭',
     description: 'Super-admin analytics for all Media Influencer stores. Track escrow, platform cuts, and revenue per influencer.',
 };
 

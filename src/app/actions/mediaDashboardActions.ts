@@ -12,7 +12,7 @@ export interface MediaStoreStats {
     serviceGMV: number;           // PR/Collab service orders only
     physicalGMV: number;          // fashion/general product orders
     bookingFeeRevenue: number;    // total booking fees collected
-    // Platform Cuts (BizConNet's share)
+    // Platform Cuts (Compass's share)
     platformBookingCut: number;   // 20% of booking fees
     platformEscrowCut: number;    // 10% of service GMV
     platformPhysicalCut: number;  // 5% of physical GMV

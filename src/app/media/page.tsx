@@ -259,7 +259,7 @@ function DMLLoopSection() {
                             <CheckCircle2 size={20} className="text-violet-600 dark:text-violet-400" />
                         </div>
                         <div>
-                            <p className="font-bold text-gray-900 dark:text-white">The BizConNet Fix</p>
+                            <p className="font-bold text-gray-900 dark:text-white">The Compass 🧭 Fix</p>
                             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                                 One link for your Bio. Brands see your fixed rates, check your availability, and{' '}
                                 <strong className="text-violet-600 dark:text-violet-400">pay upfront</strong>.
@@ -478,7 +478,7 @@ function AntiHustleSection() {
                         <br />Go back to being a creator.
                     </h2>
                     <p className="mt-4 text-gray-500 dark:text-gray-400 max-w-lg mx-auto">
-                        BizConNet gives you the infrastructure of a full business — without the admin. Launch your booking page in minutes.
+                        Compass 🧭 gives you the infrastructure of a full business — without the admin. Launch your booking page in minutes.
                     </p>
                 </motion.div>
 
@@ -908,7 +908,7 @@ export default function MediaLandingPage() {
                     <div className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
                         <Sparkles size={12} className="text-white" />
                     </div>
-                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">BizConNet creators</span>
+                    <span className="text-xs font-bold text-gray-700 dark:text-gray-300">Compass 🧭 creators</span>
                     <a
                         href="#register"
                         className="text-xs font-bold text-violet-600 dark:text-violet-400 hover:underline"
@@ -929,7 +929,7 @@ export default function MediaLandingPage() {
             {/* Footer */}
             <footer className="py-10 px-6 text-center bg-gray-50 dark:bg-zinc-950 border-t border-gray-100 dark:border-zinc-900">
                 <p className="text-xs text-gray-400 dark:text-gray-600">
-                    © {new Date().getFullYear()} BizConNet. All rights reserved. · Powered by Paystack Escrow.
+                    © {new Date().getFullYear()} Compass 🧭. All rights reserved. · Powered by Paystack Escrow.
                 </p>
             </footer>
         </main>
