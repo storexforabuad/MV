@@ -15,10 +15,14 @@ export interface MediaStoreStats {
     // Platform Cuts (BizConNet's share)
     platformBookingCut: number;   // 20% of booking fees
     platformEscrowCut: number;    // 10% of service GMV
-    totalPlatformRevenue: number; // sum of the above two cuts
+    platformPhysicalCut: number;  // 5% of physical GMV
+    totalPlatformRevenue: number; // sum of the above three cuts
     // Escrow Health
     escrowHeldBalance: number;    // funds currently in escrow (not yet released)
     escrowReleasedTotal: number;  // funds released so far
+    disputedOrdersCount: number;  // orders currently flagged as disputed
+    agedOrdersCount: number;      // pending-review orders older than 7 days
+    agedOrderIds: string[];       // IDs of these aged orders
     // Order Counts
     totalOrders: number;
     serviceOrders: number;
@@ -37,6 +41,8 @@ export async function getMediaDashboardStats(): Promise<{
         totalEscrowHeld: number;
         totalBookingCuts: number;
         totalEscrowCuts: number;
+        totalPhysicalCuts: number; // NEW: 5% on physical items
+        totalDisputedOrders: number;
         storeCount: number;
     };
     error?: string;
@@ -64,6 +70,11 @@ export async function getMediaDashboardStats(): Promise<{
             let escrowReleasedTotal = 0;
             let serviceOrders = 0;
             let pendingReviewOrders = 0;
+            let disputedOrdersCount = 0;
+            let agedOrdersCount = 0;
+            let agedOrderIds: string[] = [];
+            const now = Date.now();
+            const sevenDaysInMs = 7 * 24 * 60 * 60 * 1000;
 
             for (const orderDoc of ordersSnap.docs) {
                 const order = orderDoc.data();
@@ -96,6 +107,10 @@ export async function getMediaDashboardStats(): Promise<{
                     escrowHeldBalance += escrowValue;
                 }
 
+                if (order.paymentStatus === 'escrow-disputed') {
+                    disputedOrdersCount++;
+                }
+
                 if (order.paymentStatus === 'escrow-released') {
                     const releasedValue = products
                         .filter((p: any) => p.productType === 'media-influencer' && p.subtype === 'service')
@@ -105,11 +120,22 @@ export async function getMediaDashboardStats(): Promise<{
 
                 if (order.orderStatus === 'pending-review') {
                     pendingReviewOrders++;
+
+                    // Check for aged orders (> 7 days)
+                    const orderDate = typeof order.orderDate.toDate === 'function'
+                        ? order.orderDate.toMillis()
+                        : new Date(order.orderDate).getTime();
+
+                    if (now - orderDate > sevenDaysInMs) {
+                        agedOrdersCount++;
+                        agedOrderIds.push(orderDoc.id);
+                    }
                 }
             }
 
             const platformBookingCut = bookingFeeRevenue * 0.20;
             const platformEscrowCut = serviceGMV * 0.10;
+            const platformPhysicalCut = physicalGMV * 0.05; // Standardized 5% cut
 
             storeStats.push({
                 storeId,
@@ -121,12 +147,16 @@ export async function getMediaDashboardStats(): Promise<{
                 bookingFeeRevenue,
                 platformBookingCut,
                 platformEscrowCut,
-                totalPlatformRevenue: platformBookingCut + platformEscrowCut,
+                platformPhysicalCut,
+                totalPlatformRevenue: platformBookingCut + platformEscrowCut + platformPhysicalCut,
                 escrowHeldBalance,
                 escrowReleasedTotal,
                 totalOrders: ordersSnap.size,
                 serviceOrders,
                 pendingReviewOrders,
+                disputedOrdersCount,
+                agedOrdersCount,
+                agedOrderIds,
             });
         }
 
@@ -139,9 +169,11 @@ export async function getMediaDashboardStats(): Promise<{
                 totalEscrowHeld: acc.totalEscrowHeld + s.escrowHeldBalance,
                 totalBookingCuts: acc.totalBookingCuts + s.platformBookingCut,
                 totalEscrowCuts: acc.totalEscrowCuts + s.platformEscrowCut,
+                totalPhysicalCuts: acc.totalPhysicalCuts + (s as any).platformPhysicalCut || 0,
+                totalDisputedOrders: acc.totalDisputedOrders + s.disputedOrdersCount,
                 storeCount: acc.storeCount + 1,
             }),
-            { totalPlatformRevenue: 0, totalEscrowHeld: 0, totalBookingCuts: 0, totalEscrowCuts: 0, storeCount: 0 }
+            { totalPlatformRevenue: 0, totalEscrowHeld: 0, totalBookingCuts: 0, totalEscrowCuts: 0, totalPhysicalCuts: 0, totalDisputedOrders: 0, storeCount: 0 }
         );
 
         return { success: true, stores: storeStats, totals };
@@ -150,7 +182,7 @@ export async function getMediaDashboardStats(): Promise<{
         return {
             success: false,
             stores: [],
-            totals: { totalPlatformRevenue: 0, totalEscrowHeld: 0, totalBookingCuts: 0, totalEscrowCuts: 0, storeCount: 0 },
+            totals: { totalPlatformRevenue: 0, totalEscrowHeld: 0, totalBookingCuts: 0, totalEscrowCuts: 0, totalPhysicalCuts: 0, totalDisputedOrders: 0, storeCount: 0 },
             error: String(error),
         };
     }

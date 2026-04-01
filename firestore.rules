@@ -53,7 +53,7 @@ service cloud.firestore {
       return (!('commission' in product) ||
                 (product.commission is number &&
                  product.commission >= 1 &&
-                 product.commission <= 12)) &&
+                 product.commission <= 20)) &&
              (!('originalPrice' in product) ||
                 product.originalPrice == null ||
                 (product.price < product.originalPrice));
@@ -125,7 +125,12 @@ service cloud.firestore {
         allow update: if (request.auth != null &&
                         exists(/databases/$(database)/documents/stores/$(request.auth.uid)) &&
                         get(/databases/$(database)/documents/customers/$(userId)/orders/$(orderId)).data.storeMeta.id == request.auth.uid &&
-                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'paymentEvidenceUrl', 'paymentStatus', 'paymentEvidenceFileName', 'paymentEvidenceUploadedAt', 'ttl']))
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+                          'orderStatus', 'status', 'paymentEvidenceUrl', 'paymentStatus', 
+                          'paymentEvidenceFileName', 'paymentEvidenceUploadedAt', 'ttl',
+                          'disputeReason', 'deliverableUrl', 'influencerNote', 'paystackReference',
+                          'paymentConfirmedAt', 'deliverableUploadedAt', 'escrowReleasedAt', 'updatedAt'
+                        ]))
                      || true;
         allow delete: if true;
       }

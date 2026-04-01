@@ -50,13 +50,17 @@ export async function sendCustomerNotification(
         const storeId = orderData?.storeMeta?.id || '';
         const deliveryMethod = orderData?.deliveryMethod || 'home'; // Default to home if missing
 
+        const isInfluencer = orderData?.storeMeta?.storeType === 'media-influencer';
+
         // Create notification message based on status and delivery method
         let notificationBody = '';
         if (newStatus === 'ready') {
             if (deliveryMethod === 'pickup') {
                 notificationBody = `Your order from ${storeName} is ready for pickup! #${shortOrderId}`;
             } else {
-                notificationBody = `Your order from ${storeName} has been shipped! #${shortOrderId}`;
+                notificationBody = isInfluencer 
+                    ? `Your service from ${storeName} is completed! #${shortOrderId}`
+                    : `Your order from ${storeName} has been shipped! #${shortOrderId}`;
             }
         } else {
             notificationBody = `Parts of your order from ${storeName} are ready! #${shortOrderId}`;
@@ -80,6 +84,7 @@ export async function sendCustomerNotification(
                 storeId,
                 newStatus,
                 url: deepLinkUrl,
+                storeType: isInfluencer ? 'media-influencer' : 'standard',
             },
             webpush: {
                 notification: {

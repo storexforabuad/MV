@@ -40,6 +40,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# firebase
+firestore.rules
+.firebase/
+.firebaserc
+
 .vercel
 
 .vercel

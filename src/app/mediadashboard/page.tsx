@@ -8,6 +8,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { getMediaDashboardStats, MediaStoreStats } from '@/app/actions/mediaDashboardActions';
+import { bulkReleaseAgedEscrows } from '@/app/actions/orderActions';
+import toast from 'react-hot-toast';
 
 const fmt = (n: number) =>
     n >= 1_000_000
@@ -45,8 +47,29 @@ function MetricChip({
 }
 
 // ─── Store Row Card ────────────────────────────────────────────────────────────
-function StoreCard({ store, index }: { store: MediaStoreStats; index: number }) {
+function StoreCard({ store, index, onRefresh }: { store: MediaStoreStats; index: number; onRefresh: () => void }) {
     const [open, setOpen] = useState(false);
+    const [isReleasing, setIsReleasing] = useState(false);
+
+    const handleBulkRelease = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (!confirm(`Are you sure you want to release all ${store.agedOrdersCount} aged escrows for ${store.storeName}?`)) return;
+
+        setIsReleasing(true);
+        try {
+            const result = await bulkReleaseAgedEscrows(store.storeId, store.agedOrderIds);
+            if (result.success) {
+                toast.success(`Successfully released ${result.count} aged orders!`);
+                onRefresh();
+            } else {
+                toast.error(result.error || 'Failed to release orders');
+            }
+        } catch (err) {
+            toast.error('An unexpected error occurred');
+        } finally {
+            setIsReleasing(false);
+        }
+    };
 
     return (
         <motion.div
@@ -71,6 +94,12 @@ function StoreCard({ store, index }: { store: MediaStoreStats; index: number }) 
                 </div>
 
                 <div className="flex items-center gap-3">
+                    {store.disputedOrdersCount > 0 && (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 text-[10px] font-bold uppercase animate-pulse">
+                            <AlertCircle size={10} />
+                            {store.disputedOrdersCount} Dispute
+                        </span>
+                    )}
                     {store.pendingReviewOrders > 0 && (
                         <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 text-[10px] font-bold uppercase">
                             <Clock size={10} />
@@ -119,14 +148,18 @@ function StoreCard({ store, index }: { store: MediaStoreStats; index: number }) 
                             {/* BizConNet Cuts */}
                             <div className="col-span-2">
                                 <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-3">BizConNet Platform Cuts</p>
-                                <div className="grid grid-cols-2 gap-2">
+                                <div className="grid grid-cols-3 gap-2">
                                     <div className="rounded-2xl p-3 bg-green-50 dark:bg-green-900/20">
-                                        <p className="text-[10px] font-bold uppercase tracking-wider text-green-600 dark:text-green-400 opacity-70">20% Booking Cut</p>
-                                        <p className="text-lg font-extrabold text-green-700 dark:text-green-300 mt-0.5">{fmt(store.platformBookingCut)}</p>
+                                        <p className="text-[10px] font-bold uppercase tracking-wider text-green-600 dark:text-green-400 opacity-70">20% Booking</p>
+                                        <p className="text-base font-extrabold text-green-700 dark:text-green-300 mt-0.5">{fmt(store.platformBookingCut)}</p>
                                     </div>
                                     <div className="rounded-2xl p-3 bg-teal-50 dark:bg-teal-900/20">
-                                        <p className="text-[10px] font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400 opacity-70">10% Escrow Cut</p>
-                                        <p className="text-lg font-extrabold text-teal-700 dark:text-teal-300 mt-0.5">{fmt(store.platformEscrowCut)}</p>
+                                        <p className="text-[10px] font-bold uppercase tracking-wider text-teal-600 dark:text-teal-400 opacity-70">10% Services</p>
+                                        <p className="text-base font-extrabold text-teal-700 dark:text-teal-300 mt-0.5">{fmt(store.platformEscrowCut)}</p>
+                                    </div>
+                                    <div className="rounded-2xl p-3 bg-blue-50 dark:bg-blue-900/20">
+                                        <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400 opacity-70">5% Physical</p>
+                                        <p className="text-base font-extrabold text-blue-700 dark:text-blue-300 mt-0.5">{fmt(store.platformPhysicalCut)}</p>
                                     </div>
                                 </div>
                             </div>
@@ -152,14 +185,29 @@ function StoreCard({ store, index }: { store: MediaStoreStats; index: number }) 
                                 </div>
                             </div>
 
-                            {/* Order Stats */}
-                            <div className="col-span-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-slate-800/50 rounded-2xl px-4 py-3">
+                             {/* Order Stats */}
+                             <div className="col-span-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-slate-800/50 rounded-2xl px-4 py-3">
                                 <span>{store.totalOrders} total orders</span>
-                                <span>{store.serviceOrders} service orders</span>
+                                <div>
+                                    {store.disputedOrdersCount > 0 && <span className="text-red-500 font-bold mr-3">{store.disputedOrdersCount} disputed</span>}
+                                    <span>{store.serviceOrders} service</span>
+                                </div>
                                 {store.pendingReviewOrders > 0 && (
                                     <span className="text-amber-600 dark:text-amber-400 font-bold">{store.pendingReviewOrders} awaiting approval</span>
                                 )}
                             </div>
+
+                            {/* Manual Action for Aged Escrow */}
+                            {store.agedOrdersCount > 0 && (
+                                <button
+                                    onClick={handleBulkRelease}
+                                    disabled={isReleasing}
+                                    className="col-span-2 py-3 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold shadow-md transition-all flex items-center justify-center gap-2"
+                                >
+                                    {isReleasing ? <RefreshCw size={14} className="animate-spin" /> : <Unlock size={14} />}
+                                    Approve & Release {store.agedOrdersCount} Aged Escrows
+                                </button>
+                            )}
 
                             {/* CTA */}
                             <Link
@@ -239,7 +287,7 @@ export default function MediaDashboardPage() {
                         <MetricChip
                             label="Total Platform Revenue"
                             value={fmt(totals.totalPlatformRevenue)}
-                            sub="20% booking + 10% escrow cuts"
+                            sub="20% booking + 10% escrow + 5% product"
                             icon={<DollarSign size={17} />}
                             color="green"
                         />
@@ -258,8 +306,8 @@ export default function MediaDashboardPage() {
                             color="amber"
                         />
                         <MetricChip
-                            label="Escrow Cuts (10%)"
-                            value={fmt(totals.totalEscrowCuts)}
+                            label="Product Cuts (5%)"
+                            value={fmt(totals.totalPhysicalCuts)}
                             sub={`Across ${totals.storeCount} influencer stores`}
                             icon={<TrendingUp size={17} />}
                             color="purple"
@@ -308,7 +356,7 @@ export default function MediaDashboardPage() {
                 {/* Store Cards */}
                 <div className="space-y-3">
                     {stores.map((store, i) => (
-                        <StoreCard key={store.storeId} store={store} index={i} />
+                        <StoreCard key={store.storeId} store={store} index={i} onRefresh={fetchData} />
                     ))}
                 </div>
             </div>

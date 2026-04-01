@@ -244,7 +244,7 @@ export default function PaymentFlowPage({
           metadata: {
             orderId: newOrder.id,
             cart_items: cartSummary,
-            commission_percent: itemsToOrder[0]?.commission || (itemsToOrder.some(i => i.productType === 'media-influencer' && i.subtype === 'service') ? 15 : 5)
+            commission_percent: itemsToOrder[0]?.commission || (itemsToOrder.some(i => i.productType === 'media-influencer' && i.subtype === 'service') ? 10 : 5)
           }
         })
       });

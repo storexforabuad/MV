@@ -12,6 +12,8 @@ import {
 import Image from 'next/image';
 import CategorySelectorModal from './modals/CategorySelectorModal';
 import { ModernToggle, FloatingLabelInput } from '../ui/ComposerInputs';
+import { StoreMeta } from '../../types/store';
+import { AlertTriangle } from 'lucide-react';
 
 interface AddServiceComposerProps {
     isOpen: boolean;
@@ -23,6 +25,7 @@ interface AddServiceComposerProps {
     onAddCategory: (name: string) => Promise<void>;
     storeName?: string;
     instagramHandle?: string;
+    storeMeta?: StoreMeta;
 }
 
 const PLATFORMS = [
@@ -33,7 +36,7 @@ const PLATFORMS = [
     { id: 'Cross-Platform', name: 'Cross-Platform', icon: Share2 },
 ];
 
-export default function AddServiceComposer({ isOpen, onClose, onBack, storeId, categories, onProductAdded, onAddCategory, storeName, instagramHandle }: AddServiceComposerProps) {
+export default function AddServiceComposer({ isOpen, onClose, onBack, storeId, categories, onProductAdded, onAddCategory, storeName, instagramHandle, storeMeta }: AddServiceComposerProps) {
     const [currentStep, setCurrentStep] = useState(0);
     const [name, setName] = useState('');
     const [price, setPrice] = useState('');
@@ -354,6 +357,18 @@ export default function AddServiceComposer({ isOpen, onClose, onBack, storeId, c
                                 </h4>
                             </div>
                         </div>
+
+                        {!storeMeta?.paystackSubaccountCode && (
+                            <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-2xl flex items-start gap-3">
+                                <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                                <div>
+                                    <p className="text-sm font-bold text-amber-800 dark:text-amber-200">Payout Account Required</p>
+                                    <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                                        You must connect your bank subaccount in <b>Store Settings</b> to list services. This ensures automated escrow payouts.
+                                    </p>
+                                </div>
+                            </div>
+                        )}
                     </motion.div>
                 );
 
@@ -437,9 +452,9 @@ export default function AddServiceComposer({ isOpen, onClose, onBack, storeId, c
                     <footer className="fixed bottom-0 left-0 right-0 p-6 sm:p-10 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800 z-20">
                         <div className="max-w-4xl mx-auto w-full">
                             <button
-                                disabled={isUploading || (currentStep === 0 && !imageFile) || (currentStep === 1 && (!name || !categoryId))}
+                                disabled={isUploading || (currentStep === 0 && !imageFile) || (currentStep === 1 && (!name || !categoryId)) || (currentStep === 3 && !storeMeta?.paystackSubaccountCode)}
                                 onClick={currentStep === 3 ? handleSubmit : () => setCurrentStep(prev => prev + 1)}
-                                className={`w-full py-5 rounded-[2rem] font-black text-xl transition-all shadow-xl flex items-center justify-center gap-3 ${isUploading || (currentStep === 0 && !imageFile) || (currentStep === 1 && (!name || !categoryId))
+                                className={`w-full py-5 rounded-[2rem] font-black text-xl transition-all shadow-xl flex items-center justify-center gap-3 ${isUploading || (currentStep === 0 && !imageFile) || (currentStep === 1 && (!name || !categoryId)) || (currentStep === 3 && !storeMeta?.paystackSubaccountCode)
                                     ? 'bg-slate-100 dark:bg-slate-900 text-slate-400 cursor-not-allowed'
                                     : 'bg-blue-600 hover:bg-blue-700 text-white hover:scale-[1.02] active:scale-[0.98]'
                                     }`}

@@ -13,6 +13,7 @@ export default function StoreNotificationListener({ storeId }: { storeId: string
         orderId: string;
         status: 'shipped' | 'ready' | 'partially-ready';
         storeName?: string;
+        storeType?: string;
     } | null>(null);
     const router = useRouter();
 
@@ -26,7 +27,7 @@ export default function StoreNotificationListener({ storeId }: { storeId: string
                     console.log('[StoreListener] Data:', payload.data);
 
                     if (payload.data?.type === 'order_status_update') {
-                        const { orderId, newStatus, storeId: msgStoreId } = payload.data;
+                        const { orderId, newStatus, storeId: msgStoreId, storeType } = payload.data;
                         console.log(`[StoreListener] Comparing storeId: ${storeId} with msgStoreId: ${msgStoreId}`);
 
                         // Only show if it matches the current store context or if we want global notifications
@@ -36,6 +37,7 @@ export default function StoreNotificationListener({ storeId }: { storeId: string
                             setNotificationData({
                                 orderId,
                                 status: newStatus as 'shipped' | 'ready' | 'partially-ready',
+                                storeType,
                                 storeName: payload.notification?.title?.includes('from')
                                     ? payload.notification.title.split('from')[1].trim()
                                     : undefined
@@ -70,6 +72,7 @@ export default function StoreNotificationListener({ storeId }: { storeId: string
             orderId={notificationData.orderId}
             status={notificationData.status}
             storeName={notificationData.storeName}
+            storeType={notificationData.storeType}
         />
     );
 }

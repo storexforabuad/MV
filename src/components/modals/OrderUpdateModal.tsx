@@ -9,6 +9,7 @@ interface OrderUpdateModalProps {
     orderId: string;
     status: 'shipped' | 'ready' | 'partially-ready';
     storeName?: string;
+    storeType?: string;
 }
 
 export const OrderUpdateModal: React.FC<OrderUpdateModalProps> = ({
@@ -17,14 +18,20 @@ export const OrderUpdateModal: React.FC<OrderUpdateModalProps> = ({
     onViewOrder,
     orderId,
     status,
-    storeName
+    storeName,
+    storeType
 }) => {
     if (!isOpen) return null;
 
+    const isInfluencer = storeType === 'media-influencer';
     const isShipped = status === 'shipped';
-    const title = isShipped ? 'Order Shipped!' : 'Ready for Pickup!';
+    const title = isShipped 
+        ? (isInfluencer ? 'Service Completed!' : 'Order Shipped!') 
+        : 'Ready for Pickup!';
     const message = isShipped
-        ? `Your order #${orderId.slice(-6)} from ${storeName || 'the store'} is on its way.`
+        ? (isInfluencer 
+            ? `Your service #${orderId.slice(-6)} from ${storeName || 'the store'} is now complete.`
+            : `Your order #${orderId.slice(-6)} from ${storeName || 'the store'} is on its way.`)
         : `Your order #${orderId.slice(-6)} from ${storeName || 'the store'} is ready for pickup.`;
 
     return (
@@ -56,10 +63,10 @@ export const OrderUpdateModal: React.FC<OrderUpdateModalProps> = ({
                         <div className="p-6 flex flex-col items-center text-center">
                             {/* Icon */}
                             <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${isShipped
-                                    ? 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400'
+                                    ? (isInfluencer ? 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400' : 'bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400')
                                     : 'bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400'
                                 }`}>
-                                {isShipped ? <Package className="w-8 h-8" /> : <ShoppingBag className="w-8 h-8" />}
+                                {isShipped && !isInfluencer ? <Package className="w-8 h-8" /> : <ShoppingBag className="w-8 h-8" />}
                             </div>
 
                             {/* Content */}

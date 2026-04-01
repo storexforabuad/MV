@@ -27,11 +27,11 @@ export interface Order {
     products: Product[]; // Now supports multiple products
     storeMeta: StoreMeta;
     orderDate: string; // ISO string
-    orderStatus: 'processing' | 'partially-ready' | 'ready' | 'shipped' | 'pending-review';
+    orderStatus: 'processing' | 'partially-ready' | 'ready' | 'shipped' | 'pending-review' | 'disputed';
     orderNotes?: string;
     // Payment-related fields (currently for restaurant orders only, expandable to other store types)
     paymentEvidenceUrl?: string; // Cloudinary URL of payment proof - latest upload only
-    paymentStatus?: 'pending' | 'submitted' | 'escrow-held' | 'escrow-released' | 'refunded'; // pending: no evidence yet, submitted: customer uploaded evidence
+    paymentStatus?: 'pending' | 'submitted' | 'escrow-held' | 'escrow-released' | 'escrow-disputed' | 'refunded'; // pending: no evidence yet, submitted: customer uploaded evidence
     paymentEvidenceUploadedAt?: string; // ISO string - for TTL cleanup tracking (30 days)
     paymentEvidenceFileName?: string; // Original filename for reference
     deliveryMethod?: 'home' | 'pickup';
@@ -84,7 +84,7 @@ interface FirestoreOrderData {
     orderNotes?: string;
     // Payment-related fields (restaurant orders, expandable to other types)
     paymentEvidenceUrl?: string;
-    paymentStatus?: 'pending' | 'submitted' | 'escrow-held' | 'escrow-released' | 'refunded';
+    paymentStatus?: 'pending' | 'submitted' | 'escrow-held' | 'escrow-released' | 'escrow-disputed' | 'refunded';
     paymentEvidenceUploadedAt?: Timestamp;
     paymentEvidenceFileName?: string;
     ttl?: number; // Unix timestamp in seconds - Firestore TTL for auto-cleanup after 30 days
@@ -92,6 +92,7 @@ interface FirestoreOrderData {
     // Media Influencer / Escrow Fields
     deliverableUrl?: string;
     campaignBrief?: string;
+    disputeReason?: string;
 }
 
 /**
@@ -737,3 +738,55 @@ export async function releaseEscrow(
     }
 }
 
+/**
+ * Flags an order as disputed by the brand.
+ */
+export const disputeEscrow = async (storeId: string, orderId: string, reason: string) => {
+    try {
+        const batch = writeBatch(db);
+        const storeOrderRef = doc(db, 'stores', storeId, 'orders', orderId);
+        const orderSnap = await getDoc(storeOrderRef);
+
+        if (!orderSnap.exists()) return { success: false, error: 'Order not found' };
+        const orderData = orderSnap.data();
+
+        const updatePayload = {
+            paymentStatus: 'escrow-disputed' as const,
+            orderStatus: 'disputed' as const,
+            disputeReason: reason,
+            updatedAt: Timestamp.now()
+        };
+
+        batch.update(storeOrderRef, updatePayload);
+
+        // Update customer view if it exists
+        if (orderData.customerId) {
+            const customerOrderRef = doc(db, 'customers', orderData.customerId, 'orders', orderId);
+            const customerOrderSnap = await getDoc(customerOrderRef);
+            if (customerOrderSnap.exists()) {
+                batch.update(customerOrderRef, updatePayload);
+            }
+        }
+
+        await batch.commit();
+        return { success: true };
+    } catch (err) {
+        console.error('Error disputing escrow:', err);
+        return { success: false, error: String(err) };
+    }
+};
+
+/**
+ * Bulk releases aged escrows. 
+ * This is the admin-controlled version of the auto-release.
+ */
+export const bulkReleaseAgedEscrows = async (storeId: string, orderIds: string[]) => {
+    try {
+        const results = await Promise.all(orderIds.map(id => releaseEscrow(storeId, id)));
+        const successCount = results.filter(r => r.success).length;
+        return { success: true, count: successCount };
+    } catch (err) {
+        console.error('Error in bulk release:', err);
+        return { success: false, error: String(err) };
+    }
+};

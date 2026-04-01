@@ -28,10 +28,17 @@ interface OrderDetailCardProps {
   storeId?: string;
 }
 
-const getStatusUI = (status: Order['orderStatus']) => {
+const getStatusUI = (status: Order['orderStatus'], storeType?: string) => {
+  const isInfluencer = storeType === 'media-influencer';
   switch (status) {
+    case 'disputed':
+      return { icon: <AlertCircle className="w-4 h-4" />, text: 'Disputed', color: 'text-red-400' };
     case 'shipped':
-      return { icon: <Truck className="w-4 h-4" />, text: 'Shipped', color: 'text-blue-400' };
+      return { 
+        icon: isInfluencer ? <CheckCircle className="w-4 h-4" /> : <Truck className="w-4 h-4" />, 
+        text: isInfluencer ? 'Completed' : 'Shipped', 
+        color: isInfluencer ? 'text-green-400' : 'text-blue-400' 
+      };
     case 'ready':
       return { icon: <CheckCircle className="w-4 h-4" />, text: 'Ready for Pickup', color: 'text-green-400' };
     case 'partially-ready':
@@ -65,7 +72,7 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted, onR
 
   // FIX: Use the backward-compatible 'products' array for calculation.
   const totalAmount = products.reduce((acc, p) => acc + p.price * (p.productType === 'general' ? p.quantity : 1), 0);
-  const statusInfo = getStatusUI(order.orderStatus);
+  const statusInfo = getStatusUI(order.orderStatus, storeMeta?.storeType);
 
   return (
     <>
