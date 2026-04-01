@@ -290,6 +290,10 @@ service cloud.firestore {
       allow read, update, delete: if true;
     }
 
+    match /mediaRegistrations/{registrationId} {
+      allow read, create, update, delete: if true;
+    }
+
     // --- Wholesale Transactions (Platform-level) ---
     // Stores platform-level wholesale transactions for reporting and settlement
     match /wholesaleTransactions/{transactionId} {

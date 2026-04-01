@@ -4,10 +4,11 @@ import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     TrendingUp, Unlock, DollarSign, Store, Clock, CheckCircle,
-    RefreshCw, ChevronRight, AlertCircle, Star, Users
+    RefreshCw, ChevronRight, AlertCircle, Star, Users, UserPlus, BadgeCheck, Tag
 } from 'lucide-react';
 import Link from 'next/link';
 import { getMediaDashboardStats, MediaStoreStats } from '@/app/actions/mediaDashboardActions';
+import { getMediaRegistrations, MediaRegistrationData } from '@/app/actions/mediaRegistrationActions';
 import { bulkReleaseAgedEscrows } from '@/app/actions/orderActions';
 import toast from 'react-hot-toast';
 
@@ -185,8 +186,8 @@ function StoreCard({ store, index, onRefresh }: { store: MediaStoreStats; index:
                                 </div>
                             </div>
 
-                             {/* Order Stats */}
-                             <div className="col-span-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-slate-800/50 rounded-2xl px-4 py-3">
+                            {/* Order Stats */}
+                            <div className="col-span-2 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-slate-800/50 rounded-2xl px-4 py-3">
                                 <span>{store.totalOrders} total orders</span>
                                 <div>
                                     {store.disputedOrdersCount > 0 && <span className="text-red-500 font-bold mr-3">{store.disputedOrdersCount} disputed</span>}
@@ -221,6 +222,141 @@ function StoreCard({ store, index, onRefresh }: { store: MediaStoreStats; index:
                 )}
             </AnimatePresence>
         </motion.div>
+    );
+}
+
+// ─── Registration Card ─────────────────────────────────────────────────────────
+function RegistrationCard({ reg, index }: { reg: MediaRegistrationData; index: number }) {
+    const ts = reg.registeredAt as any;
+    const date = ts?.toDate ? ts.toDate() : new Date(ts || Date.now());
+    const fmtDate = date.toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' });
+    const fmtTime = date.toLocaleTimeString('en-NG', { hour: '2-digit', minute: '2-digit' });
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.04 }}
+            className="bg-white dark:bg-slate-900 rounded-3xl border border-gray-100 dark:border-slate-800 shadow-sm p-5 flex items-center gap-4"
+        >
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-extrabold text-lg shadow-md shadow-purple-200/50 dark:shadow-none flex-shrink-0">
+                {reg.name.charAt(0).toUpperCase()}
+            </div>
+            <div className="flex-1 min-w-0">
+                <p className="font-bold text-gray-900 dark:text-white truncate">{reg.name}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{reg.email}</p>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">{reg.bankName} · ···{reg.accountNumber.slice(-4)}</p>
+            </div>
+            <div className="flex flex-col items-end gap-1.5 flex-shrink-0">
+                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${reg.paymentType === 'paid'
+                        ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300'
+                        : 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                    }`}>
+                    {reg.paymentType === 'paid' ? <><BadgeCheck size={10} /> Paid</> : <><Tag size={10} /> Free</>}
+                </span>
+                <p className="text-[10px] text-gray-400">{fmtDate} · {fmtTime}</p>
+            </div>
+        </motion.div>
+    );
+}
+
+// ─── New Registrations Section ─────────────────────────────────────────────────
+function NewRegistrationsSection() {
+    const [registrations, setRegistrations] = useState<MediaRegistrationData[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [filter, setFilter] = useState<'all' | 'paid' | 'free'>('all');
+
+    useEffect(() => {
+        (async () => {
+            setLoading(true);
+            const data = await getMediaRegistrations();
+            setRegistrations(data);
+            setLoading(false);
+        })();
+    }, []);
+
+    const filtered = filter === 'all' ? registrations : registrations.filter(r => r.paymentType === filter);
+    const paidCount = registrations.filter(r => r.paymentType === 'paid').length;
+    const freeCount = registrations.filter(r => r.paymentType === 'free').length;
+
+    return (
+        <div className="space-y-4">
+            {/* Section header */}
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                    <UserPlus size={16} className="text-violet-500" />
+                    <h2 className="text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                        New Registrations ({registrations.length})
+                    </h2>
+                </div>
+                <Link href="/media" className="text-xs font-bold text-violet-600 dark:text-violet-400 hover:underline">View Landing Page ↗</Link>
+            </div>
+
+            {/* Metric chips */}
+            <div className="grid grid-cols-3 gap-3">
+                {[
+                    { label: 'Total', value: registrations.length, color: 'from-violet-500 to-purple-600 shadow-purple-200/50' },
+                    { label: 'Paid (₦10k)', value: paidCount, color: 'from-green-500 to-teal-500 shadow-green-200/50' },
+                    { label: 'Free (Code)', value: freeCount, color: 'from-blue-500 to-cyan-500 shadow-blue-200/50' },
+                ].map(chip => (
+                    <motion.div
+                        key={chip.label}
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`bg-gradient-to-br ${chip.color} rounded-3xl p-4 text-white shadow-lg`}
+                    >
+                        <p className="text-[10px] font-bold uppercase tracking-widest opacity-80">{chip.label}</p>
+                        <p className="text-3xl font-extrabold tracking-tight mt-1">{chip.value}</p>
+                    </motion.div>
+                ))}
+            </div>
+
+            {/* Filter tabs */}
+            <div className="flex gap-2">
+                {(['all', 'paid', 'free'] as const).map(f => (
+                    <button
+                        key={f}
+                        onClick={() => setFilter(f)}
+                        className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all capitalize ${filter === f
+                                ? 'bg-violet-600 text-white shadow-md shadow-violet-500/30'
+                                : 'bg-gray-100 dark:bg-slate-800 text-gray-500 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-slate-700'
+                            }`}
+                    >
+                        {f}
+                    </button>
+                ))}
+            </div>
+
+            {/* Loading skeleton */}
+            {loading && (
+                <div className="space-y-3">
+                    {[1, 2, 3].map(i => (
+                        <div key={i} className="h-[76px] bg-gray-100 dark:bg-slate-800 rounded-3xl animate-pulse" />
+                    ))}
+                </div>
+            )}
+
+            {/* Empty state */}
+            {!loading && filtered.length === 0 && (
+                <div className="text-center py-12">
+                    <div className="w-16 h-16 rounded-full bg-violet-50 dark:bg-violet-900/20 flex items-center justify-center mx-auto mb-3">
+                        <UserPlus size={24} className="text-violet-400" />
+                    </div>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">
+                        {filter === 'all' ? 'No registrations yet. Share the /media page!' : `No ${filter} registrations yet.`}
+                    </p>
+                </div>
+            )}
+
+            {/* Registration cards */}
+            {!loading && (
+                <div className="space-y-3">
+                    {filtered.map((reg, i) => (
+                        <RegistrationCard key={reg.id} reg={reg} index={i} />
+                    ))}
+                </div>
+            )}
+        </div>
     );
 }
 
@@ -358,6 +494,11 @@ export default function MediaDashboardPage() {
                     {stores.map((store, i) => (
                         <StoreCard key={store.storeId} store={store} index={i} onRefresh={fetchData} />
                     ))}
+                </div>
+
+                {/* ── New Registrations Section ─────────────────────── */}
+                <div className="mt-8 pt-8 border-t border-gray-100 dark:border-slate-800">
+                    <NewRegistrationsSection />
                 </div>
             </div>
         </div>
