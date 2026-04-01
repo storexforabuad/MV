@@ -9,7 +9,7 @@ interface PaymentEvidenceViewerProps {
   paymentEvidenceUrl?: string;
   paymentEvidenceFileName?: string;
   paymentEvidenceUploadedAt?: string;
-  paymentStatus?: 'pending' | 'submitted' | 'escrow-held' | 'escrow-released' | 'refunded';
+  paymentStatus?: 'pending' | 'submitted' | 'escrow-held' | 'escrow-released' | 'escrow-disputed' | 'refunded';
 }
 
 export default function PaymentEvidenceViewer({
@@ -65,19 +65,22 @@ export default function PaymentEvidenceViewer({
           </button>
         </div>
 
-        {/* Status indicator */}
         <div className="mt-3 pt-3 border-t border-blue-200 dark:border-blue-800">
           <div className="flex items-center gap-2">
             <div
               className={`h-2 w-2 rounded-full ${paymentStatus === 'submitted'
                   ? 'bg-yellow-500'
-                  : 'bg-gray-400'
+                  : paymentStatus === 'escrow-disputed'
+                    ? 'bg-red-500'
+                    : 'bg-gray-400'
                 }`}
             />
             <span className="text-xs font-medium text-gray-700 dark:text-gray-300">
               {paymentStatus === 'submitted'
                 ? 'Awaiting vendor verification'
-                : 'Pending payment'}
+                : paymentStatus === 'escrow-disputed'
+                  ? 'Payment Disputed'
+                  : 'Pending payment'}
             </span>
           </div>
         </div>

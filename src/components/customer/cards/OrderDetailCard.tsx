@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { Timestamp } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
-import { Repeat, MessageSquare, Clock, CheckCircle, Truck, FileText } from 'lucide-react';
+import { Repeat, MessageSquare, Clock, CheckCircle, Truck, FileText, AlertCircle } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Order } from '../../../hooks/useOrders';
 import { formatPrice } from '../../../utils/price';
@@ -34,10 +34,10 @@ const getStatusUI = (status: Order['orderStatus'], storeType?: string) => {
     case 'disputed':
       return { icon: <AlertCircle className="w-4 h-4" />, text: 'Disputed', color: 'text-red-400' };
     case 'shipped':
-      return { 
-        icon: isInfluencer ? <CheckCircle className="w-4 h-4" /> : <Truck className="w-4 h-4" />, 
-        text: isInfluencer ? 'Completed' : 'Shipped', 
-        color: isInfluencer ? 'text-green-400' : 'text-blue-400' 
+      return {
+        icon: isInfluencer ? <CheckCircle className="w-4 h-4" /> : <Truck className="w-4 h-4" />,
+        text: isInfluencer ? 'Completed' : 'Shipped',
+        color: isInfluencer ? 'text-green-400' : 'text-blue-400'
       };
     case 'ready':
       return { icon: <CheckCircle className="w-4 h-4" />, text: 'Ready for Pickup', color: 'text-green-400' };
