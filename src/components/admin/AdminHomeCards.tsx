@@ -514,14 +514,24 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
   }, [uiVisible]);
   */
 
-  const ordersIndex = cardData.findIndex(card => card.label === 'Orders');
+  const isInfluencer = props.storeType === 'media-influencer';
+  const isEscrow = props.paymentFlow === 'paystack_escrow';
+  const isSpecialStore = isInfluencer || isEscrow;
 
-  // Filter to show only specific cards
   const allowedCards = ['Launch', 'Compass', 'Orders', 'Settings', 'Views', 'Manage Categories', 'Manage Products', 'Subscription', 'Circles', 'Revenue', 'Deliveries', 'Customers'];
   const cardsToRender = cardData.filter(card => {
+    // Hide Circles for everyone for now
+    if (card.label === 'Circles') return false;
+
     if (allowedCards.includes(card.label)) {
-      if (card.label === 'Subscription' && props.storeType === 'media-influencer') return false;
-      if (card.label === 'Circles' && props.paymentFlow === 'paystack_escrow') return false;
+      if (card.label === 'Subscription' && isInfluencer) return false;
+
+      // Hide specific cards for standard stores (not influencer and not escrow)
+      if (!isSpecialStore) {
+        const sensitiveCards = ['Compass', 'Revenue', 'Orders', 'Deliveries', 'Customers'];
+        if (sensitiveCards.includes(card.label)) return false;
+      }
+
       return true;
     }
     return false;
