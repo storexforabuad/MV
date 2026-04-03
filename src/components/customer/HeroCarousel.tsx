@@ -381,6 +381,21 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                         >
                             {isMediaInfluencer ? 'Elite PR services & premium products, safely secured by Compass🧭 Escrow.' : 'Professional store services, secured by Compass🧭 Escrow.'}
                         </motion.p>
+
+                        <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.6 }}
+                            className="mt-6 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 backdrop-blur-md w-fit group-hover:bg-white/20 transition-all cursor-pointer shadow-lg active:scale-95"
+                        >
+                            <span className="text-[10px] font-black text-white uppercase tracking-widest">View Catalog</span>
+                            <motion.div
+                                animate={{ x: [0, 4, 0] }}
+                                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                            >
+                                <ChevronRight className="w-3.5 h-3.5 text-white/90" />
+                            </motion.div>
+                        </motion.div>
                     </div>
                 </div>
 
