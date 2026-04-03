@@ -277,6 +277,16 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                 <div className="absolute inset-0 overflow-hidden">
                     <div className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-amber-400/20 blur-[100px] rounded-full animate-pulse" />
                     <div className="absolute -bottom-[20%] -right-[10%] w-[60%] h-[60%] bg-pink-400/20 blur-[100px] rounded-full animate-pulse delay-700" />
+
+                    {/* Subtle Premium Pattern */}
+                    <div
+                        className="absolute inset-0 opacity-[0.4] mix-blend-overlay pointer-events-none"
+                        style={{
+                            backgroundImage: 'radial-gradient(circle at 1.5px 1.5px, rgba(255, 255, 255, 0.15) 1.5px, transparent 0)',
+                            backgroundSize: '28px 28px'
+                        }}
+                    />
+
                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay" />
                 </div>
 
