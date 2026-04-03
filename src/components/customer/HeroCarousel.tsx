@@ -51,7 +51,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
 
     // Only show the second slide if it's a restaurant or fashion store
     const showWelcomeSlide = false;
-    const slideCount = isStunnerStores ? 2 : isInfluencerOrEscrow ? (isMediaInfluencer ? 2 : 1) : 1;
+    const slideCount = isStunnerStores ? 2 : 1;
 
     const paginate = (newDirection: number) => {
         if (slideCount <= 1) return;
@@ -307,7 +307,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             transition={{ delay: 0.2 }}
                             className="text-2xl sm:text-3xl font-black text-white tracking-tighter leading-none whitespace-nowrap"
                         >
-                            {isMediaInfluencer ? 'Official Booking Page' : 'Official Store Page'}
+                            Official Business Page
                         </motion.h3>
 
                         <motion.div
@@ -328,7 +328,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             transition={{ delay: 0.4 }}
                             className="text-xs sm:text-sm text-white/90 max-w-[280px] sm:max-w-sm font-medium leading-tight mt-1"
                         >
-                            {isMediaInfluencer ? 'Professional promotion services, secured by Compass🧭 Escrow.' : 'Professional store services, secured by Compass🧭 Escrow.'}
+                            {isMediaInfluencer ? 'Elite PR services & premium products, safely secured by Compass🧭 Escrow.' : 'Professional store services, secured by Compass🧭 Escrow.'}
                         </motion.p>
                     </div>
                 </div>
