@@ -46,9 +46,12 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
     const is420Hub = storeMeta?.id === '420-Hub' || storeMeta?.name === '420-Hub' || storeMeta?.name === '420 Hub';
     const isStunnerStores = storeMeta?.id?.toLowerCase().includes('stunner') || storeMeta?.name?.toLowerCase().includes('stunner');
     const isMediaInfluencer = storeMeta?.storeType === 'media-influencer';
+    const isEscrowStore = storeMeta?.paymentFlow === 'paystack_escrow';
+    const isInfluencerOrEscrow = isMediaInfluencer || isEscrowStore;
+
     // Only show the second slide if it's a restaurant or fashion store
     const showWelcomeSlide = false;
-    const slideCount = isStunnerStores ? 2 : isMediaInfluencer ? 1 : 1;
+    const slideCount = isStunnerStores ? 2 : isInfluencerOrEscrow ? (isMediaInfluencer ? 2 : 1) : 1;
 
     const paginate = (newDirection: number) => {
         if (slideCount <= 1) return;
@@ -287,13 +290,13 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             >
                                 <Sparkles className="w-3 h-3 text-amber-300" />
                                 <span className="text-[9px] font-black text-white uppercase tracking-wider">
-                                    Premium Influencer
+                                    {isMediaInfluencer ? 'Premium Influencer' : 'Premium Store'}
                                 </span>
                             </motion.div>
                             <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-blue-500/20 border border-blue-400/30 backdrop-blur-md flex-shrink-0">
                                 <BadgeCheck className="w-3 h-3 text-blue-300" />
                                 <span className="text-[9px] font-bold text-blue-100 uppercase tracking-wider whitespace-nowrap">
-                                    Verified Media Kit
+                                    {isMediaInfluencer ? 'Verified Media Kit' : 'Verified Merchant'}
                                 </span>
                             </div>
                         </div>
@@ -304,7 +307,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             transition={{ delay: 0.2 }}
                             className="text-2xl sm:text-3xl font-black text-white tracking-tighter leading-none whitespace-nowrap"
                         >
-                            Official Booking Page
+                            {isMediaInfluencer ? 'Official Booking Page' : 'Official Store Page'}
                         </motion.h3>
 
                         <motion.div
@@ -314,7 +317,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             className="flex items-center gap-2"
                         >
                             <span className="text-xs sm:text-sm font-bold text-white/90 uppercase tracking-widest">
-                                For <span className="text-amber-400"> {storeMeta?.ceoName || 'Aisha Ibrahem'}</span>
+                                {isMediaInfluencer ? 'For' : 'By'} <span className="text-amber-400"> {storeMeta?.ceoName || storeMeta?.name || 'Aisha Ibrahem'}</span>
                             </span>
                             <div className="h-px w-8 bg-gradient-to-r from-amber-400/50 to-transparent" />
                         </motion.div>
@@ -325,15 +328,15 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             transition={{ delay: 0.4 }}
                             className="text-xs sm:text-sm text-white/90 max-w-[280px] sm:max-w-sm font-medium leading-tight mt-1"
                         >
-                            Professional promotion services, secured by Escrow.
+                            {isMediaInfluencer ? 'Professional promotion services, secured by Compass🧭 Escrow.' : 'Professional store services, secured by Compass🧭 Escrow.'}
                         </motion.p>
                     </div>
                 </div>
 
-                {/* Powered by BCN™ */}
+                {/* Powered by Paystack */}
                 <div className="absolute bottom-6 sm:bottom-8 right-8 z-20 flex items-center gap-1.5">
                     <span className="text-[9px] font-bold text-white/60 tracking-widest uppercase">
-                        Powered by <span className="text-white">Compass 🧭</span>
+                        Powered by <span className="text-white">Paystack</span>
                     </span>
                 </div>
             </div>
@@ -435,7 +438,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                         <CustomSmokeShopCard />
                     ) : isStunnerStores ? (
                         pageIndex === 0 ? <CustomStunnerCard /> : <CustomStunnerGlamCard />
-                    ) : isMediaInfluencer ? (
+                    ) : isInfluencerOrEscrow ? (
                         pageIndex === 0 ? <CustomInfluencerCard /> : <InfluencerStatsCard />
                     ) : pageIndex === 0 ? (
                         <RamadanCountdown className="w-full h-full" storeName={storeMeta?.name} onNeedAWebsiteClick={onNeedAWebsiteClick} onRefresh={onRefresh} />
