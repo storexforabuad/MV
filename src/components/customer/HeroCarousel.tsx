@@ -1,11 +1,12 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import RamadanCountdown from './RamadanCountdown';
 import Image from 'next/image';
 import { StoreMeta } from '@/types/store';
-import { ChevronRight, ChevronLeft, BadgeCheck, Sparkles, Users, Heart, Camera, Zap } from 'lucide-react';
+import { BusinessCardModal } from '../products/BusinessCardModal';
+import { ChevronRight, ChevronLeft, BadgeCheck, Sparkles, Users } from 'lucide-react';
 
 interface HeroCarouselProps {
     storeMeta?: StoreMeta;
@@ -42,6 +43,7 @@ const swipePower = (offset: number, velocity: number) => {
 export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh }: HeroCarouselProps) {
     const [page, setPage] = useState(0);
     const [direction, setDirection] = useState(0);
+    const [isBusinessCardOpen, setIsBusinessCardOpen] = useState(false);
 
     const is420Hub = storeMeta?.id === '420-Hub' || storeMeta?.name === '420-Hub' || storeMeta?.name === '420 Hub';
     const isStunnerStores = storeMeta?.id?.toLowerCase().includes('stunner') || storeMeta?.name?.toLowerCase().includes('stunner');
@@ -49,7 +51,6 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
     const isEscrowStore = storeMeta?.paymentFlow === 'paystack_escrow';
     const isInfluencerOrEscrow = isMediaInfluencer || isEscrowStore;
 
-    // Only show the second slide if it's a restaurant or fashion store
     const showWelcomeSlide = false;
     const slideCount = isStunnerStores ? 2 : 1;
 
@@ -59,10 +60,8 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
         setDirection(newDirection);
     };
 
-    // Wrap page index
     const pageIndex = Math.abs(page % slideCount);
 
-    // Auto-play if multiple slides
     useEffect(() => {
         if (slideCount <= 1) return;
         const timer = setInterval(() => {
@@ -75,7 +74,6 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
         return (
             <div className="relative overflow-hidden rounded-[2.5rem] bg-zinc-950 border border-emerald-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col justify-center w-full h-full">
                 <div className="absolute inset-0 bg-black">
-                    {/* Add your generated image here later! */}
                     <Image src="/images/smoke-shop-bg.png" fill priority className="object-cover opacity-50" alt="Smoke Shop Background" />
                     <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/40 via-black/80 to-black" />
                 </div>
@@ -104,14 +102,12 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                     </div>
                 </div>
 
-                {/* Powered by Compass 🧭 at the bottom right */}
                 <div className="absolute bottom-4 right-6 z-20">
                     <span className="text-[10px] sm:text-xs font-semibold text-white/40 tracking-wider">
                         Powered by <span className="text-emerald-500/80">Compass 🧭</span>
                     </span>
                 </div>
 
-                {/* Decorative shine */}
                 <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-emerald-500/10 blur-[60px] rounded-full pointer-events-none" />
             </div>
         );
@@ -149,14 +145,12 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                     </div>
                 </div>
 
-                {/* Powered by Compass 🧭 at the bottom right */}
                 <div className="absolute bottom-4 right-6 z-20">
                     <span className="text-[10px] sm:text-xs font-semibold text-white/40 tracking-wider">
                         Powered by <span className="text-violet-500/80">Compass 🧭</span>
                     </span>
                 </div>
 
-                {/* Decorative shine */}
                 <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-violet-500/20 blur-[60px] rounded-full pointer-events-none" />
                 <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-cyan-500/10 blur-[60px] rounded-full pointer-events-none" />
             </div>
@@ -195,14 +189,12 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                     </div>
                 </div>
 
-                {/* Powered by Compass 🧭 at the bottom right */}
                 <div className="absolute bottom-4 right-6 z-20">
                     <span className="text-[10px] sm:text-xs font-semibold text-white/40 tracking-wider">
                         Powered by <span className="text-violet-500/80">Compass 🧭</span>
                     </span>
                 </div>
 
-                {/* Decorative shine */}
                 <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-cyan-500/20 blur-[60px] rounded-full pointer-events-none" />
                 <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-violet-500/10 blur-[60px] rounded-full pointer-events-none" />
             </div>
@@ -264,7 +256,6 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                     </div>
                 </div>
 
-                {/* Decorative shine */}
                 <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-amber-500/20 blur-[60px] rounded-full pointer-events-none" />
             </div>
         );
@@ -315,9 +306,6 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                         }}
                         className="absolute top-1/4 left-1/3 w-[40%] h-[40%] bg-amber-400/20 blur-[100px] rounded-full"
                     />
-
-                    <div className="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-amber-400/20 blur-[100px] rounded-full animate-pulse" />
-                    <div className="absolute -bottom-[20%] -right-[10%] w-[60%] h-[60%] bg-pink-400/20 blur-[100px] rounded-full animate-pulse delay-700" />
 
                     {/* Subtle Premium Pattern */}
                     <div
@@ -386,9 +374,10 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             initial={{ opacity: 0, y: 10 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.6 }}
+                            onClick={() => setIsBusinessCardOpen(true)}
                             className="mt-6 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 backdrop-blur-md w-fit group-hover:bg-white/20 transition-all cursor-pointer shadow-lg active:scale-95"
                         >
-                            <span className="text-[10px] font-black text-white uppercase tracking-widest">View Catalog</span>
+                            <span className="text-[10px] font-black text-white uppercase tracking-widest">View Profile</span>
                             <motion.div
                                 animate={{ x: [0, 4, 0] }}
                                 transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
@@ -442,10 +431,10 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
 
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mt-1">
                         {[
-                            { label: 'Instagram', value: stats.instagramFollowers || 45000, color: 'text-pink-400', icon: '📸' },
-                            { label: 'TikTok', value: stats.tiktokFollowers || 125000, color: 'text-cyan-400', icon: '🎵' },
-                            { label: 'YouTube', value: stats.youtubeSubscribers || 8500, color: 'text-red-500', icon: '📺' },
-                            { label: 'Twitter/X', value: stats.twitterFollowers || 12000, color: 'text-blue-400', icon: '🐦' }
+                            { label: 'Instagram', value: stats.instagramFollowers || 0, color: 'text-pink-400', icon: '📸' },
+                            { label: 'TikTok', value: stats.tiktokFollowers || 0, color: 'text-cyan-400', icon: '🎵' },
+                            { label: 'YouTube', value: stats.youtubeSubscribers || 0, color: 'text-red-500', icon: '📺' },
+                            { label: 'Twitter/X', value: stats.twitterFollowers || 0, color: 'text-blue-400', icon: '🐦' }
                         ].map((item, idx) => (
                             <motion.div
                                 key={item.label}
@@ -462,10 +451,6 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             </motion.div>
                         ))}
                     </div>
-                </div>
-
-                <div className="absolute bottom-4 right-10">
-                    <span className="text-[7px] font-bold text-white/10 tracking-[0.3em]">INSIGHT ENGINE</span>
                 </div>
             </div>
         );
@@ -498,7 +483,6 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                         }
                     }}
                     className="absolute w-full h-full cursor-pointer"
-                    onClick={() => onNeedAWebsiteClick?.()}
                 >
                     {is420Hub ? (
                         <CustomSmokeShopCard />
@@ -514,25 +498,32 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                 </motion.div>
             </AnimatePresence>
 
-            {/* Indicators */}
+            {/* Pagination / Progress Indicators */}
             {slideCount > 1 && (
-                <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-20 pointer-events-none">
+                <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20 px-3 py-1.5 rounded-full bg-black/20 backdrop-blur-md border border-white/10">
                     {[...Array(slideCount)].map((_, i) => (
                         <button
                             key={i}
-                            onClick={() => {
+                            onClick={(e) => {
+                                e.stopPropagation();
                                 setDirection(i > pageIndex ? 1 : -1);
                                 setPage(i);
                             }}
-                            className={`pointer-events-auto rounded-full transition-all duration-300 ${i === pageIndex
-                                ? `${isStunnerStores ? 'bg-cyan-400' : is420Hub ? 'bg-emerald-400' : isInfluencerOrEscrow ? 'bg-indigo-400' : 'bg-amber-400'} w-6 h-1.5`
-                                : 'bg-white/30 hover:bg-white/50 w-1.5 h-1.5'
+                            className={`h-1 rounded-full transition-all duration-500 pointer-events-auto ${i === pageIndex
+                                ? `w-4 ${isInfluencerOrEscrow ? 'bg-indigo-400' : (is420Hub ? 'bg-emerald-400' : 'bg-rose-500')}`
+                                : 'w-1 bg-white/20 hover:bg-white/40'
                                 }`}
-                            style={{ minWidth: '6px', minHeight: '6px', padding: 0, border: 'none' }}
                         />
                     ))}
                 </div>
             )}
+
+            {/* Modals */}
+            <BusinessCardModal
+                open={isBusinessCardOpen}
+                onClose={() => setIsBusinessCardOpen(false)}
+                storeMeta={storeMeta}
+            />
         </div>
     );
 }

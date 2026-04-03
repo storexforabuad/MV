@@ -65,7 +65,7 @@ export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean;
                 {/* Header */}
                 <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-modal-background">
                   <h2 className="text-xl font-bold text-gray-900 dark:text-white">
-                    About Store
+                    {isInfluencer ? 'Media Profile' : 'About Store'}
                   </h2>
                   <button
                     type="button"
@@ -87,9 +87,9 @@ export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean;
                             alt={storeMeta.name || 'Store Logo'}
                             width={100}
                             height={100}
-                            className="w-24 h-24 rounded-full object-cover shadow-xl border-4 border-white dark:border-slate-800 mx-auto mb-4"
+                            className={`w-24 h-24 rounded-full object-cover shadow-xl border-4 ${isInfluencer ? 'border-pink-500/20' : 'border-white dark:border-slate-800'} mx-auto mb-4`}
                           />
-                          <div className="absolute -bottom-1 -right-1 bg-green-500 w-6 h-6 rounded-full border-4 border-white dark:border-slate-800" />
+                          <div className={`absolute -bottom-1 -right-1 ${isInfluencer ? 'bg-pink-500' : 'bg-green-500'} w-6 h-6 rounded-full border-4 border-white dark:border-slate-800`} />
                         </div>
                       )}
                       <h3 className="text-2xl font-black text-gray-900 dark:text-white tracking-tight mb-2">
@@ -97,15 +97,16 @@ export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean;
                       </h3>
 
                       {/* Compass Verified Badge */}
-                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 border border-blue-100 dark:border-blue-800 mb-3 animate-pulse-slow">
-                        <BadgeCheck className="w-4 h-4 text-blue-600 dark:text-blue-400 fill-blue-100 dark:fill-blue-900/50" />
-                        <span className="text-[10px] font-extrabold text-blue-700 dark:text-blue-300 tracking-widest uppercase">
-                          Compass 🧭 Verified Seller
+                      <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full ${isInfluencer ? 'bg-pink-50 dark:bg-pink-900/30 border-pink-100 dark:border-pink-800' : 'bg-blue-50 dark:bg-blue-900/30 border-blue-100 dark:border-blue-800'} mb-3 animate-pulse-slow`}>
+                        <BadgeCheck className={`w-4 h-4 ${isInfluencer ? 'text-pink-600 dark:text-pink-400 fill-pink-100 dark:fill-pink-900/50' : 'text-blue-600 dark:text-blue-400 fill-blue-100 dark:fill-blue-900/50'}`} />
+                        <span className={`text-[10px] font-extrabold ${isInfluencer ? 'text-pink-700 dark:text-pink-300' : 'text-blue-700 dark:text-blue-300'} tracking-widest uppercase`}>
+                          Compass 🧭 {isInfluencer ? 'Verified Talent' : 'Verified Seller'}
                         </span>
                       </div>
+
                       {storeMeta.ceoName && (
                         <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-widest">
-                          Led by {storeMeta.ceoName}
+                          {isInfluencer ? 'Creator:' : 'Led by'} {storeMeta.ceoName}
                         </p>
                       )}
                       {storeMeta.businessDescription && (
@@ -115,7 +116,7 @@ export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean;
                       )}
                       <div className="flex items-center justify-center gap-1 mt-4">
                         {[...Array(5)].map((_, i) => (
-                          <Star key={i} className="w-5 h-5 fill-amber-400 text-amber-400" />
+                          <Star key={i} className={`w-5 h-5 ${isInfluencer ? 'fill-pink-500 text-pink-500' : 'fill-amber-400 text-amber-400'}`} />
                         ))}
                       </div>
                     </div>
@@ -128,7 +129,7 @@ export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean;
                               <MapPin className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Store Location</p>
+                              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">{isInfluencer ? 'Base Location' : 'Store Location'}</p>
                               <p className="text-sm font-semibold text-gray-900 dark:text-white leading-relaxed">
                                 {fullAddress}
                               </p>
@@ -145,14 +146,16 @@ export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean;
                       )}
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div className="bg-gray-50 dark:bg-gray-900/50 p-5 rounded-2xl border border-gray-100 dark:border-gray-800">
+                        <div className={`bg-gray-50 dark:bg-gray-900/50 p-5 rounded-2xl border border-gray-100 dark:border-gray-800 ${isInfluencer ? 'hover:border-pink-200 dark:hover:border-pink-900 transition-all' : ''}`}>
                           <div className="flex items-center gap-4">
-                            <div className="p-3 bg-amber-100 dark:bg-amber-900/30 rounded-xl">
-                              <Clock className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                            <div className={`p-3 ${isInfluencer ? 'bg-pink-100 dark:bg-pink-900/30' : 'bg-amber-100 dark:bg-amber-900/30'} rounded-xl`}>
+                              {isInfluencer ? <Star className="w-6 h-6 text-pink-600 dark:text-pink-400" /> : <Clock className="w-6 h-6 text-amber-600 dark:text-amber-400" />}
                             </div>
                             <div>
-                              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">Opening Hours</p>
-                              <p className="text-sm font-bold text-gray-900 dark:text-white">Open 24/7</p>
+                              <p className="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-1">{isInfluencer ? 'PR & Collabs' : 'Opening Hours'}</p>
+                              <p className={`text-sm font-bold text-gray-900 dark:text-white ${isInfluencer ? 'text-pink-600 dark:text-pink-400' : ''}`}>
+                                {isInfluencer ? 'Response < 24h' : 'Open 24/7'}
+                              </p>
                             </div>
                           </div>
                         </div>
@@ -176,25 +179,25 @@ export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean;
                         <div className="mt-8 pt-8 border-t border-gray-100 dark:border-gray-800">
                           <div className="flex items-center gap-2 mb-4">
                             <BadgeCheck className="w-4 h-4 text-pink-500" />
-                            <h4 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">Social Reach</h4>
+                            <h4 className="text-xs font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em]">Validated Social Reach</h4>
                           </div>
                           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center text-center">
+                            <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center text-center group hover:bg-pink-500/5 transition-all">
                               <span className="text-sm mb-1">📸</span>
                               <p className="text-sm font-black text-gray-900 dark:text-white leading-none">{formatNumber(socialStats.instagramFollowers || 45000)}</p>
                               <span className="text-[8px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tighter mt-1">Instagram</span>
                             </div>
-                            <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center text-center">
+                            <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center text-center group hover:bg-pink-500/5 transition-all">
                               <span className="text-sm mb-1">🎵</span>
                               <p className="text-sm font-black text-gray-900 dark:text-white leading-none">{formatNumber(socialStats.tiktokFollowers || 125000)}</p>
                               <span className="text-[8px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tighter mt-1">TikTok</span>
                             </div>
-                            <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center text-center">
+                            <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center text-center group hover:bg-pink-500/5 transition-all">
                               <span className="text-sm mb-1">📺</span>
                               <p className="text-sm font-black text-gray-900 dark:text-white leading-none">{formatNumber(socialStats.youtubeSubscribers || 8500)}</p>
                               <span className="text-[8px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tighter mt-1">YouTube</span>
                             </div>
-                            <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center text-center">
+                            <div className="bg-gray-50 dark:bg-gray-900/50 p-3 rounded-2xl border border-gray-100 dark:border-gray-800 flex flex-col items-center justify-center text-center group hover:bg-pink-500/5 transition-all">
                               <span className="text-sm mb-1">🐦</span>
                               <p className="text-sm font-black text-gray-900 dark:text-white leading-none">{formatNumber(socialStats.twitterFollowers || 12000)}</p>
                               <span className="text-[8px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-tighter mt-1">Twitter</span>
@@ -212,27 +215,6 @@ export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean;
                   </div>
                 </div>
 
-                {/* Footer Actions */}
-                <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-modal-background p-4 sm:px-6">
-                  <div className="max-w-3xl mx-auto w-full grid grid-cols-2 gap-4">
-                    <a
-                      href={`tel:${storeMeta.whatsapp?.replace(/\s/g, '')}`}
-                      className="flex items-center justify-center gap-2 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-900 dark:text-white font-bold py-4 px-6 rounded-xl transition-all active:scale-[0.98]"
-                    >
-                      <Phone size={20} />
-                      <span>Call</span>
-                    </a>
-                    <a
-                      href={`https://wa.me/${formatWhatsAppNumber(storeMeta.whatsapp)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 bg-[#25D366] hover:bg-[#20bd5b] text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-green-500/20 transition-all active:scale-[0.98]"
-                    >
-                      <MessageCircle size={20} />
-                      <span>WhatsApp</span>
-                    </a>
-                  </div>
-                </div>
 
               </Dialog.Panel>
             </Transition.Child>
