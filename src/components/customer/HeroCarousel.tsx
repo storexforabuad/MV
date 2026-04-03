@@ -459,7 +459,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                                 setPage(i);
                             }}
                             className={`pointer-events-auto rounded-full transition-all duration-300 ${i === pageIndex
-                                ? `${isStunnerStores ? 'bg-cyan-400' : is420Hub ? 'bg-emerald-400' : isMediaInfluencer ? 'bg-indigo-400' : 'bg-amber-400'} w-6 h-1.5`
+                                ? `${isStunnerStores ? 'bg-cyan-400' : is420Hub ? 'bg-emerald-400' : isInfluencerOrEscrow ? 'bg-indigo-400' : 'bg-amber-400'} w-6 h-1.5`
                                 : 'bg-white/30 hover:bg-white/50 w-1.5 h-1.5'
                                 }`}
                             style={{ minWidth: '6px', minHeight: '6px', padding: 0, border: 'none' }}
