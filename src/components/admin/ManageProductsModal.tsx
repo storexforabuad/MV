@@ -2,7 +2,7 @@
 import React, { useState, useMemo, Fragment, useRef, useEffect, useCallback, useDeferredValue } from 'react';
 import { Menu, Transition } from '@headlessui/react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { XMarkIcon, MagnifyingGlassIcon, EllipsisVerticalIcon, EyeIcon } from '@heroicons/react/24/solid';
+import { XMarkIcon, MagnifyingGlassIcon, EllipsisVerticalIcon, EyeIcon, ChevronDownIcon } from '@heroicons/react/24/solid';
 import { Archive, Percent, PlusCircle } from 'lucide-react';
 import Image from 'next/image';
 import { Product, MediaInfluencerProduct } from '../../types/product';
@@ -39,7 +39,8 @@ const ProductRow = React.memo(({
   onDeleteRequest,
   isSelectMode,
   isSelected,
-  onSelect
+  onSelect,
+  isSuggested
 }: {
   product: Product,
   categoryName: string,
@@ -47,7 +48,8 @@ const ProductRow = React.memo(({
   onDeleteRequest: (product: Product) => void,
   isSelectMode: boolean,
   isSelected: boolean,
-  onSelect: (productId: string) => void
+  onSelect: (productId: string) => void,
+  isSuggested?: boolean
 }) => {
   const { menuPosition, calculateMenuPosition } = useDynamicMenuPosition();
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -69,6 +71,7 @@ const ProductRow = React.memo(({
           src={product.images[0]}
           alt={product.name}
           fill
+          sizes="(max-width: 768px) 64px, 64px"
           className="object-cover rounded-lg pointer-events-none"
         />
       </div>
@@ -83,7 +86,14 @@ const ProductRow = React.memo(({
               <p className="text-sm text-gray-400 line-through">{formatPrice(product.originalPrice)}</p>
             </>
           ) : (
-            <p className="text-lg font-bold text-gray-900 dark:text-zinc-100">{formatPrice(product.price)}</p>
+            <div className="flex flex-col">
+              <p className="text-lg font-bold text-gray-900 dark:text-zinc-100 leading-none">{formatPrice(product.price)}</p>
+              {isSuggested && (
+                <span className="text-[10px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-tighter mt-0.5">
+                  Suggested
+                </span>
+              )}
+            </div>
           )}
         </div>
 
@@ -219,6 +229,82 @@ const FilterChip = ({ label, value, activeFilter, onClick, count }: { label: str
 };
 
 
+
+const FollowerPriceSlider = ({ followerCount, onChange, isExpanded, onToggle }: { followerCount: number, onChange: (val: number) => void, isExpanded: boolean, onToggle: (expanded: boolean) => void }) => {
+  const formatFollowers = (val: number) => {
+    if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
+    if (val >= 1000) return `${(val / 1000).toFixed(1)}k`;
+    return val.toString();
+  };
+
+  return (
+    <div className={`mb-6 transition-all duration-300 ${isExpanded ? 'bg-blue-50/50 dark:bg-blue-900/10 p-6 rounded-[2.5rem] border border-blue-100 dark:border-blue-900/30 shadow-sm' : 'p-2'}`}>
+      <div className="flex justify-between items-center">
+        <div>
+          <h3 className={`font-bold tracking-tight transition-colors ${isExpanded ? 'text-lg text-blue-900 dark:text-blue-100' : 'text-sm text-gray-500 dark:text-zinc-400'}`}>
+            Product Rate Suggestion
+          </h3>
+          {isExpanded && (
+            <p className="text-xs text-blue-700/60 dark:text-blue-400/60 font-medium">Auto-adjust rates based on reach</p>
+          )}
+        </div>
+
+        <button
+          onClick={() => onToggle(!isExpanded)}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center gap-2 ${isExpanded
+            ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/30'
+            : 'bg-white dark:bg-zinc-800 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/50'}`}
+        >
+          {isExpanded ? (
+            <>Reset Rates <XMarkIcon className="w-3.5 h-3.5" /></>
+          ) : (
+            <>Get Suggested Rates <ChevronDownIcon className="w-3.5 h-3.5" /></>
+          )}
+        </button>
+      </div>
+
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0, marginTop: 0 }}
+            animate={{ height: 'auto', opacity: 1, marginTop: 24 }}
+            exit={{ height: 0, opacity: 0, marginTop: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="flex justify-between items-end mb-6">
+              <div className="text-left">
+                <p className="text-[10px] font-black text-blue-400 dark:text-blue-500 uppercase tracking-widest mb-1">Current Reach</p>
+                <span className="text-4xl font-black text-blue-600 dark:text-blue-400 leading-none tracking-tighter">
+                  {formatFollowers(followerCount)}
+                </span>
+                <span className="text-sm font-bold text-blue-400 ml-2 tracking-tight">Followers</span>
+              </div>
+            </div>
+
+            <div className="relative pt-2 pb-8">
+              <input
+                type="range"
+                min="500"
+                max={500000}
+                step="500"
+                value={followerCount}
+                onChange={(e) => onChange(parseInt(e.target.value))}
+                className="w-full h-2.5 bg-blue-100 dark:bg-blue-900/30 rounded-full appearance-none cursor-pointer accent-blue-600"
+              />
+              <div className="absolute -bottom-1 left-0 right-0 grid grid-cols-3 text-[9px] font-black text-blue-400/50 uppercase tracking-tighter">
+                <span className="text-left">Nano (500)</span>
+                <span className="text-center">Micro</span>
+                <span className="text-right whitespace-nowrap">Macro (500k)</span>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
+
 // --- MAIN COMPONENT ---
 
 const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClose, products, setProducts, categories, onUpdateProduct, onDeleteProduct, onAddCategory, storeId, storeType }) => {
@@ -232,6 +318,8 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [isBulkDeleteConfirmOpen, setIsBulkDeleteConfirmOpen] = useState(false);
   const [isGeneratingFee, setIsGeneratingFee] = useState(false);
+  const [followerCount, setFollowerCount] = useState(499); // 499 = "None"
+  const [isPriceSuggestionExpanded, setIsPriceSuggestionExpanded] = useState(false);
 
   const [visibleCount, setVisibleCount] = useState(20);
   const { ref: loadMoreRef, inView } = useInView();
@@ -297,6 +385,25 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
       })
       .filter(p => p.name.toLowerCase().includes(deferredSearchQuery.toLowerCase()));
   }, [products, deferredSearchQuery, activeFilter]);
+
+  const priceMultiplier = useMemo(() => {
+    if (followerCount < 500) return 1.0;
+    // Normalized multiplier based on followers (500 -> 0.05, 1M -> 1.0)
+    return Math.max(0.05, followerCount / 1000000);
+  }, [followerCount]);
+
+  const { services, physicalProducts } = useMemo(() => {
+    const s: Product[] = [];
+    const p: Product[] = [];
+    filteredProducts.forEach(prod => {
+      if (prod.productType === 'media-influencer' && (prod as any).subtype === 'service') {
+        s.push(prod);
+      } else {
+        p.push(prod);
+      }
+    });
+    return { services: s, physicalProducts: p };
+  }, [filteredProducts]);
 
   useEffect(() => {
     setVisibleCount(20);
@@ -455,9 +562,9 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
               </div>
             </div>
 
-            <main className="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-zinc-900/50">
+            <main className="flex-1 overflow-y-auto p-4 bg-gray-50 dark:bg-zinc-900/50 space-y-8">
               {isSelectMode && (
-                <div className="mb-2 px-2">
+                <div className="px-2">
                   <label className="flex items-center gap-3 p-2 rounded-lg hover:bg-white dark:-zinc-800 transition-colors cursor-pointer">
                     <input
                       type="checkbox"
@@ -475,38 +582,96 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
                   </label>
                 </div>
               )}
-              <div className="space-y-2">
-                {visibleProducts.length > 0 ? (
-                  <>
-                    {visibleProducts.map(p => (
-                      <div key={p.id} className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-700">
-                        <ProductRow
-                          product={p}
-                          categoryName={p.categoryId ? categoryMap[p.categoryId] : 'Uncategorized'}
-                          onEdit={setEditingProduct}
-                          onDeleteRequest={setProductToDelete}
-                          isSelectMode={isSelectMode}
-                          isSelected={selectedProducts.includes(p.id)}
-                          onSelect={handleToggleSelection}
-                        />
-                      </div>
-                    ))}
-                    {visibleCount < filteredProducts.length && (
-                      <div ref={loadMoreRef} className="py-6 flex justify-center">
-                        <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-16 text-center">
-                    <div className="w-16 h-16 bg-gray-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-4">
-                      <MagnifyingGlassIcon className="w-8 h-8 text-gray-400" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">No products found</h3>
-                    <p className="text-sm text-gray-500 dark:text-zinc-400 mt-1">Try adjusting your search or filters.</p>
+
+              {/* SERVICES SECTION */}
+              {services.length > 0 && (
+                <section>
+                  <div className="flex items-center justify-between mb-4 px-2">
+                    <h3 className="text-sm font-black text-gray-400 uppercase tracking-[0.2em]">Collaboration Services</h3>
+                    <span className="text-[10px] font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{services.length} Items</span>
                   </div>
-                )}
-              </div>
+
+                  {storeType === 'media-influencer' && !isSelectMode && (
+                    <FollowerPriceSlider
+                      followerCount={followerCount}
+                      onChange={setFollowerCount}
+                      isExpanded={isPriceSuggestionExpanded}
+                      onToggle={(expanded) => {
+                        setIsPriceSuggestionExpanded(expanded);
+                        if (expanded && followerCount < 500) {
+                          setFollowerCount(500);
+                        } else if (!expanded) {
+                          setFollowerCount(499);
+                        }
+                      }}
+                    />
+                  )}
+
+                  <div className="space-y-2">
+                    {services.map(p => {
+                      // Adjust price for mocks if multiplier is active
+                      const isMock = p.id.startsWith('media-') || p.id.startsWith('candle-');
+                      const displayProduct = isMock && followerCount >= 500 ? {
+                        ...p,
+                        price: Math.round((p.price * priceMultiplier) / 500) * 500 // Round to nearest 500
+                      } : p;
+
+                      return (
+                        <div key={p.id} className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-700">
+                          <ProductRow
+                            product={displayProduct}
+                            categoryName={p.categoryId ? categoryMap[p.categoryId] : 'Uncategorized'}
+                            onEdit={setEditingProduct}
+                            onDeleteRequest={setProductToDelete}
+                            isSelectMode={isSelectMode}
+                            isSelected={selectedProducts.includes(p.id)}
+                            onSelect={handleToggleSelection}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              )}
+
+              {/* PHYSICAL PRODUCTS SECTION */}
+              {physicalProducts.length > 0 && (
+                <section>
+                  <div className="flex items-center justify-between mb-4 px-2">
+                    <h3 className="text-sm font-black text-gray-400 uppercase tracking-[0.2em]">Store Products</h3>
+                    <span className="text-[10px] font-bold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">{physicalProducts.length} Items</span>
+                  </div>
+                  <div className="space-y-2">
+                    {physicalProducts.map(p => {
+                      const isMock = p.id.startsWith('media-') || p.id.startsWith('candle-');
+                      return (
+                        <div key={p.id} className="bg-white dark:bg-zinc-800 rounded-xl shadow-sm border border-gray-100 dark:border-zinc-700">
+                          <ProductRow
+                            product={p}
+                            categoryName={p.categoryId ? categoryMap[p.categoryId] : 'Uncategorized'}
+                            onEdit={setEditingProduct}
+                            onDeleteRequest={setProductToDelete}
+                            isSelectMode={isSelectMode}
+                            isSelected={selectedProducts.includes(p.id)}
+                            onSelect={handleToggleSelection}
+                            isSuggested={isMock && followerCount >= 500}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </section>
+              )}
+
+              {filteredProducts.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-16 text-center">
+                  <div className="w-16 h-16 bg-gray-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mb-4">
+                    <MagnifyingGlassIcon className="w-8 h-8 text-gray-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-zinc-100">No products found</h3>
+                  <p className="text-sm text-gray-500 dark:text-zinc-400 mt-1">Try adjusting your search or filters.</p>
+                </div>
+              )}
             </main>
 
             <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 z-20">

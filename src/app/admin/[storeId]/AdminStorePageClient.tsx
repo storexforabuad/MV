@@ -370,18 +370,30 @@ export default function AdminStorePageClient({
       let processedProducts = fetchedProducts;
       let processedCategories = fetchedCategories;
 
-      if (fetchedStoreMeta?.storeType === 'media-influencer' && fetchedProducts.length === 0) {
-        const hiddenIds = getHiddenMockIds(storeId);
-        processedProducts = (mockMediaProducts as Product[]).filter(p => !hiddenIds.includes(p.id));
+      // --- Influencer Mock Injection (Always present in Admin if store is influencer) ---
 
-        if (fetchedCategories.length === 0) {
-          processedCategories = [
-            { id: 'pr-collabs', name: 'PR & Collab Services' },
-            { id: 'candles', name: 'Candles & Home' },
-            { id: 'apparel', name: 'Apparel & Modest Wear' },
-            { id: 'fragrances', name: 'Perfumes & Oils' }
-          ];
-        }
+      if (fetchedStoreMeta?.storeType === 'media-influencer') {
+        const hiddenIds = getHiddenMockIds(storeId);
+        const mocks = (mockMediaProducts as Product[]).filter(p => !hiddenIds.includes(p.id));
+
+        // Merge real products and mock products (prioritize real ones if ID collisions exist)
+        const realIds = new Set(fetchedProducts.map(p => p.id));
+        const filteredMocks = mocks.filter(p => !realIds.has(p.id));
+        processedProducts = [...fetchedProducts, ...filteredMocks];
+
+        const mockCats = [
+          { id: 'pr-collabs', name: 'PR & Collab Services' },
+          { id: 'candles', name: 'Candles & Home' },
+          { id: 'apparel', name: 'Apparel & Modest Wear' },
+          { id: 'fragrances', name: 'Perfumes & Oils' }
+        ];
+
+        // Merge categories, avoiding duplicates by name or ID
+        const existingCatNames = new Set(fetchedCategories.map(c => c.name.toLowerCase()));
+        const existingCatIds = new Set(fetchedCategories.map(c => c.id));
+
+        const filteredMockCats = mockCats.filter(c => !existingCatNames.has(c.name.toLowerCase()) && !existingCatIds.has(c.id));
+        processedCategories = [...fetchedCategories, ...filteredMockCats];
       }
 
       setProducts(processedProducts);
@@ -506,15 +518,18 @@ export default function AdminStorePageClient({
             ...updatedData,
             storeId: storeId, // Ensure it's for this store
             id: undefined, // Let Firestore generate a real ID
-            createdAt: new Date() // Set real creation date
+            createdAt: { toMillis: () => Date.now() } as any, // Set real creation date
+            views: 0, // Reset views for the new real product
           };
+
           await addProduct(storeId, newProductData as any);
+          hideMockId(storeId, productId); // Hide the old mock version
           toast.success('Mock service converted to real product!');
         }
       } else {
         await updateProduct(storeId, productId, updatedData);
       }
-      await handleManualRefresh();
+      await fetchData(false); // Silent sync instead of full manual refresh for smoother UX
     } catch (error) {
       console.error("Failed to update product:", error);
       throw error;

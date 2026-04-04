@@ -29,11 +29,11 @@ interface AddServiceComposerProps {
 }
 
 const PLATFORMS = [
-    { id: 'Instagram', name: 'Instagram', icon: Globe },
-    { id: 'TikTok', name: 'TikTok', icon: Zap },
-    { id: 'YouTube', name: 'YouTube', icon: Sparkles },
-    { id: 'Twitter', name: 'X / Twitter', icon: MessageCircle },
-    { id: 'Cross-Platform', name: 'Cross-Platform', icon: Share2 },
+    { id: 'Instagram', name: 'Instagram', icon: Globe, defaultImage: '/services/instagram-service.png' },
+    { id: 'TikTok', name: 'TikTok', icon: Zap, defaultImage: '/services/tiktok-service.png' },
+    { id: 'YouTube', name: 'YouTube', icon: Sparkles, defaultImage: '/services/youtube-service.png' },
+    { id: 'Twitter', name: 'X / Twitter', icon: MessageCircle, defaultImage: '/services/twitter-service.png' },
+    { id: 'Cross-Platform', name: 'Cross-Platform', icon: Share2, defaultImage: '/services/cross-platform-service.png' },
 ];
 
 export default function AddServiceComposer({ isOpen, onClose, onBack, storeId, categories, onProductAdded, onAddCategory, storeName, instagramHandle, storeMeta }: AddServiceComposerProps) {
@@ -96,7 +96,8 @@ export default function AddServiceComposer({ isOpen, onClose, onBack, storeId, c
     };
 
     const handleSubmit = async () => {
-        if (!name || !price || !categoryId || !imageFile) {
+        // If no image is uploaded, we check if a default platform image can be used
+        if (!name || !price || !categoryId || (!imageFile && !platform)) {
             toast.error('Please complete all required fields.');
             return;
         }
@@ -106,10 +107,17 @@ export default function AddServiceComposer({ isOpen, onClose, onBack, storeId, c
         setUploadProgress(10);
 
         try {
-            setUploadProgress(30);
-            const compressedFile = await compressImage(imageFile);
-            setUploadProgress(50);
-            const imageUrl = await uploadImageToCloudinary(compressedFile, storeId);
+            let imageUrl = '';
+            if (imageFile) {
+                setUploadProgress(30);
+                const compressedFile = await compressImage(imageFile);
+                setUploadProgress(50);
+                imageUrl = await uploadImageToCloudinary(compressedFile, storeId);
+            } else {
+                // Use default platform image
+                const platformData = PLATFORMS.find(p => p.id === platform);
+                imageUrl = platformData?.defaultImage || '';
+            }
             setUploadProgress(80);
 
             const serviceProduct: MediaInfluencerProduct = {
@@ -171,14 +179,24 @@ export default function AddServiceComposer({ isOpen, onClose, onBack, storeId, c
                         <div className="relative group">
                             <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
                             <div className="border-3 border-dashed border-slate-300 dark:border-slate-700 rounded-[2.5rem] p-12 text-center group-hover:border-blue-500 group-hover:bg-blue-50 dark:group-hover:bg-blue-900/10 transition-all bg-slate-50 dark:bg-slate-800/50">
-                                {imagePreview ? (
-                                    <div className="relative w-full aspect-video rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800 mx-auto max-w-sm">
-                                        <Image src={imagePreview} alt="Preview" fill className="object-cover" />
+                                {imagePreview || (platform && PLATFORMS.find(p => p.id === platform)?.defaultImage) ? (
+                                    <div className="relative w-full aspect-video rounded-3xl overflow-hidden shadow-2xl border-4 border-white dark:border-slate-800 mx-auto max-w-sm bg-slate-200 dark:bg-slate-900">
+                                        <Image
+                                            src={imagePreview || PLATFORMS.find(p => p.id === platform)?.defaultImage || ''}
+                                            alt="Preview"
+                                            fill
+                                            className="object-cover"
+                                        />
                                         <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors flex items-center justify-center">
                                             <div className="p-4 bg-white/20 backdrop-blur-md rounded-full text-white">
                                                 <ImagePlus className="w-8 h-8" />
                                             </div>
                                         </div>
+                                        {!imagePreview && (
+                                            <div className="absolute top-4 left-4 px-3 py-1 bg-blue-600 text-white text-[10px] font-bold rounded-full shadow-lg">
+                                                PLATFORM DEFAULT
+                                            </div>
+                                        )}
                                     </div>
                                 ) : (
                                     <div className="space-y-4">
@@ -452,7 +470,7 @@ export default function AddServiceComposer({ isOpen, onClose, onBack, storeId, c
                     <footer className="fixed bottom-0 left-0 right-0 p-6 sm:p-10 bg-white/80 dark:bg-slate-950/80 backdrop-blur-xl border-t border-slate-100 dark:border-slate-800 z-20">
                         <div className="max-w-4xl mx-auto w-full">
                             <button
-                                disabled={isUploading || (currentStep === 0 && !imageFile) || (currentStep === 1 && (!name || !categoryId)) || (currentStep === 3 && !storeMeta?.paystackSubaccountCode)}
+                                disabled={isUploading || (currentStep === 0 && !imageFile && !platform) || (currentStep === 1 && (!name || !categoryId)) || (currentStep === 3 && !storeMeta?.paystackSubaccountCode)}
                                 onClick={currentStep === 3 ? handleSubmit : () => setCurrentStep(prev => prev + 1)}
                                 className={`w-full py-5 rounded-[2rem] font-black text-xl transition-all shadow-xl flex items-center justify-center gap-3 ${isUploading || (currentStep === 0 && !imageFile) || (currentStep === 1 && (!name || !categoryId)) || (currentStep === 3 && !storeMeta?.paystackSubaccountCode)
                                     ? 'bg-slate-100 dark:bg-slate-900 text-slate-400 cursor-not-allowed'
