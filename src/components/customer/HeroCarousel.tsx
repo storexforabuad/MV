@@ -50,6 +50,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
     const isMediaInfluencer = storeMeta?.storeType === 'media-influencer';
     const isEscrowStore = storeMeta?.paymentFlow === 'paystack_escrow';
     const isInfluencerOrEscrow = isMediaInfluencer || isEscrowStore;
+    const isSolarStore = storeMeta?.storeType === 'solar';
 
     const showWelcomeSlide = false;
     const slideCount = isStunnerStores ? 2 : 1;
@@ -257,6 +258,64 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                 </div>
 
                 <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-amber-500/20 blur-[60px] rounded-full pointer-events-none" />
+            </div>
+        );
+    };
+
+    const CustomSolarCard = () => {
+        const isEscrow = storeMeta?.paymentFlow === 'paystack_escrow';
+        return (
+            <div className="relative overflow-hidden rounded-[2.5rem] bg-zinc-950 border border-amber-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col justify-center w-full h-full">
+                {/* Animated glow blobs */}
+                <motion.div
+                    animate={{ scale: [1, 1.15, 1], opacity: [0.4, 0.6, 0.4] }}
+                    transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                    className="absolute -top-12 -right-12 w-56 h-56 bg-amber-500/20 blur-[80px] rounded-full pointer-events-none"
+                />
+                <motion.div
+                    animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.5, 0.3] }}
+                    transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
+                    className="absolute -bottom-16 -left-8 w-48 h-48 bg-orange-600/20 blur-[80px] rounded-full pointer-events-none"
+                />
+
+                {/* Subtle grid pattern */}
+                <div
+                    className="absolute inset-0 opacity-[0.06] pointer-events-none"
+                    style={{
+                        backgroundImage: 'linear-gradient(rgba(251,191,36,0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(251,191,36,0.5) 1px, transparent 1px)',
+                        backgroundSize: '32px 32px'
+                    }}
+                />
+
+                <div className="relative z-10 px-6 sm:px-8 py-6 sm:py-8 flex flex-col justify-center h-full items-start text-left gap-3">
+                    {/* Badge */}
+                    <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/25 backdrop-blur-sm">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                        <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Clean Energy Solutions</span>
+                    </div>
+
+                    {/* Headline */}
+                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight leading-none">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-orange-400 to-amber-500">
+                            Power Your World.
+                        </span>
+                    </h3>
+
+                    {/* Sub-text */}
+                    <p className="text-sm text-gray-400 max-w-xs font-medium leading-relaxed">
+                        Certified solar panels, inverters &amp; batteries — trusted energy for home &amp; business.
+                    </p>
+
+                </div>
+
+                {/* Powered by Compass watermark — non-escrow only */}
+                {!isEscrow && (
+                    <div className="absolute bottom-4 right-6 z-20">
+                        <span className="text-[10px] sm:text-xs font-semibold text-white/30 tracking-wider">
+                            Powered by <span className="text-amber-500/70">Compass 🧭</span>
+                        </span>
+                    </div>
+                )}
             </div>
         );
     };
@@ -477,6 +536,8 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                         <CustomSmokeShopCard />
                     ) : isStunnerStores ? (
                         pageIndex === 0 ? <CustomStunnerCard /> : <CustomStunnerGlamCard />
+                    ) : isSolarStore ? (
+                        <CustomSolarCard />
                     ) : isInfluencerOrEscrow ? (
                         pageIndex === 0 ? <CustomInfluencerCard /> : <InfluencerStatsCard />
                     ) : pageIndex === 0 ? (
