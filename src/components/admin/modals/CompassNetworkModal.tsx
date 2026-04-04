@@ -6,6 +6,7 @@ import { AnimatePresence, motion, Variants } from 'framer-motion';
 interface CompassNetworkModalProps {
   isOpen: boolean;
   onClose: () => void;
+  storeType?: string;
 }
 
 // Animation variants
@@ -68,7 +69,9 @@ const FeatureCard = ({
   </motion.div>
 );
 
-export const CompassNetworkModal = ({ isOpen, onClose }: CompassNetworkModalProps) => {
+export const CompassNetworkModal = ({ isOpen, onClose, storeType }: CompassNetworkModalProps) => {
+  const isInfluencer = storeType === 'media-influencer';
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -89,7 +92,7 @@ export const CompassNetworkModal = ({ isOpen, onClose }: CompassNetworkModalProp
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
                   Compass 🧭 App
                 </h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Built for Vendors, by Vendors</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400">Built for {isInfluencer ? 'Creators' : 'Vendors'}, by {isInfluencer ? 'Creators' : 'Vendors'}</p>
               </div>
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg">
                 <Globe className="w-6 h-6 text-white" />
@@ -108,25 +111,25 @@ export const CompassNetworkModal = ({ isOpen, onClose }: CompassNetworkModalProp
                   icon={Zap}
                   iconColor="text-purple-500"
                   iconBg="bg-purple-100 dark:bg-purple-900/30"
-                  title="Cutting-Edge Technology"
-                  description="Streamline your operations with powerful, easy-to-use tools designed specifically for modern commerce."
+                  title={isInfluencer ? "Creator-Focused Technology" : "Cutting-Edge Technology"}
+                  description={isInfluencer ? "Streamline your content business with powerful, easy-to-use tools designed for both services and physical commerce." : "Streamline your operations with powerful, easy-to-use tools designed specifically for modern commerce."}
                 />
 
                 <FeatureCard
                   icon={TrendingUp}
                   iconColor="text-emerald-500"
                   iconBg="bg-emerald-100 dark:bg-emerald-900/30"
-                  title="Get More Customers"
-                  description="Connect with more buyers and expand your reach through our powerful online and offline channels."
-                  proTip="Join our exclusive events including Funfairs, Trade Fairs, and Pop-ups organized by Compass 🧭 to showcase your products directly to customers!"
+                  title={isInfluencer ? "Expand Your Reach" : "Get More Customers"}
+                  description={isInfluencer ? "Connect with brands for high-value collabs and expand your influence through our professional marketplace channels." : "Connect with more buyers and expand your reach through our powerful online and offline channels."}
+                  proTip={isInfluencer ? "Join our exclusive creator workshops and pop-up events organized by Compass 🧭 to showcase your personal brand directly to the community!" : "Join our exclusive events including Funfairs, Trade Fairs, and Pop-ups organized by Compass 🧭 to showcase your products directly to customers!"}
                 />
 
                 <FeatureCard
                   icon={Star}
                   iconColor="text-amber-500"
                   iconBg="bg-amber-100 dark:bg-amber-900/30"
-                  title="Unlock Multiple Revenue Sources"
-                  description="Your income isn't limited to your sales. Earn extra revenue from network referrals, commissions, and more."
+                  title={isInfluencer ? "Infinite Revenue Streams" : "Unlock Multiple Revenue Sources"}
+                  description={isInfluencer ? "Don't limit yourself. Monetize every aspect of your influence, from PR services and digital shoutouts to physical merch and collections." : "Your income isn't limited to your sales. Earn extra revenue from network referrals, commissions, and more."}
                 />
 
                 {/* Partners Section */}
@@ -161,7 +164,7 @@ export const CompassNetworkModal = ({ isOpen, onClose }: CompassNetworkModalProp
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
                   whileTap={{ scale: 0.98 }}
                 >
-                  Explore My Dashboard
+                  Explore My {isInfluencer ? 'Hub' : 'Dashboard'}
                 </motion.button>
               </div>
             </footer>

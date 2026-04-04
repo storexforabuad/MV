@@ -263,7 +263,10 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
 
     const CustomInfluencerCard = () => {
         return (
-            <div className="relative overflow-hidden rounded-[2.75rem] bg-gradient-to-br from-rose-600 via-fuchsia-600 to-indigo-700 border border-white/20 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col w-full h-full group">
+            <div
+                onClick={() => setIsBusinessCardOpen(true)}
+                className="relative overflow-hidden rounded-[2.75rem] bg-gradient-to-br from-rose-600 via-fuchsia-600 to-indigo-700 border border-white/20 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col w-full h-full group cursor-pointer"
+            >
                 {/* Decorative background elements */}
                 <div className="absolute inset-0 overflow-hidden">
                     {/* Primary Animated Mesh Blobs */}
@@ -355,7 +358,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             transition={{ delay: 0.3 }}
                             className="flex items-center gap-2"
                         >
-                            <span className="text-xs sm:text-sm font-bold text-white/90 uppercase tracking-widest">
+                            <span className="text-sm sm:text-base md:text-lg font-bold text-white/90 uppercase tracking-widest">
                                 {isMediaInfluencer ? 'For' : 'By'} <span className="text-amber-400"> {storeMeta?.ceoName || storeMeta?.name || 'Aisha Ibrahem'}</span>
                             </span>
                             <div className="h-px w-8 bg-gradient-to-r from-amber-400/50 to-transparent" />
@@ -370,21 +373,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             {isMediaInfluencer ? 'Elite PR services & premium products, safely secured by Compass🧭 Escrow.' : 'Professional store services, secured by Compass🧭 Escrow.'}
                         </motion.p>
 
-                        <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.6 }}
-                            onClick={() => setIsBusinessCardOpen(true)}
-                            className="mt-6 flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/10 border border-white/20 backdrop-blur-md w-fit group-hover:bg-white/20 transition-all cursor-pointer shadow-lg active:scale-95"
-                        >
-                            <span className="text-[10px] font-black text-white uppercase tracking-widest">View Profile</span>
-                            <motion.div
-                                animate={{ x: [0, 4, 0] }}
-                                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                            >
-                                <ChevronRight className="w-3.5 h-3.5 text-white/90" />
-                            </motion.div>
-                        </motion.div>
+
                     </div>
                 </div>
 

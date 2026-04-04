@@ -602,8 +602,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
     }
 
     const { label, subtitle } = card;
-    if (label === 'Compass') setIsCompassBenefitsModalOpen(true);
-    else if (label === 'Compass') setIsCompassNetworkModalOpen(true);
+    if (label === 'Compass') setIsCompassNetworkModalOpen(true);
     else if (label === 'Launch') setIsLaunchGuideModalOpen(true);
     else if (label === 'Tips') setIsTipsModalOpen(true);
     else if (label === 'Views') setIsViewsModalOpen(true);
@@ -1016,8 +1015,9 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
             );
           }
 
-          // Dynamic Subscription card with status-based color and icon
+          // Dynamic Subscription card - hidden for now
           if (card.label === 'Subscription') {
+            return null;
             const status = props.subscriptionStatus || 'trial';
             const SubscriptionIcon = getSubscriptionIcon(status);
             const gradient = getSubscriptionGradient(status);
@@ -1162,7 +1162,7 @@ export default function AdminHomeCards(props: AdminHomeCardsProps) {
 
       {isSocialPostsModalOpen && (<SocialPostsModal isOpen={isSocialPostsModalOpen} onClose={handleCloseSocialPostsModal} storeId={props.storeId} storeName={props.storeName || 'Store'} products={props.products} categories={props.categories} />)}
 
-      {isCompassNetworkModalOpen && (<CompassNetworkModal isOpen={isCompassNetworkModalOpen} onClose={handleCloseCompassNetworkModal} />)}
+      {isCompassNetworkModalOpen && (<CompassNetworkModal isOpen={isCompassNetworkModalOpen} onClose={handleCloseCompassNetworkModal} storeType={props.storeType} />)}
 
       {isCompassBenefitsModalOpen && (<CompassBenefitsModal isOpen={isCompassBenefitsModalOpen} onClose={handleCloseCompassBenefitsModal} />)}
 
