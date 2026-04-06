@@ -324,49 +324,61 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
         return (
             <div
                 onClick={() => setIsBusinessCardOpen(true)}
-                className="relative overflow-hidden rounded-[2.75rem] bg-gradient-to-br from-rose-600 via-fuchsia-600 to-indigo-700 border border-white/20 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col w-full h-full group cursor-pointer"
+                className="relative overflow-hidden rounded-[2.75rem] influencer-live-bg border border-white/20 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col w-full h-full group cursor-pointer"
             >
                 {/* Decorative background elements */}
                 <div className="absolute inset-0 overflow-hidden">
-                    {/* Primary Animated Mesh Blobs */}
+                    {/* Primary Animated Mesh Blobs — organic breathing rhythm */}
                     <motion.div
                         animate={{
-                            x: [0, 100, 0],
-                            y: [0, 50, 0],
-                            scale: [1, 1.2, 1]
+                            x: [0, 90, -20, 0],
+                            y: [0, 40, 70, 0],
+                            scale: [1, 1.25, 1.05, 1],
+                            opacity: [0.25, 0.55, 0.35, 0.25]
                         }}
                         transition={{
-                            duration: 20,
+                            duration: 18,
                             repeat: Infinity,
-                            ease: "linear"
+                            ease: "easeInOut"
                         }}
-                        className="absolute -top-[10%] -left-[10%] w-[70%] h-[70%] bg-rose-500/30 blur-[120px] rounded-full"
+                        className="absolute -top-[10%] -left-[10%] w-[70%] h-[70%] bg-rose-500/40 blur-[110px] rounded-full"
                     />
                     <motion.div
                         animate={{
-                            x: [0, -80, 0],
-                            y: [0, 100, 0],
-                            scale: [1, 1.1, 1]
+                            x: [0, -70, 20, 0],
+                            y: [0, 90, 40, 0],
+                            scale: [1, 1.15, 0.95, 1],
+                            opacity: [0.2, 0.5, 0.3, 0.2]
                         }}
                         transition={{
-                            duration: 25,
+                            duration: 22,
                             repeat: Infinity,
-                            ease: "linear"
+                            ease: "easeInOut",
+                            delay: 3
                         }}
-                        className="absolute -bottom-[20%] -right-[10%] w-[70%] h-[70%] bg-indigo-600/30 blur-[120px] rounded-full"
+                        className="absolute -bottom-[20%] -right-[10%] w-[70%] h-[70%] bg-indigo-600/40 blur-[110px] rounded-full"
                     />
                     <motion.div
                         animate={{
-                            x: [0, 50, 0],
-                            y: [0, -50, 0],
-                            scale: [1, 1.3, 1]
+                            x: [0, 40, -30, 0],
+                            y: [0, -60, 20, 0],
+                            scale: [1, 1.35, 0.9, 1],
+                            opacity: [0.12, 0.38, 0.2, 0.12]
                         }}
                         transition={{
-                            duration: 15,
+                            duration: 28,
                             repeat: Infinity,
-                            ease: "linear"
+                            ease: "easeInOut",
+                            delay: 7
                         }}
-                        className="absolute top-1/4 left-1/3 w-[40%] h-[40%] bg-amber-400/20 blur-[100px] rounded-full"
+                        className="absolute top-1/4 left-1/3 w-[40%] h-[40%] bg-amber-400/25 blur-[90px] rounded-full"
+                    />
+
+                    {/* Shimmer sweep — glassy liquid surface */}
+                    <motion.div
+                        animate={{ y: ['-110%', '210%'] }}
+                        transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', repeatDelay: 4 }}
+                        className="absolute inset-x-0 h-[35%] bg-gradient-to-b from-white/0 via-white/[0.06] to-white/0 pointer-events-none"
                     />
 
                     {/* Subtle Premium Pattern */}
