@@ -322,9 +322,11 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
 
     const CustomInfluencerCard = () => {
         return (
-            <div
+            <motion.div
                 onClick={() => setIsBusinessCardOpen(true)}
                 className="relative overflow-hidden rounded-[2.75rem] influencer-live-bg border border-white/20 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col w-full h-full group cursor-pointer"
+                animate={{ boxShadow: ['0 0 0px rgba(192,38,211,0)', '0 0 40px rgba(192,38,211,0.4)', '0 0 0px rgba(192,38,211,0)'] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
             >
                 {/* Decorative background elements */}
                 <div className="absolute inset-0 overflow-hidden">
@@ -341,7 +343,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             repeat: Infinity,
                             ease: "easeInOut"
                         }}
-                        className="absolute -top-[10%] -left-[10%] w-[70%] h-[70%] bg-rose-500/40 blur-[110px] rounded-full"
+                        className="absolute -top-[10%] -left-[10%] w-[70%] h-[70%] bg-rose-500/40 blur-[110px] rounded-full mix-blend-screen"
                     />
                     <motion.div
                         animate={{
@@ -356,7 +358,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             ease: "easeInOut",
                             delay: 3
                         }}
-                        className="absolute -bottom-[20%] -right-[10%] w-[70%] h-[70%] bg-indigo-600/40 blur-[110px] rounded-full"
+                        className="absolute -bottom-[20%] -right-[10%] w-[70%] h-[70%] bg-indigo-600/40 blur-[110px] rounded-full mix-blend-screen"
                     />
                     <motion.div
                         animate={{
@@ -371,7 +373,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             ease: "easeInOut",
                             delay: 7
                         }}
-                        className="absolute top-1/4 left-1/3 w-[40%] h-[40%] bg-amber-400/25 blur-[90px] rounded-full"
+                        className="absolute top-1/4 left-1/3 w-[40%] h-[40%] bg-amber-400/25 blur-[90px] rounded-full mix-blend-screen"
                     />
 
                     {/* Shimmer sweep — glassy liquid surface */}
@@ -391,6 +393,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                     />
 
                     <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10 mix-blend-overlay" />
+                    <div className="absolute inset-0 opacity-[0.08] mix-blend-overlay pointer-events-none z-0" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E\")" }} />
                 </div>
 
                 <div className="relative z-10 px-6 sm:px-8 py-6 sm:py-8 flex flex-col justify-center h-full items-start text-left gap-4">
@@ -454,7 +457,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                         Powered by <span className="text-white">Paystack</span>
                     </span>
                 </div>
-            </div>
+            </motion.div>
         );
     };
 
