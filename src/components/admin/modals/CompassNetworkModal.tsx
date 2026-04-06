@@ -1,6 +1,6 @@
 'use client';
 
-import { Zap, TrendingUp, Star, Globe, Sparkles, Building2, CreditCard, Smartphone } from 'lucide-react';
+import { ShieldCheck, Zap, TrendingUp, Star, Globe, Sparkles, Building2, CreditCard, Smartphone, CheckCircle2, X, Camera, Package, PenTool, Handshake, Video, ShoppingBag, MonitorSmartphone } from 'lucide-react';
 import { AnimatePresence, motion, Variants } from 'framer-motion';
 
 interface CompassNetworkModalProps {
@@ -23,7 +23,6 @@ const itemVariants: Variants = {
   visible: { y: 0, opacity: 1, transition: { ease: 'easeOut', duration: 0.4 } },
 };
 
-// Reusable Card Component matching TipsModal style
 const FeatureCard = ({
   icon: Icon,
   iconColor,
@@ -69,107 +68,276 @@ const FeatureCard = ({
   </motion.div>
 );
 
+const PainSolutionCard = ({
+  icon: Icon,
+  iconColor,
+  iconBg,
+  pain,
+  solution,
+  title
+}: {
+  icon: React.ElementType;
+  iconColor: string;
+  iconBg: string;
+  pain: string;
+  solution: string;
+  title: string;
+}) => (
+  <motion.div
+    variants={itemVariants}
+    className="bg-white dark:bg-slate-800/50 rounded-2xl p-5 space-y-4 border border-rose-100/50 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300 group"
+  >
+    <div className="flex items-center gap-3">
+      <div className={`p-2.5 rounded-xl ${iconBg} transition-transform group-hover:scale-110 duration-300`}>
+        <Icon className={`w-6 h-6 ${iconColor}`} />
+      </div>
+      <h3 className="font-bold text-lg text-gray-800 dark:text-white">{title}</h3>
+    </div>
+
+    <div className="space-y-3">
+      <div className="flex gap-3 items-start opacity-60 grayscale group-hover:grayscale-0 transition-all duration-500">
+        <div className="mt-1 flex-shrink-0">
+          <div className="w-5 h-5 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+            <X className="w-3 h-3 text-red-500" />
+          </div>
+        </div>
+        <p className="text-sm text-gray-500 dark:text-gray-400 line-through decoration-red-400/50">{pain}</p>
+      </div>
+
+      <div className="flex gap-3 items-start bg-emerald-50/50 dark:bg-emerald-900/10 p-3 rounded-xl border border-emerald-100/50 dark:border-emerald-500/10">
+        <div className="mt-1 flex-shrink-0">
+          <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+          </div>
+        </div>
+        <p className="text-sm font-medium text-gray-700 dark:text-gray-200">{solution}</p>
+      </div>
+    </div>
+  </motion.div>
+);
+
+const InfluencerCompassModal = ({ onClose }: { onClose: () => void }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: '100vh' }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: '100vh' }}
+      transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+      className="fixed inset-0 z-[100] flex flex-col bg-slate-50 dark:bg-slate-900"
+    >
+      <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-br from-rose-50 via-fuchsia-50/30 to-slate-50 dark:from-rose-900/10 dark:via-fuchsia-900/5 dark:to-slate-900 pointer-events-none" />
+
+      <div className="relative z-10 flex flex-col h-full">
+        {/* Header */}
+        <header className="flex items-center justify-between p-4 sm:p-5 border-b border-rose-100 dark:border-slate-700 flex-shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-indigo-600 dark:from-rose-400 dark:to-indigo-400">
+              Compass 🧭 App
+            </h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 font-medium">Built for Creators, by Creators</p>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-rose-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-rose-500/20">
+            <Globe className="w-6 h-6 text-white" />
+          </div>
+        </header>
+
+        {/* Content */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-32">
+          <motion.div
+            className="max-w-3xl mx-auto space-y-6"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            {/* Hero Statement */}
+            <motion.div variants={itemVariants} className="text-center space-y-2 mb-8">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-gray-800 dark:text-white tracking-tight">
+                Stop Posting for <span className="text-rose-500 dark:text-rose-400">Free.</span>
+              </h1>
+              <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 font-medium">
+                Start Running a Creator Business.
+              </p>
+            </motion.div>
+
+            {/* Pain -> Solution Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <PainSolutionCard
+                icon={ShieldCheck}
+                iconColor="text-indigo-500"
+                iconBg="bg-indigo-100 dark:bg-indigo-900/30"
+                title="No More Ghosted Deals"
+                pain="Brands ghost you after you deliver the content"
+                solution="Compass Escrow holds payment before you start"
+              />
+              <PainSolutionCard
+                icon={Smartphone}
+                iconColor="text-rose-500"
+                iconBg="bg-rose-100 dark:bg-rose-900/30"
+                title="End DM Chaos"
+                pain="Negotiating rates and chasing receipts in DMs"
+                solution="Professional storefront: one link, instant booking"
+              />
+              <PainSolutionCard
+                icon={Sparkles}
+                iconColor="text-fuchsia-500"
+                iconBg="bg-fuchsia-100 dark:bg-fuchsia-900/30"
+                title="Monetize Everything"
+                pain="Free posts for brands who pay nothing"
+                solution="Sell PR services, shoutouts, merch, and digital products side-by-side"
+              />
+              <PainSolutionCard
+                icon={Zap}
+                iconColor="text-amber-500"
+                iconBg="bg-amber-100 dark:bg-amber-900/30"
+                title="Instant Payouts"
+                pain="Waiting 30–60 days for brand accounting"
+                solution="Funds released the moment you deliver — your money, your timeline"
+              />
+            </div>
+
+            {/* What you can sell chips */}
+            <motion.div variants={itemVariants} className="pt-6 pb-2">
+              <p className="text-xs font-bold text-center text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4">
+                What you can sell
+              </p>
+              <div className="flex flex-wrap justify-center items-center gap-2 max-w-2xl mx-auto">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-semibold border border-slate-200 dark:border-slate-700"><Camera className="w-4 h-4 text-pink-500" /> Shoutouts</span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-semibold border border-slate-200 dark:border-slate-700"><Package className="w-4 h-4 text-amber-500" /> Brand Unboxings</span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-semibold border border-slate-200 dark:border-slate-700"><PenTool className="w-4 h-4 text-emerald-500" /> Creator Merch</span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-semibold border border-slate-200 dark:border-slate-700"><Handshake className="w-4 h-4 text-blue-500" /> Collabs</span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-semibold border border-slate-200 dark:border-slate-700"><Video className="w-4 h-4 text-violet-500" /> Reels & Shorts</span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-semibold border border-slate-200 dark:border-slate-700"><ShoppingBag className="w-4 h-4 text-rose-500" /> Physical Products</span>
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-sm font-semibold border border-slate-200 dark:border-slate-700"><MonitorSmartphone className="w-4 h-4 text-cyan-500" /> Digital Products</span>
+              </div>
+            </motion.div>
+
+          </motion.div>
+        </main>
+
+        {/* Footer */}
+        <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-rose-100 dark:border-slate-700">
+          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent dark:from-slate-900 dark:to-transparent pointer-events-none" />
+          <div className="relative max-w-3xl mx-auto">
+            <motion.button
+              onClick={onClose}
+              className="w-full bg-gradient-to-r from-rose-600 to-indigo-600 hover:from-rose-700 hover:to-indigo-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg shadow-rose-500/20 hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+              whileTap={{ scale: 0.98 }}
+            >
+              Open My Creator Hub
+            </motion.button>
+          </div>
+        </footer>
+      </div>
+    </motion.div>
+  );
+};
+
+const VendorCompassModal = ({ onClose }: { onClose: () => void }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: '100vh' }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: '100vh' }}
+      transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
+      className="fixed inset-0 z-[100] flex flex-col bg-white dark:bg-slate-900"
+    >
+      <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-br from-blue-50 via-purple-50/30 to-white dark:from-blue-900/10 dark:via-purple-900/5 dark:to-slate-900 pointer-events-none" />
+
+      <div className="relative z-10 flex flex-col h-full">
+        {/* Header */}
+        <header className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 dark:border-slate-700 flex-shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
+          <div>
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
+              Compass 🧭 App
+            </h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400">Built for Vendors, by Vendors</p>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg">
+            <Globe className="w-6 h-6 text-white" />
+          </div>
+        </header>
+
+        {/* Content */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-32">
+          <motion.div
+            className="max-w-3xl mx-auto space-y-4"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <FeatureCard
+              icon={Zap}
+              iconColor="text-purple-500"
+              iconBg="bg-purple-100 dark:bg-purple-900/30"
+              title="Cutting-Edge Technology"
+              description="Streamline your operations with powerful, easy-to-use tools designed specifically for modern commerce."
+            />
+
+            <FeatureCard
+              icon={TrendingUp}
+              iconColor="text-emerald-500"
+              iconBg="bg-emerald-100 dark:bg-emerald-900/30"
+              title="Get More Customers"
+              description="Connect with more buyers and expand your reach through our powerful online and offline channels."
+              proTip="Join our exclusive events including Funfairs, Trade Fairs, and Pop-ups organized by Compass 🧭 to showcase your products directly to customers!"
+            />
+
+            <FeatureCard
+              icon={Star}
+              iconColor="text-amber-500"
+              iconBg="bg-amber-100 dark:bg-amber-900/30"
+              title="Unlock Multiple Revenue Sources"
+              description="Your income isn't limited to your sales. Earn extra revenue from network referrals, commissions, and more."
+            />
+
+            {/* Partners Section */}
+            <motion.div variants={itemVariants} className="pt-4">
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-5 border border-slate-100 dark:border-slate-700">
+                <p className="text-xs font-semibold text-center text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">
+                  Trusted Partners
+                </p>
+                <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-10">
+                  <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300 font-bold text-lg">
+                    <Building2 className="w-5 h-5" /> Google
+                  </div>
+                  <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300 font-bold text-lg">
+                    <CreditCard className="w-5 h-5" /> Paystack
+                  </div>
+                  <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300 font-bold text-lg">
+                    <Smartphone className="w-5 h-5" /> OPay
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+          </motion.div>
+        </main>
+
+        {/* Footer */}
+        <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-slate-700">
+          <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent dark:from-slate-900 dark:to-transparent pointer-events-none" />
+          <div className="relative max-w-3xl mx-auto">
+            <motion.button
+              onClick={onClose}
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+              whileTap={{ scale: 0.98 }}
+            >
+              Explore My Dashboard
+            </motion.button>
+          </div>
+        </footer>
+      </div>
+    </motion.div>
+  );
+};
+
 export const CompassNetworkModal = ({ isOpen, onClose, storeType }: CompassNetworkModalProps) => {
   const isInfluencer = storeType === 'media-influencer';
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div
-          initial={{ opacity: 0, y: '100vh' }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: '100vh' }}
-          transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
-          className="fixed inset-0 z-[100] flex flex-col bg-white dark:bg-slate-900"
-        >
-          {/* Decorative gradient background */}
-          <div className="absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-br from-blue-50 via-purple-50/30 to-white dark:from-blue-900/10 dark:via-purple-900/5 dark:to-slate-900 pointer-events-none" />
-
-          <div className="relative z-10 flex flex-col h-full">
-            {/* Header */}
-            <header className="flex items-center justify-between p-4 sm:p-5 border-b border-gray-200 dark:border-slate-700 flex-shrink-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-white">
-                  Compass 🧭 App
-                </h2>
-                <p className="text-xs text-gray-500 dark:text-gray-400">Built for {isInfluencer ? 'Creators' : 'Vendors'}, by {isInfluencer ? 'Creators' : 'Vendors'}</p>
-              </div>
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg">
-                <Globe className="w-6 h-6 text-white" />
-              </div>
-            </header>
-
-            {/* Content */}
-            <main className="flex-1 overflow-y-auto p-4 sm:p-6 pb-32">
-              <motion.div
-                className="max-w-3xl mx-auto space-y-4"
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-              >
-                <FeatureCard
-                  icon={Zap}
-                  iconColor="text-purple-500"
-                  iconBg="bg-purple-100 dark:bg-purple-900/30"
-                  title={isInfluencer ? "Creator-Focused Technology" : "Cutting-Edge Technology"}
-                  description={isInfluencer ? "Streamline your content business with powerful, easy-to-use tools designed for both services and physical commerce." : "Streamline your operations with powerful, easy-to-use tools designed specifically for modern commerce."}
-                />
-
-                <FeatureCard
-                  icon={TrendingUp}
-                  iconColor="text-emerald-500"
-                  iconBg="bg-emerald-100 dark:bg-emerald-900/30"
-                  title={isInfluencer ? "Expand Your Reach" : "Get More Customers"}
-                  description={isInfluencer ? "Connect with brands for high-value collabs and expand your influence through our professional marketplace channels." : "Connect with more buyers and expand your reach through our powerful online and offline channels."}
-                  proTip={isInfluencer ? "Join our exclusive creator workshops and pop-up events organized by Compass 🧭 to showcase your personal brand directly to the community!" : "Join our exclusive events including Funfairs, Trade Fairs, and Pop-ups organized by Compass 🧭 to showcase your products directly to customers!"}
-                />
-
-                <FeatureCard
-                  icon={Star}
-                  iconColor="text-amber-500"
-                  iconBg="bg-amber-100 dark:bg-amber-900/30"
-                  title={isInfluencer ? "Infinite Revenue Streams" : "Unlock Multiple Revenue Sources"}
-                  description={isInfluencer ? "Don't limit yourself. Monetize every aspect of your influence, from PR services and digital shoutouts to physical merch and collections." : "Your income isn't limited to your sales. Earn extra revenue from network referrals, commissions, and more."}
-                />
-
-                {/* Partners Section */}
-                <motion.div variants={itemVariants} className="pt-4">
-                  <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-5 border border-slate-100 dark:border-slate-700">
-                    <p className="text-xs font-semibold text-center text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-4">
-                      Trusted Partners
-                    </p>
-                    <div className="flex flex-wrap justify-center items-center gap-6 sm:gap-10">
-                      <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300 font-bold text-lg">
-                        <Building2 className="w-5 h-5" /> Google
-                      </div>
-                      <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300 font-bold text-lg">
-                        <CreditCard className="w-5 h-5" /> Paystack
-                      </div>
-                      <div className="flex items-center gap-2 text-slate-600 dark:text-slate-300 font-bold text-lg">
-                        <Smartphone className="w-5 h-5" /> OPay
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
-
-              </motion.div>
-            </main>
-
-            {/* Footer */}
-            <footer className="relative mt-auto flex-shrink-0 p-4 sm:p-5 border-t border-gray-200 dark:border-slate-700">
-              <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-white to-transparent dark:from-slate-900 dark:to-transparent pointer-events-none" />
-              <div className="relative max-w-3xl mx-auto">
-                <motion.button
-                  onClick={onClose}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3.5 px-6 rounded-xl transition-all duration-300 ease-in-out shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Explore My {isInfluencer ? 'Hub' : 'Dashboard'}
-                </motion.button>
-              </div>
-            </footer>
-          </div>
-        </motion.div>
+        isInfluencer ? <InfluencerCompassModal onClose={onClose} /> : <VendorCompassModal onClose={onClose} />
       )}
     </AnimatePresence>
   );
