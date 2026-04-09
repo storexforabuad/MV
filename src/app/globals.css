@@ -4,10 +4,13 @@
 
 /* Pulse glow animation for refresh button */
 @keyframes pulse-glow {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
     box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
   }
+
   50% {
     opacity: 1;
     box-shadow: 0 0 0 8px rgba(59, 130, 246, 0);
@@ -22,6 +25,7 @@
 :root {
   --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
 }
+
 .pb-safe-area-inset-bottom {
   padding-bottom: calc(1rem + var(--safe-area-inset-bottom));
 }
@@ -33,24 +37,30 @@
   user-select: none;
 }
 
-input, textarea, [contenteditable="true"] {
+input,
+textarea,
+[contenteditable="true"] {
   user-select: text !important;
   -webkit-touch-callout: default !important;
 }
 
 img {
   -webkit-user-drag: none;
-  pointer-events: none; /* Deter long-press on images */
+  pointer-events: none;
+  /* Deter long-press on images */
 }
 
 /* Allow pointer events on interactive elements inside images if any, 
    but generally we want to protect the image itself */
-a img, button img {
+a img,
+button img {
   pointer-events: auto;
 }
+
 :root {
   /* ... existing variables ... */
-  --navbar-bg-rgb: 255, 255, 255; /* for light mode */
+  --navbar-bg-rgb: 255, 255, 255;
+  /* for light mode */
   --blur-background: rgba(255, 255, 255, 0.6);
 }
 
@@ -62,14 +72,14 @@ a img, button img {
 
   --tooltip-background: rgba(0, 0, 0, 0.8);
   --tooltip-text: #ffffff;
-  
+
   /* Component backgrounds */
   --card-background: #ffffff;
   --card-hover: #f5f5f7;
   --navbar-bg: rgba(255, 255, 255, 0.6);
   --input-background: #f5f5f7;
   --modal-background: #ffffff;
-  
+
   /* Text colors */
   --text-primary: #1d1d1f;
   --text-secondary: #6e6e73;
@@ -80,20 +90,21 @@ a img, button img {
   --border-color: #d2d2d7;
   --input-border: #d2d2d7;
   --border-focus: #0066cc;
-  
+
   /* Button colors - Updated to be more subdued */
   --button-primary: #0071e3;
   --button-primary-hover: #0077ED;
   --button-secondary: rgba(0, 0, 0, 0.05);
   --button-secondary-hover: rgba(0, 0, 0, 0.1);
   --button-secondary-active: #d2d2d7;
-   --button-success: #34c759;        /* Apple's system green */
-  --button-success-hover: #30b753; 
+  --button-success: #34c759;
+  /* Apple's system green */
+  --button-success-hover: #30b753;
   --button-danger: #ff3b30;
   --button-danger-hover: #ff453a;
   --button-secondary-disabled: #f5f5f7;
   --text-secondary-disabled: #86868b;
-  
+
   /* Status colors */
   --success: #22c55e;
   --warning: #f59e0b;
@@ -103,20 +114,28 @@ a img, button img {
 
 
   /* Badge/Tag colors */
-    --badge-yellow-bg: #facc15; /* Yellow-400 */
-  --badge-yellow-text: #78350f; /* Yellow-900 */
+  --badge-yellow-bg: #facc15;
+  /* Yellow-400 */
+  --badge-yellow-text: #78350f;
+  /* Yellow-900 */
   --badge-blue-bg: rgba(0, 102, 204, 0.1);
-  --badge-blue-text: #0066cc;     /* All category */
+  --badge-blue-text: #0066cc;
+  /* All category */
   --badge-red-bg: rgba(255, 59, 48, 0.1);
-  --badge-red-text: #ff3b30;      /* Sold Out and discounts */
+  --badge-red-text: #ff3b30;
+  /* Sold Out and discounts */
   --badge-green-bg: rgba(0, 168, 84, 0.1);
-  --badge-green-text: #00a854;    /* In Stock */
+  --badge-green-text: #00a854;
+  /* In Stock */
   --badge-yellow-bg: rgba(255, 159, 10, 0.1);
-  --badge-yellow-text: #ff9f0a;   /* Limited Stock */
+  --badge-yellow-text: #ff9f0a;
+  /* Limited Stock */
   --badge-pink-bg: rgba(236, 72, 153, 0.1);
-  --badge-pink-text: #ec4899;      /* Ready To Wear */
+  --badge-pink-text: #ec4899;
+  /* Ready To Wear */
   --badge-purple-bg: rgba(147, 51, 234, 0.1);
-  --badge-purple-text: #9333ea;    /* Bespoke */
+  --badge-purple-text: #9333ea;
+  /* Bespoke */
   --badge-gray-bg: #f3f4f6;
   --badge-gray-text: #6b7280;
 
@@ -126,12 +145,15 @@ a img, button img {
 /* Dark mode text protection */
 [data-theme='dark'] {
   * {
-    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);  /* Subtle text protection */
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+    /* Subtle text protection */
   }
-  
+
   /* Ensure minimum contrast for small text */
-  .text-sm, .text-xs {
-    font-weight: 450;  /* Slightly bolder for small text */
+  .text-sm,
+  .text-xs {
+    font-weight: 450;
+    /* Slightly bolder for small text */
   }
 }
 
@@ -146,46 +168,48 @@ a img, button img {
   --skeleton-background: rgba(255, 255, 255, 0.05);
 
   /* Button text states */
-  --button-text: #ffffff;          /* New - For consistent button text */
-  --button-text-disabled: rgba(255, 255, 255, 0.7);   
+  --button-text: #ffffff;
+  /* New - For consistent button text */
+  --button-text-disabled: rgba(255, 255, 255, 0.7);
 
   --tooltip-background: rgba(255, 255, 255, 0.1);
   --tooltip-text: #ffffff;
-  
+
   /* Component backgrounds */
   --card-background: #18181b;
   --card-hover: #27272a;
   --navbar-bg: rgba(9, 9, 11, 0.6);
   --input-background: #27272a;
   --modal-background: #18181b;
-  
+
   /* Text colors */
   --text-primary: #f5f5f7;
   --text-secondary: #a1a1a6;
   --text-tertiary: #86868b;
-  
+
   /* Border colors */
   --border-color: rgba(255, 255, 255, 0.08);
   --input-border: rgba(255, 255, 255, 0.12);
   --border-focus: #0066cc;
-  
+
   /* Button colors */
   --button-primary: #0077ED;
   --button-primary-hover: #0088FF;
   --button-secondary: rgba(255, 255, 255, 0.1);
   --button-secondary-hover: rgba(255, 255, 255, 0.15);
-  --button-success: #32d74b;        /* Apple's dark mode system green */
-  --button-success-hover: #2ed348; 
+  --button-success: #32d74b;
+  /* Apple's dark mode system green */
+  --button-success-hover: #2ed348;
   --button-danger: #ff453a;
   --button-danger-hover: #ff584d;
   --button-secondary-active: rgba(255, 255, 255, 0.2);
   --text-secondary-disabled: rgba(255, 255, 255, 0.6);
   --button-secondary-disabled: rgba(255, 255, 255, 0.1);
-  
+
   /* Shadow colors */
   --shadow-color: rgba(0, 0, 0, 0.3);
   --card-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
-  
+
   /* Badge/Tag colors */
   --badge-blue-bg: rgba(0, 122, 255, 0.15);
   --badge-blue-text: #3b9cff;
@@ -200,7 +224,7 @@ a img, button img {
   --badge-purple-bg: rgba(191, 90, 242, 0.15);
   --badge-purple-text: #c39cff;
   --badge-gray-bg: rgba(142, 142, 147, 0.15);
-  --badge-gray-text: #aeaeb2; 
+  --badge-gray-text: #aeaeb2;
 }
 
 button {
@@ -236,16 +260,19 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.3s ease, color 0.3s ease;
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-  overscroll-behavior-y: none; /* Prevent bounce effect */
+  -webkit-overflow-scrolling: touch;
+  /* Smooth scrolling on iOS */
+  overscroll-behavior-y: none;
+  /* Prevent bounce effect */
   overflow-x: hidden;
-   /* letter-spacing: -0.015em; */
+  /* letter-spacing: -0.015em; */
 }
 
 /* Mobile Touch Optimizations */
 @media (hover: none) and (pointer: coarse) {
+
   /* Increase touch targets for better accessibility */
-  button, 
+  button,
   a,
   input[type="button"],
   input[type="submit"],
@@ -256,11 +283,12 @@ body {
     padding: 8px;
     touch-action: manipulation;
   }
-  
+
   /* Remove touch highlight */
   * {
     -webkit-tap-highlight-color: transparent;
   }
+
   .product-detail-button-success {
     background-color: var(--button-success-hover) !important;
   }
@@ -269,6 +297,7 @@ body {
     background-color: var(--button-secondary-hover) !important;
   }
 }
+
 /* Add this after the existing nav styles */
 nav {
   background-color: var(--blur-background);
@@ -285,12 +314,15 @@ nav {
   perspective: 1000px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .button-primary:hover {
   transform: translateY(-1px);
 }
+
 .button-primary:active {
   transform: translateY(0);
 }
+
 .product-grid {
   display: grid;
   gap: 20px;
@@ -337,11 +369,13 @@ html {
   -webkit-overflow-scrolling: touch;
   scroll-behavior: smooth;
 }
+
 .category-bar {
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 1px solid var(--border-color);
 }
+
 .category-button {
   font-size: 14px;
   font-weight: 500;
@@ -350,24 +384,30 @@ html {
   border-radius: 980px;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 /* Image hover effects */
 .product-image {
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
 .product-image:hover {
   transform: scale(1.02);
 }
-h1, h2, h3 {
+
+h1,
+h2,
+h3 {
   /* letter-spacing: -0.02em; */
   font-weight: 600;
 }
+
 /* CategoryBar Styles */
 .category-bar-container {
   position: sticky;
   z-index: 40;
   transition: top 0.3s ease-in-out;
   -webkit-transform: translateZ(0);
-  transform: translate3d(0,0,0);
+  transform: translate3d(0, 0, 0);
   will-change: top;
   backface-visibility: hidden;
   perspective: 1000px;
@@ -377,10 +417,12 @@ h1, h2, h3 {
   position: fixed;
   left: 0;
   right: 0;
-  background-color: var(--blur-background); /* Change this line */
+  background-color: var(--blur-background);
+  /* Change this line */
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
-  box-shadow:  0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
   @supports (backdrop-filter: blur(8px)) {
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
@@ -392,6 +434,7 @@ h1, h2, h3 {
   .category-bar-container {
     position: -webkit-sticky;
   }
+
   .category-bar-container.is-sticky {
     position: fixed;
   }
@@ -403,7 +446,7 @@ h1, h2, h3 {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
-  
+
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
@@ -411,12 +454,19 @@ h1, h2, h3 {
 
 /* Animation Keyframes */
 @keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
+
+  0%,
+  20%,
+  50%,
+  80%,
+  100% {
     transform: translateY(0);
   }
+
   40% {
     transform: translateY(-10px);
   }
+
   60% {
     transform: translateY(-5px);
   }
@@ -429,9 +479,9 @@ h1, h2, h3 {
   border-radius: 0.5rem;
   box-shadow: var(--card-shadow);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-  box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-   backdrop-filter: blur(20px);
-   -webkit-backdrop-filter: blur(20px);
+    box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .card:hover {
@@ -440,16 +490,19 @@ h1, h2, h3 {
 
 /* Ready Orders Modal helpers */
 .ready-modal-title {
-  font-size: clamp(1.125rem, 4.5vw, 1.75rem); /* ~18px -> 28px scaling */
+  font-size: clamp(1.125rem, 4.5vw, 1.75rem);
+  /* ~18px -> 28px scaling */
   line-height: 1.05;
   word-break: break-word;
 }
+
 .ready-orders-modal__header {
   /* Ensure header never grows beyond half the viewport and allow internal scroll if needed */
   max-height: calc(var(--dvh, 1vh) * 50);
   overflow: auto;
   -webkit-overflow-scrolling: touch;
 }
+
 /* Utility to respect iOS notch if needed */
 .ready-orders-modal--safe-pt {
   padding-top: calc(1rem + env(safe-area-inset-top, 0px));
@@ -473,7 +526,7 @@ h1, h2, h3 {
   .category-bar-container {
     transition: none;
   }
-  
+
 
   * {
     animation-duration: 0.01ms !important;
@@ -489,12 +542,14 @@ h1, h2, h3 {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 200ms;
 }
+
 .toast {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-radius: 14px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
+
 /* Hardware Acceleration */
 .transform {
   -webkit-transform: translateZ(0);
@@ -504,10 +559,10 @@ h1, h2, h3 {
 
 /* Theme Transition */
 * {
-  transition: background-color 0.2s ease-in-out, 
-              border-color 0.2s ease-in-out, 
-              color 0.2s ease-in-out,
-              box-shadow 0.2s ease-in-out;
+  transition: background-color 0.2s ease-in-out,
+    border-color 0.2s ease-in-out,
+    color 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
 }
 
 @keyframes fadeIn {
@@ -515,6 +570,7 @@ h1, h2, h3 {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -525,36 +581,37 @@ h1, h2, h3 {
   animation: fadeIn 0.3s ease-out forwards;
 }
 
- .badge-wrapper {
-     position: relative;
-     isolation: isolate;
-   }
-   
-   .badge-wrapper::before {
-     content: '';
-     position: absolute;
-     inset: -1px;
-     background: var(--background);
-     opacity: 0.8;
-     backdrop-filter: blur(2px);
-     border-radius: 9999px;
-     z-index: -1;
-   }
-   
-   .product-badge {
-     position: relative;
-     display: inline-flex;
-     align-items: center;
-     padding: 0.375rem 0.75rem;
-     border-radius: 9999px;
-     font-size: 0.75rem;
-     line-height: 1rem;
-     font-weight: 500;
-     border: 1px solid var(--border-color);
-     box-shadow: var(--shadow-sm);
-     animation: fade-in 0.3s ease-out;
-  }
-  /* Add these at the bottom of your file */
+.badge-wrapper {
+  position: relative;
+  isolation: isolate;
+}
+
+.badge-wrapper::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  background: var(--background);
+  opacity: 0.8;
+  backdrop-filter: blur(2px);
+  border-radius: 9999px;
+  z-index: -1;
+}
+
+.product-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 0.375rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 500;
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
+  animation: fade-in 0.3s ease-out;
+}
+
+/* Add these at the bottom of your file */
 .view-count-enter {
   opacity: 0;
   transform: translateY(10px);
@@ -569,7 +626,8 @@ h1, h2, h3 {
 .pull-to-refresh {
   transition: transform 0.2s ease;
   will-change: transform;
-  margin-top: var(--navbar-height); /* Add this line */
+  margin-top: var(--navbar-height);
+  /* Add this line */
 }
 
 @media (hover: none) and (pointer: coarse) {
@@ -581,13 +639,19 @@ h1, h2, h3 {
 
 /* Pull to refresh styles */
 @keyframes bounce-and-spin {
-  0%, 100% {
-    transform: translateY(var(--navbar-height)); /* Update this line */
+
+  0%,
+  100% {
+    transform: translateY(var(--navbar-height));
+    /* Update this line */
   }
+
   50% {
-    transform: translateY(calc(var(--navbar-height) + 10px)); /* Update this line */
+    transform: translateY(calc(var(--navbar-height) + 10px));
+    /* Update this line */
   }
 }
+
 .animate-bounce {
   animation: bounce-and-spin 1s infinite;
 }
@@ -597,6 +661,7 @@ h1, h2, h3 {
     opacity: 0;
     transform: scale(0.98);
   }
+
   to {
     opacity: 1;
     transform: scale(1);
@@ -604,9 +669,12 @@ h1, h2, h3 {
 }
 
 @keyframes badge-bounce {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1) translateZ(0);
   }
+
   50% {
     transform: scale(1.3) translateZ(0);
   }
@@ -652,9 +720,11 @@ h1, h2, h3 {
   0% {
     transform: scale(0.95);
   }
+
   50% {
     transform: scale(1.05);
   }
+
   100% {
     transform: scale(1);
   }
@@ -752,6 +822,7 @@ h1, h2, h3 {
   0% {
     background-position: -200% 0;
   }
+
   100% {
     background-position: 200% 0;
   }
@@ -763,23 +834,61 @@ h1, h2, h3 {
 
 /* ── Influencer Hero Card — Alive Gradient ─────────────────────────────── */
 @keyframes aliveGradient {
-  0%   { background-position: 0%   50%; }
-  25%  { background-position: 100%  0%; }
-  50%  { background-position: 100% 100%; }
-  75%  { background-position: 0%  100%; }
-  100% { background-position: 0%   50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+
+  25% {
+    background-position: 100% 0%;
+  }
+
+  50% {
+    background-position: 100% 100%;
+  }
+
+  75% {
+    background-position: 0% 100%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .influencer-live-bg {
-  background-image: linear-gradient(
-    135deg,
-    #e11d48,   /* rose-600   */
-    #c026d3,   /* fuchsia-600 */
-    #7c3aed,   /* violet-600  */
-    #4f46e5,   /* indigo-600  */
-    #db2777,   /* pink-600    */
-    #e11d48    /* back to rose — seamless loop */
-  );
+  background-image: linear-gradient(135deg,
+      #e11d48,
+      /* rose-600   */
+      #c026d3,
+      /* fuchsia-600 */
+      #7c3aed,
+      /* violet-600  */
+      #4f46e5,
+      /* indigo-600  */
+      #db2777,
+      /* pink-600    */
+      #e11d48
+      /* back to rose — seamless loop */
+    );
   background-size: 400% 400%;
   animation: aliveGradient 12s ease infinite;
+}
+
+.luxury-fashion-bg {
+  background-image: linear-gradient(135deg,
+      #000000,
+      /* black        */
+      #1a0f0a,
+      /* deep espresso */
+      #af922d,
+      /* metallic gold */
+      #5d4037,
+      /* deep bronze  */
+      #111111,
+      /* dark grey    */
+      #000000
+      /* seamless loop */
+    );
+  background-size: 400% 400%;
+  animation: aliveGradient 15s ease-in-out infinite;
 }
