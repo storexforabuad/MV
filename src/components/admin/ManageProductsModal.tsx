@@ -139,6 +139,11 @@ const ProductRow = React.memo(({
                     {product.deliveryTimeDays} Days Delivery
                   </span>
                 )}
+                {product.subtype === 'event-ticket-promo' && (
+                  <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-rose-700 bg-rose-50 dark:bg-rose-900/30 dark:text-rose-300 rounded-md border border-rose-100 dark:border-rose-800/50">
+                    Live Event Ticket
+                  </span>
+                )}
                 {product.subtype === 'booking-fee' && (
                   <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-amber-700 bg-amber-50 dark:bg-amber-900/30 dark:text-amber-300 rounded-md border border-amber-100 dark:border-amber-800/50">
                     Verification Fee
@@ -396,7 +401,7 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
     const s: Product[] = [];
     const p: Product[] = [];
     filteredProducts.forEach(prod => {
-      if (prod.productType === 'media-influencer' && (prod as any).subtype === 'service') {
+      if (prod.productType === 'media-influencer' && (prod.subtype === 'service' || prod.subtype === 'event-ticket-promo')) {
         s.push(prod);
       } else {
         p.push(prod);

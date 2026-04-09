@@ -28,7 +28,7 @@ interface EditProductPanelProps {
   onAddCategory: (name: string) => Promise<void>;
 }
 
-interface ProductFormState extends Omit<Product, 'price' | 'originalPrice'> {
+type ProductFormState = Omit<Product, 'price' | 'originalPrice'> & {
   basePrice: number | null;
   promoPrice: number | null;
   limitedStock?: boolean;
@@ -64,7 +64,9 @@ interface ProductFormState extends Omit<Product, 'price' | 'originalPrice'> {
 
   // Food
   preparationTime?: number;
-}
+
+  category?: string;
+};
 
 const StyledInput: React.FC<{ id: string, label: string, value: string | number, onChange: (e: ChangeEvent<HTMLInputElement>) => void, type?: string, placeholder?: string, disabled?: boolean }> = ({ id, label, value, onChange, type = 'text', placeholder = '', disabled = false }) => (
   <div className={disabled ? 'opacity-60' : ''}>
@@ -751,7 +753,11 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
         categories={categories}
         selectedCategoryId={formState.categoryId}
         onSelect={(categoryId: string) => {
+          const selectedCat = categories.find(c => c.id === categoryId);
           handleInputChange('categoryId', categoryId);
+          if (selectedCat) {
+            handleInputChange('category', selectedCat.name);
+          }
           setCategorySelectorOpen(false);
         }}
         onAddCategory={onAddCategory}

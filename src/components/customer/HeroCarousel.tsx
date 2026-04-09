@@ -433,7 +433,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             className="flex items-center gap-2"
                         >
                             <span className="text-sm sm:text-base md:text-lg font-bold text-white/90 uppercase tracking-widest">
-                                {isMediaInfluencer ? 'For' : 'By'} <span className="text-amber-400"> {storeMeta?.ceoName || storeMeta?.name || 'Aisha Ibrahem'}</span>
+                                {isMediaInfluencer ? 'For' : 'Led by'} <span className="text-amber-400"> {storeMeta?.ceoName || storeMeta?.name || 'Aisha Ibrahem'}</span>
                             </span>
                             <div className="h-px w-8 bg-gradient-to-r from-amber-400/50 to-transparent" />
                         </motion.div>
@@ -444,7 +444,11 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             transition={{ delay: 0.4 }}
                             className="text-xs sm:text-sm text-white/90 max-w-[280px] sm:max-w-sm font-medium leading-tight mt-1"
                         >
-                            {isMediaInfluencer ? 'Elite PR services & premium products, safely secured by Compass🧭 Escrow.' : 'Professional store services, secured by Compass🧭 Escrow.'}
+                            {isMediaInfluencer
+                                ? 'Elite PR services & premium products, safely secured by Compass🧭 Escrow.'
+                                : storeMeta?.storeType === 'fashion'
+                                    ? 'Professionally crafted leather goods. Payments secured by Compass Escrow.'
+                                    : 'Professional store services, secured by Compass🧭 Escrow.'}
                         </motion.p>
 
 

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, CheckCircle, Clock, Unlock, Video, Image, FileText, ExternalLink, Loader2, AlertCircle } from 'lucide-react';
+import { Upload, CheckCircle, Clock, Unlock, Video, Image, FileText, ExternalLink, Loader2, AlertCircle, Ticket } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { uploadEscrowDeliverable, releaseEscrow, updateOrderStatus, getOrderById, disputeEscrow } from '@/app/actions/orderActions';
 
@@ -14,6 +14,9 @@ interface EscrowDeliverablePanelProps {
     orderStatus?: string;
     deliverableUrl?: string;
     onUpdate?: () => void;
+    isEventTicketPromo?: boolean;
+    eventPayload?: any;
+    commissionCut?: number;
 }
 
 export default function EscrowDeliverablePanel({
@@ -24,6 +27,9 @@ export default function EscrowDeliverablePanel({
     orderStatus,
     deliverableUrl: initialDeliverableUrl,
     onUpdate,
+    isEventTicketPromo,
+    eventPayload,
+    commissionCut,
 }: EscrowDeliverablePanelProps) {
     const [deliverableUrl, setDeliverableUrl] = useState(initialDeliverableUrl || '');
     const [influencerNote, setInfluencerNote] = useState('');
@@ -35,6 +41,7 @@ export default function EscrowDeliverablePanel({
     const [isDisputing, setIsDisputing] = useState(false);
     const [showDisputeInput, setShowDisputeInput] = useState(false);
     const [disputeReason, setDisputeReason] = useState('');
+    const [isAcceptingPromo, setIsAcceptingPromo] = useState(false);
 
     const isEscrowHeld = paymentStatus === 'escrow-held';
     const isPendingReview = orderStatus === 'pending-review';
@@ -130,6 +137,53 @@ export default function EscrowDeliverablePanel({
         }
     };
 
+    const handleAcceptEventPromo = async () => {
+        if (!eventPayload) {
+            toast.error('Missing event details. Cannot create ticket.');
+            return;
+        }
+        if (!window.confirm('Accept this promotion? This will immediately list the tickets on your store and release the Base Fee to you.')) return;
+
+        setIsAcceptingPromo(true);
+        try {
+            // Import dynamically or assume it's available via an action
+            // Actually, we must use addProduct from '@/lib/db' 
+            const { addProduct } = await import('@/lib/db');
+
+            const newTicketProduct: any = {
+                productType: 'ticket',
+                name: eventPayload.eventName,
+                description: eventPayload.description || '',
+                price: eventPayload.tiers?.[0]?.price || 0,
+                quantity: 9999,
+                images: ['/services/live-event-ticket-default.jpg'], // default image
+                brandOrderRef: orderId,
+                commissionPercent: commissionCut || 15, // The B2B2C cut
+                eventType: 'Event',
+                eventDate: eventPayload.date,
+                eventTime: eventPayload.time,
+                venue: eventPayload.venue,
+                tiers: eventPayload.tiers || [],
+                ageRestriction: eventPayload.ageRestriction || '18+',
+                available: true,
+                categoryId: 'tickets', // Ensure it appears under a specific category if needed
+            };
+
+            await addProduct(storeId, newTicketProduct);
+
+            // Auto release escrow since influencer accepted it
+            await releaseEscrow(storeId, orderId);
+
+            toast.success('Event Tickets successfully created & listed!');
+            onUpdate?.();
+        } catch (err) {
+            console.error('Error accepting event promo:', err);
+            toast.error('Failed to create ticket listing.');
+        } finally {
+            setIsAcceptingPromo(false);
+        }
+    };
+
     const handleDispute = async () => {
         if (!disputeReason.trim()) {
             toast.error('Please provide a reason for the dispute');
@@ -221,8 +275,8 @@ export default function EscrowDeliverablePanel({
                 )}
             </AnimatePresence>
 
-            {/* Influencer Upload Panel */}
-            {isInfluencerView && isEscrowHeld && !isPendingReview && !isReleased && (
+            {/* Influencer Upload Panel for Standard Services */}
+            {isInfluencerView && isEscrowHeld && !isPendingReview && !isReleased && !isEventTicketPromo && (
                 <div className="space-y-3">
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                         Upload the campaign deliverable (video/image/link) to submit for brand approval.
@@ -279,6 +333,71 @@ export default function EscrowDeliverablePanel({
                             <><Upload size={18} /> Submit Deliverable</>
                         )}
                     </button>
+                </div>
+            )}
+
+            {/* Influencer Upload Panel - EVENT PROMO B2B ACCEPTANCE */}
+            {isInfluencerView && isEscrowHeld && !isPendingReview && !isReleased && isEventTicketPromo && (
+                <div className="space-y-4 pt-2 border-t border-gray-100 dark:border-gray-800">
+                    <div className="p-4 rounded-xl bg-rose-50 dark:bg-rose-900/10 border border-rose-100 dark:border-rose-800 space-y-3">
+                        <div className="flex items-center gap-2 text-rose-700 dark:text-rose-400">
+                            <Ticket className="w-5 h-5" />
+                            <span className="text-sm font-bold uppercase tracking-wider">Review & Accept</span>
+                        </div>
+                        <p className="text-xs text-rose-600 dark:text-rose-300">
+                            Review the event details above. Clicking Accept will immediately list the tickets on your storefront and release the base promotion fee to your available balance.
+                        </p>
+                    </div>
+
+                    <div className="flex gap-2">
+                        <button
+                            onClick={handleAcceptEventPromo}
+                            disabled={isAcceptingPromo}
+                            className="flex-[2] py-4 rounded-[1.25rem] bg-gradient-to-r from-rose-500 to-rose-700 text-white font-black text-sm hover:from-rose-600 hover:to-rose-800 transition-all shadow-lg shadow-rose-500/20 active:scale-[0.98] disabled:opacity-60 flex items-center justify-center gap-2"
+                        >
+                            {isAcceptingPromo ? (
+                                <><Loader2 size={18} className="animate-spin" /> Processing...</>
+                            ) : (
+                                <><CheckCircle size={18} /> Accept & List Tickets</>
+                            )}
+                        </button>
+                        <button
+                            onClick={() => setShowDisputeInput(true)}
+                            className="flex-1 py-4 rounded-[1.25rem] bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 font-bold text-sm hover:bg-red-100 dark:hover:bg-red-900/40 transition-all border border-red-200 dark:border-red-800 text-center"
+                        >
+                            Reject
+                        </button>
+                    </div>
+                    {showDisputeInput && (
+                        <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            className="space-y-3 pt-3"
+                        >
+                            <textarea
+                                value={disputeReason}
+                                onChange={(e) => setDisputeReason(e.target.value)}
+                                placeholder="Reason for rejecting this event?"
+                                className="w-full p-3 rounded-xl bg-white dark:bg-gray-800 border border-red-200 dark:border-red-800 text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-red-400 focus:outline-none resize-none"
+                                rows={3}
+                            />
+                            <div className="flex gap-2">
+                                <button
+                                    onClick={() => setShowDisputeInput(false)}
+                                    className="flex-1 py-2.5 rounded-xl bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 font-bold text-xs"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleDispute}
+                                    disabled={isDisputing}
+                                    className="flex-[2] py-2.5 rounded-xl bg-red-600 text-white font-bold text-xs shadow-md shadow-red-500/20"
+                                >
+                                    {isDisputing ? 'Rejecting...' : 'Confirm Rejection'}
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
                 </div>
             )}
 

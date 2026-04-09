@@ -512,20 +512,54 @@ export default function AdminStorePageClient({
       // If updating a mock product, convert it to a real product in the database
       if (productId.startsWith('media-') || productId.startsWith('candle-')) {
         const mockProduct = products.find(p => p.id === productId);
-        if (mockProduct) {
-          const newProductData = {
-            ...mockProduct,
-            ...updatedData,
-            storeId: storeId, // Ensure it's for this store
-            id: undefined, // Let Firestore generate a real ID
-            createdAt: { toMillis: () => Date.now() } as any, // Set real creation date
-            views: 0, // Reset views for the new real product
-          };
-
-          await addProduct(storeId, newProductData as any);
-          hideMockId(storeId, productId); // Hide the old mock version
-          toast.success('Mock service converted to real product!');
+        if (!mockProduct) {
+          console.error("Mock product not found:", productId);
+          return;
         }
+        let categoryIdToSave = updatedData.categoryId || (mockProduct as any).categoryId;
+        let categoryNameToSave = (updatedData as any).category || (mockProduct as any).category;
+
+        // If the category is one of the "mock/suggested" ones, we need to ensure it's in Firestore
+        const mockCatIds = ['pr-collabs', 'candles', 'apparel', 'fragrances'];
+        if (categoryIdToSave && mockCatIds.includes(categoryIdToSave)) {
+          const mockCatName = categoryNameToSave || (({
+            'pr-collabs': 'PR & Collab Services',
+            'candles': 'Candles & Home',
+            'apparel': 'Apparel & Modest Wear',
+            'fragrances': 'Perfumes & Oils'
+          } as Record<string, string>)[categoryIdToSave]);
+
+          // Check if a real category with this name already exists
+          const existingRealCat = categories.find(c =>
+            c.name.toLowerCase() === mockCatName?.toLowerCase() &&
+            !mockCatIds.includes(c.id)
+          );
+
+          if (existingRealCat) {
+            categoryIdToSave = existingRealCat.id;
+          } else {
+            // Create it in Firestore
+            const newCat = await addCategory(storeId, mockCatName || 'Uncategorized');
+            categoryIdToSave = newCat.id;
+            // Update local state to include the new real category (prevents creating it twice)
+            setCategories(prev => [...prev, newCat]);
+          }
+        }
+
+        const newProductData = {
+          ...mockProduct,
+          ...updatedData,
+          categoryId: categoryIdToSave,
+          category: categoryNameToSave,
+          storeId: storeId, // Ensure it's for this store
+          id: undefined, // Let Firestore generate a real ID
+          createdAt: { toMillis: () => Date.now() } as any, // Set real creation date
+          views: 0, // Reset views for the new real product
+        };
+
+        await addProduct(storeId, newProductData as any);
+        hideMockId(storeId, productId); // Hide the old mock version
+        toast.success('Mock service converted to real product!');
       } else {
         await updateProduct(storeId, productId, updatedData);
       }

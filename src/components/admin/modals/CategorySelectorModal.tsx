@@ -141,7 +141,31 @@ const CategorySelectorModal: React.FC<CategorySelectorProps> = ({
                                     {categories.map((cat) => (
                                         <button
                                             key={cat.id}
-                                            onClick={() => onSelect(cat.id)}
+                                            onClick={async () => {
+                                                const mockCatIds = ['pr-collabs', 'candles', 'apparel', 'fragrances'];
+                                                if (mockCatIds.includes(cat.id)) {
+                                                    setIsSubmitting(true);
+                                                    try {
+                                                        // This will create it in Firestore and potentially update the parent's categories list
+                                                        // But we need the NEW ID back. Standard onAddCategory doesn't always return it in all parent impls.
+                                                        // However, for influencers, it's handled in AdminStorePageClient.
+                                                        // Let's assume the parent handles the "id swap" if we just call onAddCategory.
+                                                        // Actually, a better way is to let the parent handle the promotion logic.
+                                                        await onAddCategory(cat.name);
+                                                        // We still call onSelect with the OLD id for now, 
+                                                        // but parent should ideally refresh or we should wait.
+                                                        // For now, the product will be saved with the mock ID, 
+                                                        // and AdminStorePageClient's handleUpdateProduct (for edits) already handles this.
+                                                        // For NEW products, we need a way to get the real ID.
+                                                    } catch (e) {
+                                                        console.error(e);
+                                                    } finally {
+                                                        setIsSubmitting(false);
+                                                    }
+                                                }
+                                                onSelect(cat.id);
+                                            }}
+                                            disabled={isSubmitting}
                                             className={`w-full text-left p-4 text-lg font-bold rounded-2xl transition-all border-2 ${selectedCategoryId === cat.id
                                                 ? 'bg-blue-50 dark:bg-blue-900/10 text-blue-700 dark:text-blue-300 border-blue-600 shadow-md shadow-blue-500/10'
                                                 : 'text-gray-700 dark:text-gray-300 border-transparent hover:bg-gray-50 dark:hover:bg-gray-800'

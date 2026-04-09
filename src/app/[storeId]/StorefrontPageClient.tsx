@@ -162,7 +162,7 @@ export default function StorefrontPageClient({
   useEffect(() => {
     if (storeMeta?.storeType === 'media-influencer' && products.length === 0 && !loading) {
       const hiddenIds = getHiddenMockIds(storeId);
-      const influencerMocks = (mockMediaProducts as any[]).filter(p => !hiddenIds.includes(p.id));
+      const influencerMocks = (mockMediaProducts as any[]).filter(p => !hiddenIds.includes(p.id) && !p.id.toLowerCase().includes('ticket'));
 
       if (influencerMocks.length === 0) return; // All mocks hidden and no real products
 

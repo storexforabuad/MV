@@ -16,7 +16,7 @@ import toast from 'react-hot-toast';
 import { useParams } from 'next/navigation';
 import { getCustomerDetails } from '@/app/actions/customerActions';
 import { useCustomer } from '@/context/CustomerContext';
-import { isFoodBeverageProduct, isFashionProduct, isElectronicsProduct, isSolarProduct, isVehicleProduct, isBeautyProduct, isArtProduct } from '@/utils/productHelpers';
+import { isFoodBeverageProduct, isFashionProduct, isElectronicsProduct, isSolarProduct, isVehicleProduct, isBeautyProduct, isArtProduct, isTicketProduct } from '@/utils/productHelpers';
 import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
 import { saveModalState, getModalState, clearModalState } from '@/lib/paymentModalStorage';
 import { requestCustomerNotificationPermission } from '@/lib/requestCustomerNotifications';
@@ -70,9 +70,21 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const [brandName, setBrandName] = useState('');
   const [campaignBrief, setCampaignBrief] = useState('');
 
+  // Event Ticket Promo inputs (B2B Phase)
+  const [eventName, setEventName] = useState('');
+  const [eventDate, setEventDate] = useState('');
+  const [eventTime, setEventTime] = useState('');
+  const [eventVenue, setEventVenue] = useState('');
+  const [eventDescription, setEventDescription] = useState('');
+  const [eventTiers, setEventTiers] = useState<any[]>([
+    { id: 'tier-1', name: 'Regular', price: 5000, quantityAvailable: 100 }
+  ]);
+
   // Interactive color and size selection state
   const [interactiveSelectedColor, setInteractiveSelectedColor] = useState<string | undefined>(selectedColor);
   const [interactiveSelectedSize, setInteractiveSelectedSize] = useState<string | undefined>(selectedSize);
+  const [selectedTierId, setSelectedTierId] = useState<string | undefined>();
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [currentProductImage, setCurrentProductImage] = useState<string>(selectedImage || product?.images?.[0] || DEFAULT_PRODUCT_IMAGE);
 
   const hasPushedState = useRef(false);
@@ -86,6 +98,16 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const { promptLogin } = useCustomer();
 
   const isPaymentFlowEnabled = shouldUsePaymentFlow(storeMeta);
+  const isElectronics = product ? isElectronicsProduct(product) : false;
+  const isSolar = product ? isSolarProduct(product) : false;
+  const isVehicle = product ? isVehicleProduct(product) : false;
+  const isFashion = product ? isFashionProduct(product) : false;
+  const isBeauty = product ? isBeautyProduct(product) : false;
+  const isArt = product ? isArtProduct(product) : false;
+  const isMediaInfluencer = product?.productType === 'media-influencer';
+  const isServiceProduct = product?.productType === 'media-influencer' && product.subtype === 'service';
+  const isEventTicketPromo = product?.productType === 'media-influencer' && product.subtype === 'event-ticket-promo';
+  const isTicket = product ? isTicketProduct(product) : false;
 
   const onCloseRef = useRef(onClose);
   useEffect(() => {
@@ -113,6 +135,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
       setShowSizeError(false);
       setInteractiveSelectedColor(selectedColor);
       setInteractiveSelectedSize(selectedSize);
+      setSelectedTierId(undefined);
       setImageLoading(true);
 
       // Restore modal state from localStorage if payment flow is enabled
@@ -139,10 +162,33 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
       // Sync product image when modal opens or product changes
       if (product) {
+        setCurrentImageIndex(0);
         setCurrentProductImage(selectedImage || product.images?.[0] || DEFAULT_PRODUCT_IMAGE);
+
+        // Pre-fill event details if available (B2B Promo)
+        if (isEventTicketPromo && (product as any).eventPayload) {
+          const ep = (product as any).eventPayload;
+          setEventName(ep.eventName || '');
+          setEventDate(ep.date || ep.eventDate || '');
+          setEventTime(ep.time || ep.eventTime || '');
+          setEventVenue(ep.venue || '');
+          setEventDescription(ep.description || '');
+          if (ep.tiers) setEventTiers(ep.tiers);
+          if (ep.brandName) setBrandName(ep.brandName);
+        }
+
+        // Pre-fill for B2B2C Ticket Product
+        if (isTicket) {
+          setEventName(product.name);
+          setEventDate((product as any).eventDate || '');
+          setEventTime((product as any).eventTime || '');
+          setEventVenue((product as any).venue || '');
+          setEventDescription(product.description || '');
+          if ((product as any).tiers) setEventTiers((product as any).tiers);
+        }
       }
     }
-  }, [isOpen, initialCustomer, isPaymentFlowEnabled, storeId, product, selectedImage]);
+  }, [isOpen, initialCustomer, isPaymentFlowEnabled, storeId, product, selectedImage, isEventTicketPromo, isTicket]);
 
   // Dedicated history management effect
   useEffect(() => {
@@ -198,15 +244,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
   if (!product) return null;
 
-  const isElectronics = isElectronicsProduct(product);
-  const isSolar = isSolarProduct(product);
-  const isVehicle = isVehicleProduct(product);
-  const isFashion = isFashionProduct(product);
-  const isBeauty = isBeautyProduct(product);
-  const isArt = isArtProduct(product);
-  const isMediaInfluencer = product.productType === 'media-influencer';
-  const isServiceProduct = product.productType === 'media-influencer' && product.subtype === 'service';
-  const hasPage1 = isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer || isArt;
+  const hasPage1 = isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer || isArt || isTicket;
   const summaryPageNum = hasPage1 ? 2 : 1;
   const paymentPageNum = hasPage1 ? 3 : 2;
 
@@ -218,9 +256,13 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
     return p.sizes || p.sizeOption || [];
   };
 
-
-
-  const subtotal = product.price * quantity;
+  const subtotal = (() => {
+    if (isTicket && selectedTierId) {
+      const t = (product as any).eventPayload?.tiers?.find((tier: any) => tier.id === selectedTierId);
+      if (t) return t.price * quantity;
+    }
+    return product.price * quantity;
+  })();
   const total = subtotal; // Removed legacy escrow and booking fees
 
   const handleEvidenceUploaded = (evidenceUrl: string, fileName: string) => {
@@ -264,8 +306,19 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
         selectedColor: interactiveSelectedColor,
         selectedSpiciness: isFoodBeverageProduct(product) ? selectedSpiciness : undefined,
         specialInstructions: isFoodBeverageProduct(product) ? specialInstructions : undefined,
-        brandName: isServiceProduct ? brandName : undefined,
-        campaignBrief: isServiceProduct ? campaignBrief : undefined
+        brandName: (isServiceProduct || isEventTicketPromo) ? brandName : undefined,
+        campaignBrief: isServiceProduct ? campaignBrief : undefined,
+        selectedTierId: isTicket ? selectedTierId : undefined,
+        eventPayload: isEventTicketPromo ? {
+          eventName,
+          date: eventDate,
+          time: eventTime,
+          venue: eventVenue,
+          description: eventDescription,
+          tiers: eventTiers,
+          category: product.category || 'Event',
+          ageRestriction: '18+'
+        } : undefined
       };
 
       if (isPaymentFlowEnabled) {
@@ -335,6 +388,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
             (isFoodBeverageProduct(product) && specialInstructions ? `📝 *Note:* ${specialInstructions}\n` : '') +
             (isServiceProduct && brandName ? `🏢 *Brand Name:* ${brandName}\n` : '') +
             (isServiceProduct && campaignBrief ? `📝 *Campaign Brief:* ${campaignBrief}\n` : '') +
+            (isEventTicketPromo ? `🎟️ *Event Ticket Promo Request*\n🏢 *Brand:* ${brandName}\n📅 *Event Date:* ${eventDate}\n📍 *Venue:* ${eventVenue}\n` : '') +
             (isSolarProduct(product) ? (
               (product.subtype === 'solar-panels' ? `☀️ *Panel Specs:* ${product.wattage}${product.cellType ? ` (${product.cellType})` : ''}${product.efficiencyRating ? `, Efficiency: ${product.efficiencyRating}` : ''}\n` : '') +
               (product.subtype === 'inverters' ? `🔄 *Inverter Specs:* ${product.powerCapacity}${product.inverterType ? ` (${product.inverterType})` : ''}${product.systemVoltage ? `, System: ${product.systemVoltage}` : ''}\n` : '') +
@@ -391,7 +445,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   };
 
   const handleProceedToPayment = () => {
-    if (!customer && !guestEmail && isPaymentFlowEnabled && isServiceProduct) {
+    if (!customer && !guestEmail && isPaymentFlowEnabled && (isServiceProduct || isEventTicketPromo)) {
       setEmailError('Please enter your email to continue');
       emailSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
@@ -404,6 +458,11 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
     if (guestEmail) {
       localStorage.setItem('guest_email', guestEmail);
+    }
+
+    if (isTicket && !selectedTierId) {
+      toast.error('Please select a ticket tier to continue');
+      return;
     }
 
     setCurrentPage(paymentPageNum as any);
@@ -436,7 +495,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                       {currentPage === 1 && (isElectronics || isSolar || isVehicle) ? 'Product Specifications' :
                         currentPage === 1 && isBeauty ? 'Details & Directions' :
                           currentPage === 1 && isArt ? 'Art Passport & Provenance' :
-                            currentPage === 1 && isMediaInfluencer ? (isServiceProduct ? 'Service Collaboration Details' : 'Influencer Product Details') :
+                            currentPage === 1 && isMediaInfluencer ? (isEventTicketPromo ? 'Promotion Details' : isServiceProduct ? 'Service Collaboration Details' : 'Influencer Product Details') :
                               currentPage === summaryPageNum ? 'Order Summary' :
                                 (isPaymentFlowEnabled ? 'Payment' : 'WhatsApp Preview')}
                     </h3>
@@ -473,8 +532,39 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           <div className="pt-2 sm:pt-4 space-y-6">
                             {/* Product Header Card */}
                             <div className="flex items-center space-x-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50">
-                              <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-white dark:bg-gray-900 shadow-sm border border-gray-100 dark:border-gray-800">
-                                <Image src={currentProductImage || DEFAULT_PRODUCT_IMAGE} alt={product.name} fill sizes="80px" className="object-cover" onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; }} />
+                              <div className="relative h-24 w-24 flex-shrink-0">
+                                <div className="relative h-24 w-24 overflow-hidden rounded-xl bg-white dark:bg-gray-900 shadow-sm border border-gray-100 dark:border-gray-800">
+                                  <AnimatePresence mode="wait">
+                                    <motion.div
+                                      key={currentImageIndex}
+                                      initial={{ opacity: 0, x: 10 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      exit={{ opacity: 0, x: -10 }}
+                                      transition={{ duration: 0.2 }}
+                                      className="relative h-full w-full"
+                                    >
+                                      <Image
+                                        src={product.images?.[currentImageIndex] || DEFAULT_PRODUCT_IMAGE}
+                                        alt={product.name}
+                                        fill
+                                        sizes="96px"
+                                        className="object-cover"
+                                        onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; }}
+                                      />
+                                    </motion.div>
+                                  </AnimatePresence>
+                                </div>
+                                {product.images && product.images.length > 1 && (
+                                  <div className="absolute -bottom-1 left-0 right-0 flex justify-center gap-1 pb-1">
+                                    {product.images.map((_, idx) => (
+                                      <button
+                                        key={idx}
+                                        onClick={() => setCurrentImageIndex(idx)}
+                                        className={`w-1.5 h-1.5 rounded-full transition-all ${currentImageIndex === idx ? 'bg-indigo-600 w-3' : 'bg-gray-300 dark:bg-gray-600'}`}
+                                      />
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                               <div className="flex-1">
                                 <h4 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{product.name}</h4>
@@ -809,8 +899,38 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           <div className="pt-2 sm:pt-4 space-y-6">
                             {/* Product Header Card */}
                             <div className="flex items-center space-x-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50">
-                              <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-white dark:bg-gray-900 shadow-sm border border-gray-100 dark:border-gray-800">
-                                <Image src={currentProductImage} alt={product.name} fill sizes="80px" className="object-cover" />
+                              <div className="relative h-24 w-24 flex-shrink-0">
+                                <div className="relative h-24 w-24 overflow-hidden rounded-xl bg-white dark:bg-gray-900 shadow-sm border border-gray-100 dark:border-gray-800">
+                                  <AnimatePresence mode="wait">
+                                    <motion.div
+                                      key={currentImageIndex}
+                                      initial={{ opacity: 0, x: 10 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      exit={{ opacity: 0, x: -10 }}
+                                      transition={{ duration: 0.2 }}
+                                      className="relative h-full w-full"
+                                    >
+                                      <Image
+                                        src={product.images?.[currentImageIndex] || DEFAULT_PRODUCT_IMAGE}
+                                        alt={product.name}
+                                        fill
+                                        sizes="96px"
+                                        className="object-cover"
+                                      />
+                                    </motion.div>
+                                  </AnimatePresence>
+                                </div>
+                                {product.images && product.images.length > 1 && (
+                                  <div className="absolute -bottom-1 left-0 right-0 flex justify-center gap-1 pb-1">
+                                    {product.images.map((_, idx) => (
+                                      <button
+                                        key={idx}
+                                        onClick={() => setCurrentImageIndex(idx)}
+                                        className={`w-1.5 h-1.5 rounded-full transition-all ${currentImageIndex === idx ? 'bg-amber-600 w-3' : 'bg-gray-300 dark:bg-gray-600'}`}
+                                      />
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                               <div className="flex-1">
                                 <h4 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{product.name}</h4>
@@ -988,8 +1108,38 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           <div className="pt-2 sm:pt-4 space-y-6">
                             {/* Product Header Card */}
                             <div className="flex items-center space-x-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-800/50 border border-gray-100 dark:border-gray-700/50">
-                              <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-white dark:bg-gray-900 shadow-sm border border-gray-100 dark:border-gray-800">
-                                <Image src={currentProductImage} alt={product.name} fill sizes="80px" className="object-cover" />
+                              <div className="relative h-24 w-24 flex-shrink-0">
+                                <div className="relative h-24 w-24 overflow-hidden rounded-xl bg-white dark:bg-gray-900 shadow-sm border border-gray-100 dark:border-gray-800">
+                                  <AnimatePresence mode="wait">
+                                    <motion.div
+                                      key={currentImageIndex}
+                                      initial={{ opacity: 0, x: 10 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      exit={{ opacity: 0, x: -10 }}
+                                      transition={{ duration: 0.2 }}
+                                      className="relative h-full w-full"
+                                    >
+                                      <Image
+                                        src={product.images?.[currentImageIndex] || DEFAULT_PRODUCT_IMAGE}
+                                        alt={product.name}
+                                        fill
+                                        sizes="96px"
+                                        className="object-cover"
+                                      />
+                                    </motion.div>
+                                  </AnimatePresence>
+                                </div>
+                                {product.images && product.images.length > 1 && (
+                                  <div className="absolute -bottom-1 left-0 right-0 flex justify-center gap-1 pb-1">
+                                    {product.images.map((_, idx) => (
+                                      <button
+                                        key={idx}
+                                        onClick={() => setCurrentImageIndex(idx)}
+                                        className={`w-1.5 h-1.5 rounded-full transition-all ${currentImageIndex === idx ? 'bg-slate-600 w-3' : 'bg-gray-300 dark:bg-gray-600'}`}
+                                      />
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                               <div className="flex-1">
                                 <h4 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{product.name}</h4>
@@ -1093,8 +1243,39 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           <div className="pt-2 sm:pt-4 space-y-8 pb-10">
                             {/* Product Header Card */}
                             <div className="flex items-center space-x-5 p-5 rounded-3xl bg-gray-50/80 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 backdrop-blur-sm">
-                              <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-2xl bg-white dark:bg-gray-900 shadow-md border border-gray-100 dark:border-gray-800 transform rotate-[-2deg]">
-                                <Image src={currentProductImage || DEFAULT_PRODUCT_IMAGE} alt={product.name} fill sizes="96px" className="object-cover" onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; }} />
+                              <div className="relative h-24 w-24 flex-shrink-0">
+                                <div className="relative h-24 w-24 overflow-hidden rounded-2xl bg-white dark:bg-gray-900 shadow-md border border-gray-100 dark:border-gray-800 transform rotate-[-2deg]">
+                                  <AnimatePresence mode="wait">
+                                    <motion.div
+                                      key={currentImageIndex}
+                                      initial={{ opacity: 0, x: 10 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      exit={{ opacity: 0, x: -10 }}
+                                      transition={{ duration: 0.2 }}
+                                      className="relative h-full w-full"
+                                    >
+                                      <Image
+                                        src={product.images?.[currentImageIndex] || DEFAULT_PRODUCT_IMAGE}
+                                        alt={product.name}
+                                        fill
+                                        sizes="96px"
+                                        className="object-cover"
+                                        onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; }}
+                                      />
+                                    </motion.div>
+                                  </AnimatePresence>
+                                </div>
+                                {product.images && product.images.length > 1 && (
+                                  <div className="absolute -bottom-1 left-0 right-0 flex justify-center gap-1 pb-1">
+                                    {product.images.map((_, idx) => (
+                                      <button
+                                        key={idx}
+                                        onClick={() => setCurrentImageIndex(idx)}
+                                        className={`w-1.5 h-1.5 rounded-full transition-all ${currentImageIndex === idx ? 'bg-indigo-600 w-3' : 'bg-gray-300 dark:bg-gray-600'}`}
+                                      />
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                               <div className="flex-1">
                                 {b.brand && <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.2em]">{b.brand}</span>}
@@ -1232,12 +1413,45 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           <div className="pt-2 sm:pt-4 space-y-8 pb-10">
                             {/* Product Header Card */}
                             <div className="flex items-center space-x-5 p-5 rounded-3xl bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100/50 dark:border-indigo-800/30 backdrop-blur-sm">
-                              <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-2xl bg-white dark:bg-gray-900 shadow-md border border-gray-100 dark:border-gray-800">
-                                <Image src={currentProductImage || DEFAULT_PRODUCT_IMAGE} alt={product.name} fill sizes="96px" className="object-cover" onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; }} />
+                              <div className="relative h-24 w-24 flex-shrink-0">
+                                <div className="relative h-24 w-24 overflow-hidden rounded-2xl bg-white dark:bg-gray-900 shadow-md border border-gray-100 dark:border-gray-800">
+                                  <AnimatePresence mode="wait">
+                                    <motion.div
+                                      key={currentImageIndex}
+                                      initial={{ opacity: 0, x: 10 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      exit={{ opacity: 0, x: -10 }}
+                                      transition={{ duration: 0.2 }}
+                                      className="relative h-full w-full"
+                                    >
+                                      <Image
+                                        src={product.images?.[currentImageIndex] || DEFAULT_PRODUCT_IMAGE}
+                                        alt={product.name}
+                                        fill
+                                        sizes="96px"
+                                        className="object-cover"
+                                        onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; }}
+                                      />
+                                    </motion.div>
+                                  </AnimatePresence>
+                                </div>
+                                {product.images && product.images.length > 1 && (
+                                  <div className="absolute -bottom-1 left-0 right-0 flex justify-center gap-1 pb-1">
+                                    {product.images.map((_, idx) => (
+                                      <button
+                                        key={idx}
+                                        onClick={() => setCurrentImageIndex(idx)}
+                                        className={`w-1.5 h-1.5 rounded-full transition-all ${currentImageIndex === idx ? 'bg-indigo-600 w-3' : 'bg-gray-300 dark:bg-gray-600'}`}
+                                      />
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                               <div className="flex-1">
                                 {isServiceProduct ? (
                                   <span className="text-[10px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.2em]">Service Collaboration</span>
+                                ) : isEventTicketPromo ? (
+                                  <span className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-[0.2em]">Ticket Promo Request</span>
                                 ) : (
                                   <span className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-[0.2em]">Influencer Product</span>
                                 )}
@@ -1304,9 +1518,11 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                               </div>
                               <div className="p-6 rounded-[2rem] bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30">
                                 <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed lowercase first-letter:uppercase whitespace-pre-line">
-                                  {product.description || (isServiceProduct
-                                    ? "Establish clear expectations for this collaboration. The influencer will review your brief and requirements once the booking is confirmed."
-                                    : "The influencer will provide details upon WhatsApp connection. All collaborations are protected via platform Escrow for your safety.")}
+                                  {product.description || (isEventTicketPromo
+                                    ? "Provide your complete event details on the next screen. Once payment is secured in Escrow, the influencer will review and accept, automatically listing the tickets on their store."
+                                    : isServiceProduct
+                                      ? "Establish clear expectations for this collaboration. The influencer will review your brief and requirements once the booking is confirmed."
+                                      : "The influencer will provide details upon WhatsApp connection. All collaborations are protected via platform Escrow for your safety.")}
                                 </p>
                               </div>
                             </section>
@@ -1332,8 +1548,39 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           <div className="pt-2 sm:pt-4 space-y-6">
                             {/* Artwork Header Card */}
                             <div className="flex items-center space-x-5 p-5 rounded-3xl bg-amber-50/50 dark:bg-amber-900/10 border border-amber-100/50 dark:border-amber-800/30 backdrop-blur-sm">
-                              <div className="relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-2xl bg-white dark:bg-gray-900 shadow-md border border-gray-100 dark:border-gray-800 transform rotate-[-2deg]">
-                                <Image src={currentProductImage || DEFAULT_PRODUCT_IMAGE} alt={product.name} fill sizes="96px" className="object-cover" onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; }} />
+                              <div className="relative h-24 w-24 flex-shrink-0">
+                                <div className="relative h-24 w-24 overflow-hidden rounded-2xl bg-white dark:bg-gray-900 shadow-md border border-gray-100 dark:border-gray-800 transform rotate-[-2deg]">
+                                  <AnimatePresence mode="wait">
+                                    <motion.div
+                                      key={currentImageIndex}
+                                      initial={{ opacity: 0, x: 10 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      exit={{ opacity: 0, x: -10 }}
+                                      transition={{ duration: 0.2 }}
+                                      className="relative h-full w-full"
+                                    >
+                                      <Image
+                                        src={product.images?.[currentImageIndex] || DEFAULT_PRODUCT_IMAGE}
+                                        alt={product.name}
+                                        fill
+                                        sizes="96px"
+                                        className="object-cover"
+                                        onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; }}
+                                      />
+                                    </motion.div>
+                                  </AnimatePresence>
+                                </div>
+                                {product.images && product.images.length > 1 && (
+                                  <div className="absolute -bottom-1 left-0 right-0 flex justify-center gap-1 pb-1">
+                                    {product.images.map((_, idx) => (
+                                      <button
+                                        key={idx}
+                                        onClick={() => setCurrentImageIndex(idx)}
+                                        className={`w-1.5 h-1.5 rounded-full transition-all ${currentImageIndex === idx ? 'bg-amber-600 w-3' : 'bg-gray-300 dark:bg-gray-600'}`}
+                                      />
+                                    ))}
+                                  </div>
+                                )}
                               </div>
                               <div className="flex-1">
                                 <span className="text-[10px] font-black text-amber-600 dark:text-amber-400 uppercase tracking-[0.2em]">Authentic Artwork</span>
@@ -1418,10 +1665,197 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                         );
                       })()}
 
+                      {/* Page 1 (Ticket Purchasing - Select Tier) */}
+                      {currentPage === 1 && isTicket && (() => {
+                        const t = product as any;
+                        const eventPayload = t.eventPayload || {};
+                        return (
+                          <div className="pt-2 sm:pt-4 space-y-8 pb-10">
+                            {/* Product Header Card */}
+                            <div className="flex items-center space-x-5 p-5 rounded-3xl bg-rose-50/50 dark:bg-rose-900/10 border border-rose-100/50 dark:border-rose-800/30 backdrop-blur-sm">
+                              <div className="relative h-24 w-24 flex-shrink-0">
+                                <div className="relative h-24 w-24 overflow-hidden rounded-2xl bg-white dark:bg-gray-900 shadow-md border border-gray-100 dark:border-gray-800">
+                                  <AnimatePresence mode="wait">
+                                    <motion.div
+                                      key={currentImageIndex}
+                                      initial={{ opacity: 0, x: 10 }}
+                                      animate={{ opacity: 1, x: 0 }}
+                                      exit={{ opacity: 0, x: -10 }}
+                                      transition={{ duration: 0.2 }}
+                                      className="relative h-full w-full"
+                                    >
+                                      <Image
+                                        src={product.images?.[currentImageIndex] || DEFAULT_PRODUCT_IMAGE}
+                                        alt={product.name}
+                                        fill
+                                        sizes="96px"
+                                        className="object-cover"
+                                        onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; }}
+                                      />
+                                    </motion.div>
+                                  </AnimatePresence>
+                                </div>
+                                {product.images && product.images.length > 1 && (
+                                  <div className="absolute -bottom-1 left-0 right-0 flex justify-center gap-1 pb-1">
+                                    {product.images.map((_, idx) => (
+                                      <button
+                                        key={idx}
+                                        onClick={() => setCurrentImageIndex(idx)}
+                                        className={`w-1.5 h-1.5 rounded-full transition-all ${currentImageIndex === idx ? 'bg-rose-600 w-3' : 'bg-gray-300 dark:bg-gray-600'}`}
+                                      />
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex-1">
+                                <span className="text-[10px] font-black text-rose-600 dark:text-rose-400 uppercase tracking-[0.2em]">Live Event</span>
+                                <h4 className="text-xl font-bold text-gray-900 dark:text-white leading-tight mt-1">{product.name}</h4>
+                                <p className="text-sm font-bold text-rose-600 dark:text-rose-400 mt-2">{eventPayload.date ? new Date(eventPayload.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) : ''} {eventPayload.time}</p>
+                              </div>
+                            </div>
+
+                            {/* Event Details */}
+                            <div className="grid grid-cols-2 gap-3">
+                              {eventPayload.venue && (
+                                <div className="bg-white dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm flex flex-col gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                    <MapPin className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Venue</span>
+                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white truncate" title={eventPayload.venue}>{eventPayload.venue}</p>
+                                  </div>
+                                </div>
+                              )}
+                              {eventPayload.ageRestriction && (
+                                <div className="bg-white dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 shadow-sm flex flex-col gap-2">
+                                  <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                    <ShieldCheck className="w-4 h-4" />
+                                  </div>
+                                  <div>
+                                    <span className="text-[10px] text-gray-400 dark:text-gray-500 font-bold uppercase tracking-wider">Age Limit</span>
+                                    <p className="font-bold text-[13px] text-gray-900 dark:text-white">{eventPayload.ageRestriction}</p>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Select Tier */}
+                            {eventPayload.tiers && eventPayload.tiers.length > 0 && (
+                              <section className="space-y-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-10 h-10 rounded-2xl bg-indigo-100 dark:bg-indigo-900/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shadow-sm border border-indigo-200/50 dark:border-indigo-800/30">
+                                    <Activity className="w-5 h-5" />
+                                  </div>
+                                  <h3 className="text-base font-bold text-gray-900 dark:text-white tracking-tight">Select Tickets</h3>
+                                </div>
+                                <div className="space-y-3">
+                                  {eventPayload.tiers.map((tier: any) => (
+                                    <div
+                                      key={tier.id}
+                                      onClick={() => setSelectedTierId(tier.id)}
+                                      className={`p-4 rounded-2xl border-2 cursor-pointer transition-all ${selectedTierId === tier.id ? 'border-rose-500 bg-rose-50 dark:bg-rose-900/20' : 'border-gray-100 dark:border-gray-800 hover:border-rose-200 dark:hover:border-rose-800/50 bg-white dark:bg-gray-800/40'}`}
+                                    >
+                                      <div className="flex justify-between items-center">
+                                        <div>
+                                          <h4 className={`font-bold ${selectedTierId === tier.id ? 'text-rose-900 dark:text-rose-100' : 'text-gray-900 dark:text-white'}`}>{tier.name}</h4>
+                                          <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1">{formatPrice(tier.price)}</p>
+                                        </div>
+                                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${selectedTierId === tier.id ? 'border-rose-500 bg-rose-500 text-white' : 'border-gray-300 dark:border-gray-600'}`}>
+                                          {selectedTierId === tier.id && <CheckCircle2 className="w-4 h-4" />}
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </section>
+                            )}
+
+                            {/* Quantity (Only if tier selected) */}
+                            {selectedTierId && (
+                              <div className="flex items-center justify-between p-5 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50">
+                                <span className="font-bold text-gray-900 dark:text-white">Quantity</span>
+                                <div className="flex items-center gap-4">
+                                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-10 h-10 rounded-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600">
+                                    <Minus className="w-4 h-4" />
+                                  </button>
+                                  <span className="text-lg font-bold w-6 text-center text-gray-900 dark:text-white">{quantity}</span>
+                                  <button onClick={() => setQuantity(quantity + 1)} className="w-10 h-10 rounded-full bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 flex items-center justify-center text-gray-600 dark:text-gray-300 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-600">
+                                    <Plus className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
+
                       {/* Stage 2: Fulfillment / Requirements */}
                       {currentPage === summaryPageNum && (
                         <div className="pt-4 sm:pt-8">
-                          {isServiceProduct ? (
+                          {isEventTicketPromo ? (
+                            /* Dedicated Request/Event Details Form for B2B Phase */
+                            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
+                              <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 rounded-[1.5rem] bg-rose-50 dark:bg-rose-900/30 flex items-center justify-center text-rose-600 dark:text-rose-400 border border-rose-100/50 dark:border-rose-800/30 shadow-sm">
+                                  <Calendar className="w-6 h-6" />
+                                </div>
+                                <div>
+                                  <h3 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">Event Details</h3>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">Provide the event details to be promoted</p>
+                                </div>
+                              </div>
+                              <div className="space-y-5">
+                                <div>
+                                  <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2 ml-1">Brand / Organizer Name</label>
+                                  <input type="text" placeholder="e.g. Acme Events" value={brandName} onChange={e => setBrandName(e.target.value)} className="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-rose-500/20 text-sm font-medium text-gray-900 dark:text-white" />
+                                </div>
+                                <div>
+                                  <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2 ml-1">Event Name</label>
+                                  <input type="text" placeholder="e.g. Summer Music Fest 2026" value={eventName} onChange={e => setEventName(e.target.value)} className="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-rose-500/20 text-sm font-medium text-gray-900 dark:text-white" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2 ml-1">Date</label>
+                                    <input type="date" value={eventDate} onChange={e => setEventDate(e.target.value)} className="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-rose-500/20 text-sm font-medium text-gray-900 dark:text-white" />
+                                  </div>
+                                  <div>
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2 ml-1">Time</label>
+                                    <input type="time" value={eventTime} onChange={e => setEventTime(e.target.value)} className="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-rose-500/20 text-sm font-medium text-gray-900 dark:text-white" />
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2 ml-1">Venue</label>
+                                  <input type="text" placeholder="Location details..." value={eventVenue} onChange={e => setEventVenue(e.target.value)} className="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-rose-500/20 text-sm font-medium text-gray-900 dark:text-white" />
+                                </div>
+                                <div>
+                                  <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-2 ml-1">Event Description</label>
+                                  <textarea rows={3} placeholder="Describe the vibe, performers, guidelines..." value={eventDescription} onChange={e => setEventDescription(e.target.value)} className="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-rose-500/20 text-sm font-medium resize-none text-gray-900 dark:text-white" />
+                                </div>
+                                <div className="pt-2">
+                                  <label className="block text-[10px] font-black uppercase tracking-widest text-gray-500 dark:text-gray-400 mb-3 ml-1">Ticket Tiers Configuration</label>
+                                  {eventTiers.map((tier, idx) => (
+                                    <div key={tier.id} className="grid grid-cols-3 gap-2 mb-2 p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700">
+                                      <input type="text" value={tier.name} onChange={e => { const nt = [...eventTiers]; nt[idx] = { ...nt[idx], name: e.target.value }; setEventTiers(nt); }} placeholder="Tier Name" className="bg-transparent text-sm focus:outline-none text-gray-900 dark:text-white" />
+                                      <input type="number" value={tier.price} onChange={e => { const nt = [...eventTiers]; nt[idx] = { ...nt[idx], price: Number(e.target.value) }; setEventTiers(nt); }} placeholder="Price (₦)" className="bg-transparent text-sm border-l border-gray-200 dark:border-gray-700 pl-3 focus:outline-none text-gray-900 dark:text-white" />
+                                      <input type="number" value={tier.quantityAvailable} onChange={e => { const nt = [...eventTiers]; nt[idx] = { ...nt[idx], quantityAvailable: Number(e.target.value) }; setEventTiers(nt); }} placeholder="Qty limits" className="bg-transparent text-sm border-l border-gray-200 dark:border-gray-700 pl-3 focus:outline-none text-gray-900 dark:text-white" />
+                                    </div>
+                                  ))}
+                                  <button onClick={() => setEventTiers([...eventTiers, { id: `tier-${eventTiers.length + 1}`, name: '', price: 0, quantityAvailable: 100 }])} className="text-xs font-bold text-indigo-600 flex items-center gap-1 mt-2 hover:underline">
+                                    <Plus className="w-3 h-3" /> Add another tier
+                                  </button>
+                                </div>
+
+                                {!customer && isPaymentFlowEnabled && (
+                                  <div ref={emailSectionRef} className="p-5 rounded-3xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100/50 dark:border-blue-800/30">
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-2 ml-1">Fulfillment Email</label>
+                                    <input type="email" placeholder="Where should we send updates?" value={guestEmail} onChange={(e) => { setGuestEmail(e.target.value); if (emailError) setEmailError(''); }} className={`w-full px-5 py-4 rounded-2xl bg-white dark:bg-gray-800/40 border ${emailError ? 'border-red-500 ring-1 ring-red-500' : 'border-blue-100/30 dark:border-blue-800/20'} focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm font-medium transition-colors`} />
+                                    {emailError && <p className="mt-2 text-xs font-bold text-red-500 flex items-center gap-1"><AlertCircle className="w-3.5 h-3.5" />{emailError}</p>}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          ) : isServiceProduct ? (
                             /* Dedicated Collaboration Brief Screen for Services */
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
                               <div className="flex items-center gap-3">
@@ -1487,7 +1921,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                 <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg bg-gray-50 dark:bg-gray-900 shadow-inner">
                                   <div className={`absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 animate-shimmer bg-[length:200%_100%] transition-opacity duration-300 ${imageLoading ? 'opacity-100' : 'opacity-0'}`} />
                                   <Image
-                                    src={currentProductImage || DEFAULT_PRODUCT_IMAGE}
+                                    src={product.images?.[currentImageIndex] || DEFAULT_PRODUCT_IMAGE}
                                     alt={product.name}
                                     width={80}
                                     height={80}
@@ -1507,6 +1941,11 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                     {interactiveSelectedSize && (
                                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200 border border-gray-200 dark:border-gray-700">
                                         📏 {interactiveSelectedSize}
+                                      </span>
+                                    )}
+                                    {isTicket && selectedTierId && (
+                                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200 border border-rose-200 dark:border-rose-700">
+                                        🎟️ Tier: {((product as any).eventPayload?.tiers || []).find((t: any) => t.id === selectedTierId)?.name || 'Regular'}
                                       </span>
                                     )}
                                   </div>
@@ -1653,9 +2092,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             </div>
                           )}
 
-                          {/* Collaboration Brief for Services (Moved back to Page 1) */}
-                          {/* Delivery Method (Hidden for services) */}
-                          {!isVehicle && !isServiceProduct && (
+                          {/* Delivery Method (Hidden for services and tickets) */}
+                          {!isVehicle && !isServiceProduct && !isTicket && !isEventTicketPromo && (
                             <div className="mt-8">
                               <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3">Delivery Method</h4>
                               <div className="grid grid-cols-2 gap-4">
@@ -1724,6 +2162,17 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             specialInstructions={specialInstructions}
                             deliveryMethod={deliveryMethod}
                             customer={customer || (guestEmail ? ({ email: guestEmail, name: guestEmail.split('@')[0], id: `guest-${guestEmail.replace(/[^a-zA-Z0-9]/g, '')}` } as any) : null)}
+                            brandName={brandName}
+                            campaignBrief={campaignBrief}
+                            selectedTierId={selectedTierId}
+                            eventPayload={isEventTicketPromo ? {
+                              eventName,
+                              date: eventDate,
+                              time: eventTime,
+                              venue: eventVenue,
+                              description: eventDescription,
+                              tiers: eventTiers
+                            } : undefined}
                           />
                         </div>
                       )}
@@ -1750,17 +2199,23 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                   {/* Footer */}
                   <div className="flex-shrink-0 border-t border-gray-200 dark:border-gray-800 bg-white dark:bg-modal-background p-4 sm:px-6">
                     <div className="max-w-3xl mx-auto w-full">
-                      {currentPage === 1 && (isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer || isArt) ? (
+                      {currentPage === 1 && (isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer || isArt || isTicket) ? (
                         <button
                           type="button"
                           className="w-full rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-6 shadow-lg transition-all active:scale-[0.98]"
-                          onClick={() => setCurrentPage(2)}
+                          onClick={() => {
+                            if (isTicket && !selectedTierId) {
+                              toast.error('Please select a ticket tier');
+                              return;
+                            }
+                            setCurrentPage(2);
+                          }}
                         >
-                          {isServiceProduct ? 'Book' : 'Order'}
+                          {isServiceProduct ? 'Book' : isTicket ? 'Checkout' : 'Order'}
                         </button>
                       ) : currentPage === summaryPageNum ? (
                         <div className="flex gap-3">
-                          {(isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer || isArt) && (
+                          {(isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer || isArt || isTicket) && (
                             <button
                               type="button"
                               className="w-1/3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold py-4 px-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-[0.98]"
@@ -1771,7 +2226,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           )}
                           <button
                             type="button"
-                            className={`${(isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer || isArt) ? 'w-2/3' : 'w-full'} rounded-xl border border-transparent px-6 py-4 text-base font-bold text-white shadow-lg transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
+                            className={`${(isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer || isArt || isTicket) ? 'w-2/3' : 'w-full'} rounded-xl border border-transparent px-6 py-4 text-base font-bold text-white shadow-lg transition-all transform active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none
                               ${hasSizes(product) && !interactiveSelectedSize
                                 ? 'bg-gray-400 dark:bg-gray-700 cursor-not-allowed'
                                 : 'bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2'}`}
@@ -1798,6 +2253,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                 isMediaInfluencer ? (
                                   isPaymentFlowEnabled ? 'Proceed to Payment' :
                                     (isServiceProduct ? 'Book via WhatsApp' : 'Order via WhatsApp')
+                                ) : isTicket ? (
+                                  isPaymentFlowEnabled ? 'Proceed to Payment' : 'Buy via WhatsApp'
                                 ) :
                                   (isPaymentFlowEnabled ? 'Proceed to Payment' : 'Order via WhatsApp')
                             )}

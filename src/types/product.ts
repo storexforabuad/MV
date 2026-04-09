@@ -312,12 +312,17 @@ export interface MediaInfluencerProduct extends BaseProduct {
   productType: 'media-influencer';
 
   // Subtypes: e.g., 'service' (PR/Collab) vs 'booking-fee'
-  subtype: 'service' | 'booking-fee';
+  subtype: 'service' | 'booking-fee' | 'event-ticket-promo';
 
   // Specific to 'service'
   platform?: 'Instagram' | 'TikTok' | 'YouTube' | 'Twitter' | 'Cross-Platform';
   deliveryTimeDays?: number;
   revisionsAllowed?: number;
+
+  // Specific to 'event-ticket-promo'
+  baseFee?: number;
+  commissionCut?: number;
+  eventPayload?: any; // The payload submitted by the brand
 
   categoryId?: string;
   category?: string;
@@ -404,6 +409,51 @@ export interface ArtProduct extends BaseProduct {
 }
 
 // ==========================================
+// TICKET PRODUCT (New - Generated from Promo Service)
+// ==========================================
+export interface TicketTier {
+  id: string;
+  name: string;
+  price: number;
+  quantity: number; // Initially set by brand, decrements as tickets are sold
+  soldOut: boolean;
+}
+
+export interface TicketProduct extends BaseProduct {
+  productType: 'ticket';
+
+  // Backlink to the brand that owns the event
+  brandOrderRef?: string;
+  commissionPercent?: number; // E.g., 10 for the B2B2C split
+
+  // Event Details (Uploaded by Brand)
+  eventType: 'concert' | 'comedy' | 'outdoor-cinema' | 'pop-up' | 'trade-fair' | 'other' | string;
+  eventDate: string; // ISO 8601
+  eventTime: string; // "19:00"
+  timezone?: string;
+
+  venue: string;
+  city?: string;
+  state?: string;
+  onlineEvent?: boolean;
+
+  tiers: TicketTier[];
+
+  ageRestriction?: string;
+  dresscode?: string;
+  refundPolicy?: string;
+  termsAndConditions?: string;
+
+  // Inventory & State
+  available: boolean;
+  soldOut?: boolean;
+  limitedStock?: boolean;
+  quantity: number; // Total combined available seats
+  categoryId?: string;
+  category?: string;
+}
+
+// ==========================================
 // MASTER UNION TYPE
 // ==========================================
-export type Product = GeneralProduct | VehicleProduct | LivestockProduct | FashionProduct | FoodBeverageProduct | ElectronicsProduct | SolarProduct | MediaInfluencerProduct | BeautyProduct | ArtProduct;
+export type Product = GeneralProduct | VehicleProduct | LivestockProduct | FashionProduct | FoodBeverageProduct | ElectronicsProduct | SolarProduct | MediaInfluencerProduct | BeautyProduct | ArtProduct | TicketProduct;

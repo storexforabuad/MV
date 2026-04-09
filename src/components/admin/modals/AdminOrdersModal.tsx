@@ -120,7 +120,8 @@ const OrderProductRow = ({ product }: { product: any }) => {
 const CustomerOrdersCard = ({ order, onMarkReady, isHighlighted, storeId, onUpdate }: { order: StoreOrder, onMarkReady: (order: StoreOrder) => void, isHighlighted?: boolean, storeId: string, onUpdate: () => void }) => {
   const { customerInfo, products } = order;
   const whatsappUrl = `https://wa.me/${formatWhatsAppNumber(customerInfo.phoneNumber)}`;
-  const isServiceOrder = products.some((p: any) => p.productType === 'media-influencer' && p.subtype === 'service');
+  const isServiceOrder = products.some((p: any) => p.productType === 'media-influencer' && (p.subtype === 'service' || p.subtype === 'event-ticket-promo'));
+  const eventTicketProduct = products.find((p: any) => p.productType === 'media-influencer' && p.subtype === 'event-ticket-promo');
 
   // Find if there are any dropshipped items in this order
   const dropshippedItems = products.filter((p: any) => p.isDropshipped && p.supplierId);
@@ -226,11 +227,11 @@ const CustomerOrdersCard = ({ order, onMarkReady, isHighlighted, storeId, onUpda
       {isServiceOrder && (
         <div className="px-5 pb-4 space-y-4">
           {/* Display Service specifics if available */}
-          {products.map((p: any) => (p.brandName || p.campaignBrief) && (
+          {products.map((p: any) => p.productType === 'media-influencer' && (p.brandName || p.campaignBrief || p.eventPayload) && (
             <div key={p.id} className="p-4 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/50 space-y-3">
               <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-400">
                 <Package className="w-4 h-4" />
-                <span className="text-xs font-bold uppercase tracking-wider">Service Requirements</span>
+                <span className="text-xs font-bold uppercase tracking-wider">{p.subtype === 'event-ticket-promo' ? 'Ticket Promo Request' : 'Service Requirements'}</span>
               </div>
               {p.brandName && (
                 <div>
@@ -244,6 +245,29 @@ const CustomerOrdersCard = ({ order, onMarkReady, isHighlighted, storeId, onUpda
                   <p className="text-sm text-slate-700 dark:text-slate-300 bg-white/50 dark:bg-slate-800/50 p-3 rounded-lg border border-indigo-100/30 dark:border-indigo-800/20">{p.campaignBrief}</p>
                 </div>
               )}
+              {p.eventPayload && (
+                <div className="grid grid-cols-2 gap-2 mt-2 pt-2 border-t border-indigo-100 dark:border-indigo-800/30">
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-tight text-indigo-400 dark:text-indigo-500">Event Info</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{p.eventPayload.eventName}</p>
+                    <p className="text-[11px] text-slate-500">{p.eventPayload.date} • {p.eventPayload.time}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black uppercase tracking-tight text-indigo-400 dark:text-indigo-500">Venue</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{p.eventPayload.venue}</p>
+                  </div>
+                  <div className="col-span-2 pt-1">
+                    <p className="text-[10px] font-black uppercase tracking-tight text-indigo-400 dark:text-indigo-500">Ticket Tiers Configuration</p>
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      {p.eventPayload.tiers?.map((t: any) => (
+                        <span key={t.id} className="text-[10px] px-2 py-1 bg-white/60 dark:bg-slate-800/60 border border-indigo-100 dark:border-indigo-800 rounded-lg font-bold text-indigo-700 dark:text-indigo-300">
+                          {t.name}: ₦{(t.price || 0).toLocaleString()} ({t.quantityAvailable} qty)
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           ))}
 
@@ -255,6 +279,9 @@ const CustomerOrdersCard = ({ order, onMarkReady, isHighlighted, storeId, onUpda
             orderStatus={order.orderStatus}
             deliverableUrl={(order as any).deliverableUrl}
             onUpdate={onUpdate}
+            isEventTicketPromo={!!eventTicketProduct}
+            eventPayload={(eventTicketProduct as any)?.eventPayload}
+            commissionCut={(eventTicketProduct as any)?.commissionCut}
           />
         </div>
       )}

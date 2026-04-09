@@ -34,6 +34,10 @@ interface PaymentFlowPageProps {
   selectedColor?: string;
   selectedSpiciness?: string;
   specialInstructions?: string;
+  brandName?: string;
+  campaignBrief?: string;
+  selectedTierId?: string;
+  eventPayload?: any;
   // For cart
   cartItems?: CartItem[];
 }
@@ -51,6 +55,10 @@ export default function PaymentFlowPage({
   specialInstructions,
   deliveryMethod,
   orderNotes,
+  brandName,
+  campaignBrief,
+  selectedTierId,
+  eventPayload,
   cartItems
 }: PaymentFlowPageProps) {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -197,6 +205,10 @@ export default function PaymentFlowPage({
           selectedColor,
           selectedSpiciness: isFoodBeverageProduct(product) ? selectedSpiciness : undefined,
           specialInstructions: isFoodBeverageProduct(product) ? specialInstructions : undefined,
+          brandName,
+          campaignBrief,
+          selectedTierId,
+          eventPayload,
           storeId // Ensure storeId is present
         }];
       }
@@ -244,7 +256,9 @@ export default function PaymentFlowPage({
           metadata: {
             orderId: newOrder.id,
             cart_items: cartSummary,
-            commission_percent: itemsToOrder[0]?.commission || (itemsToOrder.some(i => i.productType === 'media-influencer' && i.subtype === 'service') ? 10 : 5)
+            commission_percent: itemsToOrder[0]?.productType === 'ticket'
+              ? (100 - ((itemsToOrder[0]?.commissionPercent || 15) - 5)) // Compass + Brand share
+              : (itemsToOrder[0]?.commissionPercent || itemsToOrder[0]?.commission || (itemsToOrder.some(i => i.productType === 'media-influencer' && i.subtype === 'service') ? 10 : 5))
           }
         })
       });

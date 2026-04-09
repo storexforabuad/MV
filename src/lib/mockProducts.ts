@@ -880,6 +880,69 @@ export const mockMediaProducts: (MediaInfluencerProduct | VehicleProduct | Fashi
         commission: 15
     },
     {
+        id: 'media-ticket-1',
+        storeId: 'mock-media-store',
+        name: 'Live Event Ticket Promotion',
+        description: 'I will promote your live event to my audience of 500k+ followers. Includes dedicated reels, stories, and link-in-bio placement to drive massive ticket sales.',
+        price: 150000,
+        images: [
+            '/services/live-event-ticket-default.png',
+            '/services/event-ticket-promo-default.png'
+        ],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'media-influencer',
+        subtype: 'event-ticket-promo',
+        platform: 'Cross-Platform',
+        deliveryTimeDays: 7,
+        revisionsAllowed: 1,
+        categoryId: 'pr-collabs',
+        category: 'PR & Collab Services',
+        isActive: true,
+        commission: 15,
+        eventPayload: {
+            eventName: 'Summer Jam Festival 2024',
+            date: '2024-08-15',
+            time: '18:00',
+            venue: 'Eko Hotel & Suites, Lagos',
+            description: 'The biggest summer festival in Lagos featuring top artists.',
+            tiers: [
+                { id: 'regular', name: 'Regular', price: 10000, quantity: 500, soldOut: false },
+                { id: 'vip', name: 'VIP', price: 50000, quantity: 100, soldOut: false }
+            ]
+        }
+    },
+    {
+        id: 'media-ticket-2',
+        storeId: 'mock-media-store',
+        name: 'Exclusive Concert Ticket Access',
+        description: 'Direct ticket sales for the Afrobeat Night concert. Grab your early bird tickets exclusively through my store!',
+        price: 15000,
+        images: [
+            '/services/event-ticket-promo-default.png',
+            '/services/live-event-ticket-default.png',
+            '/services/cross-platform-service.png'
+        ],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'ticket',
+        eventType: 'concert',
+        eventDate: '2024-07-20',
+        eventTime: '19:30',
+        venue: 'Teslim Balogun Stadium',
+        city: 'Lagos',
+        state: 'Lagos',
+        available: true,
+        quantity: 1000,
+        tiers: [
+            { id: 'early-bird', name: 'Early Bird', price: 15000, quantity: 200, soldOut: false },
+            { id: 'standard', name: 'Standard', price: 25000, quantity: 800, soldOut: false }
+        ],
+        categoryId: 'pr-collabs',
+        category: 'PR & Collab Services',
+        commissionPercent: 10
+    },
+    {
         id: 'media-birthday',
         storeId: 'mock-media-store',
         name: 'Personalized Birthday Shoutout',

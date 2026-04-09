@@ -140,7 +140,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
         name: '',
         price: 0,
         isPromo: false,
-        commission: 2.5, // Fixed 2.5%
+        commission: 5, // Fixed 5%
         categoryId: '',
         limitedStock: false,
         soldOut: false,
@@ -195,7 +195,7 @@ const AddFashionComposer: React.FC<AddFashionComposerProps> = ({ isOpen, onClose
             name: '',
             price: 0,
             isPromo: false,
-            commission: 2.5,
+            commission: 5,
             categoryId: '',
             limitedStock: false,
             soldOut: false,

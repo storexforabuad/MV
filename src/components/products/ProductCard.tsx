@@ -23,7 +23,8 @@ import {
   isSolarProduct,
   isBeautyProduct,
   isArtProduct,
-  isMediaInfluencerProduct
+  isMediaInfluencerProduct,
+  isTicketProduct
 } from '../../utils/productHelpers';
 
 
@@ -286,11 +287,12 @@ export default function ProductCard({
     if (isElectronicsProduct(product)) return !product.available || !!product.soldOut;
     if (isSolarProduct(product)) return !product.available || !!product.soldOut;
     if (isArtProduct(product)) return !product.available || !!product.soldOut;
+    if (isTicketProduct(product)) return !(product as any).available || !!product.soldOut;
     return false;
   })();
 
-  const isLimitedStock = (isGeneralProduct(product) || isFashionProduct(product) || isLivestockProduct(product) || isElectronicsProduct(product) || isSolarProduct(product) || isBeautyProduct(product) || isArtProduct(product))
-    ? !!product.limitedStock
+  const isLimitedStock = (isGeneralProduct(product) || isFashionProduct(product) || isLivestockProduct(product) || isElectronicsProduct(product) || isSolarProduct(product) || isBeautyProduct(product) || isArtProduct(product) || isTicketProduct(product))
+    ? !!(product as any).limitedStock
     : false;
 
   const handleImageError = () => {
@@ -500,6 +502,24 @@ export default function ProductCard({
                   </div>
                 </div>
               )}
+              {isMediaInfluencerProduct(product) && product.subtype === 'event-ticket-promo' && (
+                <div className="absolute top-[18px] right-[18px] z-10">
+                  <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                    <span className="product-badge bg-purple-600 text-white shadow-md whitespace-nowrap border border-white/20 uppercase font-black tracking-wider text-[9px] px-3 py-1 rounded-full">
+                      🎫 TICKET PROMO
+                    </span>
+                  </div>
+                </div>
+              )}
+              {isTicketProduct(product) && (
+                <div className="absolute top-[18px] right-[18px] z-10">
+                  <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                    <span className="product-badge bg-blue-600 text-white shadow-md whitespace-nowrap border border-white/20 uppercase font-black tracking-wider text-[9px] px-3 py-1 rounded-full">
+                      🎟️ EVENT TICKETS
+                    </span>
+                  </div>
+                </div>
+              )}
               {(isElectronicsProduct(product) || isSolarProduct(product)) && (
                 <div className="absolute top-[18px] right-[18px] z-10 flex flex-col items-end gap-2">
                   {/* Brand Badge */}
@@ -594,6 +614,25 @@ export default function ProductCard({
             </div>
           )}
 
+          {/* Ticket Product Overlays */}
+          {!isSoldOut && isTicketProduct(product) && (
+            <div className="absolute bottom-[14px] left-[14px] z-10 flex flex-col items-start gap-1.5 max-w-[calc(100%-80px)]">
+              {(product as any).eventDate && (
+                <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                  <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-bold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2.5 py-1">
+                    📅 {new Date((product as any).eventDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })} {(product as any).eventTime && `• ${(product as any).eventTime}`}
+                  </span>
+                </div>
+              )}
+              {(product as any).venue && (
+                <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                  <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-bold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2.5 py-1 truncate max-w-[200px]">
+                    📍 {(product as any).venue}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Food Overlays on Bottom Left */}
           {!isSoldOut && isFoodBeverageProduct(product) && (
