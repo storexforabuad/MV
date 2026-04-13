@@ -234,7 +234,7 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
                           key={tab}
                           onClick={() => setActiveTab(tab)}
                           className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all duration-200 ${activeTab === tab
-                            ? 'bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 shadow-sm ring-1 ring-black/5'
+                            ? 'bg-white dark:bg-gray-800 text-emerald-600 dark:text-emerald-400 shadow-sm ring-1 ring-black/5'
                             : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
                             }`}
                         >
@@ -254,15 +254,15 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
 
                     {/* Guest Lookup View - Only for Escrow Stores */}
                     {!customer && activeTab === 'orders' && !showOnlyOrders && (
-                      <div className="bg-blue-50 dark:bg-blue-900/10 rounded-3xl p-8 text-center border border-blue-100 dark:border-blue-800/50 mb-8">
+                      <div className="bg-emerald-50 dark:bg-emerald-900/10 rounded-3xl p-8 text-center border border-emerald-100 dark:border-emerald-800/50 mb-8">
                         <div className="w-16 h-16 bg-white dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
-                          <Mail className="w-8 h-8 text-blue-500" />
+                          <Mail className="w-8 h-8 text-emerald-500" />
                         </div>
                         <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Track & Manage Orders</h3>
                         <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Sign in with your email or phone number to retrieve your orders, manage your escrow wallet, and update settings.</p>
                         <button
                           onClick={() => { onClose(); setTimeout(() => promptLogin(), 300); }}
-                          className="px-8 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-sm shadow-lg hover:-translate-y-0.5 transition-all"
+                          className="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm shadow-lg hover:-translate-y-0.5 transition-all"
                         >
                           Sign In
                         </button>
@@ -311,7 +311,7 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
                     {activeTab === 'wallet' && (
                       <div className="space-y-6">
                         {/* Hero Card */}
-                        <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-800 p-8 text-white shadow-2xl">
+                        <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 p-8 text-white shadow-2xl">
                           <div className="absolute top-0 right-0 -m-4 w-40 h-40 bg-white/10 rounded-full blur-3xl" />
                           <div className="absolute bottom-0 left-0 -m-4 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl" />
 
@@ -374,7 +374,7 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
                           <div className="flex justify-between items-center mb-4 px-1">
                             <h4 className="text-[10px] font-black uppercase tracking-widest text-gray-400">Account Information</h4>
                             {customer && !isEditingSettings && (
-                              <button onClick={() => setIsEditingSettings(true)} className="text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors">Edit Details</button>
+                              <button onClick={() => setIsEditingSettings(true)} className="text-xs font-bold text-emerald-600 hover:text-emerald-700 transition-colors">Edit Details</button>
                             )}
                           </div>
                           <div className="space-y-4">
@@ -386,7 +386,7 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
                                     type="email"
                                     value={settingsForm.email}
                                     onChange={(e) => setSettingsForm({ ...settingsForm, email: e.target.value })}
-                                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500/20 outline-none"
+                                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 outline-none"
                                   />
                                 </div>
                                 <div>
@@ -395,14 +395,14 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
                                     type="tel"
                                     value={settingsForm.phone}
                                     onChange={(e) => setSettingsForm({ ...settingsForm, phone: e.target.value.replace(/[^0-9+]/g, '') })}
-                                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500/20 outline-none"
+                                    className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 outline-none"
                                   />
                                 </div>
                               </div>
                             ) : (
                               <>
                                 <div className="p-4 rounded-2xl bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800 flex items-center gap-4">
-                                  <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
+                                  <div className="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600">
                                     <Mail className="w-5 h-5" />
                                   </div>
                                   <div className="flex-1">
@@ -435,7 +435,7 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
                                 <select
                                   value={settingsForm.state}
                                   onChange={(e) => setSettingsForm({ ...settingsForm, state: e.target.value })}
-                                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500/20 outline-none"
+                                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 outline-none"
                                 >
                                   {nigerianStates.map(state => <option key={state} value={state}>{state}</option>)}
                                 </select>
@@ -466,7 +466,7 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
                                 </div>
                               </div>
                               {!isEditingSettings && customer && (
-                                <button onClick={() => setIsEditingSettings(true)} className="w-full py-3 rounded-xl bg-white dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-500 dark:text-gray-400 hover:border-blue-500 hover:text-blue-500 transition-all">
+                                <button onClick={() => setIsEditingSettings(true)} className="w-full py-3 rounded-xl bg-white dark:bg-gray-800 border-2 border-dashed border-gray-200 dark:border-gray-700 text-xs font-bold text-gray-500 dark:text-gray-400 hover:border-emerald-500 hover:text-emerald-500 transition-all">
                                   Edit Address
                                 </button>
                               )}
@@ -488,7 +488,7 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
                                   value={settingsForm.bankName}
                                   placeholder="e.g GTBank"
                                   onChange={(e) => setSettingsForm({ ...settingsForm, bankName: e.target.value })}
-                                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500/20 outline-none"
+                                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 outline-none"
                                 />
                               </div>
                               <div>
@@ -498,7 +498,7 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
                                   value={settingsForm.accountNumber}
                                   placeholder="10-digit number"
                                   onChange={(e) => setSettingsForm({ ...settingsForm, accountNumber: e.target.value.replace(/\D/g, '') })}
-                                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500/20 outline-none"
+                                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 outline-none"
                                 />
                               </div>
                               <div>
@@ -508,7 +508,7 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
                                   value={settingsForm.accountName}
                                   placeholder="Exact name on account"
                                   onChange={(e) => setSettingsForm({ ...settingsForm, accountName: e.target.value })}
-                                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-blue-500/20 outline-none"
+                                  className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-sm font-medium focus:ring-2 focus:ring-emerald-500/20 outline-none"
                                 />
                               </div>
                             </div>
@@ -608,7 +608,7 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
                             <button
                               onClick={handleSaveSettings}
                               disabled={isSavingSettings}
-                              className="flex-[2] py-3 rounded-xl bg-blue-600 text-white font-bold text-sm shadow-lg hover:bg-blue-700 transition flex items-center justify-center gap-2"
+                              className="flex-[2] py-3 rounded-xl bg-emerald-600 text-white font-bold text-sm shadow-lg hover:bg-emerald-700 transition flex items-center justify-center gap-2"
                             >
                               {isSavingSettings ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                               Save Changes
@@ -617,10 +617,10 @@ const CustomerProfileModal: React.FC<CustomerProfileModalProps> = ({
                         )}
 
                         {!customer && (
-                          <div className="p-6 rounded-3xl bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-lg">
+                          <div className="p-6 rounded-3xl bg-gradient-to-r from-emerald-600 to-emerald-700 text-white shadow-lg">
                             <h4 className="text-lg font-bold mb-2">Create an account?</h4>
                             <p className="text-xs opacity-80 mb-6 leading-relaxed">Save your details securely and manage multiple delivery addresses across all Compass stores.</p>
-                            <button onClick={() => { onClose(); setTimeout(() => promptLogin(), 300); }} className="w-full py-3 bg-white text-blue-600 rounded-xl font-bold text-sm shadow-lg shadow-blue-900/20 hover:-translate-y-0.5 transition">
+                            <button onClick={() => { onClose(); setTimeout(() => promptLogin(), 300); }} className="w-full py-3 bg-white text-emerald-600 rounded-xl font-bold text-sm shadow-lg shadow-emerald-900/20 hover:-translate-y-0.5 transition">
                               Register Now
                             </button>
                           </div>

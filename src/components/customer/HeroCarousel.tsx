@@ -149,7 +149,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
 
                 <div className="absolute bottom-4 right-6 z-20">
                     <span className="text-[10px] sm:text-xs font-semibold text-white/40 tracking-wider">
-                        Powered by <span className="text-violet-500/80">Compass 🧭</span>
+                        Powered by <span className="text-violet-500/80">Compass™ 🧭</span>
                     </span>
                 </div>
 
@@ -193,7 +193,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
 
                 <div className="absolute bottom-4 right-6 z-20">
                     <span className="text-[10px] sm:text-xs font-semibold text-white/40 tracking-wider">
-                        Powered by <span className="text-violet-500/80">Compass 🧭</span>
+                        Powered by <span className="text-violet-500/80">Compass™ 🧭</span>
                     </span>
                 </div>
 
