@@ -106,7 +106,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
 
                 <div className="absolute bottom-4 right-6 z-20">
                     <span className="text-[10px] sm:text-xs font-semibold text-white/40 tracking-wider">
-                        Powered by <span className="text-emerald-500/80">Compass 🧭</span>
+                        Powered by <span className="text-emerald-500/80">Compass™ 🧭</span>
                     </span>
                 </div>
 
@@ -313,7 +313,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                 {!isEscrow && (
                     <div className="absolute bottom-4 right-6 z-20">
                         <span className="text-[10px] sm:text-xs font-semibold text-white/30 tracking-wider">
-                            Powered by <span className="text-amber-500/70">Compass 🧭</span>
+                            Powered by <span className="text-amber-500/70">Compass™ 🧭</span>
                         </span>
                     </div>
                 )}
@@ -446,10 +446,10 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             className="text-xs sm:text-sm text-white/90 max-w-[280px] sm:max-w-sm font-medium leading-tight mt-1"
                         >
                             {isMediaInfluencer
-                                ? 'Elite PR services & premium products, safely secured by Compass🧭 Escrow.'
+                                ? 'Elite PR services & premium products, safely secured by Compass™ 🧭.'
                                 : storeMeta?.storeType === 'fashion'
-                                    ? 'Professionally crafted leather goods. Payments secured by Compass Escrow.'
-                                    : 'Professional store services, secured by Compass🧭 Escrow.'}
+                                    ? 'Professionally crafted leather goods. Payments secured by Compass™ 🧭.'
+                                    : 'Professional store services, secured by Compass™ 🧭.'}
                         </motion.p>
 
 

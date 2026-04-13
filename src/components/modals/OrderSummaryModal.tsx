@@ -116,6 +116,28 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
     onCloseRef.current = onClose;
   }, [onClose]);
 
+  // Clean up reorder and persistence
+  useEffect(() => {
+    if (!isOpen) {
+      setQuantity(initialQuantity);
+      setCurrentPage(1);
+    }
+  }, [isOpen, initialQuantity]);
+
+  // Auto-scroll logic for service selection
+  useEffect(() => {
+    if (selectedBundleService && currentPage === 2 && scrollContainerRef.current) {
+      // Wait for framer-motion expansion animation to progress
+      const timer = setTimeout(() => {
+        const expandedElement = scrollContainerRef.current?.querySelector('[data-expanded="true"]');
+        if (expandedElement) {
+          expandedElement.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedBundleService, currentPage]);
+
   useEffect(() => {
     if (isOpen) {
       setQuantity(initialQuantity);
@@ -1077,7 +1099,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                 <>
                                   {s.totalSystemCapacity && (
                                     <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50 flex flex-col gap-2">
-                                      <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-600 dark:text-amber-400">
+                                      <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center text-amber-400">
                                         <Package className="w-4 h-4" />
                                       </div>
                                       <div>
@@ -1439,7 +1461,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                               </div>
                               <h3 className="text-2xl font-black tracking-tight">Influencer Services Hub</h3>
                               <p className="text-green-100 text-sm max-w-[280px] leading-relaxed">
-                                Professional collaborations, personalized content, and exclusive event access — all protected by Compass Escrow.
+                                Professional collaborations, personalized content, and exclusive event access — all protected by Compass™ 🧭.
                               </p>
                             </div>
                           </div>
@@ -1499,6 +1521,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                   key={svc.id}
                                   layout
                                   initial={false}
+                                  data-expanded={isExpanded}
                                   className={`group rounded-[2rem] border-2 transition-all overflow-hidden ${isExpanded
                                     ? 'border-green-500 bg-green-50/50 dark:bg-green-900/10'
                                     : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/50 hover:border-green-200 dark:hover:border-green-800'

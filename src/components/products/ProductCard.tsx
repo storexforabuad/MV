@@ -87,6 +87,8 @@ export default function ProductCard({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  const isInfluencerHub = product.id?.includes('bundle-influencer-services') || product.name === 'Influencer Services Hub';
+
   useIntersectionObserver(cardRef as React.RefObject<Element>, (entries) => {
     if (entries[0].isIntersecting) setIsVisible(true);
   }, { threshold: 0.2 });
@@ -511,6 +513,20 @@ export default function ProductCard({
                   </div>
                 </div>
               )}
+              {isMediaInfluencerProduct(product) && isInfluencerHub && (
+                <div className="absolute top-[18px] right-[18px] z-10 flex flex-col items-end gap-2">
+                  <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                    <span className="product-badge bg-emerald-600 text-white shadow-md border border-white/20 uppercase font-black tracking-wider text-[9px] px-3 py-1 rounded-full flex items-center gap-1">
+                      🛡️ ESCROW PROTECTED
+                    </span>
+                  </div>
+                  <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                    <span className="product-badge bg-blue-600 text-white shadow-md border border-white/20 uppercase font-black tracking-wider text-[9px] px-3 py-1 rounded-full flex items-center gap-1">
+                      ✨ VERIFIED
+                    </span>
+                  </div>
+                </div>
+              )}
               {isTicketProduct(product) && (
                 <div className="absolute top-[18px] right-[18px] z-10">
                   <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
@@ -864,7 +880,7 @@ export default function ProductCard({
           )}
 
           {/* Media Influencer Platform Badge (Top Right) */}
-          {!isSoldOut && isMediaInfluencerProduct(product) && (
+          {!isSoldOut && isMediaInfluencerProduct(product) && !isInfluencerHub && (
             <div className="absolute top-[14px] right-[14px] z-10">
               <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
                 <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-indigo-600 dark:text-indigo-400 shadow-sm font-bold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2.5 py-1 uppercase rounded-full">
@@ -998,38 +1014,40 @@ export default function ProductCard({
               <div />
 
               {/* Bottom Right Icon: Cart (Grid) or Heart (Single View) */}
-              <motion.div className="z-30">
-                <motion.button
-                  onClick={(e) => {
-                    if (isSingleView) {
-                      handleToggleCart(e);
-                    } else {
-                      handleOrderClick(e);
-                    }
-                  }}
-                  disabled={isSoldOut}
-                  className="flex-shrink-0 px-3 py-2 rounded-full card-glass shadow-lg flex items-center justify-center gap-1.5 disabled:opacity-50"
-                  aria-label={isSingleView ? "Add to cart" : "Place order"}
-                  type="button"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <span className={`text-sm font-bold ${isInCart ? 'text-green-500' : 'text-green-500 dark:text-green-400'}`}>
-                    {isInCart ? 'Added' : 'Add'}
-                  </span>
-                  {isSingleView ? (
-                    <ShoppingCart
-                      size={18}
-                      className={`transition-all duration-200 ${isInCart
-                        ? 'fill-green-500 text-green-500'
-                        : 'text-green-500'
-                        }`}
-                    />
-                  ) : (
-                    <ShoppingCart size={18} className={`transition-all duration-200 ${isInCart ? 'fill-green-500 text-green-500' : 'text-green-500 dark:text-green-400'}`} />
-                  )}
-                </motion.button>
-              </motion.div>
+              {!isInfluencerHub && (
+                <motion.div className="z-30">
+                  <motion.button
+                    onClick={(e) => {
+                      if (isSingleView) {
+                        handleToggleCart(e);
+                      } else {
+                        handleOrderClick(e);
+                      }
+                    }}
+                    disabled={isSoldOut}
+                    className="flex-shrink-0 px-3 py-2 rounded-full card-glass shadow-lg flex items-center justify-center gap-1.5 disabled:opacity-50"
+                    aria-label={isSingleView ? "Add to cart" : "Place order"}
+                    type="button"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <span className={`text-sm font-bold ${isInCart ? 'text-green-500' : 'text-green-500 dark:text-green-400'}`}>
+                      {isInCart ? 'Added' : 'Add'}
+                    </span>
+                    {isSingleView ? (
+                      <ShoppingCart
+                        size={18}
+                        className={`transition-all duration-200 ${isInCart
+                          ? 'fill-green-500 text-green-500'
+                          : 'text-green-500'
+                          }`}
+                      />
+                    ) : (
+                      <ShoppingCart size={18} className={`transition-all duration-200 ${isInCart ? 'fill-green-500 text-green-500' : 'text-green-500 dark:text-green-400'}`} />
+                    )}
+                  </motion.button>
+                </motion.div>
+              )}
             </div>
           )}
 
@@ -1101,6 +1119,9 @@ export default function ProductCard({
               </p>
             )}
             <p className="text-lg font-bold text-text-primary card-text-gradient">
+              {isInfluencerHub && (
+                <span className="text-[10px] font-black uppercase tracking-wider text-text-secondary mr-1 block mb-0.5">Starting from</span>
+              )}
               {formatPrice(product.price)}
               {isLivestockProduct(product) && (
                 <span className="text-sm font-normal text-text-secondary">

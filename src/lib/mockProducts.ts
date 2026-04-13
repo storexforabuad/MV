@@ -808,7 +808,7 @@ export const BUNDLE_INFLUENCER_SERVICES: MediaInfluencerProduct = {
     storeId: 'mock-media-store',
     name: 'Influencer Services Hub',
     description: 'Grow your brand with personalized birthday shoutouts, viral TikTok promos, event appearances, and premium event tickets. Tap to explore all my professional services.',
-    price: 0, // Price varies by selected service
+    price: 75000,
     images: [
         'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80',
         'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80',
