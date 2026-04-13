@@ -6,7 +6,7 @@
 
 export interface ModalState {
   storeId: string;
-  currentPage: 1 | 2 | 3;
+  currentPage: 1 | 2 | 3 | 4;
   evidenceUrl?: string;
   fileName?: string;
   expiryTime: number; // Milliseconds since epoch
@@ -25,7 +25,7 @@ const MODAL_STATE_EXPIRY_DURATION = 10 * 60 * 1000; // 10 minutes in millisecond
  */
 export function saveModalState(
   storeId: string,
-  currentPage: 1 | 2 | 3,
+  currentPage: 1 | 2 | 3 | 4,
   evidenceUrl?: string,
   fileName?: string
 ): void {

@@ -486,7 +486,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
     setCurrentPage(paymentPageNum as any);
     if (storeId) {
-      saveModalState(storeId, paymentPageNum, uploadedEvidence?.url, uploadedEvidence?.fileName);
+      saveModalState(storeId, paymentPageNum as any, uploadedEvidence?.url, uploadedEvidence?.fileName);
     }
   };
 
@@ -1429,16 +1429,16 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                       {currentPage === 1 && isBundledInfluencerServices && (
                         <div className="pt-2 sm:pt-4 space-y-8 pb-10">
                           {/* Rich Hero Card */}
-                          <div className="relative overflow-hidden rounded-[2.5rem] bg-indigo-600 p-8 text-white shadow-xl">
+                          <div className="relative overflow-hidden rounded-[2.5rem] bg-green-600 p-8 text-white shadow-xl">
                             <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
-                            <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-indigo-400/20 rounded-full blur-3xl" />
+                            <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-green-400/20 rounded-full blur-3xl" />
 
                             <div className="relative z-10 flex flex-col items-center text-center space-y-4">
                               <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-inner">
                                 <Sparkles className="w-8 h-8 text-white" />
                               </div>
                               <h3 className="text-2xl font-black tracking-tight">Influencer Services Hub</h3>
-                              <p className="text-indigo-100 text-sm max-w-[280px] leading-relaxed">
+                              <p className="text-green-100 text-sm max-w-[280px] leading-relaxed">
                                 Professional collaborations, personalized content, and exclusive event access — all protected by Compass Escrow.
                               </p>
                             </div>
@@ -1446,16 +1446,16 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
                           {/* Quick Stats / Benefits */}
                           <div className="grid grid-cols-3 gap-3">
-                            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-3xl border border-indigo-100 dark:border-indigo-800/30 flex flex-col items-center gap-2 text-center">
-                              <ShieldCheck className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                            <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-3xl border border-green-100 dark:border-green-800/30 flex flex-col items-center gap-2 text-center">
+                              <ShieldCheck className="w-5 h-5 text-green-600 dark:text-green-400" />
                               <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Escrow</span>
                             </div>
-                            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-3xl border border-indigo-100 dark:border-indigo-800/30 flex flex-col items-center gap-2 text-center">
-                              <Zap className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                            <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-3xl border border-green-100 dark:border-green-800/30 flex flex-col items-center gap-2 text-center">
+                              <Zap className="w-5 h-5 text-green-600 dark:text-green-400" />
                               <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Fast Delivery</span>
                             </div>
-                            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-3xl border border-indigo-100 dark:border-indigo-800/30 flex flex-col items-center gap-2 text-center">
-                              <Star className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                            <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-3xl border border-green-100 dark:border-green-800/30 flex flex-col items-center gap-2 text-center">
+                              <Star className="w-5 h-5 text-green-600 dark:text-green-400" />
                               <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Premium</span>
                             </div>
                           </div>
@@ -1463,7 +1463,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           {/* Explainer Cards */}
                           <div className="space-y-4">
                             <div className="flex items-center gap-3 px-2">
-                              <Info className="w-4 h-4 text-indigo-500" />
+                              <Info className="w-4 h-4 text-green-500" />
                               <h4 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">How it works</h4>
                             </div>
 
@@ -1473,8 +1473,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                 { icon: Target, title: "Provide Details", desc: "Fill in your brand info and campaign objectives." },
                                 { icon: Users, title: "Collaborate", desc: "Secure payment with Escrow and start the project." }
                               ].map((step, i) => (
-                                <div key={i} className="group p-5 rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm flex gap-4 transition-all hover:border-indigo-300 dark:hover:border-indigo-700">
-                                  <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 flex-shrink-0 group-hover:scale-110 transition-transform">
+                                <div key={i} className="group p-5 rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm flex gap-4 transition-all hover:border-green-300 dark:hover:border-green-700">
+                                  <div className="w-12 h-12 rounded-2xl bg-green-50 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 flex-shrink-0 group-hover:scale-110 transition-transform">
                                     <step.icon className="w-5 h-5" />
                                   </div>
                                   <div>
@@ -1500,8 +1500,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                   layout
                                   initial={false}
                                   className={`group rounded-[2rem] border-2 transition-all overflow-hidden ${isExpanded
-                                    ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/10'
-                                    : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/50 hover:border-indigo-200 dark:hover:border-indigo-800'
+                                    ? 'border-green-500 bg-green-50/50 dark:bg-green-900/10'
+                                    : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/50 hover:border-green-200 dark:hover:border-green-800'
                                     }`}
                                 >
                                   <button
@@ -1518,8 +1518,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                     </div>
                                     <div className="flex-1 min-w-0">
                                       <div className="flex justify-between items-start">
-                                        <h4 className="font-black text-gray-900 dark:text-white text-base truncate">{svc.name}</h4>
-                                        <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded-full">
+                                        <h4 className={`font-black text-gray-900 dark:text-white text-base leading-snug ${isExpanded ? '' : 'truncate'}`}>{svc.name}</h4>
+                                        <span className="text-xs font-bold text-green-600 dark:text-green-400 whitespace-nowrap bg-green-50 dark:bg-green-900/30 px-2 py-0.5 rounded-full">
                                           {formatPrice(svc.price)}
                                         </span>
                                       </div>
@@ -1548,9 +1548,9 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                         exit={{ height: 0, opacity: 0 }}
                                         transition={{ duration: 0.3, ease: 'easeInOut' }}
                                       >
-                                        <div className="px-5 pb-5 pt-2 border-t border-indigo-100/50 dark:border-indigo-800/30">
+                                        <div className="px-5 pb-5 pt-2 border-t border-green-100/50 dark:border-green-800/30">
                                           <div className="bg-white/50 dark:bg-gray-900/50 rounded-2xl p-4 mb-4">
-                                            <h5 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-2">Service Description</h5>
+                                            <h5 className="text-[10px] font-black text-green-400 uppercase tracking-[0.2em] mb-2">Service Description</h5>
                                             <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                                               {svc.description}
                                             </p>
@@ -1558,7 +1558,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
                                           <button
                                             onClick={() => setCurrentPage(3)}
-                                            className="w-full py-4 rounded-2xl bg-indigo-600 text-white font-black text-sm uppercase tracking-widest shadow-lg hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 group/btn active:scale-[0.98]"
+                                            className="w-full py-4 rounded-2xl bg-green-600 text-white font-black text-sm uppercase tracking-widest shadow-lg hover:bg-green-700 transition-all flex items-center justify-center gap-2 group/btn active:scale-[0.98]"
                                           >
                                             <span>Proceed with {svc.name.split(' ')[0]}</span>
                                             <Rocket className="w-4 h-4 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
@@ -1963,20 +1963,20 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                       {currentPage === summaryPageNum && (
                         <div className="pt-4 sm:pt-8">
                           {isBundledInfluencerServices && selectedBundleService && (
-                            <div className="mb-8 p-6 rounded-[2rem] bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30">
+                            <div className="mb-8 p-6 rounded-[2rem] bg-green-50/50 dark:bg-green-900/10 border border-green-100 dark:border-green-800/30">
                               <div className="flex items-center justify-between gap-4">
                                 <div className="flex items-center gap-4">
-                                  <div className="relative w-16 h-16 rounded-2xl overflow-hidden shadow-sm border border-indigo-100 dark:border-indigo-800">
+                                  <div className="relative w-16 h-16 rounded-2xl overflow-hidden shadow-sm border border-green-100 dark:border-green-800">
                                     <Image src={selectedBundleService.images?.[0] || DEFAULT_PRODUCT_IMAGE} alt={selectedBundleService.name} fill className="object-cover" />
                                   </div>
                                   <div className="flex-1">
                                     <h4 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-tight">Selected Service</h4>
-                                    <p className="text-base font-black text-indigo-600 dark:text-indigo-400 leading-tight">{selectedBundleService.name}</p>
+                                    <p className="text-base font-black text-green-600 dark:text-green-400 leading-tight">{selectedBundleService.name}</p>
                                   </div>
                                 </div>
                                 <button
                                   onClick={() => setCurrentPage(2)}
-                                  className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 text-indigo-600 shadow-sm border border-indigo-100 dark:border-indigo-700 flex items-center justify-center hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors flex-shrink-0"
+                                  className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 text-green-600 shadow-sm border border-green-100 dark:border-green-700 flex items-center justify-center hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors flex-shrink-0"
                                   title="Reselect Service"
                                 >
                                   <RefreshCw className="w-5 h-5" />
@@ -2051,7 +2051,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             /* Dedicated Collaboration Brief Screen for Services */
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
                               <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-[1.5rem] bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-100/50 dark:border-indigo-800/30 shadow-sm">
+                                <div className="w-12 h-12 rounded-[1.5rem] bg-green-50 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 border border-green-100/50 dark:border-green-800/30 shadow-sm">
                                   <PenTool className="w-6 h-6" />
                                 </div>
                                 <div>
@@ -2068,7 +2068,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                     placeholder="Enter your brand name"
                                     value={brandName}
                                     onChange={(e) => setBrandName(e.target.value)}
-                                    className="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium transition-all"
+                                    className="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-green-500/20 text-sm font-medium transition-all"
                                   />
                                 </div>
                                 <div>
@@ -2078,14 +2078,14 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                     value={campaignBrief}
                                     onChange={(e) => setCampaignBrief(e.target.value)}
                                     rows={5}
-                                    className="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-sm font-medium resize-none transition-all"
+                                    className="w-full px-5 py-4 rounded-2xl bg-gray-50 dark:bg-gray-800/40 border border-gray-100 dark:border-gray-700/50 focus:outline-none focus:ring-2 focus:ring-green-500/20 text-sm font-medium resize-none transition-all"
                                   />
                                 </div>
 
-                                {/* Guest Email (Capture on Brief page for services since summary is standard) */}
+                                { /* Guest Email (Capture on Brief page for services since summary is standard) */}
                                 {!customer && isPaymentFlowEnabled && (
-                                  <div ref={emailSectionRef} className="p-5 rounded-3xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100/50 dark:border-blue-800/30">
-                                    <label className="block text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-2 ml-1">Fulfillment Email</label>
+                                  <div ref={emailSectionRef} className="p-5 rounded-3xl bg-green-50/50 dark:bg-green-900/10 border border-green-100/50 dark:border-green-800/30">
+                                    <label className="block text-[10px] font-black uppercase tracking-widest text-green-600 dark:text-green-400 mb-2 ml-1">Fulfillment Email</label>
                                     <input
                                       type="email"
                                       placeholder="Where should we send updates?"
@@ -2094,7 +2094,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                         setGuestEmail(e.target.value);
                                         if (emailError) setEmailError('');
                                       }}
-                                      className={`w-full px-5 py-4 rounded-2xl bg-white dark:bg-gray-800/40 border ${emailError ? 'border-red-500 ring-1 ring-red-500' : 'border-blue-100/30 dark:border-blue-800/20'} focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm font-medium transition-colors`}
+                                      className={`w-full px-5 py-4 rounded-2xl bg-white dark:bg-gray-800/40 border ${emailError ? 'border-red-500 ring-1 ring-red-500' : 'border-green-100/30 dark:border-green-800/20'} focus:outline-none focus:ring-2 focus:ring-green-500/20 text-sm font-medium transition-colors`}
                                     />
                                     {emailError && (
                                       <p className="mt-2 text-xs font-bold text-red-500 flex items-center gap-1">
