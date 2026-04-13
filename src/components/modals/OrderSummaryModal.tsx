@@ -8,8 +8,9 @@ import { Product } from '@/types/product';
 import { StoreMeta } from '@/types/store';
 import { Customer } from '@/types/customer';
 import { formatPrice } from '@/utils/price';
-import { Minus, Plus, Loader2, MessageSquare, ExternalLink, AlertCircle, Smartphone, Activity, Database, Cpu, Network, ShieldCheck, Package, Fingerprint, Info, Code, Battery, Headphones, VolumeX, Gamepad2, Zap, Watch, Cable, Link, Sun, Layers, RefreshCw, Gauge, Monitor, Wifi, Palette, Ruler, PenTool, CheckCircle2, Clock } from 'lucide-react';
-import { ElectronicsProduct } from '@/types/product';
+import { Minus, Plus, Loader2, MessageSquare, ExternalLink, AlertCircle, Smartphone, Activity, Database, Cpu, Network, ShieldCheck, Package, Fingerprint, Info, Code, Battery, Headphones, VolumeX, Gamepad2, Zap, Watch, Cable, Link, Sun, Layers, RefreshCw, Gauge, Monitor, Wifi, Palette, Ruler, PenTool, CheckCircle2, Clock, Sparkles, Star, Rocket, Target, Users } from 'lucide-react';
+import { ElectronicsProduct, MediaInfluencerProduct, VehicleProduct, FashionProduct, BeautyProduct } from '@/types/product';
+import { mockMediaProducts } from '@/lib/mockProducts';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useOrders } from '@/hooks/useOrders';
 import toast from 'react-hot-toast';
@@ -50,7 +51,8 @@ interface OrderSummaryModalProps {
 }
 
 export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta, customer: initialCustomer, selectedSize, selectedColor, selectedImage, initialQuantity = 1, openedFrom, isReorder = false }: OrderSummaryModalProps) {
-  const [currentPage, setCurrentPage] = useState<1 | 2 | 3>(1);
+  const [currentPage, setCurrentPage] = useState<1 | 2 | 3 | 4>(1);
+  const [selectedBundleService, setSelectedBundleService] = useState<Product | null>(null);
   const [quantity, setQuantity] = useState(initialQuantity);
   const [deliveryMethod, setDeliveryMethod] = useState('home');
   const [customer, setCustomer] = useState<Customer | null>(initialCustomer);
@@ -137,6 +139,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
       setInteractiveSelectedSize(selectedSize);
       setSelectedTierId(undefined);
       setImageLoading(true);
+      setSelectedBundleService(null);
 
       // Restore modal state from localStorage if payment flow is enabled
       if (isPaymentFlowEnabled && storeId) {
@@ -244,9 +247,21 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
   if (!product) return null;
 
+  const isBundledInfluencerServices = product?.productType === 'media-influencer' && (product as any).subtype === 'bundled-services';
+
   const hasPage1 = isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer || isArt || isTicket;
-  const summaryPageNum = hasPage1 ? 2 : 1;
-  const paymentPageNum = hasPage1 ? 3 : 2;
+  const summaryPageNum = isBundledInfluencerServices ? 3 : (hasPage1 ? 2 : 1);
+  const paymentPageNum = isBundledInfluencerServices ? 4 : (hasPage1 ? 3 : 2);
+
+  const bundleServices = (mockMediaProducts as any[]).filter(p =>
+    p.productType === 'media-influencer' &&
+    p.subtype === 'service' &&
+    p.id !== 'permanent-influencer-services'
+  );
+
+  const activeProduct = selectedBundleService || product;
+  const isSelectedServiceTicket = selectedBundleService?.productType === 'media-influencer' && (selectedBundleService as any).subtype === 'event-ticket-promo';
+  const isSelectedServicePureService = selectedBundleService?.productType === 'media-influencer' && (selectedBundleService as any).subtype === 'service';
 
   const hasSizes = (p: any) => {
     return (p.sizes && p.sizes.length > 0) || (p.sizeOption && p.sizeOption.length > 0);
@@ -261,7 +276,11 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
       const t = (product as any).eventPayload?.tiers?.find((tier: any) => tier.id === selectedTierId);
       if (t) return t.price * quantity;
     }
-    return product.price * quantity;
+    // If we're in the influencer hub and a service is selected, use that service's price
+    if (isBundledInfluencerServices && selectedBundleService) {
+      return (selectedBundleService.price || 0) * quantity;
+    }
+    return (product?.price || 0) * quantity;
   })();
   const total = subtotal; // Removed legacy escrow and booking fees
 
@@ -445,7 +464,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   };
 
   const handleProceedToPayment = () => {
-    if (!customer && !guestEmail && isPaymentFlowEnabled && (isServiceProduct || isEventTicketPromo)) {
+    if (!customer && !guestEmail && isPaymentFlowEnabled && (isServiceProduct || isEventTicketPromo || isBundledInfluencerServices)) {
       setEmailError('Please enter your email to continue');
       emailSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
@@ -492,12 +511,13 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                   {/* Header */}
                   <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-modal-background">
                     <h3 className="text-lg font-semibold leading-6 text-gray-900 dark:text-white">
-                      {currentPage === 1 && (isElectronics || isSolar || isVehicle) ? 'Product Specifications' :
+                      {currentPage === 1 && isElectronics && (isElectronics || isSolar || isVehicle) ? 'Product Specifications' :
                         currentPage === 1 && isBeauty ? 'Details & Directions' :
                           currentPage === 1 && isArt ? 'Art Passport & Provenance' :
-                            currentPage === 1 && isMediaInfluencer ? (isEventTicketPromo ? 'Promotion Details' : isServiceProduct ? 'Service Collaboration Details' : 'Influencer Product Details') :
-                              currentPage === summaryPageNum ? 'Order Summary' :
-                                (isPaymentFlowEnabled ? 'Payment' : 'WhatsApp Preview')}
+                            currentPage === 1 && isMediaInfluencer ? (isBundledInfluencerServices ? 'Influencer Service Hub' : (isEventTicketPromo ? 'Promotion Details' : isServiceProduct ? 'Service Collaboration Details' : 'Influencer Product Details')) :
+                              currentPage === 2 && isBundledInfluencerServices ? 'Select a Service' :
+                                currentPage === summaryPageNum ? 'Order Summary' :
+                                  (isPaymentFlowEnabled ? 'Payment' : 'WhatsApp Preview')}
                     </h3>
                     <button
                       type="button"
@@ -1405,8 +1425,123 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                         );
                       })()}
 
+                      {/* Page 1 (Influencer Services Explainer Hub) */}
+                      {currentPage === 1 && isBundledInfluencerServices && (
+                        <div className="pt-2 sm:pt-4 space-y-8 pb-10">
+                          {/* Rich Hero Card */}
+                          <div className="relative overflow-hidden rounded-[2.5rem] bg-indigo-600 p-8 text-white shadow-xl">
+                            <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white/10 rounded-full blur-3xl" />
+                            <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-indigo-400/20 rounded-full blur-3xl" />
+
+                            <div className="relative z-10 flex flex-col items-center text-center space-y-4">
+                              <div className="w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-inner">
+                                <Sparkles className="w-8 h-8 text-white" />
+                              </div>
+                              <h3 className="text-2xl font-black tracking-tight">Influencer Services Hub</h3>
+                              <p className="text-indigo-100 text-sm max-w-[280px] leading-relaxed">
+                                Professional collaborations, personalized content, and exclusive event access — all protected by Compass Escrow.
+                              </p>
+                            </div>
+                          </div>
+
+                          {/* Quick Stats / Benefits */}
+                          <div className="grid grid-cols-3 gap-3">
+                            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-3xl border border-indigo-100 dark:border-indigo-800/30 flex flex-col items-center gap-2 text-center">
+                              <ShieldCheck className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Escrow</span>
+                            </div>
+                            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-3xl border border-indigo-100 dark:border-indigo-800/30 flex flex-col items-center gap-2 text-center">
+                              <Zap className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Fast Delivery</span>
+                            </div>
+                            <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-3xl border border-indigo-100 dark:border-indigo-800/30 flex flex-col items-center gap-2 text-center">
+                              <Star className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                              <span className="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Premium</span>
+                            </div>
+                          </div>
+
+                          {/* Explainer Cards */}
+                          <div className="space-y-4">
+                            <div className="flex items-center gap-3 px-2">
+                              <Info className="w-4 h-4 text-indigo-500" />
+                              <h4 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">How it works</h4>
+                            </div>
+
+                            <div className="space-y-3">
+                              {[
+                                { icon: Rocket, title: "Pick a Service", desc: "Choose from shoutouts, promos, or event appearances." },
+                                { icon: Target, title: "Provide Details", desc: "Fill in your brand info and campaign objectives." },
+                                { icon: Users, title: "Collaborate", desc: "Secure payment with Escrow and start the project." }
+                              ].map((step, i) => (
+                                <div key={i} className="group p-5 rounded-3xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 shadow-sm flex gap-4 transition-all hover:border-indigo-300 dark:hover:border-indigo-700">
+                                  <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 flex-shrink-0 group-hover:scale-110 transition-transform">
+                                    <step.icon className="w-5 h-5" />
+                                  </div>
+                                  <div>
+                                    <h5 className="font-bold text-gray-900 dark:text-white text-sm">{step.title}</h5>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{step.desc}</p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Page 2 (Bundled Service Selection Catalog) */}
+                      {currentPage === 2 && isBundledInfluencerServices && (
+                        <div className="pt-2 sm:pt-4 space-y-6 pb-10">
+                          <div className="grid grid-cols-1 gap-4">
+                            {bundleServices.map((svc) => (
+                              <button
+                                key={svc.id}
+                                onClick={() => {
+                                  setSelectedBundleService(svc);
+                                  setCurrentPage(3);
+                                }}
+                                className={`group p-4 rounded-[2rem] border-2 transition-all text-left flex items-center gap-4 ${selectedBundleService?.id === svc.id
+                                  ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/10'
+                                  : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/50 hover:border-indigo-200 dark:hover:border-indigo-800'
+                                  }`}
+                              >
+                                <div className="relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 border border-gray-100 dark:border-gray-700">
+                                  <Image
+                                    src={svc.images?.[0] || DEFAULT_PRODUCT_IMAGE}
+                                    alt={svc.name}
+                                    fill
+                                    className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                  />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex justify-between items-start">
+                                    <h4 className="font-black text-gray-900 dark:text-white text-base truncate">{svc.name}</h4>
+                                    <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded-full">
+                                      {formatPrice(svc.price)}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-1 leading-relaxed">
+                                    {svc.description}
+                                  </p>
+                                  <div className="flex items-center gap-3 mt-2">
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
+                                      <RefreshCw className="w-3 h-3" /> {svc.revisionsAllowed} Revs
+                                    </span>
+                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
+                                      <Clock className="w-3 h-3" /> {svc.deliveryTimeDays} Days
+                                    </span>
+                                  </div>
+                                </div>
+                                <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-700 flex items-center justify-center text-gray-300 group-hover:text-indigo-500 transition-colors">
+                                  <Plus className="w-5 h-5" />
+                                </div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                       {/* Page 1 (Media Influencer Details - Only for physical products, services go straight to summary) */}
-                      {currentPage === 1 && isMediaInfluencer && (() => {
+                      {currentPage === 1 && isMediaInfluencer && !isBundledInfluencerServices && (() => {
                         const m = product as any;
 
                         return (
@@ -1793,7 +1928,30 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                       {/* Stage 2: Fulfillment / Requirements */}
                       {currentPage === summaryPageNum && (
                         <div className="pt-4 sm:pt-8">
-                          {isEventTicketPromo ? (
+                          {isBundledInfluencerServices && selectedBundleService && (
+                            <div className="mb-8 p-6 rounded-[2rem] bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100 dark:border-indigo-800/30">
+                              <div className="flex items-center justify-between gap-4">
+                                <div className="flex items-center gap-4">
+                                  <div className="relative w-16 h-16 rounded-2xl overflow-hidden shadow-sm border border-indigo-100 dark:border-indigo-800">
+                                    <Image src={selectedBundleService.images?.[0] || DEFAULT_PRODUCT_IMAGE} alt={selectedBundleService.name} fill className="object-cover" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <h4 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-tight">Selected Service</h4>
+                                    <p className="text-base font-black text-indigo-600 dark:text-indigo-400 leading-tight">{selectedBundleService.name}</p>
+                                  </div>
+                                </div>
+                                <button
+                                  onClick={() => setCurrentPage(2)}
+                                  className="w-10 h-10 rounded-xl bg-white dark:bg-gray-800 text-indigo-600 shadow-sm border border-indigo-100 dark:border-indigo-700 flex items-center justify-center hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors flex-shrink-0"
+                                  title="Reselect Service"
+                                >
+                                  <RefreshCw className="w-5 h-5" />
+                                </button>
+                              </div>
+                            </div>
+                          )}
+
+                          {(isEventTicketPromo || isSelectedServiceTicket) ? (
                             /* Dedicated Request/Event Details Form for B2B Phase */
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
                               <div className="flex items-center gap-3">
@@ -1846,7 +2004,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                   </button>
                                 </div>
 
-                                {!customer && isPaymentFlowEnabled && (
+                                {!customer && isPaymentFlowEnabled && (isServiceProduct || isEventTicketPromo || isBundledInfluencerServices) && (
                                   <div ref={emailSectionRef} className="p-5 rounded-3xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100/50 dark:border-blue-800/30">
                                     <label className="block text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-2 ml-1">Fulfillment Email</label>
                                     <input type="email" placeholder="Where should we send updates?" value={guestEmail} onChange={(e) => { setGuestEmail(e.target.value); if (emailError) setEmailError(''); }} className={`w-full px-5 py-4 rounded-2xl bg-white dark:bg-gray-800/40 border ${emailError ? 'border-red-500 ring-1 ring-red-500' : 'border-blue-100/30 dark:border-blue-800/20'} focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm font-medium transition-colors`} />
@@ -1855,7 +2013,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                 )}
                               </div>
                             </div>
-                          ) : isServiceProduct ? (
+                          ) : (isServiceProduct || isSelectedServicePureService) ? (
                             /* Dedicated Collaboration Brief Screen for Services */
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
                               <div className="flex items-center gap-3">
@@ -2093,7 +2251,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           )}
 
                           {/* Delivery Method (Hidden for services and tickets) */}
-                          {!isVehicle && !isServiceProduct && !isTicket && !isEventTicketPromo && (
+                          {!isVehicle && !isServiceProduct && !isTicket && !isEventTicketPromo && !isBundledInfluencerServices && (
                             <div className="mt-8">
                               <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3">Delivery Method</h4>
                               <div className="grid grid-cols-2 gap-4">
@@ -2119,29 +2277,31 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             </div>
                           )}
 
-                          {/* Payment Details */}
-                          <div className="mt-8 border-t border-gray-200 dark:border-gray-800 pt-6">
-                            <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-4">Payment Summary</h4>
-                            <dl className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
-                              <div className="flex justify-between">
-                                <dt>Item price</dt>
-                                <dd className="font-medium text-gray-900 dark:text-gray-200">{formatPrice(subtotal)}</dd>
-                              </div>
-
-                              {/* Fees removed for commission model */}
-
-                              {deliveryMethod === 'home' && !isVehicle && !isServiceProduct && (
+                          {/* Payment Details (Hidden for bundled services as total is in the last page) */}
+                          {!isBundledInfluencerServices && (
+                            <div className="mt-8 border-t border-gray-200 dark:border-gray-800 pt-6">
+                              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-4">Payment Summary</h4>
+                              <dl className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
                                 <div className="flex justify-between">
-                                  <dt>Home delivery</dt>
-                                  <dd className="font-medium text-gray-900 dark:text-gray-200">TBD by vendor</dd>
+                                  <dt>Item price</dt>
+                                  <dd className="font-medium text-gray-900 dark:text-gray-200">{formatPrice(subtotal)}</dd>
                                 </div>
-                              )}
-                              <div className="flex justify-between items-center pt-3 border-t border-gray-100 dark:border-gray-800">
-                                <dt className="text-base font-bold text-gray-900 dark:text-white">Total</dt>
-                                <dd className="text-xl font-bold text-green-600 dark:text-green-400">{formatPrice(total)}</dd>
-                              </div>
-                            </dl>
-                          </div>
+
+                                {/* Fees removed for commission model */}
+
+                                {deliveryMethod === 'home' && !isVehicle && !isServiceProduct && (
+                                  <div className="flex justify-between">
+                                    <dt>Home delivery</dt>
+                                    <dd className="font-medium text-gray-900 dark:text-gray-200">TBD by vendor</dd>
+                                  </div>
+                                )}
+                                <div className="flex justify-between items-center pt-3 border-t border-gray-100 dark:border-gray-800">
+                                  <dt className="text-base font-bold text-gray-900 dark:text-white">Total</dt>
+                                  <dd className="text-xl font-bold text-green-600 dark:text-green-400">{formatPrice(total)}</dd>
+                                </div>
+                              </dl>
+                            </div>
+                          )}
                         </div>
                       )}
 
@@ -2208,10 +2368,18 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                               toast.error('Please select a ticket tier');
                               return;
                             }
-                            setCurrentPage(2);
+                            setCurrentPage(isBundledInfluencerServices ? 2 : 2);
                           }}
                         >
-                          {isServiceProduct ? 'Book' : isTicket ? 'Checkout' : 'Order'}
+                          {isServiceProduct || isBundledInfluencerServices ? 'Book' : isTicket ? 'Checkout' : 'Order'}
+                        </button>
+                      ) : currentPage === 2 && isBundledInfluencerServices ? (
+                        <button
+                          type="button"
+                          className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold py-4 px-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-[0.98]"
+                          onClick={() => setCurrentPage(1)}
+                        >
+                          Back to Hub
                         </button>
                       ) : currentPage === summaryPageNum ? (
                         <div className="flex gap-3">
@@ -2219,7 +2387,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             <button
                               type="button"
                               className="w-1/3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold py-4 px-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-[0.98]"
-                              onClick={() => setCurrentPage(1)}
+                              onClick={() => setCurrentPage(isBundledInfluencerServices ? 2 : 1)}
                             >
                               Back
                             </button>

@@ -292,8 +292,20 @@ export default function PaymentFlowPage({
         >
           ← Back to Summary
         </button>
+      </div>
 
-        {/* Digital Receipt Card previously here, removed to avoid redundancy with Page 2 */}
+      {/* Total Price Display */}
+      <div className="bg-white dark:bg-gray-800/40 backdrop-blur-md rounded-[2.5rem] p-8 border border-gray-100 dark:border-gray-700/50 shadow-xl flex flex-col items-center text-center space-y-2 relative overflow-hidden">
+        <div className="absolute top-0 right-0 -mr-16 -mt-16 w-32 h-32 bg-green-500/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 -ml-16 -mb-16 w-32 h-32 bg-green-500/5 rounded-full blur-3xl" />
+
+        <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.3em] relative z-10">Amount to Pay</span>
+        <div className="text-5xl font-black text-gray-900 dark:text-white tracking-tight relative z-10 font-mono">
+          {formatPrice(total)}
+        </div>
+        <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-50/80 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest relative z-10 border border-emerald-100/50 dark:border-emerald-800/30 shadow-inner">
+          <Lock className="w-3.5 h-3.5" /> Secure Checkout
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-6">

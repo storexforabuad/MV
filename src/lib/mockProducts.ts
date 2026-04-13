@@ -800,6 +800,33 @@ export const mockCandleProducts: BeautyProduct[] = [
 ];
 
 /**
+ * Special Product: Influencer Services Bundle
+ * This is a permanent card shown at the top of influencer stores.
+ */
+export const BUNDLE_INFLUENCER_SERVICES: MediaInfluencerProduct = {
+    id: 'permanent-influencer-services',
+    storeId: 'mock-media-store',
+    name: 'Influencer Services Hub',
+    description: 'Grow your brand with personalized birthday shoutouts, viral TikTok promos, event appearances, and premium event tickets. Tap to explore all my professional services.',
+    price: 0, // Price varies by selected service
+    images: [
+        'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80',
+        'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80',
+        'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&q=80'
+    ],
+    views: 0,
+    createdAt: mockTimestamp(),
+    productType: 'media-influencer',
+    subtype: 'bundled-services' as any,
+    platform: 'Cross-Platform',
+    deliveryTimeDays: 0,
+    revisionsAllowed: 0,
+    categoryId: 'pr-collabs',
+    category: 'PR & Collab Services',
+    isActive: true
+};
+
+/**
  * Mock Media Influencer Products
  * A diverse mix of PR services, automobiles, and luxury fashion
  */

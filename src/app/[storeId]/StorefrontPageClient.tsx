@@ -31,7 +31,7 @@ import toast from 'react-hot-toast';
 import HeroCarousel from '@/components/customer/HeroCarousel';
 import NeedAWebsiteModal from '@/components/customer/modals/NeedAWebsiteModal';
 import InstallPrompt from '@/components/InstallPrompt';
-import { mockArtProducts, mockBeautyProducts, mockMediaProducts, mockSolarProducts, mockCandleProducts } from '@/lib/mockProducts';
+import { mockArtProducts, mockBeautyProducts, mockMediaProducts, mockSolarProducts, mockCandleProducts, BUNDLE_INFLUENCER_SERVICES } from '@/lib/mockProducts';
 import { getHiddenMockIds } from '@/utils/mockPersistence';
 
 
@@ -163,6 +163,11 @@ export default function StorefrontPageClient({
     if (storeMeta?.storeType === 'media-influencer' && products.length === 0 && !loading) {
       const hiddenIds = getHiddenMockIds(storeId);
       const influencerMocks = (mockMediaProducts as any[]).filter(p => !hiddenIds.includes(p.id) && !p.id.toLowerCase().includes('ticket'));
+
+      // Inject permanent bundle card
+      if (!hiddenIds.includes(BUNDLE_INFLUENCER_SERVICES.id)) {
+        influencerMocks.unshift(BUNDLE_INFLUENCER_SERVICES);
+      }
 
       if (influencerMocks.length === 0) return; // All mocks hidden and no real products
 
