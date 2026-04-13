@@ -501,7 +501,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex min-h-full items-end justify-center p-0 text-center sm:items-center sm:p-4">
               <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95" enterTo="opacity-100 translate-y-0 sm:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 sm:scale-100" leaveTo="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95">
-                <Dialog.Panel className="relative w-full transform overflow-hidden rounded-t-[2rem] bg-white dark:bg-modal-background text-left align-middle shadow-2xl transition-all flex flex-col h-[72vh] max-h-[72vh] sm:h-auto sm:max-w-2xl sm:rounded-2xl sm:max-h-[85vh]">
+                <Dialog.Panel className={`relative w-full transform overflow-hidden rounded-t-[2rem] bg-white dark:bg-modal-background text-left align-middle shadow-2xl transition-all flex flex-col sm:h-auto sm:max-w-2xl sm:rounded-2xl sm:max-h-[85vh] ${currentPage === 1 && isBundledInfluencerServices ? 'h-[80vh] max-h-[80vh]' : 'h-[72vh] max-h-[72vh]'}`}>
 
                   {/* Handle Bar for Mobile */}
                   <div className="flex-shrink-0 pt-3 pb-1 flex justify-center sm:hidden">
@@ -1492,50 +1492,84 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                       {currentPage === 2 && isBundledInfluencerServices && (
                         <div className="pt-2 sm:pt-4 space-y-6 pb-10">
                           <div className="grid grid-cols-1 gap-4">
-                            {bundleServices.map((svc) => (
-                              <button
-                                key={svc.id}
-                                onClick={() => {
-                                  setSelectedBundleService(svc);
-                                  setCurrentPage(3);
-                                }}
-                                className={`group p-4 rounded-[2rem] border-2 transition-all text-left flex items-center gap-4 ${selectedBundleService?.id === svc.id
-                                  ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/10'
-                                  : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/50 hover:border-indigo-200 dark:hover:border-indigo-800'
-                                  }`}
-                              >
-                                <div className="relative w-20 h-20 rounded-2xl overflow-hidden flex-shrink-0 border border-gray-100 dark:border-gray-700">
-                                  <Image
-                                    src={svc.images?.[0] || DEFAULT_PRODUCT_IMAGE}
-                                    alt={svc.name}
-                                    fill
-                                    className="object-cover group-hover:scale-110 transition-transform duration-500"
-                                  />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex justify-between items-start">
-                                    <h4 className="font-black text-gray-900 dark:text-white text-base truncate">{svc.name}</h4>
-                                    <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded-full">
-                                      {formatPrice(svc.price)}
-                                    </span>
-                                  </div>
-                                  <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2 mt-1 leading-relaxed">
-                                    {svc.description}
-                                  </p>
-                                  <div className="flex items-center gap-3 mt-2">
-                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
-                                      <RefreshCw className="w-3 h-3" /> {svc.revisionsAllowed} Revs
-                                    </span>
-                                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
-                                      <Clock className="w-3 h-3" /> {svc.deliveryTimeDays} Days
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-700 flex items-center justify-center text-gray-300 group-hover:text-indigo-500 transition-colors">
-                                  <Plus className="w-5 h-5" />
-                                </div>
-                              </button>
-                            ))}
+                            {bundleServices.map((svc) => {
+                              const isExpanded = selectedBundleService?.id === svc.id;
+                              return (
+                                <motion.div
+                                  key={svc.id}
+                                  layout
+                                  initial={false}
+                                  className={`group rounded-[2rem] border-2 transition-all overflow-hidden ${isExpanded
+                                    ? 'border-indigo-500 bg-indigo-50/50 dark:bg-indigo-900/10'
+                                    : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/50 hover:border-indigo-200 dark:hover:border-indigo-800'
+                                    }`}
+                                >
+                                  <button
+                                    onClick={() => setSelectedBundleService(isExpanded ? null : svc)}
+                                    className="w-full p-4 flex items-center gap-4 text-left"
+                                  >
+                                    <div className="relative w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 border border-gray-100 dark:border-gray-700 bg-white">
+                                      <Image
+                                        src={svc.images?.[0] || DEFAULT_PRODUCT_IMAGE}
+                                        alt={svc.name}
+                                        fill
+                                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                                      />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex justify-between items-start">
+                                        <h4 className="font-black text-gray-900 dark:text-white text-base truncate">{svc.name}</h4>
+                                        <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 whitespace-nowrap bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded-full">
+                                          {formatPrice(svc.price)}
+                                        </span>
+                                      </div>
+                                      <div className="flex items-center gap-3 mt-1">
+                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
+                                          <RefreshCw className="w-3 h-3" /> {svc.revisionsAllowed} Revs
+                                        </span>
+                                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest flex items-center gap-1">
+                                          <Clock className="w-3 h-3" /> {svc.deliveryTimeDays} Days
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <motion.div
+                                      animate={{ rotate: isExpanded ? 180 : 0 }}
+                                      className="w-8 h-8 rounded-full bg-gray-50 dark:bg-gray-700 flex items-center justify-center text-gray-400"
+                                    >
+                                      <Plus className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-45' : ''}`} />
+                                    </motion.div>
+                                  </button>
+
+                                  <AnimatePresence>
+                                    {isExpanded && (
+                                      <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: 'auto', opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                      >
+                                        <div className="px-5 pb-5 pt-2 border-t border-indigo-100/50 dark:border-indigo-800/30">
+                                          <div className="bg-white/50 dark:bg-gray-900/50 rounded-2xl p-4 mb-4">
+                                            <h5 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-2">Service Description</h5>
+                                            <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                                              {svc.description}
+                                            </p>
+                                          </div>
+
+                                          <button
+                                            onClick={() => setCurrentPage(3)}
+                                            className="w-full py-4 rounded-2xl bg-indigo-600 text-white font-black text-sm uppercase tracking-widest shadow-lg hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 group/btn active:scale-[0.98]"
+                                          >
+                                            <span>Proceed with {svc.name.split(' ')[0]}</span>
+                                            <Rocket className="w-4 h-4 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform" />
+                                          </button>
+                                        </div>
+                                      </motion.div>
+                                    )}
+                                  </AnimatePresence>
+                                </motion.div>
+                              );
+                            })}
                           </div>
                         </div>
                       )}
