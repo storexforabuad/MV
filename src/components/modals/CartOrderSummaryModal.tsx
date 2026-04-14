@@ -93,7 +93,12 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
       if (isPaymentFlowEnabled && storeId) {
         const savedState = getModalState(storeId);
         if (savedState) {
-          setCurrentPage(savedState.currentPage === 3 ? 1 : savedState.currentPage);
+          const page = savedState.currentPage;
+          if (page === 1 || page === 2 || page === 3) {
+            setCurrentPage(page);
+          } else {
+            setCurrentPage(1);
+          }
           if (savedState.evidenceUrl) {
             setUploadedEvidence({
               url: savedState.evidenceUrl,
