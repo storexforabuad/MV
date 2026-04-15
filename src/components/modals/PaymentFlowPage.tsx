@@ -189,6 +189,14 @@ export default function PaymentFlowPage({
   const executePaystackPayment = async (activeCustomer: Customer) => {
     setIsProcessing(true);
     try {
+      // Defensive: strip any accidental functions or non-serializable fields 
+      // from the product/cart objects before passing to Server Actions.
+      const sanitizeForServer = (obj: any): any => {
+        return JSON.parse(JSON.stringify(obj, (key, value) =>
+          typeof value === 'function' ? undefined : value
+        ));
+      };
+
       // 1. Create Pending Order
       let itemsToOrder: any[] = [];
 
@@ -221,9 +229,9 @@ export default function PaymentFlowPage({
 
       const newOrder = await addOrderToFirestore(
         activeCustomer.id,
-        itemsToOrder,
-        storeMeta,
-        activeCustomer,
+        sanitizeForServer(itemsToOrder),
+        sanitizeForServer(storeMeta),
+        sanitizeForServer(activeCustomer),
         referrerId,
         false, // bonusApplied
         deliveryMethod as 'home' | 'pickup',

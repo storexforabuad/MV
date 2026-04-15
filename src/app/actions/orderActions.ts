@@ -151,10 +151,19 @@ export const addOrderToFirestore = async (
                         referralWasApplied = true;
                         const commissionValue = (firstEligibleProduct.price * firstEligibleProduct.commission!) / 100;
                         const referrerRef = doc(db, 'customers', referrerId);
-                        batch.update(referrerRef, {
-                            [`referralDataByStore.${storeId}.commissionEarned`]: increment(commissionValue),
-                            [`referralDataByStore.${storeId}.referralCount`]: increment(1)
-                        });
+
+                        // Debug logging 
+                        console.log(`[OrderAction] Verifying referrer doc: customers/${referrerId}`);
+                        const referrerSnapCheck = await getDoc(referrerRef);
+                        if (!referrerSnapCheck.exists()) {
+                            console.error(`Referrer document not found: customers/${referrerId}`);
+                        } else {
+                            batch.update(referrerRef, {
+                                [`referralDataByStore.${storeId}.commissionEarned`]: increment(commissionValue),
+                                [`referralDataByStore.${storeId}.referralCount`]: increment(1)
+                            });
+                        }
+
                         const newReferralHistoryRef = doc(db, 'customers', referrerId, 'referrals', newOrderId);
                         batch.set(newReferralHistoryRef, {
                             refereeId: customerId,
@@ -170,7 +179,14 @@ export const addOrderToFirestore = async (
         }
 
         if (bonusApplied && customerRef) {
-            batch.update(customerRef, { totalReferralCommission: 0 });
+            // Debug logging
+            console.log(`[OrderAction] Verifying customer doc for bonus update: customers/${customerId}`);
+            const customerSnapCheck = await getDoc(customerRef);
+            if (!customerSnapCheck.exists()) {
+                console.error(`Customer document not found for bonus update: customers/${customerId}`);
+            } else {
+                batch.update(customerRef, { totalReferralCommission: 0 });
+            }
         }
 
         const productsWithStatus: OrderProduct[] = products.map(p => ({ ...p, status: 'processing' }));
@@ -213,6 +229,15 @@ export const addOrderToFirestore = async (
 
         const totalCommissionFromSale = products.reduce((acc, p) => acc + (p.commission ? (p.price * p.commission) / 100 : 0), 0);
         const storeRef = doc(db, 'stores', storeId);
+
+        // Debug logging
+        console.log(`[OrderAction] Attempting to update store doc: stores/${storeId}`);
+        const storeSnap = await getDoc(storeRef);
+        if (!storeSnap.exists()) {
+            console.error(`CRITICAL: Store document not found for ID: ${storeId}. Current URL might be using a slug that doesn't match the doc ID.`);
+            throw new Error(`Store configuration error: ${storeId} not found.`);
+        }
+
         batch.update(storeRef, {
             totalOrders: increment(1),
             totalCommissionEarned: increment(totalCommissionFromSale)
@@ -243,7 +268,16 @@ export const addOrderToFirestore = async (
         };
 
     } catch (error) {
-        console.error("FATAL: Error adding order to Firestore:", JSON.stringify(error, null, 2));
+        console.error("FATAL: Error adding order to Firestore:", {
+            error,
+            customerId,
+            storeId: storeMeta?.id,
+            productCount: products?.length,
+            referralCode
+        });
+        if (error instanceof Error) {
+            console.error("Error details:", error.message);
+        }
         throw new Error("Failed to place order.");
     }
 };

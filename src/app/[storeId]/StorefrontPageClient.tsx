@@ -160,11 +160,15 @@ export default function StorefrontPageClient({
 
   // --- MOCK DATA INJECTION FOR VISUALIZATION ---
   useEffect(() => {
-    if (storeMeta?.storeType === 'media-influencer' && products.length === 0 && !loading) {
+    // Only inject mocks if we are in a media influencer store AND we truly have NO real products
+    // (We check initialProducts to be sure we're not just on an empty filter/category)
+    const hasRealProducts = (initialProducts && initialProducts.length > 0) || (products.some(p => p.id && !p.id.includes('permanent') && !p.id.includes('mock')));
+
+    if (storeMeta?.storeType === 'media-influencer' && products.length === 0 && !loading && !hasRealProducts) {
       const hiddenIds = getHiddenMockIds(storeId);
       const influencerMocks = (mockMediaProducts as any[]).filter(p => !hiddenIds.includes(p.id) && !p.id.toLowerCase().includes('ticket'));
 
-      // Inject permanent bundle card
+      // Inject permanent bundle card only if no real products exist
       if (!hiddenIds.includes(BUNDLE_INFLUENCER_SERVICES.id)) {
         influencerMocks.unshift(BUNDLE_INFLUENCER_SERVICES);
       }

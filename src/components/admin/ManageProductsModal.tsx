@@ -355,7 +355,7 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
           '/images/hub/hub-security.png'
         ],
         views: 0,
-        createdAt: { toMillis: () => Date.now() } as any,
+        createdAt: Date.now() as any, // Simple serializable number
         commission: 10,
         productType: 'media-influencer',
         subtype: 'service-hub',
