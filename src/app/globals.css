@@ -857,21 +857,21 @@ h3 {
 
 .influencer-live-bg {
   background-image: linear-gradient(135deg,
-      #e11d48,
-      /* rose-600   */
-      #c026d3,
-      /* fuchsia-600 */
-      #7c3aed,
-      /* violet-600  */
-      #4f46e5,
-      /* indigo-600  */
-      #db2777,
-      /* pink-600    */
-      #e11d48
-      /* back to rose — seamless loop */
+      #064e3b,
+      /* emerald-950 */
+      #065f46,
+      /* emerald-900 */
+      #047857,
+      /* emerald-700 */
+      #b45309,
+      /* amber-700 (gold) */
+      #065f46,
+      /* emerald-900 */
+      #064e3b
+      /* back to start */
     );
   background-size: 400% 400%;
-  animation: aliveGradient 12s ease infinite;
+  animation: aliveGradient 25s ease infinite;
 }
 
 .luxury-fashion-bg {

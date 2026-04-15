@@ -340,11 +340,11 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             opacity: [0.25, 0.55, 0.35, 0.25]
                         }}
                         transition={{
-                            duration: isFashion ? 25 : 18,
+                            duration: isFashion ? 25 : 35,
                             repeat: Infinity,
                             ease: "easeInOut"
                         }}
-                        className={`absolute -top-[10%] -left-[10%] w-[70%] h-[70%] ${isFashion ? 'bg-amber-600/30' : 'bg-rose-500/40'} blur-[110px] rounded-full mix-blend-screen`}
+                        className={`absolute -top-[10%] -left-[10%] w-[70%] h-[70%] ${isFashion ? 'bg-amber-600/30' : 'bg-emerald-500/40'} blur-[110px] rounded-full mix-blend-screen`}
                     />
                     <motion.div
                         animate={{
@@ -354,12 +354,12 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             opacity: [0.2, 0.5, 0.3, 0.2]
                         }}
                         transition={{
-                            duration: isFashion ? 30 : 22,
+                            duration: isFashion ? 30 : 45,
                             repeat: Infinity,
                             ease: "easeInOut",
                             delay: 3
                         }}
-                        className={`absolute -bottom-[20%] -right-[10%] w-[70%] h-[70%] ${isFashion ? 'bg-orange-950/40' : 'bg-indigo-600/40'} blur-[110px] rounded-full mix-blend-screen`}
+                        className={`absolute -bottom-[20%] -right-[10%] w-[70%] h-[70%] ${isFashion ? 'bg-orange-950/40' : 'bg-emerald-900/40'} blur-[110px] rounded-full mix-blend-screen`}
                     />
                     <motion.div
                         animate={{
@@ -369,12 +369,12 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             opacity: [0.12, 0.38, 0.2, 0.12]
                         }}
                         transition={{
-                            duration: isFashion ? 35 : 28,
+                            duration: isFashion ? 35 : 55,
                             repeat: Infinity,
                             ease: "easeInOut",
                             delay: 7
                         }}
-                        className={`absolute top-1/4 left-1/3 w-[40%] h-[40%] ${isFashion ? 'bg-yellow-500/10' : 'bg-amber-400/25'} blur-[90px] rounded-full mix-blend-screen`}
+                        className={`absolute top-1/4 left-1/3 w-[40%] h-[40%] ${isFashion ? 'bg-yellow-500/10' : 'bg-amber-400/30'} blur-[90px] rounded-full mix-blend-screen`}
                     />
 
                     {/* Shimmer sweep — glassy liquid surface */}
