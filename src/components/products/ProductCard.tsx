@@ -24,7 +24,8 @@ import {
   isBeautyProduct,
   isArtProduct,
   isMediaInfluencerProduct,
-  isTicketProduct
+  isTicketProduct,
+  isDigitalProduct
 } from '../../utils/productHelpers';
 
 
@@ -87,7 +88,9 @@ export default function ProductCard({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const isInfluencerHub = product.id?.includes('bundle-influencer-services') || product.name === 'Influencer Services Hub';
+  const isInfluencerHub = product.name === 'Influencer Services Hub' || (isMediaInfluencerProduct(product) && product.subtype === 'service-hub');
+  Hartman_InfluencerHub_Logic: ; // marker
+  Hartman_InfluencerHub_Logic_End: ; // marker
 
   useIntersectionObserver(cardRef as React.RefObject<Element>, (entries) => {
     if (entries[0].isIntersecting) setIsVisible(true);
@@ -536,6 +539,15 @@ export default function ProductCard({
                   </div>
                 </div>
               )}
+              {isDigitalProduct(product) && (
+                <div className="absolute top-[18px] right-[18px] z-10">
+                  <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                    <span className="product-badge bg-blue-600 text-white shadow-md whitespace-nowrap border border-white/20 uppercase font-black tracking-wider text-[9px] px-3 py-1 rounded-full">
+                      ⚡ DIGITAL
+                    </span>
+                  </div>
+                </div>
+              )}
               {(isElectronicsProduct(product) || isSolarProduct(product)) && (
                 <div className="absolute top-[18px] right-[18px] z-10 flex flex-col items-end gap-2">
                   {/* Brand Badge */}
@@ -644,6 +656,24 @@ export default function ProductCard({
                 <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
                   <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-bold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2.5 py-1 truncate max-w-[200px]">
                     📍 {(product as any).venue}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Digital Product Overlays */}
+          {!isSoldOut && isDigitalProduct(product) && (
+            <div className="absolute bottom-[14px] left-[14px] z-10 flex flex-col items-start gap-1.5 max-w-[calc(100%-80px)]">
+              <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                <span className="product-badge bg-white/95 dark:bg-black/80 backdrop-blur text-slate-800 dark:text-slate-100 shadow-sm font-bold flex items-center gap-1 border border-white/20 dark:border-white/10 text-[10px] tracking-wide px-2.5 py-1 capitalize">
+                  📂 {product.subtype?.replace('-', ' ')}
+                </span>
+              </div>
+              {product.digitalDetails?.fileType && (
+                <div className="badge-wrapper inline-flex transform-gpu transition-transform duration-200 group-hover:scale-105">
+                  <span className="product-badge bg-zinc-900/10 dark:bg-white/10 backdrop-blur text-zinc-900 dark:text-white shadow-sm font-bold flex items-center gap-1 border border-zinc-900/10 dark:border-white/10 text-[10px] tracking-widest px-2.5 py-1 uppercase">
+                    📦 {product.digitalDetails.fileType}
                   </span>
                 </div>
               )}
@@ -1132,6 +1162,6 @@ export default function ProductCard({
           </div>
         </div>
       </div>
-    </Link>
+    </Link >
   );
 }

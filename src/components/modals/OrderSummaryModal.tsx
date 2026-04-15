@@ -8,7 +8,7 @@ import { Product } from '@/types/product';
 import { StoreMeta } from '@/types/store';
 import { Customer } from '@/types/customer';
 import { formatPrice } from '@/utils/price';
-import { Minus, Plus, Loader2, MessageSquare, ExternalLink, AlertCircle, Smartphone, Activity, Database, Cpu, Network, ShieldCheck, Package, Fingerprint, Info, Code, Battery, Headphones, VolumeX, Gamepad2, Zap, Watch, Cable, Link, Sun, Layers, RefreshCw, Gauge, Monitor, Wifi, Palette, Ruler, PenTool, CheckCircle2, Clock, Sparkles, Star, Rocket, Target, Users } from 'lucide-react';
+import { Minus, Plus, Loader2, MessageSquare, ExternalLink, AlertCircle, Smartphone, Activity, Database, Cpu, Network, ShieldCheck, Package, Fingerprint, Info, Code, Battery, Headphones, VolumeX, Gamepad2, Zap, Watch, Cable, Link, Sun, Layers, RefreshCw, Gauge, Monitor, Wifi, Palette, Ruler, PenTool, CheckCircle2, Clock, Sparkles, Star, Rocket, Target, Users, BookOpen, Music, Video, Key, Download } from 'lucide-react';
 import { ElectronicsProduct, MediaInfluencerProduct, VehicleProduct, FashionProduct, BeautyProduct } from '@/types/product';
 import { mockMediaProducts } from '@/lib/mockProducts';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -17,7 +17,7 @@ import toast from 'react-hot-toast';
 import { useParams } from 'next/navigation';
 import { getCustomerDetails } from '@/app/actions/customerActions';
 import { useCustomer } from '@/context/CustomerContext';
-import { isFoodBeverageProduct, isFashionProduct, isElectronicsProduct, isSolarProduct, isVehicleProduct, isBeautyProduct, isArtProduct, isTicketProduct } from '@/utils/productHelpers';
+import { isFoodBeverageProduct, isFashionProduct, isElectronicsProduct, isSolarProduct, isVehicleProduct, isBeautyProduct, isArtProduct, isTicketProduct, isDigitalProduct } from '@/utils/productHelpers';
 import { shouldUsePaymentFlow } from '@/utils/storeHelpers';
 import { saveModalState, getModalState, clearModalState } from '@/lib/paymentModalStorage';
 import { requestCustomerNotificationPermission } from '@/lib/requestCustomerNotifications';
@@ -31,8 +31,23 @@ const SPICINESS_LEVELS = [
   { value: 'mild', label: '😌 Mild', color: 'bg-green-100 text-green-800 border-green-200' },
   { value: 'medium', label: '🌶️ Medium', color: 'bg-yellow-100 text-yellow-800 border-yellow-200' },
   { value: 'hot', label: '🔥 Hot', color: 'bg-orange-100 text-orange-800 border-orange-200' },
-  { value: 'extra-hot', label: '🤯 Extra Hot', color: 'bg-red-100 text-red-800 border-red-200' },
+  { value: 'extra-hot', label: '🤯 Extra Hot', color: 'bg-red-100 text-red-800 border-red-200' }
 ];
+
+const DIGITAL_SUBTYPE_META: Record<string, { icon: any; label: string }> = {
+  'e-books-guides': { icon: BookOpen, label: 'E-Book / Guide' },
+  'software-code': { icon: Code, label: 'Software / Tool' },
+  'audio-music': { icon: Music, label: 'Music / Audio' },
+  'courses-tutorials': { icon: Video, label: 'Online Course' },
+  'templates-assets': { icon: Layers, label: 'Templates & Assets' },
+  // Legacy fallbacks
+  'e-book': { icon: BookOpen, label: 'E-Book' },
+  'software': { icon: Code, label: 'Software' },
+  'music': { icon: Music, label: 'Music' },
+  'course': { icon: Video, label: 'Course' },
+  'license-key': { icon: Key, label: 'License Key' },
+  'other': { icon: Zap, label: 'Digital Product' },
+};
 
 const DEFAULT_PRODUCT_IMAGE = '/default_product_800x800.png';
 
@@ -106,10 +121,14 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const isFashion = product ? isFashionProduct(product) : false;
   const isBeauty = product ? isBeautyProduct(product) : false;
   const isArt = product ? isArtProduct(product) : false;
+  const isDigital = product ? isDigitalProduct(product) : false;
   const isMediaInfluencer = product?.productType === 'media-influencer';
   const isServiceProduct = product?.productType === 'media-influencer' && product.subtype === 'service';
   const isEventTicketPromo = product?.productType === 'media-influencer' && product.subtype === 'event-ticket-promo';
   const isTicket = product ? isTicketProduct(product) : false;
+  const isBundledHub = product?.productType === 'media-influencer' && (product as any).subtype === 'bundled-services';
+  const isServiceHub = product?.productType === 'media-influencer' && (product as any).subtype === 'service-hub';
+  const isInfluencerHub = isBundledHub || isServiceHub;
 
   const onCloseRef = useRef(onClose);
   useEffect(() => {
@@ -167,7 +186,14 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
       if (isPaymentFlowEnabled && storeId) {
         const savedState = getModalState(storeId);
         if (savedState) {
-          setCurrentPage(savedState.currentPage);
+          // For the Influencer Hub, always start at the Explainer (Page 1) initially
+          // unless they were already on the payment pages (3 or 4) to allow completion
+          if ((isBundledHub || isServiceHub) && savedState.currentPage <= 2) {
+            setCurrentPage(1);
+          } else {
+            setCurrentPage(savedState.currentPage);
+          }
+
           if (savedState.evidenceUrl) {
             setUploadedEvidence({
               url: savedState.evidenceUrl,
@@ -269,11 +295,9 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
   if (!product) return null;
 
-  const isBundledInfluencerServices = product?.productType === 'media-influencer' && (product as any).subtype === 'bundled-services';
-
-  const hasPage1 = isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer || isArt || isTicket;
-  const summaryPageNum = isBundledInfluencerServices ? 3 : (hasPage1 ? 2 : 1);
-  const paymentPageNum = isBundledInfluencerServices ? 4 : (hasPage1 ? 3 : 2);
+  const hasPage1 = isElectronics || isSolar || isVehicle || isBeauty || isMediaInfluencer || isArt || isTicket || isDigital;
+  const summaryPageNum = isInfluencerHub ? 3 : (hasPage1 ? 2 : 1);
+  const paymentPageNum = isInfluencerHub ? 4 : (hasPage1 ? 3 : 2);
 
   const bundleServices = (mockMediaProducts as any[]).filter(p =>
     p.productType === 'media-influencer' &&
@@ -299,7 +323,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
       if (t) return t.price * quantity;
     }
     // If we're in the influencer hub and a service is selected, use that service's price
-    if (isBundledInfluencerServices && selectedBundleService) {
+    if (isInfluencerHub && selectedBundleService) {
       return (selectedBundleService.price || 0) * quantity;
     }
     return (product?.price || 0) * quantity;
@@ -447,11 +471,15 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
               ((product as any).artDetails.isSigned ? `✍️ *Signed by Artist*\n` : '') +
               ((product as any).artDetails.hasCertificate ? `📜 *Certificate of Authenticity Included*\n` : '')
             ) : '') +
+            (isDigitalProduct(product) ? (
+              `📂 *Digital Asset:* ${product.subtype?.replace('-', ' ')}\n` +
+              (product.digitalDetails?.fileType ? `📦 *Format:* ${product.digitalDetails.fileType}\n` : '')
+            ) : '') +
             `💰 *Price:* ${formatPrice(product.price)}\n` +
-            `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n` +
-            `${deliveryMethod === 'home' ? (customer?.deliveryAddress?.street ? `📍 *To:* ${customer.deliveryAddress.street}\n` : '📍 *Address:* (Please provide your address below)\n') : ''}` +
+            (isDigitalProduct(product) ? `⚡ *Delivery Method:* Link will be shared\n` : `🚚 *Delivery Method:* ${deliveryMethod === 'home' ? 'Home Delivery' : 'Pick Up'}\n`) +
+            `${!isDigitalProduct(product) && deliveryMethod === 'home' ? (customer?.deliveryAddress?.street ? `📍 *To:* ${customer.deliveryAddress.street}\n` : '📍 *Address:* (Please provide your address below)\n') : ''}` +
             `*Total (excluding delivery):* ${formatPrice(total)}\n\n` +
-            `Please provide delivery fee and payment details.\n\n` +
+            (isDigitalProduct(product) ? `Please provide payment details to receive access.\n\n` : `Please provide delivery fee and payment details.\n\n`) +
             `Thank you! 🙏`;
         }
 
@@ -486,7 +514,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   };
 
   const handleProceedToPayment = () => {
-    if (!customer && !guestEmail && isPaymentFlowEnabled && (isServiceProduct || isEventTicketPromo || isBundledInfluencerServices)) {
+    if (!customer && !guestEmail && isPaymentFlowEnabled && (isServiceProduct || isEventTicketPromo || isInfluencerHub)) {
       setEmailError('Please enter your email to continue');
       emailSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
@@ -523,7 +551,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex min-h-full items-end justify-center p-0 text-center sm:items-center sm:p-4">
               <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95" enterTo="opacity-100 translate-y-0 sm:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 sm:scale-100" leaveTo="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95">
-                <Dialog.Panel className={`relative w-full transform overflow-hidden rounded-t-[2rem] bg-white dark:bg-modal-background text-left align-middle shadow-2xl transition-all flex flex-col sm:h-auto sm:max-w-2xl sm:rounded-2xl sm:max-h-[85vh] ${currentPage === 1 && isBundledInfluencerServices ? 'h-[80vh] max-h-[80vh]' : 'h-[72vh] max-h-[72vh]'}`}>
+                <Dialog.Panel className={`relative w-full transform overflow-hidden rounded-t-[2rem] bg-white dark:bg-modal-background text-left align-middle shadow-2xl transition-all flex flex-col sm:h-auto sm:max-w-2xl sm:rounded-2xl sm:max-h-[85vh] ${currentPage === 1 && isInfluencerHub ? 'h-[80vh] max-h-[80vh]' : 'h-[72vh] max-h-[72vh]'}`}>
 
                   {/* Handle Bar for Mobile */}
                   <div className="flex-shrink-0 pt-3 pb-1 flex justify-center sm:hidden">
@@ -536,10 +564,11 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                       {currentPage === 1 && isElectronics && (isElectronics || isSolar || isVehicle) ? 'Product Specifications' :
                         currentPage === 1 && isBeauty ? 'Details & Directions' :
                           currentPage === 1 && isArt ? 'Art Passport & Provenance' :
-                            currentPage === 1 && isMediaInfluencer ? (isBundledInfluencerServices ? 'Influencer Service Hub' : (isEventTicketPromo ? 'Promotion Details' : isServiceProduct ? 'Service Collaboration Details' : 'Influencer Product Details')) :
-                              currentPage === 2 && isBundledInfluencerServices ? 'Select a Service' :
-                                currentPage === summaryPageNum ? 'Order Summary' :
-                                  (isPaymentFlowEnabled ? 'Payment' : 'WhatsApp Preview')}
+                            currentPage === 1 && isDigital ? 'Product Details' :
+                              currentPage === 1 && isMediaInfluencer ? (isInfluencerHub ? 'Influencer Service Hub' : (isEventTicketPromo ? 'Promotion Details' : isServiceProduct ? 'Service Collaboration Details' : 'Influencer Product Details')) :
+                                currentPage === 2 && isInfluencerHub ? 'Select a Service' :
+                                  currentPage === summaryPageNum ? 'Order Summary' :
+                                    (isPaymentFlowEnabled ? 'Payment' : 'WhatsApp Preview')}
                     </h3>
                     <button
                       type="button"
@@ -1448,7 +1477,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                       })()}
 
                       {/* Page 1 (Influencer Services Explainer Hub) */}
-                      {currentPage === 1 && isBundledInfluencerServices && (
+                      {currentPage === 1 && isInfluencerHub && (
                         <div className="pt-2 sm:pt-4 space-y-8 pb-10">
                           {/* Rich Hero Card */}
                           <div className="relative overflow-hidden rounded-[2.5rem] bg-green-600 p-8 text-white shadow-xl">
@@ -1511,7 +1540,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                       )}
 
                       {/* Page 2 (Bundled Service Selection Catalog) */}
-                      {currentPage === 2 && isBundledInfluencerServices && (
+                      {currentPage === 2 && isInfluencerHub && (
                         <div className="pt-2 sm:pt-4 space-y-6 pb-10">
                           <div className="grid grid-cols-1 gap-4">
                             {bundleServices.map((svc) => {
@@ -1598,7 +1627,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                       )}
 
                       {/* Page 1 (Media Influencer Details - Only for physical products, services go straight to summary) */}
-                      {currentPage === 1 && isMediaInfluencer && !isBundledInfluencerServices && (() => {
+                      {currentPage === 1 && isMediaInfluencer && !isInfluencerHub && (() => {
                         const m = product as any;
 
                         return (
@@ -1857,6 +1886,126 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                         );
                       })()}
 
+                      {/* Page 1 (Digital Product Showcase) */}
+                      {currentPage === 1 && isDigital && (() => {
+                        const d = product as any;
+                        const subtype = d.subtype || 'other';
+                        const meta = DIGITAL_SUBTYPE_META[subtype] || { icon: Zap, label: 'Digital Product' };
+                        const fileType = d.digitalDetails?.fileType || 'Digital File';
+                        const hasExternalUrl = !!d.digitalDetails?.externalUrl;
+
+                        return (
+                          <div className="pt-2 sm:pt-4 space-y-6">
+                            {/* Full-width Hero Image */}
+                            <div className="relative w-full h-48 rounded-3xl overflow-hidden border border-gray-100 dark:border-gray-800 shadow-sm bg-gray-50 dark:bg-gray-900 flex-shrink-0">
+                              <AnimatePresence mode="wait">
+                                <motion.div
+                                  key={currentImageIndex}
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  exit={{ opacity: 0 }}
+                                  transition={{ duration: 0.3 }}
+                                  className="absolute inset-0"
+                                >
+                                  <Image
+                                    src={product.images?.[currentImageIndex] || DEFAULT_PRODUCT_IMAGE}
+                                    alt={product.name}
+                                    fill
+                                    className="object-cover"
+                                    onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; }}
+                                  />
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                                </motion.div>
+                              </AnimatePresence>
+
+                              {/* Image Indicators */}
+                              {product.images && product.images.length > 1 && (
+                                <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1.5 z-10">
+                                  {product.images.map((_, idx) => (
+                                    <button
+                                      key={idx}
+                                      onClick={() => setCurrentImageIndex(idx)}
+                                      className={`h-1.5 rounded-full transition-all ${currentImageIndex === idx ? 'bg-white w-4' : 'bg-white/50 w-1.5'}`}
+                                    />
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Title & Metadata */}
+                            <div className="space-y-4">
+                              <div className="flex flex-wrap gap-2">
+                                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 rounded-full text-xs font-bold font-mono uppercase tracking-tight">
+                                  <meta.icon className="w-3.5 h-3.5" />
+                                  {meta.label}
+                                </span>
+                                <span className="inline-flex items-center px-3 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-full text-xs font-bold border border-gray-200 dark:border-gray-700">
+                                  {fileType}
+                                </span>
+                                <span className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 rounded-full text-xs font-bold">
+                                  <Zap className="w-3 h-3" /> Instant Delivery
+                                </span>
+                              </div>
+
+                              <div>
+                                <h4 className="text-2xl font-black text-gray-900 dark:text-white leading-tight tracking-tight">{product.name}</h4>
+                                <p className="text-xl font-bold text-emerald-600 dark:text-emerald-400 mt-1">{formatPrice(product.price)}</p>
+                              </div>
+                            </div>
+
+                            {/* Description Block */}
+                            <div className="p-6 rounded-[2rem] bg-gray-50/80 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-700/50 backdrop-blur-sm">
+                              <h5 className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">About This Product</h5>
+                              <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
+                                {product.description || 'No description provided for this digital product.'}
+                              </p>
+                            </div>
+
+                            {/* Value Props / Feature Checklist */}
+                            <div className="space-y-3 px-2">
+                              <div className="flex items-start gap-3">
+                                <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                  <CheckCircle2 className="w-3 h-3" />
+                                </div>
+                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Download link delivered instantly after payment</p>
+                              </div>
+                              <div className="flex items-start gap-3">
+                                <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                  <CheckCircle2 className="w-3 h-3" />
+                                </div>
+                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">No shipping, no waiting — yours forever</p>
+                              </div>
+                              <div className="flex items-start gap-3">
+                                <div className="w-5 h-5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                  <CheckCircle2 className="w-3 h-3" />
+                                </div>
+                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Format: {fileType}</p>
+                              </div>
+                            </div>
+
+                            {/* Missing URL Warning (Defensive) */}
+                            {!hasExternalUrl && (
+                              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 p-4 rounded-2xl flex items-start gap-3">
+                                <AlertCircle className="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" />
+                                <div>
+                                  <h4 className="text-sm font-bold text-amber-800 dark:text-amber-400">Manual Delivery</h4>
+                                  <p className="text-xs text-amber-700 dark:text-amber-500 mt-1">The vendor will process this and send your download link directly via WhatsApp after payment.</p>
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="pt-2">
+                              <button
+                                onClick={() => setCurrentPage(summaryPageNum as any)}
+                                className="w-full py-4 rounded-2xl bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-bold text-sm shadow-xl hover:opacity-90 transition-opacity active:scale-[0.98]"
+                              >
+                                Continue to Summary
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
                       {/* Page 1 (Ticket Purchasing - Select Tier) */}
                       {currentPage === 1 && isTicket && (() => {
                         const t = product as any;
@@ -1985,7 +2134,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                       {/* Stage 2: Fulfillment / Requirements */}
                       {currentPage === summaryPageNum && (
                         <div className="pt-4 sm:pt-8">
-                          {isBundledInfluencerServices && selectedBundleService && (
+                          {isInfluencerHub && selectedBundleService && (
                             <div className="mb-8 p-6 rounded-[2rem] bg-green-50/50 dark:bg-green-900/10 border border-green-100 dark:border-green-800/30">
                               <div className="flex items-center justify-between gap-4">
                                 <div className="flex items-center gap-4">
@@ -2061,7 +2210,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                   </button>
                                 </div>
 
-                                {!customer && isPaymentFlowEnabled && (isServiceProduct || isEventTicketPromo || isBundledInfluencerServices) && (
+                                {!customer && isPaymentFlowEnabled && (isServiceProduct || isEventTicketPromo || isInfluencerHub) && (
                                   <div ref={emailSectionRef} className="p-5 rounded-3xl bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100/50 dark:border-blue-800/30">
                                     <label className="block text-[10px] font-black uppercase tracking-widest text-blue-600 dark:text-blue-400 mb-2 ml-1">Fulfillment Email</label>
                                     <input type="email" placeholder="Where should we send updates?" value={guestEmail} onChange={(e) => { setGuestEmail(e.target.value); if (emailError) setEmailError(''); }} className={`w-full px-5 py-4 rounded-2xl bg-white dark:bg-gray-800/40 border ${emailError ? 'border-red-500 ring-1 ring-red-500' : 'border-blue-100/30 dark:border-blue-800/20'} focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm font-medium transition-colors`} />
@@ -2174,7 +2323,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                               </div>
 
 
-                              {!isServiceProduct && (
+                              {!isServiceProduct && !isInfluencerHub && (
                                 <div className="flex flex-col items-center gap-1 bg-gray-50 dark:bg-gray-900 p-2 rounded-lg border border-gray-100 dark:border-gray-800">
                                   <span className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold">
                                     {isFashionProduct(product) && (product as any).isTextile ? (quantity > 1 ? 'Yards' : 'Yard') : (product.productType === 'livestock' && (product as any).priceUnit === 'kg' ? 'Kilos' : 'Quantity')}
@@ -2307,8 +2456,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             </div>
                           )}
 
-                          {/* Delivery Method (Hidden for services and tickets) */}
-                          {!isVehicle && !isServiceProduct && !isTicket && !isEventTicketPromo && !isBundledInfluencerServices && (
+                          {/* Delivery Method (Hidden for services, tickets, and digital) */}
+                          {!isVehicle && !isServiceProduct && !isTicket && !isEventTicketPromo && !isInfluencerHub && !isDigitalProduct(product) && (
                             <div className="mt-8">
                               <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3">Delivery Method</h4>
                               <div className="grid grid-cols-2 gap-4">
@@ -2335,7 +2484,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           )}
 
                           {/* Payment Details (Hidden for bundled services as total is in the last page) */}
-                          {!isBundledInfluencerServices && (
+                          {!isInfluencerHub && (
                             <div className="mt-8 border-t border-gray-200 dark:border-gray-800 pt-6">
                               <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-4">Payment Summary</h4>
                               <dl className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
@@ -2346,9 +2495,9 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
                                 {/* Fees removed for commission model */}
 
-                                {deliveryMethod === 'home' && !isVehicle && !isServiceProduct && (
+                                {deliveryMethod === 'home' && !isVehicle && !isServiceProduct && !isInfluencerHub && !isDigitalProduct(product) && (
                                   <div className="flex justify-between">
-                                    <dt>Home delivery</dt>
+                                    <dt>Delivery fee</dt>
                                     <dd className="font-medium text-gray-900 dark:text-gray-200">TBD by vendor</dd>
                                   </div>
                                 )}
@@ -2425,12 +2574,12 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                               toast.error('Please select a ticket tier');
                               return;
                             }
-                            setCurrentPage(isBundledInfluencerServices ? 2 : 2);
+                            setCurrentPage(isInfluencerHub ? 2 : 2);
                           }}
                         >
-                          {isServiceProduct || isBundledInfluencerServices ? 'Book' : isTicket ? 'Checkout' : 'Order'}
+                          {isServiceProduct || isInfluencerHub ? 'Book' : isTicket ? 'Checkout' : 'Order'}
                         </button>
-                      ) : currentPage === 2 && isBundledInfluencerServices ? (
+                      ) : currentPage === 2 && isInfluencerHub ? (
                         <button
                           type="button"
                           className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold py-4 px-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-[0.98]"
@@ -2444,7 +2593,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             <button
                               type="button"
                               className="w-1/3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 font-bold py-4 px-6 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all active:scale-[0.98]"
-                              onClick={() => setCurrentPage(isBundledInfluencerServices ? 2 : 1)}
+                              onClick={() => setCurrentPage(isInfluencerHub ? 2 : 1)}
                             >
                               Back
                             </button>

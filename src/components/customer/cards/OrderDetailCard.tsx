@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { Timestamp } from 'firebase/firestore';
 import { toast } from 'react-hot-toast';
-import { Repeat, MessageSquare, Clock, CheckCircle, Truck, FileText, AlertCircle } from 'lucide-react';
+import { Repeat, MessageSquare, Clock, CheckCircle, Truck, FileText, AlertCircle, Download, Zap } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Order } from '../../../hooks/useOrders';
 import { formatPrice } from '../../../utils/price';
@@ -14,7 +14,7 @@ import { Product } from '@/types/product';
 import { Customer } from '@/types/customer';
 import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 import { CartItem } from '@/lib/cartContext';
-import { isSolarProduct, isTicketProduct } from '@/utils/productHelpers';
+import { isSolarProduct, isTicketProduct, isDigitalProduct } from '@/utils/productHelpers';
 import EscrowDeliverablePanel from '@/components/admin/EscrowDeliverablePanel';
 import OrderReceiptModal from '../modals/OrderReceiptModal';
 import TicketScannerModal from '../modals/TicketScannerModal';
@@ -122,80 +122,95 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted, onR
               // Defensive check for images, as legacy product objects might not have an 'images' array.
               const imageUrl = product.images && product.images.length > 0 ? product.images[0] : undefined;
               return (
-                <div key={product.id || index} className="flex items-center gap-3">
-                  <div className="w-12 h-12 relative flex-shrink-0">
-                    {imageUrl && (
-                      <Image
-                        src={imageUrl}
-                        alt={product.name}
-                        fill
-                        sizes="48px"
-                        className="object-cover rounded-md"
-                      />
-                    )}
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-text-primary text-sm">{product.name}</p>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {((product as any).selectedColor) && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                          Color: {(product as any).selectedColor}
-                        </span>
-                      )}
-                      {((product as any).selectedSize) && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
-                          Size: {(product as any).selectedSize}
-                        </span>
-                      )}
-                      {((product as any).selectedSpiciness) && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-100 dark:border-red-800">
-                          {(product as any).selectedSpiciness === 'mild' && '😌 Mild'}
-                          {(product as any).selectedSpiciness === 'medium' && '🌶️ Medium'}
-                          {(product as any).selectedSpiciness === 'hot' && '🔥 Hot'}
-                          {(product as any).selectedSpiciness === 'extra-hot' && '🤯 Extra Hot'}
-                        </span>
-                      )}
-                      {((product as any).temperature) && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-100 dark:border-blue-800">
-                          {(product as any).temperature === 'hot' && '☕ Hot'}
-                          {(product as any).temperature === 'cold' && '❄️ Cold'}
-                          {(product as any).temperature === 'room-temp' && '🌡️ Room'}
-                        </span>
-                      )}
-                      {isSolarProduct(product as any) && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-100 dark:border-amber-800">
-                          {(() => {
-                            const s = product as any;
-                            switch (s.subtype) {
-                              case 'panel': return `☀️ ${s.wattage}`;
-                              case 'inverter': return `🔄 ${s.inverterCapacity}`;
-                              case 'battery': return `🔋 ${s.batteryCapacity}`;
-                              case 'controller': return `🎛️ ${s.controllerAmperage}`;
-                              case 'appliance': return `⚡ ${s.powerRating}`;
-                              default: return 'Solar';
-                            }
-                          })()}
-                        </span>
+                <div key={product.id || index} className="flex flex-col gap-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 relative flex-shrink-0">
+                      {imageUrl && (
+                        <Image
+                          src={imageUrl}
+                          alt={product.name}
+                          fill
+                          sizes="48px"
+                          className="object-cover rounded-md"
+                        />
                       )}
                     </div>
-                    {((product as any).specialInstructions) && (
-                      <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-800 rounded text-xs text-yellow-800 dark:text-yellow-200">
-                        <span className="font-semibold">Note:</span> {(product as any).specialInstructions}
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-text-primary text-sm truncate">{product.name}</p>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {((product as any).selectedColor) && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                            Color: {(product as any).selectedColor}
+                          </span>
+                        )}
+                        {((product as any).selectedSize) && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300">
+                            Size: {(product as any).selectedSize}
+                          </span>
+                        )}
+                        {((product as any).selectedSpiciness) && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-100 dark:border-red-800">
+                            {(product as any).selectedSpiciness === 'mild' && '😌 Mild'}
+                            {(product as any).selectedSpiciness === 'medium' && '🌶️ Medium'}
+                            {(product as any).selectedSpiciness === 'hot' && '🔥 Hot'}
+                            {(product as any).selectedSpiciness === 'extra-hot' && '🤯 Extra Hot'}
+                          </span>
+                        )}
+                        {((product as any).temperature) && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border border-blue-100 dark:border-blue-800">
+                            {(product as any).temperature === 'hot' && '☕ Hot'}
+                            {(product as any).temperature === 'cold' && '❄️ Cold'}
+                            {(product as any).temperature === 'room-temp' && '🌡️ Room'}
+                          </span>
+                        )}
+                        {isSolarProduct(product as any) && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border border-amber-100 dark:border-amber-800">
+                            {(() => {
+                              const s = product as any;
+                              switch (s.subtype) {
+                                case 'panel': return `☀️ ${s.wattage}`;
+                                case 'inverter': return `🔄 ${s.inverterCapacity}`;
+                                case 'battery': return `🔋 ${s.batteryCapacity}`;
+                                case 'controller': return `🎛️ ${s.controllerAmperage}`;
+                                case 'appliance': return `⚡ ${s.powerRating}`;
+                                default: return 'Solar';
+                              }
+                            })()}
+                          </span>
+                        )}
+                        {isDigitalProduct(product as any) && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800">
+                            <Zap className="w-3 h-3 mr-1" /> Digital
+                          </span>
+                        )}
                       </div>
-                    )}
-                    {((product as any).brandName) && (
-                      <div className="mt-2 p-2 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded text-xs text-indigo-800 dark:text-indigo-200">
-                        <span className="font-semibold uppercase tracking-wider text-[10px] block mb-1">Brand Name</span> {(product as any).brandName}
-                      </div>
-                    )}
-                    {((product as any).campaignBrief) && (
-                      <div className="mt-2 p-2 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded text-xs text-indigo-800 dark:text-indigo-200">
-                        <span className="font-semibold uppercase tracking-wider text-[10px] block mb-1">Campaign Brief</span> {(product as any).campaignBrief}
-                      </div>
-                    )}
-                    <p className="text-xs text-text-secondary mt-1">Qty: {product.productType === 'general' || product.productType === 'ticket' ? (product as any).quantity : 1}</p>
+                      {((product as any).specialInstructions) && (
+                        <div className="mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-800 rounded text-xs text-yellow-800 dark:text-yellow-200">
+                          <span className="font-semibold">Note:</span> {(product as any).specialInstructions}
+                        </div>
+                      )}
+                      {((product as any).brandName) && (
+                        <div className="mt-2 p-2 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded text-xs text-indigo-800 dark:text-indigo-200">
+                          <span className="font-semibold uppercase tracking-wider text-[10px] block mb-1">Brand Name</span> {(product as any).brandName}
+                        </div>
+                      )}
+                      {((product as any).campaignBrief) && (
+                        <div className="mt-2 p-2 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 rounded text-xs text-indigo-800 dark:text-indigo-200">
+                          <span className="font-semibold uppercase tracking-wider text-[10px] block mb-1">Campaign Brief</span> {(product as any).campaignBrief}
+                        </div>
+                      )}
+                      <p className="text-xs text-text-secondary mt-1">Qty: {product.productType === 'general' || product.productType === 'ticket' ? (product as any).quantity : 1}</p>
+                    </div>
+                    <p className="font-semibold text-text-primary text-sm whitespace-nowrap">{formatPrice(product.price * (product.productType === 'general' || product.productType === 'ticket' ? (product as any).quantity : 1))}</p>
                   </div>
-                  <p className="font-semibold text-text-primary text-sm">{formatPrice(product.price * (product.productType === 'general' || product.productType === 'ticket' ? (product as any).quantity : 1))}</p>
+                  
+                  {isDigitalProduct(product as any) && (product as any).digitalDetails?.externalUrl && (order.paymentStatus === 'escrow-held' || order.paymentStatus === 'escrow-released') && (
+                     <div className="pl-[60px] pb-2">
+                        <a href={(product as any).digitalDetails.externalUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-lg border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors">
+                           <Download className="w-3.5 h-3.5" /> Re-download {(product as any).digitalDetails?.fileType || 'File'}
+                        </a>
+                     </div>
+                  )}
                 </div>
               );
             })}

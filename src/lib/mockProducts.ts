@@ -1,4 +1,4 @@
-import { ArtProduct, BeautyProduct, MediaInfluencerProduct, VehicleProduct, FashionProduct, SolarProduct } from '../types/product';
+import { ArtProduct, BeautyProduct, MediaInfluencerProduct, VehicleProduct, FashionProduct, SolarProduct, DigitalProduct } from '../types/product';
 
 
 
@@ -810,14 +810,15 @@ export const BUNDLE_INFLUENCER_SERVICES: MediaInfluencerProduct = {
     description: 'Grow your brand with personalized birthday shoutouts, viral TikTok promos, event appearances, and premium event tickets. Tap to explore all my professional services.',
     price: 75000,
     images: [
-        'https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&q=80',
-        'https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=800&q=80',
-        'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=800&q=80'
+        '/images/hub/hub-editorial.png',
+        '/images/hub/hub-metrics.png',
+        '/images/hub/hub-workstation.png',
+        '/images/hub/hub-security.png'
     ],
     views: 0,
     createdAt: mockTimestamp(),
     productType: 'media-influencer',
-    subtype: 'bundled-services' as any,
+    subtype: 'service-hub',
     platform: 'Cross-Platform',
     deliveryTimeDays: 0,
     revisionsAllowed: 0,
@@ -1223,5 +1224,71 @@ export const mockMediaProducts: (MediaInfluencerProduct | VehicleProduct | Fashi
         sizeChart: { type: 'oil-perfume-volume' },
         categoryId: 'fragrances',
         category: 'Perfumes & Oils'
+    }
+];
+
+/**
+ * Mock Digital Products
+ * Sample items for Digital Products storefronts
+ */
+export const mockDigitalProducts: DigitalProduct[] = [
+    {
+        id: 'dig-1',
+        storeId: 'mock-digital-store',
+        name: 'The Ultimate Next.js Boilerplate',
+        description: 'A complete production-ready Next.js 14 template with authentication, database, and payments pre-configured.',
+        price: 25000,
+        originalPrice: 35000,
+        images: ['https://images.unsplash.com/photo-1618477388954-7852f32655ec?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'digital',
+        subtype: 'software-code',
+        categoryId: 'software',
+        digitalDetails: {
+            deliveryMethod: 'external-link',
+            externalUrl: 'https://drive.google.com/drive/folders/1abc123',
+            fileType: 'ZIP',
+            instructions: 'Extract the zip and run npm install to get started.'
+        },
+        available: true
+    },
+    {
+        id: 'dig-2',
+        storeId: 'mock-digital-store',
+        name: 'Mastering React 2026 E-Book',
+        description: 'Comprehensive guide to building modern, robust React applications in 2026.',
+        price: 8500,
+        images: ['https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'digital',
+        subtype: 'e-books-guides',
+        categoryId: 'e-books',
+        digitalDetails: {
+            deliveryMethod: 'external-link',
+            externalUrl: 'https://drive.google.com/file/d/1xyz',
+            fileType: 'PDF'
+        },
+        available: true
+    },
+    {
+        id: 'dig-3',
+        storeId: 'mock-digital-store',
+        name: 'Lofi Chill Beats Pack Vol. 1',
+        description: 'A collection of 25 royalty-free, high-quality lofi beats for your videos and podcasts.',
+        price: 15000,
+        images: ['https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=800&q=80'],
+        views: 0,
+        createdAt: mockTimestamp(),
+        productType: 'digital',
+        subtype: 'audio-music',
+        categoryId: 'audio',
+        digitalDetails: {
+            deliveryMethod: 'external-link',
+            externalUrl: 'https://drive.google.com/drive/folders/987abc',
+            fileType: 'WAV/MP3'
+        },
+        available: true
     }
 ];

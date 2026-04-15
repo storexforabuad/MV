@@ -312,7 +312,7 @@ export interface MediaInfluencerProduct extends BaseProduct {
   productType: 'media-influencer';
 
   // Subtypes: e.g., 'service' (PR/Collab) vs 'booking-fee'
-  subtype: 'service' | 'booking-fee' | 'event-ticket-promo';
+  subtype: 'service' | 'booking-fee' | 'event-ticket-promo' | 'service-hub';
 
   // Specific to 'service'
   platform?: 'Instagram' | 'TikTok' | 'YouTube' | 'Twitter' | 'Cross-Platform';
@@ -454,6 +454,28 @@ export interface TicketProduct extends BaseProduct {
 }
 
 // ==========================================
+// DIGITAL PRODUCT (New)
+// ==========================================
+export interface DigitalProduct extends BaseProduct {
+  productType: 'digital';
+  subtype: 'e-books-guides' | 'software-code' | 'courses-tutorials' | 'audio-music' | 'templates-assets' | 'other';
+
+  digitalDetails: {
+    fileType: string;        // "PDF", "ZIP", "MP4", "Access Link"
+    fileSize?: string;       // "15MB"
+    deliveryMethod: 'instant-download' | 'email-delivery' | 'external-link';
+    downloadUrl?: string;    // Secure URL to content (Firebase/Internal)
+    externalUrl?: string;    // Google Drive / Dropbox link
+    instructions?: string;   // Extra notes for the buyer
+  };
+
+  available: boolean;
+  soldOut?: boolean;
+  categoryId?: string;
+  category?: string;
+}
+
+// ==========================================
 // MASTER UNION TYPE
 // ==========================================
-export type Product = GeneralProduct | VehicleProduct | LivestockProduct | FashionProduct | FoodBeverageProduct | ElectronicsProduct | SolarProduct | MediaInfluencerProduct | BeautyProduct | ArtProduct | TicketProduct;
+export type Product = GeneralProduct | VehicleProduct | LivestockProduct | FashionProduct | FoodBeverageProduct | ElectronicsProduct | SolarProduct | MediaInfluencerProduct | BeautyProduct | ArtProduct | TicketProduct | DigitalProduct;

@@ -60,6 +60,7 @@ const ManageCategoriesModal = dynamic(() => import('../../../components/admin/Ma
 const AdminOrdersModal = dynamic(() => import('../../../components/admin/modals/AdminOrdersModal').then(mod => mod.AdminOrdersModal), { ssr: false });
 const AddBeautyComposer = dynamic(() => import('../../../components/admin/AddBeautyComposer'), { ssr: false });
 const AddArtComposer = dynamic(() => import('../../../components/admin/AddArtComposer'), { ssr: false });
+const AddDigitalProductComposer = dynamic(() => import('../../../components/admin/AddDigitalProductComposer'), { ssr: false });
 const AmbassadorHubModal = dynamic(() => import('../../../components/admin/modals/AmbassadorHubModal').then(mod => mod.AmbassadorHubModal), { ssr: false });
 const PostsComposerModal = dynamic(() => import('../../../components/admin/modals/PostsComposerModal'), { ssr: false });
 const SocialPostsModal = dynamic(() => import('../../../components/admin/modals/SocialPostsModal'), { ssr: false });
@@ -876,6 +877,15 @@ export default function AdminStorePageClient({
         />
       ) : storeMeta?.storeType === 'artdealer' ? (
         <AddArtComposer
+          isOpen={isComposerOpen}
+          onClose={() => setIsComposerOpen(false)}
+          storeId={storeId}
+          categories={categories}
+          onProductAdded={() => fetchData()}
+          onAddCategory={handleAddCategory}
+        />
+      ) : storeMeta?.storeType === 'digital-products' ? (
+        <AddDigitalProductComposer
           isOpen={isComposerOpen}
           onClose={() => setIsComposerOpen(false)}
           storeId={storeId}

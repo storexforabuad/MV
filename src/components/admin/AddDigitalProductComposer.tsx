@@ -1,0 +1,509 @@
+'use client';
+
+import React, { useState, useEffect, ChangeEvent } from 'react';
+import {
+    Zap, Link, FileText, CheckCircle2, Image as ImageIcon,
+    Plus, X, Upload, Info, Type, Tag, ChevronLeft,
+    ChevronRight, Loader2, Trash2, Globe, BookOpen,
+    Music, Code, Video, Layout
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { DigitalProduct } from '../../types/product';
+import toast from 'react-hot-toast';
+
+import CategorySelectorModal from './modals/CategorySelectorModal';
+import { uploadImageToCloudinary } from '../../lib/cloudinaryClient';
+import { compressImage } from '../../utils/imageCompression';
+import { Category } from '../../types/category';
+import { addProduct } from '../../lib/db';
+
+interface AddDigitalProductComposerProps {
+    isOpen: boolean;
+    onClose: () => void;
+    storeId: string;
+    categories: Category[];
+    onProductAdded: () => Promise<void>;
+    onAddCategory: (name: string) => Promise<void>;
+}
+
+const DIGITAL_SUBTYPES = [
+    { id: 'e-books-guides', label: 'E-Book / Guide', icon: BookOpen },
+    { id: 'software-code', label: 'Software / Tool', icon: Code },
+    { id: 'audio-music', label: 'Music / Audio', icon: Music },
+    { id: 'courses-tutorials', label: 'Online Course', icon: Video },
+    { id: 'templates-assets', label: 'Templates & Assets', icon: Layout },
+    { id: 'other', label: 'Other', icon: Type },
+];
+
+const FILE_TYPES = [
+    'PDF', 'ZIP', 'MP4', 'MP3', 'EPUB', 'DOCX', 'XLSX', 'APK', 'EXE', 'Access Link'
+];
+
+// --- Shared Helper Components ---
+
+const ModernToggle = ({ label, description, checked, onChange }: { label: string, description?: string, checked: boolean, onChange: (c: boolean) => void }) => (
+    <label className="flex items-center cursor-pointer justify-between w-full p-4 bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-sm transition-all hover:border-blue-200 dark:hover:border-blue-900/50">
+        <div className="flex flex-col flex-1 pr-4">
+            <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">{label}</span>
+            {description && <span className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">{description}</span>}
+        </div>
+        <div className="relative shrink-0">
+            <input type="checkbox" className="sr-only" checked={checked} onChange={(e) => onChange(e.target.checked)} />
+            <div className={`block w-12 h-7 rounded-full transition-colors ${checked ? 'bg-blue-500' : 'bg-zinc-200 dark:bg-zinc-700'}`}></div>
+            <div className={`dot absolute left-1 top-1 bg-white w-5 h-5 rounded-full shadow-sm transition-transform ${checked ? 'translate-x-5' : ''}`}></div>
+        </div>
+    </label>
+);
+
+const FloatingLabelInput = ({ label, type = "text", value, onChange, placeholder = "", prefix = "", id, multiline = false }: { label: string, type?: string, value: string | number, onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void, placeholder?: string, prefix?: string, id?: string, multiline?: boolean }) => {
+    const defaultId = `input-${label.toLowerCase().replace(/\s+/g, '-')}`;
+    const inputId = id || defaultId;
+
+    return (
+        <div className="relative">
+            {prefix && !multiline && (
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <span className="text-zinc-500 dark:text-zinc-400 sm:text-sm">{prefix}</span>
+                </div>
+            )}
+            {multiline ? (
+                <textarea
+                    id={inputId}
+                    value={value}
+                    onChange={onChange}
+                    rows={4}
+                    className="block w-full rounded-xl border-0 py-4 px-4 text-zinc-900 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-800/50 ring-1 ring-inset ring-zinc-200 dark:ring-zinc-700 placeholder:text-transparent focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 transition-all peer resize-none"
+                    placeholder={placeholder || label}
+                />
+            ) : (
+                <input
+                    id={inputId}
+                    type={type}
+                    value={value}
+                    onChange={onChange}
+                    className={`block w-full rounded-xl border-0 py-4 ${prefix ? 'pl-8' : 'pl-4'} pr-4 text-zinc-900 dark:text-zinc-100 bg-zinc-50 dark:bg-zinc-800/50 ring-1 ring-inset ring-zinc-200 dark:ring-zinc-700 placeholder:text-transparent focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 transition-all peer`}
+                    placeholder={placeholder || label}
+                />
+            )}
+            <label
+                htmlFor={inputId}
+                className={`absolute left-4 -top-2.5 bg-white dark:bg-zinc-900 px-1 text-xs font-medium text-blue-600 dark:text-blue-500 transition-all peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-blue-600 pointer-events-none ${multiline ? 'peer-placeholder-shown:top-4 peer-placeholder-shown:translate-y-0 peer-placeholder-shown:text-base peer-placeholder-shown:text-zinc-500' : 'peer-placeholder-shown:text-base peer-placeholder-shown:text-zinc-500 peer-placeholder-shown:top-4'}`}
+            >
+                {label}
+            </label>
+        </div>
+    );
+};
+
+export default function AddDigitalProductComposer({
+    isOpen, onClose, storeId, categories, onProductAdded, onAddCategory
+}: AddDigitalProductComposerProps) {
+    const [step, setStep] = useState(0);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formData, setFormData] = useState<Partial<DigitalProduct>>({
+        productType: 'digital',
+        name: '',
+        description: '',
+        price: 0,
+        images: [],
+        subtype: 'other',
+        digitalDetails: {
+            fileType: 'PDF',
+            deliveryMethod: 'external-link',
+            externalUrl: ''
+        },
+        available: true,
+        categoryId: ''
+    });
+
+    const [newImage, setNewImage] = useState('');
+    const [isUploading, setIsUploading] = useState(false);
+    const [isCategorySelectorOpen, setCategorySelectorOpen] = useState(false);
+
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+            if (categories && categories.length > 0 && !formData.categoryId) {
+                setFormData(prev => ({ ...prev, categoryId: categories[0].id }));
+            }
+        } else {
+            document.body.style.overflow = 'auto';
+            setStep(0);
+            setIsSubmitting(false);
+            setFormData(prev => ({
+                ...prev,
+                name: '',
+                description: '',
+                price: 0,
+                images: [],
+                digitalDetails: {
+                    ...prev.digitalDetails!,
+                    externalUrl: ''
+                }
+            }));
+        }
+        return () => { document.body.style.overflow = 'auto'; };
+    }, [isOpen, categories]);
+
+    const handleInputChange = (field: string, value: any) => {
+        if (field.startsWith('digitalDetails.')) {
+            const subField = field.split('.')[1];
+            setFormData(prev => ({
+                ...prev,
+                digitalDetails: {
+                    ...prev.digitalDetails!,
+                    [subField]: value
+                }
+            }));
+        } else {
+            setFormData(prev => ({ ...prev, [field]: value }));
+        }
+    };
+
+    const addImage = () => {
+        const url = newImage.trim();
+        if (!url) return;
+        if (url.startsWith('data:')) {
+            toast.error('Please upload images directly instead of pasting base64 data.');
+            return;
+        }
+        if (!formData.images?.includes(url)) {
+            setFormData(prev => ({
+                ...prev,
+                images: [...(prev.images || []), url]
+            }));
+            setNewImage('');
+        }
+    };
+
+    const handleFileUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            setIsUploading(true);
+            try {
+                const file = e.target.files[0];
+                const compressed = await compressImage(file);
+                const imageUrl = await uploadImageToCloudinary(compressed, storeId);
+                setFormData(prev => ({
+                    ...prev,
+                    images: [...(prev.images || []), imageUrl]
+                }));
+            } catch (error) {
+                console.error("Upload failed", error);
+                toast.error('Failed to upload image');
+            } finally {
+                setIsUploading(false);
+            }
+        }
+    };
+
+    const removeImage = (index: number) => {
+        setFormData(prev => ({
+            ...prev,
+            images: prev.images?.filter((_, i) => i !== index)
+        }));
+    };
+
+    const validateStep = (s: number) => {
+        if (s === 0) {
+            if (!formData.name?.trim()) return "Product title is required";
+            if (!formData.price || formData.price <= 0) return "Price must be greater than 0";
+            if (!formData.categoryId) return "Please select or create a category";
+        }
+        if (s === 1) {
+            const externalUrl = formData.digitalDetails?.externalUrl?.trim();
+            if (!externalUrl) return "Delivery link (e.g. Google Drive) is required";
+            
+            try {
+                const parsedUrl = new URL(externalUrl);
+                if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+                     return "Please enter a valid URL starting with http:// or https://";
+                }
+            } catch {
+                return "Please enter a valid URL";
+            }
+        }
+        if (s === 2) {
+            if (!formData.images || formData.images.length === 0) return "At least one cover image is required";
+        }
+        return null;
+    };
+
+    const nextStep = () => {
+        const error = validateStep(step);
+        if (error) {
+            toast.error(error);
+            return;
+        }
+        setStep(prev => Math.min(prev + 1, 3));
+    };
+
+    const prevStep = () => setStep(prev => Math.max(prev - 1, 0));
+
+    const handleSubmit = async () => {
+        const error = validateStep(step);
+        if (error) {
+            toast.error(error);
+            return;
+        }
+        setIsSubmitting(true);
+        setStep(4);
+        try {
+            await addProduct(storeId, formData as any);
+            setStep(5);
+            await onProductAdded();
+        } catch (err: any) {
+            toast.error(err.message || "Failed to publish digital product");
+            setIsSubmitting(false);
+            setStep(3);
+        }
+    };
+
+    const STEPS = [{ name: 'Basic Info' }, { name: 'Content Details' }, { name: 'Cover Images' }, { name: 'Review' }];
+    const modalVariants = { hidden: { opacity: 0, y: '100%' }, visible: { opacity: 1, y: 0 }, exit: { opacity: 0, y: '100%' } };
+
+    const renderStepContent = () => {
+        switch (step) {
+            case 0:
+                return (
+                    <motion.div key={0} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
+                        <FloatingLabelInput label="Product Title" value={formData.name || ''} onChange={(e) => handleInputChange('name', e.target.value)} placeholder="e.g. Master Class E-book" />
+                        <FloatingLabelInput label="Price (₦)" type="number" prefix="₦" value={formData.price === 0 ? '' : formData.price || ''} onChange={(e) => handleInputChange('price', e.target.value === '' ? 0 : parseFloat(e.target.value))} />
+                        <FloatingLabelInput label="Description" value={formData.description || ''} onChange={(e) => handleInputChange('description', e.target.value)} placeholder="What's included in this digital package?" multiline />
+
+                        <div className="space-y-3">
+                            <label className="text-xs font-bold text-zinc-500 uppercase tracking-wider ml-1">Category</label>
+                            <button onClick={() => setCategorySelectorOpen(true)} className="w-full text-left p-4 bg-zinc-50 dark:bg-zinc-800/50 rounded-xl border border-zinc-200 dark:border-zinc-700 flex justify-between items-center group">
+                                <span className={`font-medium ${formData.categoryId ? 'text-zinc-900 dark:text-zinc-100' : 'text-zinc-400'}`}>
+                                    {categories.find(c => c.id === formData.categoryId)?.name || 'Select Category'}
+                                </span>
+                                <ChevronRight size={20} className="text-zinc-400 group-hover:text-blue-500 transition-colors" />
+                            </button>
+                        </div>
+                    </motion.div>
+                );
+            case 1:
+                return (
+                    <motion.div key={1} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
+                        <div>
+                            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-3 block pl-1">Digital Type</label>
+                            <div className="grid grid-cols-2 gap-3">
+                                {DIGITAL_SUBTYPES.map(sub => {
+                                    const Icon = sub.icon;
+                                    const isSelected = formData.subtype === sub.id;
+                                    return (
+                                        <button
+                                            key={sub.id}
+                                            onClick={() => handleInputChange('subtype', sub.id)}
+                                            className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all text-left ${isSelected
+                                                ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 shadow-sm'
+                                                : 'border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-zinc-600 dark:text-zinc-400 hover:border-zinc-200'}`}
+                                        >
+                                            <Icon size={20} className={isSelected ? 'text-blue-500' : 'text-zinc-400'} />
+                                            <span className="text-sm font-bold">{sub.label}</span>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="text-xs font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-2 block pl-1">File Format</label>
+                            <select
+                                value={formData.digitalDetails?.fileType}
+                                onChange={(e) => handleInputChange('digitalDetails.fileType', e.target.value)}
+                                className="w-full px-4 py-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 border-0 ring-1 ring-inset ring-zinc-200 dark:ring-zinc-700 focus:ring-2 focus:ring-blue-500 text-sm font-medium text-zinc-900 dark:text-zinc-100"
+                            >
+                                {FILE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                        </div>
+
+                        <div className="space-y-4">
+                            <FloatingLabelInput
+                                label="Google Drive / Shared Link"
+                                value={formData.digitalDetails?.externalUrl || ''}
+                                onChange={(e) => handleInputChange('digitalDetails.externalUrl', e.target.value)}
+                                placeholder="https://drive.google.com/..."
+                            />
+                            <div className="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-800/30 flex gap-3">
+                                <Info className="w-5 h-5 text-blue-500 shrink-0" />
+                                <p className="text-xs text-blue-700 dark:text-blue-300 font-medium">Ensure the link is shared as "Anyone with the link can view" so buyers can access it immediately.</p>
+                            </div>
+                        </div>
+                    </motion.div>
+                );
+            case 2:
+                return (
+                    <motion.div key={2} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
+                        <div className="flex gap-2 mb-4">
+                            <div className="flex-1">
+                                <FloatingLabelInput label="Image URL" value={newImage} onChange={(e) => setNewImage(e.target.value)} placeholder="Paste image URL here..." />
+                            </div>
+                            <button
+                                onClick={addImage}
+                                className="px-6 py-4 rounded-xl bg-blue-500 text-white hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/20 flex items-center justify-center shrink-0"
+                            >
+                                <Plus size={20} />
+                            </button>
+                        </div>
+
+                        <div className="relative">
+                            <label className="flex flex-col items-center justify-center w-full py-8 border-2 border-dashed border-zinc-300 dark:border-zinc-700 rounded-2xl cursor-pointer bg-zinc-50 dark:bg-zinc-800/50 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors group">
+                                {isUploading ? (
+                                    <div className="flex flex-col items-center">
+                                        <Loader2 className="w-8 h-8 text-blue-500 animate-spin mb-2" />
+                                        <p className="text-sm font-medium text-zinc-500">Uploading...</p>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <Upload className="w-8 h-8 text-zinc-400 group-hover:text-blue-500 transition-colors mb-2" />
+                                        <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100">Click to upload from device</p>
+                                        <p className="text-xs text-zinc-500 mt-1">JPEG, PNG up to 10MB</p>
+                                    </>
+                                )}
+                                <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} disabled={isUploading} />
+                            </label>
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            {formData.images?.map((img, idx) => (
+                                <div key={idx} className="relative aspect-square rounded-2xl overflow-hidden group border border-zinc-200 dark:border-zinc-800 shadow-sm">
+                                    <img src={img} alt="" className="w-full h-full object-cover" />
+                                    <button
+                                        onClick={() => removeImage(idx)}
+                                        className="absolute top-2 right-2 p-2 bg-red-500 text-white rounded-full hover:scale-105 transition-transform shadow-lg"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
+                                    {idx === 0 && (
+                                        <span className="absolute top-2 left-2 px-2 py-1 bg-blue-500 text-white text-[10px] uppercase font-bold tracking-wider rounded-full shadow-md">Cover</span>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </motion.div>
+                );
+            case 3:
+                return (
+                    <motion.div key={3} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
+                        <div className="p-6 rounded-[2rem] bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-100 dark:border-zinc-800 space-y-4 shadow-sm">
+                            <div className="flex items-center gap-4">
+                                <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-white shadow-md bg-white">
+                                    <img src={formData.images?.[0] || '/default_product.png'} alt="" className="w-full h-full object-cover" />
+                                </div>
+                                <div>
+                                    <h4 className="text-xl font-bold text-zinc-900 dark:text-white leading-tight">{formData.name || 'Untitled Digital Product'}</h4>
+                                    <p className="text-blue-600 font-black text-lg mt-1">₦{formData.price?.toLocaleString() || '0'}</p>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-2 gap-y-4 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+                                <div>
+                                    <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest block mb-1">Type</span>
+                                    <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200 capitalize">{formData.subtype?.replace('-', ' ')}</span>
+                                </div>
+                                <div>
+                                    <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest block mb-1">Format</span>
+                                    <span className="text-sm font-semibold text-zinc-800 dark:text-zinc-200">{formData.digitalDetails?.fileType}</span>
+                                </div>
+                                <div className="col-span-2">
+                                    <span className="text-[10px] text-zinc-400 font-bold uppercase tracking-widest block mb-1">Delivery Link</span>
+                                    <span className="text-sm font-semibold text-blue-600 truncate block">{formData.digitalDetails?.externalUrl || 'N/A'}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-4 p-5 bg-emerald-50 dark:bg-emerald-900/10 rounded-2xl border border-emerald-100 dark:border-emerald-800/30 shadow-sm">
+                            <CheckCircle2 className="w-6 h-6 text-emerald-500 flex-shrink-0 mt-0.5" />
+                            <p className="text-sm text-emerald-700 dark:text-emerald-400 font-medium leading-relaxed">Your digital product is ready. Buyers will receive access instructions upon checkout.</p>
+                        </div>
+                    </motion.div>
+                );
+            case 4:
+                return (
+                    <div className="py-20 flex flex-col items-center justify-center space-y-6">
+                        <Loader2 className="w-16 h-16 text-blue-500 animate-spin" />
+                        <h3 className="text-xl font-bold text-zinc-900 dark:text-white">Publishing Product...</h3>
+                        <p className="text-zinc-500">Building your digital store...</p>
+                    </div>
+                );
+
+            case 5:
+                return (
+                    <div className="py-20 text-center space-y-6 pb-32">
+                        <div className="w-24 h-24 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded-full flex items-center justify-center mx-auto shadow-inner">
+                            <CheckCircle2 size={48} className="animate-bounce" />
+                        </div>
+                        <div>
+                            <h3 className="text-2xl font-bold text-zinc-900 dark:text-white">Product Published!</h3>
+                            <p className="text-zinc-500 mt-2">Your digital asset is now live and ready for download.</p>
+                        </div>
+                    </div>
+                );
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <AnimatePresence>
+            {isOpen && (
+                <motion.div className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-zinc-950 shadow-2xl overflow-hidden" initial="hidden" animate="visible" exit="exit" variants={modalVariants}>
+                    <header className="flex-shrink-0 flex items-center justify-between p-4 sm:p-6 border-b border-zinc-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-lg sticky top-0 z-20">
+                        <div className="flex items-center gap-4">
+                            <button onClick={step > 0 && step < 4 ? prevStep : onClose} className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors">
+                                {step > 0 && step < 4 ? <ChevronLeft className="w-6 h-6" /> : <X className="w-6 h-6" />}
+                            </button>
+                            <div>
+                                <h2 className="text-lg font-bold">Add Digital Product</h2>
+                                <p className="text-xs text-zinc-500">{STEPS[step]?.name || 'Finalizing'} • {Math.min(step + 1, 4)}/4</p>
+                            </div>
+                        </div>
+                        <div className="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center shadow-lg">
+                            <Zap className="w-6 h-6 text-white" fill="white" />
+                        </div>
+                    </header>
+
+                    <div className="flex-1 overflow-y-auto p-4 sm:p-6 max-w-3xl mx-auto w-full pb-32">
+                        {renderStepContent()}
+                    </div>
+
+                    {step < 5 && (
+                        <footer className="fixed bottom-0 left-0 right-0 p-4 sm:p-6 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md border-t border-zinc-200 dark:border-zinc-800 z-20">
+                            <div className="max-w-3xl mx-auto w-full">
+                                <button
+                                    disabled={step === 2 && (!formData.images || formData.images.length === 0)}
+                                    onClick={step === 3 ? handleSubmit : nextStep}
+                                    className={`w-full py-4 rounded-2xl font-bold text-lg transition-all shadow-lg ${(step === 2 && (!formData.images || formData.images.length === 0)) ? 'bg-zinc-100 text-zinc-400 cursor-not-allowed' : 'bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 hover:scale-[1.02] active:scale-[0.98]'}`}
+                                >
+                                    {step === 3 ? 'Publish Product' : 'Next Step'}
+                                </button>
+                            </div>
+                        </footer>
+                    )}
+                    {step === 5 && (
+                        <footer className="fixed bottom-0 left-0 right-0 p-4 sm:p-6 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-md border-t border-zinc-200 dark:border-zinc-800 z-20">
+                            <div className="max-w-3xl mx-auto w-full flex items-center gap-4">
+                                <button onClick={() => setStep(0)} className="flex-1 py-4 rounded-2xl bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-bold transition-all hover:bg-zinc-200 dark:hover:bg-zinc-700 break-words line-clamp-1 truncate active:scale-[0.98]">
+                                    Add More
+                                </button>
+                                <button onClick={onClose} className="flex-[2] py-4 rounded-2xl bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 font-bold shadow-xl transition-all hover:bg-zinc-800 dark:hover:bg-zinc-100 active:scale-[0.98]">
+                                    Done
+                                </button>
+                            </div>
+                        </footer>
+                    )}
+
+                    <CategorySelectorModal
+                        isOpen={isCategorySelectorOpen}
+                        onClose={() => setCategorySelectorOpen(false)}
+                        categories={categories}
+                        selectedCategoryId={formData.categoryId || ''}
+                        onSelect={(id) => {
+                            handleInputChange('categoryId', id);
+                            setCategorySelectorOpen(false);
+                        }}
+                        onAddCategory={onAddCategory}
+                    />
+                </motion.div>
+            )}
+        </AnimatePresence>
+    );
+}

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useRouter, useParams } from 'next/navigation';
-import { CheckCircle, Loader2, ShoppingBag, Package } from 'lucide-react';
+import { CheckCircle, Loader2, ShoppingBag, Package, Download, Zap } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import Link from 'next/link';
 import { getOrderById, confirmPayment } from '@/app/actions/orderActions';
@@ -13,6 +13,7 @@ import CustomerProfileModal from '@/components/customer/modals/CustomerProfileMo
 import { StoreMeta } from '@/types/store';
 import { getStoreMeta } from '@/lib/db';
 import NavigationStore from '@/lib/navigationStore';
+import { isDigitalProduct } from '@/utils/productHelpers';
 
 export default function PaymentSuccessPage() {
     const searchParams = useSearchParams();
@@ -31,6 +32,11 @@ export default function PaymentSuccessPage() {
 
     const { customer } = useCustomer();
     const { orders, addOrder, refetchOrders } = useOrders(customer?.id || null, storeId);
+
+    const digitalProducts = (order?.products || []).filter((p: any) => isDigitalProduct(p));
+    // Escrow may hold until released depending on the product, but download is valid immediately upon hold.
+    const isConfirmedAndPaid = status === 'success' && (order?.paymentStatus === 'escrow-held' || order?.paymentStatus === 'escrow-released' || isMock);
+    const canDownload = isConfirmedAndPaid && digitalProducts.length > 0;
 
     const hasRun = useRef(false);
 
@@ -168,6 +174,45 @@ export default function PaymentSuccessPage() {
                         </div>
                     </div>
                 </div>
+
+                {/* Download Section for Digital Products */}
+                {canDownload && (
+                    <div className="w-full bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-100 dark:border-emerald-800 rounded-xl p-5 mb-6 text-left">
+                        <div className="flex items-start gap-4 mb-3">
+                            <div className="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-800 flex items-center justify-center text-emerald-600 flex-shrink-0">
+                                <Download className="w-5 h-5" />
+                            </div>
+                            <div>
+                                <h3 className="text-base font-bold text-emerald-800 dark:text-emerald-300">Ready to Download</h3>
+                                <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">
+                                    Your digital products are ready. You can always access them later from your profile.
+                                </p>
+                            </div>
+                        </div>
+                        <div className="space-y-2 mt-4 border-t border-emerald-100 dark:border-emerald-800/50 pt-3">
+                            {digitalProducts.map((p: any, idx: number) => (
+                                <div key={idx} className="flex items-center justify-between bg-white dark:bg-gray-800 p-3 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-md bg-gray-50 dark:bg-gray-700 flex items-center justify-center border border-gray-100 dark:border-gray-600">
+                                            <Zap className="w-4 h-4 text-amber-500" />
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-bold text-gray-900 dark:text-white line-clamp-1 truncate max-w-[150px] sm:max-w-xs">{p.name}</p>
+                                            <p className="text-[10px] text-gray-500 font-medium">{p.digitalDetails?.fileType || 'Digital File'}</p>
+                                        </div>
+                                    </div>
+                                    {p.digitalDetails?.externalUrl ? (
+                                        <a href={p.digitalDetails.externalUrl} target="_blank" rel="noopener noreferrer" className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-2 flex-shrink-0">
+                                            <Download className="w-3.5 h-3.5" /> Access
+                                        </a>
+                                    ) : (
+                                        <span className="text-[10px] uppercase font-bold text-gray-400 bg-gray-50 dark:bg-gray-700 px-2 py-1 rounded flex-shrink-0">No Link</span>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 <div className="space-y-3">
                     {resolvedOrderId && (

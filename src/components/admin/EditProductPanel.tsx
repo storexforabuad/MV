@@ -230,6 +230,7 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
   if (!formState || !product) return null;
 
   const isBookingFee = formState.productType === 'media-influencer' && (formState as any).subtype === 'booking-fee';
+  const isServiceHub = formState.productType === 'media-influencer' && (formState as any).subtype === 'service-hub';
 
   return (
     <>
@@ -260,6 +261,15 @@ const EditProductPanel: React.FC<EditProductPanelProps> = ({ product, isOpen, on
                             <h3 className="font-bold text-amber-900 dark:text-amber-100 text-lg">Booking Access Fee</h3>
                             <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
                               This is the 1-time verification fee brands pay to unlock PR requests. You can only adjust the price (minimum ₦5,000). The platform takes a 20% cut. Name and categorization are locked to maintain platform standards.
+                            </p>
+                          </div>
+                        )}
+
+                        {isServiceHub && (
+                          <div className="bg-emerald-50 dark:bg-emerald-900/20 p-5 rounded-2xl border border-emerald-200 dark:border-emerald-800">
+                            <h3 className="font-bold text-emerald-900 dark:text-emerald-100 text-lg">Influencer Services Hub</h3>
+                            <p className="text-sm text-emerald-700 dark:text-emerald-300 mt-1">
+                              This is your professional services entry point. You can customize the name, description, and price (which will show as "Starting from"). The premium images provided are optimized for conversion.
                             </p>
                           </div>
                         )}

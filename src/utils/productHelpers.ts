@@ -1,4 +1,4 @@
-import { Product, GeneralProduct, VehicleProduct, FashionProduct, LivestockProduct, FoodBeverageProduct, ElectronicsProduct, SolarProduct, MediaInfluencerProduct, BeautyProduct, ArtProduct, TicketProduct } from '../types/product';
+import { Product, GeneralProduct, VehicleProduct, FashionProduct, LivestockProduct, FoodBeverageProduct, ElectronicsProduct, SolarProduct, MediaInfluencerProduct, BeautyProduct, ArtProduct, TicketProduct, DigitalProduct } from '../types/product';
 
 // Migration Helper for Legacy Products
 export function ensureProductType(product: any): Product {
@@ -51,4 +51,8 @@ export function isArtProduct(product: Product): product is ArtProduct {
 
 export function isTicketProduct(product: Product): product is TicketProduct {
     return product.productType === 'ticket';
+}
+
+export function isDigitalProduct(product: Product): product is DigitalProduct {
+    return product.productType === 'digital';
 }

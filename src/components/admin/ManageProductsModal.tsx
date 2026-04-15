@@ -149,6 +149,11 @@ const ProductRow = React.memo(({
                     Verification Fee
                   </span>
                 )}
+                {product.subtype === 'service-hub' && (
+                  <span className="px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 dark:bg-emerald-900/30 dark:text-emerald-300 rounded-md border border-emerald-100 dark:border-emerald-800/50">
+                    Services Hub
+                  </span>
+                )}
               </div>
             )}
 
@@ -323,6 +328,7 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [isBulkDeleteConfirmOpen, setIsBulkDeleteConfirmOpen] = useState(false);
   const [isGeneratingFee, setIsGeneratingFee] = useState(false);
+  const [isGeneratingHub, setIsGeneratingHub] = useState(false);
   const [followerCount, setFollowerCount] = useState(499); // 499 = "None"
   const [isPriceSuggestionExpanded, setIsPriceSuggestionExpanded] = useState(false);
 
@@ -330,6 +336,49 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
   const { ref: loadMoreRef, inView } = useInView();
 
   const hasBookingFee = products.some(p => p.productType === 'media-influencer' && p.subtype === 'booking-fee');
+  const hasInfluencerHub = products.some(p => p.productType === 'media-influencer' && p.subtype === 'service-hub');
+
+  const handleAddInfluencerHub = async () => {
+    if (!storeId || hasInfluencerHub) return;
+    setIsGeneratingHub(true);
+    try {
+      const newHub: MediaInfluencerProduct = {
+        id: '', // DB assigned
+        storeId,
+        name: 'Influencer Services Hub',
+        description: 'Grow your brand with personalized birthday shoutouts, viral TikTok promos, event appearances, and premium event tickets. Tap to explore all my professional services.',
+        price: 75000,
+        images: [
+          '/images/hub/hub-editorial.png',
+          '/images/hub/hub-metrics.png',
+          '/images/hub/hub-workstation.png',
+          '/images/hub/hub-security.png'
+        ],
+        views: 0,
+        createdAt: { toMillis: () => Date.now() } as any,
+        commission: 10,
+        productType: 'media-influencer',
+        subtype: 'service-hub',
+        isActive: true,
+        categoryId: '',
+        category: 'Services',
+        platform: 'Cross-Platform'
+      };
+
+      const docId = await addProduct(storeId, newHub);
+      if (typeof docId === 'string') {
+        setProducts(prev => [{ ...newHub, id: docId }, ...prev]);
+        toast.success('Influencer Hub created! You can now manage it normally.');
+      } else {
+        window.location.reload();
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error('Failed to create Influencer Hub');
+    } finally {
+      setIsGeneratingHub(false);
+    }
+  };
 
   const handleAddBookingFee = async () => {
     if (!storeId || hasBookingFee) return;
@@ -512,6 +561,15 @@ const ManageProductsModal: React.FC<ManageProductsModalProps> = ({ isOpen, onClo
                 <p className="text-xs text-gray-500 dark:text-zinc-400">Inventory & Stock</p>
               </div>
               <div className="flex items-center gap-3">
+                {storeType === 'media-influencer' && !hasInfluencerHub && (
+                  <button
+                    onClick={handleAddInfluencerHub}
+                    disabled={isGeneratingHub}
+                    className="text-xs font-bold bg-green-600 hover:bg-green-700 text-white py-2 px-3 rounded-xl flex items-center gap-1 shadow-sm transition-colors disabled:opacity-50"
+                  >
+                    {isGeneratingHub ? 'Generating...' : <><PlusCircle className="w-4 h-4" /> Add Service Hub</>}
+                  </button>
+                )}
                 {false && storeType === 'media-influencer' && !hasBookingFee && (
                   <button
                     onClick={handleAddBookingFee}
