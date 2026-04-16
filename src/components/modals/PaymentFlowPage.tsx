@@ -38,6 +38,7 @@ interface PaymentFlowPageProps {
   campaignBrief?: string;
   selectedTierId?: string;
   eventPayload?: any;
+  hubServices?: any[];
   // For cart
   cartItems?: CartItem[];
 }
@@ -59,6 +60,7 @@ export default function PaymentFlowPage({
   campaignBrief,
   selectedTierId,
   eventPayload,
+  hubServices,
   cartItems
 }: PaymentFlowPageProps) {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -217,6 +219,7 @@ export default function PaymentFlowPage({
           campaignBrief,
           selectedTierId,
           eventPayload,
+          hubServices,
           storeId // Ensure storeId is present
         }];
       }

@@ -366,6 +366,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
       const productToOrder = {
         ...product,
+        price: isInfluencerHub && selectedBundleService ? selectedBundleService.price : product.price,
         quantity,
         selectedSize: interactiveSelectedSize,
         selectedColor: interactiveSelectedColor,
@@ -373,6 +374,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
         specialInstructions: isFoodBeverageProduct(product) ? specialInstructions : undefined,
         brandName: (isServiceProduct || isEventTicketPromo) ? brandName : undefined,
         campaignBrief: isServiceProduct ? campaignBrief : undefined,
+        hubServices: isInfluencerHub && selectedBundleService ? [selectedBundleService] : undefined,
         selectedTierId: isTicket ? selectedTierId : undefined,
         eventPayload: isEventTicketPromo ? {
           eventName,
@@ -2520,7 +2522,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             onBack={handleBackToSummary}
                             uploadedEvidence={uploadedEvidence}
                             total={total}
-                            product={product}
+                            product={isInfluencerHub && selectedBundleService ? { ...product, price: selectedBundleService.price } : product}
                             quantity={quantity}
                             selectedSize={interactiveSelectedSize}
                             selectedColor={interactiveSelectedColor}
@@ -2531,6 +2533,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                             brandName={brandName}
                             campaignBrief={campaignBrief}
                             selectedTierId={selectedTierId}
+                            hubServices={selectedBundleService ? [selectedBundleService] : undefined}
                             eventPayload={isEventTicketPromo ? {
                               eventName,
                               date: eventDate,

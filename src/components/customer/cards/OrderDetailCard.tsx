@@ -41,7 +41,7 @@ const getStatusUI = (status: Order['orderStatus'], storeType?: string) => {
     case 'shipped':
       return {
         icon: isInfluencer ? <CheckCircle className="w-4 h-4" /> : <Truck className="w-4 h-4" />,
-        text: isInfluencer ? 'Completed' : 'Shipped',
+        text: isInfluencer ? 'Work Delivered' : 'Shipped',
         color: isInfluencer ? 'text-green-400' : 'text-blue-400'
       };
     case 'ready':
@@ -60,7 +60,7 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted, onR
   const { customer } = useCustomer();
 
   const products = order.products || [];
-  const isServiceOrder = products.some((p: any) => p.productType === 'media-influencer' && (p.subtype === 'service' || p.subtype === 'event-ticket-promo'));
+  const isServiceOrder = products.some((p: any) => p.productType === 'media-influencer' && (p.subtype === 'service' || p.subtype === 'event-ticket-promo' || p.subtype === 'service-hub'));
   const isEventPromoOrder = products.some((p: any) => p.productType === 'media-influencer' && p.subtype === 'event-ticket-promo');
   const isTicketOrder = products.some((p: any) => isTicketProduct(p));
   const resolvedStoreId = storeId || storeMeta?.id || '';
@@ -203,13 +203,13 @@ export function OrderDetailCard({ order, addOrder, storeMeta, isHighlighted, onR
                     </div>
                     <p className="font-semibold text-text-primary text-sm whitespace-nowrap">{formatPrice(product.price * (product.productType === 'general' || product.productType === 'ticket' ? (product as any).quantity : 1))}</p>
                   </div>
-                  
+
                   {isDigitalProduct(product as any) && (product as any).digitalDetails?.externalUrl && (order.paymentStatus === 'escrow-held' || order.paymentStatus === 'escrow-released') && (
-                     <div className="pl-[60px] pb-2">
-                        <a href={(product as any).digitalDetails.externalUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-lg border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors">
-                           <Download className="w-3.5 h-3.5" /> Re-download {(product as any).digitalDetails?.fileType || 'File'}
-                        </a>
-                     </div>
+                    <div className="pl-[60px] pb-2">
+                      <a href={(product as any).digitalDetails.externalUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 text-xs font-bold rounded-lg border border-emerald-200 dark:border-emerald-800 hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors">
+                        <Download className="w-3.5 h-3.5" /> Re-download {(product as any).digitalDetails?.fileType || 'File'}
+                      </a>
+                    </div>
                   )}
                 </div>
               );

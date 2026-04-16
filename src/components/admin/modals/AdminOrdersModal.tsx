@@ -120,7 +120,7 @@ const OrderProductRow = ({ product }: { product: any }) => {
 const CustomerOrdersCard = ({ order, onMarkReady, isHighlighted, storeId, onUpdate }: { order: StoreOrder, onMarkReady: (order: StoreOrder) => void, isHighlighted?: boolean, storeId: string, onUpdate: () => void }) => {
   const { customerInfo, products } = order;
   const whatsappUrl = `https://wa.me/${formatWhatsAppNumber(customerInfo.phoneNumber)}`;
-  const isServiceOrder = products.some((p: any) => p.productType === 'media-influencer' && (p.subtype === 'service' || p.subtype === 'event-ticket-promo'));
+  const isServiceOrder = products.some((p: any) => p.productType === 'media-influencer' && (p.subtype === 'service' || p.subtype === 'event-ticket-promo' || p.subtype === 'service-hub'));
   const eventTicketProduct = products.find((p: any) => p.productType === 'media-influencer' && p.subtype === 'event-ticket-promo');
 
   // Find if there are any dropshipped items in this order

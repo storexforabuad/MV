@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, CheckCircle, Clock, Unlock, Video, Image, FileText, ExternalLink, Loader2, AlertCircle, Ticket } from 'lucide-react';
+import { Upload, CheckCircle, Clock, Unlock, Video, Image, FileText, ExternalLink, Loader2, AlertCircle, Ticket, Layout } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { uploadEscrowDeliverable, releaseEscrow, updateOrderStatus, getOrderById, disputeEscrow } from '@/app/actions/orderActions';
 
@@ -279,7 +279,7 @@ export default function EscrowDeliverablePanel({
             {isInfluencerView && isEscrowHeld && !isPendingReview && !isReleased && !isEventTicketPromo && (
                 <div className="space-y-3">
                     <p className="text-xs text-gray-500 dark:text-gray-400">
-                        Upload the campaign deliverable (video/image/link) to submit for brand approval.
+                        Upload the campaign deliverable (video/image/link/report) to submit for brand approval.
                     </p>
 
                     {/* File Upload */}
