@@ -13,15 +13,15 @@ type Category = {
 // ─── Helpers (stable, outside any component) ────────────────────────────────
 
 const ICON_MAP: Record<string, string> = {
+  'All': '🏪',
   'Promo': '🔥',
   'Popular': '⭐',
-  'New Arrivals': '⏰',
 };
 
 const COLOR_MAP: Record<string, string> = {
+  'All': 'bg-[var(--badge-blue-bg)] text-[var(--badge-blue-text)]',
   'Promo': 'bg-[var(--badge-red-bg)] text-[var(--badge-red-text)]',
   'Popular': 'bg-[var(--badge-pink-bg)] text-[var(--badge-pink-text)]',
-  'New Arrivals': 'bg-[var(--badge-blue-bg)] text-[var(--badge-blue-text)]',
 };
 
 function getIconForCategory(name: string) {
@@ -234,15 +234,11 @@ export default function CategoryBar({
   };
 
   // ── Category lists ─────────────────────────────────────────────────────────
-  const systemCategoriesAll: Category[] = [
+  const systemCategories: Category[] = [
+    { id: 'all', name: 'All' },
     { id: 'promo', name: 'Promo' },
     { id: 'popular', name: 'Popular' },
-    { id: 'new-arrivals', name: 'New Arrivals' },
   ];
-
-  const systemCategories = storeType === 'restaurant'
-    ? systemCategoriesAll.filter(c => c.name !== 'New Arrivals')
-    : systemCategoriesAll;
 
   const vendorCategories = categories.filter(
     c => !systemCategories.some(sc => sc.name === c.name)

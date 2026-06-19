@@ -190,6 +190,11 @@ const ProductGrid = memo(function ProductGrid({
   const validProducts = products.filter(p => p && p.id && Array.isArray(p.images));
 
   const sortedProducts = [...validProducts].sort((a, b) => {
+    // Sold-out items always sink to the bottom
+    const aOut = (a as any).soldOut === true ? 1 : 0;
+    const bOut = (b as any).soldOut === true ? 1 : 0;
+    if (aOut !== bOut) return aOut - bOut;
+
     const timestampA = a.createdAt?.toMillis?.() || 0;
     const timestampB = b.createdAt?.toMillis?.() || 0;
     return timestampB - timestampA;

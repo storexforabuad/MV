@@ -87,15 +87,15 @@ export default function StorefrontPageClient({
   const restoredCategory = scrollRestoreState.current?.category;
 
   // Prioritize restoredCategory to ensure we land on the correct tab when returning from Admin/Product details
-  const initialCategory = restoredCategory || serverCategory || 'promo';
+  const initialCategory = restoredCategory || serverCategory || 'all';
 
   if (restoredCategory) {
     console.log(`[Storefront] Found saved state: category="${restoredCategory}", scroll=${scrollRestoreState.current?.scrollPosition}`);
   }
 
-  // If we are restoring a category OR using a deep link that is NOT the default 'promo',
+  // If we are restoring a category OR using a deep link that is NOT the default 'all',
   // we should ignore initialProducts to prevent showing the wrong list.
-  const isShowingDifferentCategory = initialCategory !== 'promo';
+  const isShowingDifferentCategory = initialCategory !== 'all';
 
   const cachedProducts = typeof window !== 'undefined' ? ProductListCache.get(`store_${storeId}_products_${initialCategory || 'all'}_page1`) : null;
 
@@ -184,7 +184,7 @@ export default function StorefrontPageClient({
         ]);
       }
 
-      if (activeCategoryId && activeCategoryId !== 'promo' && activeCategoryId !== 'popular' && activeCategoryId !== 'new-arrivals') {
+      if (activeCategoryId && activeCategoryId !== 'all' && activeCategoryId !== 'promo' && activeCategoryId !== 'popular' && activeCategoryId !== 'new-arrivals') {
         const filtered = influencerMocks.filter(p => p.categoryId === activeCategoryId);
         setProducts(filtered);
       } else {
@@ -205,7 +205,7 @@ export default function StorefrontPageClient({
         ]);
       }
 
-      if (activeCategoryId && activeCategoryId !== 'promo' && activeCategoryId !== 'popular' && activeCategoryId !== 'new-arrivals') {
+      if (activeCategoryId && activeCategoryId !== 'all' && activeCategoryId !== 'promo' && activeCategoryId !== 'popular' && activeCategoryId !== 'new-arrivals') {
         const filtered = (mockArtProducts as any[]).filter(p => p.categoryId === activeCategoryId || p.artDetails?.style?.toLowerCase() === activeCategoryId.toLowerCase());
         setProducts(filtered.length > 0 ? filtered : mockArtProducts as any[]);
       } else {
@@ -226,7 +226,7 @@ export default function StorefrontPageClient({
         ]);
       }
 
-      if (activeCategoryId && activeCategoryId !== 'promo' && activeCategoryId !== 'popular' && activeCategoryId !== 'new-arrivals') {
+      if (activeCategoryId && activeCategoryId !== 'all' && activeCategoryId !== 'promo' && activeCategoryId !== 'popular' && activeCategoryId !== 'new-arrivals') {
         const filtered = (mockBeautyProducts as any[]).filter(p => p.categoryId === activeCategoryId || p.subtype === activeCategoryId);
         setProducts(filtered.length > 0 ? filtered : mockBeautyProducts as any[]);
       } else {
@@ -245,7 +245,7 @@ export default function StorefrontPageClient({
         ]);
       }
 
-      if (activeCategoryId && activeCategoryId !== 'promo' && activeCategoryId !== 'popular' && activeCategoryId !== 'new-arrivals') {
+      if (activeCategoryId && activeCategoryId !== 'all' && activeCategoryId !== 'promo' && activeCategoryId !== 'popular' && activeCategoryId !== 'new-arrivals') {
         const filtered = (mockSolarProducts as any[]).filter(p => p.categoryId === activeCategoryId || p.subtype === activeCategoryId);
         setProducts(filtered.length > 0 ? filtered : mockSolarProducts as any[]);
       } else {
@@ -339,6 +339,10 @@ export default function StorefrontPageClient({
         fetchedProducts = cached;
       } else {
         switch (categoryId) {
+          case 'all': {
+            fetchedProducts = await getProducts(storeId);
+            break;
+          }
           case 'promo': {
             const promoProducts = await getProducts(storeId);
             fetchedProducts = promoProducts.filter(p => p.originalPrice && p.originalPrice > p.price);
@@ -350,7 +354,8 @@ export default function StorefrontPageClient({
             setLastVisible(newLastVisible);
             break;
           }
-          case 'new-arrivals': {
+          case 'new-arrivals':
+          case 'New Arrivals': {
             fetchedProducts = await getProducts(storeId);
             break;
           }
@@ -386,6 +391,7 @@ export default function StorefrontPageClient({
   // Get all categories including special ones
   const getAllCategories = useCallback(() => {
     return [
+      { id: 'all', name: 'All' },
       { id: 'promo', name: 'Promo' },
       { id: 'popular', name: 'Popular' },
       { id: 'new-arrivals', name: 'New Arrivals' },
