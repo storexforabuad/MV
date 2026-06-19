@@ -391,7 +391,7 @@ export default function StorefrontPageClient({
   // Get all categories including special ones
   const getAllCategories = useCallback(() => {
     return [
-      { id: 'all', name: 'All' },
+      { id: 'all', name: 'Everything' },
       { id: 'promo', name: 'Promo' },
       { id: 'popular', name: 'Popular' },
       { id: 'new-arrivals', name: 'New Arrivals' },

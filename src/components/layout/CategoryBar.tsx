@@ -13,13 +13,13 @@ type Category = {
 // ─── Helpers (stable, outside any component) ────────────────────────────────
 
 const ICON_MAP: Record<string, string> = {
-  'All': '🏪',
+  'Everything': '🏪',
   'Promo': '🔥',
   'Popular': '⭐',
 };
 
 const COLOR_MAP: Record<string, string> = {
-  'All': 'bg-[var(--badge-blue-bg)] text-[var(--badge-blue-text)]',
+  'Everything': 'bg-[var(--badge-blue-bg)] text-[var(--badge-blue-text)]',
   'Promo': 'bg-[var(--badge-red-bg)] text-[var(--badge-red-text)]',
   'Popular': 'bg-[var(--badge-pink-bg)] text-[var(--badge-pink-text)]',
 };
@@ -235,7 +235,7 @@ export default function CategoryBar({
 
   // ── Category lists ─────────────────────────────────────────────────────────
   const systemCategories: Category[] = [
-    { id: 'all', name: 'All' },
+    { id: 'all', name: 'Everything' },
     { id: 'promo', name: 'Promo' },
     { id: 'popular', name: 'Popular' },
   ];
