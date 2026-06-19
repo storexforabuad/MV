@@ -447,9 +447,11 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                         >
                             {isMediaInfluencer
                                 ? 'Elite PR services & premium products, safely secured by Compass™ 🧭.'
-                                : storeMeta?.storeType === 'fashion'
-                                    ? 'Professionally crafted leather goods. Payments secured by Compass™ 🧭.'
-                                    : 'Professional store services, secured by Compass™ 🧭.'}
+                                : storeMeta?.id === 'supermom-ng'
+                                    ? "Curated women's wear, baby care & home essentials — all in one trusted store."
+                                    : storeMeta?.storeType === 'fashion'
+                                        ? 'Professionally crafted leather goods. Payments secured by Compass™ 🧭.'
+                                        : 'Professional store services, secured by Compass™ 🧭.'}
                         </motion.p>
 
 
