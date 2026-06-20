@@ -49,7 +49,8 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
     const isStunnerStores = storeMeta?.id?.toLowerCase().includes('stunner') || storeMeta?.name?.toLowerCase().includes('stunner');
     const isMediaInfluencer = storeMeta?.storeType === 'media-influencer';
     const isEscrowStore = storeMeta?.paymentFlow === 'paystack_escrow';
-    const isInfluencerOrEscrow = isMediaInfluencer || isEscrowStore;
+    const isSuperMom = storeMeta?.id === 'supermom-ng';
+    const isInfluencerOrEscrow = isMediaInfluencer || isEscrowStore || isSuperMom;
     const isSolarStore = storeMeta?.storeType === 'solar';
     const isFashion = storeMeta?.storeType === 'fashion';
 
@@ -325,7 +326,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
         return (
             <motion.div
                 onClick={() => setIsBusinessCardOpen(true)}
-                className={`relative overflow-hidden rounded-[2.75rem] ${isFashion ? 'luxury-fashion-bg' : 'influencer-live-bg'} border border-white/20 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col w-full h-full group cursor-pointer`}
+                className={`relative overflow-hidden rounded-[2.75rem] ${isSuperMom ? 'bg-gradient-to-br from-red-950 via-red-900 to-red-950' : isFashion ? 'luxury-fashion-bg' : 'influencer-live-bg'} border border-white/20 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col w-full h-full group cursor-pointer`}
                 animate={{ boxShadow: ['0 0 0px rgba(192,38,211,0)', '0 0 40px rgba(192,38,211,0.4)', '0 0 0px rgba(192,38,211,0)'] }}
                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
             >
@@ -344,7 +345,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             repeat: Infinity,
                             ease: "easeInOut"
                         }}
-                        className={`absolute -top-[10%] -left-[10%] w-[70%] h-[70%] ${isFashion ? 'bg-amber-600/30' : 'bg-emerald-500/40'} blur-[110px] rounded-full mix-blend-screen`}
+                        className={`absolute -top-[10%] -left-[10%] w-[70%] h-[70%] ${isSuperMom ? 'bg-red-600/40' : isFashion ? 'bg-amber-600/30' : 'bg-emerald-500/40'} blur-[110px] rounded-full mix-blend-screen`}
                     />
                     <motion.div
                         animate={{
@@ -359,7 +360,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             ease: "easeInOut",
                             delay: 3
                         }}
-                        className={`absolute -bottom-[20%] -right-[10%] w-[70%] h-[70%] ${isFashion ? 'bg-orange-950/40' : 'bg-emerald-900/40'} blur-[110px] rounded-full mix-blend-screen`}
+                        className={`absolute -bottom-[20%] -right-[10%] w-[70%] h-[70%] ${isSuperMom ? 'bg-rose-900/50' : isFashion ? 'bg-orange-950/40' : 'bg-emerald-900/40'} blur-[110px] rounded-full mix-blend-screen`}
                     />
                     <motion.div
                         animate={{
@@ -374,7 +375,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             ease: "easeInOut",
                             delay: 7
                         }}
-                        className={`absolute top-1/4 left-1/3 w-[40%] h-[40%] ${isFashion ? 'bg-yellow-500/10' : 'bg-amber-400/30'} blur-[90px] rounded-full mix-blend-screen`}
+                        className={`absolute top-1/4 left-1/3 w-[40%] h-[40%] ${isSuperMom ? 'bg-pink-500/20' : isFashion ? 'bg-yellow-500/10' : 'bg-amber-400/30'} blur-[90px] rounded-full mix-blend-screen`}
                     />
 
                     {/* Shimmer sweep — glassy liquid surface */}

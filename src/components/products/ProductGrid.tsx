@@ -121,7 +121,7 @@ const ProductGrid = memo(function ProductGrid({
   const router = useRouter();
   const { customer, promptLogin } = useCustomer();
   const { orders, addOrder, refetchOrders } = useOrders(customer?.id ?? null, storeId || "");
-  const [isSingleColumn, setIsSingleColumn] = useState(true);
+  const [isSingleColumn, setIsSingleColumn] = useState(storeId !== 'supermom-ng');
   const [isReferralModalOpen, setReferralModalOpen] = useState(false);
 
   // Order modal state

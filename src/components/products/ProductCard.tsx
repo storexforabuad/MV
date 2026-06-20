@@ -1061,9 +1061,11 @@ export default function ProductCard({
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
-                    <span className={`text-sm font-bold ${isInCart ? 'text-green-500' : 'text-green-500 dark:text-green-400'}`}>
-                      {isInCart ? 'Added' : 'Add'}
-                    </span>
+                    {isSingleView && (
+                      <span className={`text-sm font-bold ${isInCart ? 'text-green-500' : 'text-green-500 dark:text-green-400'}`}>
+                        {isInCart ? 'Added' : 'Add'}
+                      </span>
+                    )}
                     {isSingleView ? (
                       <ShoppingCart
                         size={18}
