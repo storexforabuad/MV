@@ -2280,6 +2280,41 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                 )}
                               </div>
                             </div>
+                          ) : storeId === 'supermom-ng' ? (
+                            /* Premium Centered Product Header for supermom-ng */
+                            <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
+                              <div className="flex flex-col items-center text-center space-y-4 pt-2">
+                                <div className="relative w-72 h-72 flex-shrink-0 overflow-hidden rounded-[3rem] bg-gray-50 dark:bg-gray-900 shadow-2xl shadow-gray-200/50 dark:shadow-black/20 border border-gray-100 dark:border-gray-800">
+                                  <div className={`absolute inset-0 bg-gradient-to-r from-gray-100 via-gray-200 to-gray-100 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 animate-shimmer bg-[length:200%_100%] transition-opacity duration-300 ${imageLoading ? 'opacity-100' : 'opacity-0'}`} />
+                                  <Image
+                                    src={product.images?.[currentImageIndex] || DEFAULT_PRODUCT_IMAGE}
+                                    alt={product.name}
+                                    fill
+                                    className={`object-cover relative z-10 transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                                    onLoad={() => setImageLoading(false)}
+                                    onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; setImageLoading(false); }}
+                                  />
+                                </div>
+                                <div className="space-y-2 px-4">
+                                  <h4 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white leading-tight tracking-tight uppercase">{product.name}</h4>
+                                  <div className="flex flex-col items-center gap-1.5">
+                                    <p className="text-2xl font-black text-rose-600 dark:text-rose-400 tracking-tighter">{formatPrice(product.price)}</p>
+                                    <div className="flex flex-wrap justify-center gap-1.5">
+                                      {interactiveSelectedColor && (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-[9px] font-black text-gray-500 uppercase border border-gray-200 dark:border-gray-700">
+                                          {interactiveSelectedColor}
+                                        </span>
+                                      )}
+                                      {interactiveSelectedSize && (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-[9px] font-black text-gray-500 uppercase border border-gray-200 dark:border-gray-700">
+                                          Size: {interactiveSelectedSize}
+                                        </span>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           ) : (
                             /* Standard Summary View for Physical Products */
                             <div className="space-y-6">
@@ -2326,16 +2361,49 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
 
                               {!isServiceProduct && !isInfluencerHub && (
-                                <div className="flex flex-col items-center gap-1 bg-gray-50 dark:bg-gray-900 p-2 rounded-lg border border-gray-100 dark:border-gray-800">
-                                  <span className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold">
-                                    {isFashionProduct(product) && (product as any).isTextile ? (quantity > 1 ? 'Yards' : 'Yard') : (product.productType === 'livestock' && (product as any).priceUnit === 'kg' ? 'Kilos' : 'Quantity')}
-                                  </span>
-                                  <div className="flex items-center gap-3">
-                                    <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Minus size={18} /></button>
-                                    <span className="text-lg font-bold text-gray-900 dark:text-white min-w-[1.5rem] text-center">{quantity}</span>
-                                    <button onClick={() => setQuantity(q => q + 1)} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Plus size={18} /></button>
+                                storeId === 'supermom-ng' ? (
+                                  <div className="flex flex-col items-center justify-center p-6 rounded-[2.5rem] bg-gray-50/50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-700/50 shadow-sm transition-all">
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500 mb-4">Quantity</span>
+                                    <div className="flex items-center gap-8">
+                                      <motion.button
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                                        className="w-12 h-12 rounded-2xl bg-white dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 shadow-md border border-gray-100 dark:border-gray-600 hover:text-rose-500 dark:hover:text-rose-400 transition-colors"
+                                      >
+                                        <Minus className="w-5 h-5 stroke-[2.5]" />
+                                      </motion.button>
+                                      <AnimatePresence mode="wait">
+                                        <motion.span
+                                          key={quantity}
+                                          initial={{ opacity: 0, y: 10 }}
+                                          animate={{ opacity: 1, y: 0 }}
+                                          exit={{ opacity: 0, y: -10 }}
+                                          className="text-2xl font-black min-w-[2rem] text-center text-gray-900 dark:text-white font-mono"
+                                        >
+                                          {quantity}
+                                        </motion.span>
+                                      </AnimatePresence>
+                                      <motion.button
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => setQuantity(q => q + 1)}
+                                        className="w-12 h-12 rounded-2xl bg-white dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 shadow-md border border-gray-100 dark:border-gray-600 hover:text-green-500 dark:hover:text-green-400 transition-colors"
+                                      >
+                                        <Plus className="w-5 h-5 stroke-[2.5]" />
+                                      </motion.button>
+                                    </div>
                                   </div>
-                                </div>
+                                ) : (
+                                  <div className="flex flex-col items-center gap-1 bg-gray-50 dark:bg-gray-900 p-2 rounded-lg border border-gray-100 dark:border-gray-800">
+                                    <span className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold">
+                                      {isFashionProduct(product) && (product as any).isTextile ? (quantity > 1 ? 'Yards' : 'Yard') : (product.productType === 'livestock' && (product as any).priceUnit === 'kg' ? 'Kilos' : 'Quantity')}
+                                    </span>
+                                    <div className="flex items-center gap-3">
+                                      <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Minus size={18} /></button>
+                                      <span className="text-lg font-bold text-gray-900 dark:text-white min-w-[1.5rem] text-center">{quantity}</span>
+                                      <button onClick={() => setQuantity(q => q + 1)} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Plus size={18} /></button>
+                                    </div>
+                                  </div>
+                                )
                               )}
                             </div>
                           )}
@@ -2461,25 +2529,43 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           {/* Delivery Method (Hidden for services, tickets, and digital) */}
                           {!isVehicle && !isServiceProduct && !isTicket && !isEventTicketPromo && !isInfluencerHub && !isDigitalProduct(product) && (
                             <div className="mt-8">
-                              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-3">Delivery Method</h4>
+                              <h4 className={`text-sm font-black uppercase tracking-widest text-gray-900 dark:text-white mb-4 ${storeId === 'supermom-ng' ? 'ml-1' : ''}`}>
+                                {storeId === 'supermom-ng' && <span className="inline-block w-1.5 h-4 bg-indigo-500 rounded-full mr-2 align-middle" />}
+                                Delivery Method
+                              </h4>
                               <div className="grid grid-cols-2 gap-4">
-                                <div onClick={() => setDeliveryMethod('home')} className={`flex cursor-pointer items-center rounded-xl border p-4 transition-all duration-200 ${deliveryMethod === 'home' ? 'border-green-500 bg-green-50 dark:bg-green-900/10 ring-1 ring-green-500' : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900'}`}>
-                                  <div className={`p-2 rounded-full mr-3 ${deliveryMethod === 'home' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'}`}>
-                                    <HomeIcon className="h-5 w-5" />
+                                <div
+                                  onClick={() => setDeliveryMethod('home')}
+                                  className={`flex flex-col items-center justify-center p-4 rounded-[2rem] border-2 transition-all duration-300 cursor-pointer ${deliveryMethod === 'home'
+                                    ? 'border-green-500 bg-green-50 dark:bg-green-900/20 shadow-lg shadow-green-500/10'
+                                    : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/40 hover:border-green-200 dark:hover:border-green-800/50'
+                                    }`}
+                                >
+                                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-2 transition-colors ${deliveryMethod === 'home' ? 'bg-green-500 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'}`}>
+                                    <HomeIcon className="h-6 w-6" />
                                   </div>
-                                  <span className="text-sm font-medium dark:text-gray-200">Home Delivery</span>
+                                  <span className={`text-xs font-black uppercase tracking-tighter ${deliveryMethod === 'home' ? 'text-green-700 dark:text-green-400' : 'text-gray-500 dark:text-gray-400'}`}>Home Delivery</span>
                                 </div>
-                                <div onClick={() => setDeliveryMethod('pickup')} className={`flex cursor-pointer items-center rounded-xl border p-4 transition-all duration-200 ${deliveryMethod === 'pickup' ? 'border-green-500 bg-green-50 dark:bg-green-900/10 ring-1 ring-green-500' : 'border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900'}`}>
-                                  <div className={`p-2 rounded-full mr-3 ${deliveryMethod === 'pickup' ? 'bg-green-100 text-green-600' : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'}`}>
-                                    <BriefcaseIcon className="h-5 w-5" />
+                                <div
+                                  onClick={() => setDeliveryMethod('pickup')}
+                                  className={`flex flex-col items-center justify-center p-4 rounded-[2rem] border-2 transition-all duration-300 cursor-pointer ${deliveryMethod === 'pickup'
+                                    ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20 shadow-lg shadow-indigo-500/10'
+                                    : 'border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800/40 hover:border-indigo-200 dark:hover:border-indigo-800/50'
+                                    }`}
+                                >
+                                  <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-2 transition-colors ${deliveryMethod === 'pickup' ? 'bg-indigo-500 text-white' : 'bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400'}`}>
+                                    <BriefcaseIcon className="h-6 w-6" />
                                   </div>
-                                  <span className="text-sm font-medium dark:text-gray-200">Pick Up</span>
+                                  <span className={`text-xs font-black uppercase tracking-tighter ${deliveryMethod === 'pickup' ? 'text-indigo-700 dark:text-indigo-400' : 'text-gray-500 dark:text-gray-400'}`}>Pick Up</span>
                                 </div>
                               </div>
                               {deliveryMethod === 'home' && customer && customer.deliveryAddress && (
-                                <div className="mt-3 flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-900 p-3 rounded-lg">
-                                  <span className="font-medium flex-shrink-0">Delivering to:</span>
-                                  <span>{customer.deliveryAddress.street}</span>
+                                <div className="mt-4 flex items-start gap-3 text-xs text-gray-600 dark:text-gray-400 bg-gray-50/50 dark:bg-gray-900/50 p-4 rounded-2xl border border-gray-100 dark:border-gray-700/50">
+                                  <MapPin className="w-4 h-4 text-rose-500 flex-shrink-0" />
+                                  <div>
+                                    <span className="font-black text-gray-900 dark:text-white uppercase text-[9px] tracking-wider block mb-0.5">Delivering to</span>
+                                    <span className="font-medium">{customer.deliveryAddress.street}</span>
+                                  </div>
                                 </div>
                               )}
                             </div>
@@ -2488,26 +2574,45 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           {/* Payment Details (Hidden for bundled services as total is in the last page) */}
                           {!isInfluencerHub && (
                             <div className="mt-8 border-t border-gray-200 dark:border-gray-800 pt-6">
-                              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-200 mb-4">Payment Summary</h4>
-                              <dl className="space-y-3 text-sm text-gray-600 dark:text-gray-400">
-                                <div className="flex justify-between">
-                                  <dt>Item price</dt>
-                                  <dd className="font-medium text-gray-900 dark:text-gray-200">{formatPrice(subtotal)}</dd>
-                                </div>
+                              <div className="flex items-center gap-2 mb-4 ml-1">
+                                <div className="w-1.5 h-4 bg-rose-500 rounded-full" />
+                                <h4 className="text-sm font-black uppercase tracking-widest text-gray-900 dark:text-white">Payment Summary</h4>
+                              </div>
 
-                                {/* Fees removed for commission model */}
-
-                                {deliveryMethod === 'home' && !isVehicle && !isServiceProduct && !isInfluencerHub && !isDigitalProduct(product) && (
-                                  <div className="flex justify-between">
-                                    <dt>Delivery fee</dt>
-                                    <dd className="font-medium text-gray-900 dark:text-gray-200">TBD by vendor</dd>
+                              <div className={`p-6 rounded-[2rem] ${storeId === 'supermom-ng' ? 'bg-gray-50/50 dark:bg-gray-800/20 border-2 border-dashed border-gray-200 dark:border-gray-700/50' : 'bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800'}`}>
+                                <dl className="space-y-4 text-sm">
+                                  <div className="flex justify-between items-center">
+                                    <dt className="text-xs font-bold text-gray-500 uppercase tracking-widest">Items Subtotal</dt>
+                                    <dd className="font-black text-gray-900 dark:text-white tracking-tight">{formatPrice(subtotal)}</dd>
                                   </div>
-                                )}
-                                <div className="flex justify-between items-center pt-3 border-t border-gray-100 dark:border-gray-800">
-                                  <dt className="text-base font-bold text-gray-900 dark:text-white">Total</dt>
-                                  <dd className="text-xl font-bold text-green-600 dark:text-green-400">{formatPrice(total)}</dd>
-                                </div>
-                              </dl>
+
+                                  {/* Delivery Fee Row */}
+                                  {deliveryMethod === 'home' && !isVehicle && !isServiceProduct && !isInfluencerHub && !isDigitalProduct(product) && (
+                                    <div className="flex justify-between items-center">
+                                      <dt className="text-xs font-bold text-gray-500 uppercase tracking-widest">Delivery Fee</dt>
+                                      <dd className="font-black text-gray-900 dark:text-white tracking-tight">
+                                        {storeId === 'supermom-ng' ? (
+                                          <span className="text-[10px] bg-amber-100 text-amber-700 px-2.5 py-1 rounded-lg border border-amber-200 uppercase tracking-wider">TBD By Vendor</span>
+                                        ) : (
+                                          formatPrice(0) // Logic for other stores or placeholder
+                                        )}
+                                      </dd>
+                                    </div>
+                                  )}
+
+                                  {deliveryMethod === 'pickup' && (
+                                    <div className="flex justify-between items-center">
+                                      <dt className="text-xs font-bold text-gray-500 uppercase tracking-widest">Pick Up Cost</dt>
+                                      <dd className="text-[10px] font-black bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-lg border border-emerald-200 uppercase tracking-wider">Free</dd>
+                                    </div>
+                                  )}
+
+                                  <div className="pt-4 border-t border-gray-200 dark:border-gray-700/50 flex justify-between items-center">
+                                    <dt className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-tighter">Estimated Total</dt>
+                                    <dd className="text-2xl font-black text-indigo-600 dark:text-indigo-400 tracking-tighter">{formatPrice(total)}</dd>
+                                  </div>
+                                </dl>
+                              </div>
                             </div>
                           )}
                         </div>
@@ -2671,12 +2776,12 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                 </Dialog.Panel>
               </Transition.Child>
             </div>
-          </div>
-        </Dialog>
-      </Transition.Root>
+          </div >
+        </Dialog >
+      </Transition.Root >
 
       {/* Leave App Confirmation Dialog */}
-      <Transition.Root show={showLeaveAppConfirmation} as={Fragment}>
+      < Transition.Root show={showLeaveAppConfirmation} as={Fragment}>
         <Dialog as="div" className="relative z-[60]" onClose={() => setShowLeaveAppConfirmation(false)}>
           <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0">
             <div className="fixed inset-0 bg-black bg-opacity-75 transition-opacity" />
@@ -2726,7 +2831,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
             </div>
           </div>
         </Dialog>
-      </Transition.Root>
+      </Transition.Root >
     </>
   );
 }
