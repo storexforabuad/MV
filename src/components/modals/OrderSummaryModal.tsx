@@ -25,7 +25,7 @@ import PaymentFlowPage from './PaymentFlowPage';
 import { formatWhatsAppNumber } from '@/utils/phoneUtils';
 import { shouldShowWhatsAppPreview } from '@/utils/storeHelpers';
 import WhatsAppPreviewPage from './WhatsAppPreviewPage';
-import { Tag, Calendar, Settings, MapPin } from 'lucide-react';
+import { Tag, Calendar, Settings, MapPin, Share2, Copy, Check, DownloadCloud, X } from 'lucide-react';
 
 const SPICINESS_LEVELS = [
   { value: 'mild', label: '😌 Mild', color: 'bg-green-100 text-green-800 border-green-200' },
@@ -83,6 +83,11 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const [guestEmail, setGuestEmail] = useState('');
   const [emailError, setEmailError] = useState('');
 
+  // Share functionality state
+  const [isShareMenuOpen, setIsShareMenuOpen] = useState(false);
+  const [isCopying, setIsCopying] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [shareSuccess, setShareSuccess] = useState<'copy' | 'download' | 'both' | null>(null);
   // Influencer Service specific inputs
   const [brandName, setBrandName] = useState('');
   const [campaignBrief, setCampaignBrief] = useState('');
@@ -140,8 +145,72 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
     if (!isOpen) {
       setQuantity(initialQuantity);
       setCurrentPage(1);
+      setIsShareMenuOpen(false);
+      setShareSuccess(null);
     }
   }, [isOpen, initialQuantity]);
+
+  // Share utility functions
+  const handleCopyCaption = async () => {
+    if (!product) return;
+    setIsCopying(true);
+    try {
+      const storeUrl = typeof window !== 'undefined' ? `${window.location.origin}/${storeId}?product=${product.id}` : '';
+      const caption = `${product.name} - ${formatPrice(product.price)}\n\nCheck it out here: ${storeUrl}`;
+      await navigator.clipboard.writeText(caption);
+      setShareSuccess('copy');
+      toast.success('Caption copied to clipboard!');
+      setTimeout(() => setShareSuccess(null), 2000);
+    } catch (err) {
+      toast.error('Failed to copy caption');
+    } finally {
+      setIsCopying(false);
+    }
+  };
+
+  const handleSaveImage = async () => {
+    if (!product || !product.images?.[0]) return;
+    setIsDownloading(true);
+    try {
+      const imageUrl = product.images[currentImageIndex] || product.images[0];
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${product.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.jpg`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      setShareSuccess('download');
+      toast.success('Image saved successfully!');
+      setTimeout(() => setShareSuccess(null), 2000);
+    } catch (err) {
+      toast.error('Failed to save image');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const handleShareBoth = async () => {
+    setIsDownloading(true);
+    setIsCopying(true);
+    try {
+      await Promise.all([handleCopyCaption(), handleSaveImage()]);
+      setShareSuccess('both');
+      toast.success('Image saved and caption copied!');
+      setTimeout(() => {
+        setShareSuccess(null);
+        setIsShareMenuOpen(false);
+      }, 2000);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsDownloading(false);
+      setIsCopying(false);
+    }
+  };
 
   // Auto-scroll logic for service selection
   useEffect(() => {
@@ -2294,6 +2363,12 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                     onLoad={() => setImageLoading(false)}
                                     onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; setImageLoading(false); }}
                                   />
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); setIsShareMenuOpen(true); }}
+                                    className="absolute top-4 right-4 z-20 w-11 h-11 rounded-full bg-black/20 dark:bg-black/40 backdrop-blur-md flex items-center justify-center text-white dark:text-gray-200 shadow-lg border border-white/20 dark:border-white/10 hover:bg-black/30 dark:hover:bg-black/60 transition-all hover:scale-105"
+                                  >
+                                    <Share2 className="w-5 h-5 drop-shadow-md" />
+                                  </button>
                                 </div>
                                 <div className="space-y-2 px-4">
                                   <h4 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white leading-tight tracking-tight uppercase">{product.name}</h4>
@@ -2773,6 +2848,62 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                     </div>
                   </div>
 
+                  {/* Share Menu Popup Overlay */}
+                  <AnimatePresence>
+                    {isShareMenuOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: '100%' }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: '100%' }}
+                        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                        className="absolute inset-x-0 bottom-0 z-50 bg-white dark:bg-gray-900 rounded-t-[2.5rem] shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.5)] border-t border-gray-100 dark:border-gray-800"
+                      >
+                        <div className="p-6 pt-5 pb-8 space-y-6">
+                          <div className="flex justify-between items-center">
+                            <h3 className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-widest pl-1">Share Product</h3>
+                            <button onClick={() => setIsShareMenuOpen(false)} className="w-8 h-8 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                              <X className="w-5 h-5 text-gray-500" />
+                            </button>
+                          </div>
+
+                          <div className="flex gap-4">
+                            <button
+                              onClick={handleSaveImage}
+                              disabled={isDownloading}
+                              className="flex-1 flex flex-col items-center justify-center gap-3 p-4 rounded-3xl bg-indigo-50/50 dark:bg-indigo-900/10 border border-indigo-100/50 dark:border-indigo-800/30 hover:bg-indigo-100/50 dark:hover:bg-indigo-900/30 transition-all active:scale-95"
+                            >
+                              <div className="w-14 h-14 rounded-2xl bg-indigo-100 dark:bg-indigo-800/50 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
+                                {shareSuccess === 'download' ? <Check className="w-6 h-6" /> : <DownloadCloud className="w-6 h-6" />}
+                              </div>
+                              <span className="text-[10px] font-black text-gray-900 dark:text-gray-300 uppercase tracking-widest">Save Image</span>
+                            </button>
+
+                            <button
+                              onClick={handleCopyCaption}
+                              disabled={isCopying}
+                              className="flex-1 flex flex-col items-center justify-center gap-3 p-4 rounded-3xl bg-rose-50/50 dark:bg-rose-900/10 border border-rose-100/50 dark:border-rose-800/30 hover:bg-rose-100/50 dark:hover:bg-rose-900/30 transition-all active:scale-95"
+                            >
+                              <div className="w-14 h-14 rounded-2xl bg-rose-100 dark:bg-rose-800/50 flex items-center justify-center text-rose-600 dark:text-rose-400">
+                                {shareSuccess === 'copy' ? <Check className="w-6 h-6" /> : <Copy className="w-6 h-6" />}
+                              </div>
+                              <span className="text-[10px] font-black text-gray-900 dark:text-gray-300 uppercase tracking-widest">Copy Text</span>
+                            </button>
+
+                            <button
+                              onClick={handleShareBoth}
+                              disabled={isDownloading || isCopying}
+                              className="flex-1 flex flex-col items-center justify-center gap-3 p-4 rounded-3xl bg-green-50/50 dark:bg-green-900/10 border border-green-100/50 dark:border-green-800/30 hover:bg-green-100/50 dark:hover:bg-green-900/30 transition-all active:scale-95"
+                            >
+                              <div className="w-14 h-14 rounded-2xl bg-green-100 dark:bg-green-800/50 flex items-center justify-center text-green-600 dark:text-green-400">
+                                {shareSuccess === 'both' ? <Check className="w-6 h-6" /> : <Share2 className="w-6 h-6" />}
+                              </div>
+                              <span className="text-[10px] font-black text-gray-900 dark:text-gray-300 uppercase tracking-widest">Do Both</span>
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </Dialog.Panel>
               </Transition.Child>
             </div>
