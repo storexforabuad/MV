@@ -2388,6 +2388,40 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                     </div>
                                   </div>
                                 </div>
+
+                                {/* Quantity Selector for supermom-ng */}
+                                {!isServiceProduct && !isInfluencerHub && (
+                                  <div className="flex flex-col items-center justify-center p-6 rounded-[2.5rem] bg-gray-50/50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-700/50 shadow-sm transition-all">
+                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500 mb-4">Quantity</span>
+                                    <div className="flex items-center gap-8">
+                                      <motion.button
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                                        className="w-12 h-12 rounded-2xl bg-white dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 shadow-md border border-gray-100 dark:border-gray-600 hover:text-rose-500 dark:hover:text-rose-400 transition-colors"
+                                      >
+                                        <Minus className="w-5 h-5 stroke-[2.5]" />
+                                      </motion.button>
+                                      <AnimatePresence mode="wait">
+                                        <motion.span
+                                          key={quantity}
+                                          initial={{ opacity: 0, y: 10 }}
+                                          animate={{ opacity: 1, y: 0 }}
+                                          exit={{ opacity: 0, y: -10 }}
+                                          className="text-2xl font-black min-w-[2rem] text-center text-gray-900 dark:text-white font-mono"
+                                        >
+                                          {quantity}
+                                        </motion.span>
+                                      </AnimatePresence>
+                                      <motion.button
+                                        whileTap={{ scale: 0.9 }}
+                                        onClick={() => setQuantity(q => q + 1)}
+                                        className="w-12 h-12 rounded-2xl bg-white dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 shadow-md border border-gray-100 dark:border-gray-600 hover:text-green-500 dark:hover:text-green-400 transition-colors"
+                                      >
+                                        <Plus className="w-5 h-5 stroke-[2.5]" />
+                                      </motion.button>
+                                    </div>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           ) : (
@@ -2436,49 +2470,16 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
 
                               {!isServiceProduct && !isInfluencerHub && (
-                                storeId === 'supermom-ng' ? (
-                                  <div className="flex flex-col items-center justify-center p-6 rounded-[2.5rem] bg-gray-50/50 dark:bg-gray-800/30 border border-gray-100 dark:border-gray-700/50 shadow-sm transition-all">
-                                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 dark:text-gray-500 mb-4">Quantity</span>
-                                    <div className="flex items-center gap-8">
-                                      <motion.button
-                                        whileTap={{ scale: 0.9 }}
-                                        onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                                        className="w-12 h-12 rounded-2xl bg-white dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 shadow-md border border-gray-100 dark:border-gray-600 hover:text-rose-500 dark:hover:text-rose-400 transition-colors"
-                                      >
-                                        <Minus className="w-5 h-5 stroke-[2.5]" />
-                                      </motion.button>
-                                      <AnimatePresence mode="wait">
-                                        <motion.span
-                                          key={quantity}
-                                          initial={{ opacity: 0, y: 10 }}
-                                          animate={{ opacity: 1, y: 0 }}
-                                          exit={{ opacity: 0, y: -10 }}
-                                          className="text-2xl font-black min-w-[2rem] text-center text-gray-900 dark:text-white font-mono"
-                                        >
-                                          {quantity}
-                                        </motion.span>
-                                      </AnimatePresence>
-                                      <motion.button
-                                        whileTap={{ scale: 0.9 }}
-                                        onClick={() => setQuantity(q => q + 1)}
-                                        className="w-12 h-12 rounded-2xl bg-white dark:bg-gray-700 flex items-center justify-center text-gray-600 dark:text-gray-300 shadow-md border border-gray-100 dark:border-gray-600 hover:text-green-500 dark:hover:text-green-400 transition-colors"
-                                      >
-                                        <Plus className="w-5 h-5 stroke-[2.5]" />
-                                      </motion.button>
-                                    </div>
+                                <div className="flex flex-col items-center gap-1 bg-gray-50 dark:bg-gray-900 p-2 rounded-lg border border-gray-100 dark:border-gray-800">
+                                  <span className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold">
+                                    {isFashionProduct(product) && (product as any).isTextile ? (quantity > 1 ? 'Yards' : 'Yard') : (product.productType === 'livestock' && (product as any).priceUnit === 'kg' ? 'Kilos' : 'Quantity')}
+                                  </span>
+                                  <div className="flex items-center gap-3">
+                                    <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Minus size={18} /></button>
+                                    <span className="text-lg font-bold text-gray-900 dark:text-white min-w-[1.5rem] text-center">{quantity}</span>
+                                    <button onClick={() => setQuantity(q => q + 1)} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Plus size={18} /></button>
                                   </div>
-                                ) : (
-                                  <div className="flex flex-col items-center gap-1 bg-gray-50 dark:bg-gray-900 p-2 rounded-lg border border-gray-100 dark:border-gray-800">
-                                    <span className="text-[10px] uppercase tracking-wider text-gray-500 dark:text-gray-400 font-semibold">
-                                      {isFashionProduct(product) && (product as any).isTextile ? (quantity > 1 ? 'Yards' : 'Yard') : (product.productType === 'livestock' && (product as any).priceUnit === 'kg' ? 'Kilos' : 'Quantity')}
-                                    </span>
-                                    <div className="flex items-center gap-3">
-                                      <button onClick={() => setQuantity(q => Math.max(1, q - 1))} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Minus size={18} /></button>
-                                      <span className="text-lg font-bold text-gray-900 dark:text-white min-w-[1.5rem] text-center">{quantity}</span>
-                                      <button onClick={() => setQuantity(q => q + 1)} className="p-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"><Plus size={18} /></button>
-                                    </div>
-                                  </div>
-                                )
+                                </div>
                               )}
                             </div>
                           )}
