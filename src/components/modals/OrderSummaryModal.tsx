@@ -2485,7 +2485,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           )}
 
                           {/* Variant Selection (Color/Size) */}
-                          <div className="space-y-6 pt-2 border-t border-gray-100 dark:border-gray-800">
+                          <div className={`space-y-6 pt-2 border-t border-gray-100 dark:border-gray-800 ${storeId === 'supermom-ng' ? 'mt-8' : ''}`}>
                             {/* Color Selection - For Products with Colors */}
                             {isFashionProduct(product) && (product as any).colors && (product as any).colors.length > 0 && !(product as any).isTextile && (
                               <div className="space-y-4">
