@@ -155,7 +155,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
     if (!product) return;
     setIsCopying(true);
     try {
-      const storeUrl = typeof window !== 'undefined' ? `${window.location.origin}/${storeId}?product=${product.id}` : '';
+      const storeUrl = `https://tinyurl.com/thelinkinmybio/${storeId}/products/${product.id}`;
       const caption = `${product.name} - ${formatPrice(product.price)}\n\nCheck it out here: ${storeUrl}`;
       await navigator.clipboard.writeText(caption);
       setShareSuccess('copy');
