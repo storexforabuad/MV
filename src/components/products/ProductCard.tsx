@@ -409,30 +409,19 @@ export default function ProductCard({
           if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
 
           clickTimeoutRef.current = setTimeout(() => {
-            if (isSingleView) {
-              if (onOrderClick && !isSoldOut) {
-                // Intelligent Color Mapping: Pre-select color based on current visible image
-                let finalSelectedColor = selectedColor;
-                if (isFashionProduct(product) && product.colors) {
-                  const colorMatch = product.colors.find(c => c.images?.includes(carouselImages[currentImageIndex]));
-                  if (colorMatch) {
-                    finalSelectedColor = colorMatch.name;
-                  }
+            if (onOrderClick && !isSoldOut) {
+              // Intelligent Color Mapping: Pre-select color based on current visible image
+              let finalSelectedColor = selectedColor;
+              if (isFashionProduct(product) && product.colors) {
+                const colorMatch = product.colors.find(c => c.images?.includes(carouselImages[currentImageIndex]));
+                if (colorMatch) {
+                  finalSelectedColor = colorMatch.name;
                 }
-                onOrderClick(product, finalSelectedColor, selectedSize, carouselImages[currentImageIndex]);
-                handleTrackInteraction();
-                // Haptic feedback
-                if (navigator.vibrate) navigator.vibrate(20);
               }
-            } else {
-              if (isVehicleProduct(product) && isImageClick && onOrderClick) {
-                onOrderClick(product, selectedColor, selectedSize, carouselImages[currentImageIndex]);
-                handleTrackInteraction();
-                if (navigator.vibrate) navigator.vibrate(20);
-              } else {
-                handleClick();
-                window.location.href = productLink;
-              }
+              onOrderClick(product, finalSelectedColor, selectedSize, carouselImages[currentImageIndex]);
+              handleTrackInteraction();
+              // Haptic feedback
+              if (navigator.vibrate) navigator.vibrate(20);
             }
           }, 300);
         }}
