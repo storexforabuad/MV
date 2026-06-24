@@ -327,12 +327,16 @@ const ProductGrid = memo(function ProductGrid({
         ) : (
           sortedProducts.map((product) => {
             const productWithType = ensureProductType(product);
+            const isSuperMomNg = storeId === 'supermom-ng';
+            const hasMultipleImagesOrColors = (product.images && product.images.length > 1) || ((product as any).colors && (product as any).colors.length > 1);
+            const shouldBeBig = isSuperMomNg && hasMultipleImagesOrColors;
+
             return (
               <motion.div
                 key={product.id}
                 layout
                 transition={transition}
-                className="group block relative touch-manipulation"
+                className={`group block relative touch-manipulation ${shouldBeBig && !isSingleColumn ? 'col-span-full' : ''}`}
               >
                 {productWithType.productType === 'vehicle' ? (
                   <VehicleCard
@@ -347,7 +351,7 @@ const ProductGrid = memo(function ProductGrid({
                     activeCategoryId={activeCategoryId}
                     storeMeta={storeMeta}
                     onOrderClick={handleOrderClick}
-                    isSingleView={isSingleColumn}
+                    isSingleView={isSingleColumn || shouldBeBig}
                   />
                 )}
               </motion.div>

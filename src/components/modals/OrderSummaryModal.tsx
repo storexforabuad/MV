@@ -2486,39 +2486,56 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
 
                           {/* Variant Selection (Color/Size) */}
                           <div className={`space-y-6 pt-2 border-t border-gray-100 dark:border-gray-800 ${storeId === 'supermom-ng' ? 'mt-8' : ''}`}>
-                            {/* Color Selection - For Products with Colors */}
-                            {isFashionProduct(product) && (product as any).colors && (product as any).colors.length > 0 && !(product as any).isTextile && (
+                            {/* Color Selection - For Products with Colors/Designs */}
+                            {isFashionProduct(product) && (product as any).colors && (product as any).colors.length > 0 && (
                               <div className="space-y-4">
                                 <div className="flex items-center gap-2 mb-2">
-                                  <div className="w-1.5 h-6 bg-pink-500 rounded-full" />
+                                  <div className={`w-1.5 h-6 rounded-full ${((product as any).isTextile) ? 'bg-amber-500' : 'bg-pink-500'}`} />
                                   <h4 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">
-                                    🎨 Select Color
+                                    {((product as any).isTextile) ? '🎨 Select Design' : '🎨 Select Color'}
                                   </h4>
                                 </div>
                                 <div className="flex flex-wrap gap-2.5">
-                                  {(product as any).colors.map((color: any, idx: number) => (
-                                    <button
-                                      key={idx}
-                                      onClick={() => setInteractiveSelectedColor(color.name)}
-                                      className={`flex items-center justify-center gap-2 px-4 py-2 rounded-lg border-2 transition-all duration-200 ${interactiveSelectedColor === color.name
-                                        ? 'border-blue-600 bg-blue-50/50 dark:bg-blue-900/20'
-                                        : 'border-gray-100 dark:border-gray-800 hover:border-gray-200 dark:hover:border-gray-700'
-                                        }`}
-                                    >
-                                      <div
-                                        className="h-4 w-4 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm"
-                                        style={{ backgroundColor: color.hex }}
-                                      />
-                                      <span className={`text-xs font-bold leading-none ${interactiveSelectedColor === color.name ? 'text-blue-700 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}>
-                                        {color.name}
-                                      </span>
-                                      {interactiveSelectedColor === color.name && (
-                                        <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                                        </svg>
-                                      )}
-                                    </button>
-                                  ))}
+                                  {(product as any).colors.map((color: any, idx: number) => {
+                                    const hasImage = color.images && color.images.length > 0;
+                                    const isSelected = interactiveSelectedColor === color.name;
+                                    return (
+                                      <button
+                                        key={idx}
+                                        onClick={() => setInteractiveSelectedColor(color.name)}
+                                        className={`flex flex-col items-center justify-center gap-1.5 p-1 rounded-xl border-2 transition-all duration-200 ${isSelected
+                                          ? 'border-blue-600 bg-blue-50 dark:bg-blue-900/20 shadow-md ring-2 ring-blue-500/20'
+                                          : 'border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
+                                          }`}
+                                      >
+                                        {hasImage ? (
+                                          <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-gray-100 dark:border-gray-800">
+                                            <Image
+                                              src={color.images[0]}
+                                              alt={color.name}
+                                              fill
+                                              className="object-cover"
+                                            />
+                                          </div>
+                                        ) : (
+                                          <div
+                                            className="h-8 w-8 mx-4 mt-2 rounded-full border border-gray-200 dark:border-gray-700 shadow-sm"
+                                            style={{ backgroundColor: color.hex }}
+                                          />
+                                        )}
+                                        <div className="flex items-center gap-1 px-2 pb-1">
+                                          <span className={`text-[11px] font-bold tracking-tight whitespace-nowrap ${isSelected ? 'text-blue-700 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400'}`}>
+                                            {color.name}
+                                          </span>
+                                          {isSelected && (
+                                            <svg className="w-3 h-3 text-blue-600 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                            </svg>
+                                          )}
+                                        </div>
+                                      </button>
+                                    );
+                                  })}
                                 </div>
                               </div>
                             )}
