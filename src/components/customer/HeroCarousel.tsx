@@ -325,7 +325,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
     const CustomInfluencerCard = () => {
         return (
             <motion.div
-                onClick={() => setIsBusinessCardOpen(true)}
+                onClick={() => window.location.reload()}
                 className={`relative overflow-hidden rounded-[2.75rem] ${isSuperMom ? 'bg-gradient-to-br from-red-950 via-red-900 to-red-950' : isFashion ? 'luxury-fashion-bg' : 'influencer-live-bg'} border border-white/20 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col w-full h-full group cursor-pointer`}
                 animate={{ boxShadow: ['0 0 0px rgba(192,38,211,0)', '0 0 40px rgba(192,38,211,0.4)', '0 0 0px rgba(192,38,211,0)'] }}
                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
@@ -554,6 +554,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                         }
                     }}
                     className="absolute w-full h-full cursor-pointer"
+                    onClick={() => window.location.reload()}
                 >
                     {is420Hub ? (
                         <CustomSmokeShopCard />

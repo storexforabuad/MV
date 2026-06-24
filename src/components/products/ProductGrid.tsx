@@ -195,9 +195,21 @@ const ProductGrid = memo(function ProductGrid({
     const bOut = (b as any).soldOut === true ? 1 : 0;
     if (aOut !== bOut) return aOut - bOut;
 
-    const timestampA = a.createdAt?.toMillis?.() || 0;
-    const timestampB = b.createdAt?.toMillis?.() || 0;
-    return timestampB - timestampA;
+    // Preserve views sorting for Popular category
+    if (activeCategoryId === 'popular') {
+      return (b.views || 0) - (a.views || 0);
+    }
+
+    // Robust timestamp normalisation
+    const getTime = (date: any) => {
+      if (!date) return 0;
+      if (typeof date.toMillis === 'function') return date.toMillis();
+      if (typeof date === 'string' || typeof date === 'number') return new Date(date).getTime();
+      if (date.seconds) return date.seconds * 1000;
+      return 0;
+    };
+
+    return getTime(b.createdAt) - getTime(a.createdAt);
   });
 
   const transition: Transition = {
