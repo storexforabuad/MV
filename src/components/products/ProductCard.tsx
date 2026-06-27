@@ -371,10 +371,6 @@ export default function ProductCard({
   };
   // ─────────────────────────────────────────────────────────────────────────
 
-  // ── Double Tap state ────────────────────────────────────────────────────
-  const lastClickTimeRef = useRef<number>(0);
-  const clickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
   return (
     <Link href={productLink} passHref>
       <div
@@ -393,37 +389,20 @@ export default function ProductCard({
             return;
           }
 
-          const now = Date.now();
-          const timeSinceLastClick = now - lastClickTimeRef.current;
-
-          // DOUBLE TAP DETECTED
-          if (timeSinceLastClick < 300) {
-            if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
-            lastClickTimeRef.current = 0; // Reset
-            executeCopy();
-            return;
-          }
-
-          // FIRST TAP DELAY LOGIC
-          lastClickTimeRef.current = now;
-          if (clickTimeoutRef.current) clearTimeout(clickTimeoutRef.current);
-
-          clickTimeoutRef.current = setTimeout(() => {
-            if (onOrderClick && !isSoldOut) {
-              // Intelligent Color Mapping: Pre-select color based on current visible image
-              let finalSelectedColor = selectedColor;
-              if (isFashionProduct(product) && product.colors) {
-                const colorMatch = product.colors.find(c => c.images?.includes(carouselImages[currentImageIndex]));
-                if (colorMatch) {
-                  finalSelectedColor = colorMatch.name;
-                }
+          if (onOrderClick && !isSoldOut) {
+            // Intelligent Color Mapping: Pre-select color based on current visible image
+            let finalSelectedColor = selectedColor;
+            if (isFashionProduct(product) && product.colors) {
+              const colorMatch = product.colors.find(c => c.images?.includes(carouselImages[currentImageIndex]));
+              if (colorMatch) {
+                finalSelectedColor = colorMatch.name;
               }
-              onOrderClick(product, finalSelectedColor, selectedSize, carouselImages[currentImageIndex]);
-              handleTrackInteraction();
-              // Haptic feedback
-              if (navigator.vibrate) navigator.vibrate(20);
             }
-          }, 300);
+            onOrderClick(product, finalSelectedColor, selectedSize, carouselImages[currentImageIndex]);
+            handleTrackInteraction();
+            // Haptic feedback
+            if (navigator.vibrate) navigator.vibrate(20);
+          }
         }}
         style={{ WebkitTapHighlightColor: 'transparent' }}
       >
