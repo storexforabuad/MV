@@ -52,7 +52,7 @@ export default function ProductCard({
   onOrderClick,
   isSingleView
 }: ProductCardProps) {
-  const [imageLoading, setImageLoading] = useState(true);
+  const [loadedImages, setLoadedImages] = useState<Record<string, boolean>>({});
   const [imgSrc, setImgSrc] = useState(product.images?.[0] || DEFAULT_IMAGES.medium);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [direction, setDirection] = useState(0); // 1 for next, -1 for prev
@@ -444,8 +444,14 @@ export default function ProductCard({
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
-          {imageLoading && (
-            <div className="absolute inset-0 bg-[var(--skeleton-background)] animate-pulse z-10" />
+          {!loadedImages[displayImage] && (
+            <div className="absolute inset-0 z-0 overflow-hidden bg-zinc-200 dark:bg-zinc-800 pointer-events-none">
+              <motion.div
+                className="absolute inset-0 z-10 bg-gradient-to-r from-transparent via-white/40 dark:via-white/10 to-transparent -skew-x-[20deg]"
+                animate={{ x: ['-200%', '200%'] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+              />
+            </div>
           )}
 
           {isSoldOut && (
@@ -1011,13 +1017,13 @@ export default function ProductCard({
                 fill
                 sizes="(max-width: 640px) 400px, (max-width: 1024px) 800px, 1200px"
                 className={`object-cover object-center
-                  will-change-transform group-hover:scale-[1.03]
-                  ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
+                  will-change-transform group-hover:scale-[1.03] transition-opacity duration-300
+                  ${loadedImages[displayImage] ? 'opacity-100' : 'opacity-0'}`}
                 loading="lazy"
                 draggable="false"
                 placeholder="blur"
                 blurDataURL={displayImage}
-                onLoad={() => setImageLoading(false)}
+                onLoad={() => setLoadedImages(prev => ({ ...prev, [displayImage]: true }))}
                 onError={handleImageError}
               />
             </motion.div>
@@ -1109,14 +1115,16 @@ export default function ProductCard({
 
           {/* Carousel Dots - Bottom Center - Only show when NOT sold out */}
           {!isSoldOut && hasMultipleImages && (
-            <div className={`absolute bottom-3 left-1/2 transform -translate-x-1/2 flex items-center justify-center gap-1 z-20 transition-opacity duration-300 ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+            <div className={`absolute bottom-3 inset-x-0 w-full flex items-center justify-center gap-1.5 z-20 pointer-events-none transition-opacity duration-300 ${isMobile ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
               {carouselImages.map((_, index) => (
                 <div
                   key={index}
-                  className={`transition-all duration-300 ease-out rounded-full ${index === currentImageIndex
+                  onClick={(e) => handleDotClick(e, index)}
+                  className={`transition-all duration-300 ease-out rounded-full pointer-events-auto cursor-pointer ${index === currentImageIndex
                     ? 'w-1.5 h-1.5 bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)]'
-                    : 'w-1.5 h-1.5 bg-white/60'
+                    : 'w-1 h-1 bg-white/50 hover:bg-white/80'
                     }`}
+                  aria-label={`Go to slide ${index + 1}`}
                 />
               ))}
             </div>

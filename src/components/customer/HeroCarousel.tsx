@@ -459,10 +459,10 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                     </div>
                 </div>
 
-                {/* Powered by Paystack */}
+                {/* Powered by Compass */}
                 <div className="absolute bottom-6 sm:bottom-8 right-8 z-20 flex items-center gap-1.5">
-                    <span className="text-[9px] font-bold text-white/60 tracking-widest uppercase">
-                        Powered by <span className="text-white">Paystack</span>
+                    <span className="text-[9px] font-bold text-white/60 tracking-widest uppercase flex items-center">
+                        Powered by <span className="text-white font-black ml-1">COMPASS🧭</span>
                     </span>
                 </div>
             </motion.div>

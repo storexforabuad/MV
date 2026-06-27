@@ -82,6 +82,15 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
   const [showSizeError, setShowSizeError] = useState(false);
   const [guestEmail, setGuestEmail] = useState('');
   const [emailError, setEmailError] = useState('');
+  const [hasScrolled, setHasScrolled] = useState(false);
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    if (e.currentTarget.scrollTop > 10 && !hasScrolled) {
+      setHasScrolled(true);
+    } else if (e.currentTarget.scrollTop <= 10 && hasScrolled) {
+      setHasScrolled(false);
+    }
+  };
 
   // Share functionality state
   const [isShareMenuOpen, setIsShareMenuOpen] = useState(false);
@@ -147,6 +156,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
       setCurrentPage(1);
       setIsShareMenuOpen(false);
       setShareSuccess(null);
+      setHasScrolled(false);
     }
   }, [isOpen, initialQuantity]);
 
@@ -250,6 +260,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
       setSelectedTierId(undefined);
       setImageLoading(true);
       setSelectedBundleService(null);
+      setHasScrolled(false);
 
       // Restore modal state from localStorage if payment flow is enabled
       if (isPaymentFlowEnabled && storeId) {
@@ -345,6 +356,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
     if (scrollContainerRef.current) {
       scrollContainerRef.current.scrollTo({ top: 0, behavior: 'smooth' });
     }
+    setHasScrolled(false);
   }, [currentPage]);
 
   // Update product image when color changes
@@ -622,7 +634,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex min-h-full items-end justify-center p-0 text-center sm:items-center sm:p-4">
               <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95" enterTo="opacity-100 translate-y-0 sm:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 sm:scale-100" leaveTo="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95">
-                <Dialog.Panel className={`relative w-full transform overflow-hidden rounded-t-[2rem] bg-white dark:bg-modal-background text-left align-middle shadow-2xl transition-all flex flex-col sm:h-auto sm:max-w-2xl sm:rounded-2xl sm:max-h-[85vh] ${currentPage === 1 && isInfluencerHub ? 'h-[80vh] max-h-[80vh]' : 'h-[72vh] max-h-[72vh]'}`}>
+                <Dialog.Panel className={`relative w-full transform overflow-hidden rounded-t-[2rem] bg-white dark:bg-modal-background text-left align-middle shadow-2xl transition-[height,max-height] duration-500 ease-in-out flex flex-col sm:h-auto sm:max-w-2xl sm:rounded-2xl sm:max-h-[85vh] ${currentPage === 1 && isInfluencerHub ? (hasScrolled ? 'h-[90vh] max-h-[90vh]' : 'h-[80vh] max-h-[80vh]') : (hasScrolled ? 'h-[82vh] max-h-[82vh]' : 'h-[72vh] max-h-[72vh]')}`}>
 
                   {/* Handle Bar for Mobile */}
                   <div className="flex-shrink-0 pt-3 pb-1 flex justify-center sm:hidden">
@@ -665,7 +677,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                   `}</style>
 
                   {/* Main Content */}
-                  <div ref={scrollContainerRef} className="flex-grow overflow-y-auto p-4 sm:p-6">
+                  <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-grow overflow-y-auto p-4 sm:p-6">
                     <div className="max-w-3xl mx-auto w-full">
                       {/* Page 1 (Electronics Specs - "Device Passport") */}
                       {currentPage === 1 && isElectronics && (() => {
