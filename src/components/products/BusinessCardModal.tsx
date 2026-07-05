@@ -106,7 +106,7 @@ export function BusinessCardModal({ open, onClose, storeMeta }: { open: boolean;
 
                       {storeMeta.ceoName && (
                         <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mt-1 uppercase tracking-widest">
-                          {isInfluencer ? 'Creator:' : 'Led by'} {storeMeta.ceoName}
+                          {isInfluencer ? 'Creator:' : 'For'} {storeMeta.ceoName}
                         </p>
                       )}
                       {storeMeta.businessDescription && (

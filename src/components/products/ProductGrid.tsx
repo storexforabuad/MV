@@ -121,7 +121,9 @@ const ProductGrid = memo(function ProductGrid({
   const router = useRouter();
   const { customer, promptLogin } = useCustomer();
   const { orders, addOrder, refetchOrders } = useOrders(customer?.id ?? null, storeId || "");
-  const [isSingleColumn, setIsSingleColumn] = useState(storeId !== 'supermom-ng');
+  const PREMIUM_STORES = ['supermom-ng', 'mum-mupeeder-collection'];
+  const isPremiumStore = typeof storeId === 'string' && PREMIUM_STORES.includes(storeId);
+  const [isSingleColumn, setIsSingleColumn] = useState(!isPremiumStore);
   const [isReferralModalOpen, setReferralModalOpen] = useState(false);
 
   // Order modal state
@@ -327,9 +329,10 @@ const ProductGrid = memo(function ProductGrid({
         ) : (
           sortedProducts.map((product) => {
             const productWithType = ensureProductType(product);
-            const isSuperMomNg = storeId === 'supermom-ng';
+            const PREMIUM_STORES = ['supermom-ng', 'mum-mupeeder-collection'];
+            const isPremiumStoreItem = typeof storeId === 'string' && PREMIUM_STORES.includes(storeId);
             const hasMultipleImagesOrColors = (product.images && product.images.length > 1) || ((product as any).colors && (product as any).colors.length > 1);
-            const shouldBeBig = isSuperMomNg && hasMultipleImagesOrColors;
+            const shouldBeBig = isPremiumStoreItem && hasMultipleImagesOrColors;
 
             return (
               <motion.div

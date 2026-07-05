@@ -2361,7 +2361,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                 )}
                               </div>
                             </div>
-                          ) : storeId === 'supermom-ng' ? (
+                          ) : (['supermom-ng', 'mum-mupeeder-collection'].includes(storeId || '')) ? (
                             /* Premium Centered Product Header for supermom-ng */
                             <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4">
                               <div className="flex flex-col items-center text-center space-y-4 pt-2">
@@ -2497,7 +2497,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           )}
 
                           {/* Variant Selection (Color/Size) */}
-                          <div className={`space-y-6 pt-2 border-t border-gray-100 dark:border-gray-800 ${storeId === 'supermom-ng' ? 'mt-8' : ''}`}>
+                          <div className={`space-y-6 pt-2 border-t border-gray-100 dark:border-gray-800 ${(['supermom-ng', 'mum-mupeeder-collection'].includes(storeId || '')) ? 'mt-8' : ''}`}>
                             {/* Color Selection - For Products with Colors/Designs */}
                             {isFashionProduct(product) && (product as any).colors && (product as any).colors.length > 0 && (
                               <div className="space-y-4">
@@ -2634,8 +2634,8 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                           {/* Delivery Method (Hidden for services, tickets, and digital) */}
                           {!isVehicle && !isServiceProduct && !isTicket && !isEventTicketPromo && !isInfluencerHub && !isDigitalProduct(product) && (
                             <div className="mt-8">
-                              <h4 className={`text-sm font-black uppercase tracking-widest text-gray-900 dark:text-white mb-4 ${storeId === 'supermom-ng' ? 'ml-1' : ''}`}>
-                                {storeId === 'supermom-ng' && <span className="inline-block w-1.5 h-4 bg-indigo-500 rounded-full mr-2 align-middle" />}
+                              <h4 className={`text-sm font-black uppercase tracking-widest text-gray-900 dark:text-white mb-4 ${(['supermom-ng', 'mum-mupeeder-collection'].includes(storeId || '')) ? 'ml-1' : ''}`}>
+                                {(['supermom-ng', 'mum-mupeeder-collection'].includes(storeId || '')) && <span className="inline-block w-1.5 h-4 bg-indigo-500 rounded-full mr-2 align-middle" />}
                                 Delivery Method
                               </h4>
                               <div className="grid grid-cols-2 gap-4">
@@ -2684,7 +2684,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                 <h4 className="text-sm font-black uppercase tracking-widest text-gray-900 dark:text-white">Payment Summary</h4>
                               </div>
 
-                              <div className={`p-6 rounded-[2rem] ${storeId === 'supermom-ng' ? 'bg-gray-50/50 dark:bg-gray-800/20 border-2 border-dashed border-gray-200 dark:border-gray-700/50' : 'bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800'}`}>
+                              <div className={`p-6 rounded-[2rem] ${(['supermom-ng', 'mum-mupeeder-collection'].includes(storeId || '')) ? 'bg-gray-50/50 dark:bg-gray-800/20 border-2 border-dashed border-gray-200 dark:border-gray-700/50' : 'bg-gray-50 dark:bg-gray-900 border border-gray-100 dark:border-gray-800'}`}>
                                 <dl className="space-y-4 text-sm">
                                   <div className="flex justify-between items-center">
                                     <dt className="text-xs font-bold text-gray-500 uppercase tracking-widest">Items Subtotal</dt>
@@ -2696,7 +2696,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                     <div className="flex justify-between items-center">
                                       <dt className="text-xs font-bold text-gray-500 uppercase tracking-widest">Delivery Fee</dt>
                                       <dd className="font-black text-gray-900 dark:text-white tracking-tight">
-                                        {storeId === 'supermom-ng' ? (
+                                        {(['supermom-ng', 'mum-mupeeder-collection'].includes(storeId || '')) ? (
                                           <span className="text-[10px] bg-amber-100 text-amber-700 px-2.5 py-1 rounded-lg border border-amber-200 uppercase tracking-wider">TBD By Vendor</span>
                                         ) : (
                                           formatPrice(0) // Logic for other stores or placeholder
