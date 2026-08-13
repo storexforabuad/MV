@@ -185,7 +185,7 @@ export default function CartPage() {
                     <CartItemComponent
                       key={`${item.id}-${item.selectedSize || ''}-${item.selectedColor || ''}`}
                       item={item}
-                      onUpdateQuantity={(quantity) => handleUpdateQuantity(item, Number(quantity))}
+                      onUpdateQuantity={(_id, quantity) => handleUpdateQuantity(item, quantity)}
                       onRemove={() => handleRemoveItem(item)}
                     />
                   ))}

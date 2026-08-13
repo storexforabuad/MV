@@ -252,7 +252,7 @@ export default function StorefrontPageClient({
         setProducts(mockSolarProducts as any[]);
       }
     }
-  }, [storeMeta?.storeType, loading, products.length, categories.length, activeCategoryId]);
+  }, [storeMeta?.storeType, activeCategoryId]);
 
 
 
