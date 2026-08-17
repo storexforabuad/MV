@@ -19,8 +19,6 @@ import { saveModalState, getModalState, clearModalState } from '@/lib/paymentMod
 import { requestCustomerNotificationPermission } from '@/lib/requestCustomerNotifications';
 import PaymentFlowPage from './PaymentFlowPage';
 import { formatWhatsAppNumber } from '@/utils/phoneUtils';
-import { shouldShowWhatsAppPreview } from '@/utils/storeHelpers';
-import WhatsAppPreviewPage from './WhatsAppPreviewPage';
 
 interface CartOrderSummaryModalProps {
   isOpen: boolean;
@@ -41,8 +39,6 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
   const [orderNotes, setOrderNotes] = useState('');
   const [uploadedEvidence, setUploadedEvidence] = useState<{ url: string; fileName: string } | undefined>();
   const [showLeaveAppConfirmation, setShowLeaveAppConfirmation] = useState(false);
-  const [whatsappMessage, setWhatsappMessage] = useState('');
-  const [hasPlacedOrder, setHasPlacedOrder] = useState(false);
   const [showSizeError, setShowSizeError] = useState(false);
   const [imageLoading, setImageLoading] = useState<Record<string, boolean>>({});
   const [guestEmail, setGuestEmail] = useState('');
@@ -86,7 +82,6 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
       setOrderNotes('');
       setUploadedEvidence(undefined);
       setShowLeaveAppConfirmation(false);
-      setHasPlacedOrder(false);
       setShowSizeError(false);
       setImageLoading({});
 
@@ -155,10 +150,6 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
     }
   }, [currentPage]);
 
-  // Reset hasPlacedOrder if any order details change
-  useEffect(() => {
-    setHasPlacedOrder(false);
-  }, [deliveryMethod, orderNotes, cartItems]);
 
   const handleEvidenceUploaded = (evidenceUrl: string, fileName: string) => {
     setUploadedEvidence({ url: evidenceUrl, fileName });
@@ -185,10 +176,6 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
       return;
     }
 
-    if (hasPlacedOrder && !isPaymentFlowEnabled) {
-      setCurrentPage(2);
-      return;
-    }
 
     setIsPlacingOrder(true);
     try {
@@ -291,18 +278,13 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
         const encodedMessage = encodeURIComponent(message);
         const whatsappUrl = `https://wa.me/${formatWhatsAppNumber(storeMeta.whatsapp)}?text=${encodedMessage}`;
 
-        if (shouldShowWhatsAppPreview(storeMeta.storeType)) {
-          setWhatsappMessage(message);
-          setHasPlacedOrder(true);
-          setCurrentPage(2);
-        } else {
-          window.open(whatsappUrl, '_blank');
-          // Small delay to ensure the redirect is triggered before closing/clearing
-          setTimeout(() => {
-            dispatch({ type: 'CLEAR_CART' });
-            onOrderSuccess();
-          }, 500);
-        }
+        window.open(whatsappUrl, '_blank');
+        // Small delay to ensure the redirect is triggered before closing/clearing
+        setTimeout(() => {
+          dispatch({ type: 'CLEAR_CART' });
+          onOrderSuccess();
+          onClose();
+        }, 500);
       }
     } catch (error) {
       console.error("Error placing cart order:", error);
@@ -832,25 +814,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                         </div>
                       )}
 
-                      {currentPage === 2 && !isPaymentFlowEnabled && storeMeta && (
-                        <div className="h-full">
-                          <WhatsAppPreviewPage
-                            message={whatsappMessage}
-                            onConfirm={() => {
-                              const encodedMessage = encodeURIComponent(whatsappMessage);
-                              const whatsappUrl = `https://wa.me/${formatWhatsAppNumber(storeMeta.whatsapp)}?text=${encodedMessage}`;
-                              window.open(whatsappUrl, '_blank');
-                              setTimeout(() => {
-                                dispatch({ type: 'CLEAR_CART' });
-                                onOrderSuccess();
-                                onClose();
-                              }, 500);
-                            }}
-                            onBack={handleBackToSummary}
-                            isPlacingOrder={isPlacingOrder}
-                          />
-                        </div>
-                      )}
+
                     </div>
                   </div>
 
@@ -934,33 +898,6 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                             </button>
                           )}
                         </div>
-                      ) : currentPage === paymentPageNum && !isPaymentFlowEnabled ? (
-                        <button
-                          type="button"
-                          className="w-full bg-[#25D366] hover:bg-[#20bd5b] text-white font-bold py-4 px-6 rounded-xl shadow-lg shadow-green-500/20 flex items-center justify-center gap-2 transition-all active:scale-[0.98] disabled:opacity-50"
-                          onClick={() => {
-                            if (!storeMeta) return;
-                            const encodedMessage = encodeURIComponent(whatsappMessage);
-                            const whatsappUrl = `https://wa.me/${formatWhatsAppNumber(storeMeta.whatsapp)}?text=${encodedMessage}`;
-                            window.open(whatsappUrl, '_blank');
-                            setTimeout(() => {
-                              dispatch({ type: 'CLEAR_CART' });
-                              onOrderSuccess();
-                              onClose();
-                            }, 500);
-                          }}
-                          disabled={isPlacingOrder}
-                        >
-                          {isPlacingOrder ? (
-                            <Loader2 className="h-5 w-5 animate-spin" />
-                          ) : (
-                            <>
-                              <MessageSquare size={20} />
-                              <span>Open WhatsApp</span>
-                              <ExternalLink size={16} className="opacity-70" />
-                            </>
-                          )}
-                        </button>
                       ) : null}
                     </div>
                   </div>
