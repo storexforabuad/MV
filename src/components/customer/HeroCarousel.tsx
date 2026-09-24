@@ -75,11 +75,34 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
         return () => clearInterval(timer);
     }, [page, slideCount]);
 
+    // Guard: Prevent flashing RamadanCountdown while storeMeta is fetching
+    if (!storeMeta) {
+        return (
+            <div className="relative mx-4 mb-6 h-[220px] overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-zinc-900/90 via-zinc-950 to-zinc-900/90 border border-white/5 animate-pulse shadow-xl">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/[0.04] to-transparent -skew-x-12 animate-[shimmer_2s_infinite]" />
+                <div className="relative z-10 px-8 py-8 flex flex-col justify-between h-full">
+                    <div className="flex gap-2 items-center">
+                        <div className="h-5 w-28 bg-white/10 rounded-full" />
+                        <div className="h-5 w-24 bg-white/5 rounded-full" />
+                    </div>
+                    <div className="space-y-2.5">
+                        <div className="h-8 w-56 bg-white/10 rounded-xl" />
+                        <div className="h-4 w-40 bg-white/5 rounded-lg" />
+                    </div>
+                    <div className="flex justify-between items-center pt-2">
+                        <div className="h-3 w-48 bg-white/5 rounded-md" />
+                        <div className="h-3 w-28 bg-white/10 rounded-full" />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     const CustomSmokeShopCard = () => {
         return (
             <div className="relative overflow-hidden rounded-[2.5rem] bg-zinc-950 border border-emerald-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col justify-center w-full h-full">
                 <div className="absolute inset-0 bg-black">
-                    <Image src="/images/smoke-shop-bg.png" fill priority className="object-cover opacity-50" alt="Smoke Shop Background" />
+                    <Image src="/images/smoke-shop-bg.png" fill priority sizes="(max-width: 768px) 100vw, 800px" className="object-cover opacity-50" alt="Smoke Shop Background" />
                     <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/40 via-black/80 to-black" />
                 </div>
 
@@ -122,7 +145,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
         return (
             <div className="relative overflow-hidden rounded-[2.5rem] bg-zinc-950 border border-violet-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col justify-center w-full h-full">
                 <div className="absolute inset-0 bg-black">
-                    <Image src="/images/stunner-bg.png" fill priority className="object-cover opacity-40 mix-blend-luminosity" alt="Stunner Stores Background" />
+                    <Image src="/images/stunner-bg.png" fill priority sizes="(max-width: 768px) 100vw, 800px" className="object-cover opacity-40 mix-blend-luminosity" alt="Stunner Stores Background" />
                     <div className="absolute inset-0 bg-gradient-to-br from-violet-900/40 via-black/80 to-black" />
                 </div>
 
@@ -166,7 +189,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
         return (
             <div className="relative overflow-hidden rounded-[2.5rem] bg-zinc-950 border border-violet-500/20 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col justify-center w-full h-full">
                 <div className="absolute inset-0 bg-black">
-                    <Image src="/images/stunner-unisex-glam-bg.png" fill priority className="object-cover opacity-40 mix-blend-luminosity" alt="Stunner Unisex Hair and Glam Background" />
+                    <Image src="/images/stunner-unisex-glam-bg.png" fill priority sizes="(max-width: 768px) 100vw, 800px" className="object-cover opacity-40 mix-blend-luminosity" alt="Stunner Unisex Hair and Glam Background" />
                     <div className="absolute inset-0 bg-gradient-to-br from-violet-900/40 via-black/80 to-black" />
                 </div>
 
@@ -223,6 +246,7 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                         src={welcomeImage}
                         fill
                         priority
+                        sizes="(max-width: 768px) 100vw, 800px"
                         className="object-cover opacity-60"
                         alt={badgeText}
                     />
@@ -328,33 +352,33 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
         return (
             <motion.div
                 onClick={() => window.location.reload()}
-                className={`relative overflow-hidden rounded-[2.75rem] ${isPremiumTheme ? (isMumMupeeder ? 'bg-gradient-to-br from-neutral-900 via-[#1a1a1a] to-black' : 'bg-gradient-to-br from-red-950 via-red-900 to-red-950') : isFashion ? 'luxury-fashion-bg' : 'influencer-live-bg'} border border-white/20 shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col w-full h-full group cursor-pointer`}
-                animate={{ boxShadow: ['0 0 0px rgba(192,38,211,0)', '0 0 40px rgba(192,38,211,0.4)', '0 0 0px rgba(192,38,211,0)'] }}
+                className={`relative overflow-hidden rounded-[2.75rem] ${isPremiumTheme ? (isMumMupeeder ? 'bg-gradient-to-br from-neutral-900 via-[#1a1a1a] to-black border-neutral-700/40' : 'bg-gradient-to-br from-[#1A0306] via-[#35070D] to-[#120204] border-[#E0A96D]/30 shadow-[0_16px_50px_rgba(20,2,4,0.75)]') : isFashion ? 'luxury-fashion-bg border-white/20' : 'influencer-live-bg border-white/20'} border shadow-2xl min-h-[180px] sm:min-h-[220px] flex flex-col w-full h-full group cursor-pointer`}
+                animate={{ boxShadow: isPremiumTheme && !isMumMupeeder ? ['0 0 0px rgba(224,169,109,0)', '0 0 35px rgba(120,18,28,0.45)', '0 0 0px rgba(224,169,109,0)'] : ['0 0 0px rgba(192,38,211,0)', '0 0 40px rgba(192,38,211,0.4)', '0 0 0px rgba(192,38,211,0)'] }}
                 transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
             >
                 {/* Decorative background elements */}
                 <div className="absolute inset-0 overflow-hidden">
-                    {/* Primary Animated Mesh Blobs — organic breathing rhythm */}
+                    {/* Primary Animated Mesh Blobs — organic velvet breathing rhythm */}
                     <motion.div
                         animate={{
                             x: [0, 90, -20, 0],
                             y: [0, 40, 70, 0],
                             scale: [1, 1.25, 1.05, 1],
-                            opacity: [0.25, 0.55, 0.35, 0.25]
+                            opacity: [0.3, 0.6, 0.4, 0.3]
                         }}
                         transition={{
                             duration: isFashion ? 25 : 35,
                             repeat: Infinity,
                             ease: "easeInOut"
                         }}
-                        className={`absolute -top-[10%] -left-[10%] w-[70%] h-[70%] ${isPremiumTheme ? (isMumMupeeder ? 'bg-neutral-500/20' : 'bg-red-600/40') : isFashion ? 'bg-amber-600/30' : 'bg-emerald-500/40'} blur-[110px] rounded-full mix-blend-screen`}
+                        className={`absolute -top-[10%] -left-[10%] w-[70%] h-[70%] ${isPremiumTheme ? (isMumMupeeder ? 'bg-neutral-500/20' : 'bg-[#6A0E18]/45') : isFashion ? 'bg-amber-600/30' : 'bg-emerald-500/40'} blur-[110px] rounded-full mix-blend-screen`}
                     />
                     <motion.div
                         animate={{
                             x: [0, -70, 20, 0],
                             y: [0, 90, 40, 0],
                             scale: [1, 1.15, 0.95, 1],
-                            opacity: [0.2, 0.5, 0.3, 0.2]
+                            opacity: [0.25, 0.55, 0.35, 0.25]
                         }}
                         transition={{
                             duration: isFashion ? 30 : 45,
@@ -362,14 +386,14 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             ease: "easeInOut",
                             delay: 3
                         }}
-                        className={`absolute -bottom-[20%] -right-[10%] w-[70%] h-[70%] ${isPremiumTheme ? (isMumMupeeder ? 'bg-zinc-600/20' : 'bg-rose-900/50') : isFashion ? 'bg-orange-950/40' : 'bg-emerald-900/40'} blur-[110px] rounded-full mix-blend-screen`}
+                        className={`absolute -bottom-[20%] -right-[10%] w-[70%] h-[70%] ${isPremiumTheme ? (isMumMupeeder ? 'bg-zinc-600/20' : 'bg-[#2E050A]/70') : isFashion ? 'bg-orange-950/40' : 'bg-emerald-900/40'} blur-[110px] rounded-full mix-blend-screen`}
                     />
                     <motion.div
                         animate={{
                             x: [0, 40, -30, 0],
                             y: [0, -60, 20, 0],
                             scale: [1, 1.35, 0.9, 1],
-                            opacity: [0.12, 0.38, 0.2, 0.12]
+                            opacity: [0.15, 0.45, 0.25, 0.15]
                         }}
                         transition={{
                             duration: isFashion ? 35 : 55,
@@ -377,21 +401,21 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             ease: "easeInOut",
                             delay: 7
                         }}
-                        className={`absolute top-1/4 left-1/3 w-[40%] h-[40%] ${isPremiumTheme ? (isMumMupeeder ? 'bg-stone-400/10' : 'bg-pink-500/20') : isFashion ? 'bg-yellow-500/10' : 'bg-amber-400/30'} blur-[90px] rounded-full mix-blend-screen`}
+                        className={`absolute top-1/4 left-1/3 w-[40%] h-[40%] ${isPremiumTheme ? (isMumMupeeder ? 'bg-stone-400/10' : 'bg-[#E0A96D]/18') : isFashion ? 'bg-yellow-500/10' : 'bg-amber-400/30'} blur-[90px] rounded-full mix-blend-screen`}
                     />
 
                     {/* Shimmer sweep — glassy liquid surface */}
                     <motion.div
                         animate={{ y: ['-110%', '210%'] }}
                         transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut', repeatDelay: 4 }}
-                        className="absolute inset-x-0 h-[35%] bg-gradient-to-b from-white/0 via-white/[0.06] to-white/0 pointer-events-none"
+                        className="absolute inset-x-0 h-[35%] bg-gradient-to-b from-white/0 via-white/[0.07] to-white/0 pointer-events-none"
                     />
 
                     {/* Subtle Premium Pattern */}
                     <div
-                        className="absolute inset-0 opacity-[0.4] mix-blend-overlay pointer-events-none"
+                        className="absolute inset-0 opacity-[0.35] mix-blend-overlay pointer-events-none"
                         style={{
-                            backgroundImage: 'radial-gradient(circle at 1.5px 1.5px, rgba(255, 255, 255, 0.15) 1.5px, transparent 0)',
+                            backgroundImage: 'radial-gradient(circle at 1.5px 1.5px, rgba(255, 255, 255, 0.18) 1.5px, transparent 0)',
                             backgroundSize: '28px 28px'
                         }}
                     />
@@ -406,10 +430,10 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.8 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/20 border border-white/30 backdrop-blur-md shadow-lg flex-shrink-0"
+                                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full ${isPremiumTheme && !isMumMupeeder ? 'bg-[#2E050A]/70 border border-[#E0A96D]/40 text-[#FCEAC5] shadow-md' : 'bg-white/20 border border-white/30 text-white'} backdrop-blur-md flex-shrink-0`}
                             >
                                 <Sparkles className="w-3 h-3 text-amber-300" />
-                                <span className="text-[9px] font-black text-white uppercase tracking-wider">
+                                <span className="text-[9px] font-black uppercase tracking-wider">
                                     {isMediaInfluencer ? 'Premium Influencer' : 'Premium Store'}
                                 </span>
                             </motion.div>
@@ -437,9 +461,9 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                             className="flex items-center gap-2"
                         >
                             <span className="text-sm sm:text-base md:text-lg font-bold text-white/90 uppercase tracking-widest">
-                                {isMediaInfluencer ? 'For' : 'For'} <span className="text-amber-400"> {storeMeta?.ceoName || storeMeta?.name || 'Aisha Ibrahem'}</span>
+                                {isMediaInfluencer ? 'For' : 'For'} <span className={isPremiumTheme && !isMumMupeeder ? 'text-[#F5D79E] font-black' : 'text-amber-400'}> {storeMeta?.ceoName || storeMeta?.name || 'Aisha Ibrahem'}</span>
                             </span>
-                            <div className="h-px w-8 bg-gradient-to-r from-amber-400/50 to-transparent" />
+                            <div className={`h-px w-8 ${isPremiumTheme && !isMumMupeeder ? 'bg-gradient-to-r from-[#E0A96D]/70 to-transparent' : 'bg-gradient-to-r from-amber-400/50 to-transparent'}`} />
                         </motion.div>
 
                         <motion.p
@@ -456,8 +480,6 @@ export default function HeroCarousel({ storeMeta, onNeedAWebsiteClick, onRefresh
                                         ? 'Professionally crafted leather goods. Payments secured by Compass™ 🧭.'
                                         : 'Professional store services, secured by Compass™ 🧭.'}
                         </motion.p>
-
-
                     </div>
                 </div>
 

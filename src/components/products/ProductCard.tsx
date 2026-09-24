@@ -372,10 +372,11 @@ export default function ProductCard({
   // ─────────────────────────────────────────────────────────────────────────
 
   return (
-    <Link href={productLink} passHref>
+    <Link href={productLink} passHref tabIndex={-1} className="block h-full outline-none focus:outline-none focus:ring-0 select-none">
       <div
         ref={cardRef}
-        className="relative group h-full"
+        tabIndex={-1}
+        className="relative group h-full outline-none focus:outline-none focus:ring-0 select-none"
         onMouseLeave={() => setIsHovered(false)}
         onClick={(e) => {
           e.preventDefault();
@@ -410,7 +411,7 @@ export default function ProductCard({
           className={`product-image-container relative aspect-[3/4] w-full rounded-[32px] overflow-hidden
           shadow-[0_4px_12px_-2px_rgba(0,0,0,0.08),0_2px_6px_-1px_rgba(0,0,0,0.05)] dark:shadow-lg dark:shadow-white/10
           transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]
-          transform-gpu will-change-transform
+          transform-gpu ${!isMobile ? 'group-hover:will-change-transform' : ''}
           group-hover:shadow-[0_16px_24px_-8px_rgba(0,0,0,0.12),0_4px_12px_-4px_rgba(0,0,0,0.08)] dark:group-hover:shadow-xl dark:group-hover:shadow-white/15
           ${!isMobile ? 'group-hover:translate-y-[-4px]' : ''}
           bg-white dark:bg-card-background border-2 border-transparent`}

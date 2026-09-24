@@ -634,7 +634,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
           <div className="fixed inset-0 z-10 overflow-y-auto">
             <div className="flex min-h-full items-end justify-center p-0 text-center sm:items-center sm:p-4">
               <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95" enterTo="opacity-100 translate-y-0 sm:scale-100" leave="ease-in duration-200" leaveFrom="opacity-100 translate-y-0 sm:scale-100" leaveTo="opacity-0 translate-y-full sm:translate-y-0 sm:scale-95">
-                <Dialog.Panel className={`relative w-full transform overflow-hidden rounded-t-[2rem] bg-white dark:bg-modal-background text-left align-middle shadow-2xl transition-[height,max-height] duration-500 ease-in-out flex flex-col sm:h-auto sm:max-w-2xl sm:rounded-2xl sm:max-h-[95vh] ${currentPage === 1 && isInfluencerHub ? (hasScrolled ? 'h-[95vh] max-h-[95vh]' : 'h-[80vh] max-h-[80vh]') : (hasScrolled ? 'h-[90vh] max-h-[90vh]' : 'h-[72vh] max-h-[72vh]')}`}>
+                <Dialog.Panel className="relative w-full transform overflow-hidden rounded-t-[2rem] bg-white dark:bg-modal-background text-left align-middle shadow-2xl flex flex-col h-[88vh] max-h-[88vh] sm:h-auto sm:max-w-2xl sm:rounded-2xl sm:max-h-[92vh]">
 
                   {/* Handle Bar for Mobile */}
                   <div className="flex-shrink-0 pt-3 pb-1 flex justify-center sm:hidden">
@@ -677,7 +677,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                   `}</style>
 
                   {/* Main Content */}
-                  <div ref={scrollContainerRef} onScroll={handleScroll} className="flex-grow overflow-y-auto p-4 sm:p-6">
+                  <div ref={scrollContainerRef} className="flex-grow overflow-y-auto p-4 sm:p-6 overscroll-y-contain [webkit-overflow-scrolling:touch]">
                     <div className="max-w-3xl mx-auto w-full">
                       {/* Page 1 (Electronics Specs - "Device Passport") */}
                       {currentPage === 1 && isElectronics && (() => {
@@ -1648,6 +1648,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                         src={svc.images?.[0] || DEFAULT_PRODUCT_IMAGE}
                                         alt={svc.name}
                                         fill
+                                        sizes="64px"
                                         className="object-cover group-hover:scale-110 transition-transform duration-500"
                                       />
                                     </div>
@@ -1994,6 +1995,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                     src={product.images?.[currentImageIndex] || DEFAULT_PRODUCT_IMAGE}
                                     alt={product.name}
                                     fill
+                                    sizes="(max-width: 640px) 100vw, 600px"
                                     className="object-cover"
                                     onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; }}
                                   />
@@ -2222,7 +2224,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                               <div className="flex items-center justify-between gap-4">
                                 <div className="flex items-center gap-4">
                                   <div className="relative w-16 h-16 rounded-2xl overflow-hidden shadow-sm border border-green-100 dark:border-green-800">
-                                    <Image src={selectedBundleService.images?.[0] || DEFAULT_PRODUCT_IMAGE} alt={selectedBundleService.name} fill className="object-cover" />
+                                    <Image src={selectedBundleService.images?.[0] || DEFAULT_PRODUCT_IMAGE} alt={selectedBundleService.name} fill sizes="64px" className="object-cover" />
                                   </div>
                                   <div className="flex-1">
                                     <h4 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-tight">Selected Service</h4>
@@ -2371,6 +2373,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                     src={product.images?.[currentImageIndex] || DEFAULT_PRODUCT_IMAGE}
                                     alt={product.name}
                                     fill
+                                    sizes="(max-width: 640px) 288px, 288px"
                                     className={`object-cover relative z-10 transition-opacity duration-300 ${imageLoading ? 'opacity-0' : 'opacity-100'}`}
                                     onLoad={() => setImageLoading(false)}
                                     onError={(e) => { (e.target as HTMLImageElement).src = DEFAULT_PRODUCT_IMAGE; setImageLoading(false); }}
@@ -2526,6 +2529,7 @@ export default function OrderSummaryModal({ isOpen, onClose, product, storeMeta,
                                               src={color.images[0]}
                                               alt={color.name}
                                               fill
+                                              sizes="64px"
                                               className="object-cover"
                                             />
                                           </div>

@@ -491,6 +491,7 @@ export default function CartOrderSummaryModal({ isOpen, onClose, onOrderSuccess,
                                       src={item.selectedImage || item.images?.[0] || '/default_product_800x800.png'}
                                       alt={item.name}
                                       fill
+                                      sizes="48px"
                                       className="object-cover"
                                       onError={(e) => { (e.target as HTMLImageElement).src = '/default_product_800x800.png'; }}
                                     />

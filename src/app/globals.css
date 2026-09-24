@@ -298,6 +298,18 @@ body {
   }
 }
 
+/* Universal Tap & Focus Highlights normalization */
+*, *::before, *::after {
+  -webkit-tap-highlight-color: transparent;
+}
+
+a:focus:not(:focus-visible),
+button:focus:not(:focus-visible),
+div:focus:not(:focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 /* Add this after the existing nav styles */
 nav {
   background-color: var(--blur-background);

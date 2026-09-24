@@ -310,17 +310,14 @@ const ProductGrid = memo(function ProductGrid({
             ${isSingleColumn ? 'grid-cols-1' : 'grid-cols-2'} 
             sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 
             px-3 sm:px-6 lg:px-8 bg-background`}
-        layout
       >
         {isLoading ? (
           Array.from({ length: 6 }).map((_, index) => (
-            <motion.div
+            <div
               key={`skeleton-${index}`}
-              layout
-              transition={transition}
             >
               <SkeletonLoader />
-            </motion.div>
+            </div>
           ))
         ) : sortedProducts.length === 0 ? (
           <div className="col-span-full w-full">
@@ -335,10 +332,8 @@ const ProductGrid = memo(function ProductGrid({
             const shouldBeBig = isPremiumStoreItem && hasMultipleImagesOrColors;
 
             return (
-              <motion.div
+              <div
                 key={product.id}
-                layout
-                transition={transition}
                 className={`group block relative touch-manipulation ${shouldBeBig && !isSingleColumn ? 'col-span-full' : ''}`}
               >
                 {productWithType.productType === 'vehicle' ? (
@@ -357,7 +352,7 @@ const ProductGrid = memo(function ProductGrid({
                     isSingleView={isSingleColumn || shouldBeBig}
                   />
                 )}
-              </motion.div>
+              </div>
             );
           })
         )}
